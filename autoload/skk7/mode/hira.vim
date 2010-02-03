@@ -271,17 +271,26 @@ let s:rom_str_buf = ''
 func! skk7#mode#hira#initialize() "{{{
 endfunc "}}}
 
-func! skk7#mode#hira#_cb_im_enter() "{{{
-    let s:rom_str_buf = ''
-endfunc "}}}
 
-
-" Filters {{{
+" Callbacks {{{
 
 " For debug.
 func! skk7#mode#hira#cb_no_filter() "{{{
     call skk7#util#internal_error()
 endfunc "}}}
+
+func! skk7#mode#hira#cb_im_enter() "{{{
+    let s:rom_str_buf = ''
+endfunc "}}}
+
+func! skk7#mode#hira#cb_now_working(char) "{{{
+    return !empty(s:rom_str_buf)
+endfunc "}}}
+
+" }}}
+
+
+" Filters {{{
 
 func! skk7#mode#hira#filter_main(buf_str, filtered_str, buf_char, char, henkan_count) "{{{
     let orig_rom_str_buf = s:rom_str_buf
