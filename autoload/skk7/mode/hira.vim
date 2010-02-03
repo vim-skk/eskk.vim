@@ -307,7 +307,7 @@ func! skk7#mode#hira#filter_main(buf_str, filtered_str, buf_char, char, henkan_c
         finally
             let s:rom_str_buf = rest
         endtry
-    elseif s:has_candidates()
+    elseif skk7#mode#hira#has_candidates(s:rom_str_buf)
         return a:char
     else
         let s:rom_str_buf = strpart(orig_rom_str_buf, 0, strlen(orig_rom_str_buf) - 1)  . a:char
@@ -329,8 +329,8 @@ endfunc "}}}
 " }
 " But this uses a lot of memory.
 "
-func! s:has_candidates() "{{{
-    let regex = '^' . s:rom_str_buf
+func! skk7#mode#hira#has_candidates(str) "{{{
+    let regex = '^' . a:str
     return !empty(filter(keys(s:ROM_TABLE), 'v:val =~# regex'))
 endfunc "}}}
 
