@@ -20,24 +20,6 @@ set cpo&vim
 
 " Variables {{{
 
-let skk7#EV_INITIALIZE = 'init'
-let skk7#EV_IM_ENTER = 'im-enter'
-let skk7#EV_IM_LEAVE = 'im-leave'
-
-if !exists('skk7_invoked_events')
-    let skk7_invoked_events = [
-    \   'EV_INITIALIZE',
-    \   'EV_IM_ENTER',
-    \   'EV_IM_LEAVE'
-    \]
-endif
-if !exists('skk7_registered_modes')
-    let skk7_registered_modes = [
-    \   'hira'
-    \]
-endif
-
-
 let s:skk7_mode = ''
 let s:skk7_state = ''
 
@@ -73,8 +55,6 @@ func! skk7#enable() "{{{
     let s:skk7_mode = g:skk7_initial_mode
     let s:skk7_state = 'main'
 
-    call skk7#event#execute(g:skk7#EV_IM_ENTER)
-
     return "\<C-^>"
 endfunc "}}}
 
@@ -84,12 +64,6 @@ endfunc "}}}
 func! s:initialize() "{{{
     call skk7#util#log("initializing skk7...")
 
-    " Register events.
-    for event in g:skk7_invoked_events
-        call skk7#event#register_invoked(g:skk7#{event})
-        call skk7#util#logf("register %s event.", g:skk7#{event})
-    endfor
-
     " Register built-in modes.
     for mode in g:skk7_registered_modes
         call skk7#register_mode(mode)
@@ -97,8 +71,6 @@ func! s:initialize() "{{{
 
     " Register Mappings.
     call s:set_up_mappings()
-
-    call skk7#event#execute(g:skk7#EV_INITIALIZE)
 endfunc "}}}
 
 

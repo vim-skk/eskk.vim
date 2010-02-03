@@ -69,11 +69,10 @@ endif
 if !exists('skk7_initial_mode')
     let skk7_initial_mode = 'hira'
 endif
-if !exists('skk7_invoked_events')
-    " See 'autoload/skk7.vim'.
-endif
 if !exists('skk7_registered_modes')
-    " See 'autoload/skk7.vim'.
+    let skk7_registered_modes = [
+    \   'hira'
+    \]
 endif
 if !exists('skk7_mapped_chars')
     " TODO 記号
