@@ -25,25 +25,14 @@ let s:skk7_state = ''
 
 let s:mode_change_keys = {}
 
-" 変換フェーズになってからまだ変換されていない文字列
-let s:filter_buf_str = ''
-" 上の文字列のフィルタがかけられた版
-let s:filter_filtered_str = ''
-" 変換フェーズになってからまた変換フェーズになった場合の文字 (0文字か1文字)
-let s:filter_buf_char = ''
-" 変換キーが押された回数
-let s:filter_henkan_count = 0
-" 変換フェーズかどうか
-let s:filter_is_henkan_phase = 0
-" 非同期なフィルタの実行がサポートされているかどうか
-let s:filter_is_async = 0
+" この他の変数はs:initialize_im_enter()を参照。
 
 " }}}
 
 
 " Initialize {{{
 
-func! s:initialize() "{{{
+func! s:initialize_once() "{{{
     call skk7#util#log("initializing skk7...")
 
     " Register built-in modes.
@@ -53,6 +42,21 @@ func! s:initialize() "{{{
 
     " Register Mappings.
     call s:set_up_mappings()
+endfunc "}}}
+
+func! s:initialize_im_enter() "{{{
+    " 変換フェーズになってからまだ変換されていない文字列
+    let s:filter_buf_str = ''
+    " 上の文字列のフィルタがかけられた版
+    let s:filter_filtered_str = ''
+    " 変換フェーズになってからまた変換フェーズになった場合の文字 (0文字か1文字)
+    let s:filter_buf_char = ''
+    " 変換キーが押された回数
+    let s:filter_henkan_count = 0
+    " 変換フェーズかどうか
+    let s:filter_is_henkan_phase = 0
+    " 非同期なフィルタの実行がサポートされているかどうか
+    let s:filter_is_async = 0
 endfunc "}}}
 
 
@@ -96,10 +100,15 @@ func! skk7#enable() "{{{
         return
     endif
 
+    call s:initialize_im_enter()
+
     " TODO
     " Save previous mode/state.
     call skk7#set_mode(g:skk7_initial_mode)
     let s:skk7_state = 'main'
+
+    let cb_im_enter = printf('skk7#mode#%s#cb_im_enter', s:skk7_mode)
+    call s:call_if_exists(cb_im_enter, [], 'no throw')
 
     return "\<C-^>"
 endfunc "}}}
@@ -358,7 +367,7 @@ endfunc "}}}
 " }}}
 
 
-call s:initialize()
+call s:initialize_once()
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
 " }}}
