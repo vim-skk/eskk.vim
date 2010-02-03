@@ -65,8 +65,8 @@ func! s:initialize() "{{{
     call skk7#util#log("initializing skk7...")
 
     " Register built-in modes.
-    for mode in g:skk7_registered_modes
-        call skk7#register_mode(mode)
+    for [key, mode] in g:skk7_registered_modes
+        call skk7#register_mode(key, mode)
     endfor
 
     " Register Mappings.
@@ -105,7 +105,7 @@ endfunc "}}}
 
 " API functions for filter. {{{
 
-func! skk7#register_mode(mode) "{{{
+func! skk7#register_mode(key, mode) "{{{
     " TODO Lazy loading?
     call skk7#mode#{a:mode}#initialize()
 endfunc "}}}

@@ -71,7 +71,10 @@ if !exists('skk7_initial_mode')
 endif
 if !exists('skk7_registered_modes')
     let skk7_registered_modes = [
-    \   'hira'
+    \   ['q', 'kata'],
+    \   ['l', 'ascii'],
+    \   ['L', 'zenei'],
+    \   ['/', 'abbrev'],
     \]
 endif
 if !exists('skk7_mapped_chars')
