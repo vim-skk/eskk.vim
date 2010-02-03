@@ -110,8 +110,8 @@ noremap! <expr> <Plug>(skk7-escape-key) skk7#escape_key()
 
 if !g:skk7_no_default_mappings
     map! <C-j>  <Plug>(skk7-enable)
-    map! ;      <Plug>(skk7-sticky-key)
-    map! z      <Plug>(skk7-escape-key)
+    lmap ;      <Plug>(skk7-sticky-key)
+    lmap z      <Plug>(skk7-escape-key)
 endif
 " }}}
 
