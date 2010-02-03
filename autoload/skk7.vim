@@ -116,12 +116,7 @@ func! s:set_up_mappings() "{{{
 endfunc "}}}
 
 func! s:get_all_chars() "{{{
-    " TODO 記号
-    return split(
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    \   '\zs'
-    \)
+    return split(g:skk7_mapped_chars, '\zs')
 endfunc "}}}
 
 func! s:do_map(modes, options, remap_p, lhs, rhs) "{{{

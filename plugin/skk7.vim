@@ -21,7 +21,7 @@ scriptencoding utf-8
 " Name: skk7
 " Version: 0.0.0
 " Author:  tyru <tyru.exe@gmail.com>
-" Last Change: 2010-02-02.
+" Last Change: 2010-02-03.
 "
 " Description:
 "   NO DESCRIPTION YET
@@ -74,6 +74,12 @@ if !exists('skk7_invoked_events')
 endif
 if !exists('skk7_registered_modes')
     " See 'autoload/skk7.vim'.
+endif
+if !exists('skk7_mapped_chars')
+    " TODO 記号
+    let skk7_mapped_chars =
+    \   'abcdefghijklmnopqrstuvwxyz'
+    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 endif
 
 " }}}
