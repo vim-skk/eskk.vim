@@ -12,6 +12,7 @@ set cpo&vim
 let s:debug_msg_list = []
 
 func! skk7#debug#log(msg) "{{{
+    redraw
     call add(s:debug_msg_list, a:msg)
     call skk7#util#warn(a:msg)
     execute printf('sleep %dm', g:skk7_debug_wait_ms)
