@@ -105,8 +105,12 @@ func! skk7#enable() "{{{
 endfunc "}}}
 
 func! skk7#sticky_key() "{{{
-    call skk7#set_henkan_phase(1)
-    return g:skk7_marker_white
+    if !skk7#is_henkan_phase()
+        call skk7#set_henkan_phase(1)
+        return g:skk7_marker_white
+    else
+        return ''
+    endif
 endfunc "}}}
 
 func! skk7#escape_key() "{{{
