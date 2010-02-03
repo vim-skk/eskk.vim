@@ -21,7 +21,7 @@ scriptencoding utf-8
 " Name: skk7
 " Version: 0.0.0
 " Author:  tyru <tyru.exe@gmail.com>
-" Last Change: 2010-02-03.
+" Last Change: 2010-02-04.
 "
 " Description:
 "   NO DESCRIPTION YET
@@ -104,14 +104,27 @@ endif
 " }}}
 
 " Mappings {{{
+
+" Map if not mapped.
+func! s:map(from, to, modes)
+    for m in split(a:modes, '\zs')
+        if !hasmapto(a:to, m)
+            execute
+            \   m . 'map'
+            \   a:from
+            \   a:to
+        endif
+    endfor
+endfunc
+
 noremap! <expr> <Plug>(skk7-enable)     skk7#enable()
 noremap! <expr> <Plug>(skk7-sticky-key) skk7#sticky_key()
 noremap! <expr> <Plug>(skk7-escape-key) skk7#escape_key()
 
 if !g:skk7_no_default_mappings
-    map! <C-j>  <Plug>(skk7-enable)
-    lmap ;      <Plug>(skk7-sticky-key)
-    lmap z      <Plug>(skk7-escape-key)
+    call s:map('<C-j>', '<Plug>(skk7-enable)'    , 'ic')
+    call s:map(';'    , '<Plug>(skk7-sticky-key)', 'l')
+    call s:map('z'    , '<Plug>(skk7-escape-key)', 'l')
 endif
 " }}}
 
