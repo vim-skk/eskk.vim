@@ -70,12 +70,23 @@ if !exists('skk7_initial_mode')
     let skk7_initial_mode = 'hira'
 endif
 if !exists('skk7_registered_modes')
+    " TODO
     let skk7_registered_modes = [
-    \   ['q', 'kata'],
-    \   ['l', 'ascii'],
-    \   ['L', 'zenei'],
-    \   ['/', 'abbrev'],
+    \   ['Q', 'hira']
     \]
+    " let skk7_registered_modes = [
+    " \   ['q', 'kata'],
+    " \   ['l', 'ascii'],
+    " \   ['L', 'zenei'],
+    " \   ['/', 'abbrev'],
+    " \]
+    " let skk7_registered_modes = {
+    " \   'hira': {},
+    " \   'kata': {'map_to': 'q'},
+    " \   'ascii': {'map_to': 'l'}
+    " \   'zenei': {'map_to': 'L'}
+    " \   'abbrev': {'map_to': '/'}
+    " \}
 endif
 if !exists('skk7_mapped_chars')
     " TODO 記号
@@ -83,14 +94,24 @@ if !exists('skk7_mapped_chars')
     \   'abcdefghijklmnopqrstuvwxyz'
     \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 endif
+if !exists("skk7_marker_white")
+  let skk7_marker_white = '▽'
+endif
+if !exists("skk7_marker_black")
+  let skk7_marker_black = '▼'
+endif
 
 " }}}
 
 " Mappings {{{
-noremap! <expr> <Plug>(skk7-enable) skk7#enable()
+noremap! <expr> <Plug>(skk7-enable)     skk7#enable()
+noremap! <expr> <Plug>(skk7-sticky-key) skk7#sticky_key()
+noremap! <expr> <Plug>(skk7-escape-key) skk7#escape_key()
 
 if !g:skk7_no_default_mappings
     map! <C-j>  <Plug>(skk7-enable)
+    map! ;      <Plug>(skk7-sticky-key)
+    map! z      <Plug>(skk7-escape-key)
 endif
 " }}}
 

@@ -23,6 +23,8 @@ set cpo&vim
 let s:skk7_mode = ''
 let s:skk7_state = ''
 
+let s:mode_change_keys = {}
+
 " 変換フェーズになってからまだ変換されていない文字列
 let s:filter_buf_str = ''
 " 上の文字列のフィルタがかけられた版
@@ -37,26 +39,6 @@ let s:filter_is_henkan_phase = 0
 let s:filter_is_async = 0
 
 " }}}
-
-
-" Functions {{{
-
-func! skk7#is_enabled() "{{{
-    return &iminsert == 1
-endfunc "}}}
-
-func! skk7#enable() "{{{
-    if skk7#is_enabled()
-        return
-    endif
-
-    " TODO
-    " Save previous mode/state.
-    let s:skk7_mode = g:skk7_initial_mode
-    let s:skk7_state = 'main'
-
-    return "\<C-^>"
-endfunc "}}}
 
 
 " Initialize {{{
@@ -83,7 +65,7 @@ func! s:set_up_mappings() "{{{
         \             '<buffer><expr><silent>',
         \             1,
         \             char,
-        \             printf('<SID>do_filter(%s)', string(char)))
+        \             printf('<SID>dispatch_key(%s)', string(char)))
     endfor
 endfunc "}}}
 
@@ -103,9 +85,36 @@ endfunc "}}}
 " }}}
 
 
-" API functions for filter. {{{
+" Functions {{{
+
+func! skk7#is_enabled() "{{{
+    return &iminsert == 1
+endfunc "}}}
+
+func! skk7#enable() "{{{
+    if skk7#is_enabled()
+        return
+    endif
+
+    " TODO
+    " Save previous mode/state.
+    let s:skk7_mode = g:skk7_initial_mode
+    let s:skk7_state = 'main'
+
+    return "\<C-^>"
+endfunc "}}}
+
+func! skk7#sticky_key() "{{{
+    call skk7#set_henkan_phase(1)
+    return g:skk7_marker_white
+endfunc "}}}
+
+func! skk7#escape_key() "{{{
+    return ''
+endfunc "}}}
 
 func! skk7#register_mode(key, mode) "{{{
+    let s:mode_change_keys[a:key] = a:mode
     " TODO Lazy loading?
     call skk7#mode#{a:mode}#initialize()
 endfunc "}}}
@@ -140,16 +149,68 @@ func! skk7#set_henkan_phase(cond) "{{{
     let s:filter_is_henkan_phase = a:cond
 endfunc "}}}
 
-" }}}
+func! skk7#is_mode_change_key(char) "{{{
+    return has_key(s:mode_change_keys, a:char)
+endfunc "}}}
+
+func! skk7#is_sticky_key(char) "{{{
+    return maparg(a:char, 'ic') ==# '<Plug>(skk7-sticky-key)'
+endfunc "}}}
+
+func! skk7#is_escape_key(char) "{{{
+    return maparg(a:char, 'ic') ==# '<Plug>(skk7-escape-key)'
+endfunc "}}}
+
+func! skk7#is_big_letter(char) "{{{
+    return a:char =~# '^[A-Z]$'
+endfunc "}}}
+
+func! skk7#is_special_key(char) "{{{
+    return
+    \   skk7#is_mode_change_key(a:char)
+    \   || skk7#is_sticky_key(a:char)
+    \   || skk7#is_big_letter(a:char)
+endfunc "}}}
 
 
 " ここからフィルタ用関数にディスパッチする
-func! s:do_filter(char) "{{{
+func! s:dispatch_key(char) "{{{
+    if s:handle_special_key_p(a:char)
+        return s:handle_special_keys(a:char)
+    else
+        return s:handle_filter(a:char)
+    endif
+
+    " TODO 補完
+
+endfunc "}}}
+
+" モード切り替えなどの特殊なキーを実行するかどうか
+func! s:handle_special_key_p(char) "{{{
+    return
+    \   skk7#is_special_key(a:char)
+    \   && s:filter_buf_str ==# ''
+endfunc "}}}
+
+" モード切り替えなどの特殊なキーを実行する
+func! s:handle_special_keys(char) "{{{
+    if skk7#is_mode_change_key(a:char)
+        " モード変更
+        let s:skk7_mode = s:mode_change_keys[a:char]
+        return ''
+    elseif skk7#is_sticky_key(a:char)
+        return skk7#sticky_key()
+    elseif skk7#is_escape_key(a:char)
+        return skk7#escape_key()
+    elseif skk7#is_big_letter(a:char)
+        return skk7#sticky_key() .s:dispatch_key(tolower(a:char))
+    else
+        call skk7#util#internal_error()
+    endif
+endfunc "}}}
+
+func! s:handle_filter(char) "{{{
     let filtered = ''
-
-    " TODO
-    " モードの切り替え
-
     try
         if exists('*' . skk7#current_filter())
             let filtered = {skk7#current_filter()}(
@@ -165,7 +226,6 @@ func! s:do_filter(char) "{{{
             else
                 call skk7#mode#_default#cb_no_filter()
             endif
-
             " ローマ字のまま返す
             return a:char
         endif
@@ -244,6 +304,21 @@ func! s:current_mode() "{{{
 endfunc "}}}
 
 " }}}
+
+" }}}
+
+
+" Autocmd {{{
+
+augroup skk7-augroup
+    autocmd!
+
+    autocmd InsertEnter * call s:autocmd_insert_enter()
+augroup END
+
+func! s:autocmd_insert_enter() "{{{
+    call skk7#set_henkan_phase(0)
+endfunc "}}}
 
 " }}}
 
