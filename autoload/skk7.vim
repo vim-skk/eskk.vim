@@ -98,7 +98,7 @@ func! skk7#enable() "{{{
 
     " TODO
     " Save previous mode/state.
-    let s:skk7_mode = g:skk7_initial_mode
+    call skk7#set_mode(g:skk7_initial_mode)
     let s:skk7_state = 'main'
 
     return "\<C-^>"
@@ -141,9 +141,16 @@ func! skk7#is_async() "{{{
 endfunc "}}}
 
 " NOTE: 必要ないかも
-" func! skk7#set_mode(mode) "{{{
-"     let s:skk7_mode = a:mode
-" endfunc "}}}
+func! skk7#set_mode(next_mode) "{{{
+    let cb_mode_leave = printf('skk7#mode#%s#cb_mode_leave', s:skk7_mode)
+    call s:call_if_exists(cb_mode_leave, [a:next_mode], "no throw")
+
+    let prev_mode = s:skk7_mode
+    let s:skk7_mode = a:next_mode
+
+    let cb_mode_enter = printf('skk7#mode#%s#cb_mode_enter', s:skk7_mode)
+    call s:call_if_exists(cb_mode_enter, [prev_mode], "no throw")
+endfunc "}}}
 
 func! skk7#set_state(state) "{{{
     let s:skk7_state = a:state
@@ -191,16 +198,19 @@ endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行するかどうか
 func! s:handle_special_key_p(char) "{{{
+    let cb_now_working = printf('skk7#mode#%s#cb_now_working', s:skk7_mode)
+
     return
     \   skk7#is_special_key(a:char)
     \   && s:filter_buf_str ==# ''
+    \   && !s:call_if_exists(cb_now_working, [a:char], 0)
 endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行する
 func! s:handle_special_keys(char) "{{{
     if skk7#is_mode_change_key(a:char)
         " モード変更
-        let s:skk7_mode = s:mode_change_keys[a:char]
+        call skk7#set_mode(s:mode_change_keys[a:char])
         return ''
     elseif skk7#is_sticky_key(a:char)
         return skk7#sticky_key()
@@ -304,7 +314,24 @@ endfunc "}}}
 " Utility functions. {{{
 
 func! s:current_mode() "{{{
-    return 'skk7#mode#%s' . s:skk7_mode
+    return 'skk7#mode#' . s:skk7_mode
+endfunc "}}}
+
+" a:func is string.
+" arg 3 is not for 'self'.
+func! s:call_if_exists(func, args, ...) "{{{
+    if s:is_callable(a:func)
+        return call(a:func, a:args)
+    elseif a:0 != 0
+        return a:1
+    else
+        throw printf("skk7: no such function '%s'.", a:func)
+    endif
+endfunc "}}}
+
+" a:func is string.
+func! s:is_callable(func) "{{{
+    return exists('*' . a:func)
 endfunc "}}}
 
 " }}}
