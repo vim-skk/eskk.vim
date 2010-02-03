@@ -185,7 +185,9 @@ endfunc "}}}
 
 
 " ここからフィルタ用関数にディスパッチする
-func! s:dispatch_key(char) "{{{
+func! s:dispatch_key(char, ...) "{{{
+    let [capital_p] = skk7#util#get_args(a:000, 0)
+
     if s:handle_special_key_p(a:char)
         return s:handle_special_keys(a:char)
     else
@@ -217,7 +219,7 @@ func! s:handle_special_keys(char) "{{{
     elseif skk7#is_escape_key(a:char)
         return skk7#escape_key()
     elseif skk7#is_big_letter(a:char)
-        return skk7#sticky_key() .s:dispatch_key(tolower(a:char))
+        return skk7#sticky_key() .s:dispatch_key(tolower(a:char), 1)
     else
         call skk7#util#internal_error()
     endif

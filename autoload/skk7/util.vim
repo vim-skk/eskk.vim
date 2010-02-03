@@ -41,8 +41,31 @@ func! skk7#util#internal_error(...) "{{{
     endif
 endfunc "}}}
 
+
 func! skk7#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
+endfunc "}}}
+
+func! skk7#util#get_args(args, ...) "{{{
+    let ret_args = []
+    let i = 0
+
+    while i < len(a:000)
+        call add(
+        \   ret_args,
+        \   skk7#util#has_idx(a:args, i) ?
+        \       a:args[i]
+        \       : a:000[i]
+        \)
+        let i += 1
+    endwhile
+
+    return ret_args
+endfunc "}}}
+
+" NOTE: Not supported negative idx.
+func! skk7#util#has_idx(list, idx) "{{{
+    return 0 < a:idx && a:idx < len(a:list)
 endfunc "}}}
 
 " }}}
