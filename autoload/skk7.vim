@@ -165,11 +165,13 @@ func! skk7#is_mode_change_key(char) "{{{
 endfunc "}}}
 
 func! skk7#is_sticky_key(char) "{{{
-    return maparg(a:char, 'ic') ==# '<Plug>(skk7-sticky-key)'
+    " mapmode-lを優先的に探す
+    return maparg(a:char, 'lic') ==# '<Plug>(skk7-sticky-key)'
 endfunc "}}}
 
 func! skk7#is_escape_key(char) "{{{
-    return maparg(a:char, 'ic') ==# '<Plug>(skk7-escape-key)'
+    " mapmode-lを優先的に探す
+    return maparg(a:char, 'lic') ==# '<Plug>(skk7-escape-key)'
 endfunc "}}}
 
 func! skk7#is_big_letter(char) "{{{
