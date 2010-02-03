@@ -267,16 +267,8 @@ let s:rom_str_buf = ''
 
 " Functions {{{
 
-" Set up function.
+" This function will be called from autoload/skk7.vim.
 func! skk7#mode#hira#initialize() "{{{
-    call skk7#event#register_function(g:skk7#EV_IM_ENTER, 'skk7#mode#hira#_cb_im_enter', [])
-
-    " Register autocmd if needed.
-    augroup skk7_mode_hira
-        autocmd!
-        autocmd InsertEnter call skk7#mode#hira#_cb_im_enter()
-    augroup END
-
 endfunc "}}}
 
 func! skk7#mode#hira#_cb_im_enter() "{{{
