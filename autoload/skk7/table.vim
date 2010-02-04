@@ -14,20 +14,6 @@ let s:current_table_name = ''
 
 " Functions {{{
 
-func! s:skip_spaces(str) "{{{
-    return substitute(a:str, '^\s*', '', '')
-endfunc "}}}
-
-" TODO Escape + Whitespace
-func! s:get_arg(arg) "{{{
-    let matched = matchstr(a:arg, '^\S\+')
-    return [matched, strpart(a:arg, strlen(matched))]
-endfunc "}}}
-
-func! s:unget_arg(arg, str) "{{{
-    return a:str . a:arg
-endfunc "}}}
-
 func! s:parse_arg(arg) "{{{
     let arg = a:arg
     let opt_regex = '-\(\w\+\)=\(\S\+\)'
@@ -35,8 +21,8 @@ func! s:parse_arg(arg) "{{{
     " Parse options.
     let opt = {}
     while arg != ''
-        let arg = s:skip_spaces(arg)
-        let [a, arg] = s:get_arg(arg)
+        let arg = skk7#util#skip_spaces(arg)
+        let [a, arg] = skk7#util#get_arg(arg)
 
         let m = matchlist(a, opt_regex)
         if !empty(m)
@@ -48,7 +34,7 @@ func! s:parse_arg(arg) "{{{
                 throw printf("skk7: Skk7TableMap: unknown '%s' option.", opt_name)
             endif
         else
-            let arg = s:unget_arg(arg, a)
+            let arg = skk7#util#unget_arg(arg, a)
             break
         endif
     endwhile
@@ -56,8 +42,8 @@ func! s:parse_arg(arg) "{{{
     " Parse arguments.
     let lhs_rhs = []
     while arg != ''
-        let arg = s:skip_spaces(arg)
-        let [a, arg] = s:get_arg(arg)
+        let arg = skk7#util#skip_spaces(arg)
+        let [a, arg] = skk7#util#get_arg(arg)
         call add(lhs_rhs, a)
     endwhile
     if len(lhs_rhs) != 2

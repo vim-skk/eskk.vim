@@ -68,6 +68,25 @@ func! skk7#util#has_idx(list, idx) "{{{
     return 0 < a:idx && a:idx < len(a:list)
 endfunc "}}}
 
+
+" For macro. {{{
+
+func! skk7#util#skip_spaces(str) "{{{
+    return substitute(a:str, '^\s*', '', '')
+endfunc "}}}
+
+" TODO Escape + Whitespace
+func! skk7#util#get_arg(arg) "{{{
+    let matched = matchstr(a:arg, '^\S\+')
+    return [matched, strpart(a:arg, strlen(matched))]
+endfunc "}}}
+
+func! skk7#util#unget_arg(arg, str) "{{{
+    return a:str . a:arg
+endfunc "}}}
+
+" }}}
+
 " }}}
 
 
