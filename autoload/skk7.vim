@@ -19,7 +19,7 @@ set cpo&vim
 let s:skk7_mode = ''
 let s:skk7_state = ''
 
-let s:mode_change_keys = {}
+let s:special_keys = {}
 
 " この他の変数はs:initialize_im_enter()を参照。
 
@@ -104,6 +104,8 @@ endfunc "}}}
 
 " Functions {{{
 
+" Autoload functions {{{
+
 func! skk7#is_enabled() "{{{
     return &iminsert == 1
 endfunc "}}}
@@ -136,7 +138,9 @@ func! skk7#sticky_key() "{{{
 endfunc "}}}
 
 func! skk7#register_mode(key, mode) "{{{
-    let s:mode_change_keys[a:key] = a:mode
+    " TODO Force mapping?
+    call s:maptable_map_modechange_key(a:key, a:mode, 0)
+
     " TODO Lazy loading?
     call skk7#mode#{a:mode}#initialize()
 endfunc "}}}
@@ -177,13 +181,15 @@ func! skk7#set_henkan_phase(cond) "{{{
     let s:filter_is_henkan_phase = a:cond
 endfunc "}}}
 
-func! skk7#is_mode_change_key(char) "{{{
-    return has_key(s:mode_change_keys, a:char)
+func! skk7#is_modechange_key(char) "{{{
+    return skk7#is_special_key(a:char)
+    \   && s:special_keys[a:char].type ==# 'modechange'
 endfunc "}}}
 
 func! skk7#is_sticky_key(char) "{{{
     " mapmode-lを優先的に探す
-    return maparg(a:char, 'lic') ==# '<Plug>(skk7-sticky-key)'
+    return skk7#is_special_key(a:char)
+    \   && s:special_keys[a:char].type ==# 'sticky'
 endfunc "}}}
 
 func! skk7#is_big_letter(char) "{{{
@@ -191,12 +197,51 @@ func! skk7#is_big_letter(char) "{{{
 endfunc "}}}
 
 func! skk7#is_special_key(char) "{{{
-    return
-    \   skk7#is_mode_change_key(a:char)
-    \   || skk7#is_sticky_key(a:char)
-    \   || skk7#is_big_letter(a:char)
+    return has_key(s:special_keys, a:char)
 endfunc "}}}
 
+" }}}
+
+" For s:special_keys. {{{
+
+" Map key.
+func! s:maptable_map_key(from_key, map_st, force) "{{{
+    " If:
+    " - s:special_keys DOES NOT has a:from_key.
+    " - Or, s:special_keys HAS a:from_key but a:force is true.
+    if !(has_key(s:special_keys, a:from_key) && !a:force)
+        let s:special_keys[a:from_key] = a:map_st
+    endif
+endfunc "}}}
+
+
+" Create modechange key's structure.
+func! s:maptable_create_modechange_key(mode) "{{{
+    return {
+    \   'type': 'modechange',
+    \   'mode': a:mode,
+    \}
+endfunc "}}}
+
+" Map modechange key.
+func! s:maptable_map_modechange_key(key, mode, force) "{{{
+    call s:maptable_map_key(a:key, s:maptable_create_modechange_key(a:mode), a:force)
+endfunc "}}}
+
+
+" Create sticky key's structure.
+func! s:maptable_create_sticky_key() "{{{
+    return {'type': 'sticky'}
+endfunc "}}}
+
+" Map sticky key.
+func! s:maptable_map_sticky_key(key) "{{{
+    call s:maptable_map_key(a:key, s:maptable_create_sticky_key(), a:force)
+endfunc "}}}
+
+" }}}
+
+" Dispatch functions {{{
 
 " ここからフィルタ用関数にディスパッチする
 func! s:dispatch_key(char, ...) "{{{
@@ -224,9 +269,11 @@ endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行する
 func! s:handle_special_keys(char) "{{{
-    if skk7#is_mode_change_key(a:char)
+    " TODO Priority
+
+    if skk7#is_modechange_key(a:char)
         " モード変更
-        call skk7#set_mode(s:mode_change_keys[a:char])
+        call skk7#set_mode(s:special_keys[a:char].mode)
         return ''
     elseif skk7#is_sticky_key(a:char)
         return skk7#sticky_key()
@@ -265,6 +312,8 @@ func! s:handle_filter(char) "{{{
 
     return filtered
 endfunc "}}}
+
+" }}}
 
 " }}}
 
