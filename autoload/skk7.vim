@@ -164,7 +164,6 @@ func! skk7#is_async() "{{{
     return s:filter_is_async
 endfunc "}}}
 
-" NOTE: 必要ないかも
 func! skk7#set_mode(next_mode) "{{{
     let cb_mode_leave = printf('skk7#mode#%s#cb_mode_leave', s:skk7_mode)
     call skk7#util#call_if_exists(cb_mode_leave, [a:next_mode], "no throw")
