@@ -60,12 +60,10 @@ func! s:initialize_im_enter() "{{{
 endfunc "}}}
 
 
-" Handlers.
-
 func! s:set_up_mappings() "{{{
     for char in s:get_all_chars()
         " XXX: '<silent>' sometimes causes strange bug...
-        call s:do_map('l',
+        call s:execute_map('l',
         \             '<buffer><expr><silent>',
         \             1,
         \             char,
@@ -96,7 +94,7 @@ func! s:get_all_chars() "{{{
     \]
 endfunc "}}}
 
-func! s:do_map(modes, options, remap_p, lhs, rhs) "{{{
+func! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
     for mode in split(a:modes, '\zs')
         execute printf('%s%smap', mode, (a:remap_p ? 'nore' : ''))
         \       a:options
