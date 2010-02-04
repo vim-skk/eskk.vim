@@ -296,7 +296,7 @@ func! skk7#mode#hira#filter_main(buf_str, filtered_str, buf_char, char, henkan_c
     let orig_rom_str_buf = s:rom_str_buf
     let s:rom_str_buf .= a:char
 
-    let def = g:skk7#table#rom_to_hira#definition
+    let def = skk7#table#rom_to_hira#get_definition()
     if has_key(def, s:rom_str_buf)
         let rest = get(def[s:rom_str_buf], 'rest', '')
         try
@@ -314,7 +314,7 @@ func! skk7#mode#hira#filter_main(buf_str, filtered_str, buf_char, char, henkan_c
 endfunc "}}}
 
 func! skk7#mode#hira#has_candidates(str) "{{{
-    return skk7#table#has_candidates(g:skk7#table#rom_to_hira#definition, a:str)
+    return skk7#table#has_candidates(skk7#table#rom_to_hira#get_definition(), a:str)
 endfunc "}}}
 
 " }}}

@@ -9,250 +9,251 @@ set cpo&vim
 " }}}
 
 
-" call skk7#table#define_macro()
+func! skk7#table#rom_to_hira#get_definition()
+    return g:skk7#table#rom_to_hira#definition
+endfunc
 
-" Skk7Map rom_to_hira a あ
-" Skk7Map rom_to_hira bb っ
 
+call skk7#table#define_macro()
 
-let skk7#table#rom_to_hira#definition = {
-\   "a": {"map_to": "あ"},
-\   "bb": {"map_to": "っ", "rest": "b"},
-\   "ba": {"map_to": "ば"},
-\   "be": {"map_to": "べ"},
-\   "bi": {"map_to": "び"},
-\   "bo": {"map_to": "ぼ"},
-\   "bu": {"map_to": "ぶ"},
-\   "bya": {"map_to": "びゃ"},
-\   "bye": {"map_to": "びぇ"},
-\   "byi": {"map_to": "びぃ"},
-\   "byo": {"map_to": "びょ"},
-\   "byu": {"map_to": "びゅ"},
-\   "cc": {"map_to": "っ", "rest": "c"},
-\   "cha": {"map_to": "ちゃ"},
-\   "che": {"map_to": "ちぇ"},
-\   "chi": {"map_to": "ち"},
-\   "cho": {"map_to": "ちょ"},
-\   "chu": {"map_to": "ちゅ"},
-\   "cya": {"map_to": "ちゃ"},
-\   "cye": {"map_to": "ちぇ"},
-\   "cyi": {"map_to": "ちぃ"},
-\   "cyo": {"map_to": "ちょ"},
-\   "cyu": {"map_to": "ちゅ"},
-\   "dd": {"map_to": "っ", "rest": "d"},
-\   "da": {"map_to": "だ"},
-\   "de": {"map_to": "で"},
-\   "dha": {"map_to": "でゃ"},
-\   "dhe": {"map_to": "でぇ"},
-\   "dhi": {"map_to": "でぃ"},
-\   "dho": {"map_to": "でょ"},
-\   "dhu": {"map_to": "でゅ"},
-\   "di": {"map_to": "ぢ"},
-\   "do": {"map_to": "ど"},
-\   "du": {"map_to": "づ"},
-\   "dya": {"map_to": "ぢゃ"},
-\   "dye": {"map_to": "ぢぇ"},
-\   "dyi": {"map_to": "ぢぃ"},
-\   "dyo": {"map_to": "ぢょ"},
-\   "dyu": {"map_to": "ぢゅ"},
-\   "e": {"map_to": "え"},
-\   "ff": {"map_to": "っ", "rest": "f"},
-\   "fa": {"map_to": "ふぁ"},
-\   "fe": {"map_to": "ふぇ"},
-\   "fi": {"map_to": "ふぃ"},
-\   "fo": {"map_to": "ふぉ"},
-\   "fu": {"map_to": "ふ"},
-\   "fya": {"map_to": "ふゃ"},
-\   "fye": {"map_to": "ふぇ"},
-\   "fyi": {"map_to": "ふぃ"},
-\   "fyo": {"map_to": "ふょ"},
-\   "fyu": {"map_to": "ふゅ"},
-\   "gg": {"map_to": "っ", "rest": "g"},
-\   "ga": {"map_to": "が"},
-\   "ge": {"map_to": "げ"},
-\   "gi": {"map_to": "ぎ"},
-\   "go": {"map_to": "ご"},
-\   "gu": {"map_to": "ぐ"},
-\   "gya": {"map_to": "ぎゃ"},
-\   "gye": {"map_to": "ぎぇ"},
-\   "gyi": {"map_to": "ぎぃ"},
-\   "gyo": {"map_to": "ぎょ"},
-\   "gyu": {"map_to": "ぎゅ"},
-\   "ha": {"map_to": "は"},
-\   "he": {"map_to": "へ"},
-\   "hi": {"map_to": "ひ"},
-\   "ho": {"map_to": "ほ"},
-\   "hu": {"map_to": "ふ"},
-\   "hya": {"map_to": "ひゃ"},
-\   "hye": {"map_to": "ひぇ"},
-\   "hyi": {"map_to": "ひぃ"},
-\   "hyo": {"map_to": "ひょ"},
-\   "hyu": {"map_to": "ひゅ"},
-\   "i": {"map_to": "い"},
-\   "jj": {"map_to": "っ", "rest": "j"},
-\   "ja": {"map_to": "じゃ"},
-\   "je": {"map_to": "じぇ"},
-\   "ji": {"map_to": "じ"},
-\   "jo": {"map_to": "じょ"},
-\   "ju": {"map_to": "じゅ"},
-\   "jya": {"map_to": "じゃ"},
-\   "jye": {"map_to": "じぇ"},
-\   "jyi": {"map_to": "じぃ"},
-\   "jyo": {"map_to": "じょ"},
-\   "jyu": {"map_to": "じゅ"},
-\   "kk": {"map_to": "っ", "rest": "k"},
-\   "ka": {"map_to": "か"},
-\   "ke": {"map_to": "け"},
-\   "ki": {"map_to": "き"},
-\   "ko": {"map_to": "こ"},
-\   "ku": {"map_to": "く"},
-\   "kya": {"map_to": "きゃ"},
-\   "kye": {"map_to": "きぇ"},
-\   "kyi": {"map_to": "きぃ"},
-\   "kyo": {"map_to": "きょ"},
-\   "kyu": {"map_to": "きゅ"},
-\   "ma": {"map_to": "ま"},
-\   "me": {"map_to": "め"},
-\   "mi": {"map_to": "み"},
-\   "mo": {"map_to": "も"},
-\   "mu": {"map_to": "む"},
-\   "mya": {"map_to": "みゃ"},
-\   "mye": {"map_to": "みぇ"},
-\   "myi": {"map_to": "みぃ"},
-\   "myo": {"map_to": "みょ"},
-\   "myu": {"map_to": "みゅ"},
-\   "n": {"map_to": "ん"},
-\   "n'": {"map_to": "ん"},
-\   "na": {"map_to": "な"},
-\   "ne": {"map_to": "ね"},
-\   "ni": {"map_to": "に"},
-\   "nn": {"map_to": "ん"},
-\   "no": {"map_to": "の"},
-\   "nu": {"map_to": "ぬ"},
-\   "nya": {"map_to": "にゃ"},
-\   "nye": {"map_to": "にぇ"},
-\   "nyi": {"map_to": "にぃ"},
-\   "nyo": {"map_to": "にょ"},
-\   "nyu": {"map_to": "にゅ"},
-\   "o": {"map_to": "お"},
-\   "pp": {"map_to": "っ", "rest": "p"},
-\   "pa": {"map_to": "ぱ"},
-\   "pe": {"map_to": "ぺ"},
-\   "pi": {"map_to": "ぴ"},
-\   "po": {"map_to": "ぽ"},
-\   "pu": {"map_to": "ぷ"},
-\   "pya": {"map_to": "ぴゃ"},
-\   "pye": {"map_to": "ぴぇ"},
-\   "pyi": {"map_to": "ぴぃ"},
-\   "pyo": {"map_to": "ぴょ"},
-\   "pyu": {"map_to": "ぴゅ"},
-\   "rr": {"map_to": "っ", "rest": "r"},
-\   "ra": {"map_to": "ら"},
-\   "re": {"map_to": "れ"},
-\   "ri": {"map_to": "り"},
-\   "ro": {"map_to": "ろ"},
-\   "ru": {"map_to": "る"},
-\   "rya": {"map_to": "りゃ"},
-\   "rye": {"map_to": "りぇ"},
-\   "ryi": {"map_to": "りぃ"},
-\   "ryo": {"map_to": "りょ"},
-\   "ryu": {"map_to": "りゅ"},
-\   "ss": {"map_to": "っ", "rest": "s"},
-\   "sa": {"map_to": "さ"},
-\   "se": {"map_to": "せ"},
-\   "sha": {"map_to": "しゃ"},
-\   "she": {"map_to": "しぇ"},
-\   "shi": {"map_to": "し"},
-\   "sho": {"map_to": "しょ"},
-\   "shu": {"map_to": "しゅ"},
-\   "si": {"map_to": "し"},
-\   "so": {"map_to": "そ"},
-\   "su": {"map_to": "す"},
-\   "sya": {"map_to": "しゃ"},
-\   "sye": {"map_to": "しぇ"},
-\   "syi": {"map_to": "しぃ"},
-\   "syo": {"map_to": "しょ"},
-\   "syu": {"map_to": "しゅ"},
-\   "tt": {"map_to": "っ", "rest": "t"},
-\   "ta": {"map_to": "た"},
-\   "te": {"map_to": "て"},
-\   "tha": {"map_to": "てぁ"},
-\   "the": {"map_to": "てぇ"},
-\   "thi": {"map_to": "てぃ"},
-\   "tho": {"map_to": "てょ"},
-\   "thu": {"map_to": "てゅ"},
-\   "ti": {"map_to": "ち"},
-\   "to": {"map_to": "と"},
-\   "tsu": {"map_to": "つ"},
-\   "tu": {"map_to": "つ"},
-\   "tya": {"map_to": "ちゃ"},
-\   "tye": {"map_to": "ちぇ"},
-\   "tyi": {"map_to": "ちぃ"},
-\   "tyo": {"map_to": "ちょ"},
-\   "tyu": {"map_to": "ちゅ"},
-\   "u": {"map_to": "う"},
-\   "vv": {"map_to": "っ", "rest": "v"},
-\   "va": {"map_to": "う゛ぁ"},
-\   "ve": {"map_to": "う゛ぇ"},
-\   "vi": {"map_to": "う゛ぃ"},
-\   "vo": {"map_to": "う゛ぉ"},
-\   "vu": {"map_to": "う゛"},
-\   "ww": {"map_to": "っ", "rest": "w"},
-\   "wa": {"map_to": "わ"},
-\   "we": {"map_to": "うぇ"},
-\   "wi": {"map_to": "うぃ"},
-\   "wo": {"map_to": "を"},
-\   "wu": {"map_to": "う"},
-\   "xx": {"map_to": "っ", "rest": "x"},
-\   "xa": {"map_to": "ぁ"},
-\   "xe": {"map_to": "ぇ"},
-\   "xi": {"map_to": "ぃ"},
-\   "xka": {"map_to": "か"},
-\   "xke": {"map_to": "け"},
-\   "xo": {"map_to": "ぉ"},
-\   "xtsu": {"map_to": "っ"},
-\   "xtu": {"map_to": "っ"},
-\   "xu":  {"map_to": "ぅ"},
-\   "xwa": {"map_to": "ゎ"},
-\   "xwe": {"map_to": "ゑ"},
-\   "xwi": {"map_to": "ゐ"},
-\   "xya": {"map_to": "ゃ"},
-\   "xyo": {"map_to": "ょ"},
-\   "xyu": {"map_to": "ゅ"},
-\   "yy": {"map_to": "っ", "rest": "y"},
-\   "ya": {"map_to": "や"},
-\   "ye": {"map_to": "いぇ"},
-\   "yo": {"map_to": "よ"},
-\   "yu": {"map_to": "ゆ"},
-\   "zz": {"map_to": "っ", "rest": "z"},
-\   "z,": {"map_to": "‥"},
-\   "z-": {"map_to": "～"},
-\   "z.": {"map_to": "…"},
-\   "z/": {"map_to": "・"},
-\   "z[": {"map_to": "『"},
-\   "z]": {"map_to": "』"},
-\   "za": {"map_to": "ざ"},
-\   "ze": {"map_to": "ぜ"},
-\   "zh": {"map_to": "←"},
-\   "zi": {"map_to": "じ"},
-\   "zj": {"map_to": "↓"},
-\   "zk": {"map_to": "↑"},
-\   "zl": {"map_to": "→"},
-\   "zo": {"map_to": "ぞ"},
-\   "zu": {"map_to": "ず"},
-\   "zya": {"map_to": "じゃ"},
-\   "zye": {"map_to": "じぇ"},
-\   "zyi": {"map_to": "じぃ"},
-\   "zyo": {"map_to": "じょ"},
-\   "zyu": {"map_to": "じゅ"},
-\   "-": {"map_to": "ー"},
-\   ":": {"map_to": "："},
-\   ";": {"map_to": "；"},
-\   "!": {"map_to": "！"},
-\   "?": {"map_to": "？"},
-\   "[": {"map_to": "「"},
-\   "]": {"map_to": "」"},
-\}
+Skk7Table rom_to_hira
+
+call skk7#table#map("a", "あ")
+call skk7#table#map("bb", "っ", 0, "b")
+call skk7#table#map("ba", "ば")
+call skk7#table#map("be", "べ")
+call skk7#table#map("bi", "び")
+call skk7#table#map("bo", "ぼ")
+call skk7#table#map("bu", "ぶ")
+call skk7#table#map("bya", "びゃ")
+call skk7#table#map("bye", "びぇ")
+call skk7#table#map("byi", "びぃ")
+call skk7#table#map("byo", "びょ")
+call skk7#table#map("byu", "びゅ")
+call skk7#table#map("cc", "っ", 0, "c")
+call skk7#table#map("cha", "ちゃ")
+call skk7#table#map("che", "ちぇ")
+call skk7#table#map("chi", "ち")
+call skk7#table#map("cho", "ちょ")
+call skk7#table#map("chu", "ちゅ")
+call skk7#table#map("cya", "ちゃ")
+call skk7#table#map("cye", "ちぇ")
+call skk7#table#map("cyi", "ちぃ")
+call skk7#table#map("cyo", "ちょ")
+call skk7#table#map("cyu", "ちゅ")
+call skk7#table#map("dd", "っ", 0, "d")
+call skk7#table#map("da", "だ")
+call skk7#table#map("de", "で")
+call skk7#table#map("dha", "でゃ")
+call skk7#table#map("dhe", "でぇ")
+call skk7#table#map("dhi", "でぃ")
+call skk7#table#map("dho", "でょ")
+call skk7#table#map("dhu", "でゅ")
+call skk7#table#map("di", "ぢ")
+call skk7#table#map("do", "ど")
+call skk7#table#map("du", "づ")
+call skk7#table#map("dya", "ぢゃ")
+call skk7#table#map("dye", "ぢぇ")
+call skk7#table#map("dyi", "ぢぃ")
+call skk7#table#map("dyo", "ぢょ")
+call skk7#table#map("dyu", "ぢゅ")
+call skk7#table#map("e", "え")
+call skk7#table#map("ff", "っ", 0, "f")
+call skk7#table#map("fa", "ふぁ")
+call skk7#table#map("fe", "ふぇ")
+call skk7#table#map("fi", "ふぃ")
+call skk7#table#map("fo", "ふぉ")
+call skk7#table#map("fu", "ふ")
+call skk7#table#map("fya", "ふゃ")
+call skk7#table#map("fye", "ふぇ")
+call skk7#table#map("fyi", "ふぃ")
+call skk7#table#map("fyo", "ふょ")
+call skk7#table#map("fyu", "ふゅ")
+call skk7#table#map("gg", "っ", 0, "g")
+call skk7#table#map("ga", "が")
+call skk7#table#map("ge", "げ")
+call skk7#table#map("gi", "ぎ")
+call skk7#table#map("go", "ご")
+call skk7#table#map("gu", "ぐ")
+call skk7#table#map("gya", "ぎゃ")
+call skk7#table#map("gye", "ぎぇ")
+call skk7#table#map("gyi", "ぎぃ")
+call skk7#table#map("gyo", "ぎょ")
+call skk7#table#map("gyu", "ぎゅ")
+call skk7#table#map("ha", "は")
+call skk7#table#map("he", "へ")
+call skk7#table#map("hi", "ひ")
+call skk7#table#map("ho", "ほ")
+call skk7#table#map("hu", "ふ")
+call skk7#table#map("hya", "ひゃ")
+call skk7#table#map("hye", "ひぇ")
+call skk7#table#map("hyi", "ひぃ")
+call skk7#table#map("hyo", "ひょ")
+call skk7#table#map("hyu", "ひゅ")
+call skk7#table#map("i", "い")
+call skk7#table#map("jj", "っ", 0, "j")
+call skk7#table#map("ja", "じゃ")
+call skk7#table#map("je", "じぇ")
+call skk7#table#map("ji", "じ")
+call skk7#table#map("jo", "じょ")
+call skk7#table#map("ju", "じゅ")
+call skk7#table#map("jya", "じゃ")
+call skk7#table#map("jye", "じぇ")
+call skk7#table#map("jyi", "じぃ")
+call skk7#table#map("jyo", "じょ")
+call skk7#table#map("jyu", "じゅ")
+call skk7#table#map("kk", "っ", 0, "k")
+call skk7#table#map("ka", "か")
+call skk7#table#map("ke", "け")
+call skk7#table#map("ki", "き")
+call skk7#table#map("ko", "こ")
+call skk7#table#map("ku", "く")
+call skk7#table#map("kya", "きゃ")
+call skk7#table#map("kye", "きぇ")
+call skk7#table#map("kyi", "きぃ")
+call skk7#table#map("kyo", "きょ")
+call skk7#table#map("kyu", "きゅ")
+call skk7#table#map("ma", "ま")
+call skk7#table#map("me", "め")
+call skk7#table#map("mi", "み")
+call skk7#table#map("mo", "も")
+call skk7#table#map("mu", "む")
+call skk7#table#map("mya", "みゃ")
+call skk7#table#map("mye", "みぇ")
+call skk7#table#map("myi", "みぃ")
+call skk7#table#map("myo", "みょ")
+call skk7#table#map("myu", "みゅ")
+call skk7#table#map("n", "ん")
+call skk7#table#map("n'", "ん")
+call skk7#table#map("na", "な")
+call skk7#table#map("ne", "ね")
+call skk7#table#map("ni", "に")
+call skk7#table#map("nn", "ん")
+call skk7#table#map("no", "の")
+call skk7#table#map("nu", "ぬ")
+call skk7#table#map("nya", "にゃ")
+call skk7#table#map("nye", "にぇ")
+call skk7#table#map("nyi", "にぃ")
+call skk7#table#map("nyo", "にょ")
+call skk7#table#map("nyu", "にゅ")
+call skk7#table#map("o", "お")
+call skk7#table#map("pp", "っ", 0, "p")
+call skk7#table#map("pa", "ぱ")
+call skk7#table#map("pe", "ぺ")
+call skk7#table#map("pi", "ぴ")
+call skk7#table#map("po", "ぽ")
+call skk7#table#map("pu", "ぷ")
+call skk7#table#map("pya", "ぴゃ")
+call skk7#table#map("pye", "ぴぇ")
+call skk7#table#map("pyi", "ぴぃ")
+call skk7#table#map("pyo", "ぴょ")
+call skk7#table#map("pyu", "ぴゅ")
+call skk7#table#map("rr", "っ", 0, "r")
+call skk7#table#map("ra", "ら")
+call skk7#table#map("re", "れ")
+call skk7#table#map("ri", "り")
+call skk7#table#map("ro", "ろ")
+call skk7#table#map("ru", "る")
+call skk7#table#map("rya", "りゃ")
+call skk7#table#map("rye", "りぇ")
+call skk7#table#map("ryi", "りぃ")
+call skk7#table#map("ryo", "りょ")
+call skk7#table#map("ryu", "りゅ")
+call skk7#table#map("ss", "っ", 0, "s")
+call skk7#table#map("sa", "さ")
+call skk7#table#map("se", "せ")
+call skk7#table#map("sha", "しゃ")
+call skk7#table#map("she", "しぇ")
+call skk7#table#map("shi", "し")
+call skk7#table#map("sho", "しょ")
+call skk7#table#map("shu", "しゅ")
+call skk7#table#map("si", "し")
+call skk7#table#map("so", "そ")
+call skk7#table#map("su", "す")
+call skk7#table#map("sya", "しゃ")
+call skk7#table#map("sye", "しぇ")
+call skk7#table#map("syi", "しぃ")
+call skk7#table#map("syo", "しょ")
+call skk7#table#map("syu", "しゅ")
+call skk7#table#map("tt", "っ", 0, "t")
+call skk7#table#map("ta", "た")
+call skk7#table#map("te", "て")
+call skk7#table#map("tha", "てぁ")
+call skk7#table#map("the", "てぇ")
+call skk7#table#map("thi", "てぃ")
+call skk7#table#map("tho", "てょ")
+call skk7#table#map("thu", "てゅ")
+call skk7#table#map("ti", "ち")
+call skk7#table#map("to", "と")
+call skk7#table#map("tsu", "つ")
+call skk7#table#map("tu", "つ")
+call skk7#table#map("tya", "ちゃ")
+call skk7#table#map("tye", "ちぇ")
+call skk7#table#map("tyi", "ちぃ")
+call skk7#table#map("tyo", "ちょ")
+call skk7#table#map("tyu", "ちゅ")
+call skk7#table#map("u", "う")
+call skk7#table#map("vv", "っ", 0, "v")
+call skk7#table#map("va", "う゛ぁ")
+call skk7#table#map("ve", "う゛ぇ")
+call skk7#table#map("vi", "う゛ぃ")
+call skk7#table#map("vo", "う゛ぉ")
+call skk7#table#map("vu", "う゛")
+call skk7#table#map("ww", "っ", 0, "w")
+call skk7#table#map("wa", "わ")
+call skk7#table#map("we", "うぇ")
+call skk7#table#map("wi", "うぃ")
+call skk7#table#map("wo", "を")
+call skk7#table#map("wu", "う")
+call skk7#table#map("xx", "っ", 0, "x")
+call skk7#table#map("xa", "ぁ")
+call skk7#table#map("xe", "ぇ")
+call skk7#table#map("xi", "ぃ")
+call skk7#table#map("xka", "か")
+call skk7#table#map("xke", "け")
+call skk7#table#map("xo", "ぉ")
+call skk7#table#map("xtsu", "っ")
+call skk7#table#map("xtu", "っ")
+call skk7#table#map("xu", "ぅ")
+call skk7#table#map("xwa", "ゎ")
+call skk7#table#map("xwe", "ゑ")
+call skk7#table#map("xwi", "ゐ")
+call skk7#table#map("xya", "ゃ")
+call skk7#table#map("xyo", "ょ")
+call skk7#table#map("xyu", "ゅ")
+call skk7#table#map("yy", "っ", 0, "y")
+call skk7#table#map("ya", "や")
+call skk7#table#map("ye", "いぇ")
+call skk7#table#map("yo", "よ")
+call skk7#table#map("yu", "ゆ")
+call skk7#table#map("zz", "っ", 0, "z")
+call skk7#table#map("z,", "‥")
+call skk7#table#map("z-", "～")
+call skk7#table#map("z.", "…")
+call skk7#table#map("z/", "・")
+call skk7#table#map("z[", "『")
+call skk7#table#map("z]", "』")
+call skk7#table#map("za", "ざ")
+call skk7#table#map("ze", "ぜ")
+call skk7#table#map("zh", "←")
+call skk7#table#map("zi", "じ")
+call skk7#table#map("zj", "↓")
+call skk7#table#map("zk", "↑")
+call skk7#table#map("zl", "→")
+call skk7#table#map("zo", "ぞ")
+call skk7#table#map("zu", "ず")
+call skk7#table#map("zya", "じゃ")
+call skk7#table#map("zye", "じぇ")
+call skk7#table#map("zyi", "じぃ")
+call skk7#table#map("zyo", "じょ")
+call skk7#table#map("zyu", "じゅ")
+call skk7#table#map("-", "ー")
+call skk7#table#map(":", "：")
+call skk7#table#map(";", "；")
+call skk7#table#map("!", "！")
+call skk7#table#map("?", "？")
+call skk7#table#map("[", "「")
+call skk7#table#map("]", "」")
 
 
 
