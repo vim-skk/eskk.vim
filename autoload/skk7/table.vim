@@ -26,7 +26,7 @@ endfunc "}}}
 
 func! s:unget_arg(arg, str) "{{{
     return a:str . a:arg
-endfunc
+endfunc "}}}
 
 func! s:parse_arg(arg) "{{{
     let arg = a:arg
@@ -68,9 +68,9 @@ func! s:parse_arg(arg) "{{{
     return lhs_rhs + [get(opt, 'rest', '')]
 endfunc "}}}
 
-func! s:table_varname()
+func! s:table_varname() "{{{
     return printf('g:skk7#table#%s#definition', s:current_table_name)
-endfunc
+endfunc "}}}
 
 
 
@@ -87,7 +87,7 @@ endfunc "}}}
 
 func! s:cmd_table(arg) "{{{
     return skk7#table#table_name(a:arg)
-endfunc
+endfunc "}}}
 
 func! s:cmd_table_map(arg, bang) "{{{
     try
