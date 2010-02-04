@@ -296,14 +296,12 @@ func! skk7#mode#hira#filter_main(buf_str, filtered_str, buf_char, char, henkan_c
     let orig_rom_str_buf = s:rom_str_buf
     let s:rom_str_buf .= a:char
 
-    if has_key(s:ROM_TABLE, s:rom_str_buf)
-        let rest =
-            \   has_key(s:ROM_TABLE[s:rom_str_buf], 'rest') ?
-            \       s:ROM_TABLE[s:rom_str_buf].rest
-            \       : ''
+    let def = g:skk7#table#rom_to_hira#definition
+    if has_key(def, s:rom_str_buf)
+        let rest = get(def[s:rom_str_buf], 'rest', '')
         try
             let bs = repeat(s:BS, skk7#util#mb_strlen(orig_rom_str_buf))
-            return bs . s:ROM_TABLE[s:rom_str_buf].hira . rest
+            return bs . def[s:rom_str_buf].map_to . rest
         finally
             let s:rom_str_buf = rest
         endtry
@@ -315,23 +313,8 @@ func! skk7#mode#hira#filter_main(buf_str, filtered_str, buf_char, char, henkan_c
     endif
 endfunc "}}}
 
-" TODO
-" Current implementation is smart but heavy.
-" Make table like this?
-" 's': {
-"   'a': {'kana': 'さ'},
-"
-"   .
-"   .
-"   .
-"
-"   'y': {'a': {'kana': 'しゃ'}}
-" }
-" But this uses a lot of memory.
-"
 func! skk7#mode#hira#has_candidates(str) "{{{
-    let regex = '^' . a:str
-    return !empty(filter(keys(s:ROM_TABLE), 'v:val =~# regex'))
+    return skk7#table#has_candidates(g:skk7#table#rom_to_hira#definition, a:str)
 endfunc "}}}
 
 " }}}
