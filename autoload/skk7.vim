@@ -74,7 +74,26 @@ func! s:set_up_mappings() "{{{
 endfunc "}}}
 
 func! s:get_all_chars() "{{{
-    return split(g:skk7_mapped_chars, '\zs')
+    return split(
+    \   'abcdefghijklmnopqrstuvwxyz'
+    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    \  .'1234567890'
+    \  .'!"#$%&''()'
+    \  .',./;:]@[-^\'
+    \  .'<>?_+*}`{=~'
+    \   ,
+    \   '\zs'
+    \) + [
+    \   "<Bar>",
+    \   "<Tab>",
+    \   "<BS>",
+    \   "<Insert>",
+    \   "<Home>",
+    \   "<PageUp>",
+    \   "<Delete>",
+    \   "<End>",
+    \   "<PageDown>",
+    \]
 endfunc "}}}
 
 func! s:do_map(modes, options, remap_p, lhs, rhs) "{{{
@@ -230,7 +249,7 @@ func! s:handle_special_keys(char) "{{{
     elseif skk7#is_escape_key(a:char)
         return skk7#escape_key()
     elseif skk7#is_big_letter(a:char)
-        return skk7#sticky_key() .s:dispatch_key(tolower(a:char), 1)
+        return skk7#sticky_key() . s:dispatch_key(tolower(a:char), 1)
     else
         call skk7#util#internal_error()
     endif

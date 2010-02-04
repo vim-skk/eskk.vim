@@ -88,12 +88,6 @@ if !exists('skk7_registered_modes')
     " \   'abbrev': {'map_to': '/'}
     " \}
 endif
-if !exists('skk7_mapped_chars')
-    " TODO 記号
-    let skk7_mapped_chars =
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-endif
 if !exists("skk7_marker_white")
   let skk7_marker_white = '▽'
 endif
