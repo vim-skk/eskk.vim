@@ -32,7 +32,7 @@ let s:mode_change_keys = {}
 
 " Initialize {{{
 
-func! s:initialize_once() "{{{
+func! skk7#init_keys() "{{{
     call skk7#util#log("initializing skk7...")
 
     " Register built-in modes.
@@ -369,7 +369,7 @@ endfunc "}}}
 " }}}
 
 
-call s:initialize_once()
+call skk7#init_keys()
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
 " }}}
