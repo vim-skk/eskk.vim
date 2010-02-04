@@ -68,6 +68,23 @@ func! skk7#util#has_idx(list, idx) "{{{
     return 0 < a:idx && a:idx < len(a:list)
 endfunc "}}}
 
+" a:func is string.
+func! skk7#util#is_callable(func) "{{{
+    return exists('*' . a:func)
+endfunc "}}}
+
+" a:func is string.
+" arg 3 is not for 'self'.
+func! skk7#util#call_if_exists(func, args, ...) "{{{
+    if skk7#util#is_callable(a:func)
+        return call(a:func, a:args)
+    elseif a:0 != 0
+        return a:1
+    else
+        throw printf("skk7: no such function '%s'.", a:func)
+    endif
+endfunc "}}}
+
 
 " For macro. {{{
 

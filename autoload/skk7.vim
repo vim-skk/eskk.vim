@@ -127,7 +127,7 @@ func! skk7#enable() "{{{
     let s:skk7_state = 'main'
 
     let cb_im_enter = printf('skk7#mode#%s#cb_im_enter', s:skk7_mode)
-    call s:call_if_exists(cb_im_enter, [], 'no throw')
+    call skk7#util#call_if_exists(cb_im_enter, [], 'no throw')
 
     return "\<C-^>"
 endfunc "}}}
@@ -171,13 +171,13 @@ endfunc "}}}
 " NOTE: 必要ないかも
 func! skk7#set_mode(next_mode) "{{{
     let cb_mode_leave = printf('skk7#mode#%s#cb_mode_leave', s:skk7_mode)
-    call s:call_if_exists(cb_mode_leave, [a:next_mode], "no throw")
+    call skk7#util#call_if_exists(cb_mode_leave, [a:next_mode], "no throw")
 
     let prev_mode = s:skk7_mode
     let s:skk7_mode = a:next_mode
 
     let cb_mode_enter = printf('skk7#mode#%s#cb_mode_enter', s:skk7_mode)
-    call s:call_if_exists(cb_mode_enter, [prev_mode], "no throw")
+    call skk7#util#call_if_exists(cb_mode_enter, [prev_mode], "no throw")
 endfunc "}}}
 
 func! skk7#set_state(state) "{{{
@@ -235,7 +235,7 @@ func! s:handle_special_key_p(char) "{{{
     return
     \   skk7#is_special_key(a:char)
     \   && s:filter_buf_str ==# ''
-    \   && !s:call_if_exists(cb_now_working, [a:char], 0)
+    \   && !skk7#util#call_if_exists(cb_now_working, [a:char], 0)
 endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行する
@@ -347,23 +347,6 @@ endfunc "}}}
 
 func! s:current_mode() "{{{
     return 'skk7#mode#' . s:skk7_mode
-endfunc "}}}
-
-" a:func is string.
-" arg 3 is not for 'self'.
-func! s:call_if_exists(func, args, ...) "{{{
-    if s:is_callable(a:func)
-        return call(a:func, a:args)
-    elseif a:0 != 0
-        return a:1
-    else
-        throw printf("skk7: no such function '%s'.", a:func)
-    endif
-endfunc "}}}
-
-" a:func is string.
-func! s:is_callable(func) "{{{
-    return exists('*' . a:func)
 endfunc "}}}
 
 " }}}
