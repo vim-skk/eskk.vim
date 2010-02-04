@@ -31,7 +31,7 @@ func! s:parse_arg(arg) "{{{
             if opt_name ==# 'rest'
                 let opt.rest = opt_value
             else
-                throw printf("skk7: Skk7TableMap: unknown '%s' option.", opt_name)
+                throw printf("skk7: Skk7TableMap: unknown option '%s'.", opt_name)
             endif
         else
             let arg = skk7#util#unget_arg(arg, a)
