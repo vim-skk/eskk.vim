@@ -19,7 +19,7 @@ endfunc "}}}
 
 func! skk7#util#warnf(msg, ...) "{{{
     call skk7#util#warn(call('printf', [a:msg] + a:000))
-endfunc
+endfunc "}}}
 
 func! skk7#util#log(...) "{{{
     if g:skk7_debug
@@ -67,8 +67,6 @@ endfunc "}}}
 func! skk7#util#has_idx(list, idx) "{{{
     return 0 < a:idx && a:idx < len(a:list)
 endfunc "}}}
-
-" }}}
 
 " }}}
 
