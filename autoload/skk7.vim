@@ -97,7 +97,7 @@ endfunc "}}}
 
 func! skk7#enable() "{{{
     if skk7#is_enabled()
-        return
+        return ''
     endif
 
     call s:initialize_im_enter()
