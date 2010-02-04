@@ -80,7 +80,7 @@ func! s:cmd_table_map(arg, bang) "{{{
         let [lhs, rhs, rest] = s:parse_arg(a:arg)
         return call('skk7#table#map', [lhs, rhs, (a:bang != '' ? 1 : 0), rest])
     catch /^skk7:/
-        echoerr v:exception
+        call skk7#util#warn(v:exception)
     endtry
 endfunc "}}}
 
