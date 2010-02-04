@@ -113,13 +113,11 @@ endfunc
 
 noremap! <expr> <Plug>(skk7-enable)     skk7#enable()
 noremap! <expr> <Plug>(skk7-sticky-key) skk7#sticky_key()
-noremap! <expr> <Plug>(skk7-escape-key) skk7#escape_key()
 lnoremap <expr> <Plug>(skk7-init-keys)  skk7#init_keys()
 
 if !g:skk7_no_default_mappings
     call s:map('<C-j>', '<Plug>(skk7-enable)'    , 'ic')
     call s:map(';'    , '<Plug>(skk7-sticky-key)', 'l')
-    call s:map('z'    , '<Plug>(skk7-escape-key)', 'l')
     " call s:map('<C-@>'    , '<Plug>(skk7-init-keys)', 'l')
 endif
 " }}}

@@ -141,10 +141,6 @@ func! skk7#sticky_key() "{{{
     endif
 endfunc "}}}
 
-func! skk7#escape_key() "{{{
-    return ''
-endfunc "}}}
-
 func! skk7#register_mode(key, mode) "{{{
     let s:mode_change_keys[a:key] = a:mode
     " TODO Lazy loading?
@@ -197,11 +193,6 @@ func! skk7#is_sticky_key(char) "{{{
     return maparg(a:char, 'lic') ==# '<Plug>(skk7-sticky-key)'
 endfunc "}}}
 
-func! skk7#is_escape_key(char) "{{{
-    " mapmode-lを優先的に探す
-    return maparg(a:char, 'lic') ==# '<Plug>(skk7-escape-key)'
-endfunc "}}}
-
 func! skk7#is_big_letter(char) "{{{
     return a:char =~# '^[A-Z]$'
 endfunc "}}}
@@ -246,8 +237,6 @@ func! s:handle_special_keys(char) "{{{
         return ''
     elseif skk7#is_sticky_key(a:char)
         return skk7#sticky_key()
-    elseif skk7#is_escape_key(a:char)
-        return skk7#escape_key()
     elseif skk7#is_big_letter(a:char)
         return skk7#sticky_key() . s:dispatch_key(tolower(a:char), 1)
     else
