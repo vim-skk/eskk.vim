@@ -145,6 +145,10 @@ func! skk7#register_mode(key, mode) "{{{
     call skk7#mode#{a:mode}#initialize()
 endfunc "}}}
 
+func! skk7#get_registered_modes() "{{{
+    return keys(s:maptable_filter_table('val.type ==# "modechange"'))
+endfunc
+
 func! skk7#current_filter() "{{{
     return skk7#filter_fmt(s:skk7_mode, s:skk7_state)
 endfunc "}}}
@@ -263,6 +267,18 @@ endfunc "}}}
 " Map sticky key.
 func! s:maptable_map_sticky_key(key) "{{{
     call s:maptable_map_key(a:key, s:maptable_create_sticky_key(), a:force)
+endfunc "}}}
+
+
+
+func! s:maptable_filter_table(expr) "{{{
+    let ret = {}
+    for [key, val] in items(deepcopy(s:special_keys))
+        if eval(a:expr)
+            let ret[key] = val
+        endif
+    endfor
+    return ret
 endfunc "}}}
 
 " }}}
