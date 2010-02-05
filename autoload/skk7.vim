@@ -290,10 +290,10 @@ func! s:handle_filter(char) "{{{
         let current_filter = skk7#current_filter()
         if skk7#util#is_callable(current_filter)
             let filtered = {current_filter}(
+            \   a:char,
             \   s:filter_buf_str,
             \   s:filter_filtered_str,
             \   s:filter_buf_char,
-            \   a:char,
             \   s:filter_henkan_count
             \)
         else
