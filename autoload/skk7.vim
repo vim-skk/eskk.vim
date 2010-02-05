@@ -173,6 +173,10 @@ func! skk7#set_mode(next_mode) "{{{
     call skk7#util#call_if_exists(cb_mode_enter, [prev_mode], "no throw")
 endfunc "}}}
 
+func! skk7#get_mode() "{{{
+    return s:skk7_mode
+endfunc "}}}
+
 func! skk7#set_state(state) "{{{
     let s:skk7_state = a:state
 endfunc "}}}
