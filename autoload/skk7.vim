@@ -343,6 +343,9 @@ endfunc "}}}
 
 " }}}
 
+" }}}
+
+
 " For macro. {{{
 
 func! skk7#define_macro() "{{{
@@ -431,8 +434,21 @@ endfunc "}}}
 
 " }}}
 
-" }}}
+" Commands {{{
 
+command!
+\   -nargs=?
+\   Skk7SetMode
+\   call s:cmd_set_mode(<f-args>)
+
+func! s:cmd_set_mode(...) "{{{
+    if a:0 != 0
+        call skk7#set_mode(a:1)
+    endif
+    echo skk7#get_mode()
+endfunc "}}}
+
+" }}}
 
 " Autocmd {{{
 
