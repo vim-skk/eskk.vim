@@ -99,27 +99,18 @@ endif
 
 " Mappings {{{
 
-" Map if not mapped.
-func! s:map(from, to, modes)
-    for m in split(a:modes, '\zs')
-        if !hasmapto(a:to, m)
-            execute
-            \   m . 'map'
-            \   a:from
-            \   a:to
-        endif
-    endfor
-endfunc
-
 noremap! <expr> <Plug>(skk7-enable)     skk7#enable()
 noremap! <expr> <Plug>(skk7-sticky-key) skk7#sticky_key()
 lnoremap <expr> <Plug>(skk7-init-keys)  skk7#init_keys()
 
 if !g:skk7_no_default_mappings
-    call s:map('<C-j>', '<Plug>(skk7-enable)'    , 'ic')
-    call s:map(';'    , '<Plug>(skk7-sticky-key)', 'l')
-    " call s:map('<C-@>'    , '<Plug>(skk7-init-keys)', 'l')
+    map! <C-j>  <Plug>(skk7-enable)
+    lmap <C-@>  <Plug>(skk7-init-keys)
+
+    " TODO Make command macro.
+    call skk7#map('sticky', ';', '', 0)
 endif
+
 " }}}
 
 " Restore 'cpoptions' {{{

@@ -215,6 +215,25 @@ func! s:maptable_map_key(from_key, map_st, force) "{{{
 endfunc "}}}
 
 
+func! s:maptable_is_supported_type(type) "{{{
+    return exists('*' . s:maptable_get_type_func(a:type))
+endfunc "}}}
+
+func! s:maptable_get_type_func(type) "{{{
+    return printf('s:maptable_create_%s_key', a:type)
+endfunc "}}}
+
+
+func! s:maptable_create_detected_type(type, args) "{{{
+    call skk7#util#logf('type = %s, args = %s', a:type, string(a:args))
+    if s:maptable_is_supported_type(a:type)
+        return call(s:maptable_get_type_func(a:type), a:args)
+    else
+        throw printf("skk7: unknown type '%s'.", a:type)
+    endif
+endfunc "}}}
+
+
 " Create modechange key's structure.
 func! s:maptable_create_modechange_key(mode) "{{{
     return {
@@ -313,6 +332,94 @@ func! s:handle_filter(char) "{{{
     endtry
 
     return filtered
+endfunc "}}}
+
+" }}}
+
+" For macro. {{{
+
+func! skk7#define_macro() "{{{
+    command!
+    \   -buffer -nargs=+ -bang
+    \   Skk7Map
+    \   call s:cmd_map(<q-args>, "<bang>")
+    " command!
+    " \   -buffer -nargs=+ -bang
+    " \   Skk7MapSticky
+    " \   call s:cmd_map(<q-args>, "<bang>")
+    " command!
+    " \   -buffer -nargs=+ -bang
+    " \   Skk7MapMode
+    " \   call s:cmd_map(<q-args>, "<bang>")
+endfunc "}}}
+
+func! s:parse_arg(arg) "{{{
+    let arg = a:arg
+    let opt_regex = '-\(\w\+\)=\(\S\+\)'
+
+    " Parse options.
+    let opt = {}
+    while arg != ''
+        let arg = s:skip_spaces(arg)
+        let [a, arg] = s:get_arg(arg)
+
+        let m = matchlist(a, opt_regex)
+        if !empty(m)
+            " a is option.
+            let [opt_name, opt_value] = m[1:2]
+            if opt_name ==# 'type'
+                let opt.types = split(opt_value, ',')
+            else
+                throw printf("skk7: Skk7Map: unknown '%s' option.", opt_name)
+            endif
+        else
+            let arg = s:unget_arg(arg, a)
+            break
+        endif
+    endwhile
+
+    " Parse arguments.
+    let lhs_rhs = []
+    while arg != ''
+        let arg = s:skip_spaces(arg)
+        let [a, arg] = s:get_arg(arg)
+        call add(lhs_rhs, a)
+    endwhile
+    if len(lhs_rhs) != 2
+        call skk7#util#logf('lhs_rhs = %s', string(lhs_rhs))
+        throw 'skk7: Skk7Map [-type=...] lhs rhs'
+    endif
+
+    return lhs_rhs + [get(opt, 'types', [])]
+endfunc "}}}
+
+func! s:cmd_map(arg, bang) "{{{
+    try
+        let [lhs, rhs, types] = s:parse_arg(a:arg)
+        for t in types
+            call s:do_macro_map(t, lhs, rhs, (a:bang != '' ? 1 : 0))
+        endfor
+    catch /^skk7:/
+        call skk7#util#warn(v:exception)
+    endtry
+endfunc "}}}
+
+func! skk7#map(types, lhs, rhs, ...) "{{{
+    let force = a:0 != 0 ? a:1 : 0
+    for t in type(a:types) == type([]) ? a:types : [a:types]
+        call s:do_macro_map(t, a:lhs, a:rhs, force)
+    endfor
+endfunc "}}}
+
+func! s:do_macro_map(type, lhs, rhs, force) "{{{
+    call s:maptable_map_key(
+    \   a:lhs,
+    \   s:maptable_create_detected_type(
+    \       a:type,
+    \       (a:rhs != '' ? [a:rhs] : [])
+    \   ),
+    \   a:force
+    \)
 endfunc "}}}
 
 " }}}
