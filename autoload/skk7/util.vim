@@ -69,8 +69,11 @@ func! skk7#util#has_idx(list, idx) "{{{
 endfunc "}}}
 
 " a:func is string.
-func! skk7#util#is_callable(func) "{{{
-    return exists('*' . a:func)
+"
+" NOTE: This returns 0 for script local function.
+func! skk7#util#is_callable(Fn) "{{{
+    return type(a:Fn) == type(function('tr'))
+    \   || exists('*' . a:Fn)
 endfunc "}}}
 
 " a:func is string.
