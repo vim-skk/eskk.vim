@@ -269,28 +269,24 @@ let s:rom_str_buf = ''
 
 " This function will be called from autoload/skk7.vim.
 func! skk7#mode#hira#initialize() "{{{
+    let s:rom_str_buf = ''
 endfunc "}}}
 
 
-" Callbacks {{{
 
-" For debug.
-func! skk7#mode#hira#cb_no_filter() "{{{
-    call skk7#util#internal_error()
-endfunc "}}}
+" Callbacks
 
 func! skk7#mode#hira#cb_im_enter() "{{{
-    let s:rom_str_buf = ''
+    call skk7#mode#hira#initialize()
 endfunc "}}}
 
 func! skk7#mode#hira#cb_now_working(char) "{{{
     return !empty(s:rom_str_buf)
 endfunc "}}}
 
-" }}}
 
 
-" Filters {{{
+" Filter functions
 
 func! skk7#mode#hira#filter_main(char, buf_str, filtered_str, buf_char, henkan_count) "{{{
     let orig_rom_str_buf = s:rom_str_buf
@@ -316,8 +312,6 @@ endfunc "}}}
 func! skk7#mode#hira#has_candidates(str) "{{{
     return skk7#table#has_candidates(skk7#table#rom_to_hira#get_definition(), a:str)
 endfunc "}}}
-
-" }}}
 
 " }}}
 
