@@ -287,8 +287,9 @@ endfunc "}}}
 func! s:handle_filter(char) "{{{
     let filtered = ''
     try
-        if exists('*' . skk7#current_filter())
-            let filtered = {skk7#current_filter()}(
+        let current_filter = skk7#current_filter()
+        if skk7#util#is_callable(current_filter)
+            let filtered = {current_filter}(
             \   s:filter_buf_str,
             \   s:filter_filtered_str,
             \   s:filter_buf_char,
@@ -296,8 +297,9 @@ func! s:handle_filter(char) "{{{
             \   s:filter_henkan_count
             \)
         else
-            if exists('*' . printf('skk7#mode#%s#cb_no_filter', s:skk7_mode))
-                call skk7#mode#{s:skk7_mode}#cb_no_filter()
+            let cb_no_filter = printf('skk7#mode#%s#cb_no_filter', s:skk7_mode)
+            if skk7#util#is_callable(cb_no_filter)
+                call {cb_no_filter}()
             else
                 call skk7#mode#_default#cb_no_filter()
             endif
