@@ -326,6 +326,8 @@ endfunc "}}}
 func! s:handle_filter(char) "{{{
     let filtered = ''
     try
+        " TODO フィルタ関数の文字列以外の戻り値に対応
+
         let current_filter = skk7#current_filter()
         if skk7#util#is_callable(current_filter)
             let filtered = {current_filter}(
