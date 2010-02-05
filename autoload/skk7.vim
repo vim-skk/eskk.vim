@@ -171,6 +171,9 @@ func! skk7#set_mode(next_mode) "{{{
 
     let cb_mode_enter = printf('skk7#mode#%s#cb_mode_enter', s:skk7_mode)
     call skk7#util#call_if_exists(cb_mode_enter, [prev_mode], "no throw")
+
+    " For &statusline.
+    redrawstatus
 endfunc "}}}
 
 func! skk7#get_mode() "{{{
