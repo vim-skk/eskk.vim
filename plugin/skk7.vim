@@ -72,7 +72,8 @@ endif
 if !exists('skk7_registered_modes')
     " TODO
     let skk7_registered_modes = [
-    \   ['Q', 'hira']
+    \   ['Q', 'hira'],
+    \   ['l', 'ascii'],
     \]
     " let skk7_registered_modes = [
     " \   ['q', 'kata'],
