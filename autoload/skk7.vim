@@ -101,9 +101,6 @@ endfunc "}}}
 
 " }}}
 
-
-" Functions {{{
-
 " Autoload functions {{{
 
 func! skk7#is_enabled() "{{{
@@ -147,7 +144,7 @@ endfunc "}}}
 
 func! skk7#get_registered_modes() "{{{
     return keys(s:maptable_filter_table('val.type ==# "modechange"'))
-endfunc
+endfunc "}}}
 
 func! skk7#current_filter() "{{{
     return skk7#filter_fmt(s:skk7_mode, s:skk7_state)
@@ -213,7 +210,7 @@ endfunc "}}}
 
 " }}}
 
-" For s:special_keys. {{{
+" s:maptable_*() (for s:special_keys) {{{
 
 " Map key.
 func! s:maptable_map_key(from_key, map_st, force) "{{{
@@ -359,10 +356,8 @@ endfunc "}}}
 
 " }}}
 
-" }}}
 
-
-" For macro. {{{
+" For command macro. {{{
 
 func! skk7#define_macro() "{{{
     command!
@@ -450,6 +445,7 @@ endfunc "}}}
 
 " }}}
 
+
 " Commands {{{
 
 command!
@@ -465,6 +461,7 @@ func! s:cmd_set_mode(...) "{{{
 endfunc "}}}
 
 " }}}
+
 
 " Autocmd {{{
 
