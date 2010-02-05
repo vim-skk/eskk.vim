@@ -101,6 +101,14 @@ endfunc "}}}
 
 " }}}
 
+" Utility functions {{{
+
+func! s:get_mode_func(func_str) "{{{
+    return printf('skk7#mode#%s#%s', s:skk7_mode, a:func_str)
+endfunc "}}}
+
+" }}}
+
 " Autoload functions {{{
 
 func! skk7#is_enabled() "{{{
@@ -119,8 +127,7 @@ func! skk7#enable() "{{{
     call skk7#set_mode(g:skk7_initial_mode)
     let s:skk7_state = 'main'
 
-    let cb_im_enter = printf('skk7#mode#%s#cb_im_enter', s:skk7_mode)
-    call skk7#util#call_if_exists(cb_im_enter, [], 'no throw')
+    call skk7#util#call_if_exists(s:get_mode_func('cb_im_enter'), [], 'no throw')
 
     return "\<C-^>"
 endfunc "}}}
@@ -147,11 +154,7 @@ func! skk7#get_registered_modes() "{{{
 endfunc "}}}
 
 func! skk7#current_filter() "{{{
-    return skk7#filter_fmt(s:skk7_mode, s:skk7_state)
-endfunc "}}}
-
-func! skk7#filter_fmt(mode, state) "{{{
-    return printf('skk7#mode#%s#filter_%s', a:mode, a:state)
+    return s:get_mode_func('filter_' . s:skk7_state)
 endfunc "}}}
 
 " NOTE: skk7#is_henkan_phase() がtrueの時、s:filter_buf_str は ''
@@ -164,14 +167,20 @@ func! skk7#is_async() "{{{
 endfunc "}}}
 
 func! skk7#set_mode(next_mode) "{{{
-    let cb_mode_leave = printf('skk7#mode#%s#cb_mode_leave', s:skk7_mode)
-    call skk7#util#call_if_exists(cb_mode_leave, [a:next_mode], "no throw")
+    call skk7#util#call_if_exists(
+    \   s:get_mode_func('cb_mode_leave'),
+    \   [a:next_mode],
+    \   "no throw"
+    \)
 
     let prev_mode = s:skk7_mode
     let s:skk7_mode = a:next_mode
 
-    let cb_mode_enter = printf('skk7#mode#%s#cb_mode_enter', s:skk7_mode)
-    call skk7#util#call_if_exists(cb_mode_enter, [prev_mode], "no throw")
+    call skk7#util#call_if_exists(
+    \   s:get_mode_func('cb_mode_enter'),
+    \   [prev_mode],
+    \   "no throw"
+    \)
 
     " For &statusline.
     redrawstatus
@@ -298,12 +307,14 @@ endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行するかどうか
 func! s:handle_special_key_p(char) "{{{
-    let cb_now_working = printf('skk7#mode#%s#cb_now_working', s:skk7_mode)
-
     return
     \   skk7#is_special_key(a:char)
     \   && s:filter_buf_str ==# ''
-    \   && !skk7#util#call_if_exists(cb_now_working, [a:char], 0)
+    \   && !skk7#util#call_if_exists(
+    \           s:get_mode_func('cb_now_working'),
+    \           [a:char],
+    \           0
+    \       )
 endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行する
@@ -338,7 +349,7 @@ func! s:handle_filter(char) "{{{
             \   s:filter_henkan_count
             \)
         else
-            let cb_no_filter = printf('skk7#mode#%s#cb_no_filter', s:skk7_mode)
+            let cb_no_filter = s:get_mode_func('cb_no_filter')
             if skk7#util#is_callable(cb_no_filter)
                 call {cb_no_filter}()
             else
