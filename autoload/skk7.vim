@@ -431,28 +431,23 @@ func! s:cmd_map(arg, bang) "{{{
     try
         let [lhs, rhs, types] = s:parse_arg(a:arg)
         for t in types
-            call s:do_macro_map(t, lhs, rhs, (a:bang != '' ? 1 : 0))
+            call skk7#map(t, lhs, rhs, (a:bang ==# '!' ? 1 : 0))
         endfor
     catch /^skk7:/
         call skk7#util#warn(v:exception)
     endtry
 endfunc "}}}
 
-func! skk7#map(types, lhs, rhs, ...) "{{{
+func! skk7#map(type, lhs, rhs, ...) "{{{
     let force = a:0 != 0 ? a:1 : 0
-    for t in type(a:types) == type([]) ? a:types : [a:types]
-        call s:do_macro_map(t, a:lhs, a:rhs, force)
-    endfor
-endfunc "}}}
 
-func! s:do_macro_map(type, lhs, rhs, force) "{{{
     call s:maptable_map_key(
     \   a:lhs,
     \   s:maptable_create_detected_type(
     \       a:type,
     \       (a:rhs != '' ? [a:rhs] : [])
     \   ),
-    \   a:force
+    \   force
     \)
 endfunc "}}}
 
