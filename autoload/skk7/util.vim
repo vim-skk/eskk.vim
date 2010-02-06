@@ -46,6 +46,11 @@ func! skk7#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
 endfunc "}}}
 
+func! skk7#util#mb_chop(str) "{{{
+    return substitute(a:str, '.$', '', '')
+endfunc "}}}
+
+
 func! skk7#util#get_args(args, ...) "{{{
     let ret_args = []
     let i = 0
