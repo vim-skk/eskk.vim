@@ -18,8 +18,6 @@ set cpo&vim
 
 let s:skk7_mode = ''
 
-let s:special_keys = {}
-
 let skk7#FROM_KEY_MAP = 'map'
 let skk7#FROM_STICKY_KEY_MAP = 'sticky'
 let skk7#FROM_BIG_LETTER = 'big'
@@ -40,6 +38,8 @@ func! skk7#init_keys() "{{{
 endfunc "}}}
 
 func! s:initialize_im_enter() "{{{
+    " 変換フェーズでない状態で入力され、まだ確定していない文字列
+    let g:skk7#rom_str_buf = ''
     " 変換フェーズになってからまだ変換されていない文字列
     let s:filter_buf_str = ''
     " 上の文字列のフィルタがかけられた版
@@ -240,17 +240,10 @@ endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行するかどうか
 func! s:handle_special_key_p(char, from) "{{{
-    " TODO cb_now_workingは必須にするつもりなので
-    " call_if_exists()で呼び出さなくてもいい
-
     return
     \   skk7#is_special_key(a:char, a:from)
     \   && s:filter_buf_str ==# ''
-    \   && !skk7#util#call_if_exists(
-    \           s:get_mode_func('cb_now_working'),
-    \           [a:char],
-    \           0
-    \       )
+    \   && g:skk#rom_str_buf ==# ''
 endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行する
@@ -296,7 +289,7 @@ func! s:handle_filter(char, from) "{{{
         return a:char
 
     catch
-        call skk7#util#warnf(v:exception)
+        call skk7#util#warn(v:exception)
         " ローマ字のまま返す
         return a:char
     endtry

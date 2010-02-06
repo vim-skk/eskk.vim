@@ -130,9 +130,18 @@ endfunc "}}}
 " }
 " But this uses a lot of memory.
 "
-func! skk7#table#has_candidates(definition, str) "{{{
-    let regex = '^' . a:str
-    return !empty(filter(keys(a:definition), 'v:val =~# regex'))
+func! skk7#table#has_candidates(table_name) "{{{
+    let len = strlen(g:skk7#rom_str_buf)
+    if len == 0
+        call skk7#util#internal_error()
+    endif
+
+    return !empty(
+    \   filter(
+    \       keys(skk7#table#{a:table_name}#get_definition()),
+    \       'stridx(v:val, g:skk7#rom_str_buf) == 0'
+    \   )
+    \)
 endfunc "}}}
 
 " }}}

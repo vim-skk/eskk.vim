@@ -261,7 +261,6 @@ let s:ROM_TABLE = {
 " }}}
 
 let s:BS = "\<C-h>"
-let s:rom_str_buf = ''
 " }}}
 
 
@@ -274,7 +273,7 @@ endfunc "}}}
 
 " This function will be called from autoload/skk7.vim.
 func! skk7#mode#hira#initialize() "{{{
-    let s:rom_str_buf = ''
+    let g:skk7#rom_str_buf = ''
 endfunc "}}}
 
 func! skk7#mode#hira#enable(again) "{{{
@@ -294,37 +293,33 @@ func! skk7#mode#hira#cb_im_enter() "{{{
     call skk7#mode#hira#initialize()
 endfunc "}}}
 
-func! skk7#mode#hira#cb_now_working(char) "{{{
-    return !empty(s:rom_str_buf)
-endfunc "}}}
-
 
 
 " Filter functions
 
 func! skk7#mode#hira#filter_main(char, from, buf_str, filtered_str, buf_char, henkan_count) "{{{
-    let orig_rom_str_buf = s:rom_str_buf
-    let s:rom_str_buf .= a:char
+    let orig_rom_str_buf = g:skk7#rom_str_buf
+    let g:skk7#rom_str_buf .= a:char
 
     let def = skk7#table#rom_to_hira#get_definition()
-    if has_key(def, s:rom_str_buf)
-        let rest = get(def[s:rom_str_buf], 'rest', '')
+    if has_key(def, g:skk7#rom_str_buf)
+        let rest = get(def[g:skk7#rom_str_buf], 'rest', '')
         try
             let bs = repeat(s:BS, skk7#util#mb_strlen(orig_rom_str_buf))
-            return bs . def[s:rom_str_buf].map_to . rest
+            return bs . def[g:skk7#rom_str_buf].map_to . rest
         finally
-            let s:rom_str_buf = rest
+            let g:skk7#rom_str_buf = rest
         endtry
-    elseif skk7#mode#hira#has_candidates(s:rom_str_buf)
+    elseif skk7#table#has_candidates('rom_to_hira')
         return a:char
     else
-        let s:rom_str_buf = strpart(orig_rom_str_buf, 0, strlen(orig_rom_str_buf) - 1)  . a:char
+        let g:skk7#rom_str_buf = strpart(
+        \   orig_rom_str_buf,
+        \   0,
+        \   strlen(orig_rom_str_buf) - 1
+        \) . a:char
         return s:BS . a:char
     endif
-endfunc "}}}
-
-func! skk7#mode#hira#has_candidates(str) "{{{
-    return skk7#table#has_candidates(skk7#table#rom_to_hira#get_definition(), a:str)
 endfunc "}}}
 
 " }}}
