@@ -309,13 +309,10 @@ func! s:handle_special_keys(char, from) "{{{
 endfunc "}}}
 
 func! s:handle_filter(char, from) "{{{
-    try
-        " TODO
-        " - フィルタ関数の文字列以外の戻り値に対応
-        " - g:loaded_skk7_mode_hoge を見て
-        "   定義されていてかつtrueだったら
-        "   例外は飛んでこない「はず」
+    " TODO
+    " - フィルタ関数の文字列以外の戻り値に対応
 
+    try
         let filtered = {s:get_mode_func('filter_main')}(
         \   a:char,
         \   a:from,
@@ -324,18 +321,10 @@ func! s:handle_filter(char, from) "{{{
         \)
         return filtered
 
-    catch /^E117:/    " 未知の関数です
-        let cb_no_filter = s:get_mode_func('cb_no_filter')
-        if skk7#util#is_callable(cb_no_filter)
-            call {cb_no_filter}()
-        else
-            call skk7#mode#cb_no_filter()
-        endif
-        " ローマ字のまま返す
-        return a:char
-
     catch
-        call skk7#util#warn(v:exception)
+        " TODO 現在のモードで最初の一回だけv:exceptionを表示
+
+        call s:initialize_variables()
         " ローマ字のまま返す
         return a:char
     endtry
