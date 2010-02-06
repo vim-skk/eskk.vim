@@ -35,7 +35,7 @@ let skk7#HENKAN_PHASE_HENKAN = 2
 " Initialize {{{
 
 func! skk7#init_keys() "{{{
-    call skk7#util#log("initializing skk7...")
+    call skk7#util#log("<Plug>(skk7-init-keys)")
 
     " Clear current variable states.
     call s:initialize_variables()
@@ -46,6 +46,8 @@ endfunc "}}}
 
 
 func! s:initialize_variables() "{{{
+    call skk7#util#log('initializing variables...')
+
     let s:skk7_mode = ''
 
     " 変換フェーズでない状態で入力され、まだ確定していない文字列
@@ -61,6 +63,8 @@ endfunc "}}}
 
 
 func! s:set_up_mappings() "{{{
+    call skk7#util#log('set up mappings...')
+
     for char in s:get_all_chars()
         " XXX: '<silent>' sometimes causes strange bug...
         call s:execute_map('l',
@@ -140,6 +144,8 @@ endfunc "}}}
 
 
 func! skk7#sticky_key(again) "{{{
+    call skk7#util#log("<Plug>(skk7-sticky-key)")
+
     if !a:again
         return skk7#dispatch_key('', g:skk7#FROM_STICKY_KEY_MAP)
     else
