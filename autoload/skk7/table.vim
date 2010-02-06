@@ -120,13 +120,13 @@ endfunc "}}}
 " Current implementation is smart but heavy.
 " Make table like this?
 " 's': {
-"   'a': {'kana': 'さ'},
+"   'a': {'map_to': 'さ'},
 "
 "   .
 "   .
 "   .
 "
-"   'y': {'a': {'kana': 'しゃ'}}
+"   'y': {'a': {'map_to': 'しゃ'}}
 " }
 " But this uses a lot of memory.
 "
