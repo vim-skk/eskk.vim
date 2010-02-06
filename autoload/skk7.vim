@@ -275,16 +275,11 @@ func! skk7#is_backspace_key(char, from) "{{{
     return a:char ==# "\<BS>" || a:char ==# "\<C-h>"
 endfunc "}}}
 
-func! skk7#is_delete_key(char, from) "{{{
-    return a:char ==# "\<Delete>"
-endfunc "}}}
-
 func! skk7#is_special_key(char, from) "{{{
     return skk7#is_modechange_key(a:char, a:from)
     \   || skk7#is_sticky_key(a:char, a:from)
     \   || skk7#is_big_letter(a:char, a:from)
     \   || skk7#is_backspace_key(a:char, a:from)
-    \   || skk7#is_delete_key(a:char, a:from)
 endfunc "}}}
 
 
@@ -348,9 +343,6 @@ func! s:handle_special_keys(char, from) "{{{
         \   skk7#util#mb_chop(skk7#get_current_buf())
         \)
         return "\<BS>"
-
-    elseif skk7#is_delete_key(a:char, a:from)
-        return "\<Delete>"
 
     else
         call skk7#util#internal_error()
