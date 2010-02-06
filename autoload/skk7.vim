@@ -42,6 +42,10 @@ func! skk7#init_keys() "{{{
 
     " Register Mappings.
     call s:set_up_mappings()
+
+    " TODO
+    " Save previous mode/state.
+    call skk7#set_mode(g:skk7_initial_mode)
 endfunc "}}}
 
 func! s:initialize_variables() "{{{
@@ -133,14 +137,8 @@ func! skk7#enable() "{{{
         return ''
     endif
 
-    call s:initialize_variables()
-
-    " TODO
-    " Save previous mode/state.
-    call skk7#set_mode(g:skk7_initial_mode)
-
+    call skk7#init_keys()
     call skk7#util#call_if_exists(s:get_mode_func('cb_im_enter'), [], 'no throw')
-
     return "\<C-^>"
 endfunc "}}}
 
@@ -287,7 +285,7 @@ endfunc "}}}
 " ここからフィルタ用関数にディスパッチする
 func! skk7#dispatch_key(char, from) "{{{
     if !skk7#is_supported_mode(s:skk7_mode)
-        call skk7#enable()
+        call skk7#init_keys()
     endif
 
     if s:handle_special_key_p(a:char, a:from)
