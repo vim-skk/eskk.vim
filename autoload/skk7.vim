@@ -150,7 +150,12 @@ func! skk7#register_mode(key, mode) "{{{
 endfunc "}}}
 
 func! skk7#get_registered_modes() "{{{
-    return keys(s:maptable_filter_table('val.type ==# "modechange"'))
+    return map(
+    \   values(
+    \       s:maptable_filter_table('val.type ==# "modechange"')
+    \   ),
+    \   'v:val.mode'
+    \)
 endfunc "}}}
 
 func! skk7#current_filter() "{{{
@@ -167,6 +172,11 @@ func! skk7#is_async() "{{{
 endfunc "}}}
 
 func! skk7#set_mode(next_mode) "{{{
+    if !skk7#is_supported_mode(a:next_mode)
+        call skk7#util#warnf("mode '%s' is not supported.", a:next_mode)
+        return
+    endif
+
     call skk7#util#call_if_exists(
     \   s:get_mode_func('cb_mode_leave'),
     \   [a:next_mode],
@@ -188,6 +198,16 @@ endfunc "}}}
 
 func! skk7#get_mode() "{{{
     return s:skk7_mode
+endfunc "}}}
+
+func! skk7#is_supported_mode(mode) "{{{
+    for m in skk7#get_registered_modes()
+        call skk7#util#logf("supported mode = %s", m)
+        if m ==# a:mode
+            return 1
+        endif
+    endfor
+    return 0
 endfunc "}}}
 
 func! skk7#set_state(state) "{{{
@@ -463,7 +483,12 @@ command!
 
 func! s:cmd_set_mode(...) "{{{
     if a:0 != 0
-        call skk7#set_mode(a:1)
+        if skk7#is_supported_mode(a:1)
+            call skk7#set_mode(a:1)
+        else
+            call skk7#util#warnf("mode '%s' is not supported.", a:1)
+            return
+        endif
     endif
     echo skk7#get_mode()
 endfunc "}}}
