@@ -373,7 +373,7 @@ func! s:handle_filter(char) "{{{
             if skk7#util#is_callable(cb_no_filter)
                 call {cb_no_filter}()
             else
-                call skk7#mode#_default#cb_no_filter()
+                call skk7#mode#cb_no_filter()
             endif
             " ローマ字のまま返す
             return a:char
