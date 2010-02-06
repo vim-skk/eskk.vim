@@ -76,6 +76,26 @@ func! skk7#test#is(got, expected, ...) "{{{
 endfunc "}}}
 
 
+func! skk7#test#exists_func(Fn, ...) "{{{
+    let args = a:0 != 0 ? a:1 : []
+
+    try
+        call call(a:Fn, args)
+        return 1
+    catch /E116:/
+        return 0
+    catch /E117:/    " 未知の関数です
+        return 0
+    catch /E118:/
+        return 0
+    catch /E119:/    " 関数の引数が少な過ぎます
+        return 1
+    catch /E120:/
+        return 0
+    endtry
+endfunc "}}}
+
+
 func! s:begin_test() "{{{
     let s:current_test_num = 1
 endfunc "}}}

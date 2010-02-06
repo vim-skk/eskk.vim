@@ -68,10 +68,12 @@ func! skk7#util#get_args(args, ...) "{{{
     return ret_args
 endfunc "}}}
 
+
 " NOTE: Not supported negative idx.
 func! skk7#util#has_idx(list, idx) "{{{
     return 0 < a:idx && a:idx < len(a:list)
 endfunc "}}}
+
 
 " a:func is string.
 "
@@ -90,19 +92,6 @@ func! skk7#util#call_if_exists(Fn, args, ...) "{{{
     else
         throw printf("skk7: no such function '%s'.", a:Fn)
     endif
-endfunc "}}}
-
-func! skk7#util#exists_func(Fn) "{{{
-    try
-        call skk7#util#call_if_exists(a:Fn, [])
-        return 1
-    catch /^E117:/    " 未知の関数です
-        return 0
-    catch /^skk7: no such function/
-        return 0
-    catch /^\(Vim(return):\)\=E119:/    " 関数の引数が少な過ぎます
-        return 1
-    endtry
 endfunc "}}}
 
 

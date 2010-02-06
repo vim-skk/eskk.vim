@@ -7,23 +7,32 @@ set cpo&vim
 " }}}
 
 
-func! s:get_mode_func(mode, func_str)
-    return printf('skk7#mode#%s#%s', a:mode, a:func_str)
+func! s:modef(mode, varname)
+    return printf('skk7#mode#%s#%s', a:mode, a:varname)
 endfunc
 
 func! s:run()
     for m in skk7#get_registered_modes()
+
+        " 関数のチェック
         for f in [
-        \   'load',
-        \   'initialize',
-        \   'cb_now_working',
         \   'filter_main',
-        \   'has_candidates'
         \]
-            let func = s:get_mode_func(m, f)
+            let func = s:modef(m, f)
             call skk7#test#ok(
-            \   skk7#util#exists_func(func),
+            \   skk7#test#exists_func(func),
             \   printf("exists '%s'.", func)
+            \)
+        endfor
+
+        " 変数のチェック
+        for v in [
+        \   'handle_all_keys',
+        \]
+            let varname = 'g:' . s:modef(m, v)
+            call skk7#test#ok(
+            \   exists(varname),
+            \   printf("exists '%s'.", varname)
             \)
         endfor
     endfor

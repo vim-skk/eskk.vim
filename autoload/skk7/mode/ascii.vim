@@ -11,16 +11,11 @@ set cpo&vim
 
 " Variables {{{
 
-let skk7#mode#hira#handle_all_keys = 1
+let skk7#mode#ascii#handle_all_keys = 1
 
 " }}}
 
 " Functions {{{
-
-" Each mode must have 'load()' function
-" to check if its mode exists.
-func! skk7#mode#hira#load() "{{{
-endfunc "}}}
 
 " This function will be called from autoload/skk7.vim.
 func! skk7#mode#ascii#initialize() "{{{

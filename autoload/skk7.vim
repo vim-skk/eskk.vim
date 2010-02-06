@@ -197,6 +197,7 @@ func! skk7#get_henkan_buf(henkan_phase) "{{{
     return g:skk7#henkan_buf_table[a:henkan_phase]
 endfunc "}}}
 
+
 func! skk7#get_current_buf() "{{
     return g:skk7#henkan_buf_table[skk7#get_henkan_phase()]
 endfunc "}}}
@@ -204,6 +205,7 @@ endfunc "}}}
 func! skk7#set_current_buf(str) "{{{
     let g:skk7#henkan_buf_table[skk7#get_henkan_phase()] = a:str
 endfunc "}}}
+
 
 func! skk7#get_henkan_phase() "{{{
     return s:henkan_phase
@@ -226,6 +228,7 @@ endfunc "}}}
 func! skk7#get_mode_from(from) "{{{
     return strpart(a:sig, strlen(g:skk7#FROM_MODECHANGE_KEY_MAP))
 endfunc "}}}
+
 
 func! skk7#is_modechange_key(char, from) "{{{
     return stridx(a:from, g:skk7#FROM_MODECHANGE_KEY_MAP) == 0
@@ -253,6 +256,18 @@ func! skk7#is_special_key(char, from) "{{{
     \   || skk7#is_big_letter(a:char, a:from)
     \   || skk7#is_backspace_key(a:char, a:from)
     \   || skk7#is_delete_key(a:char, a:from)
+endfunc "}}}
+
+
+func! skk7#get_registered_modes() "{{{
+    let prefix = 'loaded_skk7_mode_'
+    return map(
+    \   filter(
+    \      keys(g:),
+    \      'stridx(v:val, prefix) == 0'
+    \   ),
+    \   'strpart(v:val, strlen(prefix))'
+    \)
 endfunc "}}}
 
 " }}}
