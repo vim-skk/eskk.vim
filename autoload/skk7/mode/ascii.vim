@@ -9,6 +9,12 @@ set cpo&vim
 " }}}
 
 
+" Variables {{{
+
+let skk7#mode#hira#handle_all_keys = 1
+
+" }}}
+
 " Functions {{{
 
 " Each mode must have 'load()' function
@@ -35,14 +41,6 @@ endfunc "}}}
 
 func! skk7#mode#ascii#filter_main(char, from, ...) "{{{
     return a:char
-endfunc "}}}
-
-
-
-" Callbacks
-
-func! skk7#mode#ascii#cb_now_working(...) "{{{
-    return 1
 endfunc "}}}
 
 " }}}

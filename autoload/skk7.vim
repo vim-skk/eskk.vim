@@ -274,7 +274,8 @@ endfunc "}}}
 " モード切り替えなどの特殊なキーを実行するかどうか
 func! s:handle_special_key_p(char, from) "{{{
     return
-    \   skk7#is_special_key(a:char, a:from)
+    \   !g:skk7#mode#{skk7#get_mode()}#handle_all_keys
+    \   && skk7#is_special_key(a:char, a:from)
     \   && g:skk7#henkan_buf_table[skk7#get_henkan_phase()] ==# ''
 endfunc "}}}
 

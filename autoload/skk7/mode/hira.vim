@@ -10,7 +10,9 @@ set cpo&vim
 
 " Variables {{{
 
+let skk7#mode#hira#handle_all_keys = 0
 let s:BS = "\<C-h>"
+
 " }}}
 
 
