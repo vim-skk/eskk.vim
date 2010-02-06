@@ -34,20 +34,6 @@ let skk7#HENKAN_PHASE_OKURI = 2
 
 " Initialize {{{
 
-func! skk7#init_keys() "{{{
-    call skk7#util#log("<Plug>(skk7-init-keys)")
-
-    " Clear current variable states.
-    call s:initialize_variables()
-
-    " Register Mappings.
-    call s:set_up_mappings()
-
-    " TODO
-    " Save previous mode/state.
-    call skk7#set_mode(g:skk7_initial_mode)
-endfunc "}}}
-
 func! s:initialize_variables() "{{{
     call skk7#util#log('initializing variables...')
 
@@ -160,6 +146,20 @@ func! skk7#toggle() "{{{
 endfunc "}}}
 
 
+func! skk7#init_keys() "{{{
+    call skk7#util#log("<Plug>(skk7-init-keys)")
+
+    " Clear current variable states.
+    call s:initialize_variables()
+
+    " Register Mappings.
+    call s:set_up_mappings()
+
+    " TODO
+    " Save previous mode/state.
+    call skk7#set_mode(g:skk7_initial_mode)
+endfunc "}}}
+
 func! skk7#sticky_key(again) "{{{
     call skk7#util#log("<Plug>(skk7-sticky-key)")
 
@@ -227,7 +227,7 @@ func! skk7#get_henkan_buf(henkan_phase) "{{{
 endfunc "}}}
 
 
-func! skk7#get_current_buf() "{{
+func! skk7#get_current_buf() "{{{
     return g:skk7#henkan_buf_table[skk7#get_henkan_phase()]
 endfunc "}}}
 
