@@ -179,6 +179,8 @@ func! skk7#set_mode(next_mode) "{{{
     let prev_mode = s:skk7_mode
     let s:skk7_mode = a:next_mode
 
+    call s:initialize_variables()
+
     call skk7#util#call_if_exists(
     \   s:get_mode_func('cb_mode_enter'),
     \   [prev_mode],
