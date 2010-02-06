@@ -21,7 +21,7 @@ scriptencoding utf-8
 " Name: skk7
 " Version: 0.0.0
 " Author:  tyru <tyru.exe@gmail.com>
-" Last Change: 2010-02-06.
+" Last Change: 2010-02-07.
 "
 " Description:
 "   NO DESCRIPTION YET
@@ -81,12 +81,13 @@ endif
 " Mappings {{{
 
 noremap! <expr> <Plug>(skk7-enable)     skk7#enable()
+noremap! <expr> <Plug>(skk7-disable)    skk7#disable()
+noremap! <expr> <Plug>(skk7-toggle)     skk7#toggle()
 lnoremap <expr> <Plug>(skk7-init-keys)  skk7#init_keys()
 lnoremap <expr> <Plug>(skk7-sticky-key) skk7#sticky_key(0)
 
 if !g:skk7_no_default_mappings
-    map! <C-j>  <Plug>(skk7-enable)
-    lmap <C-@>  <Plug>(skk7-init-keys)
+    map! <C-j>  <Plug>(skk7-toggle)
     lmap ;      <Plug>(skk7-sticky-key)
 endif
 

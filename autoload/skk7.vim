@@ -142,6 +142,23 @@ func! skk7#enable() "{{{
     return "\<C-^>"
 endfunc "}}}
 
+func! skk7#disable() "{{{
+    if !skk7#is_enabled()
+        return ''
+    endif
+
+    call skk7#util#call_if_exists(s:get_mode_func('cb_im_leave'), [], 'no throw')
+    return "\<C-^>"
+endfunc "}}}
+
+func! skk7#toggle() "{{{
+    if skk7#is_enabled()
+        return skk7#disable()
+    else
+        return skk7#enable()
+    endif
+endfunc "}}}
+
 
 func! skk7#sticky_key(again) "{{{
     call skk7#util#log("<Plug>(skk7-sticky-key)")
