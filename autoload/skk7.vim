@@ -150,7 +150,11 @@ func! skk7#sticky_key(again) "{{{
         return skk7#dispatch_key('', g:skk7#FROM_STICKY_KEY_MAP)
     else
         let henkan_phase = skk7#get_henkan_phase()
-        if skk7#util#has_idx(g:skk7#henkan_buf_table, henkan_phase + 1)
+        let advance_p =
+        \   skk7#util#has_idx(g:skk7#henkan_buf_table, henkan_phase + 1)
+        \   && skk7#get_current_buf() !=# ''
+
+        if advance_p
             call skk7#set_henkan_phase(henkan_phase + 1)
             return g:skk7_marker_white
         else
