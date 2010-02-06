@@ -44,7 +44,6 @@ func! skk7#init_keys() "{{{
     call s:set_up_mappings()
 endfunc "}}}
 
-
 func! s:initialize_variables() "{{{
     call skk7#util#log('initializing variables...')
 
@@ -287,6 +286,10 @@ endfunc "}}}
 
 " ここからフィルタ用関数にディスパッチする
 func! skk7#dispatch_key(char, from) "{{{
+    if !skk7#is_supported_mode(s:skk7_mode)
+        call skk7#enable()
+    endif
+
     if s:handle_special_key_p(a:char, a:from)
         return s:handle_special_keys(a:char, a:from)
     else
