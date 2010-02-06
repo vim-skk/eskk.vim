@@ -33,7 +33,7 @@ endfunc "}}}
 
 " Filter functions
 
-func! skk7#mode#ascii#filter_main(char, ...) "{{{
+func! skk7#mode#ascii#filter_main(char, from, ...) "{{{
     return a:char
 endfunc "}}}
 
@@ -41,7 +41,7 @@ endfunc "}}}
 
 " Callbacks
 
-func! skk7#mode#ascii#cb_now_working(char, ...) "{{{
+func! skk7#mode#ascii#cb_now_working(...) "{{{
     return 1
 endfunc "}}}
 

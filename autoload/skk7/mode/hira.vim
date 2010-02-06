@@ -302,7 +302,7 @@ endfunc "}}}
 
 " Filter functions
 
-func! skk7#mode#hira#filter_main(char, buf_str, filtered_str, buf_char, henkan_count) "{{{
+func! skk7#mode#hira#filter_main(char, from, buf_str, filtered_str, buf_char, henkan_count) "{{{
     let orig_rom_str_buf = s:rom_str_buf
     let s:rom_str_buf .= a:char
 

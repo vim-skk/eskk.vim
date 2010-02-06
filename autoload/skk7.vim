@@ -17,7 +17,6 @@ set cpo&vim
 " Variables {{{
 
 let s:skk7_mode = ''
-let s:skk7_state = ''
 
 let s:special_keys = {}
 
@@ -128,7 +127,6 @@ func! skk7#enable() "{{{
     " TODO
     " Save previous mode/state.
     call skk7#set_mode(g:skk7_initial_mode)
-    let s:skk7_state = 'main'
 
     call skk7#util#call_if_exists(s:get_mode_func('cb_im_enter'), [], 'no throw')
 
@@ -149,10 +147,6 @@ func! skk7#sticky_key(again) "{{{
     endif
 endfunc "}}}
 
-
-func! skk7#current_filter() "{{{
-    return s:get_mode_func('filter_' . s:skk7_state)
-endfunc "}}}
 
 " NOTE: skk7#is_henkan_phase() がtrueの時、s:filter_buf_str は ''
 func! skk7#is_henkan_phase() "{{{
@@ -197,10 +191,6 @@ func! skk7#is_supported_mode(mode) "{{{
     return exists(varname) && {varname}
 endfunc "}}}
 
-func! skk7#set_state(state) "{{{
-    let s:skk7_state = a:state
-endfunc "}}}
-
 func! skk7#set_henkan_phase(cond) "{{{
     let s:filter_is_henkan_phase = a:cond
 endfunc "}}}
@@ -241,7 +231,7 @@ func! skk7#dispatch_key(char, from) "{{{
     if s:handle_special_key_p(a:char, a:from)
         return s:handle_special_keys(a:char, a:from)
     else
-        return s:handle_filter(a:char)
+        return s:handle_filter(a:char, a:from)
     endif
 
     " TODO 補完
@@ -281,13 +271,13 @@ func! s:handle_special_keys(char, from) "{{{
     endif
 endfunc "}}}
 
-func! s:handle_filter(char) "{{{
+func! s:handle_filter(char, from) "{{{
     try
         " TODO フィルタ関数の文字列以外の戻り値に対応
 
-        let current_filter = skk7#current_filter()
-        let filtered = {current_filter}(
+        let filtered = {s:get_mode_func('filter_main')}(
         \   a:char,
+        \   a:from,
         \   s:filter_buf_str,
         \   s:filter_filtered_str,
         \   s:filter_buf_char,
