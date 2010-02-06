@@ -14,18 +14,22 @@ set cpo&vim
 "   またインサートモードになった時にまだ有効になっている件
 
 
-" Variables {{{
-
-let s:skk7_mode = ''
+" Constants {{{
 
 let skk7#FROM_KEY_MAP = 'map'
 let skk7#FROM_STICKY_KEY_MAP = 'sticky'
 let skk7#FROM_BIG_LETTER = 'big'
 let skk7#FROM_MODECHANGE_KEY_MAP = 'mode'
 
-" この他の変数はs:initialize_im_enter()を参照。
+" Normal
+let skk7#HENKAN_PHASE_NORMAL = 0
+" Waiting for okurigana.
+let skk7#HENKAN_PHASE_OKURI = 1
+" Choosing henkan candidates.
+let skk7#HENKAN_PHASE_HENKAN = 2
 
 " }}}
+" See s:initialize_variables() about variables.
 
 
 " Initialize {{{
@@ -33,23 +37,24 @@ let skk7#FROM_MODECHANGE_KEY_MAP = 'mode'
 func! skk7#init_keys() "{{{
     call skk7#util#log("initializing skk7...")
 
+    " Clear current variable states.
+    call s:initialize_variables()
+
     " Register Mappings.
     call s:set_up_mappings()
 endfunc "}}}
 
-func! s:initialize_im_enter() "{{{
+
+func! s:initialize_variables() "{{{
+    let s:skk7_mode = ''
+
     " 変換フェーズでない状態で入力され、まだ確定していない文字列
-    let g:skk7#rom_str_buf = ''
-    " 変換フェーズになってからまだ変換されていない文字列
-    let s:filter_buf_str = ''
-    " 上の文字列のフィルタがかけられた版
-    let s:filter_filtered_str = ''
-    " 変換フェーズになってからまた変換フェーズになった場合の文字 (0文字か1文字)
-    let s:filter_buf_char = ''
+    let g:skk7#henkan_buf_table = ['', '', '']
     " 変換キーが押された回数
-    let s:filter_henkan_count = 0
-    " 変換フェーズかどうか
-    let s:filter_is_henkan_phase = 0
+    let s:henkan_count = 0
+    " 現在の変換フェーズ
+    let s:henkan_phase = g:skk7#HENKAN_PHASE_NORMAL
+
     " 非同期なフィルタの実行がサポートされているかどうか
     let s:filter_is_async = 0
 endfunc "}}}
@@ -122,7 +127,7 @@ func! skk7#enable() "{{{
         return ''
     endif
 
-    call s:initialize_im_enter()
+    call s:initialize_variables()
 
     " TODO
     " Save previous mode/state.
@@ -138,8 +143,9 @@ func! skk7#sticky_key(again) "{{{
     if !a:again
         return skk7#dispatch_key('', g:skk7#FROM_STICKY_KEY_MAP)
     else
-        if !skk7#is_henkan_phase()
-            call skk7#set_henkan_phase(1)
+        let henkan_phase = skk7#get_henkan_phase()
+        if skk7#util#has_idx(g:skk7#henkan_buf_table, henkan_phase + 1)
+            call skk7#set_henkan_phase(henkan_phase + 1)
             return g:skk7_marker_white
         else
             return ''
@@ -147,11 +153,6 @@ func! skk7#sticky_key(again) "{{{
     endif
 endfunc "}}}
 
-
-" NOTE: skk7#is_henkan_phase() がtrueの時、s:filter_buf_str は ''
-func! skk7#is_henkan_phase() "{{{
-    return s:filter_is_henkan_phase
-endfunc "}}}
 
 func! skk7#is_async() "{{{
     return s:filter_is_async
@@ -191,8 +192,30 @@ func! skk7#is_supported_mode(mode) "{{{
     return exists(varname) && {varname}
 endfunc "}}}
 
-func! skk7#set_henkan_phase(cond) "{{{
-    let s:filter_is_henkan_phase = a:cond
+
+func! skk7#get_henkan_buf(henkan_phase) "{{{
+    return g:skk7#henkan_buf_table[a:henkan_phase]
+endfunc "}}}
+
+func! skk7#get_current_buf() "{{
+    return g:skk7#henkan_buf_table[skk7#get_henkan_phase()]
+endfunc "}}}
+
+func! skk7#set_current_buf(str) "{{{
+    let g:skk7#henkan_buf_table[skk7#get_henkan_phase()] = a:str
+endfunc "}}}
+
+func! skk7#get_henkan_phase() "{{{
+    return s:henkan_phase
+endfunc "}}}
+
+" TODO フィルタ関数実行中はいじれないようにする？
+func! skk7#set_henkan_phase(henkan_phase) "{{{
+    if skk7#util#has_idx(s:henkan_phase, a:henkan_phase)
+        let s:henkan_phase = a:henkan_phase
+    else
+        call skk7#util#internal_error()
+    endif
 endfunc "}}}
 
 
@@ -216,10 +239,20 @@ func! skk7#is_big_letter(char, from) "{{{
     return a:char =~# '^[A-Z]$'
 endfunc "}}}
 
+func! skk7#is_backspace_key(char, from) "{{{
+    return a:char ==# "\<BS>" || a:char ==# "\<C-h>"
+endfunc "}}}
+
+func! skk7#is_delete_key(char, from) "{{{
+    return a:char ==# "\<Delete>"
+endfunc "}}}
+
 func! skk7#is_special_key(char, from) "{{{
     return skk7#is_modechange_key(a:char, a:from)
     \   || skk7#is_sticky_key(a:char, a:from)
     \   || skk7#is_big_letter(a:char, a:from)
+    \   || skk7#is_backspace_key(a:char, a:from)
+    \   || skk7#is_delete_key(a:char, a:from)
 endfunc "}}}
 
 " }}}
@@ -242,8 +275,7 @@ endfunc "}}}
 func! s:handle_special_key_p(char, from) "{{{
     return
     \   skk7#is_special_key(a:char, a:from)
-    \   && s:filter_buf_str ==# ''
-    \   && g:skk#rom_str_buf ==# ''
+    \   && g:skk7#henkan_buf_table[skk7#get_henkan_phase()] ==# ''
 endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行する
@@ -254,11 +286,23 @@ func! s:handle_special_keys(char, from) "{{{
         " モード変更
         call skk7#set_mode(skk7#get_mode_from(a:from))
         return ''
+
     elseif skk7#is_sticky_key(a:char, a:from)
         return skk7#sticky_key(1)
+
     elseif skk7#is_big_letter(a:char, a:from)
         return skk7#sticky_key(1)
         \    . skk7#dispatch_key(tolower(a:char), g:skk7#FROM_BIG_LETTER)
+
+    elseif skk7#is_backspace_key(a:char, a:from)
+        call skk7#set_current_buf(
+        \   skk7#util#mb_chop(skk7#get_current_buf())
+        \)
+        return "\<BS>"
+
+    elseif skk7#is_delete_key(a:char, a:from)
+        return "\<Delete>"
+
     else
         call skk7#util#internal_error()
     endif
@@ -266,15 +310,17 @@ endfunc "}}}
 
 func! s:handle_filter(char, from) "{{{
     try
-        " TODO フィルタ関数の文字列以外の戻り値に対応
+        " TODO
+        " - フィルタ関数の文字列以外の戻り値に対応
+        " - g:loaded_skk7_mode_hoge を見て
+        "   定義されていてかつtrueだったら
+        "   例外は飛んでこない「はず」
 
         let filtered = {s:get_mode_func('filter_main')}(
         \   a:char,
         \   a:from,
-        \   s:filter_buf_str,
-        \   s:filter_filtered_str,
-        \   s:filter_buf_char,
-        \   s:filter_henkan_count
+        \   skk7#get_henkan_phase(),
+        \   s:henkan_count
         \)
         return filtered
 
@@ -333,7 +379,7 @@ augroup skk7-augroup
 augroup END
 
 func! s:autocmd_insert_enter() "{{{
-    call skk7#set_henkan_phase(0)
+    call skk7#init_keys()
 endfunc "}}}
 
 " }}}

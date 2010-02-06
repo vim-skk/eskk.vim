@@ -273,7 +273,6 @@ endfunc "}}}
 
 " This function will be called from autoload/skk7.vim.
 func! skk7#mode#hira#initialize() "{{{
-    let g:skk7#rom_str_buf = ''
 endfunc "}}}
 
 func! skk7#mode#hira#enable(again) "{{{
@@ -297,27 +296,40 @@ endfunc "}}}
 
 " Filter functions
 
-func! skk7#mode#hira#filter_main(char, from, buf_str, filtered_str, buf_char, henkan_count) "{{{
-    let orig_rom_str_buf = g:skk7#rom_str_buf
-    let g:skk7#rom_str_buf .= a:char
+func! skk7#mode#hira#filter_main(char, from, henkan_phase, henkan_count) "{{{
+    if a:henkan_phase ==# g:skk7#HENKAN_PHASE_NORMAL
+        return s:filter_rom_to_hira(a:char, a:from, a:henkan_count)
+    elseif a:henkan_phase ==# g:skk7#HENKAN_PHASE_OKURI
+        " TODO
+    elseif a:henkan_phase ==# g:skk7#HENKAN_PHASE_HENKAN
+        " TODO
+    endif
+endfunc "}}}
+
+func! s:filter_rom_to_hira(char, from, henkan_count) "{{{
+    let orig_rom_str_buf = skk7#get_current_buf()
+    let rom_str_buf = orig_rom_str_buf . a:char
+    call skk7#set_current_buf(rom_str_buf)
 
     let def = skk7#table#rom_to_hira#get_definition()
-    if has_key(def, g:skk7#rom_str_buf)
-        let rest = get(def[g:skk7#rom_str_buf], 'rest', '')
+    if has_key(def, rom_str_buf)
+        let rest = get(def[rom_str_buf], 'rest', '')
         try
             let bs = repeat(s:BS, skk7#util#mb_strlen(orig_rom_str_buf))
-            return bs . def[g:skk7#rom_str_buf].map_to . rest
+            return bs . def[rom_str_buf].map_to . rest
         finally
-            let g:skk7#rom_str_buf = rest
+            call skk7#set_current_buf(rest)
         endtry
-    elseif skk7#table#has_candidates('rom_to_hira')
+    elseif skk7#table#has_candidates('rom_to_hira', orig_rom_str_buf)
         return a:char
     else
-        let g:skk7#rom_str_buf = strpart(
-        \   orig_rom_str_buf,
-        \   0,
-        \   strlen(orig_rom_str_buf) - 1
-        \) . a:char
+        call skk7#set_current_buf(
+        \   strpart(
+        \      orig_rom_str_buf,
+        \      0,
+        \      strlen(orig_rom_str_buf) - 1
+        \   ) . a:char
+        \)
         return s:BS . a:char
     endif
 endfunc "}}}
