@@ -23,10 +23,10 @@ let skk7#FROM_MODECHANGE_KEY_MAP = 'mode'
 
 " Normal
 let skk7#HENKAN_PHASE_NORMAL = 0
-" Waiting for okurigana.
-let skk7#HENKAN_PHASE_OKURI = 1
 " Choosing henkan candidates.
-let skk7#HENKAN_PHASE_HENKAN = 2
+let skk7#HENKAN_PHASE_HENKAN = 1
+" Waiting for okurigana.
+let skk7#HENKAN_PHASE_OKURI = 2
 
 " }}}
 " See s:initialize_variables() about variables.
