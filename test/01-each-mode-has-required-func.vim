@@ -13,7 +13,13 @@ endfunc
 
 func! s:run()
     for m in skk7#get_registered_modes()
-        for f in ['initialize', 'cb_now_working', 'filter_main', 'has_candidates']
+        for f in [
+        \   'load',
+        \   'initialize',
+        \   'cb_now_working',
+        \   'filter_main',
+        \   'has_candidates'
+        \]
             let func = s:get_mode_func(m, f)
             call skk7#test#ok(
             \   skk7#util#exists_func(func),
