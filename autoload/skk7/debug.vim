@@ -15,7 +15,9 @@ func! skk7#debug#log(msg) "{{{
     redraw
     call add(s:debug_msg_list, a:msg)
     call skk7#util#warn(a:msg)
-    execute printf('sleep %dm', g:skk7_debug_wait_ms)
+    if g:skk7_debug_wait_ms !=# 0
+        execute printf('sleep %dm', g:skk7_debug_wait_ms)
+    endif
 endfunc "}}}
 
 func! skk7#debug#logf(msg, ...) "{{{
