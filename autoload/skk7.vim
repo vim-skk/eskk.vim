@@ -398,6 +398,14 @@ endfunc "}}}
 
 " }}}
 
+" :Skk7Reset {{{
+
+command!
+\   Skk7Reset
+\   call skk7#init_keys()
+
+" }}}
+
 " }}}
 
 
