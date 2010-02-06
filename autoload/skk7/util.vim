@@ -76,16 +76,28 @@ func! skk7#util#is_callable(Fn) "{{{
     \   || exists('*' . a:Fn)
 endfunc "}}}
 
-" a:func is string.
 " arg 3 is not for 'self'.
-func! skk7#util#call_if_exists(func, args, ...) "{{{
-    if skk7#util#is_callable(a:func)
-        return call(a:func, a:args)
+func! skk7#util#call_if_exists(Fn, args, ...) "{{{
+    if skk7#util#is_callable(a:Fn)
+        return call(a:Fn, a:args)
     elseif a:0 != 0
         return a:1
     else
-        throw printf("skk7: no such function '%s'.", a:func)
+        throw printf("skk7: no such function '%s'.", a:Fn)
     endif
+endfunc "}}}
+
+func! skk7#util#exists_func(Fn) "{{{
+    try
+        call skk7#util#call_if_exists(a:Fn, [])
+        return 1
+    catch /^E117:/    " 未知の関数です
+        return 0
+    catch /^skk7: no such function/
+        return 0
+    catch /^\(Vim(return):\)\=E119:/    " 関数の引数が少な過ぎます
+        return 1
+    endtry
 endfunc "}}}
 
 

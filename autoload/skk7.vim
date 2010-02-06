@@ -104,7 +104,7 @@ endfunc "}}}
 " Utility functions {{{
 
 func! s:get_mode_func(func_str) "{{{
-    return printf('skk7#mode#%s#%s', s:skk7_mode, a:func_str)
+    return printf('skk7#mode#%s#%s', skk7#get_mode(), a:func_str)
 endfunc "}}}
 
 " }}}
