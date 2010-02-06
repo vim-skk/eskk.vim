@@ -21,6 +21,11 @@ let s:skk7_state = ''
 
 let s:special_keys = {}
 
+let skk7#FROM_KEY_MAP = 'map'
+let skk7#FROM_STICKY_KEY_MAP = 'sticky'
+let skk7#FROM_BIG_LETTER = 'big'
+let skk7#FROM_MODECHANGE_KEY_MAP = 'mode'
+
 " この他の変数はs:initialize_im_enter()を参照。
 
 " }}}
@@ -30,11 +35,6 @@ let s:special_keys = {}
 
 func! skk7#init_keys() "{{{
     call skk7#util#log("initializing skk7...")
-
-    " Register built-in modes.
-    for [key, mode] in g:skk7_registered_modes
-        call skk7#register_mode(key, mode)
-    endfor
 
     " Register Mappings.
     call s:set_up_mappings()
@@ -60,10 +60,13 @@ func! s:set_up_mappings() "{{{
     for char in s:get_all_chars()
         " XXX: '<silent>' sometimes causes strange bug...
         call s:execute_map('l',
-        \             '<buffer><expr><silent>',
-        \             1,
-        \             char,
-        \             printf('<SID>dispatch_key(%s)', string(char)))
+        \   '<buffer><expr><silent>',
+        \   1,
+        \   char,
+        \   printf(
+        \       'skk7#dispatch_key(%s, %s)',
+        \       string(char),
+        \       string(g:skk7#FROM_KEY_MAP)))
     endfor
 endfunc "}}}
 
@@ -132,31 +135,20 @@ func! skk7#enable() "{{{
     return "\<C-^>"
 endfunc "}}}
 
-func! skk7#sticky_key() "{{{
-    if !skk7#is_henkan_phase()
-        call skk7#set_henkan_phase(1)
-        return g:skk7_marker_white
+
+func! skk7#sticky_key(again) "{{{
+    if !a:again
+        return skk7#dispatch_key('', g:skk7#FROM_STICKY_KEY_MAP)
     else
-        return ''
+        if !skk7#is_henkan_phase()
+            call skk7#set_henkan_phase(1)
+            return g:skk7_marker_white
+        else
+            return ''
+        endif
     endif
 endfunc "}}}
 
-func! skk7#register_mode(key, mode) "{{{
-    " TODO Force mapping?
-    call s:maptable_map_modechange_key(a:key, a:mode, 0)
-
-    " TODO Lazy loading?
-    call skk7#mode#{a:mode}#initialize()
-endfunc "}}}
-
-func! skk7#get_registered_modes() "{{{
-    return map(
-    \   values(
-    \       s:maptable_filter_table('val.type ==# "modechange"')
-    \   ),
-    \   'v:val.mode'
-    \)
-endfunc "}}}
 
 func! skk7#current_filter() "{{{
     return s:get_mode_func('filter_' . s:skk7_state)
@@ -201,13 +193,8 @@ func! skk7#get_mode() "{{{
 endfunc "}}}
 
 func! skk7#is_supported_mode(mode) "{{{
-    for m in skk7#get_registered_modes()
-        call skk7#util#logf("supported mode = %s", m)
-        if m ==# a:mode
-            return 1
-        endif
-    endfor
-    return 0
+    let varname = 'g:loaded_skk7_mode_' . a:mode
+    return exists(varname) && {varname}
 endfunc "}}}
 
 func! skk7#set_state(state) "{{{
@@ -218,93 +205,31 @@ func! skk7#set_henkan_phase(cond) "{{{
     let s:filter_is_henkan_phase = a:cond
 endfunc "}}}
 
-func! skk7#is_modechange_key(char) "{{{
-    return skk7#is_special_key(a:char)
-    \   && s:special_keys[a:char].type ==# 'modechange'
+
+func! skk7#from_mode(mode) "{{{
+    return g:skk7#FROM_MODECHANGE_KEY_MAP . a:mode
 endfunc "}}}
 
-func! skk7#is_sticky_key(char) "{{{
-    " mapmode-lを優先的に探す
-    return skk7#is_special_key(a:char)
-    \   && s:special_keys[a:char].type ==# 'sticky'
+func! skk7#get_mode_from(from) "{{{
+    return strpart(a:sig, strlen(g:skk7#FROM_MODECHANGE_KEY_MAP))
 endfunc "}}}
 
-func! skk7#is_big_letter(char) "{{{
+func! skk7#is_modechange_key(char, from) "{{{
+    return stridx(a:from, g:skk7#FROM_MODECHANGE_KEY_MAP) == 0
+endfunc "}}}
+
+func! skk7#is_sticky_key(char, from) "{{{
+    return a:from ==# g:skk7#FROM_STICKY_KEY_MAP
+endfunc "}}}
+
+func! skk7#is_big_letter(char, from) "{{{
     return a:char =~# '^[A-Z]$'
 endfunc "}}}
 
-func! skk7#is_special_key(char) "{{{
-    return has_key(s:special_keys, a:char)
-endfunc "}}}
-
-" }}}
-
-" s:maptable_*() (for s:special_keys) {{{
-
-" Map key.
-func! s:maptable_map_key(from_key, map_st, force) "{{{
-    " If:
-    " - s:special_keys DOES NOT has a:from_key.
-    " - Or, s:special_keys HAS a:from_key but a:force is true.
-    if !(has_key(s:special_keys, a:from_key) && !a:force)
-        let s:special_keys[a:from_key] = a:map_st
-    endif
-endfunc "}}}
-
-
-func! s:maptable_is_supported_type(type) "{{{
-    return exists('*' . s:maptable_get_type_func(a:type))
-endfunc "}}}
-
-func! s:maptable_get_type_func(type) "{{{
-    return printf('s:maptable_create_%s_key', a:type)
-endfunc "}}}
-
-
-func! s:maptable_create_detected_type(type, args) "{{{
-    call skk7#util#logf('type = %s, args = %s', a:type, string(a:args))
-    if s:maptable_is_supported_type(a:type)
-        return call(s:maptable_get_type_func(a:type), a:args)
-    else
-        throw printf("skk7: unknown type '%s'.", a:type)
-    endif
-endfunc "}}}
-
-
-" Create modechange key's structure.
-func! s:maptable_create_modechange_key(mode) "{{{
-    return {
-    \   'type': 'modechange',
-    \   'mode': a:mode,
-    \}
-endfunc "}}}
-
-" Map modechange key.
-func! s:maptable_map_modechange_key(key, mode, force) "{{{
-    call s:maptable_map_key(a:key, s:maptable_create_modechange_key(a:mode), a:force)
-endfunc "}}}
-
-
-" Create sticky key's structure.
-func! s:maptable_create_sticky_key() "{{{
-    return {'type': 'sticky'}
-endfunc "}}}
-
-" Map sticky key.
-func! s:maptable_map_sticky_key(key) "{{{
-    call s:maptable_map_key(a:key, s:maptable_create_sticky_key(), a:force)
-endfunc "}}}
-
-
-
-func! s:maptable_filter_table(expr) "{{{
-    let ret = {}
-    for [key, val] in items(deepcopy(s:special_keys))
-        if eval(a:expr)
-            let ret[key] = val
-        endif
-    endfor
-    return ret
+func! skk7#is_special_key(char, from) "{{{
+    return skk7#is_modechange_key(a:char, a:from)
+    \   || skk7#is_sticky_key(a:char, a:from)
+    \   || skk7#is_big_letter(a:char, a:from)
 endfunc "}}}
 
 " }}}
@@ -312,11 +237,9 @@ endfunc "}}}
 " Dispatch functions {{{
 
 " ここからフィルタ用関数にディスパッチする
-func! s:dispatch_key(char, ...) "{{{
-    let [capital_p] = skk7#util#get_args(a:000, 0)
-
-    if s:handle_special_key_p(a:char)
-        return s:handle_special_keys(a:char)
+func! skk7#dispatch_key(char, from) "{{{
+    if s:handle_special_key_p(a:char, a:from)
+        return s:handle_special_keys(a:char, a:from)
     else
         return s:handle_filter(a:char)
     endif
@@ -326,9 +249,12 @@ func! s:dispatch_key(char, ...) "{{{
 endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行するかどうか
-func! s:handle_special_key_p(char) "{{{
+func! s:handle_special_key_p(char, from) "{{{
+    " TODO cb_now_workingは必須にするつもりなので
+    " call_if_exists()で呼び出さなくてもいい
+
     return
-    \   skk7#is_special_key(a:char)
+    \   skk7#is_special_key(a:char, a:from)
     \   && s:filter_buf_str ==# ''
     \   && !skk7#util#call_if_exists(
     \           s:get_mode_func('cb_now_working'),
@@ -338,143 +264,60 @@ func! s:handle_special_key_p(char) "{{{
 endfunc "}}}
 
 " モード切り替えなどの特殊なキーを実行する
-func! s:handle_special_keys(char) "{{{
+func! s:handle_special_keys(char, from) "{{{
     " TODO Priority
 
-    if skk7#is_modechange_key(a:char)
+    if skk7#is_modechange_key(a:char, a:from)
         " モード変更
-        call skk7#set_mode(s:special_keys[a:char].mode)
+        call skk7#set_mode(skk7#get_mode_from(a:from))
         return ''
-    elseif skk7#is_sticky_key(a:char)
-        return skk7#sticky_key()
-    elseif skk7#is_big_letter(a:char)
-        return skk7#sticky_key() . s:dispatch_key(tolower(a:char), 1)
+    elseif skk7#is_sticky_key(a:char, a:from)
+        return skk7#sticky_key(1)
+    elseif skk7#is_big_letter(a:char, a:from)
+        return skk7#sticky_key(1)
+        \    . skk7#dispatch_key(tolower(a:char), g:skk7#FROM_BIG_LETTER)
     else
         call skk7#util#internal_error()
     endif
 endfunc "}}}
 
 func! s:handle_filter(char) "{{{
-    let filtered = ''
     try
         " TODO フィルタ関数の文字列以外の戻り値に対応
 
         let current_filter = skk7#current_filter()
-        if skk7#util#is_callable(current_filter)
-            let filtered = {current_filter}(
-            \   a:char,
-            \   s:filter_buf_str,
-            \   s:filter_filtered_str,
-            \   s:filter_buf_char,
-            \   s:filter_henkan_count
-            \)
+        let filtered = {current_filter}(
+        \   a:char,
+        \   s:filter_buf_str,
+        \   s:filter_filtered_str,
+        \   s:filter_buf_char,
+        \   s:filter_henkan_count
+        \)
+        return filtered
+
+    catch /^E117:/    " 未知の関数です
+        let cb_no_filter = s:get_mode_func('cb_no_filter')
+        if skk7#util#is_callable(cb_no_filter)
+            call {cb_no_filter}()
         else
-            let cb_no_filter = s:get_mode_func('cb_no_filter')
-            if skk7#util#is_callable(cb_no_filter)
-                call {cb_no_filter}()
-            else
-                call skk7#mode#cb_no_filter()
-            endif
-            " ローマ字のまま返す
-            return a:char
+            call skk7#mode#cb_no_filter()
         endif
-    catch /^skk7:/
+        " ローマ字のまま返す
+        return a:char
+
+    catch
         call skk7#util#warnf(v:exception)
         " ローマ字のまま返す
         return a:char
     endtry
-
-    return filtered
-endfunc "}}}
-
-" }}}
-
-
-" For command macro. {{{
-
-func! skk7#define_macro() "{{{
-    command!
-    \   -buffer -nargs=+ -bang
-    \   Skk7Map
-    \   call s:cmd_map(<q-args>, "<bang>")
-    " command!
-    " \   -buffer -nargs=+ -bang
-    " \   Skk7MapSticky
-    " \   call s:cmd_map(<q-args>, "<bang>")
-    " command!
-    " \   -buffer -nargs=+ -bang
-    " \   Skk7MapMode
-    " \   call s:cmd_map(<q-args>, "<bang>")
-endfunc "}}}
-
-func! s:parse_arg(arg) "{{{
-    let arg = a:arg
-    let opt_regex = '-\(\w\+\)=\(\S\+\)'
-
-    " Parse options.
-    let opt = {}
-    while arg != ''
-        let arg = s:skip_spaces(arg)
-        let [a, arg] = s:get_arg(arg)
-
-        let m = matchlist(a, opt_regex)
-        if !empty(m)
-            " a is option.
-            let [opt_name, opt_value] = m[1:2]
-            if opt_name ==# 'type'
-                let opt.types = split(opt_value, ',')
-            else
-                throw printf("skk7: Skk7Map: unknown '%s' option.", opt_name)
-            endif
-        else
-            let arg = s:unget_arg(arg, a)
-            break
-        endif
-    endwhile
-
-    " Parse arguments.
-    let lhs_rhs = []
-    while arg != ''
-        let arg = s:skip_spaces(arg)
-        let [a, arg] = s:get_arg(arg)
-        call add(lhs_rhs, a)
-    endwhile
-    if len(lhs_rhs) != 2
-        call skk7#util#logf('lhs_rhs = %s', string(lhs_rhs))
-        throw 'skk7: Skk7Map [-type=...] lhs rhs'
-    endif
-
-    return lhs_rhs + [get(opt, 'types', [])]
-endfunc "}}}
-
-func! s:cmd_map(arg, bang) "{{{
-    try
-        let [lhs, rhs, types] = s:parse_arg(a:arg)
-        for t in types
-            call skk7#map(t, lhs, rhs, (a:bang ==# '!' ? 1 : 0))
-        endfor
-    catch /^skk7:/
-        call skk7#util#warn(v:exception)
-    endtry
-endfunc "}}}
-
-func! skk7#map(type, lhs, rhs, ...) "{{{
-    let force = a:0 != 0 ? a:1 : 0
-
-    call s:maptable_map_key(
-    \   a:lhs,
-    \   s:maptable_create_detected_type(
-    \       a:type,
-    \       (a:rhs != '' ? [a:rhs] : [])
-    \   ),
-    \   force
-    \)
 endfunc "}}}
 
 " }}}
 
 
 " Commands {{{
+
+" :Skk7SetMode {{{
 
 command!
 \   -nargs=?
@@ -492,6 +335,8 @@ func! s:cmd_set_mode(...) "{{{
     endif
     echo skk7#get_mode()
 endfunc "}}}
+
+" }}}
 
 " }}}
 
