@@ -49,16 +49,19 @@ func! s:initialize_variables() "{{{
     call skk7#util#log('initializing variables...')
 
     let s:skk7_mode = ''
+    " 非同期なフィルタの実行がサポートされているかどうか
+    let s:filter_is_async = 0
 
+    call s:initialize_buffer_table()
+endfunc "}}}
+
+func! s:initialize_buffer_table() "{{{
     " 変換フェーズでない状態で入力され、まだ確定していない文字列
     let g:skk7#henkan_buf_table = ['', '', '']
     " 変換キーが押された回数
     let s:henkan_count = 0
     " 現在の変換フェーズ
     let s:henkan_phase = g:skk7#HENKAN_PHASE_NORMAL
-
-    " 非同期なフィルタの実行がサポートされているかどうか
-    let s:filter_is_async = 0
 endfunc "}}}
 
 
@@ -179,7 +182,7 @@ func! skk7#set_mode(next_mode) "{{{
     let prev_mode = s:skk7_mode
     let s:skk7_mode = a:next_mode
 
-    call s:initialize_variables()
+    call s:initialize_buffer_table()
 
     call skk7#util#call_if_exists(
     \   s:get_mode_func('cb_mode_enter'),
@@ -348,7 +351,7 @@ func! s:handle_filter(char, from) "{{{
     catch
         " TODO 現在のモードで最初の一回だけv:exceptionを表示
 
-        call s:initialize_variables()
+        call s:initialize_buffer_table()
         " ローマ字のまま返す
         return a:char
     endtry
