@@ -18,34 +18,6 @@ let s:BS = "\<C-h>"
 
 " Functions {{{
 
-" Each mode must have 'load()' function
-" to check if its mode exists.
-func! skk7#mode#hira#load() "{{{
-endfunc "}}}
-
-" This function will be called from autoload/skk7.vim.
-func! skk7#mode#hira#initialize() "{{{
-endfunc "}}}
-
-func! skk7#mode#hira#enable(again) "{{{
-    if !a:again
-        return skk7#dispatch_key('', skk7#from_mode('hira'))
-    else
-        call skk7#mode#hira#initialize()
-        return ''
-    endif
-endfunc "}}}
-
-
-
-" Callbacks
-
-func! skk7#mode#hira#cb_im_enter() "{{{
-    call skk7#mode#hira#initialize()
-endfunc "}}}
-
-
-
 " Filter functions
 
 func! skk7#mode#hira#filter_main(char, from, henkan_phase, henkan_count) "{{{
