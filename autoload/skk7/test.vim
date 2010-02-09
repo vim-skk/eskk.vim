@@ -75,6 +75,10 @@ func! skk7#test#is(got, expected, ...) "{{{
     let s:current_test_num += 1
 endfunc "}}}
 
+func! skk7#test#diag(msg) "{{{
+    echomsg '#' a:msg
+endfunc "}}}
+
 
 func! skk7#test#exists_func(Fn, ...) "{{{
     let args = a:0 != 0 ? a:1 : []
