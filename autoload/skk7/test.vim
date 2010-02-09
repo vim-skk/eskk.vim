@@ -24,6 +24,15 @@ let s:current_test_num = 1
 
 " Functions {{{
 
+" I do not use skk7#util#warn()
+" because I want to upload this test library
+" to www.vim.org indivisually.
+func! s:warn(...) "{{{
+    echohl WarningMsg
+    echomsg join(a:000, ' ')
+    echohl None
+endfunc "}}}
+
 func! skk7#test#run() "{{{
     let tested = 0
     for t in s:glob(printf('%s/*.vim', g:skk7#test#test_dir))
@@ -33,9 +42,7 @@ func! skk7#test#run() "{{{
     endfor
 
     if !tested
-        echohl WarningMsg
-        echomsg 'no tests to run.'
-        echohl None
+        call s:warn('no tests to run.')
     endif
 endfunc "}}}
 
@@ -47,12 +54,23 @@ endfunc "}}}
 func! skk7#test#ok(cond, ...) "{{{
     let testname = a:0 != 0 ? a:1 : ''
 
-    echomsg printf(
-    \   '%d. %s ... %s',
-    \   s:current_test_num,
-    \   testname,
-    \   g:skk7#test#{a:cond ? 'ok_ok_str' : 'ok_not_ok_str'}
-    \)
+    if a:cond
+        echomsg printf(
+        \   '%d. %s ... %s',
+        \   s:current_test_num,
+        \   testname,
+        \   g:skk7#test#ok_ok_str
+        \)
+    else
+        call s:warn(
+        \   printf(
+        \      '%d. %s ... %s',
+        \      s:current_test_num,
+        \      testname,
+        \      g:skk7#test#ok_not_ok_str
+        \   )
+        \)
+    endif
 
     let s:current_test_num += 1
 endfunc "}}}
@@ -60,23 +78,32 @@ endfunc "}}}
 func! skk7#test#is(got, expected, ...) "{{{
     let testname = a:0 != 0 ? a:1 : ''
 
-    echomsg printf(
-    \   '%d. %s ... %s',
-    \   s:current_test_num,
-    \   testname,
-    \   (a:got ==# a:expected ?
-    \       g:skk7#test#is_ok_str
-    \       : printf(
-    \           g:skk7#test#is_not_ok_str,
-    \           string(a:got),
-    \           string(a:expected)))
-    \)
+    if a:got ==# a:expected
+        echomsg printf(
+        \   '%d. %s ... %s',
+        \   s:current_test_num,
+        \   testname,
+        \   g:skk7#test#is_ok_str
+        \)
+    else
+        call s:warn(
+        \   printf(
+        \      '%d. %s ... %s',
+        \      s:current_test_num,
+        \      testname,
+        \      printf(
+        \          g:skk7#test#is_not_ok_str,
+        \          string(a:got),
+        \          string(a:expected))
+        \   )
+        \)
+    endif
 
     let s:current_test_num += 1
 endfunc "}}}
 
 func! skk7#test#diag(msg) "{{{
-    echomsg '#' a:msg
+    call s:warn('#', a:msg)
 endfunc "}}}
 
 
