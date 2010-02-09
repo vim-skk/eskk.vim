@@ -45,7 +45,7 @@ endfunc "}}}
 
 
 func! skk7#test#ok(cond, ...) "{{{
-    let testname = a:0 != 0 ? printf('%s:', a:1) : ''
+    let testname = a:0 != 0 ? a:1 : ''
 
     echomsg printf(
     \   '%d. %s ... %s',
