@@ -69,9 +69,9 @@ func! skk7#util#get_args(args, ...) "{{{
 endfunc "}}}
 
 
-" NOTE: Not supported negative idx.
 func! skk7#util#has_idx(list, idx) "{{{
-    return 0 < a:idx && a:idx < len(a:list)
+    let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
+    return 0 <= idx && idx < len(a:list)
 endfunc "}}}
 
 
