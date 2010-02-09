@@ -37,9 +37,12 @@ let skk7#HENKAN_PHASE_OKURI = 2
 func! s:initialize_variables() "{{{
     call skk7#util#log('initializing variables...')
 
+    " 現在のモード
     let s:skk7_mode = ''
     " 非同期なフィルタの実行がサポートされているかどうか
     let s:filter_is_async = 0
+    " 特殊なキーと、asciiモードなどで挿入する文字
+    let s:special_keys = {}
 
     call s:initialize_buffer_table()
 endfunc "}}}
