@@ -153,6 +153,18 @@ func! skk7#util#eval_key(key) "{{{
     endwhile
 endfunc "}}}
 
+
+" Boost.Format-like function.
+" This is useful for embedding values in string.
+func! skk7#util#bind(fmt, ...) "{{{
+    let ret = a:fmt
+    for i in range(len(a:000))
+        let regex = '%' . (i + 1) . '%'
+        let ret = substitute(ret, regex, string(a:000[i]), 'g')
+    endfor
+    return ret
+endfunc "}}}
+
 " }}}
 
 
