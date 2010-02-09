@@ -14,7 +14,9 @@ set cpo&vim
 "   またインサートモードになった時にまだ有効になっている件
 
 
-" Constants {{{
+" Variables {{{
+
+" Constants
 
 let skk7#FROM_KEY_MAP = 'map'
 let skk7#FROM_STICKY_KEY_MAP = 'sticky'
@@ -28,22 +30,25 @@ let skk7#HENKAN_PHASE_HENKAN = 1
 " Waiting for okurigana.
 let skk7#HENKAN_PHASE_OKURI = 2
 
+
+
+" 現在のモード
+let s:skk7_mode = ''
+" 非同期なフィルタの実行がサポートされているかどうか
+let s:filter_is_async = 0
+" 特殊なキーと、asciiモードなどで挿入する文字
+let s:maptable = {}
+
 " }}}
-" See s:initialize_variables() about variables.
 
 
 " Initialize {{{
 
 func! s:initialize_variables() "{{{
+    " NOTE: Do not initialize s:maptable.
+
     call skk7#util#log('initializing variables...')
-
-    " 現在のモード
     let s:skk7_mode = ''
-    " 非同期なフィルタの実行がサポートされているかどうか
-    let s:filter_is_async = 0
-    " 特殊なキーと、asciiモードなどで挿入する文字
-    let s:special_keys = {}
-
     call s:initialize_buffer_table()
 endfunc "}}}
 
