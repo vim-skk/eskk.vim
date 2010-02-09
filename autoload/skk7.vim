@@ -377,40 +377,6 @@ endfunc "}}}
 " }}}
 
 
-" Commands {{{
-
-" :Skk7SetMode {{{
-
-command!
-\   -nargs=?
-\   Skk7SetMode
-\   call s:cmd_set_mode(<f-args>)
-
-func! s:cmd_set_mode(...) "{{{
-    if a:0 != 0
-        if skk7#is_supported_mode(a:1)
-            call skk7#set_mode(a:1)
-        else
-            call skk7#util#warnf("mode '%s' is not supported.", a:1)
-            return
-        endif
-    endif
-    echo skk7#get_mode()
-endfunc "}}}
-
-" }}}
-
-" :Skk7Reset {{{
-
-command!
-\   Skk7Reset
-\   call skk7#init_keys()
-
-" }}}
-
-" }}}
-
-
 call skk7#init_keys()
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
