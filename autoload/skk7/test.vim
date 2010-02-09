@@ -50,6 +50,11 @@ func! s:glob(expr) "{{{
     return split(glob(a:expr), "\n")
 endfunc "}}}
 
+func! s:equal(l, r) "{{{
+    return type(a:l) == type(a:r)
+    \   && a:l ==# a:r
+endfunc "}}}
+
 
 func! skk7#test#ok(cond, ...) "{{{
     let testname = a:0 != 0 ? a:1 : ''
@@ -78,7 +83,7 @@ endfunc "}}}
 func! skk7#test#is(got, expected, ...) "{{{
     let testname = a:0 != 0 ? a:1 : ''
 
-    if a:got ==# a:expected
+    if s:equal(a:got, a:expected)
         echomsg printf(
         \   '%d. %s ... %s',
         \   s:current_test_num,
