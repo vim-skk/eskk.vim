@@ -61,7 +61,6 @@ func! s:set_up_mappings() "{{{
     call skk7#util#log('set up mappings...')
 
     for char in s:get_all_chars()
-        " XXX: '<silent>' sometimes causes strange bug...
         call s:execute_map('l',
         \   '<buffer><expr><silent>',
         \   1,
