@@ -160,6 +160,7 @@ func! skk7#init_keys() "{{{
     call s:initialize_variables()
 
     " Register Mappings.
+    lmapclear <buffer>
     call s:set_up_mappings()
 
     " TODO
