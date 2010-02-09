@@ -412,21 +412,6 @@ command!
 " }}}
 
 
-" Autocmd {{{
-
-augroup skk7-augroup
-    autocmd!
-
-    autocmd InsertEnter * call s:autocmd_insert_enter()
-augroup END
-
-func! s:autocmd_insert_enter() "{{{
-    call skk7#init_keys()
-endfunc "}}}
-
-" }}}
-
-
 call skk7#init_keys()
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
