@@ -44,7 +44,7 @@ func! s:initialize_once() "{{{
     " 特殊なキーと、asciiモードなどで挿入する文字
     let s:maptable = skk7#maptable#new()
     " サポートしているモード
-    let s:available_modes = {}
+    let s:available_modes = []
 
     call s:initialize_buffer_table()
 endfunc "}}}
@@ -242,8 +242,7 @@ func! skk7#get_mode() "{{{
 endfunc "}}}
 
 func! skk7#is_supported_mode(mode) "{{{
-    let varname = 'g:loaded_skk7_mode_' . a:mode
-    return exists(varname) && {varname}
+    return !empty(filter(copy(s:available_modes), 'v:val ==# a:mode'))
 endfunc "}}}
 
 
@@ -309,13 +308,13 @@ endfunc "}}}
 
 
 func! skk7#register_mode(mode) "{{{
-    let s:available_modes[a:mode] = 1
+    call add(s:available_modes, a:mode)
     let fmt = 'lnoremap <expr> <Plug>(skk7-mode-to-%s) skk7#set_mode(%s)'
     execute printf(fmt, a:mode, string(a:mode))
 endfunc "}}}
 
 func! skk7#get_registered_modes() "{{{
-    return keys(s:available_modes)
+    return s:available_modes
 endfunc "}}}
 
 
