@@ -35,6 +35,15 @@ let skk7#HENKAN_PHASE_OKURI = 2
 " Initialize {{{
 
 func! s:initialize_once() "{{{
+    " FIXME:
+    " 1. On gVim, in Linux(ubuntu)
+    "   This message will appear as 'Error'.
+    " 2. But on Vim(CUI), in Linux(ubuntu)
+    "   This message will appear
+    "   as just message with WarningMsg
+    "   (this is desired behavior).
+    " 3. On gVim or Vim(CUI), in Windows
+    "   Same as 2.
     call skk7#util#log('Initialize variables...')
 
     " 現在のモード
