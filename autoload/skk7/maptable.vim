@@ -20,6 +20,7 @@ endif
 
 " TODO
 " - Check if mode is supported.
+" - Interface to get 'evaled_map_to'.
 
 " Functions {{{
 
