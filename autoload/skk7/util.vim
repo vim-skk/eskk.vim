@@ -165,6 +165,60 @@ func! skk7#util#bind(fmt, ...) "{{{
     return ret
 endfunc "}}}
 
+
+func! skk7#util#get_f(...) "{{{
+    return call('s:follow', [0] + a:000)
+endfunc "}}}
+
+func! skk7#util#has_key_f(...) "{{{
+    return call('s:follow', [1] + a:000)
+endfunc "}}}
+
+" Built-in 'get()' like function.
+" But 3 arg is omitted, this throws an exception.
+"
+" This allows both Dictionary and List as a:dict.
+" And if a:ret_bool is true:
+"   Return boolean value(existence of key).
+" And if a:ret_bool is false:
+"   Raise an exception or return value if it exists.
+func! s:follow(ret_bool, dict, follow, ...) "{{{
+    if empty(a:follow)
+        call skk7#util#internal_error()
+    endif
+
+    if a:0 == 0
+        if type(a:dict) == type([])
+            if !skk7#util#has_idx(a:dict, a:follow[0])
+                if a:ret_bool
+                    return 0
+                else
+                    call skk7#util#internal_error()
+                endif
+            endif
+        elseif type(a:dict) == type({})
+            if !has_key(a:dict, a:follow[0])
+                if a:ret_bool
+                    return 0
+                else
+                    call skk7#util#internal_error()
+                endif
+            endif
+        else
+            call skk7#util#internal_error()
+        endif
+        let got = get(a:dict, a:follow[0])
+    else
+        let got = get(a:dict, a:follow[0], a:1)
+    endif
+
+    if len(a:follow) == 1
+        return a:ret_bool ? 1 : got
+    else
+        return call('s:follow', [a:ret_bool, got, remove(a:follow, 1, -1)] + a:000)
+    endif
+endfunc "}}}
+
 " }}}
 
 
