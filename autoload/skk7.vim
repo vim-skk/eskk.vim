@@ -37,7 +37,7 @@ let s:skk7_mode = ''
 " 非同期なフィルタの実行がサポートされているかどうか
 let s:filter_is_async = 0
 " 特殊なキーと、asciiモードなどで挿入する文字
-let s:maptable = {}
+let s:maptable = skk7#maptable#new()
 
 " }}}
 
@@ -301,6 +301,39 @@ func! skk7#get_registered_modes() "{{{
     \   'strpart(v:val, strlen(prefix))'
     \)
 endfunc "}}}
+
+
+func! skk7#mapclear(...) "{{{
+    let [local_mode] = skk7#util#get_args(a:000, '')
+    return s:maptable.mapclear(local_mode)
+endfunc "}}}
+
+func! skk7#unmap(lhs, ...) "{{{
+    let [local_mode] = skk7#util#get_args(a:000, '')
+    return s:maptable.unmap(a:lhs, local_mode)
+endfunc "}}}
+
+func! skk7#map(lhs, rhs, ...) "{{{
+    let [local_mode, force] = skk7#util#get_args(a:000, '', 0)
+    return s:maptable.map(a:lhs, a:rhs, local_mode, force)
+endfunc "}}}
+
+func! skk7#maparg(lhs, ...) "{{{
+    let [local_mode] = skk7#util#get_args(a:000, '')
+    return s:maptable.maparg(a:lhs, local_mode)
+endfunc "}}}
+
+func! skk7#mapcheck(lhs, ...) "{{{
+    let [local_mode] = skk7#util#get_args(a:000, '')
+    return s:maptable.mapcheck(a:lhs, local_mode)
+endfunc "}}}
+
+" TODO
+" func! skk7#hasmapto(rhs, ...) "{{{
+"     let [local_mode] = skk7#util#get_args(a:000, '')
+"     return s:maptable.hasmapto(a:rhs, local_mode)
+" endfunc "}}}
+
 
 " }}}
 
