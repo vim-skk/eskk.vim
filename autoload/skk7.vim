@@ -417,7 +417,7 @@ endfunc "}}}
 
 
 runtime plugin/skk7.vim
-call skk7#init_keys()
+call s:initialize_variables()
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
