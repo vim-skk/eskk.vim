@@ -124,6 +124,7 @@ func! s:split_special_key(key) "{{{
     return [head, strpart(a:key, strlen(head))]
 endfunc "}}}
 
+" TODO Rename to unescape_key()?
 func! skk7#util#eval_key(key) "{{{
     let key = a:key
     let evaled = ''
