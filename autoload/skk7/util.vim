@@ -35,9 +35,9 @@ endfunc "}}}
 
 func! skk7#util#internal_error(...) "{{{
     if a:0 == 0
-        call skk7#util#warn('skk7: util: sorry, internal error.')
+        throw 'skk7: util: sorry, internal error.'
     else
-        call skk7#util#warn('skk7: util: sorry, internal error: ' . a:1)
+        throw 'skk7: util: sorry, internal error: ' . a:1
     endif
 endfunc "}}}
 
