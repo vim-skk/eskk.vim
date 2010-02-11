@@ -14,9 +14,7 @@ set cpo&vim
 "   またインサートモードになった時にまだ有効になっている件
 
 
-" Variables {{{
-
-" Constants
+" Constants {{{
 
 let skk7#FROM_KEY_MAP = 'map'
 let skk7#FROM_STICKY_KEY_MAP = 'sticky'
@@ -30,24 +28,30 @@ let skk7#HENKAN_PHASE_HENKAN = 1
 " Waiting for okurigana.
 let skk7#HENKAN_PHASE_OKURI = 2
 
-
-
-" 現在のモード
-let s:skk7_mode = ''
-" 非同期なフィルタの実行がサポートされているかどうか
-let s:filter_is_async = 0
-" 特殊なキーと、asciiモードなどで挿入する文字
-let s:maptable = skk7#maptable#new()
-
 " }}}
+" See s:initialize_once() for Variables.
 
 
 " Initialize {{{
 
-func! s:initialize_variables() "{{{
-    " NOTE: Do not initialize s:maptable.
+func! s:initialize_once() "{{{
+    call skk7#util#log('Initialize variables...')
 
-    call skk7#util#log('initializing variables...')
+    " 現在のモード
+    let s:skk7_mode = ''
+    " 非同期なフィルタの実行がサポートされているかどうか
+    let s:filter_is_async = 0
+    " 特殊なキーと、asciiモードなどで挿入する文字
+    let s:maptable = skk7#maptable#new()
+    " サポートしているモード
+    let s:available_modes = {}
+
+    call s:initialize_buffer_table()
+endfunc "}}}
+
+func! s:reset_variables() "{{{
+    call skk7#util#log('reset variables...')
+
     let s:skk7_mode = ''
     call s:initialize_buffer_table()
 endfunc "}}}
@@ -59,6 +63,18 @@ func! s:initialize_buffer_table() "{{{
     let s:henkan_count = 0
     " 現在の変換フェーズ
     let s:henkan_phase = g:skk7#HENKAN_PHASE_NORMAL
+endfunc "}}}
+
+func! s:set_up() "{{{
+    " Clear current variable states.
+    call s:reset_variables()
+
+    " Register Mappings.
+    call s:set_up_mappings()
+
+    " TODO
+    " Save previous mode/state.
+    call skk7#set_mode(g:skk7_initial_mode)
 endfunc "}}}
 
 
@@ -130,7 +146,7 @@ func! skk7#enable() "{{{
         return ''
     endif
 
-    call skk7#init_keys()
+    call s:set_up()
     call skk7#util#call_if_exists(s:get_mode_func('cb_im_enter'), [], 'no throw')
     return "\<C-^>"
 endfunc "}}}
@@ -153,11 +169,12 @@ func! skk7#toggle() "{{{
 endfunc "}}}
 
 
+" This is for emergency use.
 func! skk7#init_keys() "{{{
     call skk7#util#log("<Plug>(skk7-init-keys)")
 
     " Clear current variable states.
-    call s:initialize_variables()
+    call s:reset_variables()
 
     " Register Mappings.
     lmapclear <buffer>
@@ -334,7 +351,6 @@ endfunc "}}}
 "     return s:maptable.hasmapto(a:rhs, local_mode)
 " endfunc "}}}
 
-
 " }}}
 
 " Dispatch functions {{{
@@ -342,7 +358,8 @@ endfunc "}}}
 " ここからフィルタ用関数にディスパッチする
 func! skk7#dispatch_key(char, from) "{{{
     if !skk7#is_supported_mode(s:skk7_mode)
-        call skk7#init_keys()
+        call skk7#util#warn('current mode is empty! please call skk7#init_keys()...')
+        sleep 1
     endif
 
     if s:handle_special_key_p(a:char, a:from)
@@ -417,7 +434,7 @@ endfunc "}}}
 
 
 runtime plugin/skk7.vim
-call s:initialize_variables()
+call s:initialize_once()
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
