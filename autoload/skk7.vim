@@ -308,15 +308,14 @@ func! skk7#is_special_key(char, from) "{{{
 endfunc "}}}
 
 
+func! skk7#register_mode(mode) "{{{
+    let s:available_modes[a:mode] = 1
+    let fmt = 'lnoremap <expr> <Plug>(skk7-mode-to-%s) skk7#set_mode(%s)'
+    execute printf(fmt, a:mode, string(a:mode))
+endfunc "}}}
+
 func! skk7#get_registered_modes() "{{{
-    let prefix = 'loaded_skk7_mode_'
-    return map(
-    \   filter(
-    \      keys(g:),
-    \      'stridx(v:val, prefix) == 0'
-    \   ),
-    \   'strpart(v:val, strlen(prefix))'
-    \)
+    return keys(s:available_modes)
 endfunc "}}}
 
 
