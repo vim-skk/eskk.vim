@@ -348,6 +348,10 @@ func! skk7#dispatch_key(char) "{{{
         sleep 1
     endif
 
+    " TODO
+    " Dispatch function processes backspace
+    " even if current buffer string is not empty.
+
     return s:handle_filter(a:char)
 endfunc "}}}
 
