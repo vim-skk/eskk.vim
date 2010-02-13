@@ -32,9 +32,10 @@ endfunc
 let s:maptable = {'table': {}}
 
 " Map key.
-func! s:maptable.map(lhs, rhs, local_mode, force) dict "{{{
-    let evaled_lhs = skk7#util#eval_key(a:lhs)
-    let evaled_rhs = skk7#util#eval_key(a:rhs)
+func! s:maptable.map(lhs, rhs, local_mode, force, ...) dict "{{{
+    let [options] = skk7#util#get_args(a:000, 'eE')
+    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
+    let evaled_rhs = s:has_opt(options, 'E') ? skk7#util#eval_key(a:rhs) : a:rhs
     if !has_key(self.table, evaled_lhs)
         let self.table[evaled_lhs] = {}
     endif
@@ -68,8 +69,9 @@ func! s:maptable.map(lhs, rhs, local_mode, force) dict "{{{
     return a:rhs
 endfunc "}}}
 
-func! s:maptable.unmap(lhs, local_mode) dict "{{{
-    let evaled_lhs = skk7#util#eval_key(a:lhs)
+func! s:maptable.unmap(lhs, local_mode, ...) dict "{{{
+    let [options] = skk7#util#get_args(a:000, 'e')
+    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
 
     if !self.hasmapof(a:lhs, a:local_mode)
         " TODO Message?
@@ -98,11 +100,13 @@ func! s:maptable.mapclear(local_mode) dict "{{{
     endif
 endfunc "}}}
 
-func! s:maptable.maparg(lhs, local_mode) dict "{{{
-    if !self.hasmapof(a:lhs, a:local_mode)
+func! s:maptable.maparg(lhs, local_mode, ...) dict "{{{
+    let [options] = skk7#util#get_args(a:000, 'e')
+
+    if !self.hasmapof(a:lhs, a:local_mode, options)
         return ''
     endif
-    let evaled_lhs = skk7#util#eval_key(a:lhs)
+    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
 
     if a:local_mode == ''
         return get(self.table[evaled_lhs], 'map_to', '')
@@ -133,8 +137,9 @@ func! s:maptable.mapcheck(lhs, local_mode) dict "{{{
     \)
 endfunc "}}}
 
-func! s:maptable.hasmapof(lhs, local_mode) dict "{{{
-    let evaled_lhs = skk7#util#eval_key(a:lhs)
+func! s:maptable.hasmapof(lhs, local_mode, ...) dict "{{{
+    let [options] = skk7#util#get_args(a:000, 'e')
+    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
 
     if a:local_mode == ''
         return skk7#util#has_key_f(self.table, [evaled_lhs, 'map_to'])
@@ -177,6 +182,10 @@ func! s:destroy_key(table, evaled_lhs, local_mode) "{{{
         " Destroy local mapping.
         unlet! t.local[a:local_mode]
     endif
+endfunc "}}}
+
+func! s:has_opt(options, opt) "{{{
+    return stridx(a:options, a:opt) != -1
 endfunc "}}}
 
 
