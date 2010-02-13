@@ -91,9 +91,10 @@ func! s:set_up_mappings() "{{{
     call skk7#util#log('set up mappings...')
 
     for char in s:get_all_chars()
-        call s:execute_map('l',
+        call s:execute_map(
+        \   'l',
         \   '<buffer><expr><silent>',
-        \   1,
+        \   0,
         \   char,
         \   printf(
         \       'skk7#dispatch_key(%s, %s)',
@@ -127,7 +128,7 @@ endfunc "}}}
 
 func! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
     for mode in split(a:modes, '\zs')
-        execute printf('%s%smap', mode, (a:remap_p ? 'nore' : ''))
+        execute printf('%s%smap', mode, (a:remap_p ? '' : 'nore'))
         \       a:options
         \       a:lhs
         \       a:rhs
