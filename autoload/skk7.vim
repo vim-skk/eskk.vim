@@ -353,9 +353,6 @@ endfunc "}}}
 
 " フィルタ用関数のディスパッチ
 func! s:handle_filter(char) "{{{
-    " TODO
-    " - フィルタ関数の文字列以外の戻り値に対応
-
     try
         let filtered = {s:get_mode_func('filter_main')}(
         \   a:char,
