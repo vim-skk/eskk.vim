@@ -340,6 +340,7 @@ endfunc "}}}
 
 func! skk7#map(lhs, rhs, ...) "{{{
     let [local_mode, force] = skk7#util#get_args(a:000, '', 0)
+    " TODO Map a:lhs also in Vim's mapping table.
     return s:maptable.map(a:lhs, a:rhs, local_mode, force)
 endfunc "}}}
 
@@ -370,6 +371,9 @@ func! skk7#dispatch_key(char, from) "{{{
         sleep 1
     endif
 
+    " TODO
+    " Dispatch function processes backspace
+    " even if current buffer string is not empty.
     if s:handle_special_key_p(a:char, a:from)
         return s:handle_special_keys(a:char, a:from)
     else
