@@ -345,8 +345,8 @@ func! skk7#map(lhs, rhs, ...) "{{{
 endfunc "}}}
 
 func! skk7#maparg(lhs, ...) "{{{
-    let [local_mode] = skk7#util#get_args(a:000, '')
-    return s:maptable.maparg(a:lhs, local_mode)
+    let [local_mode, options] = skk7#util#get_args(a:000, '', 'e')
+    return s:maptable.maparg(a:lhs, local_mode, options)
 endfunc "}}}
 
 func! skk7#mapcheck(lhs, ...) "{{{
