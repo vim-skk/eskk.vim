@@ -15,20 +15,17 @@ set cpo&vim
 " }}}
 
 
-" Global variables {{{
+call skk7#register_mode('ascii')
 
+" Global variables {{{
 if !exists('g:skk7_mode_ascii_no_default_mappings')
     let g:skk7_mode_ascii_no_default_mappings = 0
 endif
-
 " }}}
 
 " Mappings {{{
-
-lmap <expr> <Plug>(skk7-mode-ascii.enable)  skk7#mode#ascii#enable(0)
-
 if g:skk7_mode_ascii_no_default_mappings
-    lmap l      <Plug>(skk7-mode-ascii.enable)
+    call skk7#map('<C-j>', '<Plug>(skk7-mode-to-hira)', 'ascii')
 endif
 " }}}
 

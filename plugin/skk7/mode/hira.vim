@@ -15,20 +15,19 @@ set cpo&vim
 " }}}
 
 
-" Global variables {{{
+call skk7#register_mode('hira')
 
+" Global variables {{{
 if !exists('g:skk7_mode_hira_no_default_mappings')
     let g:skk7_mode_hira_no_default_mappings = 0
 endif
-
 " }}}
 
 " Mappings {{{
-
-lmap <expr> <Plug>(skk7-mode-hira.enable)  skk7#mode#hira#enable(0)
-
 if g:skk7_mode_hira_no_default_mappings
-    lmap Q      <Plug>(skk7-mode-hira.enable)
+    call skk7#map('q', '<Plug>(skk7-mode-to-kata)', 'hira')
+    call skk7#map('l', '<Plug>(skk7-mode-to-ascii)', 'hira')
+    call skk7#map('L', '<Plug>(skk7-mode-to-zenei)', 'hira')
 endif
 " }}}
 
