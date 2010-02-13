@@ -122,7 +122,9 @@ endfunc "}}}
 
 
 func! skk7#test#diag(msg) "{{{
-    call s:warn('#', a:msg)
+    echohl Comment
+    echomsg '#' a:msg
+    echohl None
 endfunc "}}}
 
 
