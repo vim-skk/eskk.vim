@@ -132,7 +132,7 @@ endfunc "}}}
 "
 func! skk7#table#has_candidates(table_name, str_buf) "{{{
     if empty(a:str_buf)
-        call skk7#util#internal_error()
+        throw skk7#error#internal_error('skk7: table:')
     endif
 
     return !empty(

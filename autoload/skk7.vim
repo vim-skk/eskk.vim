@@ -279,7 +279,7 @@ func! skk7#set_henkan_phase(henkan_phase) "{{{
     if skk7#util#has_idx(s:henkan_phase, a:henkan_phase)
         let s:henkan_phase = a:henkan_phase
     else
-        call skk7#util#internal_error()
+        throw skk7#error#internal_error('skk7:')
     endif
 endfunc "}}}
 
@@ -415,7 +415,7 @@ func! s:handle_special_keys(char, from) "{{{
         return "\<BS>"
 
     else
-        call skk7#util#internal_error()
+        throw skk7#error#internal_error('skk7:')
     endif
 endfunc "}}}
 

@@ -33,14 +33,6 @@ func! skk7#util#logf(...) "{{{
     endif
 endfunc "}}}
 
-func! skk7#util#internal_error(...) "{{{
-    if a:0 == 0
-        throw 'skk7: util: sorry, internal error.'
-    else
-        throw 'skk7: util: sorry, internal error: ' . a:1
-    endif
-endfunc "}}}
-
 
 func! skk7#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
@@ -149,7 +141,7 @@ func! skk7#util#eval_key(key) "{{{
             let [sp_key, key] = s:split_special_key(key)
             let evaled .= eval(printf('"\%s"', sp_key))
         else
-            call skk7#util#internal_error()
+            throw skk7#error#internal_error('skk7: util:')
         endif
     endwhile
 endfunc "}}}
@@ -185,7 +177,7 @@ endfunc "}}}
 "   Raise an exception or return value if it exists.
 func! s:follow(ret_bool, dict, follow, ...) "{{{
     if empty(a:follow)
-        call skk7#util#internal_error()
+        throw skk7#error#internal_error('skk7: util:')
     endif
 
     if a:0 == 0
@@ -194,7 +186,7 @@ func! s:follow(ret_bool, dict, follow, ...) "{{{
                 if a:ret_bool
                     return 0
                 else
-                    call skk7#util#internal_error()
+                    throw skk7#error#internal_error('skk7: util:')
                 endif
             endif
         elseif type(a:dict) == type({})
@@ -202,11 +194,11 @@ func! s:follow(ret_bool, dict, follow, ...) "{{{
                 if a:ret_bool
                     return 0
                 else
-                    call skk7#util#internal_error()
+                    throw skk7#error#internal_error('skk7: util:')
                 endif
             endif
         else
-            call skk7#util#internal_error()
+            throw skk7#error#internal_error('skk7: util:')
         endif
         let got = get(a:dict, a:follow[0])
     else
