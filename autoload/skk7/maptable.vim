@@ -116,13 +116,14 @@ func! s:maptable.maparg(lhs, local_mode, ...) dict "{{{
 endfunc "}}}
 
 " NOTE: Return value is List not Str.
-func! s:maptable.mapcheck(lhs, local_mode) dict "{{{
-    let maparg = self.maparg(a:lhs, a:local_mode)
+func! s:maptable.mapcheck(lhs, local_mode, ...) dict "{{{
+    let [options] = skk7#util#get_args(a:000, 'e')
+    let maparg = self.maparg(a:lhs, a:local_mode, options)
     if maparg != ''
         return [maparg]
     endif
 
-    let evaled_lhs = skk7#util#eval_key(a:lhs)
+    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
     return map(
     \   s:filter_table(
     \       self.table,
