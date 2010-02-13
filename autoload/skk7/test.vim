@@ -107,6 +107,20 @@ func! skk7#test#is(got, expected, ...) "{{{
     let s:current_test_num += 1
 endfunc "}}}
 
+func! skk7#test#raise_ok(command, regex, ...) "{{{
+    try
+        execute a:command
+        call call('skk7#test#ok', [0] + a:000)
+    catch
+        if v:exception =~# a:regex
+            call call('skk7#test#ok', [1] + a:000)
+        else
+            throw v:exception
+        endif
+    endtry
+endfunc "}}}
+
+
 func! skk7#test#diag(msg) "{{{
     call s:warn('#', a:msg)
 endfunc "}}}
