@@ -97,9 +97,8 @@ func! s:set_up_mappings() "{{{
         \   0,
         \   char,
         \   printf(
-        \       'skk7#dispatch_key(%s, %s)',
-        \       string(char),
-        \       string(g:skk7#FROM_KEY_MAP)))
+        \       'skk7#dispatch_key(%s)',
+        \       string(char)))
     endfor
 endfunc "}}}
 
@@ -199,7 +198,7 @@ func! skk7#sticky_key(again) "{{{
     call skk7#util#log("<Plug>(skk7-sticky-key)")
 
     if !a:again
-        return skk7#dispatch_key('', g:skk7#FROM_STICKY_KEY_MAP)
+        return skk7#dispatch_key('')
     else
         let henkan_phase = skk7#get_henkan_phase()
         let advance_p =
@@ -284,36 +283,14 @@ func! skk7#set_henkan_phase(henkan_phase) "{{{
 endfunc "}}}
 
 
-func! skk7#from_mode(mode) "{{{
-    return g:skk7#FROM_MODECHANGE_KEY_MAP . a:mode
-endfunc "}}}
-
-func! skk7#get_mode_from(from) "{{{
-    return strpart(a:sig, strlen(g:skk7#FROM_MODECHANGE_KEY_MAP))
-endfunc "}}}
-
-
-func! skk7#is_modechange_key(char, from) "{{{
-    return stridx(a:from, g:skk7#FROM_MODECHANGE_KEY_MAP) == 0
-endfunc "}}}
-
-func! skk7#is_sticky_key(char, from) "{{{
-    return a:from ==# g:skk7#FROM_STICKY_KEY_MAP
-endfunc "}}}
-
-func! skk7#is_big_letter(char, from) "{{{
-    return a:char =~# '^[A-Z]$'
-endfunc "}}}
-
-func! skk7#is_backspace_key(char, from) "{{{
-    return a:char ==# "\<BS>" || a:char ==# "\<C-h>"
-endfunc "}}}
-
-func! skk7#is_special_key(char, from) "{{{
-    return skk7#is_modechange_key(a:char, a:from)
-    \   || skk7#is_sticky_key(a:char, a:from)
-    \   || skk7#is_big_letter(a:char, a:from)
-    \   || skk7#is_backspace_key(a:char, a:from)
+func! skk7#is_special_key(char) "{{{
+    " skk7#maparg()'s 3 arg is '',
+    " because a:char is already evaled.
+    return skk7#maparg(a:char, '', '')
+    \   || a:char =~# '^[A-Z]$'
+    \   || a:char ==# "\<BS>"
+    \   || a:char ==# "\<C-h>"
+    \   || a:char ==# "\<Enter>"
 endfunc "}}}
 
 
@@ -365,69 +342,24 @@ endfunc "}}}
 " Dispatch functions {{{
 
 " ここからフィルタ用関数にディスパッチする
-func! skk7#dispatch_key(char, from) "{{{
+func! skk7#dispatch_key(char) "{{{
     if !skk7#is_supported_mode(s:skk7_mode)
         call skk7#util#warn('current mode is empty! please call skk7#init_keys()...')
         sleep 1
     endif
 
-    " TODO
-    " Dispatch function processes backspace
-    " even if current buffer string is not empty.
-    if s:handle_special_key_p(a:char, a:from)
-        return s:handle_special_keys(a:char, a:from)
-    else
-        return s:handle_filter(a:char, a:from)
-    endif
-
-    " TODO 補完
-
-endfunc "}}}
-
-" モード切り替えなどの特殊なキーを実行するかどうか
-func! s:handle_special_key_p(char, from) "{{{
-    return
-    \   !g:skk7#mode#{skk7#get_mode()}#handle_all_keys
-    \   && skk7#is_special_key(a:char, a:from)
-    \   && g:skk7#henkan_buf_table[skk7#get_henkan_phase()] ==# ''
-endfunc "}}}
-
-" モード切り替えなどの特殊なキーを実行する
-func! s:handle_special_keys(char, from) "{{{
-    " TODO Priority
-
-    if skk7#is_modechange_key(a:char, a:from)
-        " モード変更
-        call skk7#set_mode(skk7#get_mode_from(a:from))
-        return ''
-
-    elseif skk7#is_sticky_key(a:char, a:from)
-        return skk7#sticky_key(1)
-
-    elseif skk7#is_big_letter(a:char, a:from)
-        return skk7#sticky_key(1)
-        \    . skk7#dispatch_key(tolower(a:char), g:skk7#FROM_BIG_LETTER)
-
-    elseif skk7#is_backspace_key(a:char, a:from)
-        call skk7#set_current_buf(
-        \   skk7#util#mb_chop(skk7#get_current_buf())
-        \)
-        return "\<BS>"
-
-    else
-        throw skk7#error#internal_error('skk7:')
-    endif
+    return s:handle_filter(a:char)
 endfunc "}}}
 
 " フィルタ用関数のディスパッチ
-func! s:handle_filter(char, from) "{{{
+func! s:handle_filter(char) "{{{
     " TODO
     " - フィルタ関数の文字列以外の戻り値に対応
 
     try
         let filtered = {s:get_mode_func('filter_main')}(
         \   a:char,
-        \   a:from,
+        \   '',
         \   skk7#get_henkan_phase(),
         \   s:henkan_count
         \)
