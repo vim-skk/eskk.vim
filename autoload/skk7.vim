@@ -378,7 +378,7 @@ endfunc "}}}
 " }}}
 
 
-runtime plugin/skk7.vim
+runtime! plugin/skk7.vim
 call s:initialize_once()
 
 " Restore 'cpoptions' {{{
