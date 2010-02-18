@@ -67,7 +67,7 @@ endfunc "}}}
 
 func! s:initialize_buffer_table() "{{{
     " 変換フェーズでない状態で入力され、まだ確定していない文字列
-    let g:eskk#henkan_buf_table = ['', '', '']
+    let s:buftable = eskk#buftable#new()
     " 変換キーが押された回数
     let s:henkan_count = 0
     " 現在の変換フェーズ
@@ -204,17 +204,17 @@ func! eskk#sticky_key(again) "{{{
     if !a:again
         return eskk#filter_key('')
     else
-        let henkan_phase = eskk#get_henkan_phase()
-        let advance_p =
-        \   eskk#util#has_idx(g:eskk#henkan_buf_table, henkan_phase + 1)
-        \   && eskk#get_current_buf() !=# ''
-
-        if advance_p
-            call eskk#set_henkan_phase(henkan_phase + 1)
-            return g:eskk_marker_white
-        else
-            return ''
-        endif
+        " let henkan_phase = eskk#get_henkan_phase()
+        " let advance_p =
+        " \   eskk#util#has_idx(g:eskk#henkan_buf_table, henkan_phase + 1)
+        " \   && eskk#get_current_buf() !=# ''
+        "
+        " if advance_p
+        "     call eskk#set_henkan_phase(henkan_phase + 1)
+        "     return g:eskk_marker_white
+        " else
+        "     return ''
+        " endif
     endif
 endfunc "}}}
 
@@ -259,17 +259,12 @@ func! eskk#is_supported_mode(mode) "{{{
 endfunc "}}}
 
 
-func! eskk#get_henkan_buf(henkan_phase) "{{{
-    return g:eskk#henkan_buf_table[a:henkan_phase]
-endfunc "}}}
-
-
 func! eskk#get_current_buf() "{{{
-    return g:eskk#henkan_buf_table[eskk#get_henkan_phase()]
+    return s:buftable.get_current_table().get_rom_str()
 endfunc "}}}
 
 func! eskk#set_current_buf(str) "{{{
-    let g:eskk#henkan_buf_table[eskk#get_henkan_phase()] = a:str
+    call s:buftable.get_current_table().set_rom_str(a:str)
 endfunc "}}}
 
 
