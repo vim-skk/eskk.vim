@@ -10,7 +10,7 @@ scriptencoding utf-8
 " Name: eskk
 " Version: 0.0.0
 " Author:  tyru <tyru.exe@gmail.com>
-" Last Change: 2010-02-26.
+" Last Change: 2010-02-27.
 "
 " Description:
 "   NO DESCRIPTION YET
@@ -59,11 +59,17 @@ endif
 if !exists('eskk_initial_mode')
     let eskk_initial_mode = 'hira'
 endif
-if !exists("eskk_marker_white")
-  let eskk_marker_white = '▽'
+if !exists("eskk_marker_henkan")
+  let eskk_marker_henkan = '▽'
 endif
-if !exists("eskk_marker_black")
-  let eskk_marker_black = '▼'
+if !exists("eskk_marker_okuri")
+  let eskk_marker_okuri = '*'
+endif
+if !exists("eskk_marker_henkan_select")
+  let eskk_marker_henkan_select = '▼'
+endif
+if !exists("eskk_marker_jisyo_touroku")
+  let eskk_marker_jisyo_touroku = '?'
 endif
 
 " }}}
