@@ -44,7 +44,7 @@ func! s:initialize_once() "{{{
     "   (this is desired behavior).
     " 3. On gVim or Vim(CUI), in Windows
     "   Same as 2.
-    call skk7#util#log('Initialize variables...')
+    " call skk7#util#log('Initialize variables...')
 
     " 現在のモード
     let s:skk7_mode = ''
