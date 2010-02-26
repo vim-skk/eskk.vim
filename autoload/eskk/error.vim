@@ -10,28 +10,25 @@ set cpo&vim
 
 
 " Functions {{{
-func! eskk#error#internal_error(from, ...) "{{{
+func! s:make_error(what, from, ...) "{{{
     if a:0 == 0
-        return join([a:from, 'internal error'], ' ')
+        return join([a:from, a:what], ' ')
     else
-        return join([a:from, 'internal error:', a:1], ' ')
+        return join([a:from, a:what . ':', a:1], ' ')
     endif
+endfunc "}}}
+
+
+func! eskk#error#internal_error(...) "{{{
+    return call('s:make_error', ['internal error'] + a:000)
 endfunc "}}}
 
 func! eskk#error#out_of_idx(from, ...) "{{{
-    if a:0 == 0
-        return join([a:from, 'out of index'], ' ')
-    else
-        return join([a:from, 'out of index:', a:1], ' ')
-    endif
+    return call('s:make_error', ['out of index'] + a:000)
 endfunc "}}}
 
 func! eskk#error#not_implemented(from, ...) "{{{
-    if a:0 == 0
-        return join([a:from, 'not implemented'], ' ')
-    else
-        return join([a:from, 'not implemented:', a:1], ' ')
-    endif
+    return call('s:make_error', ['not implemented'] + a:000)
 endfunc "}}}
 " }}}
 
