@@ -11,21 +11,21 @@ set cpo&vim
 
 func! s:run()
     " Dictionary
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_f(
     \       {'foo': 1},
     \       ['foo']
     \   ),
     \   1
     \)
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_f(
     \       {'foo': {'bar': 1}},
     \       ['foo', 'bar']
     \   ),
     \   1
     \)
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_f(
     \       {},
     \       ['foo'],
@@ -35,21 +35,21 @@ func! s:run()
     \)
 
     " List
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_f(
     \       [1,2,3],
     \       [0]
     \   ),
     \   1
     \)
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_f(
     \       [[1], 2 ,3],
     \       [0, 0]
     \   ),
     \   1
     \)
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_f(
     \       [1],
     \       [1],
@@ -63,9 +63,9 @@ func! s:run()
         \   {'foo': 1},
         \   [],
         \)
-        call skk7#test#ok(0, 'raise error')
+        call simpletap#ok(0, 'raise error')
     catch
-        call skk7#test#ok(1, 'raise error')
+        call simpletap#ok(1, 'raise error')
     endtry
 
     try
@@ -73,9 +73,9 @@ func! s:run()
         \   {},
         \   ['foo'],
         \)
-        call skk7#test#ok(0, 'raise error')
+        call simpletap#ok(0, 'raise error')
     catch
-        call skk7#test#ok(1, 'raise error')
+        call simpletap#ok(1, 'raise error')
     endtry
 
     try
@@ -83,17 +83,17 @@ func! s:run()
             {},
             ['foo', 'bar'],
         )
-        call skk7#test#ok(0, 'raise error')
+        call simpletap#ok(0, 'raise error')
     catch
-        call skk7#test#ok(1, 'raise error')
+        call simpletap#ok(1, 'raise error')
     endtry
 
 endfunc
 
 
-Skk7TestBegin
+TestBegin
 call s:run()
-Skk7TestEnd
+TestEnd
 
 
 " Restore 'cpoptions' {{{

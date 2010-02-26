@@ -1,0 +1,3 @@
+[submodule "lib/simpletap"]
+	path = lib/simpletap
+	url = git://github.com/tyru/simpletap.vim.git
