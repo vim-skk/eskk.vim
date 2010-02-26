@@ -9,27 +9,27 @@ set cpo&vim
 
 
 func! s:run()
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_args([1, 2], 1, 2, 3, 4),
     \   [1,2,3,4]
     \)
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_args([1, 2], 1, 3),
     \   [1,2]
     \)
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_args([1, 2], 1),
     \   [1]
     \)
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#get_args([[1], [2]], [1]),
     \   [[1]]
     \)
 endfunc
 
-Skk7TestBegin
+TestBegin
 call s:run()
-Skk7TestEnd
+TestEnd
 
 
 " Restore 'cpoptions' {{{

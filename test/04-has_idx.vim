@@ -7,17 +7,17 @@ set cpo&vim
 
 
 func! s:run()
-    call skk7#test#ok(skk7#util#has_idx([0], 0))
-    call skk7#test#ok(! skk7#util#has_idx([0], 1))
+    call simpletap#ok(skk7#util#has_idx([0], 0))
+    call simpletap#ok(! skk7#util#has_idx([0], 1))
 
-    call skk7#test#ok(skk7#util#has_idx([0], -1))
-    call skk7#test#ok(! skk7#util#has_idx([0], -2))
+    call simpletap#ok(skk7#util#has_idx([0], -1))
+    call simpletap#ok(! skk7#util#has_idx([0], -2))
 endfunc
 
 
-Skk7TestBegin
+TestBegin
 call s:run()
-Skk7TestEnd
+TestEnd
 
 
 " Restore 'cpoptions' {{{

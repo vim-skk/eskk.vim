@@ -16,24 +16,24 @@ endfunc
 
 
 func! s:run()
-    call skk7#test#ok(skk7#util#is_callable('FuncForTest'), 'FuncForTest() is callable')
-    call skk7#test#ok(! skk7#util#is_callable('FuncForTestHoge'), 'FuncForTestHoge() is not callable')
+    call simpletap#ok(skk7#util#is_callable('FuncForTest'), 'FuncForTest() is callable')
+    call simpletap#ok(! skk7#util#is_callable('FuncForTestHoge'), 'FuncForTestHoge() is not callable')
 
     try
         call skk7#util#call_if_exists('FuncForTest', [])
-        call skk7#test#ok(0, 'FuncForTest() throws exception')
+        call simpletap#ok(0, 'FuncForTest() throws exception')
     catch /^FuncForTestException$/
-        call skk7#test#ok(1, 'FuncForTest() throws exception')
+        call simpletap#ok(1, 'FuncForTest() throws exception')
     endtry
 
     try
         call skk7#util#call_if_exists('FuncForTestHoge', [])
-        call skk7#test#ok(0, 'FuncForTestHoge() does not exist')
+        call simpletap#ok(0, 'FuncForTestHoge() does not exist')
     catch
-        call skk7#test#ok(1, 'FuncForTestHoge() does not exist')
+        call simpletap#ok(1, 'FuncForTestHoge() does not exist')
     endtry
 
-    call skk7#test#is(
+    call simpletap#is(
     \   skk7#util#call_if_exists(
     \       'FuncForTestHoge',
     \       [],
@@ -45,9 +45,9 @@ func! s:run()
 endfunc
 
 
-Skk7TestBegin
+TestBegin
 call s:run()
-Skk7TestEnd
+TestEnd
 
 
 " Restore 'cpoptions' {{{

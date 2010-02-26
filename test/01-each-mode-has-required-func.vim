@@ -19,8 +19,8 @@ func! s:run()
         \   'filter_main',
         \]
             let func = s:modef(m, f)
-            call skk7#test#ok(
-            \   skk7#test#exists_func(func),
+            call simpletap#ok(
+            \   simpletap#exists_func(func),
             \   printf("exists '%s'.", func)
             \)
         endfor
@@ -30,7 +30,7 @@ func! s:run()
         \   'handle_all_keys',
         \]
             let varname = 'g:' . s:modef(m, v)
-            call skk7#test#ok(
+            call simpletap#ok(
             \   exists(varname),
             \   printf("exists '%s'.", varname)
             \)
@@ -42,9 +42,9 @@ endfunc
 " ただ変数が関数ローカルじゃなく
 " グローバルになってしまうのを防ぐために
 " わざわざ関数を作っている。
-Skk7TestBegin
+TestBegin
 call s:run()
-Skk7TestEnd
+TestEnd
 
 
 " Restore 'cpoptions' {{{
