@@ -8,57 +8,57 @@ set cpo&vim
 
 
 func! s:run()
-    call skk7#mapclear()
+    call eskk#mapclear()
 
-    call simpletap#is(skk7#maparg(';'), '')
-    " call simpletap#ok(! skk7#hasmapto('<Plug>(skk7-sticky)-key'))
+    call simpletap#is(eskk#maparg(';'), '')
+    " call simpletap#ok(! eskk#hasmapto('<Plug>(eskk-sticky)-key'))
 
-    call skk7#map(';', '<Plug>(skk7-sticky-key)')
+    call eskk#map(';', '<Plug>(eskk-sticky-key)')
 
-    call simpletap#is(skk7#maparg(';'), '<Plug>(skk7-sticky-key)')
-    " call simpletap#ok(skk7#hasmapto('<Plug>(skk7-sticky)-key'))
-
-
-    call simpletap#is(skk7#mapcheck('f'), [])
-    call skk7#map('foo', '<Plug>(skk7-sticky-key)')
-    call simpletap#is(skk7#mapcheck('f'), ['<Plug>(skk7-sticky-key)'])
-    call simpletap#is(skk7#mapcheck('fo'), ['<Plug>(skk7-sticky-key)'])
-    call simpletap#is(skk7#mapcheck('foo'), ['<Plug>(skk7-sticky-key)'])
-
-    call skk7#unmap('fo')
-    call simpletap#is(skk7#mapcheck('f'), ['<Plug>(skk7-sticky-key)'])
-    call simpletap#is(skk7#mapcheck('fo'), ['<Plug>(skk7-sticky-key)'])
-    call simpletap#is(skk7#mapcheck('foo'), ['<Plug>(skk7-sticky-key)'])
-
-    call skk7#unmap('foo')
-    call simpletap#is(skk7#mapcheck('f'), [])
-    call simpletap#is(skk7#mapcheck('fo'), [])
-    call simpletap#is(skk7#mapcheck('foo'), [])
+    call simpletap#is(eskk#maparg(';'), '<Plug>(eskk-sticky-key)')
+    " call simpletap#ok(eskk#hasmapto('<Plug>(eskk-sticky)-key'))
 
 
-    call simpletap#diag("skk7#map('q', '<Plug>(skk7-mode-to-kata)', 'hira')")
-    call skk7#map('q', '<Plug>(skk7-mode-to-kata)', 'hira')
-    call simpletap#is(skk7#maparg('q'), '')
-    call simpletap#is(skk7#maparg('q', 'hira'), '<Plug>(skk7-mode-to-kata)')
-    call simpletap#is(skk7#maparg('q', 'kata'), '')
+    call simpletap#is(eskk#mapcheck('f'), [])
+    call eskk#map('foo', '<Plug>(eskk-sticky-key)')
+    call simpletap#is(eskk#mapcheck('f'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is(eskk#mapcheck('fo'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is(eskk#mapcheck('foo'), ['<Plug>(eskk-sticky-key)'])
 
-    call simpletap#diag("skk7#map('q', '<Plug>(skk7-mode-to-hira)')")
-    call skk7#map('q', '<Plug>(skk7-mode-to-hira)')
-    call simpletap#is(skk7#maparg('q'), '<Plug>(skk7-mode-to-hira)')
-    call simpletap#is(skk7#maparg('q', 'hira'), '<Plug>(skk7-mode-to-kata)')
-    call simpletap#is(skk7#maparg('q', 'kata'), '')
+    call eskk#unmap('fo')
+    call simpletap#is(eskk#mapcheck('f'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is(eskk#mapcheck('fo'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is(eskk#mapcheck('foo'), ['<Plug>(eskk-sticky-key)'])
 
-    call simpletap#diag("skk7#unmap('q')")
-    call skk7#unmap('q')
-    call simpletap#is(skk7#maparg('q'), '')
-    call simpletap#is(skk7#maparg('q', 'hira'), '<Plug>(skk7-mode-to-kata)')
-    call simpletap#is(skk7#maparg('q', 'kata'), '')
+    call eskk#unmap('foo')
+    call simpletap#is(eskk#mapcheck('f'), [])
+    call simpletap#is(eskk#mapcheck('fo'), [])
+    call simpletap#is(eskk#mapcheck('foo'), [])
 
-    call simpletap#diag("skk7#unmap('q', 'hira')")
-    call skk7#unmap('q', 'hira')
-    call simpletap#is(skk7#maparg('q'), '')
-    call simpletap#is(skk7#maparg('q', 'hira'), '')
-    call simpletap#is(skk7#maparg('q', 'kata'), '')
+
+    call simpletap#diag("eskk#map('q', '<Plug>(eskk-mode-to-kata)', 'hira')")
+    call eskk#map('q', '<Plug>(eskk-mode-to-kata)', 'hira')
+    call simpletap#is(eskk#maparg('q'), '')
+    call simpletap#is(eskk#maparg('q', 'hira'), '<Plug>(eskk-mode-to-kata)')
+    call simpletap#is(eskk#maparg('q', 'kata'), '')
+
+    call simpletap#diag("eskk#map('q', '<Plug>(eskk-mode-to-hira)')")
+    call eskk#map('q', '<Plug>(eskk-mode-to-hira)')
+    call simpletap#is(eskk#maparg('q'), '<Plug>(eskk-mode-to-hira)')
+    call simpletap#is(eskk#maparg('q', 'hira'), '<Plug>(eskk-mode-to-kata)')
+    call simpletap#is(eskk#maparg('q', 'kata'), '')
+
+    call simpletap#diag("eskk#unmap('q')")
+    call eskk#unmap('q')
+    call simpletap#is(eskk#maparg('q'), '')
+    call simpletap#is(eskk#maparg('q', 'hira'), '<Plug>(eskk-mode-to-kata)')
+    call simpletap#is(eskk#maparg('q', 'kata'), '')
+
+    call simpletap#diag("eskk#unmap('q', 'hira')")
+    call eskk#unmap('q', 'hira')
+    call simpletap#is(eskk#maparg('q'), '')
+    call simpletap#is(eskk#maparg('q', 'hira'), '')
+    call simpletap#is(eskk#maparg('q', 'kata'), '')
 
 
     " TODO

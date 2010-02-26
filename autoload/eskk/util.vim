@@ -1,7 +1,7 @@
 " vim:foldmethod=marker:fen:
 scriptencoding utf-8
 
-" See 'plugin/skk7.vim' about the license.
+" See 'plugin/eskk.vim' about the license.
 
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
@@ -11,46 +11,46 @@ set cpo&vim
 
 " Functions {{{
 
-func! skk7#util#warn(msg) "{{{
+func! eskk#util#warn(msg) "{{{
     echohl WarningMsg
     echomsg a:msg
     echohl None
 endfunc "}}}
 
-func! skk7#util#warnf(msg, ...) "{{{
-    call skk7#util#warn(call('printf', [a:msg] + a:000))
+func! eskk#util#warnf(msg, ...) "{{{
+    call eskk#util#warn(call('printf', [a:msg] + a:000))
 endfunc "}}}
 
-func! skk7#util#log(...) "{{{
-    if g:skk7_debug
-        return call('skk7#debug#log', a:000)
+func! eskk#util#log(...) "{{{
+    if g:eskk_debug
+        return call('eskk#debug#log', a:000)
     endif
 endfunc "}}}
 
-func! skk7#util#logf(...) "{{{
-    if g:skk7_debug
-        return call('skk7#debug#logf', a:000)
+func! eskk#util#logf(...) "{{{
+    if g:eskk_debug
+        return call('eskk#debug#logf', a:000)
     endif
 endfunc "}}}
 
 
-func! skk7#util#mb_strlen(str) "{{{
+func! eskk#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
 endfunc "}}}
 
-func! skk7#util#mb_chop(str) "{{{
+func! eskk#util#mb_chop(str) "{{{
     return substitute(a:str, '.$', '', '')
 endfunc "}}}
 
 
-func! skk7#util#get_args(args, ...) "{{{
+func! eskk#util#get_args(args, ...) "{{{
     let ret_args = []
     let i = 0
 
     while i < len(a:000)
         call add(
         \   ret_args,
-        \   skk7#util#has_idx(a:args, i) ?
+        \   eskk#util#has_idx(a:args, i) ?
         \       a:args[i]
         \       : a:000[i]
         \)
@@ -61,7 +61,7 @@ func! skk7#util#get_args(args, ...) "{{{
 endfunc "}}}
 
 
-func! skk7#util#has_idx(list, idx) "{{{
+func! eskk#util#has_idx(list, idx) "{{{
     let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
     return 0 <= idx && idx < len(a:list)
 endfunc "}}}
@@ -70,36 +70,36 @@ endfunc "}}}
 " a:func is string.
 "
 " NOTE: This returns 0 for script local function.
-func! skk7#util#is_callable(Fn) "{{{
+func! eskk#util#is_callable(Fn) "{{{
     return type(a:Fn) == type(function('tr'))
     \   || exists('*' . a:Fn)
 endfunc "}}}
 
 " arg 3 is not for 'self'.
-func! skk7#util#call_if_exists(Fn, args, ...) "{{{
-    if skk7#util#is_callable(a:Fn)
+func! eskk#util#call_if_exists(Fn, args, ...) "{{{
+    if eskk#util#is_callable(a:Fn)
         return call(a:Fn, a:args)
     elseif a:0 != 0
         return a:1
     else
-        throw printf("skk7: no such function '%s'.", a:Fn)
+        throw printf("eskk: no such function '%s'.", a:Fn)
     endif
 endfunc "}}}
 
 
 " For macro. {{{
 
-func! skk7#util#skip_spaces(str) "{{{
+func! eskk#util#skip_spaces(str) "{{{
     return substitute(a:str, '^\s*', '', '')
 endfunc "}}}
 
 " TODO Escape + Whitespace
-func! skk7#util#get_arg(arg) "{{{
+func! eskk#util#get_arg(arg) "{{{
     let matched = matchstr(a:arg, '^\S\+')
     return [matched, strpart(a:arg, strlen(matched))]
 endfunc "}}}
 
-func! skk7#util#unget_arg(arg, str) "{{{
+func! eskk#util#unget_arg(arg, str) "{{{
     return a:str . a:arg
 endfunc "}}}
 
@@ -117,7 +117,7 @@ func! s:split_special_key(key) "{{{
 endfunc "}}}
 
 " TODO Rename to unescape_key()?
-func! skk7#util#eval_key(key) "{{{
+func! eskk#util#eval_key(key) "{{{
     let key = a:key
     let evaled = ''
     while 1
@@ -141,7 +141,7 @@ func! skk7#util#eval_key(key) "{{{
             let [sp_key, key] = s:split_special_key(key)
             let evaled .= eval(printf('"\%s"', sp_key))
         else
-            throw skk7#error#internal_error('skk7: util:')
+            throw eskk#error#internal_error('eskk: util:')
         endif
     endwhile
 endfunc "}}}
@@ -149,7 +149,7 @@ endfunc "}}}
 
 " Boost.Format-like function.
 " This is useful for embedding values in string.
-func! skk7#util#bind(fmt, ...) "{{{
+func! eskk#util#bind(fmt, ...) "{{{
     let ret = a:fmt
     for i in range(len(a:000))
         let regex = '%' . (i + 1) . '%'
@@ -159,11 +159,11 @@ func! skk7#util#bind(fmt, ...) "{{{
 endfunc "}}}
 
 
-func! skk7#util#get_f(...) "{{{
+func! eskk#util#get_f(...) "{{{
     return call('s:follow', [0] + a:000)
 endfunc "}}}
 
-func! skk7#util#has_key_f(...) "{{{
+func! eskk#util#has_key_f(...) "{{{
     return call('s:follow', [1] + a:000)
 endfunc "}}}
 
@@ -177,16 +177,16 @@ endfunc "}}}
 "   Raise an exception or return value if it exists.
 func! s:follow(ret_bool, dict, follow, ...) "{{{
     if empty(a:follow)
-        throw skk7#error#internal_error('skk7: util:')
+        throw eskk#error#internal_error('eskk: util:')
     endif
 
     if a:0 == 0
         if type(a:dict) == type([])
-            if !skk7#util#has_idx(a:dict, a:follow[0])
+            if !eskk#util#has_idx(a:dict, a:follow[0])
                 if a:ret_bool
                     return 0
                 else
-                    throw skk7#error#internal_error('skk7: util:')
+                    throw eskk#error#internal_error('eskk: util:')
                 endif
             endif
         elseif type(a:dict) == type({})
@@ -194,11 +194,11 @@ func! s:follow(ret_bool, dict, follow, ...) "{{{
                 if a:ret_bool
                     return 0
                 else
-                    throw skk7#error#internal_error('skk7: util:')
+                    throw eskk#error#internal_error('eskk: util:')
                 endif
             endif
         else
-            throw skk7#error#internal_error('skk7: util:')
+            throw eskk#error#internal_error('eskk: util:')
         endif
         let got = get(a:dict, a:follow[0])
     else

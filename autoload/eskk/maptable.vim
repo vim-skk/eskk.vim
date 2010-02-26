@@ -1,7 +1,7 @@
 " vim:foldmethod=marker:fen:
 scriptencoding utf-8
 
-" See 'plugin/skk7.vim' about the license.
+" See 'plugin/eskk.vim' about the license.
 
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
@@ -24,7 +24,7 @@ endif
 
 " Functions {{{
 
-func! skk7#maptable#new()
+func! eskk#maptable#new()
     return deepcopy(s:maptable)
 endfunc
 
@@ -33,9 +33,9 @@ let s:maptable = {'table': {}}
 
 " Map key.
 func! s:maptable.map(lhs, rhs, local_mode, force, ...) dict "{{{
-    let [options] = skk7#util#get_args(a:000, 'eE')
-    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
-    let evaled_rhs = s:has_opt(options, 'E') ? skk7#util#eval_key(a:rhs) : a:rhs
+    let [options] = eskk#util#get_args(a:000, 'eE')
+    let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
+    let evaled_rhs = s:has_opt(options, 'E') ? eskk#util#eval_key(a:rhs) : a:rhs
     if !has_key(self.table, evaled_lhs)
         let self.table[evaled_lhs] = {}
     endif
@@ -70,15 +70,15 @@ func! s:maptable.map(lhs, rhs, local_mode, force, ...) dict "{{{
 endfunc "}}}
 
 func! s:maptable.unmap(lhs, local_mode, ...) dict "{{{
-    let [options] = skk7#util#get_args(a:000, 'e')
-    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
+    let [options] = eskk#util#get_args(a:000, 'e')
+    let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
 
     if !self.hasmapof(a:lhs, a:local_mode)
         " TODO Message?
         return
     endif
     if a:local_mode != ''
-    \   && !skk7#util#has_key_f(self.table[evaled_lhs], ['local', a:local_mode])
+    \   && !eskk#util#has_key_f(self.table[evaled_lhs], ['local', a:local_mode])
         " TODO Message?
         return
     endif
@@ -101,33 +101,33 @@ func! s:maptable.mapclear(local_mode) dict "{{{
 endfunc "}}}
 
 func! s:maptable.maparg(lhs, local_mode, ...) dict "{{{
-    let [options] = skk7#util#get_args(a:000, 'e')
+    let [options] = eskk#util#get_args(a:000, 'e')
 
     if !self.hasmapof(a:lhs, a:local_mode, options)
         return ''
     endif
-    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
+    let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
 
     if a:local_mode == ''
         return get(self.table[evaled_lhs], 'map_to', '')
     else
-        return skk7#util#get_f(self.table[evaled_lhs], ['local', a:local_mode, 'map_to'], '')
+        return eskk#util#get_f(self.table[evaled_lhs], ['local', a:local_mode, 'map_to'], '')
     endif
 endfunc "}}}
 
 " NOTE: Return value is List not Str.
 func! s:maptable.mapcheck(lhs, local_mode, ...) dict "{{{
-    let [options] = skk7#util#get_args(a:000, 'e')
+    let [options] = eskk#util#get_args(a:000, 'e')
     let maparg = self.maparg(a:lhs, a:local_mode, options)
     if maparg != ''
         return [maparg]
     endif
 
-    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
+    let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
     return map(
     \   s:filter_table(
     \       self.table,
-    \       skk7#util#bind(
+    \       eskk#util#bind(
     \           'has_key(val, "map_to")' .
     \           ' && strpart(key, 0, strlen(%1%)) ==# %1%',
     \           evaled_lhs
@@ -139,13 +139,13 @@ func! s:maptable.mapcheck(lhs, local_mode, ...) dict "{{{
 endfunc "}}}
 
 func! s:maptable.hasmapof(lhs, local_mode, ...) dict "{{{
-    let [options] = skk7#util#get_args(a:000, 'e')
-    let evaled_lhs = s:has_opt(options, 'e') ? skk7#util#eval_key(a:lhs) : a:lhs
+    let [options] = eskk#util#get_args(a:000, 'e')
+    let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
 
     if a:local_mode == ''
-        return skk7#util#has_key_f(self.table, [evaled_lhs, 'map_to'])
+        return eskk#util#has_key_f(self.table, [evaled_lhs, 'map_to'])
     else
-        return skk7#util#has_key_f(self.table, [evaled_lhs, 'local', a:local_mode, 'map_to'])
+        return eskk#util#has_key_f(self.table, [evaled_lhs, 'local', a:local_mode, 'map_to'])
     endif
 endfunc "}}}
 

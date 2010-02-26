@@ -1,7 +1,7 @@
 " vim:foldmethod=marker:fen:
 scriptencoding utf-8
 
-" See 'plugin/skk7.vim' about the license.
+" See 'plugin/eskk.vim' about the license.
 
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
@@ -10,7 +10,7 @@ set cpo&vim
 
 " Variables {{{
 
-let skk7#mode#hira#handle_all_keys = 0
+let eskk#mode#hira#handle_all_keys = 0
 let s:BS = "\<C-h>"
 
 " }}}
@@ -20,34 +20,34 @@ let s:BS = "\<C-h>"
 
 " Filter functions
 
-func! skk7#mode#hira#filter_main(char, from, henkan_phase, henkan_count) "{{{
-    if a:henkan_phase ==# g:skk7#HENKAN_PHASE_NORMAL
+func! eskk#mode#hira#filter_main(char, from, henkan_phase, henkan_count) "{{{
+    if a:henkan_phase ==# g:eskk#HENKAN_PHASE_NORMAL
         return s:filter_rom_to_hira(a:char, a:from, a:henkan_count)
-    elseif a:henkan_phase ==# g:skk7#HENKAN_PHASE_OKURI
+    elseif a:henkan_phase ==# g:eskk#HENKAN_PHASE_OKURI
         " TODO
-    elseif a:henkan_phase ==# g:skk7#HENKAN_PHASE_HENKAN
+    elseif a:henkan_phase ==# g:eskk#HENKAN_PHASE_HENKAN
         " TODO
     endif
 endfunc "}}}
 
 func! s:filter_rom_to_hira(char, from, henkan_count) "{{{
-    let orig_rom_str_buf = skk7#get_current_buf()
+    let orig_rom_str_buf = eskk#get_current_buf()
     let rom_str_buf = orig_rom_str_buf . a:char
-    call skk7#set_current_buf(rom_str_buf)
+    call eskk#set_current_buf(rom_str_buf)
 
-    let def = skk7#table#rom_to_hira#get_definition()
+    let def = eskk#table#rom_to_hira#get_definition()
     if has_key(def, rom_str_buf)
         let rest = get(def[rom_str_buf], 'rest', '')
         try
-            let bs = repeat(s:BS, skk7#util#mb_strlen(orig_rom_str_buf))
+            let bs = repeat(s:BS, eskk#util#mb_strlen(orig_rom_str_buf))
             return bs . def[rom_str_buf].map_to . rest
         finally
-            call skk7#set_current_buf(rest)
+            call eskk#set_current_buf(rest)
         endtry
-    elseif skk7#table#has_candidates('rom_to_hira', orig_rom_str_buf)
+    elseif eskk#table#has_candidates('rom_to_hira', orig_rom_str_buf)
         return a:char
     else
-        call skk7#set_current_buf(
+        call eskk#set_current_buf(
         \   strpart(
         \      orig_rom_str_buf,
         \      0,

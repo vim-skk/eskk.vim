@@ -10,19 +10,19 @@ set cpo&vim
 
 func! s:run()
     call simpletap#is(
-    \   skk7#util#get_args([1, 2], 1, 2, 3, 4),
+    \   eskk#util#get_args([1, 2], 1, 2, 3, 4),
     \   [1,2,3,4]
     \)
     call simpletap#is(
-    \   skk7#util#get_args([1, 2], 1, 3),
+    \   eskk#util#get_args([1, 2], 1, 3),
     \   [1,2]
     \)
     call simpletap#is(
-    \   skk7#util#get_args([1, 2], 1),
+    \   eskk#util#get_args([1, 2], 1),
     \   [1]
     \)
     call simpletap#is(
-    \   skk7#util#get_args([[1], [2]], [1]),
+    \   eskk#util#get_args([[1], [2]], [1]),
     \   [[1]]
     \)
 endfunc

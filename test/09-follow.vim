@@ -7,26 +7,26 @@ set cpo&vim
 
 
 " TODO
-" Test skk7#util#has_key_f().
+" Test eskk#util#has_key_f().
 
 func! s:run()
     " Dictionary
     call simpletap#is(
-    \   skk7#util#get_f(
+    \   eskk#util#get_f(
     \       {'foo': 1},
     \       ['foo']
     \   ),
     \   1
     \)
     call simpletap#is(
-    \   skk7#util#get_f(
+    \   eskk#util#get_f(
     \       {'foo': {'bar': 1}},
     \       ['foo', 'bar']
     \   ),
     \   1
     \)
     call simpletap#is(
-    \   skk7#util#get_f(
+    \   eskk#util#get_f(
     \       {},
     \       ['foo'],
     \       1
@@ -36,21 +36,21 @@ func! s:run()
 
     " List
     call simpletap#is(
-    \   skk7#util#get_f(
+    \   eskk#util#get_f(
     \       [1,2,3],
     \       [0]
     \   ),
     \   1
     \)
     call simpletap#is(
-    \   skk7#util#get_f(
+    \   eskk#util#get_f(
     \       [[1], 2 ,3],
     \       [0, 0]
     \   ),
     \   1
     \)
     call simpletap#is(
-    \   skk7#util#get_f(
+    \   eskk#util#get_f(
     \       [1],
     \       [1],
     \       1
@@ -59,7 +59,7 @@ func! s:run()
     \)
 
     try
-        call skk7#util#get_f(
+        call eskk#util#get_f(
         \   {'foo': 1},
         \   [],
         \)
@@ -69,7 +69,7 @@ func! s:run()
     endtry
 
     try
-        call skk7#util#get_f(
+        call eskk#util#get_f(
         \   {},
         \   ['foo'],
         \)
@@ -79,7 +79,7 @@ func! s:run()
     endtry
 
     try
-        call skk7#util#get_f(
+        call eskk#util#get_f(
             {},
             ['foo', 'bar'],
         )

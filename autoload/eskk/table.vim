@@ -1,7 +1,7 @@
 " vim:foldmethod=marker:fen:
 scriptencoding utf-8
 
-" See 'plugin/skk7.vim' about the license.
+" See 'plugin/eskk.vim' about the license.
 
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
@@ -21,8 +21,8 @@ func! s:parse_arg(arg) "{{{
     " Parse options.
     let opt = {}
     while arg != ''
-        let arg = skk7#util#skip_spaces(arg)
-        let [a, arg] = skk7#util#get_arg(arg)
+        let arg = eskk#util#skip_spaces(arg)
+        let [a, arg] = eskk#util#get_arg(arg)
 
         let m = matchlist(a, opt_regex)
         if !empty(m)
@@ -31,10 +31,10 @@ func! s:parse_arg(arg) "{{{
             if opt_name ==# 'rest'
                 let opt.rest = opt_value
             else
-                throw printf("skk7: Skk7TableMap: unknown option '%s'.", opt_name)
+                throw printf("eskk: EskkTableMap: unknown option '%s'.", opt_name)
             endif
         else
-            let arg = skk7#util#unget_arg(arg, a)
+            let arg = eskk#util#unget_arg(arg, a)
             break
         endif
     endwhile
@@ -42,49 +42,49 @@ func! s:parse_arg(arg) "{{{
     " Parse arguments.
     let lhs_rhs = []
     while arg != ''
-        let arg = skk7#util#skip_spaces(arg)
-        let [a, arg] = skk7#util#get_arg(arg)
+        let arg = eskk#util#skip_spaces(arg)
+        let [a, arg] = eskk#util#get_arg(arg)
         call add(lhs_rhs, a)
     endwhile
     if len(lhs_rhs) != 2
-        call skk7#util#logf('lhs_rhs = %s', string(lhs_rhs))
-        throw 'skk7: Skk7TableMap [-rest=...] lhs rhs'
+        call eskk#util#logf('lhs_rhs = %s', string(lhs_rhs))
+        throw 'eskk: EskkTableMap [-rest=...] lhs rhs'
     endif
 
     return lhs_rhs + [get(opt, 'rest', '')]
 endfunc "}}}
 
 func! s:table_varname() "{{{
-    return printf('g:skk7#table#%s#definition', s:current_table_name)
+    return printf('g:eskk#table#%s#definition', s:current_table_name)
 endfunc "}}}
 
 
 
-func! skk7#table#define_macro() "{{{
+func! eskk#table#define_macro() "{{{
     command!
     \   -buffer -nargs=1
-    \   Skk7Table
+    \   EskkTable
     \   call s:cmd_table(<f-args>)
     command!
     \   -buffer -nargs=+ -bang
-    \   Skk7TableMap
+    \   EskkTableMap
     \   call s:cmd_table_map(<q-args>, "<bang>")
 endfunc "}}}
 
 func! s:cmd_table(arg) "{{{
-    return skk7#table#table_name(a:arg)
+    return eskk#table#table_name(a:arg)
 endfunc "}}}
 
 func! s:cmd_table_map(arg, bang) "{{{
     try
         let [lhs, rhs, rest] = s:parse_arg(a:arg)
-        return call('skk7#table#map', [lhs, rhs, (a:bang != '' ? 1 : 0), rest])
-    catch /^skk7:/
-        call skk7#util#warn(v:exception)
+        return call('eskk#table#map', [lhs, rhs, (a:bang != '' ? 1 : 0), rest])
+    catch /^eskk:/
+        call eskk#util#warn(v:exception)
     endtry
 endfunc "}}}
 
-func! skk7#table#table_name(name) "{{{
+func! eskk#table#table_name(name) "{{{
     let s:current_table_name = a:name
     let varname = s:table_varname()
     if !exists(varname)
@@ -93,8 +93,8 @@ func! skk7#table#table_name(name) "{{{
 endfunc "}}}
 
 " Force overwrite if a:bang is true.
-func! skk7#table#map(lhs, rhs, ...) "{{{
-    let [bang, rest] = skk7#util#get_args(a:000, 0, '')
+func! eskk#table#map(lhs, rhs, ...) "{{{
+    let [bang, rest] = eskk#util#get_args(a:000, 0, '')
 
     if s:current_table_name == '' | return | endif
     let def = {s:table_varname()}
@@ -110,7 +110,7 @@ func! skk7#table#map(lhs, rhs, ...) "{{{
     endif
 endfunc "}}}
 
-func! skk7#table#unmap(lhs) "{{{
+func! eskk#table#unmap(lhs) "{{{
     if s:current_table_name == '' | return | endif
     unlet {s:table_varname()}[a:lhs]
 endfunc "}}}
@@ -130,14 +130,14 @@ endfunc "}}}
 " }
 " But this uses a lot of memory.
 "
-func! skk7#table#has_candidates(table_name, str_buf) "{{{
+func! eskk#table#has_candidates(table_name, str_buf) "{{{
     if empty(a:str_buf)
-        throw skk7#error#internal_error('skk7: table:')
+        throw eskk#error#internal_error('eskk: table:')
     endif
 
     return !empty(
     \   filter(
-    \       keys(skk7#table#{a:table_name}#get_definition()),
+    \       keys(eskk#table#{a:table_name}#get_definition()),
     \       'stridx(v:val, a:str_buf) == 0'
     \   )
     \)

@@ -16,31 +16,31 @@ endfunc
 
 
 func! s:run()
-    call simpletap#ok(skk7#util#is_callable('FuncForTest'), 'FuncForTest() is callable')
-    call simpletap#ok(! skk7#util#is_callable('FuncForTestHoge'), 'FuncForTestHoge() is not callable')
+    call simpletap#ok(eskk#util#is_callable('FuncForTest'), 'FuncForTest() is callable')
+    call simpletap#ok(! eskk#util#is_callable('FuncForTestHoge'), 'FuncForTestHoge() is not callable')
 
     try
-        call skk7#util#call_if_exists('FuncForTest', [])
+        call eskk#util#call_if_exists('FuncForTest', [])
         call simpletap#ok(0, 'FuncForTest() throws exception')
     catch /^FuncForTestException$/
         call simpletap#ok(1, 'FuncForTest() throws exception')
     endtry
 
     try
-        call skk7#util#call_if_exists('FuncForTestHoge', [])
+        call eskk#util#call_if_exists('FuncForTestHoge', [])
         call simpletap#ok(0, 'FuncForTestHoge() does not exist')
     catch
         call simpletap#ok(1, 'FuncForTestHoge() does not exist')
     endtry
 
     call simpletap#is(
-    \   skk7#util#call_if_exists(
+    \   eskk#util#call_if_exists(
     \       'FuncForTestHoge',
     \       [],
     \       0
     \   ),
     \   0,
-    \   "skk7#util#call_if_exists()'s arg 3 is for return value"
+    \   "eskk#util#call_if_exists()'s arg 3 is for return value"
     \)
 endfunc
 

@@ -8,11 +8,11 @@ set cpo&vim
 
 
 func! s:modef(mode, varname)
-    return printf('skk7#mode#%s#%s', a:mode, a:varname)
+    return printf('eskk#mode#%s#%s', a:mode, a:varname)
 endfunc
 
 func! s:run()
-    for m in skk7#get_registered_modes()
+    for m in eskk#get_registered_modes()
 
         " 関数のチェック
         for f in [

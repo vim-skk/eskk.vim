@@ -10,7 +10,7 @@ set cpo&vim
 
 
 " Functions {{{
-func! skk7#error#internal_error(from, ...) "{{{
+func! eskk#error#internal_error(from, ...) "{{{
     if a:0 == 0
         return join([a:from, 'internal error'], ' ')
     else
@@ -18,7 +18,7 @@ func! skk7#error#internal_error(from, ...) "{{{
     endif
 endfunc "}}}
 
-func! skk7#error#out_of_idx(from, ...) "{{{
+func! eskk#error#out_of_idx(from, ...) "{{{
     if a:0 == 0
         return join([a:from, 'out of index'], ' ')
     else
