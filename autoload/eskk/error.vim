@@ -25,6 +25,14 @@ func! eskk#error#out_of_idx(from, ...) "{{{
         return join([a:from, 'out of index:', a:1], ' ')
     endif
 endfunc "}}}
+
+func! eskk#error#not_implemented(from, ...) "{{{
+    if a:0 == 0
+        return join([a:from, 'not implemented'], ' ')
+    else
+        return join([a:from, 'not implemented:', a:1], ' ')
+    endif
+endfunc "}}}
 " }}}
 
 
