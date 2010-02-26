@@ -212,6 +212,40 @@ func! s:follow(ret_bool, dict, follow, ...) "{{{
     endif
 endfunc "}}}
 
+
+func! eskk#util#zip(list1, list2) "{{{
+    let ret = []
+    let i = 0
+    while 1
+        let list1_has_idx = eskk#util#has_idx(a:list1, i)
+        let list2_has_idx = eskk#util#has_idx(a:list2, i)
+        if !list1_has_idx && !list2_has_idx
+            return ret
+        else
+            call add(
+            \   ret,
+            \   (list1_has_idx ? [a:list1[i]] : [])
+            \       + (list2_has_idx ? [a:list2[i]] : [])
+            \)
+        endif
+        let i += 1
+    endwhile
+
+    call eskk#error#internal_error('eskk: util:', 'this block will be never reached')
+endfunc "}}}
+
+
+func! eskk#util#make_bs(n) "{{{
+    return repeat("\<BS>", a:n)
+endfunc "}}}
+
+
+func! eskk#util#assert(cond, ...) "{{{
+    if !a:cond
+        throw call('eskk#util#internal_error', ['eskk: util:'] + a:000)
+    endif
+endfunc "}}}
+
 " }}}
 
 
