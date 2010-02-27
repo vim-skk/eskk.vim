@@ -28,33 +28,50 @@ func! eskk#mode#hira#filter_main(char, from, henkan_phase, henkan_count) "{{{
     elseif a:henkan_phase ==# g:eskk#HENKAN_PHASE_HENKAN
         " TODO
     endif
+
+    " TODO Handle special keys registered in a:maptable.
+
+    return s:filter_rom_to_hira(a:char, a:from, a:buftable, a:maptable)
 endfunc "}}}
 
-func! s:filter_rom_to_hira(char, from, henkan_count) "{{{
-    let orig_rom_str_buf = eskk#get_current_buf()
-    let rom_str_buf = orig_rom_str_buf . a:char
-    call eskk#set_current_buf(rom_str_buf)
+func! s:filter_rom_to_hira(char, from, buftable, maptable) "{{{
+    let buf_str = a:buftable.get_current_buf_str()
+    let rom_str = buf_str.get_rom_str()
 
-    let def = g:eskk#table#rom_to_hira#definition
-    if has_key(def, rom_str_buf)
-        let rest = get(def[rom_str_buf], 'rest', '')
-        try
-            let bs = repeat(s:BS, eskk#util#mb_strlen(orig_rom_str_buf))
-            return bs . def[rom_str_buf].map_to . rest
-        finally
-            call eskk#set_current_buf(rest)
-        endtry
-    elseif eskk#table#has_candidates('rom_to_hira', orig_rom_str_buf)
-        return a:char
-    else
-        call eskk#set_current_buf(
-        \   strpart(
-        \      orig_rom_str_buf,
-        \      0,
-        \      strlen(orig_rom_str_buf) - 1
-        \   ) . a:char
+    if eskk#table#has_map('rom_to_hira', rom_str)
+        " Match!
+        call eskk#util#log('match!')
+
+        call buf_str.set_filtered_str(
+        \   eskk#table#get_map('rom_to_hira', rom_str)
         \)
-        return s:BS . a:char
+        call buf_str.flush_filtered_str()
+
+        " Assumption: 'eskk#table#has_map(def, rest)' is false
+        let rest = eskk#table#get_rest('rom_to_hira', rom_str, '')
+        call buf_str.set_filtered_str(rest)
+
+        return
+
+    elseif eskk#table#has_candidates('rom_to_hira', rom_str)
+        " Has candidates but not match.
+        call eskk#util#log('wait for a next key.')
+        call buf_str.set_filtered_str(rom_str)
+        return
+
+    else
+        " No candidates.
+        " Remove rom_str[-2].
+        call eskk#util#log('no candidates.')
+        call eskk#util#assert(
+        \   strlen(rom_str) >= 2,
+        \   "'rom_str' must have at least 2 characters"
+        \)
+        call buf_str.set_filtered_str(
+        \   strpart(rom_str, 0, strlen(rom_str) - 2)
+        \       . strpart(rom_str, strlen(rom_str) - 1)
+        \)
+        return
     endif
 endfunc "}}}
 

@@ -259,15 +259,6 @@ func! eskk#is_supported_mode(mode) "{{{
 endfunc "}}}
 
 
-func! eskk#get_current_buf() "{{{
-    return s:buftable.get_current_table().get_rom_str()
-endfunc "}}}
-
-func! eskk#set_current_buf(str) "{{{
-    call s:buftable.get_current_table().set_rom_str(a:str)
-endfunc "}}}
-
-
 func! eskk#get_henkan_phase() "{{{
     return s:henkan_phase
 endfunc "}}}
@@ -355,19 +346,36 @@ endfunc "}}}
 
 " フィルタ用関数のディスパッチ
 func! s:handle_filter(char) "{{{
+
+    " Add a:char to current buffer string.
+    let buf_str = s:buftable.get_current_buf_str()
+    if buf_str.get_rom_str() == ''
+        " Remember current pos.
+        call buf_str.set_expr_pos('.')
+    endif
+    call buf_str.add_rom_str(a:char)
+
     try
-        let filtered = {s:get_mode_func('filter_main')}(
+        call eskk#util#log('calling filter function...')
+        call {s:get_mode_func('filter_main')}(
         \   a:char,
         \   '',
         \   eskk#get_henkan_phase(),
         \   s:henkan_count
         \)
-        return filtered
+        try
+            return s:buftable.get_display_str()
+        finally
+            call s:buftable.clear_buf_str()
+        endtry
 
     catch
         " TODO 現在のモードで最初の一回だけv:exceptionを表示
+        call eskk#util#warnf('[%s] at [%s]', v:exception, v:throwpoint)
 
         call s:initialize_buffer_table()
+        " TODO Clear displayed string.
+
         " ローマ字のまま返す
         return a:char
     endtry
