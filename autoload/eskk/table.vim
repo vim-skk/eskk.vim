@@ -11,6 +11,8 @@ set cpo&vim
 
 let s:current_table_name = ''
 
+" TODO
+" - Build table in Vim <SID> mapping table.
 
 " Functions {{{
 
@@ -150,6 +152,16 @@ func! eskk#table#has_candidates(table_name, str_buf) "{{{
     \       'stridx(v:val, a:str_buf) == 0'
     \   )
     \)
+endfunc "}}}
+
+func! eskk#table#get_map(table_name, lhs, ...) "{{{
+    let map = eskk#table#{a:table_name}#get_definition()[a:lhs]
+    return call('get', [map, 'map_to'] + a:000)
+endfunc "}}}
+
+func! eskk#table#get_rest(table_name, lhs, ...) "{{{
+    let map = eskk#table#{a:table_name}#get_definition()[a:lhs]
+    return call('get', [map, 'rest'] + a:000)
 endfunc "}}}
 
 " }}}
