@@ -44,13 +44,13 @@ func! s:initialize_once() "{{{
     "   Same as 2.
     " call eskk#util#log('Initialize variables...')
 
-    " 現在のモード
+    " Current mode.
     let s:eskk_mode = ''
-    " 非同期なフィルタの実行がサポートされているかどうか
+    " Async support?
     let s:filter_is_async = 0
-    " 特殊なキーと、asciiモードなどで挿入する文字
+    " Database of mappings.
     let s:map = eskk#map#new()
-    " サポートしているモード
+    " Supported modes.
     let s:available_modes = []
 
     call s:initialize_buffer_table()
