@@ -19,16 +19,16 @@ func! s:make_error(what, from, ...) "{{{
 endfunc "}}}
 
 
-func! eskk#error#internal_error(...) "{{{
-    return call('s:make_error', ['internal error'] + a:000)
+func! eskk#error#internal_error(from, ...) "{{{
+    return call('s:make_error', ['internal error', a:from] + a:000)
 endfunc "}}}
 
 func! eskk#error#out_of_idx(from, ...) "{{{
-    return call('s:make_error', ['out of index'] + a:000)
+    return call('s:make_error', ['out of index', a:from] + a:000)
 endfunc "}}}
 
 func! eskk#error#not_implemented(from, ...) "{{{
-    return call('s:make_error', ['not implemented'] + a:000)
+    return call('s:make_error', ['not implemented', a:from] + a:000)
 endfunc "}}}
 " }}}
 
