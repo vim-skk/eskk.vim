@@ -306,7 +306,6 @@ func! eskk#filter_key(char) "{{{
 
     let opt = {
     \   'redispatch_keys': [],
-    \   'finalize_fn': [],
     \   'return': 0,
     \}
     let filter_args = [
@@ -343,9 +342,6 @@ func! eskk#filter_key(char) "{{{
         return a:char
 
     finally
-        for args in opt.finalize_fn
-            call call('call', args)
-        endfor
         call s:buftable.finalize()
     endtry
 endfunc "}}}
