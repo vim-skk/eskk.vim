@@ -97,7 +97,6 @@ func! s:split_special_key(key) "{{{
     let head = matchstr(a:key, '^<[^>]\+>')
     return [head, strpart(a:key, strlen(head))]
 endfunc "}}}
-" TODO Rename to unescape_key()?
 func! eskk#util#eval_key(key) "{{{
     let key = a:key
     let evaled = ''
@@ -113,10 +112,6 @@ func! eskk#util#eval_key(key) "{{{
         elseif key[0] ==# '<' && key =~# '^<[^>]*$'
             " No '>'
             return evaled . key
-        elseif tolower(key) =~# '^<lt>'
-            " '<lt>' -> '<'
-            let evaled .= '<'
-            let key = strpart(key, strlen('<lt>'))
         elseif key[0] ==# '<'
             " Special key.
             let [sp_key, key] = s:split_special_key(key)
