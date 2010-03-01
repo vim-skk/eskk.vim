@@ -21,10 +21,14 @@ let s:BS = "\<BS>"
 " See s:initialize_once() for Variables.
 
 " FIXME
-" 1. enable lang mode
-" 2. leave insert mode
-" 3. enter insert mode.
-" lang mode is still enabled.
+" 1. Enable lang mode
+" 2. Leave insert mode
+" 3. Enter insert mode.
+" Lang mode is still enabled.
+"
+" TODO
+" - Trap CursorMovedI
+
 " Functions {{{
 
 " Initialize
