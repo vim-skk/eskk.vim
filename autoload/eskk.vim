@@ -27,7 +27,9 @@ let s:BS = "\<BS>"
 " Lang mode is still enabled.
 "
 " TODO
-" - Trap CursorMovedI
+" - Trap CursorMovedI and
+" -- s:buftable.reset()
+" -- rewrite current displayed string.
 
 " Functions {{{
 
