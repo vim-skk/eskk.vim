@@ -63,15 +63,15 @@ endfunc "}}}
 func! eskk#table#define_macro() "{{{
     command!
     \   -buffer -nargs=1
-    \   EskkTable
-    \   call s:cmd_table(<f-args>)
+    \   EskkTableBegin
+    \   call s:cmd_table_begin(<f-args>)
     command!
     \   -buffer -nargs=+ -bang
     \   EskkTableMap
     \   call s:cmd_table_map(<q-args>, "<bang>")
 endfunc "}}}
 
-func! s:cmd_table(arg) "{{{
+func! s:cmd_table_begin(arg) "{{{
     return eskk#table#table_name(a:arg)
 endfunc "}}}
 

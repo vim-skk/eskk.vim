@@ -11,7 +11,7 @@ set cpo&vim
 
 call eskk#table#define_macro()
 
-EskkTable rom_to_hira
+EskkTableBegin rom_to_hira
 
 EskkTableMap a あ
 EskkTableMap -rest=b bb っ
