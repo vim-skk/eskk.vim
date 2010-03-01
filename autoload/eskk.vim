@@ -91,14 +91,7 @@ func! s:set_up_mappings() "{{{
     call eskk#util#log('set up mappings...')
 
     for char in s:get_all_chars()
-        call s:execute_map(
-        \   'l',
-        \   '<buffer><expr><silent>',
-        \   0,
-        \   char,
-        \   printf(
-        \       'eskk#dispatch_key(%s)',
-        \       string(char)))
+        call eskk#track_key(char)
     endfor
 endfunc "}}}
 
@@ -132,6 +125,17 @@ func! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
         \       a:lhs
         \       a:rhs
     endfor
+endfunc "}}}
+
+func! eskk#track_key(char) "{{{
+    call s:execute_map(
+    \   'l',
+    \   '<buffer><expr><silent>',
+    \   0,
+    \   a:char,
+    \   printf(
+    \       'eskk#dispatch_key(%s)',
+    \       string(a:char)))
 endfunc "}}}
 
 " }}}
