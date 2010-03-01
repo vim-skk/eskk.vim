@@ -41,10 +41,12 @@ func! s:buffer_string_new() "{{{
 endfunc "}}}
 
 
-func! s:buffer_string.clear() dict "{{{
-    let self._pos = []
-    let self._rom_str = ''
-    let self._filter_str = ''
+func! s:buffer_string.reset() dict "{{{
+    for k in keys(s:buftable)
+        if has_key(self, k)
+            let self[k] = deepcopy(s:buftable[k])
+        endif
+    endfor
 endfunc "}}}
 
 func! s:buffer_string.getpos(expr) dict "{{{
@@ -113,11 +115,12 @@ func! eskk#buftable#new() "{{{
 endfunc "}}}
 
 
-func! s:buftable.clear_all() dict "{{{
-    for t in self._table
-        call t.clear()
+func! s:buftable.reset() dict "{{{
+    for k in keys(s:buftable)
+        if has_key(self, k)
+            let self[k] = deepcopy(s:buftable[k])
+        endif
     endfor
-    let self._henkan_phase = g:eskk#buftable#HENKAN_PHASE_NORMAL
 endfunc "}}}
 
 " This is called from dispatch function.
