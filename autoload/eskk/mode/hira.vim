@@ -21,15 +21,13 @@ func! eskk#mode#hira#filter_main(char, from, opt, buftable, maptable) "{{{
 
     let henkan_phase = a:buftable.get_henkan_phase()
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return s:filter_rom_to_hira(a:char, a:from, a:buftable, a:maptable, a:opt)
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        " TODO
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        " TODO
+        return s:filter_rom_to_hira(a:char, a:from, a:opt, a:buftable, a:maptable)
+    else
+        return eskk#default_filter(a:char, a:from, a:opt, a:buftable, a:maptable)
     endif
 endfunc "}}}
 
-func! s:filter_rom_to_hira(char, from, buftable, maptable, opt) "{{{
+func! s:filter_rom_to_hira(char, from, opt, buftable, maptable) "{{{
     let buf_str = a:buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . a:char
 
