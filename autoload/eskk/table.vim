@@ -11,6 +11,8 @@ set cpo&vim
 
 let s:current_table_name = ''
 
+" TODO
+" - Build table in Vim <SID> mapping table.
 
 " Functions {{{
 
@@ -138,7 +140,11 @@ endfunc "}}}
 " }
 " But this uses a lot of memory.
 "
-func! eskk#table#has_candidates(table_name, str_buf) "{{{
+func! eskk#table#has_candidates(...) "{{{
+    return !empty(call('eskk#table#get_candidates', a:000))
+endfunc "}}}
+
+func! eskk#table#get_candidates(table_name, str_buf) "{{{
     if empty(a:str_buf)
         throw eskk#error#internal_error('eskk: table:')
     endif
@@ -150,6 +156,45 @@ func! eskk#table#has_candidates(table_name, str_buf) "{{{
     \       'stridx(v:val, a:str_buf) == 0'
     \   )
     \)
+endfunc "}}}
+
+
+func! eskk#table#has_map(table_name, lhs) "{{{
+    let def = eskk#table#{a:table_name}#get_definition()
+    return has_key(def, a:lhs)
+endfunc "}}}
+
+
+func! eskk#table#get_map_to(table_name, lhs, ...) "{{{
+    if !eskk#table#has_map(a:table_name, a:lhs)
+        if a:0 == 0
+            throw eskk#error#argument_error('eskk: table:')
+        else
+            return a:1
+        endif
+    endif
+    let def = eskk#table#{a:table_name}#get_definition()
+    return def[a:lhs].map_to
+endfunc "}}}
+
+
+func! eskk#table#has_rest(table_name, lhs) "{{{
+    let def = eskk#table#{a:table_name}#get_definition()
+
+    return has_key(def, a:lhs)
+    \   && has_key(def[a:lhs], 'rest')
+endfunc "}}}
+
+func! eskk#table#get_rest(table_name, lhs, ...) "{{{
+    if !eskk#table#has_rest(a:table_name, a:lhs)
+        if a:0 == 0
+            throw eskk#error#argument_error('eskk: table:')
+        else
+            return a:1
+        endif
+    endif
+    let def = eskk#table#{a:table_name}#get_definition()
+    return def[a:lhs].rest
 endfunc "}}}
 
 " }}}

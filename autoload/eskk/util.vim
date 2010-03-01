@@ -158,6 +158,10 @@ func! eskk#util#bind(fmt, ...) "{{{
     return ret
 endfunc "}}}
 
+func! eskk#util#stringf(fmt, ...) "{{{
+    return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
+endfunc "}}}
+
 
 func! eskk#util#get_f(...) "{{{
     return call('s:follow', [0] + a:000)
