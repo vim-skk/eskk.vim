@@ -9,11 +9,6 @@ set cpo&vim
 " }}}
 
 
-func! eskk#table#rom_to_kata#get_definition()
-    return g:eskk#table#rom_to_kata#definition
-endfunc
-
-
 call eskk#table#define_macro()
 
 EskkTable rom_to_kata

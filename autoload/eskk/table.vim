@@ -135,9 +135,10 @@ func! eskk#table#has_candidates(table_name, str_buf) "{{{
         throw eskk#error#internal_error('eskk: table:')
     endif
 
+    let def = {s:table_varname()}
     return !empty(
     \   filter(
-    \       keys(eskk#table#{a:table_name}#get_definition()),
+    \       keys(def),
     \       'stridx(v:val, a:str_buf) == 0'
     \   )
     \)

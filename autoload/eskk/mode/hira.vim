@@ -35,7 +35,7 @@ func! s:filter_rom_to_hira(char, from, henkan_count) "{{{
     let rom_str_buf = orig_rom_str_buf . a:char
     call eskk#set_current_buf(rom_str_buf)
 
-    let def = eskk#table#rom_to_hira#get_definition()
+    let def = g:eskk#table#rom_to_hira#definition
     if has_key(def, rom_str_buf)
         let rest = get(def[rom_str_buf], 'rest', '')
         try
