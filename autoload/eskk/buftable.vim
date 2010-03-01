@@ -187,7 +187,7 @@ func! s:buftable.get_lower_phases() dict "{{{
     return reverse(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, self._henkan_phase))
 endfunc "}}}
 func! s:buftable.get_lower_buf_str() dict "{{{
-    return map(self.get_lower_phases(), 'a:this.get_buf_str(v:val)')
+    return map(self.get_lower_phases(), 'self.get_buf_str(v:val)')
 endfunc "}}}
 
 

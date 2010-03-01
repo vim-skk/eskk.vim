@@ -368,14 +368,10 @@ func! s:do_backspace(char, from, opt, buftable, maptable) "{{{
         " Build backspaces to delete previous characters.
         for buf_str in a:buftable.get_lower_buf_str()
             if buf_str.get_rom_str() != ''
-                for n in range(1, self._bs_mb_len)
-                    call buf_str.pop_rom_str()
-                endfor
+                call buf_str.pop_rom_str()
                 break
             elseif buf_str.get_filter_str() != ''
-                for n in range(1, self._bs_mb_len)
-                    call buf_str.pop_filter_str()
-                endfor
+                call buf_str.pop_filter_str()
                 break
             endif
         endfor
