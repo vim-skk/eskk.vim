@@ -21,12 +21,7 @@ let eskk#FROM_STICKY_KEY_MAP = 'sticky'
 let eskk#FROM_BIG_LETTER = 'big'
 let eskk#FROM_MODECHANGE_KEY_MAP = 'mode'
 
-" Normal
-let eskk#HENKAN_PHASE_NORMAL = 0
-" Choosing henkan candidates.
-let eskk#HENKAN_PHASE_HENKAN = 1
-" Waiting for okurigana.
-let eskk#HENKAN_PHASE_OKURI = 2
+let s:BS = "\<BS>"
 
 " }}}
 " See s:initialize_once() for Variables.
@@ -68,10 +63,6 @@ endfunc "}}}
 func! s:initialize_buffer_table() "{{{
     " 変換フェーズでない状態で入力され、まだ確定していない文字列
     let s:buftable = eskk#buftable#new()
-    " 変換キーが押された回数
-    let s:henkan_count = 0
-    " 現在の変換フェーズ
-    let s:henkan_phase = g:eskk#HENKAN_PHASE_NORMAL
 endfunc "}}}
 
 func! s:set_up() "{{{
@@ -259,31 +250,6 @@ func! eskk#is_supported_mode(mode) "{{{
 endfunc "}}}
 
 
-func! eskk#get_henkan_phase() "{{{
-    return s:henkan_phase
-endfunc "}}}
-
-" TODO フィルタ関数実行中はいじれないようにする？
-func! eskk#set_henkan_phase(henkan_phase) "{{{
-    if eskk#util#has_idx(s:henkan_phase, a:henkan_phase)
-        let s:henkan_phase = a:henkan_phase
-    else
-        throw eskk#error#internal_error('eskk:')
-    endif
-endfunc "}}}
-
-
-func! eskk#is_special_key(char) "{{{
-    " eskk#maparg()'s 3 arg is '',
-    " because a:char is already evaled.
-    return eskk#maparg(a:char, '', '')
-    \   || a:char =~# '^[A-Z]$'
-    \   || a:char ==# "\<BS>"
-    \   || a:char ==# "\<C-h>"
-    \   || a:char ==# "\<Enter>"
-endfunc "}}}
-
-
 func! eskk#register_mode(mode) "{{{
     call add(s:available_modes, a:mode)
     let fmt = 'lnoremap <expr> <Plug>(eskk-mode-to-%s) eskk#set_mode(%s)'
@@ -332,53 +298,101 @@ endfunc "}}}
 " Dispatch functions {{{
 
 func! eskk#filter_key(char) "{{{
+    call eskk#util#logf('a:char = %s, keycode = %d', a:char, char2nr(a:char))
     if !eskk#is_supported_mode(s:eskk_mode)
         call eskk#util#warn('current mode is empty! please call eskk#init_keys()...')
         sleep 1
     endif
 
-    " TODO
-    " Dispatch function processes backspace
-    " even if current buffer string is not empty.
-
-    return s:handle_filter(a:char)
-endfunc "}}}
-
-" フィルタ用関数のディスパッチ
-func! s:handle_filter(char) "{{{
-
-    " Add a:char to current buffer string.
-    let buf_str = s:buftable.get_current_buf_str()
-    if buf_str.get_rom_str() == ''
-        " Remember current pos.
-        call buf_str.set_expr_pos('.')
-    endif
-    call buf_str.add_rom_str(a:char)
+    let opt = {
+    \   'redispatch_keys': [],
+    \   'finalize_fn': [],
+    \   'return': 0,
+    \}
+    let filter_args = [
+    \   a:char,
+    \   '',
+    \   opt,
+    \   s:buftable,
+    \   s:map,
+    \]
+    call s:buftable.set_old_str(s:buftable.get_display_str())
 
     try
-        call eskk#util#log('calling filter function...')
-        call {s:get_mode_func('filter_main')}(
-        \   a:char,
-        \   '',
-        \   eskk#get_henkan_phase(),
-        \   s:henkan_count
-        \)
-        try
-            return s:buftable.get_display_str()
-        finally
-            call s:buftable.clear_buf_str()
-        endtry
+        " TODO If mode hopes not to be processed by default filter
+        if eskk#has_default_filter(a:char)
+            call eskk#util#log('calling eskk#default_filter()...')
+            call call('eskk#default_filter', filter_args)
+        else
+            call eskk#util#log('calling filter function...')
+            call call(s:get_mode_func('filter_main'), filter_args)
+        endif
+
+        if type(opt.return) == type("")
+            return opt.return
+        else
+            let str = s:buftable.rewrite()
+            let rest = join(map(opt.redispatch_keys, 'eskk#dispatch_key(v:val)'), '')
+            return str . rest
+        endif
 
     catch
-        " TODO 現在のモードで最初の一回だけv:exceptionを表示
+        " TODO Show v:exception only once in current mode.
         call eskk#util#warnf('[%s] at [%s]', v:exception, v:throwpoint)
-
-        call s:initialize_buffer_table()
-        " TODO Clear displayed string.
-
-        " ローマ字のまま返す
+        call s:buftable.clear_all()
         return a:char
+
+    finally
+        for args in opt.finalize_fn
+            call call('call', args)
+        endfor
+        call s:buftable.finalize()
     endtry
+endfunc "}}}
+
+
+func! eskk#has_default_filter(char) "{{{
+    return a:char ==# "\<BS>"
+    \   || a:char ==# "\<C-h>"
+    \   || a:char ==# "\<CR>"
+endfunc "}}}
+
+func! eskk#default_filter(char, from, opt, buftable, maptable) "{{{
+    if a:char ==# "\<BS>" || a:char ==# "\<C-h>"
+        call s:do_backspace(a:char, a:from, a:opt, a:buftable, a:maptable)
+    elseif a:char ==# "\<CR>"
+        call s:do_enter(a:char, a:from, a:opt, a:buftable, a:maptable)
+    endif
+endfunc "}}}
+
+func! s:do_backspace(char, from, opt, buftable, maptable) "{{{
+    if a:buftable.get_old_str() == ''
+        let a:opt.return = s:BS
+    else
+        " Build backspaces to delete previous characters.
+        for buf_str in a:buftable.get_lower_buf_str()
+            if buf_str.get_rom_str() != ''
+                for n in range(1, self._bs_mb_len)
+                    call buf_str.pop_rom_str()
+                endfor
+                break
+            elseif buf_str.get_filter_str() != ''
+                for n in range(1, self._bs_mb_len)
+                    call buf_str.pop_filter_str()
+                endfor
+                break
+            endif
+        endfor
+    endif
+endfunc "}}}
+
+func! s:do_enter(char, from, opt, buftable, maptable) "{{{
+    let phase = s:buftable.get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call a:buftable.clear_all()
+    else
+        throw eskk#error#not_implemented('eskk:')
+    endif
 endfunc "}}}
 
 " }}}

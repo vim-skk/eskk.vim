@@ -8,75 +8,63 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-" Variables {{{
-
+" Mode options {{{
 let eskk#mode#hira#handle_all_keys = 0
-let s:BS = "\<C-h>"
-
 " }}}
-
 
 " Functions {{{
 
 " Filter functions
 
-func! eskk#mode#hira#filter_main(char, from, henkan_phase, henkan_count) "{{{
-    if a:henkan_phase ==# g:eskk#HENKAN_PHASE_NORMAL
-        return s:filter_rom_to_hira(a:char, a:from, a:henkan_count)
-    elseif a:henkan_phase ==# g:eskk#HENKAN_PHASE_OKURI
-        " TODO
-    elseif a:henkan_phase ==# g:eskk#HENKAN_PHASE_HENKAN
-        " TODO
-    endif
-
+func! eskk#mode#hira#filter_main(char, from, opt, buftable, maptable) "{{{
     " TODO Handle special keys registered in a:maptable.
 
-    return s:filter_rom_to_hira(a:char, a:from, a:buftable, a:maptable)
+    let henkan_phase = a:buftable.get_henkan_phase()
+    if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        return s:filter_rom_to_hira(a:char, a:from, a:buftable, a:maptable, a:opt)
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        " TODO
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        " TODO
+    endif
 endfunc "}}}
 
-func! s:filter_rom_to_hira(char, from, buftable, maptable) "{{{
+func! s:filter_rom_to_hira(char, from, buftable, maptable, opt) "{{{
     let buf_str = a:buftable.get_current_buf_str()
-    let rom_str = buf_str.get_rom_str()
+    let rom_str = buf_str.get_rom_str() . a:char
 
     if eskk#table#has_map('rom_to_hira', rom_str)
         " Match!
         call eskk#util#log('match!')
 
-        call buf_str.set_filtered_str(
-        \   eskk#table#get_map('rom_to_hira', rom_str)
+        call buf_str.set_filter_str(
+        \   eskk#table#get_map_to('rom_to_hira', rom_str)
         \)
-        call buf_str.flush_filtered_str()
+        call buf_str.clear_rom_str()
 
-        " Assumption: 'eskk#table#has_map(def, rest)' is false
-        let rest = eskk#table#get_rest('rom_to_hira', rom_str, '')
-        call buf_str.set_filtered_str(rest)
-
+        " Assumption: 'eskk#table#has_map(def, rest)' returns false.
+        let rest = eskk#table#get_rest('rom_to_hira', rom_str, -1)
+        if rest !=# -1
+            call add(a:opt.redispatch_keys, rest)
+        endif
         return
 
     elseif eskk#table#has_candidates('rom_to_hira', rom_str)
         " Has candidates but not match.
         call eskk#util#log('wait for a next key.')
-        call buf_str.set_filtered_str(rom_str)
+        call buf_str.push_rom_str(a:char)
         return
 
     else
         " No candidates.
         " Remove rom_str[-2].
         call eskk#util#log('no candidates.')
-        call eskk#util#assert(
-        \   strlen(rom_str) >= 2,
-        \   "'rom_str' must have at least 2 characters"
-        \)
-        call buf_str.set_filtered_str(
-        \   strpart(rom_str, 0, strlen(rom_str) - 2)
-        \       . strpart(rom_str, strlen(rom_str) - 1)
-        \)
+        call buf_str.pop_rom_str()
         return
     endif
 endfunc "}}}
 
 " }}}
-
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
