@@ -10,38 +10,31 @@ set cpo&vim
 
 
 " Functions {{{
-
 func! eskk#util#warn(msg) "{{{
     echohl WarningMsg
     echomsg a:msg
     echohl None
 endfunc "}}}
-
 func! eskk#util#warnf(msg, ...) "{{{
     call eskk#util#warn(call('printf', [a:msg] + a:000))
 endfunc "}}}
-
 func! eskk#util#log(...) "{{{
     if g:eskk_debug
         return call('eskk#debug#log', a:000)
     endif
 endfunc "}}}
-
 func! eskk#util#logf(...) "{{{
     if g:eskk_debug
         return call('eskk#debug#logf', a:000)
     endif
 endfunc "}}}
 
-
 func! eskk#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
 endfunc "}}}
-
 func! eskk#util#mb_chop(str) "{{{
     return substitute(a:str, '.$', '', '')
 endfunc "}}}
-
 
 func! eskk#util#get_args(args, ...) "{{{
     let ret_args = []
@@ -60,12 +53,10 @@ func! eskk#util#get_args(args, ...) "{{{
     return ret_args
 endfunc "}}}
 
-
 func! eskk#util#has_idx(list, idx) "{{{
     let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
     return 0 <= idx && idx < len(a:list)
 endfunc "}}}
-
 
 " a:func is string.
 "
@@ -86,36 +77,26 @@ func! eskk#util#call_if_exists(Fn, args, ...) "{{{
     endif
 endfunc "}}}
 
-
-" For macro. {{{
-
 func! eskk#util#skip_spaces(str) "{{{
     return substitute(a:str, '^\s*', '', '')
 endfunc "}}}
-
 " TODO Escape + Whitespace
 func! eskk#util#get_arg(arg) "{{{
     let matched = matchstr(a:arg, '^\S\+')
     return [matched, strpart(a:arg, strlen(matched))]
 endfunc "}}}
-
 func! eskk#util#unget_arg(arg, str) "{{{
     return a:str . a:arg
 endfunc "}}}
-
-" }}}
-
 
 func! s:split_key(key) "{{{
     let head = matchstr(a:key, '^[^<]\+')
     return [head, strpart(a:key, strlen(head))]
 endfunc "}}}
-
 func! s:split_special_key(key) "{{{
     let head = matchstr(a:key, '^<[^>]\+>')
     return [head, strpart(a:key, strlen(head))]
 endfunc "}}}
-
 " TODO Rename to unescape_key()?
 func! eskk#util#eval_key(key) "{{{
     let key = a:key
@@ -146,7 +127,6 @@ func! eskk#util#eval_key(key) "{{{
     endwhile
 endfunc "}}}
 
-
 " Boost.Format-like function.
 " This is useful for embedding values in string.
 func! eskk#util#bind(fmt, ...) "{{{
@@ -157,16 +137,13 @@ func! eskk#util#bind(fmt, ...) "{{{
     endfor
     return ret
 endfunc "}}}
-
 func! eskk#util#stringf(fmt, ...) "{{{
     return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunc "}}}
 
-
 func! eskk#util#get_f(...) "{{{
     return call('s:follow', [0] + a:000)
 endfunc "}}}
-
 func! eskk#util#has_key_f(...) "{{{
     return call('s:follow', [1] + a:000)
 endfunc "}}}
@@ -216,7 +193,6 @@ func! s:follow(ret_bool, dict, follow, ...) "{{{
     endif
 endfunc "}}}
 
-
 func! eskk#util#zip(list1, list2) "{{{
     let ret = []
     let i = 0
@@ -238,18 +214,15 @@ func! eskk#util#zip(list1, list2) "{{{
     call eskk#error#internal_error('eskk: util:', 'this block will be never reached')
 endfunc "}}}
 
-
 func! eskk#util#make_bs(n) "{{{
     return repeat("\<BS>", a:n)
 endfunc "}}}
-
 
 func! eskk#util#assert(cond, ...) "{{{
     if !a:cond
         throw call('eskk#util#internal_error', ['eskk: util:'] + a:000)
     endif
 endfunc "}}}
-
 " }}}
 
 
