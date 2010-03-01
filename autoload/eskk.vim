@@ -134,7 +134,7 @@ func! eskk#track_key(char) "{{{
     \   0,
     \   a:char,
     \   printf(
-    \       'eskk#dispatch_key(%s)',
+    \       'eskk#filter_key(%s)',
     \       string(a:char)))
 endfunc "}}}
 
@@ -202,7 +202,7 @@ func! eskk#sticky_key(again) "{{{
     call eskk#util#log("<Plug>(eskk-sticky-key)")
 
     if !a:again
-        return eskk#dispatch_key('')
+        return eskk#filter_key('')
     else
         let henkan_phase = eskk#get_henkan_phase()
         let advance_p =
@@ -345,8 +345,7 @@ endfunc "}}}
 
 " Dispatch functions {{{
 
-" ここからフィルタ用関数にディスパッチする
-func! eskk#dispatch_key(char) "{{{
+func! eskk#filter_key(char) "{{{
     if !eskk#is_supported_mode(s:eskk_mode)
         call eskk#util#warn('current mode is empty! please call eskk#init_keys()...')
         sleep 1
