@@ -56,8 +56,9 @@ func! s:parse_arg(arg) "{{{
     return lhs_rhs + [get(opt, 'rest', '')]
 endfunc "}}}
 
-func! s:table_varname() "{{{
-    return printf('g:eskk#table#%s#definition', s:current_table_name)
+func! s:table_varname(...) "{{{
+    let name = a:0 != 0 ? a:1 : s:current_table_name
+    return printf('g:eskk#table#%s#definition', name)
 endfunc "}}}
 
 
@@ -149,7 +150,7 @@ func! eskk#table#get_candidates(table_name, str_buf) "{{{
         throw eskk#error#internal_error('eskk: table:')
     endif
 
-    let def = {s:table_varname()}
+    let def = {s:table_varname(a:table_name)}
     return !empty(
     \   filter(
     \       keys(def),
@@ -160,7 +161,7 @@ endfunc "}}}
 
 
 func! eskk#table#has_map(table_name, lhs) "{{{
-    let def = eskk#table#{a:table_name}#get_definition()
+    let def = {s:table_varname(a:table_name)}
     return has_key(def, a:lhs)
 endfunc "}}}
 
@@ -173,13 +174,13 @@ func! eskk#table#get_map_to(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    let def = eskk#table#{a:table_name}#get_definition()
+    let def = {s:table_varname(a:table_name)}
     return def[a:lhs].map_to
 endfunc "}}}
 
 
 func! eskk#table#has_rest(table_name, lhs) "{{{
-    let def = eskk#table#{a:table_name}#get_definition()
+    let def = {s:table_varname(a:table_name)}
 
     return has_key(def, a:lhs)
     \   && has_key(def[a:lhs], 'rest')
@@ -193,7 +194,7 @@ func! eskk#table#get_rest(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    let def = eskk#table#{a:table_name}#get_definition()
+    let def = {s:table_varname(a:table_name)}
     return def[a:lhs].rest
 endfunc "}}}
 
