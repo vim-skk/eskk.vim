@@ -120,6 +120,7 @@ func! eskk#util#eval_key(key) "{{{
             throw eskk#error#internal_error('eskk: util:')
         endif
     endwhile
+    throw eskk#error#never_reached('eskk: util:')
 endfunc "}}}
 
 " Boost.Format-like function.
