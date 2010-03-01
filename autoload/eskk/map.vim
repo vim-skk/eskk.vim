@@ -9,30 +9,21 @@ set cpo&vim
 " }}}
 
 
-" Scope Variables {{{
-" }}}
-" Global Variables {{{
-if !exists('g:maptable_debug')
-    let g:maptable_debug = 0
-endif
-" }}}
-
-
 " TODO
 " - Check if mode is supported.
 " - Interface to get 'evaled_map_to'.
 
 " Functions {{{
 
-func! eskk#maptable#new()
-    return deepcopy(s:maptable)
+func! eskk#map#new()
+    return deepcopy(s:map)
 endfunc
 
 
-let s:maptable = {'table': {}}
+let s:map = {'table': {}}
 
 " Map key.
-func! s:maptable.map(lhs, rhs, local_mode, force, ...) dict "{{{
+func! s:map.map(lhs, rhs, local_mode, force, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'eE')
     let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
     let evaled_rhs = s:has_opt(options, 'E') ? eskk#util#eval_key(a:rhs) : a:rhs
@@ -69,7 +60,7 @@ func! s:maptable.map(lhs, rhs, local_mode, force, ...) dict "{{{
     return a:rhs
 endfunc "}}}
 
-func! s:maptable.unmap(lhs, local_mode, ...) dict "{{{
+func! s:map.unmap(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
     let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
 
@@ -86,7 +77,7 @@ func! s:maptable.unmap(lhs, local_mode, ...) dict "{{{
     call s:destroy_key(self.table, evaled_lhs, a:local_mode)
 endfunc "}}}
 
-func! s:maptable.mapclear(local_mode) dict "{{{
+func! s:map.mapclear(local_mode) dict "{{{
     if a:local_mode == ''
         " FIXME This delete also local mappings
         let self.table = {}
@@ -100,7 +91,7 @@ func! s:maptable.mapclear(local_mode) dict "{{{
     endif
 endfunc "}}}
 
-func! s:maptable.maparg(lhs, local_mode, ...) dict "{{{
+func! s:map.maparg(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
 
     if !self.hasmapof(a:lhs, a:local_mode, options)
@@ -116,7 +107,7 @@ func! s:maptable.maparg(lhs, local_mode, ...) dict "{{{
 endfunc "}}}
 
 " NOTE: Return value is List not Str.
-func! s:maptable.mapcheck(lhs, local_mode, ...) dict "{{{
+func! s:map.mapcheck(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
     let maparg = self.maparg(a:lhs, a:local_mode, options)
     if maparg != ''
@@ -138,7 +129,7 @@ func! s:maptable.mapcheck(lhs, local_mode, ...) dict "{{{
     \)
 endfunc "}}}
 
-func! s:maptable.hasmapof(lhs, local_mode, ...) dict "{{{
+func! s:map.hasmapof(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
     let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
 
@@ -149,7 +140,7 @@ func! s:maptable.hasmapof(lhs, local_mode, ...) dict "{{{
     endif
 endfunc "}}}
 
-func! s:maptable.hasmapto(rhs, local_mode) dict "{{{
+func! s:map.hasmapto(rhs, local_mode) dict "{{{
     " TODO
 endfunc "}}}
 
@@ -190,7 +181,7 @@ func! s:has_opt(options, opt) "{{{
 endfunc "}}}
 
 
-lockvar s:maptable
+lockvar s:map
 
 " }}}
 

@@ -51,7 +51,7 @@ func! s:initialize_once() "{{{
     " 非同期なフィルタの実行がサポートされているかどうか
     let s:filter_is_async = 0
     " 特殊なキーと、asciiモードなどで挿入する文字
-    let s:maptable = eskk#maptable#new()
+    let s:map = eskk#map#new()
     " サポートしているモード
     let s:available_modes = []
 
@@ -307,34 +307,34 @@ endfunc "}}}
 
 func! eskk#mapclear(...) "{{{
     let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:maptable.mapclear(local_mode)
+    return s:map.mapclear(local_mode)
 endfunc "}}}
 
 func! eskk#unmap(lhs, ...) "{{{
     let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:maptable.unmap(a:lhs, local_mode)
+    return s:map.unmap(a:lhs, local_mode)
 endfunc "}}}
 
 func! eskk#map(lhs, rhs, ...) "{{{
     let [local_mode, force] = eskk#util#get_args(a:000, '', 0)
     " TODO Map a:lhs also in Vim's mapping table.
-    return s:maptable.map(a:lhs, a:rhs, local_mode, force)
+    return s:map.map(a:lhs, a:rhs, local_mode, force)
 endfunc "}}}
 
 func! eskk#maparg(lhs, ...) "{{{
     let [local_mode, options] = eskk#util#get_args(a:000, '', 'e')
-    return s:maptable.maparg(a:lhs, local_mode, options)
+    return s:map.maparg(a:lhs, local_mode, options)
 endfunc "}}}
 
 func! eskk#mapcheck(lhs, ...) "{{{
     let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:maptable.mapcheck(a:lhs, local_mode)
+    return s:map.mapcheck(a:lhs, local_mode)
 endfunc "}}}
 
 " TODO
 " func! eskk#hasmapto(rhs, ...) "{{{
 "     let [local_mode] = eskk#util#get_args(a:000, '')
-"     return s:maptable.hasmapto(a:rhs, local_mode)
+"     return s:map.hasmapto(a:rhs, local_mode)
 " endfunc "}}}
 
 " }}}
