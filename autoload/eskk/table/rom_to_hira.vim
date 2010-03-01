@@ -123,7 +123,6 @@ EskkTableMap mye みぇ
 EskkTableMap myi みぃ
 EskkTableMap myo みょ
 EskkTableMap myu みゅ
-EskkTableMap n ん
 EskkTableMap n' ん
 EskkTableMap na な
 EskkTableMap ne ね
