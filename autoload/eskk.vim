@@ -52,18 +52,14 @@ func! s:initialize_once() "{{{
     let s:map = eskk#map#new()
     " Supported modes.
     let s:available_modes = []
-
-    call s:initialize_buffer_table()
+    " Buffer strings for inserted, filtered, and so on.
+    let s:buftable = eskk#buftable#new()
 endfunc "}}}
 func! s:reset_variables() "{{{
     call eskk#util#log('reset variables...')
 
     let s:eskk_mode = ''
-    call s:initialize_buffer_table()
-endfunc "}}}
-func! s:initialize_buffer_table() "{{{
-    " 変換フェーズでない状態で入力され、まだ確定していない文字列
-    let s:buftable = eskk#buftable#new()
+    call s:buftable.reset()
 endfunc "}}}
 func! s:set_up() "{{{
     " Clear current variable states.
@@ -193,7 +189,7 @@ func! eskk#set_mode(next_mode) "{{{
     let prev_mode = s:eskk_mode
     let s:eskk_mode = a:next_mode
 
-    call s:initialize_buffer_table()
+    call s:buftable.reset()
 
     call eskk#util#call_if_exists(
     \   s:get_mode_func('cb_mode_enter'),
@@ -291,7 +287,7 @@ func! eskk#filter_key(char) "{{{
     catch
         " TODO Show v:exception only once in current mode.
         call eskk#util#warnf('[%s] at [%s]', v:exception, v:throwpoint)
-        call s:buftable.clear_all()
+        call s:buftable.reset()
         return a:char
 
     finally
@@ -329,7 +325,7 @@ endfunc "}}}
 func! s:do_enter(char, from, opt, buftable, maptable) "{{{
     let phase = s:buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call a:buftable.clear_all()
+        call a:buftable.reset()
     else
         throw eskk#error#not_implemented('eskk:')
     endif
