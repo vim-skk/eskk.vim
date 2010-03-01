@@ -75,31 +75,9 @@ endfunc "}}}
 func! s:set_up_mappings() "{{{
     call eskk#util#log('set up mappings...')
 
-    for char in s:get_all_chars()
-        call eskk#track_key(char)
+    for key in g:eskk_mapped_key
+        call eskk#track_key(key)
     endfor
-endfunc "}}}
-func! s:get_all_chars() "{{{
-    return split(
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    \  .'1234567890'
-    \  .'!"#$%&''()'
-    \  .',./;:]@[-^\'
-    \  .'<>?_+*}`{=~'
-    \   ,
-    \   '\zs'
-    \) + [
-    \   "<Bar>",
-    \   "<Tab>",
-    \   "<BS>",
-    \   "<Insert>",
-    \   "<Home>",
-    \   "<PageUp>",
-    \   "<Delete>",
-    \   "<End>",
-    \   "<PageDown>",
-    \]
 endfunc "}}}
 func! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
     for mode in split(a:modes, '\zs')

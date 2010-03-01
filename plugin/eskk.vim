@@ -10,7 +10,7 @@ scriptencoding utf-8
 " Name: eskk
 " Version: 0.0.0
 " Author:  tyru <tyru.exe@gmail.com>
-" Last Change: 2010-02-27.
+" Last Change: 2010-03-01.
 "
 " Description:
 "   NO DESCRIPTION YET
@@ -53,6 +53,24 @@ endif
 " Mappings
 if !exists('eskk_no_default_mappings')
     let eskk_no_default_mappings = 0
+endif
+if !exists('eskk_mapped_key')
+    let eskk_mapped_key = split(
+    \   'abcdefghijklmnopqrstuvwxyz'
+    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    \  .'1234567890'
+    \  .'!"#$%&''()'
+    \  .',./;:]@[-^\'
+    \  .'>?_+*}`{=~'
+    \   ,
+    \   '\zs'
+    \) + [
+    \   "<lt>",
+    \   "<Bar>",
+    \   "<Tab>",
+    \   "<BS>",
+    \   "<C-h>",
+    \]
 endif
 
 " Misc.
