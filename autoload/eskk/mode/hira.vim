@@ -16,20 +16,21 @@ let eskk#mode#hira#handle_all_keys = 0
 
 " Filter functions
 
-func! eskk#mode#hira#filter_main(char, from, opt, buftable, maptable) "{{{
+func! eskk#mode#hira#filter_main(key_info, opt, buftable, maptable) "{{{
     " TODO Handle special keys registered in a:maptable.
 
     let henkan_phase = a:buftable.get_henkan_phase()
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return s:filter_rom_to_hira(a:char, a:from, a:opt, a:buftable, a:maptable)
+        return s:filter_rom_to_hira(a:key_info, a:opt, a:buftable, a:maptable)
     else
-        return eskk#default_filter(a:char, a:from, a:opt, a:buftable, a:maptable)
+        return eskk#default_filter(a:key_info, a:opt, a:buftable, a:maptable)
     endif
 endfunc "}}}
 
-func! s:filter_rom_to_hira(char, from, opt, buftable, maptable) "{{{
+func! s:filter_rom_to_hira(key_info, opt, buftable, maptable) "{{{
+    let char = a:key_info.char
     let buf_str = a:buftable.get_current_buf_str()
-    let rom_str = buf_str.get_rom_str() . a:char
+    let rom_str = buf_str.get_rom_str() . char
 
     if eskk#table#has_map('rom_to_hira', rom_str)
         " Match!
@@ -50,7 +51,7 @@ func! s:filter_rom_to_hira(char, from, opt, buftable, maptable) "{{{
     elseif eskk#table#has_candidates('rom_to_hira', rom_str)
         " Has candidates but not match.
         call eskk#util#log('wait for a next key.')
-        call buf_str.push_rom_str(a:char)
+        call buf_str.push_rom_str(char)
         return
 
     else

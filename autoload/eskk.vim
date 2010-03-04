@@ -16,6 +16,10 @@ let eskk#FROM_STICKY_KEY_MAP = 'sticky'
 let eskk#FROM_BIG_LETTER = 'big'
 let eskk#FROM_MODECHANGE_KEY_MAP = 'mode'
 
+let eskk#KEY_TYPE_UNKNOWN = 0
+let eskk#KEY_TYPE_STICKY_KEY = 1
+let eskk#KEY_TYPE_BIG_LETTER = 2
+
 let s:BS = "\<BS>"
 " }}}
 " See s:initialize_once() for Variables.
@@ -259,9 +263,9 @@ func! eskk#filter_key(char) "{{{
     \   'redispatch_keys': [],
     \   'return': 0,
     \}
+    let key_info = s:create_key_info(a:char)
     let filter_args = [
-    \   a:char,
-    \   '',
+    \   key_info,
     \   opt,
     \   s:buftable,
     \   s:map,
@@ -296,19 +300,36 @@ func! eskk#filter_key(char) "{{{
         call s:buftable.finalize()
     endtry
 endfunc "}}}
+func! s:create_key_info(char) "{{{
+    return {
+    \   'char': a:char,
+    \   'type': s:get_key_type(a:char)
+    \}
+endfunc "}}}
+func! s:get_key_type(char) "{{{
+    let maparg = tolower(maparg(a:char, 'l'))
+    if maparg =~# '<plug>(eskk-sticky-key)'
+        return g:eskk#KEY_TYPE_STICKY_KEY
+    elseif a:char =~# '^[A-Z]$'.'\C'
+        return g:eskk#KEY_TYPE_BIG_LETTER
+    else
+        return g:eskk#KEY_TYPE_UNKNOWN
+    endif
+endfunc "}}}
 func! eskk#has_default_filter(char) "{{{
     return a:char ==# "\<BS>"
     \   || a:char ==# "\<C-h>"
     \   || a:char ==# "\<CR>"
 endfunc "}}}
-func! eskk#default_filter(char, from, opt, buftable, maptable) "{{{
-    if a:char ==# "\<BS>" || a:char ==# "\<C-h>"
-        call s:do_backspace(a:char, a:from, a:opt, a:buftable, a:maptable)
-    elseif a:char ==# "\<CR>"
-        call s:do_enter(a:char, a:from, a:opt, a:buftable, a:maptable)
+func! eskk#default_filter(key_info, opt, buftable, maptable) "{{{
+    let char = a:key_info.char
+    if char ==# "\<BS>" || char ==# "\<C-h>"
+        call s:do_backspace(a:key_info, a:opt, a:buftable, a:maptable)
+    elseif char ==# "\<CR>"
+        call s:do_enter(a:key_info, a:opt, a:buftable, a:maptable)
     endif
 endfunc "}}}
-func! s:do_backspace(char, from, opt, buftable, maptable) "{{{
+func! s:do_backspace(key_info, opt, buftable, ...) "{{{
     if a:buftable.get_old_str() == ''
         let a:opt.return = s:BS
     else
@@ -324,7 +345,7 @@ func! s:do_backspace(char, from, opt, buftable, maptable) "{{{
         endfor
     endif
 endfunc "}}}
-func! s:do_enter(char, from, opt, buftable, maptable) "{{{
+func! s:do_enter(key_info, opt, buftable, ...) "{{{
     let phase = s:buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call a:buftable.reset()
