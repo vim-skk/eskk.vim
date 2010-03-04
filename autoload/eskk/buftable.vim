@@ -170,7 +170,7 @@ func! s:buftable.get_display_str() dict "{{{
         " 1. marker string
         " 2. filter string
         " 3. rom string
-        let ret .= s:get_marker(phase)
+        let ret .= self.get_marker(phase)
         let ret .= buf_str.get_filter_str()
         let ret .= buf_str.get_rom_str()
     endfor
@@ -220,12 +220,7 @@ func! s:buftable.empty() dict "{{{
 endfunc "}}}
 
 
-func! s:validate_table_idx(table, henkan_phase, msg) "{{{
-    if !eskk#util#has_idx(a:table, a:henkan_phase)
-        throw eskk#error#out_of_idx("eskk: buftable:")
-    endif
-endfunc "}}}
-func! s:get_marker(henkan_phase) "{{{
+func! s:buftable.get_marker(henkan_phase) dict "{{{
     let table = [
     \    '',
     \    g:eskk_marker_henkan,
@@ -238,6 +233,16 @@ func! s:get_marker(henkan_phase) "{{{
     "     throw ''
     " endif
     return table[a:henkan_phase]
+endfunc "}}}
+func! s:buftable.get_current_marker() "{{{
+    return self.get_marker(self.get_henkan_phase())
+endfunc "}}}
+
+
+func! s:validate_table_idx(table, henkan_phase, msg) "{{{
+    if !eskk#util#has_idx(a:table, a:henkan_phase)
+        throw eskk#error#out_of_idx("eskk: buftable:")
+    endif
 endfunc "}}}
 
 
