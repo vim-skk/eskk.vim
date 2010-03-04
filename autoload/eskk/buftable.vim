@@ -93,6 +93,10 @@ func! s:buffer_string.clear_filter_str() dict "{{{
 endfunc "}}}
 
 
+func! s:buffer_string.empty() dict "{{{
+    return self._rom_str == '' && self._filter_str == ''
+endfunc "}}}
+
 lockvar s:buffer_string
 " }}}
 " s:buftable {{{
@@ -203,6 +207,16 @@ func! s:buftable.get_all_phases() dict "{{{
 endfunc "}}}
 func! s:buftable.get_all_buf_str() dict "{{{
     return self._table
+endfunc "}}}
+
+
+func! s:buftable.empty() dict "{{{
+    for i in self._table
+        if !i.empty()
+            return 0
+        endif
+    endfor
+    return 1
 endfunc "}}}
 
 
