@@ -248,6 +248,8 @@ EskkTableMap ! ！
 EskkTableMap ? ？
 EskkTableMap [ 「
 EskkTableMap ] 」
+EskkTableMap . 。
+EskkTableMap , 、
 
 EskkTableEnd
 
