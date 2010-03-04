@@ -331,13 +331,20 @@ func! eskk#has_default_filter(key_info) "{{{
     return char ==# "\<BS>"
     \   || char ==# "\<C-h>"
     \   || char ==# "\<CR>"
+    \   || type ==# g:eskk#KEY_TYPE_STICKY_KEY
+    \   || type ==# g:eskk#KEY_TYPE_BIG_LETTER
 endfunc "}}}
 func! eskk#default_filter(key_info, opt, buftable, maptable) "{{{
-    let char = a:key_info.char
+    let [char, type] = [a:key_info.char, a:key_info.type]
     if char ==# "\<BS>" || char ==# "\<C-h>"
         call s:do_backspace(a:key_info, a:opt, a:buftable, a:maptable)
     elseif char ==# "\<CR>"
         call s:do_enter(a:key_info, a:opt, a:buftable, a:maptable)
+    elseif type ==# g:eskk#KEY_TYPE_STICKY_KEY
+        return eskk#sticky_key(1, a:key_info)
+    elseif type ==# g:eskk#KEY_TYPE_BIG_LETTER
+        return eskk#sticky_key(1, a:key_info)
+        \    . eskk#filter_key(eskk#create_key_info(tolower(char)))
     endif
 endfunc "}}}
 func! s:do_backspace(key_info, opt, buftable, ...) "{{{
