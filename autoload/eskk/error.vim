@@ -38,6 +38,11 @@ endfunc "}}}
 func! eskk#error#map_parse_error(from, ...) "{{{
     return call('s:make_error', [':map parse error', a:from] + a:000)
 endfunc "}}}
+
+" This is only used from eskk#util#assert().
+func! eskk#error#assertion_failure(from, ...) "{{{
+    return call('s:make_error', ['assertion failed', a:from] + a:000)
+endfunc "}}}
 " }}}
 
 
