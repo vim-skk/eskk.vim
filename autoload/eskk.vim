@@ -100,7 +100,7 @@ func! eskk#track_key(char) "{{{
     \   0,
     \   a:char,
     \   printf(
-    \       'eskk#filter_key(eskk#create_key_info(%s))',
+    \       'eskk#filter_key(%s)',
     \       string(a:char)))
 endfunc "}}}
 
@@ -161,7 +161,7 @@ func! eskk#sticky_key(again, key_info) "{{{
     call eskk#util#log("<Plug>(eskk-sticky-key)")
 
     if !a:again
-        return eskk#filter_key(eskk#create_key_info_from_type(g:eskk#KEY_TYPE_STICKY_KEY))
+        return eskk#filter_key_info(eskk#create_key_info_from_type(g:eskk#KEY_TYPE_STICKY_KEY))
     else
         if s:buftable.step_henkan_phase()
             return s:buftable.get_current_marker()
@@ -246,7 +246,10 @@ endfunc "}}}
 
 
 " Dispatch functions
-func! eskk#filter_key(key_info) "{{{
+func! eskk#filter_key(char) "{{{
+    return eskk#filter_key_info(eskk#create_key_info(a:char))
+endfunc "}}}
+func! eskk#filter_key_info(key_info) "{{{
     call eskk#util#logf('a:key_info.char = %s(%d)', a:key_info.char, char2nr(a:key_info.char))
     call eskk#util#logf('a:key_info.type = %d', a:key_info.type)
     if !eskk#is_supported_mode(s:eskk_mode)
@@ -269,6 +272,7 @@ func! eskk#filter_key(key_info) "{{{
     try
         let let_me_handle = call(s:get_mode_func('cb_handle_key'), filter_args)
         call eskk#util#log('current mode handles key:'.let_me_handle)
+
         if !let_me_handle && eskk#has_default_filter(a:key_info)
             call eskk#util#log('calling eskk#default_filter()...')
             call call('eskk#default_filter', filter_args)
@@ -346,7 +350,7 @@ func! eskk#default_filter(key_info, opt, buftable, maptable) "{{{
         return eskk#sticky_key(1, a:key_info)
     elseif type ==# g:eskk#KEY_TYPE_BIG_LETTER
         return eskk#sticky_key(1, a:key_info)
-        \    . eskk#filter_key(eskk#create_key_info(tolower(char)))
+        \    . eskk#filter_key(tolower(char))
     endif
 endfunc "}}}
 func! s:do_backspace(key_info, opt, buftable, ...) "{{{
