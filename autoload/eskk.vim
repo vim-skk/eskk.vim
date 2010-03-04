@@ -253,7 +253,8 @@ endfunc "}}}
 
 " Dispatch functions
 func! eskk#filter_key(key_info) "{{{
-    call eskk#util#logf('a:char = %s, keycode = %d', a:key_info.char, char2nr(a:key_info.char))
+    call eskk#util#logf('a:key_info.char = %s(%d)', a:key_info.char, char2nr(a:key_info.char))
+    call eskk#util#logf('a:key_info.type = %d', a:key_info.type)
     if !eskk#is_supported_mode(s:eskk_mode)
         call eskk#util#warn('current mode is empty! please call eskk#init_keys()...')
         sleep 1
@@ -291,7 +292,23 @@ func! eskk#filter_key(key_info) "{{{
 
     catch
         " TODO Show v:exception only once in current mode.
-        call eskk#util#warnf('[%s] at [%s]', v:exception, v:throwpoint)
+        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        call eskk#util#warn('--- buftable ---')
+        for phase in s:buftable.get_all_phases()
+            let buf_str = s:buftable.get_buf_str(phase)
+            call eskk#util#warnf('phase:%d', phase)
+            call eskk#util#warnf('pos: %s', string(buf_str.get_pos()))
+            call eskk#util#warnf('rom_str: %s', buf_str.get_rom_str())
+            call eskk#util#warnf('filter_str: %s', buf_str.get_filter_str())
+        endfor
+        call eskk#util#warn('--- key_info ---')
+        call eskk#util#warnf('char: %s', a:key_info.char)
+        call eskk#util#warnf('type: %d', a:key_info.type)
+        call eskk#util#warn('--- exception ---')
+        call eskk#util#warnf('v:exception: %s', v:exception)
+        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
+        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+
         call s:buftable.reset()
         return a:key_info.char
 
