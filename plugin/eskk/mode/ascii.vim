@@ -3,6 +3,9 @@ scriptencoding utf-8
 
 " See 'plugin/eskk.vim' about the license.
 
+
+runtime! plugin/eskk.vim
+
 " Load Once {{{
 if exists('g:loaded_eskk_mode_ascii') && g:loaded_eskk_mode_ascii
     finish
@@ -22,7 +25,6 @@ if !exists('g:eskk_mode_ascii_no_default_mappings')
     let g:eskk_mode_ascii_no_default_mappings = 0
 endif
 " }}}
-
 " Mappings {{{
 if g:eskk_mode_ascii_no_default_mappings
     call eskk#map('<C-j>', '<Plug>(eskk-mode-to-hira)', 'ascii')

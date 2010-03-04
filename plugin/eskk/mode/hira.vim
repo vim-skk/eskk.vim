@@ -3,6 +3,9 @@ scriptencoding utf-8
 
 " See 'plugin/eskk.vim' about the license.
 
+
+runtime! plugin/eskk.vim
+
 " Load Once {{{
 if exists('g:loaded_eskk_mode_hira') && g:loaded_eskk_mode_hira
     finish
@@ -22,7 +25,6 @@ if !exists('g:eskk_mode_hira_no_default_mappings')
     let g:eskk_mode_hira_no_default_mappings = 0
 endif
 " }}}
-
 " Mappings {{{
 if g:eskk_mode_hira_no_default_mappings
     call eskk#map('q', '<Plug>(eskk-mode-to-kata)', 'hira')
