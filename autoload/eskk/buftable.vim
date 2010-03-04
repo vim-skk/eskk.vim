@@ -49,8 +49,11 @@ func! s:buffer_string.reset() dict "{{{
     endfor
 endfunc "}}}
 
-func! s:buffer_string.getpos(expr) dict "{{{
+func! s:buffer_string.set_pos(expr) dict "{{{
     let self._pos = getpos(a:expr)
+endfunc "}}}
+func! s:buffer_string.get_pos() dict "{{{
+    return self._pos
 endfunc "}}}
 
 
@@ -191,6 +194,15 @@ func! s:buftable.get_lower_phases() dict "{{{
 endfunc "}}}
 func! s:buftable.get_lower_buf_str() dict "{{{
     return map(self.get_lower_phases(), 'self.get_buf_str(v:val)')
+endfunc "}}}
+func! s:buftable.get_all_phases() dict "{{{
+    return range(
+    \   g:eskk#buftable#HENKAN_PHASE_NORMAL,
+    \   g:eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
+    \)
+endfunc "}}}
+func! s:buftable.get_all_buf_str() dict "{{{
+    return self._table
 endfunc "}}}
 
 
