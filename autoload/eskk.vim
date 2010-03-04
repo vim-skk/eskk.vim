@@ -157,23 +157,17 @@ func! eskk#init_keys() "{{{
     " Save previous mode/state.
     call eskk#set_mode(g:eskk_initial_mode)
 endfunc "}}}
-func! eskk#sticky_key(again) "{{{
+func! eskk#sticky_key(again, key_info) "{{{
     call eskk#util#log("<Plug>(eskk-sticky-key)")
 
     if !a:again
-        return eskk#filter_key('')
+        return eskk#filter_key(eskk#create_key_info_from_type(g:eskk#KEY_TYPE_STICKY_KEY))
     else
-        " let henkan_phase = eskk#get_henkan_phase()
-        " let advance_p =
-        " \   eskk#util#has_idx(g:eskk#henkan_buf_table, henkan_phase + 1)
-        " \   && eskk#get_current_buf() !=# ''
-        "
-        " if advance_p
-        "     call eskk#set_henkan_phase(henkan_phase + 1)
-        "     return g:eskk_marker_white
-        " else
-        "     return ''
-        " endif
+        if s:buftable.step_henkan_phase()
+            return s:buftable.get_current_marker()
+        else
+            return ''
+        endif
     endif
 endfunc "}}}
 
