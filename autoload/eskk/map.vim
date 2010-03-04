@@ -12,6 +12,8 @@ set cpo&vim
 " TODO
 " - Check if mode is supported.
 " - Interface to get 'evaled_map_to'.
+" - Use <SID> mapping.
+" - Rewrite almost...
 
 " Functions {{{
 
