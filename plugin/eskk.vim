@@ -1,29 +1,7 @@
 " vim:foldmethod=marker:fen:
 scriptencoding utf-8
 
-" License is Public Domain.
-
-" Change Log: {{{
-" }}}
-" Document {{{
-"
-" Name: eskk
-" Version: 0.0.0
-" Author:  tyru <tyru.exe@gmail.com>
-" Last Change: 2010-03-05.
-"
-" Description:
-"   NO DESCRIPTION YET
-"
-" Usage: {{{
-"   Commands: {{{
-"   }}}
-"   Mappings: {{{
-"   }}}
-"   Global Variables: {{{
-"   }}}
-" }}}
-" }}}
+" See 'doc/eskk.txt'.
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
