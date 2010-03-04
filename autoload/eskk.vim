@@ -288,6 +288,7 @@ func! eskk#filter_key(key_info) "{{{
     catch
         " TODO Show v:exception only once in current mode.
         call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        sleep 1
         call eskk#util#warn('--- buftable ---')
         for phase in s:buftable.get_all_phases()
             let buf_str = s:buftable.get_buf_str(phase)
