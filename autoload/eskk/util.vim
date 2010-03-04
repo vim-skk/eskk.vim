@@ -216,7 +216,7 @@ endfunc "}}}
 
 func! eskk#util#assert(cond, ...) "{{{
     if !a:cond
-        throw call('eskk#util#internal_error', ['eskk: util:'] + a:000)
+        throw call('eskk#error#assertion_failure', ['eskk: util:'] + a:000)
     endif
 endfunc "}}}
 " }}}
