@@ -34,6 +34,10 @@ endfunc "}}}
 func! eskk#error#never_reached(from, ...) "{{{
     return call('s:make_error', ['this block will be never reached', a:from] + a:000)
 endfunc "}}}
+
+func! eskk#error#map_parse_error(from, ...) "{{{
+    return call('s:make_error', [':map parse error', a:from] + a:000)
+endfunc "}}}
 " }}}
 
 
