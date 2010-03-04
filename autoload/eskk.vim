@@ -282,7 +282,7 @@ func! eskk#filter_key(char) "{{{
             return opt.return
         else
             let str = s:buftable.rewrite()
-            let rest = join(map(opt.redispatch_keys, 'eskk#dispatch_key(v:val)'), '')
+            let rest = join(map(opt.redispatch_keys, 'eskk#filter_key(v:val)'), '')
             return str . rest
         endif
 
