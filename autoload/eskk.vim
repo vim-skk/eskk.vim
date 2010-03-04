@@ -100,7 +100,7 @@ func! eskk#track_key(char) "{{{
     \   0,
     \   a:char,
     \   printf(
-    \       'eskk#filter_key(%s)',
+    \       'eskk#filter_key(eskk#create_key_info(%s))',
     \       string(a:char)))
 endfunc "}}}
 
@@ -252,8 +252,8 @@ endfunc "}}}
 
 
 " Dispatch functions
-func! eskk#filter_key(char) "{{{
-    call eskk#util#logf('a:char = %s, keycode = %d', a:char, char2nr(a:char))
+func! eskk#filter_key(key_info) "{{{
+    call eskk#util#logf('a:char = %s, keycode = %d', a:key_info.char, char2nr(a:key_info.char))
     if !eskk#is_supported_mode(s:eskk_mode)
         call eskk#util#warn('current mode is empty! please call eskk#init_keys()...')
         sleep 1
@@ -263,9 +263,8 @@ func! eskk#filter_key(char) "{{{
     \   'redispatch_keys': [],
     \   'return': 0,
     \}
-    let key_info = s:create_key_info(a:char)
     let filter_args = [
-    \   key_info,
+    \   a:key_info,
     \   opt,
     \   s:buftable,
     \   s:map,
@@ -274,7 +273,7 @@ func! eskk#filter_key(char) "{{{
 
     try
         " TODO If mode hopes not to be processed by default filter
-        if eskk#has_default_filter(a:char)
+        if eskk#has_default_filter(a:key_info)
             call eskk#util#log('calling eskk#default_filter()...')
             call call('eskk#default_filter', filter_args)
         else
@@ -294,13 +293,13 @@ func! eskk#filter_key(char) "{{{
         " TODO Show v:exception only once in current mode.
         call eskk#util#warnf('[%s] at [%s]', v:exception, v:throwpoint)
         call s:buftable.reset()
-        return a:char
+        return a:key_info.char
 
     finally
         call s:buftable.finalize()
     endtry
 endfunc "}}}
-func! s:create_key_info(char) "{{{
+func! eskk#create_key_info(char) "{{{
     return {
     \   'char': a:char,
     \   'type': s:get_key_type(a:char)
@@ -316,10 +315,11 @@ func! s:get_key_type(char) "{{{
         return g:eskk#KEY_TYPE_UNKNOWN
     endif
 endfunc "}}}
-func! eskk#has_default_filter(char) "{{{
-    return a:char ==# "\<BS>"
-    \   || a:char ==# "\<C-h>"
-    \   || a:char ==# "\<CR>"
+func! eskk#has_default_filter(key_info) "{{{
+    let [char, type] = [a:key_info.char, a:key_info.type]
+    return char ==# "\<BS>"
+    \   || char ==# "\<C-h>"
+    \   || char ==# "\<CR>"
 endfunc "}}}
 func! eskk#default_filter(key_info, opt, buftable, maptable) "{{{
     let char = a:key_info.char
