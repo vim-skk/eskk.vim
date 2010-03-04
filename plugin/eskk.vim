@@ -10,7 +10,7 @@ scriptencoding utf-8
 " Name: eskk
 " Version: 0.0.0
 " Author:  tyru <tyru.exe@gmail.com>
-" Last Change: 2010-03-01.
+" Last Change: 2010-03-05.
 "
 " Description:
 "   NO DESCRIPTION YET
@@ -36,7 +36,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-;
+
 " Scope Variables {{{
 let s:debug_errmsg = []
 " }}}
