@@ -14,8 +14,12 @@ let eskk#mode#hira#handle_all_keys = 0
 
 " Functions {{{
 
-" Filter functions
+" Callback
+func! eskk#mode#hira#cb_handle_key(...) "{{{
+    return 0
+endfunc "}}}
 
+" Filter functions
 func! eskk#mode#hira#filter_main(key_info, opt, buftable, maptable) "{{{
     " TODO Handle special keys registered in a:maptable.
 
@@ -26,7 +30,6 @@ func! eskk#mode#hira#filter_main(key_info, opt, buftable, maptable) "{{{
         return eskk#default_filter(a:key_info, a:opt, a:buftable, a:maptable)
     endif
 endfunc "}}}
-
 func! s:filter_rom_to_hira(key_info, opt, buftable, maptable) "{{{
     let char = a:key_info.char
     let buf_str = a:buftable.get_current_buf_str()

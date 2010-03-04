@@ -9,21 +9,18 @@ set cpo&vim
 " }}}
 
 
-" Variables {{{
-
-let eskk#mode#ascii#handle_all_keys = 1
-
-" }}}
-
-" Functions {{{
-
-" Filter functions
-
-func! eskk#mode#ascii#filter_main(char, from, ...) "{{{
-    return a:char
+" Callback
+func! eskk#mode#ascii#cb_handle_key(key_info, ...) "{{{
+    let c = a:key_info.char
+    return c =~# '^[a-zA-Z0-9]$'
+    \   || c =~# '^[\-^\\!"#$%&''()=~|]$'
+    \   || c =~# '^[@\[;:\],./`{+*}<>?_]$'
 endfunc "}}}
 
-" }}}
+" Filter function
+func! eskk#mode#ascii#filter_main(key_info, opt, ...) "{{{
+    let a:opt.return = a:key_info.char
+endfunc "}}}
 
 
 " Restore 'cpoptions' {{{

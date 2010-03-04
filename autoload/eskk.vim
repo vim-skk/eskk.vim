@@ -267,8 +267,9 @@ func! eskk#filter_key(key_info) "{{{
     call s:buftable.set_old_str(s:buftable.get_display_str())
 
     try
-        " TODO If mode hopes not to be processed by default filter
-        if eskk#has_default_filter(a:key_info)
+        let let_me_handle = call(s:get_mode_func('cb_handle_key'), filter_args)
+        call eskk#util#log('current mode handles key:'.let_me_handle)
+        if !let_me_handle && eskk#has_default_filter(a:key_info)
             call eskk#util#log('calling eskk#default_filter()...')
             call call('eskk#default_filter', filter_args)
         else
