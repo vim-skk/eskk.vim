@@ -75,6 +75,7 @@ EskkTableMap gye ぎぇ
 EskkTableMap gyi ぎぃ
 EskkTableMap gyo ぎょ
 EskkTableMap gyu ぎゅ
+EskkTableMap -rest=h hh っ
 EskkTableMap ha は
 EskkTableMap he へ
 EskkTableMap hi ひ
@@ -108,6 +109,7 @@ EskkTableMap kye きぇ
 EskkTableMap kyi きぃ
 EskkTableMap kyo きょ
 EskkTableMap kyu きゅ
+EskkTableMap -rest=m mm っ
 EskkTableMap ma ま
 EskkTableMap me め
 EskkTableMap mi み
