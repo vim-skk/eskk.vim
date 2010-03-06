@@ -31,9 +31,7 @@ func! s:run()
 endfunc
 
 
-TestBegin
 call s:run()
-TestEnd
 
 
 " Restore 'cpoptions' {{{

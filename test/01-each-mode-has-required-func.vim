@@ -42,9 +42,7 @@ endfunc
 " ただ変数が関数ローカルじゃなく
 " グローバルになってしまうのを防ぐために
 " わざわざ関数を作っている。
-TestBegin
 call s:run()
-TestEnd
 
 
 " Restore 'cpoptions' {{{
