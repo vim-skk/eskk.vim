@@ -43,6 +43,7 @@ endfunc
 " グローバルになってしまうのを防ぐために
 " わざわざ関数を作っている。
 call s:run()
+Done
 
 
 " Restore 'cpoptions' {{{

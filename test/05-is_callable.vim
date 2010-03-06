@@ -46,6 +46,7 @@ endfunc
 
 
 call s:run()
+Done
 
 
 " Restore 'cpoptions' {{{

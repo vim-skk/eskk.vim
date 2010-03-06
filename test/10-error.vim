@@ -27,11 +27,9 @@ endfunc
 
 
 call s:run()
+Done
 
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
 " }}}
-
-
-

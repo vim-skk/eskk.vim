@@ -87,6 +87,7 @@ func! s:run()
 endfunc
 
 call s:run()
+Done
 
 
 " Restore 'cpoptions' {{{
