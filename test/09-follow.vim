@@ -58,6 +58,8 @@ func! s:run()
     \   1
     \)
 
+    " TODO Use simpletap#throws_ok() or simpletap#ok().
+
     try
         call eskk#util#get_f(
         \   {'foo': 1},
