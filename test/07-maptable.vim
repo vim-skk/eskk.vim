@@ -19,21 +19,21 @@ func! s:run()
     " call simpletap#ok(eskk#hasmapto('<Plug>(eskk-sticky)-key'))
 
 
-    call simpletap#is(eskk#mapcheck('f'), [])
+    call simpletap#is_deeply(eskk#mapcheck('f'), [])
     call eskk#map('foo', '<Plug>(eskk-sticky-key)')
-    call simpletap#is(eskk#mapcheck('f'), ['<Plug>(eskk-sticky-key)'])
-    call simpletap#is(eskk#mapcheck('fo'), ['<Plug>(eskk-sticky-key)'])
-    call simpletap#is(eskk#mapcheck('foo'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is_deeply(eskk#mapcheck('f'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is_deeply(eskk#mapcheck('fo'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is_deeply(eskk#mapcheck('foo'), ['<Plug>(eskk-sticky-key)'])
 
     call eskk#unmap('fo')
-    call simpletap#is(eskk#mapcheck('f'), ['<Plug>(eskk-sticky-key)'])
-    call simpletap#is(eskk#mapcheck('fo'), ['<Plug>(eskk-sticky-key)'])
-    call simpletap#is(eskk#mapcheck('foo'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is_deeply(eskk#mapcheck('f'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is_deeply(eskk#mapcheck('fo'), ['<Plug>(eskk-sticky-key)'])
+    call simpletap#is_deeply(eskk#mapcheck('foo'), ['<Plug>(eskk-sticky-key)'])
 
     call eskk#unmap('foo')
-    call simpletap#is(eskk#mapcheck('f'), [])
-    call simpletap#is(eskk#mapcheck('fo'), [])
-    call simpletap#is(eskk#mapcheck('foo'), [])
+    call simpletap#is_deeply(eskk#mapcheck('f'), [])
+    call simpletap#is_deeply(eskk#mapcheck('fo'), [])
+    call simpletap#is_deeply(eskk#mapcheck('foo'), [])
 
 
     call simpletap#diag("eskk#map('q', '<Plug>(eskk-mode-to-kata)', 'hira')")
