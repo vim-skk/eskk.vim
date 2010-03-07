@@ -10,33 +10,33 @@ set cpo&vim
 
 
 " Functions {{{
-func! eskk#util#warn(msg) "{{{
+function! eskk#util#warn(msg) "{{{
     echohl WarningMsg
     echomsg a:msg
     echohl None
-endfunc "}}}
-func! eskk#util#warnf(msg, ...) "{{{
+endfunction "}}}
+function! eskk#util#warnf(msg, ...) "{{{
     call eskk#util#warn(call('printf', [a:msg] + a:000))
-endfunc "}}}
-func! eskk#util#log(...) "{{{
+endfunction "}}}
+function! eskk#util#log(...) "{{{
     if g:eskk_debug
         return call('eskk#debug#log', a:000)
     endif
-endfunc "}}}
-func! eskk#util#logf(...) "{{{
+endfunction "}}}
+function! eskk#util#logf(...) "{{{
     if g:eskk_debug
         return call('eskk#debug#logf', a:000)
     endif
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#mb_strlen(str) "{{{
+function! eskk#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
-endfunc "}}}
-func! eskk#util#mb_chop(str) "{{{
+endfunction "}}}
+function! eskk#util#mb_chop(str) "{{{
     return substitute(a:str, '.$', '', '')
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#get_args(args, ...) "{{{
+function! eskk#util#get_args(args, ...) "{{{
     let ret_args = []
     let i = 0
 
@@ -51,23 +51,23 @@ func! eskk#util#get_args(args, ...) "{{{
     endwhile
 
     return ret_args
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#has_idx(list, idx) "{{{
+function! eskk#util#has_idx(list, idx) "{{{
     let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
     return 0 <= idx && idx < len(a:list)
-endfunc "}}}
+endfunction "}}}
 
 " a:func is string.
 "
 " NOTE: This returns 0 for script local function.
-func! eskk#util#is_callable(Fn) "{{{
+function! eskk#util#is_callable(Fn) "{{{
     return type(a:Fn) == type(function('tr'))
     \   || exists('*' . a:Fn)
-endfunc "}}}
+endfunction "}}}
 
 " arg 3 is not for 'self'.
-func! eskk#util#call_if_exists(Fn, args, ...) "{{{
+function! eskk#util#call_if_exists(Fn, args, ...) "{{{
     if eskk#util#is_callable(a:Fn)
         return call(a:Fn, a:args)
     elseif a:0 != 0
@@ -75,29 +75,29 @@ func! eskk#util#call_if_exists(Fn, args, ...) "{{{
     else
         throw printf("eskk: no such function '%s'.", a:Fn)
     endif
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#skip_spaces(str) "{{{
+function! eskk#util#skip_spaces(str) "{{{
     return substitute(a:str, '^\s*', '', '')
-endfunc "}}}
+endfunction "}}}
 " TODO Escape + Whitespace
-func! eskk#util#get_arg(arg) "{{{
+function! eskk#util#get_arg(arg) "{{{
     let matched = matchstr(a:arg, '^\S\+')
     return [matched, strpart(a:arg, strlen(matched))]
-endfunc "}}}
-func! eskk#util#unget_arg(arg, str) "{{{
+endfunction "}}}
+function! eskk#util#unget_arg(arg, str) "{{{
     return a:str . a:arg
-endfunc "}}}
+endfunction "}}}
 
-func! s:split_key(key) "{{{
+function! s:split_key(key) "{{{
     let head = matchstr(a:key, '^[^<]\+')
     return [head, strpart(a:key, strlen(head))]
-endfunc "}}}
-func! s:split_special_key(key) "{{{
+endfunction "}}}
+function! s:split_special_key(key) "{{{
     let head = matchstr(a:key, '^<[^>]\+>')
     return [head, strpart(a:key, strlen(head))]
-endfunc "}}}
-func! eskk#util#eval_key(key) "{{{
+endfunction "}}}
+function! eskk#util#eval_key(key) "{{{
     let key = a:key
     let evaled = ''
     while 1
@@ -121,28 +121,28 @@ func! eskk#util#eval_key(key) "{{{
         endif
     endwhile
     throw eskk#error#never_reached('eskk: util:')
-endfunc "}}}
+endfunction "}}}
 
 " Boost.Format-like function.
 " This is useful for embedding values in string.
-func! eskk#util#bind(fmt, ...) "{{{
+function! eskk#util#bind(fmt, ...) "{{{
     let ret = a:fmt
     for i in range(len(a:000))
         let regex = '%' . (i + 1) . '%'
         let ret = substitute(ret, regex, string(a:000[i]), 'g')
     endfor
     return ret
-endfunc "}}}
-func! eskk#util#stringf(fmt, ...) "{{{
+endfunction "}}}
+function! eskk#util#stringf(fmt, ...) "{{{
     return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#get_f(...) "{{{
+function! eskk#util#get_f(...) "{{{
     return call('s:follow', [0] + a:000)
-endfunc "}}}
-func! eskk#util#has_key_f(...) "{{{
+endfunction "}}}
+function! eskk#util#has_key_f(...) "{{{
     return call('s:follow', [1] + a:000)
-endfunc "}}}
+endfunction "}}}
 
 " Built-in 'get()' like function.
 " But 3 arg is omitted, this throws an exception.
@@ -152,7 +152,7 @@ endfunc "}}}
 "   Return boolean value(existence of key).
 " And if a:ret_bool is false:
 "   Raise an exception or return value if it exists.
-func! s:follow(ret_bool, dict, follow, ...) "{{{
+function! s:follow(ret_bool, dict, follow, ...) "{{{
     if empty(a:follow)
         throw eskk#error#internal_error('eskk: util:')
     endif
@@ -187,9 +187,9 @@ func! s:follow(ret_bool, dict, follow, ...) "{{{
     else
         return call('s:follow', [a:ret_bool, got, remove(a:follow, 1, -1)] + a:000)
     endif
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#zip(list1, list2) "{{{
+function! eskk#util#zip(list1, list2) "{{{
     let ret = []
     let i = 0
     while 1
@@ -208,17 +208,17 @@ func! eskk#util#zip(list1, list2) "{{{
     endwhile
 
     call eskk#error#internal_error('eskk: util:', 'this block will be never reached')
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#make_bs(n) "{{{
+function! eskk#util#make_bs(n) "{{{
     return repeat("\<BS>", a:n)
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#util#assert(cond, ...) "{{{
+function! eskk#util#assert(cond, ...) "{{{
     if !a:cond
         throw call('eskk#error#assertion_failure', ['eskk: util:'] + a:000)
     endif
-endfunc "}}}
+endfunction "}}}
 " }}}
 
 

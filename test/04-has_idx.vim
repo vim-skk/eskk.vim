@@ -6,13 +6,13 @@ set cpo&vim
 " }}}
 
 
-func! s:run()
+function! s:run()
     call simpletap#ok(eskk#util#has_idx([0], 0))
     call simpletap#ok(! eskk#util#has_idx([0], 1))
 
     call simpletap#ok(eskk#util#has_idx([0], -1))
     call simpletap#ok(! eskk#util#has_idx([0], -2))
-endfunc
+endfunction
 
 
 call s:run()

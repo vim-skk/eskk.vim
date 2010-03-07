@@ -7,7 +7,7 @@ set cpo&vim
 
 
 
-func! s:run()
+function! s:run()
     call eskk#mapclear()
 
     call simpletap#is(eskk#maparg(';'), '')
@@ -64,7 +64,7 @@ func! s:run()
     " TODO
     " - force
     " - mapcheck() spec on :help
-endfunc
+endfunction
 
 
 call s:run()

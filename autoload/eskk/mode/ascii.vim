@@ -10,17 +10,17 @@ set cpo&vim
 
 
 " Callback
-func! eskk#mode#ascii#cb_handle_key(key_info, ...) "{{{
+function! eskk#mode#ascii#cb_handle_key(key_info, ...) "{{{
     let c = a:key_info.char
     return c =~# '^[a-zA-Z0-9]$'
     \   || c =~# '^[\-^\\!"#$%&''()=~|]$'
     \   || c =~# '^[@\[;:\],./`{+*}<>?_]$'
-endfunc "}}}
+endfunction "}}}
 
 " Filter function
-func! eskk#mode#ascii#filter_main(key_info, opt, ...) "{{{
+function! eskk#mode#ascii#filter_main(key_info, opt, ...) "{{{
     let a:opt.return = a:key_info.char
-endfunc "}}}
+endfunction "}}}
 
 
 " Restore 'cpoptions' {{{

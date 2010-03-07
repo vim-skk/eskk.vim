@@ -28,22 +28,22 @@ let s:eskk_events = {}
 
 
 " Str event: Event name
-func! eskk#event#register_invoked(event) "{{{
+function! eskk#event#register_invoked(event) "{{{
     if !eskk#event#is_supported(a:event)
         let s:eskk_events[a:event] = []
     endif
-endfunc "}}}
+endfunction "}}}
 
 
 " Num id: Index number of s:eskk_events
 " Str event: Event name
 " Str cmd: Command to enqueue
-func! eskk#event#register_command(event, cmd) "{{{
+function! eskk#event#register_command(event, cmd) "{{{
     if !eskk#event#is_supported(a:event)
         throw printf("eskk: event: '%s' is not supported event name.", a:event)
     endif
     call s:register(a:event, s:create_event(a:cmd, [], 1))
-endfunc "}}}
+endfunction "}}}
 
 " Num id: Index number of s:eskk_events
 " Dict events: Events dictionary to be enqueued
@@ -51,21 +51,21 @@ endfunc "}}}
 " Callable Fn: Function to call
 " List args: Arguments passing to function
 " Bool eval_p: If true, evaluate args when execute.
-func! eskk#event#register_function(event, Fn, args, ...) "{{{
+function! eskk#event#register_function(event, Fn, args, ...) "{{{
     let eval_p = a:0 != 0 ? a:1 : 0
     if !eskk#event#is_supported(a:event)
         throw printf("eskk: event: '%s' is not supported event name.", a:event)
     endif
     call s:register(a:event, s:create_event(a:Fn, a:args, 0, eval_p))
-endfunc "}}}
+endfunction "}}}
 
 " Str event: Event name
-func! eskk#event#is_supported(event) "{{{
+function! eskk#event#is_supported(event) "{{{
     return has_key(s:eskk_events, a:event)
-endfunc "}}}
+endfunction "}}}
 
 " Str event: Event name
-func! eskk#event#execute(event) "{{{
+function! eskk#event#execute(event) "{{{
     if !eskk#event#is_supported(a:event)
         " Do not throw an error.
         " Just ignore non-supported event.
@@ -75,33 +75,33 @@ func! eskk#event#execute(event) "{{{
     for st in s:eskk_events[a:event]
         call s:dispatch(st)
     endfor
-endfunc "}}}
+endfunction "}}}
 
 
 
 " Add event structure.
-func! s:register(event, st) "{{{
+function! s:register(event, st) "{{{
     call add(s:eskk_events[a:event], a:st)
-endfunc "}}}
+endfunction "}}}
 
 " Create event structure.
-func! s:create_event(Fn_or_cmd, args, is_cmd, eval_p) "{{{
+function! s:create_event(Fn_or_cmd, args, is_cmd, eval_p) "{{{
     if a:is_cmd
         return {'cmd': a:Fn_or_cmd, 'is_cmd': 1}
     else
         return {'fn': a:Fn_or_cmd, 'args': a:args, 'eval': a:eval_p, 'is_cmd': 0}
     endif
-endfunc "}}}
+endfunction "}}}
 
 " Execute command or function.
-func! s:dispatch(st) "{{{
+function! s:dispatch(st) "{{{
     if a:st.is_cmd
         execute a:st.cmd
         return
     else
         return call(a:st.fn, (a:st.eval ? eval(a:st.args) : a:st.args))
     endif
-endfunc "}}}
+endfunction "}}}
 
 
 

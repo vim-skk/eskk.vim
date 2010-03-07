@@ -7,7 +7,7 @@ set cpo&vim
 
 
 
-func! s:run()
+function! s:run()
     call simpletap#is(eskk#util#mb_strlen('あいうえお'), 5)
     call simpletap#is(eskk#util#mb_strlen(''), 0)
     call simpletap#is(eskk#util#mb_strlen('あ'), 1)
@@ -17,7 +17,7 @@ func! s:run()
 
     call simpletap#is(eskk#util#mb_chop('あいうえお'), 'あいうえ')
     call simpletap#is(eskk#util#mb_chop(''), '')
-endfunc
+endfunction
 
 
 call s:run()

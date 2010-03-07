@@ -94,7 +94,7 @@ command!
 \   EskkSetMode
 \   call s:cmd_set_mode(<f-args>)
 
-func! s:cmd_set_mode(...) "{{{
+function! s:cmd_set_mode(...) "{{{
     if a:0 != 0
         if eskk#is_supported_mode(a:1)
             call eskk#set_mode(a:1)
@@ -104,7 +104,7 @@ func! s:cmd_set_mode(...) "{{{
         endif
     endif
     echo eskk#get_mode()
-endfunc "}}}
+endfunction "}}}
 
 " }}}
 

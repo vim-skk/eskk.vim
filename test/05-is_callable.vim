@@ -9,13 +9,13 @@ set cpo&vim
 silent! delfunc FuncForTest
 silent! delfunc FuncForTestHoge
 
-func! FuncForTest()
+function! FuncForTest()
     " Function for testing if this is callable.
     throw 'FuncForTestException'
-endfunc
+endfunction
 
 
-func! s:run()
+function! s:run()
     call simpletap#ok(eskk#util#is_callable('FuncForTest'), 'FuncForTest() is callable')
     call simpletap#ok(! eskk#util#is_callable('FuncForTestHoge'), 'FuncForTestHoge() is not callable')
 
@@ -42,7 +42,7 @@ func! s:run()
     \   0,
     \   "eskk#util#call_if_exists()'s arg 3 is for return value"
     \)
-endfunc
+endfunction
 
 
 call s:run()
