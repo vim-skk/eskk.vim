@@ -36,66 +36,66 @@ lockvar s:BS
 " s:buffer_string {{{
 let s:buffer_string = {'_pos': [], '_rom_str': '', '_filter_str': ''}
 
-func! s:buffer_string_new() "{{{
+function! s:buffer_string_new() "{{{
     return deepcopy(s:buffer_string)
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buffer_string.reset() dict "{{{
+function! s:buffer_string.reset() dict "{{{
     for k in keys(s:buftable)
         if has_key(self, k)
             let self[k] = deepcopy(s:buftable[k])
         endif
     endfor
-endfunc "}}}
+endfunction "}}}
 
-func! s:buffer_string.set_pos(expr) dict "{{{
+function! s:buffer_string.set_pos(expr) dict "{{{
     let self._pos = getpos(a:expr)
-endfunc "}}}
-func! s:buffer_string.get_pos() dict "{{{
+endfunction "}}}
+function! s:buffer_string.get_pos() dict "{{{
     return self._pos
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buffer_string.get_rom_str() dict "{{{
+function! s:buffer_string.get_rom_str() dict "{{{
     return self._rom_str
-endfunc "}}}
-func! s:buffer_string.set_rom_str(str) dict "{{{
+endfunction "}}}
+function! s:buffer_string.set_rom_str(str) dict "{{{
     let self._rom_str = a:str
-endfunc "}}}
-func! s:buffer_string.push_rom_str(str) dict "{{{
+endfunction "}}}
+function! s:buffer_string.push_rom_str(str) dict "{{{
     call self.set_rom_str(self.get_rom_str() . a:str)
-endfunc "}}}
-func! s:buffer_string.pop_rom_str() dict "{{{
+endfunction "}}}
+function! s:buffer_string.pop_rom_str() dict "{{{
     let s = self.get_rom_str()
     call self.set_rom_str(strpart(s, 0, strlen(s) - 1))
-endfunc "}}}
-func! s:buffer_string.clear_rom_str() dict "{{{
+endfunction "}}}
+function! s:buffer_string.clear_rom_str() dict "{{{
     let self._rom_str = ''
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buffer_string.get_filter_str() dict "{{{
+function! s:buffer_string.get_filter_str() dict "{{{
     return self._filter_str
-endfunc "}}}
-func! s:buffer_string.set_filter_str(str) dict "{{{
+endfunction "}}}
+function! s:buffer_string.set_filter_str(str) dict "{{{
     let self._filter_str = a:str
-endfunc "}}}
-func! s:buffer_string.push_filter_str(str) dict "{{{
+endfunction "}}}
+function! s:buffer_string.push_filter_str(str) dict "{{{
     call self.set_filter_str(self.get_filter_str() . a:str)
-endfunc "}}}
-func! s:buffer_string.pop_filter_str() dict "{{{
+endfunction "}}}
+function! s:buffer_string.pop_filter_str() dict "{{{
     let s = self.get_filter_str()
     call self.set_filter_str(eskk#util#mb_chop(s))
-endfunc "}}}
-func! s:buffer_string.clear_filter_str() dict "{{{
+endfunction "}}}
+function! s:buffer_string.clear_filter_str() dict "{{{
     let self._filter_str = ''
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buffer_string.empty() dict "{{{
+function! s:buffer_string.empty() dict "{{{
     return self._rom_str == '' && self._filter_str == ''
-endfunc "}}}
+endfunction "}}}
 
 lockvar s:buffer_string
 " }}}
@@ -117,53 +117,53 @@ let s:buftable = {
 " when inserted string has newline.
 
 
-func! eskk#buftable#new() "{{{
+function! eskk#buftable#new() "{{{
     return deepcopy(s:buftable)
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buftable.reset() dict "{{{
+function! s:buftable.reset() dict "{{{
     for k in keys(s:buftable)
         if has_key(self, k)
             let self[k] = deepcopy(s:buftable[k])
         endif
     endfor
-endfunc "}}}
+endfunction "}}}
 
 " This is called from dispatch function.
-func! s:buftable.finalize() dict "{{{
+function! s:buftable.finalize() dict "{{{
     if self._henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         let buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         call buf_str.clear_filter_str()
     endif
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buftable.get_buf_str(henkan_phase) dict "{{{
+function! s:buftable.get_buf_str(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase, "eskk: buftable:")
     return self._table[a:henkan_phase]
-endfunc "}}}
-func! s:buftable.get_current_buf_str() dict "{{{
+endfunction "}}}
+function! s:buftable.get_current_buf_str() dict "{{{
     return self.get_buf_str(self._henkan_phase)
-endfunc "}}}
+endfunction "}}}
 
 
 " Rewrite old string, Insert new string.
-func! s:buftable.set_old_str(str) dict "{{{
+function! s:buftable.set_old_str(str) dict "{{{
     let self._old_str = a:str
-endfunc "}}}
-func! s:buftable.get_old_str() dict "{{{
+endfunction "}}}
+function! s:buftable.get_old_str() dict "{{{
     return self._old_str
-endfunc "}}}
+endfunction "}}}
 " Return inserted string.
 " Inserted string contains "\<BS>"
 " to delete old characters.
-func! s:buftable.rewrite() dict "{{{
+function! s:buftable.rewrite() dict "{{{
     " TODO Rewrite mininum string as possible.
     let bs = repeat(s:BS, eskk#util#mb_strlen(self._old_str))
     return bs . self.get_display_str()
-endfunc "}}}
-func! s:buftable.get_display_str() dict "{{{
+endfunction "}}}
+function! s:buftable.get_display_str() dict "{{{
     let ret = ''
     for phase in self.get_lower_phases()
         let buf_str = self.get_buf_str(phase)
@@ -175,19 +175,19 @@ func! s:buftable.get_display_str() dict "{{{
         let ret .= buf_str.get_rom_str()
     endfor
     return ret
-endfunc "}}}
+endfunction "}}}
 
 
 " self._henkan_phase
-func! s:buftable.get_henkan_phase() dict "{{{
+function! s:buftable.get_henkan_phase() dict "{{{
     return self._henkan_phase
-endfunc "}}}
+endfunction "}}}
 " TODO フィルタ関数実行中はいじれないようにする？
-func! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
+function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase, "eskk: buftable:")
     let self.henkan_phase = a:henkan_phase
-endfunc "}}}
-func! s:buftable.step_henkan_phase() dict "{{{
+endfunction "}}}
+function! s:buftable.step_henkan_phase() dict "{{{
     let phase = self.get_henkan_phase()
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
@@ -199,37 +199,37 @@ func! s:buftable.step_henkan_phase() dict "{{{
         " TODO
         throw eskk#error#not_implemented('eskk: buftable:')
     endif
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buftable.get_lower_phases() dict "{{{
+function! s:buftable.get_lower_phases() dict "{{{
     return reverse(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, self._henkan_phase))
-endfunc "}}}
-func! s:buftable.get_lower_buf_str() dict "{{{
+endfunction "}}}
+function! s:buftable.get_lower_buf_str() dict "{{{
     return map(self.get_lower_phases(), 'self.get_buf_str(v:val)')
-endfunc "}}}
-func! s:buftable.get_all_phases() dict "{{{
+endfunction "}}}
+function! s:buftable.get_all_phases() dict "{{{
     return range(
     \   g:eskk#buftable#HENKAN_PHASE_NORMAL,
     \   g:eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
     \)
-endfunc "}}}
-func! s:buftable.get_all_buf_str() dict "{{{
+endfunction "}}}
+function! s:buftable.get_all_buf_str() dict "{{{
     return self._table
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buftable.empty() dict "{{{
+function! s:buftable.empty() dict "{{{
     for i in self._table
         if !i.empty()
             return 0
         endif
     endfor
     return 1
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:buftable.get_marker(henkan_phase) dict "{{{
+function! s:buftable.get_marker(henkan_phase) dict "{{{
     let table = [
     \    '',
     \    g:eskk_marker_henkan,
@@ -242,17 +242,17 @@ func! s:buftable.get_marker(henkan_phase) dict "{{{
     "     throw ''
     " endif
     return table[a:henkan_phase]
-endfunc "}}}
-func! s:buftable.get_current_marker() "{{{
+endfunction "}}}
+function! s:buftable.get_current_marker() "{{{
     return self.get_marker(self.get_henkan_phase())
-endfunc "}}}
+endfunction "}}}
 
 
-func! s:validate_table_idx(table, henkan_phase, msg) "{{{
+function! s:validate_table_idx(table, henkan_phase, msg) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
         throw eskk#error#out_of_idx("eskk: buftable:")
     endif
-endfunc "}}}
+endfunction "}}}
 
 
 lockvar s:buftable

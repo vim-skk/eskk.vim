@@ -9,7 +9,7 @@ set cpo&vim
 " TODO
 " Test eskk#util#has_key_f().
 
-func! s:run()
+function! s:run()
     " Dictionary
     call simpletap#is(
     \   eskk#util#get_f(
@@ -90,7 +90,7 @@ func! s:run()
         call simpletap#ok(1, 'raise error')
     endtry
 
-endfunc
+endfunction
 
 
 call s:run()

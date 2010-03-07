@@ -29,11 +29,11 @@ if !exists('g:eskk_debug_wait_ms')
 endif
 
 " Mappings
-if !exists('eskk_no_default_mappings')
-    let eskk_no_default_mappings = 0
+if !exists('g:eskk_no_default_mappings')
+    let g:eskk_no_default_mappings = 0
 endif
-if !exists('eskk_mapped_key')
-    let eskk_mapped_key = split(
+if !exists('g:eskk_mapped_key')
+    let g:eskk_mapped_key = split(
     \   'abcdefghijklmnopqrstuvwxyz'
     \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     \  .'1234567890'
@@ -52,20 +52,20 @@ if !exists('eskk_mapped_key')
 endif
 
 " Misc.
-if !exists('eskk_initial_mode')
-    let eskk_initial_mode = 'hira'
+if !exists('g:eskk_initial_mode')
+    let g:eskk_initial_mode = 'hira'
 endif
-if !exists("eskk_marker_henkan")
-  let eskk_marker_henkan = '▽'
+if !exists("g:eskk_marker_henkan")
+    let g:eskk_marker_henkan = '▽'
 endif
-if !exists("eskk_marker_okuri")
-  let eskk_marker_okuri = '*'
+if !exists("g:eskk_marker_okuri")
+    let g:eskk_marker_okuri = '*'
 endif
-if !exists("eskk_marker_henkan_select")
-  let eskk_marker_henkan_select = '▼'
+if !exists("g:eskk_marker_henkan_select")
+    let g:eskk_marker_henkan_select = '▼'
 endif
-if !exists("eskk_marker_jisyo_touroku")
-  let eskk_marker_jisyo_touroku = '?'
+if !exists("g:eskk_marker_jisyo_touroku")
+    let g:eskk_marker_jisyo_touroku = '?'
 endif
 
 " }}}
@@ -94,7 +94,7 @@ command!
 \   EskkSetMode
 \   call s:cmd_set_mode(<f-args>)
 
-func! s:cmd_set_mode(...) "{{{
+function! s:cmd_set_mode(...) "{{{
     if a:0 != 0
         if eskk#is_supported_mode(a:1)
             call eskk#set_mode(a:1)
@@ -104,7 +104,7 @@ func! s:cmd_set_mode(...) "{{{
         endif
     endif
     echo eskk#get_mode()
-endfunc "}}}
+endfunction "}}}
 
 " }}}
 

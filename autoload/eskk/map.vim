@@ -17,15 +17,15 @@ set cpo&vim
 
 " Functions {{{
 
-func! eskk#map#new()
+function! eskk#map#new()
     return deepcopy(s:map)
-endfunc
+endfunction
 
 
 let s:map = {'table': {}}
 
 " Map key.
-func! s:map.map(lhs, rhs, local_mode, force, ...) dict "{{{
+function! s:map.map(lhs, rhs, local_mode, force, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'eE')
     let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
     let evaled_rhs = s:has_opt(options, 'E') ? eskk#util#eval_key(a:rhs) : a:rhs
@@ -60,9 +60,9 @@ func! s:map.map(lhs, rhs, local_mode, force, ...) dict "{{{
 
     " non-evaled rhs.
     return a:rhs
-endfunc "}}}
+endfunction "}}}
 
-func! s:map.unmap(lhs, local_mode, ...) dict "{{{
+function! s:map.unmap(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
     let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
 
@@ -77,9 +77,9 @@ func! s:map.unmap(lhs, local_mode, ...) dict "{{{
     endif
 
     call s:destroy_key(self.table, evaled_lhs, a:local_mode)
-endfunc "}}}
+endfunction "}}}
 
-func! s:map.mapclear(local_mode) dict "{{{
+function! s:map.mapclear(local_mode) dict "{{{
     if a:local_mode == ''
         " FIXME This delete also local mappings
         let self.table = {}
@@ -91,9 +91,9 @@ func! s:map.mapclear(local_mode) dict "{{{
         \   '! has_key(val, "local")'
         \)
     endif
-endfunc "}}}
+endfunction "}}}
 
-func! s:map.maparg(lhs, local_mode, ...) dict "{{{
+function! s:map.maparg(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
 
     if !self.hasmapof(a:lhs, a:local_mode, options)
@@ -106,10 +106,10 @@ func! s:map.maparg(lhs, local_mode, ...) dict "{{{
     else
         return eskk#util#get_f(self.table[evaled_lhs], ['local', a:local_mode, 'map_to'], '')
     endif
-endfunc "}}}
+endfunction "}}}
 
 " NOTE: Return value is List not Str.
-func! s:map.mapcheck(lhs, local_mode, ...) dict "{{{
+function! s:map.mapcheck(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
     let maparg = self.maparg(a:lhs, a:local_mode, options)
     if maparg != ''
@@ -129,9 +129,9 @@ func! s:map.mapcheck(lhs, local_mode, ...) dict "{{{
     \   ),
     \   'v:val.map_to'
     \)
-endfunc "}}}
+endfunction "}}}
 
-func! s:map.hasmapof(lhs, local_mode, ...) dict "{{{
+function! s:map.hasmapof(lhs, local_mode, ...) dict "{{{
     let [options] = eskk#util#get_args(a:000, 'e')
     let evaled_lhs = s:has_opt(options, 'e') ? eskk#util#eval_key(a:lhs) : a:lhs
 
@@ -140,15 +140,15 @@ func! s:map.hasmapof(lhs, local_mode, ...) dict "{{{
     else
         return eskk#util#has_key_f(self.table, [evaled_lhs, 'local', a:local_mode, 'map_to'])
     endif
-endfunc "}}}
+endfunction "}}}
 
-func! s:map.hasmapto(rhs, local_mode) dict "{{{
+function! s:map.hasmapto(rhs, local_mode) dict "{{{
     " TODO
-endfunc "}}}
+endfunction "}}}
 
 
 
-func! s:filter_table(table, expr, sort_p) "{{{
+function! s:filter_table(table, expr, sort_p) "{{{
     let ret = []
     for key in a:sort_p ? sort(keys(a:table)) : keys(a:table)
         let val = a:table[key]
@@ -157,17 +157,17 @@ func! s:filter_table(table, expr, sort_p) "{{{
         endif
     endfor
     return ret
-endfunc "}}}
+endfunction "}}}
 
 " Create map structure.
-func! s:create_key(rhs, raw_rhs) "{{{
+function! s:create_key(rhs, raw_rhs) "{{{
     return {
     \   'evaled_map_to': a:rhs,
     \   'map_to': a:raw_rhs
     \}
-endfunc "}}}
+endfunction "}}}
 
-func! s:destroy_key(table, evaled_lhs, local_mode) "{{{
+function! s:destroy_key(table, evaled_lhs, local_mode) "{{{
     let t = a:table[a:evaled_lhs]
     if a:local_mode == ''
         " Destroy non-local mapping.
@@ -176,11 +176,11 @@ func! s:destroy_key(table, evaled_lhs, local_mode) "{{{
         " Destroy local mapping.
         unlet! t.local[a:local_mode]
     endif
-endfunc "}}}
+endfunction "}}}
 
-func! s:has_opt(options, opt) "{{{
+function! s:has_opt(options, opt) "{{{
     return stridx(a:options, a:opt) != -1
-endfunc "}}}
+endfunction "}}}
 
 
 lockvar s:map

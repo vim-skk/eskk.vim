@@ -7,7 +7,7 @@ set cpo&vim
 
 
 
-func! s:run()
+function! s:run()
     call simpletap#is(
     \   eskk#util#bind('%1%', 'hello'),
     \   string('hello')
@@ -28,7 +28,7 @@ func! s:run()
     \   eskk#util#bind('hey %1% %1%', 'hello'),
     \   printf('hey %s %s', string('hello'), string('hello'))
     \)
-endfunc
+endfunction
 
 
 call s:run()

@@ -7,11 +7,11 @@ set cpo&vim
 " }}}
 
 
-func! s:modef(mode, varname)
+function! s:modef(mode, varname)
     return printf('eskk#mode#%s#%s', a:mode, a:varname)
-endfunc
+endfunction
 
-func! s:run()
+function! s:run()
     for m in eskk#get_registered_modes()
 
         " 関数のチェック
@@ -36,7 +36,7 @@ func! s:run()
             \)
         endfor
     endfor
-endfunc
+endfunction
 
 
 " ただ変数が関数ローカルじゃなく

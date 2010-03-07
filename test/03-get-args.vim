@@ -8,7 +8,7 @@ set cpo&vim
 
 
 
-func! s:run()
+function! s:run()
     call simpletap#is_deeply(
     \   eskk#util#get_args([1, 2], 1, 2, 3, 4),
     \   [1,2,3,4]
@@ -25,7 +25,7 @@ func! s:run()
     \   eskk#util#get_args([[1], [2]], [1]),
     \   [[1]]
     \)
-endfunc
+endfunction
 
 call s:run()
 Done

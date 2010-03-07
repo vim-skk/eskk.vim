@@ -6,7 +6,7 @@ set cpo&vim
 " }}}
 
 
-func! s:run()
+function! s:run()
     call simpletap#throws_ok(
     \   "throw eskk#error#internal_error('eskk:')",
     \   '^eskk: internal error$'
@@ -23,7 +23,7 @@ func! s:run()
     \   "throw eskk#error#out_of_idx('eskk: foo:')",
     \   '^eskk: foo: out of index$'
     \)
-endfunc
+endfunction
 
 
 call s:run()

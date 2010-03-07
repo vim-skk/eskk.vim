@@ -8,7 +8,7 @@ set cpo&vim
 
 
 
-func! s:run()
+function! s:run()
     call simpletap#is(
     \   eskk#util#eval_key('<CR>'),
     \   "\<CR>"
@@ -84,7 +84,7 @@ func! s:run()
     \   eskk#util#eval_key('<tes>'),
     \   "<tes>"
     \)
-endfunc
+endfunction
 
 call s:run()
 Done

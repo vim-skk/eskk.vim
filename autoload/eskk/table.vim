@@ -16,7 +16,7 @@ let s:current_table_name = ''
 
 " Functions {{{
 
-func! s:parse_arg(arg) "{{{
+function! s:parse_arg(arg) "{{{
     let arg = a:arg
     let opt_regex = '-\(\w\+\)=\(\S\+\)'
 
@@ -54,16 +54,16 @@ func! s:parse_arg(arg) "{{{
     endif
 
     return lhs_rhs + [get(opt, 'rest', '')]
-endfunc "}}}
+endfunction "}}}
 
-func! s:table_varname(...) "{{{
+function! s:table_varname(...) "{{{
     let name = a:0 != 0 ? a:1 : s:current_table_name
     return printf('g:eskk#table#%s#definition', name)
-endfunc "}}}
+endfunction "}}}
 
 
 
-func! eskk#table#define_macro() "{{{
+function! eskk#table#define_macro() "{{{
     command!
     \   -buffer -nargs=1
     \   EskkTableBegin
@@ -76,35 +76,35 @@ func! eskk#table#define_macro() "{{{
     \   -buffer -nargs=+ -bang
     \   EskkTableMap
     \   call s:cmd_table_map(<q-args>, "<bang>")
-endfunc "}}}
+endfunction "}}}
 
-func! s:cmd_table_begin(arg) "{{{
+function! s:cmd_table_begin(arg) "{{{
     return eskk#table#table_name(a:arg)
-endfunc "}}}
+endfunction "}}}
 
-func! s:cmd_table_end() "{{{
+function! s:cmd_table_end() "{{{
     lockvar {s:table_varname()}
-endfunc "}}}
+endfunction "}}}
 
-func! s:cmd_table_map(arg, bang) "{{{
+function! s:cmd_table_map(arg, bang) "{{{
     try
         let [lhs, rhs, rest] = s:parse_arg(a:arg)
         return call('eskk#table#map', [lhs, rhs, (a:bang != '' ? 1 : 0), rest])
     catch /^eskk:/
         call eskk#util#warn(v:exception)
     endtry
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#table#table_name(name) "{{{
+function! eskk#table#table_name(name) "{{{
     let s:current_table_name = a:name
     let varname = s:table_varname()
     if !exists(varname)
         let {varname} = {}
     endif
-endfunc "}}}
+endfunction "}}}
 
 " Force overwrite if a:bang is true.
-func! eskk#table#map(lhs, rhs, ...) "{{{
+function! eskk#table#map(lhs, rhs, ...) "{{{
     let [bang, rest] = eskk#util#get_args(a:000, 0, '')
 
     if s:current_table_name == '' | return | endif
@@ -119,12 +119,12 @@ func! eskk#table#map(lhs, rhs, ...) "{{{
     if rest != ''
         let def[a:lhs].rest = rest
     endif
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#table#unmap(lhs) "{{{
+function! eskk#table#unmap(lhs) "{{{
     if s:current_table_name == '' | return | endif
     unlet {s:table_varname()}[a:lhs]
-endfunc "}}}
+endfunction "}}}
 
 
 " TODO
@@ -141,11 +141,11 @@ endfunc "}}}
 " }
 " But this uses a lot of memory.
 "
-func! eskk#table#has_candidates(...) "{{{
+function! eskk#table#has_candidates(...) "{{{
     return !empty(call('eskk#table#get_candidates', a:000))
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#table#get_candidates(table_name, str_buf) "{{{
+function! eskk#table#get_candidates(table_name, str_buf) "{{{
     if empty(a:str_buf)
         throw eskk#error#internal_error('eskk: table:')
     endif
@@ -157,16 +157,16 @@ func! eskk#table#get_candidates(table_name, str_buf) "{{{
     \       'stridx(v:val, a:str_buf) == 0'
     \   )
     \)
-endfunc "}}}
+endfunction "}}}
 
 
-func! eskk#table#has_map(table_name, lhs) "{{{
+function! eskk#table#has_map(table_name, lhs) "{{{
     let def = {s:table_varname(a:table_name)}
     return has_key(def, a:lhs)
-endfunc "}}}
+endfunction "}}}
 
 
-func! eskk#table#get_map_to(table_name, lhs, ...) "{{{
+function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
     if !eskk#table#has_map(a:table_name, a:lhs)
         if a:0 == 0
             throw eskk#error#argument_error('eskk: table:')
@@ -176,17 +176,17 @@ func! eskk#table#get_map_to(table_name, lhs, ...) "{{{
     endif
     let def = {s:table_varname(a:table_name)}
     return def[a:lhs].map_to
-endfunc "}}}
+endfunction "}}}
 
 
-func! eskk#table#has_rest(table_name, lhs) "{{{
+function! eskk#table#has_rest(table_name, lhs) "{{{
     let def = {s:table_varname(a:table_name)}
 
     return has_key(def, a:lhs)
     \   && has_key(def[a:lhs], 'rest')
-endfunc "}}}
+endfunction "}}}
 
-func! eskk#table#get_rest(table_name, lhs, ...) "{{{
+function! eskk#table#get_rest(table_name, lhs, ...) "{{{
     if !eskk#table#has_rest(a:table_name, a:lhs)
         if a:0 == 0
             throw eskk#error#argument_error('eskk: table:')
@@ -196,7 +196,7 @@ func! eskk#table#get_rest(table_name, lhs, ...) "{{{
     endif
     let def = {s:table_varname(a:table_name)}
     return def[a:lhs].rest
-endfunc "}}}
+endfunction "}}}
 
 " }}}
 
