@@ -56,16 +56,16 @@ if !exists('g:eskk_initial_mode')
     let g:eskk_initial_mode = 'hira'
 endif
 if !exists("g:eskk_marker_henkan")
-  let g:eskk_marker_henkan = '▽'
+    let g:eskk_marker_henkan = '▽'
 endif
 if !exists("g:eskk_marker_okuri")
-  let g:eskk_marker_okuri = '*'
+    let g:eskk_marker_okuri = '*'
 endif
 if !exists("g:eskk_marker_henkan_select")
-  let g:eskk_marker_henkan_select = '▼'
+    let g:eskk_marker_henkan_select = '▼'
 endif
 if !exists("g:eskk_marker_jisyo_touroku")
-  let g:eskk_marker_jisyo_touroku = '?'
+    let g:eskk_marker_jisyo_touroku = '?'
 endif
 
 " }}}
