@@ -20,7 +20,7 @@ function! s:run()
         \]
             let func = s:modef(m, f)
             call simpletap#ok(
-            \   simpletap#exists_func(func),
+            \   simpletap#util#really_exists_func(func),
             \   printf("exists '%s'.", func)
             \)
         endfor
