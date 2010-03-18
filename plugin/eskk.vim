@@ -15,9 +15,6 @@ set cpo&vim
 " }}}
 
 
-" Scope Variables {{{
-let s:debug_errmsg = []
-" }}}
 " Global Variables {{{
 
 " Debug
