@@ -66,16 +66,22 @@ endfunction "}}}
 function! eskk#table#define_macro() "{{{
     command!
     \   -buffer -nargs=1
-    \   EskkTableBegin
+    \   TableBegin
     \   call s:cmd_table_begin(<f-args>)
     command!
     \   -buffer
-    \   EskkTableEnd
+    \   TableEnd
     \   call s:cmd_table_end()
     command!
     \   -buffer -nargs=+ -bang
-    \   EskkTableMap
-    \   call s:cmd_table_map(<q-args>, "<bang>")
+    \   Map
+    \   call s:cmd_map(<q-args>, "<bang>")
+endfunction "}}}
+
+function! eskk#table#undefine_macro() "{{{
+    delcommand TableBegin
+    delcommand TableEnd
+    delcommand Map
 endfunction "}}}
 
 function! s:cmd_table_begin(arg) "{{{
@@ -84,9 +90,10 @@ endfunction "}}}
 
 function! s:cmd_table_end() "{{{
     lockvar {s:table_varname()}
+    call eskk#table#undefine_macro()
 endfunction "}}}
 
-function! s:cmd_table_map(arg, bang) "{{{
+function! s:cmd_map(arg, bang) "{{{
     try
         let [lhs, rhs, rest] = s:parse_arg(a:arg)
         return call('eskk#table#map', [lhs, rhs, (a:bang != '' ? 1 : 0), rest])

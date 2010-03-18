@@ -11,250 +11,250 @@ set cpo&vim
 
 call eskk#table#define_macro()
 
-EskkTable rom_to_kata
+TableBegin rom_to_kata
 
-EskkTableMap a ア
-EskkTableMap -rest=b bb ッ
-EskkTableMap ba バ
-EskkTableMap be ベ
-EskkTableMap bi ビ
-EskkTableMap bo ボ
-EskkTableMap bu ブ
-EskkTableMap bya ビャ
-EskkTableMap bye ビェ
-EskkTableMap byi ビィ
-EskkTableMap byo ビョ
-EskkTableMap byu ビュ
-EskkTableMap -rest=c cc ッ
-EskkTableMap cha チャ
-EskkTableMap che チェ
-EskkTableMap chi チ
-EskkTableMap cho チョ
-EskkTableMap chu チュ
-EskkTableMap cya チャ
-EskkTableMap cye チェ
-EskkTableMap cyi チィ
-EskkTableMap cyo チョ
-EskkTableMap cyu チュ
-EskkTableMap -rest=d dd ッ
-EskkTableMap da ダ
-EskkTableMap de デ
-EskkTableMap dha デャ
-EskkTableMap dhe デェ
-EskkTableMap dhi ディ
-EskkTableMap dho デョ
-EskkTableMap dhu デュ
-EskkTableMap di ヂ
-EskkTableMap do ド
-EskkTableMap du ヅ
-EskkTableMap dya ヂャ
-EskkTableMap dye ヂェ
-EskkTableMap dyi ヂィ
-EskkTableMap dyo ヂョ
-EskkTableMap dyu ヂュ
-EskkTableMap e エ
-EskkTableMap -rest=f ff ッ
-EskkTableMap fa ファ
-EskkTableMap fe フェ
-EskkTableMap fi フィ
-EskkTableMap fo フォ
-EskkTableMap fu フ
-EskkTableMap fya フャ
-EskkTableMap fye フェ
-EskkTableMap fyi フィ
-EskkTableMap fyo フョ
-EskkTableMap fyu フュ
-EskkTableMap -rest=g gg ッ
-EskkTableMap ga ガ
-EskkTableMap ge ゲ
-EskkTableMap gi ギ
-EskkTableMap go ゴ
-EskkTableMap gu グ
-EskkTableMap gya ギャ
-EskkTableMap gye ギェ
-EskkTableMap gyi ギィ
-EskkTableMap gyo ギョ
-EskkTableMap gyu ギュ
-EskkTableMap -rest=h hh ッ
-EskkTableMap ha ハ
-EskkTableMap he ヘ
-EskkTableMap hi ヒ
-EskkTableMap ho ホ
-EskkTableMap hu フ
-EskkTableMap hya ヒャ
-EskkTableMap hye ヒェ
-EskkTableMap hyi ヒィ
-EskkTableMap hyo ヒョ
-EskkTableMap hyu ヒュ
-EskkTableMap i イ
-EskkTableMap -rest=j jj ッ
-EskkTableMap ja ジャ
-EskkTableMap je ジェ
-EskkTableMap ji ジ
-EskkTableMap jo ジョ
-EskkTableMap ju ジュ
-EskkTableMap jya ジャ
-EskkTableMap jye ジェ
-EskkTableMap jyi ジィ
-EskkTableMap jyo ジョ
-EskkTableMap jyu ジュ
-EskkTableMap -rest=k kk ッ
-EskkTableMap ka カ
-EskkTableMap ke ケ
-EskkTableMap ki キ
-EskkTableMap ko コ
-EskkTableMap ku ク
-EskkTableMap kya キャ
-EskkTableMap kye キェ
-EskkTableMap kyi キィ
-EskkTableMap kyo キョ
-EskkTableMap kyu キュ
-EskkTableMap -rest=m mm ッ
-EskkTableMap ma マ
-EskkTableMap me メ
-EskkTableMap mi ミ
-EskkTableMap mo モ
-EskkTableMap mu ム
-EskkTableMap mya ミャ
-EskkTableMap mye ミェ
-EskkTableMap myi ミィ
-EskkTableMap myo ミョ
-EskkTableMap myu ミュ
-EskkTableMap n ン
-EskkTableMap n' ン
-EskkTableMap na ナ
-EskkTableMap ne ネ
-EskkTableMap ni ニ
-EskkTableMap nn ン
-EskkTableMap no ノ
-EskkTableMap nu ヌ
-EskkTableMap nya ニャ
-EskkTableMap nye ニェ
-EskkTableMap nyi ニィ
-EskkTableMap nyo ニョ
-EskkTableMap nyu ニュ
-EskkTableMap o オ
-EskkTableMap -rest=p pp ッ
-EskkTableMap pa パ
-EskkTableMap pe ペ
-EskkTableMap pi ピ
-EskkTableMap po ポ
-EskkTableMap pu プ
-EskkTableMap pya ピャ
-EskkTableMap pye ピェ
-EskkTableMap pyi ピィ
-EskkTableMap pyo ピョ
-EskkTableMap pyu ピュ
-EskkTableMap -rest=r rr ッ
-EskkTableMap ra ラ
-EskkTableMap re レ
-EskkTableMap ri リ
-EskkTableMap ro ロ
-EskkTableMap ru ル
-EskkTableMap rya リャ
-EskkTableMap rye リェ
-EskkTableMap ryi リィ
-EskkTableMap ryo リョ
-EskkTableMap ryu リュ
-EskkTableMap -rest=s ss ッ
-EskkTableMap sa サ
-EskkTableMap se セ
-EskkTableMap sha シャ
-EskkTableMap she シェ
-EskkTableMap shi シ
-EskkTableMap sho ショ
-EskkTableMap shu シュ
-EskkTableMap si シ
-EskkTableMap so ソ
-EskkTableMap su ス
-EskkTableMap sya シャ
-EskkTableMap sye シェ
-EskkTableMap syi シィ
-EskkTableMap syo ショ
-EskkTableMap syu シュ
-EskkTableMap -rest=t tt ッ
-EskkTableMap ta タ
-EskkTableMap te テ
-EskkTableMap tha テァ
-EskkTableMap the テェ
-EskkTableMap thi ティ
-EskkTableMap tho テョ
-EskkTableMap thu テュ
-EskkTableMap ti チ
-EskkTableMap to ト
-EskkTableMap tsu ツ
-EskkTableMap tu ツ
-EskkTableMap tya チャ
-EskkTableMap tye チェ
-EskkTableMap tyi チィ
-EskkTableMap tyo チョ
-EskkTableMap tyu チュ
-EskkTableMap u ウ
-EskkTableMap -rest=v vv ッ
-EskkTableMap va ヴァ
-EskkTableMap ve ヴェ
-EskkTableMap vi ヴィ
-EskkTableMap vo ヴォ
-EskkTableMap vu ヴ
-EskkTableMap -rest=w ww ッ
-EskkTableMap wa ワ
-EskkTableMap we ウェ
-EskkTableMap wi ウィ
-EskkTableMap wo ヲ
-EskkTableMap wu ウ
-EskkTableMap -rest=x xx ッ
-EskkTableMap xa ァ
-EskkTableMap xe ェ
-EskkTableMap xi ィ
-EskkTableMap xka ヵ
-EskkTableMap xke ヶ
-EskkTableMap xo ォ
-EskkTableMap xtsu ッ
-EskkTableMap xtu ッ
-EskkTableMap xu ゥ
-EskkTableMap xwa ヮ
-EskkTableMap xwe ヱ
-EskkTableMap xwi ヰ
-EskkTableMap xya ャ
-EskkTableMap xyo ョ
-EskkTableMap xyu ュ
-EskkTableMap -rest=y yy ッ
-EskkTableMap ya ヤ
-EskkTableMap ye イェ
-EskkTableMap yo ヨ
-EskkTableMap yu ユ
-EskkTableMap -rest=z zz ッ
-EskkTableMap z, ‥
-EskkTableMap z- ～
-EskkTableMap z. …
-EskkTableMap z/ ・
-EskkTableMap z[ 『
-EskkTableMap z] 』
-EskkTableMap za ザ
-EskkTableMap ze ゼ
-EskkTableMap zh ←
-EskkTableMap zi ジ
-EskkTableMap zj ↓
-EskkTableMap zk ↑
-EskkTableMap zl →
-EskkTableMap zo ゾ
-EskkTableMap zu ズ
-EskkTableMap zya ジャ
-EskkTableMap zye ジェ
-EskkTableMap zyi ジィ
-EskkTableMap zyo ジョ
-EskkTableMap zyu ジュ
-EskkTableMap - ー
-EskkTableMap : ：
-EskkTableMap ; ；
-EskkTableMap ! ！
-EskkTableMap ? ？
-EskkTableMap [ 「
-EskkTableMap ] 」
-EskkTableMap . 。
-EskkTableMap , 、
+Map a ア
+Map -rest=b bb ッ
+Map ba バ
+Map be ベ
+Map bi ビ
+Map bo ボ
+Map bu ブ
+Map bya ビャ
+Map bye ビェ
+Map byi ビィ
+Map byo ビョ
+Map byu ビュ
+Map -rest=c cc ッ
+Map cha チャ
+Map che チェ
+Map chi チ
+Map cho チョ
+Map chu チュ
+Map cya チャ
+Map cye チェ
+Map cyi チィ
+Map cyo チョ
+Map cyu チュ
+Map -rest=d dd ッ
+Map da ダ
+Map de デ
+Map dha デャ
+Map dhe デェ
+Map dhi ディ
+Map dho デョ
+Map dhu デュ
+Map di ヂ
+Map do ド
+Map du ヅ
+Map dya ヂャ
+Map dye ヂェ
+Map dyi ヂィ
+Map dyo ヂョ
+Map dyu ヂュ
+Map e エ
+Map -rest=f ff ッ
+Map fa ファ
+Map fe フェ
+Map fi フィ
+Map fo フォ
+Map fu フ
+Map fya フャ
+Map fye フェ
+Map fyi フィ
+Map fyo フョ
+Map fyu フュ
+Map -rest=g gg ッ
+Map ga ガ
+Map ge ゲ
+Map gi ギ
+Map go ゴ
+Map gu グ
+Map gya ギャ
+Map gye ギェ
+Map gyi ギィ
+Map gyo ギョ
+Map gyu ギュ
+Map -rest=h hh ッ
+Map ha ハ
+Map he ヘ
+Map hi ヒ
+Map ho ホ
+Map hu フ
+Map hya ヒャ
+Map hye ヒェ
+Map hyi ヒィ
+Map hyo ヒョ
+Map hyu ヒュ
+Map i イ
+Map -rest=j jj ッ
+Map ja ジャ
+Map je ジェ
+Map ji ジ
+Map jo ジョ
+Map ju ジュ
+Map jya ジャ
+Map jye ジェ
+Map jyi ジィ
+Map jyo ジョ
+Map jyu ジュ
+Map -rest=k kk ッ
+Map ka カ
+Map ke ケ
+Map ki キ
+Map ko コ
+Map ku ク
+Map kya キャ
+Map kye キェ
+Map kyi キィ
+Map kyo キョ
+Map kyu キュ
+Map -rest=m mm ッ
+Map ma マ
+Map me メ
+Map mi ミ
+Map mo モ
+Map mu ム
+Map mya ミャ
+Map mye ミェ
+Map myi ミィ
+Map myo ミョ
+Map myu ミュ
+Map n ン
+Map n' ン
+Map na ナ
+Map ne ネ
+Map ni ニ
+Map nn ン
+Map no ノ
+Map nu ヌ
+Map nya ニャ
+Map nye ニェ
+Map nyi ニィ
+Map nyo ニョ
+Map nyu ニュ
+Map o オ
+Map -rest=p pp ッ
+Map pa パ
+Map pe ペ
+Map pi ピ
+Map po ポ
+Map pu プ
+Map pya ピャ
+Map pye ピェ
+Map pyi ピィ
+Map pyo ピョ
+Map pyu ピュ
+Map -rest=r rr ッ
+Map ra ラ
+Map re レ
+Map ri リ
+Map ro ロ
+Map ru ル
+Map rya リャ
+Map rye リェ
+Map ryi リィ
+Map ryo リョ
+Map ryu リュ
+Map -rest=s ss ッ
+Map sa サ
+Map se セ
+Map sha シャ
+Map she シェ
+Map shi シ
+Map sho ショ
+Map shu シュ
+Map si シ
+Map so ソ
+Map su ス
+Map sya シャ
+Map sye シェ
+Map syi シィ
+Map syo ショ
+Map syu シュ
+Map -rest=t tt ッ
+Map ta タ
+Map te テ
+Map tha テァ
+Map the テェ
+Map thi ティ
+Map tho テョ
+Map thu テュ
+Map ti チ
+Map to ト
+Map tsu ツ
+Map tu ツ
+Map tya チャ
+Map tye チェ
+Map tyi チィ
+Map tyo チョ
+Map tyu チュ
+Map u ウ
+Map -rest=v vv ッ
+Map va ヴァ
+Map ve ヴェ
+Map vi ヴィ
+Map vo ヴォ
+Map vu ヴ
+Map -rest=w ww ッ
+Map wa ワ
+Map we ウェ
+Map wi ウィ
+Map wo ヲ
+Map wu ウ
+Map -rest=x xx ッ
+Map xa ァ
+Map xe ェ
+Map xi ィ
+Map xka ヵ
+Map xke ヶ
+Map xo ォ
+Map xtsu ッ
+Map xtu ッ
+Map xu ゥ
+Map xwa ヮ
+Map xwe ヱ
+Map xwi ヰ
+Map xya ャ
+Map xyo ョ
+Map xyu ュ
+Map -rest=y yy ッ
+Map ya ヤ
+Map ye イェ
+Map yo ヨ
+Map yu ユ
+Map -rest=z zz ッ
+Map z, ‥
+Map z- ～
+Map z. …
+Map z/ ・
+Map z[ 『
+Map z] 』
+Map za ザ
+Map ze ゼ
+Map zh ←
+Map zi ジ
+Map zj ↓
+Map zk ↑
+Map zl →
+Map zo ゾ
+Map zu ズ
+Map zya ジャ
+Map zye ジェ
+Map zyi ジィ
+Map zyo ジョ
+Map zyu ジュ
+Map - ー
+Map : ：
+Map ; ；
+Map ! ！
+Map ? ？
+Map [ 「
+Map ] 」
+Map . 。
+Map , 、
 
-EskkTableEnd
+TableEnd
 
 
 
