@@ -278,7 +278,7 @@ function! eskk#filter_key_info(key_info) "{{{
             call call('eskk#default_filter', filter_args)
         else
             call eskk#util#log('calling filter function...')
-            call call(s:get_mode_func('filter_main'), filter_args)
+            call call(s:get_mode_func('filter'), filter_args)
         endif
 
         if type(opt.return) == type("")

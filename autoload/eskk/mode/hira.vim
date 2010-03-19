@@ -20,7 +20,7 @@ function! eskk#mode#hira#cb_handle_key(...) "{{{
 endfunction "}}}
 
 " Filter functions
-function! eskk#mode#hira#filter_main(stash) "{{{
+function! eskk#mode#hira#filter(stash) "{{{
     " TODO Handle special keys registered in a:maptable.
 
     let henkan_phase = a:stash.buftable.get_henkan_phase()
