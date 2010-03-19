@@ -261,12 +261,12 @@ function! eskk#filter_key_info(key_info) "{{{
     \   'redispatch_keys': [],
     \   'return': 0,
     \}
-    let filter_args = [
-    \   a:key_info,
-    \   opt,
-    \   s:buftable,
-    \   s:map,
-    \]
+    let filter_args = [{
+    \   'key_info': a:key_info,
+    \   'option': opt,
+    \   'buftable': s:buftable,
+    \   'map': s:map,
+    \}]
     call s:buftable.set_old_str(s:buftable.get_display_str())
 
     try
@@ -340,25 +340,26 @@ function! eskk#has_default_filter(key_info) "{{{
     \   || type ==# g:eskk#KEY_TYPE_STICKY_KEY
     \   || type ==# g:eskk#KEY_TYPE_BIG_LETTER
 endfunction "}}}
-function! eskk#default_filter(key_info, opt, buftable, maptable) "{{{
-    let [char, type] = [a:key_info.char, a:key_info.type]
+function! eskk#default_filter(stash) "{{{
+    let [char, type] = [a:stash.key_info.char, a:stash.key_info.type]
     if char ==# "\<BS>" || char ==# "\<C-h>"
-        call s:do_backspace(a:key_info, a:opt, a:buftable, a:maptable)
+        call s:do_backspace(stash)
     elseif char ==# "\<CR>"
-        call s:do_enter(a:key_info, a:opt, a:buftable, a:maptable)
+        call s:do_enter(stash)
     elseif type ==# g:eskk#KEY_TYPE_STICKY_KEY
-        return eskk#sticky_key(1, a:key_info)
+        return eskk#sticky_key(1, a:stash.key_info)
     elseif type ==# g:eskk#KEY_TYPE_BIG_LETTER
-        return eskk#sticky_key(1, a:key_info)
+        return eskk#sticky_key(1, a:stash.key_info)
         \    . eskk#filter_key(tolower(char))
     endif
 endfunction "}}}
-function! s:do_backspace(key_info, opt, buftable, ...) "{{{
-    if a:buftable.get_old_str() == ''
-        let a:opt.return = s:BS
+function! s:do_backspace(stash) "{{{
+    let [opt, buftable] = [a:stash.option, a:stash.buftable]
+    if buftable.get_old_str() == ''
+        let opt.return = s:BS
     else
         " Build backspaces to delete previous characters.
-        for buf_str in a:buftable.get_lower_buf_str()
+        for buf_str in buftable.get_lower_buf_str()
             if buf_str.get_rom_str() != ''
                 call buf_str.pop_rom_str()
                 break
@@ -369,10 +370,12 @@ function! s:do_backspace(key_info, opt, buftable, ...) "{{{
         endfor
     endif
 endfunction "}}}
-function! s:do_enter(key_info, opt, buftable, ...) "{{{
-    let phase = s:buftable.get_henkan_phase()
+function! s:do_enter(stash) "{{{
+    let buftable = a:stash.buftable
+    let phase = buftable.get_henkan_phase()
+
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call a:buftable.reset()
+        call buftable.reset()
     else
         throw eskk#error#not_implemented('eskk:')
     endif

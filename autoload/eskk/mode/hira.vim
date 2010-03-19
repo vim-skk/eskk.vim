@@ -20,19 +20,19 @@ function! eskk#mode#hira#cb_handle_key(...) "{{{
 endfunction "}}}
 
 " Filter functions
-function! eskk#mode#hira#filter_main(key_info, opt, buftable, maptable) "{{{
+function! eskk#mode#hira#filter_main(stash) "{{{
     " TODO Handle special keys registered in a:maptable.
 
-    let henkan_phase = a:buftable.get_henkan_phase()
+    let henkan_phase = a:stash.buftable.get_henkan_phase()
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return s:filter_rom_to_hira(a:key_info, a:opt, a:buftable, a:maptable)
+        return s:filter_rom_to_hira(a:stash)
     else
-        return eskk#default_filter(a:key_info, a:opt, a:buftable, a:maptable)
+        return eskk#default_filter(a:stash)
     endif
 endfunction "}}}
-function! s:filter_rom_to_hira(key_info, opt, buftable, maptable) "{{{
-    let char = a:key_info.char
-    let buf_str = a:buftable.get_current_buf_str()
+function! s:filter_rom_to_hira(stash) "{{{
+    let char = a:stash.key_info.char
+    let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
 
     if eskk#table#has_map('rom_to_hira', rom_str)
@@ -47,7 +47,7 @@ function! s:filter_rom_to_hira(key_info, opt, buftable, maptable) "{{{
         " Assumption: 'eskk#table#has_map(def, rest)' returns false.
         let rest = eskk#table#get_rest('rom_to_hira', rom_str, -1)
         if rest !=# -1
-            call add(a:opt.redispatch_keys, rest)
+            call add(a:stash.opt.redispatch_keys, rest)
         endif
         return
 
