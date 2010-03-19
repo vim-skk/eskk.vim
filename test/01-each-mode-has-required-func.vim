@@ -16,7 +16,8 @@ function! s:run()
 
         " 関数のチェック
         for f in [
-        \   'filter_main',
+        \   'filter',
+        \   'cb_handle_key',
         \]
             let func = s:modef(m, f)
             call simpletap#ok(
@@ -27,7 +28,6 @@ function! s:run()
 
         " 変数のチェック
         for v in [
-        \   'handle_all_keys',
         \]
             let varname = 'g:' . s:modef(m, v)
             call simpletap#ok(

@@ -8,10 +8,6 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-" Mode options {{{
-let eskk#mode#hira#handle_all_keys = 0
-" }}}
-
 " Functions {{{
 
 " Callback
