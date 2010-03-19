@@ -82,7 +82,7 @@ function! s:set_up_mappings() "{{{
     call eskk#util#log('set up mappings...')
 
     for key in g:eskk_mapped_key
-        call eskk#track_key(key)
+        call eskk#map_key(key)
     endfor
 endfunction "}}}
 function! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
@@ -93,7 +93,7 @@ function! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
         \       a:rhs
     endfor
 endfunction "}}}
-function! eskk#track_key(char) "{{{
+function! eskk#map_key(char) "{{{
     call s:execute_map(
     \   'l',
     \   '<buffer><expr><silent>',
