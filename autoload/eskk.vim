@@ -343,9 +343,9 @@ endfunction "}}}
 function! eskk#default_filter(stash) "{{{
     let [char, type] = [a:stash.key_info.char, a:stash.key_info.type]
     if char ==# "\<BS>" || char ==# "\<C-h>"
-        call s:do_backspace(stash)
+        call s:do_backspace(a:stash)
     elseif char ==# "\<CR>"
-        call s:do_enter(stash)
+        call s:do_enter(a:stash)
     elseif type ==# g:eskk#KEY_TYPE_STICKY_KEY
         return eskk#sticky_key(1, a:stash.key_info)
     elseif type ==# g:eskk#KEY_TYPE_BIG_LETTER
