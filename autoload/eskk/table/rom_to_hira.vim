@@ -10,7 +10,6 @@ set cpo&vim
 
 
 call eskk#table#define_macro()
-
 TableBegin rom_to_hira
 
 Map a あ
@@ -254,6 +253,7 @@ Map . 。
 Map , 、
 
 TableEnd
+call eskk#table#undefine_macro()
 
 
 " Restore 'cpoptions' {{{

@@ -90,7 +90,6 @@ endfunction "}}}
 
 function! s:cmd_table_end() "{{{
     lockvar {s:table_varname()}
-    call eskk#table#undefine_macro()
 endfunction "}}}
 
 function! s:cmd_map(arg, bang) "{{{

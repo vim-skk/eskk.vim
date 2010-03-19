@@ -10,7 +10,6 @@ set cpo&vim
 
 
 call eskk#table#define_macro()
-
 TableBegin rom_to_kata
 
 Map a ア
@@ -255,6 +254,7 @@ Map . 。
 Map , 、
 
 TableEnd
+call eskk#table#undefine_macro()
 
 
 
