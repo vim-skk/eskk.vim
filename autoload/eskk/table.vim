@@ -8,12 +8,18 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-
-let s:current_table_name = ''
-
 " TODO
 " - Build table in Vim <SID> mapping table.
 " - Make util functions to parse command macro arguments.
+" - OO-ize table
+
+
+
+" Variables {{{
+let s:current_table_name = ''
+let s:table_defs = {}
+" }}}
+
 
 " Functions {{{
 
@@ -57,11 +63,24 @@ function! s:parse_arg(arg) "{{{
     return lhs_rhs + [get(opt, 'rest', '')]
 endfunction "}}}
 
-function! s:table_varname(...) "{{{
-    let name = a:0 != 0 ? a:1 : s:current_table_name
-    return printf('g:eskk#table#%s#definition', name)
+
+function! s:is_mapping_table() "{{{
+    return s:current_table_name != ''
 endfunction "}}}
 
+function! s:load_table(table_name) "{{{
+    call eskk#table#{a:table_name}#load()
+endfunction "}}}
+
+function! s:get_table(table_name, ...) "{{{
+    call s:load_table(a:table_name)
+
+    return call('get', [s:table_defs, a:table_name] + a:000)
+endfunction "}}}
+
+function! s:get_current_table(...) "{{{
+    return call('s:get_table', [s:current_table_name] + a:000)
+endfunction "}}}
 
 
 function! eskk#table#define_macro() "{{{
@@ -104,14 +123,13 @@ endfunction "}}}
 
 function! eskk#table#table_begin(name) "{{{
     let s:current_table_name = a:name
-    let varname = s:table_varname()
-    if !exists(varname)
-        let {varname} = {}
+    if !has_key(s:table_defs, s:current_table_name)
+        let s:table_defs[s:current_table_name] = {}
     endif
 endfunction "}}}
 
 function! eskk#table#table_end() "{{{
-    lockvar {s:table_varname()}
+    lockvar s:table_defs[s:current_table_name]
     let s:current_table_name = ''
 endfunction "}}}
 
@@ -119,23 +137,28 @@ endfunction "}}}
 function! eskk#table#map(lhs, rhs, ...) "{{{
     let [bang, rest] = eskk#util#get_args(a:000, 0, '')
 
-    if s:current_table_name == '' | return | endif
-    let def = {s:table_varname()}
+    if !s:is_mapping_table() | return | endif
 
     " a:lhs is already defined and not banged.
-    if has_key(def, a:lhs) && !bang
-        return
+    if !eskk#table#has_map(s:current_table_name, a:lhs) || bang
+        call s:create_map(a:lhs, a:rhs, rest)
     endif
-    let def[a:lhs] = {'map_to': a:rhs}
+endfunction "}}}
 
-    if rest != ''
-        let def[a:lhs].rest = rest
+function! s:create_map(lhs, rhs, rest) "{{{
+    let def = s:get_current_table()
+    let def[a:lhs] = {'map_to': a:rhs}
+    if a:rest != ''
+        " TODO Include 'rest' always.
+        let def[a:lhs].rest = a:rest
     endif
 endfunction "}}}
 
 function! eskk#table#unmap(lhs) "{{{
-    if s:current_table_name == '' | return | endif
-    unlet {s:table_varname()}[a:lhs]
+    if !s:is_mapping_table() | return | endif
+    if eskk#table#has_map(s:current_table_name, a:lhs)
+        unlet s:table_defs[s:current_table_name][a:lhs]
+    endif
 endfunction "}}}
 
 
@@ -158,27 +181,39 @@ function! eskk#table#has_candidates(...) "{{{
 endfunction "}}}
 
 function! eskk#table#get_candidates(table_name, str_buf) "{{{
+    call s:load_table(a:table_name)
+
     if empty(a:str_buf)
         throw eskk#error#internal_error('eskk: table:')
     endif
 
-    let def = {s:table_varname(a:table_name)}
-    return !empty(
-    \   filter(
-    \       keys(def),
-    \       'stridx(v:val, a:str_buf) == 0'
-    \   )
-    \)
+    let no_table = {}
+    let def = s:get_table(a:table_name, no_table)
+    if def is no_table
+        return no_table
+    else
+        return filter(
+        \   keys(def),
+        \   'stridx(v:val, a:str_buf) == 0'
+        \)
+    endif
 endfunction "}}}
 
 
+function! eskk#table#has_table(name) "{{{
+    return s:get_table(a:name, -1) !=# -1
+endfunction "}}}
+
 function! eskk#table#has_map(table_name, lhs) "{{{
-    let def = {s:table_varname(a:table_name)}
-    return has_key(def, a:lhs)
+    call s:load_table(a:table_name)
+
+    return eskk#util#has_key_f(s:table_defs, [a:table_name, a:lhs])
 endfunction "}}}
 
 
 function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
+    call s:load_table(a:table_name)
+
     if !eskk#table#has_map(a:table_name, a:lhs)
         if a:0 == 0
             throw eskk#error#argument_error('eskk: table:')
@@ -186,19 +221,19 @@ function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    let def = {s:table_varname(a:table_name)}
-    return def[a:lhs].map_to
+    return s:table_defs[a:table_name][a:lhs].map_to
 endfunction "}}}
 
 
 function! eskk#table#has_rest(table_name, lhs) "{{{
-    let def = {s:table_varname(a:table_name)}
+    call s:load_table(a:table_name)
 
-    return has_key(def, a:lhs)
-    \   && has_key(def[a:lhs], 'rest')
+    return eskk#util#has_key_f(s:table_defs, [a:table_name, a:lhs, 'rest'])
 endfunction "}}}
 
 function! eskk#table#get_rest(table_name, lhs, ...) "{{{
+    call s:load_table(a:table_name)
+
     if !eskk#table#has_rest(a:table_name, a:lhs)
         if a:0 == 0
             throw eskk#error#argument_error('eskk: table:')
@@ -206,8 +241,7 @@ function! eskk#table#get_rest(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    let def = {s:table_varname(a:table_name)}
-    return def[a:lhs].rest
+    return s:table_defs[a:table_name][a:lhs].rest
 endfunction "}}}
 
 " }}}
