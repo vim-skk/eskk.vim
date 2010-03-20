@@ -43,7 +43,7 @@ function! s:parse_arg(arg) "{{{
             if opt_name ==# 'rest'
                 let opt.rest = opt_value
             else
-                throw printf("eskk: EskkTableMap: unknown option '%s'.", opt_name)
+                throw eskk#error#user_error('eskk', printf("unknown option '%s'.", opt_name))
             endif
         else
             let arg = eskk#util#unget_arg(arg, a)
@@ -52,18 +52,27 @@ function! s:parse_arg(arg) "{{{
     endwhile
 
     " Parse arguments.
-    let lhs_rhs = []
+    let lhs = ''
+    let rhs = ''
     while arg != ''
         let arg = eskk#util#skip_spaces(arg)
         let [a, arg] = eskk#util#get_arg(arg)
-        call add(lhs_rhs, a)
+        if lhs == ''
+            let lhs = a
+        else
+            let rhs = a
+        endif
     endwhile
-    if len(lhs_rhs) != 2
-        call eskk#util#logf('lhs_rhs = %s', string(lhs_rhs))
-        throw 'eskk: EskkTableMap [-rest=...] lhs rhs'
+    if lhs == '' && rhs == ''
+        call eskk#util#logf('lhs = %s, rhs = %s', lhs, rhs)
+        throw eskk#error#user_error('eskk', 'Map [-rest=...] lhs rhs')
     endif
 
-    return lhs_rhs + [get(opt, 'rest', '')]
+    return {
+    \   'lhs': lhs,
+    \   'rhs': rhs,
+    \   'rest': get(opt, 'rest', ''),
+    \}
 endfunction "}}}
 
 
@@ -72,6 +81,7 @@ function! s:is_mapping_table() "{{{
 endfunction "}}}
 
 function! s:load_table(table_name) "{{{
+    " Lazy loading.
     call eskk#table#{a:table_name}#load()
 endfunction "}}}
 
@@ -116,12 +126,9 @@ function! s:cmd_table_end() "{{{
 endfunction "}}}
 
 function! s:cmd_map(arg, bang) "{{{
-    try
-        let [lhs, rhs, rest] = s:parse_arg(a:arg)
-        return call('eskk#table#map', [lhs, rhs, (a:bang != '' ? 1 : 0), rest])
-    catch /^eskk:/
-        call eskk#util#warn(v:exception)
-    endtry
+    let parsed = s:parse_arg(a:arg)
+    let [lhs, rhs, rest] = [parsed.lhs, parsed.rhs, parsed.rest]
+    return call('eskk#table#map', [s:current_table_name, (a:bang != '' ? 1 : 0), lhs, rhs, rest])
 endfunction "}}}
 
 function! eskk#table#table_begin(name) "{{{
@@ -137,13 +144,13 @@ function! eskk#table#table_end() "{{{
 endfunction "}}}
 
 " Force overwrite if a:bang is true.
-function! eskk#table#map(lhs, rhs, ...) "{{{
-    let [bang, rest] = eskk#util#get_args(a:000, 0, '')
+function! eskk#table#map(table_name, force, lhs, rhs, ...) "{{{
+    let [rest] = eskk#util#get_args(a:000, '')
 
     if !s:is_mapping_table() | return | endif
 
     " a:lhs is already defined and not banged.
-    if !eskk#table#has_map(s:current_table_name, a:lhs) || bang
+    if !eskk#table#has_map(a:table_name, a:lhs) || a:force
         call s:create_map(a:lhs, a:rhs, rest)
     endif
 endfunction "}}}
@@ -157,10 +164,15 @@ function! s:create_map(lhs, rhs, rest) "{{{
     endif
 endfunction "}}}
 
-function! eskk#table#unmap(lhs) "{{{
+function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
+    let [rest] = eskk#util#get_args(a:000, '')
+
     if !s:is_mapping_table() | return | endif
-    if eskk#table#has_map(s:current_table_name, a:lhs)
-        unlet s:table_defs[s:current_table_name][a:lhs]
+
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, a:lhs])
+        unlet s:table_defs[a:table_name][a:lhs]
+    elseif !a:silent
+        throw eskk#error#user_error('eskk', 'No table mapping.')
     endif
 endfunction "}}}
 
