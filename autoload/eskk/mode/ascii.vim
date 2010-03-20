@@ -18,8 +18,8 @@ function! eskk#mode#ascii#cb_handle_key(key_info, ...) "{{{
 endfunction "}}}
 
 " Filter function
-function! eskk#mode#ascii#filter(key_info, opt, ...) "{{{
-    let a:opt.return = a:key_info.char
+function! eskk#mode#ascii#filter(stash) "{{{
+    let a:opt.return = a:stash.key_info.char
 endfunction "}}}
 
 
