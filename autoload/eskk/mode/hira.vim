@@ -8,6 +8,10 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+" Variables {{{
+let s:rom_to_hira = eskk#table#new('rom_to_hira')
+" }}}
+
 " Functions {{{
 
 " Callback
@@ -32,23 +36,23 @@ function! s:filter_rom_to_hira(stash) "{{{
     let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
 
-    if eskk#table#has_map('rom_to_hira', rom_str)
+    if s:rom_to_hira.has_map(rom_str)
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
 
         call buf_str.set_filter_str(
-        \   eskk#table#get_map_to('rom_to_hira', rom_str)
+        \   s:rom_to_hira.get_map_to(rom_str)
         \)
         call buf_str.clear_rom_str()
 
-        " Assumption: 'eskk#table#has_map(def, rest)' returns false.
-        let rest = eskk#table#get_rest('rom_to_hira', rom_str, -1)
+        let rest = s:rom_to_hira.get_rest(rom_str, -1)
+        " Assumption: 's:rom_to_hira.has_map(rest)' returns false here.
         if rest !=# -1
             call add(a:stash.opt.redispatch_keys, rest)
         endif
         return
 
-    elseif eskk#table#has_candidates('rom_to_hira', rom_str)
+    elseif s:rom_to_hira.has_candidates(rom_str)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
         call buf_str.push_rom_str(char)
