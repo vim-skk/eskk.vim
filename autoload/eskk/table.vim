@@ -8,6 +8,9 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+" NOTE: Argument for table's name must be a:table_name.
+" Because of readability to call s:load_table().
+
 " TODO
 " - Build table in Vim <SID> mapping table.
 " - Make util functions to parse command macro arguments.
