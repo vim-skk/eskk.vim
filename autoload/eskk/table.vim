@@ -109,12 +109,17 @@ function! eskk#table#define_macro() "{{{
     \   -buffer -nargs=+ -bang
     \   Map
     \   call s:cmd_map(<q-args>, "<bang>")
+    command!
+    \   -buffer -nargs=+ -bang
+    \   Unmap
+    \   call s:cmd_unmap(<q-args>, "<bang>")
 endfunction "}}}
 
 function! eskk#table#undefine_macro() "{{{
     delcommand TableBegin
     delcommand TableEnd
     delcommand Map
+    delcommand Unmap
 endfunction "}}}
 
 function! s:cmd_table_begin(arg) "{{{
@@ -129,6 +134,12 @@ function! s:cmd_map(arg, bang) "{{{
     let parsed = s:parse_arg(a:arg)
     let [lhs, rhs, rest] = [parsed.lhs, parsed.rhs, parsed.rest]
     return call('eskk#table#map', [s:current_table_name, (a:bang != '' ? 1 : 0), lhs, rhs, rest])
+endfunction "}}}
+
+function! s:cmd_unmap(arg, bang) "{{{
+    let parsed = s:parse_arg(a:arg)
+    let [lhs, rhs, rest] = [parsed.lhs, parsed.rhs, parsed.rest]
+    return call('eskk#table#unmap', [s:current_table_name, (a:bang != '' ? 1 : 0), lhs, rest])
 endfunction "}}}
 
 function! eskk#table#table_begin(name) "{{{
