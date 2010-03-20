@@ -280,6 +280,52 @@ endfunction "}}}
 " }}}
 
 
+" OO interface {{{
+let s:objective = {}
+
+function! eskk#table#new(table_name) "{{{
+    call s:load_table(a:table_name)
+
+    let obj = deepcopy(s:objective)
+    let obj.table_name = a:table_name
+
+    return obj
+endfunction "}}}
+
+
+" I need meta programming in Vim script!!
+
+function! s:objective.has_candidates(...) dict "{{{
+    return call('eskk#table#has_candidates', [self.table_name] + a:000)
+endfunction "}}}
+
+function! s:objective.get_candidates(...) dict "{{{
+    return call('eskk#table#get_candidates', [self.table_name] + a:000)
+endfunction "}}}
+
+function! s:objective.has_map(...) dict "{{{
+    return call('eskk#table#has_map', [self.table_name] + a:000)
+endfunction "}}}
+
+function! s:objective.get_map_to(...) dict "{{{
+    return call('eskk#table#get_map_to', [self.table_name] + a:000)
+endfunction "}}}
+
+function! s:objective.has_rest(...) dict "{{{
+    return call('eskk#table#has_rest', [self.table_name] + a:000)
+endfunction "}}}
+
+function! s:objective.get_rest(...) dict "{{{
+    return call('eskk#table#get_rest', [self.table_name] + a:000)
+endfunction "}}}
+
+
+lockvar s:objective
+" }}}
+
+" }}}
+
+
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
 " }}}
