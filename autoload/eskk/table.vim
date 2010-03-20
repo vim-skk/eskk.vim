@@ -86,11 +86,11 @@ function! eskk#table#undefine_macro() "{{{
 endfunction "}}}
 
 function! s:cmd_table_begin(arg) "{{{
-    return eskk#table#table_name(a:arg)
+    return eskk#table#table_begin(a:arg)
 endfunction "}}}
 
 function! s:cmd_table_end() "{{{
-    lockvar {s:table_varname()}
+    return eskk#table#table_end()
 endfunction "}}}
 
 function! s:cmd_map(arg, bang) "{{{
@@ -102,12 +102,17 @@ function! s:cmd_map(arg, bang) "{{{
     endtry
 endfunction "}}}
 
-function! eskk#table#table_name(name) "{{{
+function! eskk#table#table_begin(name) "{{{
     let s:current_table_name = a:name
     let varname = s:table_varname()
     if !exists(varname)
         let {varname} = {}
     endif
+endfunction "}}}
+
+function! eskk#table#table_end() "{{{
+    lockvar {s:table_varname()}
+    let s:current_table_name = ''
 endfunction "}}}
 
 " Force overwrite if a:bang is true.
