@@ -13,6 +13,7 @@ let s:current_table_name = ''
 
 " TODO
 " - Build table in Vim <SID> mapping table.
+" - Make util functions to parse command macro arguments.
 
 " Functions {{{
 
