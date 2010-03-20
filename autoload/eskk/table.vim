@@ -96,6 +96,8 @@ function! s:get_current_table(...) "{{{
 endfunction "}}}
 
 
+" Autoload functions for writing table. {{{
+
 function! eskk#table#define_macro() "{{{
     command!
     \   -buffer -nargs=1
@@ -187,26 +189,31 @@ function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
     endif
 endfunction "}}}
 
+" }}}
 
-" TODO
-" Current implementation is smart but heavy.
-" Make table like this?
-" 's': {
-"   'a': {'map_to': 'さ'},
-"
-"   .
-"   .
-"   .
-"
-"   'y': {'a': {'map_to': 'しゃ'}}
-" }
-" But this uses a lot of memory.
-"
+
+" Autoload functions for mode. {{{
+
 function! eskk#table#has_candidates(...) "{{{
     return !empty(call('eskk#table#get_candidates', a:000))
 endfunction "}}}
 
 function! eskk#table#get_candidates(table_name, str_buf) "{{{
+    " TODO
+    " Current implementation is smart but heavy.
+    " Make table like this?
+    " 's': {
+    "   'a': {'map_to': 'さ'},
+    "
+    "   .
+    "   .
+    "   .
+    "
+    "   'y': {'a': {'map_to': 'しゃ'}}
+    " }
+    " But this uses a lot of memory.
+    "
+
     call s:load_table(a:table_name)
 
     if empty(a:str_buf)
