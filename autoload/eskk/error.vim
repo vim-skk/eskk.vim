@@ -19,6 +19,7 @@ function! s:make_error(what, from, ...) "{{{
 endfunction "}}}
 
 
+
 function! eskk#error#internal_error(from, ...) "{{{
     return call('s:make_error', ['internal error', a:from] + a:000)
 endfunction "}}}
@@ -42,6 +43,13 @@ endfunction "}}}
 " This is only used from eskk#util#assert().
 function! eskk#error#assertion_failure(from, ...) "{{{
     return call('s:make_error', ['assertion failed', a:from] + a:000)
+endfunction "}}}
+
+
+
+function! eskk#error#user_error(from, msg) "{{{
+    " Return simple message.
+    return printf('%s: %s', a:from, a:msg)
 endfunction "}}}
 " }}}
 
