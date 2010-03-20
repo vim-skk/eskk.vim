@@ -17,7 +17,7 @@ endfunction "}}}
 
 " Filter functions
 function! eskk#mode#hira#filter(stash) "{{{
-    " TODO Handle special keys registered in a:maptable.
+    " TODO Handle special keys registered in maptable.
 
     let henkan_phase = a:stash.buftable.get_henkan_phase()
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -26,6 +26,7 @@ function! eskk#mode#hira#filter(stash) "{{{
         return eskk#default_filter(a:stash)
     endif
 endfunction "}}}
+
 function! s:filter_rom_to_hira(stash) "{{{
     let char = a:stash.key_info.char
     let buf_str = a:stash.buftable.get_current_buf_str()
@@ -33,7 +34,7 @@ function! s:filter_rom_to_hira(stash) "{{{
 
     if eskk#table#has_map('rom_to_hira', rom_str)
         " Match!
-        call eskk#util#log('match!')
+        call eskk#util#logf('%s - match!', rom_str)
 
         call buf_str.set_filter_str(
         \   eskk#table#get_map_to('rom_to_hira', rom_str)
@@ -49,14 +50,14 @@ function! s:filter_rom_to_hira(stash) "{{{
 
     elseif eskk#table#has_candidates('rom_to_hira', rom_str)
         " Has candidates but not match.
-        call eskk#util#log('wait for a next key.')
+        call eskk#util#logf('%s - wait for a next key.', rom_str)
         call buf_str.push_rom_str(char)
         return
 
     else
         " No candidates.
         " Remove rom_str[-2].
-        call eskk#util#log('no candidates.')
+        call eskk#util#logf('%s - no candidates.', rom_str)
         call buf_str.pop_rom_str()
         return
     endif
