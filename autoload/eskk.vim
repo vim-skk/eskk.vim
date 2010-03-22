@@ -314,8 +314,6 @@ function! eskk#filter_key_info(key_info) "{{{
         return a:key_info.char
 
     finally
-        call s:buftable.finalize()
-
         for Fn in opt.finalize_fn
             call call(Fn, [])
         endfor

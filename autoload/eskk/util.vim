@@ -219,6 +219,12 @@ function! eskk#util#assert(cond, ...) "{{{
         throw call('eskk#error#assertion_failure', ['eskk: util:'] + a:000)
     endif
 endfunction "}}}
+
+" NOTE: Return value may be Funcref.
+function! eskk#util#get_local_func(funcname, sid) "{{{
+    " :help <SID>
+    return printf('<SNR>%d_%s', a:sid, a:funcname)
+endfunction "}}}
 " }}}
 
 

@@ -14,6 +14,11 @@ let s:rom_to_hira = eskk#table#new('rom_to_hira')
 
 " Functions {{{
 
+" :help <SID>
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+
 " Callback
 function! eskk#mode#hira#cb_handle_key(...) "{{{
     return 0
@@ -56,6 +61,20 @@ function! s:filter_rom_to_hira(stash) "{{{
         if rest !=# -1
             call add(a:stash.opt.redispatch_keys, rest)
         endif
+
+        " Clear filtered string when eskk#filter_key()'s finalizing.
+        let s:buftable = a:stash.buftable
+        function! s:finalize()
+            if s:buftable._henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = s:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+
+        call add(
+        \   a:stash.option.finalize_fn,
+        \   eskk#util#get_local_func('finalize', s:SID())
+        \)
 
         return
 

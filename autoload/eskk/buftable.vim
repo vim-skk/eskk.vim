@@ -130,14 +130,6 @@ function! s:buftable.reset() dict "{{{
     endfor
 endfunction "}}}
 
-" This is called from dispatch function.
-function! s:buftable.finalize() dict "{{{
-    if self._henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        let buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-        call buf_str.clear_filter_str()
-    endif
-endfunction "}}}
-
 
 function! s:buftable.get_buf_str(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase, "eskk: buftable:")
