@@ -40,16 +40,23 @@ function! s:filter_rom_to_hira(stash) "{{{
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
 
+        " Set filtered string.
         call buf_str.set_filter_str(
         \   s:rom_to_hira.get_map_to(rom_str)
         \)
         call buf_str.clear_rom_str()
 
+        " Set rest string.
+        "
+        " NOTE:
+        " rest must not have multibyte string.
+        " rest is for rom string.
         let rest = s:rom_to_hira.get_rest(rom_str, -1)
         " Assumption: 's:rom_to_hira.has_map(rest)' returns false here.
         if rest !=# -1
             call add(a:stash.opt.redispatch_keys, rest)
         endif
+
         return
 
     elseif s:rom_to_hira.has_candidates(rom_str)
