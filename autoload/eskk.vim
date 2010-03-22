@@ -260,6 +260,7 @@ function! eskk#filter_key_info(key_info) "{{{
     let opt = {
     \   'redispatch_keys': [],
     \   'return': 0,
+    \   'finalize_fn': [],
     \}
     let filter_args = [{
     \   'key_info': a:key_info,
@@ -314,6 +315,10 @@ function! eskk#filter_key_info(key_info) "{{{
 
     finally
         call s:buftable.finalize()
+
+        for Fn in opt.finalize_fn
+            call call(Fn, [])
+        endfor
     endtry
 endfunction "}}}
 function! eskk#create_key_info(char) "{{{
