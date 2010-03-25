@@ -59,7 +59,7 @@ function! s:filter_rom_to_hira(stash) "{{{
         let rest = s:rom_to_hira.get_rest(rom_str, -1)
         " Assumption: 's:rom_to_hira.has_map(rest)' returns false here.
         if rest !=# -1
-            call add(a:stash.opt.redispatch_keys, rest)
+            call add(a:stash.option.redispatch_keys, rest)
         endif
 
         " Clear filtered string when eskk#filter_key()'s finalizing.
