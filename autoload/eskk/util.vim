@@ -225,6 +225,23 @@ function! eskk#util#get_local_func(funcname, sid) "{{{
     " :help <SID>
     return printf('<SNR>%d_%s', a:sid, a:funcname)
 endfunction "}}}
+
+function! eskk#util#setbufline(expr, lnum, line) "{{{
+    let [cur_bufnr, expr_bufnr] = [bufnr('%'), bufnr(a:expr)]
+    let [cur_bufhidden, expr_bufhidden] = [getbufvar('%', '&bufhidden'), getbufvar(a:expr, '&bufhidden')]
+    call setbufvar('%', '&bufhidden', 'hide')
+    call setbufvar(a:expr, '&bufhidden', 'hide')
+    try
+        if cur_bufnr != expr_bufnr
+            execute expr_bufnr . 'buffer'
+        endif
+        return setline(a:lnum, a:line)
+    finally
+        execute cur_bufnr . 'buffer'
+        call setbufvar('%', '&bufhidden', cur_bufhidden)
+        call setbufvar(a:expr, '&bufhidden', expr_bufhidden)
+    endtry
+endfunction "}}}
 " }}}
 
 
