@@ -292,8 +292,13 @@ function! eskk#filter_key_info(key_info) "{{{
 
     catch
         " TODO Show v:exception only once in current mode.
+        "
+        " sleep 1
+        "
         call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
-        sleep 1
+        call eskk#util#warn('--- exception ---')
+        call eskk#util#warnf('v:exception: %s', v:exception)
+        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
         call eskk#util#warn('--- buftable ---')
         for phase in s:buftable.get_all_phases()
             let buf_str = s:buftable.get_buf_str(phase)
@@ -305,9 +310,6 @@ function! eskk#filter_key_info(key_info) "{{{
         call eskk#util#warn('--- key_info ---')
         call eskk#util#warnf('char: %s', a:key_info.char)
         call eskk#util#warnf('type: %d', a:key_info.type)
-        call eskk#util#warn('--- exception ---')
-        call eskk#util#warnf('v:exception: %s', v:exception)
-        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
         call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
 
         call s:buftable.reset()
