@@ -10,8 +10,8 @@ set cpo&vim
 
 
 " Callback
-function! eskk#mode#ascii#cb_handle_key(key_info, ...) "{{{
-    let c = a:key_info.char
+function! eskk#mode#ascii#cb_handle_key(stash) "{{{
+    let c = a:stash.key_info.char
     return c =~# '^[a-zA-Z0-9]$'
     \   || c =~# '^[\-^\\!"#$%&''()=~|]$'
     \   || c =~# '^[@\[;:\],./`{+*}<>?_]$'

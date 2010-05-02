@@ -20,7 +20,7 @@ function! s:SID() "{{{
 endfunction "}}}
 
 " Callback
-function! eskk#mode#hira#cb_handle_key(...) "{{{
+function! eskk#mode#hira#cb_handle_key(stash) "{{{
     return 0
 endfunction "}}}
 
