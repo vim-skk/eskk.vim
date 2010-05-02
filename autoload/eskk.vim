@@ -346,6 +346,8 @@ function! eskk#has_default_filter(key_info) "{{{
     \   || type ==# g:eskk#KEY_TYPE_BIG_LETTER
 endfunction "}}}
 function! eskk#default_filter(stash) "{{{
+    call eskk#util#log('eskk#default_filter()')
+
     let [char, type] = [a:stash.key_info.char, a:stash.key_info.type]
     if char ==# "\<BS>" || char ==# "\<C-h>"
         call s:do_backspace(a:stash)
@@ -356,6 +358,8 @@ function! eskk#default_filter(stash) "{{{
     elseif type ==# g:eskk#KEY_TYPE_BIG_LETTER
         return eskk#sticky_key(1, a:stash.key_info)
         \    . eskk#filter_key(tolower(char))
+    else
+        let a:stash.option.return = a:stash.key_info.char
     endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
