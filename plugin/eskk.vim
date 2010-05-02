@@ -25,6 +25,17 @@ if !exists('g:eskk_debug_wait_ms')
     let g:eskk_debug_wait_ms = 500
 endif
 
+" Dictionary
+if !exists("g:eskk_dictionary")
+  let g:eskk_dictionary = "~/.skk-jisyo"
+endif
+if !exists("g:eskk_backup_dictionary")
+  let g:eskk_backup_dictionary = g:eskk_dictionary . ".BAK"
+endif
+if !exists("g:eskk_large_dictionary")
+  let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
+endif
+
 " Mappings
 if !exists('g:eskk_no_default_mappings')
     let g:eskk_no_default_mappings = 0
