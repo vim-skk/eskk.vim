@@ -88,7 +88,7 @@ endfunction "}}}
 function! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
     for mode in split(a:modes, '\zs')
         execute printf('%s%smap', mode, (a:remap_p ? '' : 'nore'))
-        \       a:options
+        \       '<buffer>' . a:options
         \       a:lhs
         \       a:rhs
     endfor
