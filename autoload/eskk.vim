@@ -161,7 +161,7 @@ function! s:step_henkan_phase(buftable) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return 0    " failed.
     else
-        throw eskk#internal_error('eskk:', '')
+        throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
@@ -378,43 +378,40 @@ function! s:do_enter(stash) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call buftable.reset()
     else
-        throw eskk#not_implemented_error('eskk:')
+        throw eskk#not_implemented_error(['eskk'])
     endif
 endfunction "}}}
 
 
 
 " Errors
-function! s:make_error(what, from, ...) "{{{
-    if a:0 == 0
-        return join([a:from, a:what], ' ')
-    else
-        return join([a:from, a:what . ':', a:1], ' ')
-    endif
+function! s:make_error(from, ...) "{{{
+    return join(a:from, ': ') . ' - ' . join(a:000, ': ')
 endfunction "}}}
 
 function! eskk#internal_error(from, ...) "{{{
-    return call('s:make_error', ['internal error', a:from] + a:000)
+    return s:make_error(a:from, ['internal error'] + a:000)
 endfunction "}}}
 function! eskk#not_implemented_error(from, ...) "{{{
-    return call('s:make_error', ['not implemented', a:from] + a:000)
+    return s:make_error(a:from, ['not implemented'] + a:000)
 endfunction "}}}
 function! eskk#never_reached_error(from, ...) "{{{
-    return call('s:make_error', ['this block will be never reached', a:from] + a:000)
+    return s:make_error(a:from, ['this block will be never reached'] + a:000)
 endfunction "}}}
 function! eskk#out_of_idx_error(from, ...) "{{{
-    return call('s:make_error', ['out of index', a:from] + a:000)
+    return s:make_error(a:from, ['out of index'] + a:000)
 endfunction "}}}
 function! eskk#parse_error(from, ...) "{{{
-    return call('s:make_error', [':map parse error', a:from] + a:000)
+    return s:make_error(a:from, [':map parse error'] + a:000)
 endfunction "}}}
 function! eskk#assertion_failure_error(from, ...) "{{{
     " This is only used from eskk#util#assert().
-    return call('s:make_error', ['assertion failed', a:from] + a:000)
+    return s:make_error(a:from, ['assertion failed'] + a:000)
 endfunction "}}}
 function! eskk#user_error(from, msg) "{{{
     " Return simple message.
-    return printf('%s: %s', a:from, a:msg)
+    " TODO Omit a:from to simplify message?
+    return printf('%s: %s', join(a:from, ': '), a:msg)
 endfunction "}}}
 " }}}
 

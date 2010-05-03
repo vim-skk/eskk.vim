@@ -229,7 +229,7 @@ endfunction "}}}
 
 function! s:validate_table_idx(table, henkan_phase, msg) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
-        throw eskk#out_of_idx_error("eskk: buftable:")
+        throw eskk#out_of_idx_error(["eskk", "buftable"])
     endif
 endfunction "}}}
 
