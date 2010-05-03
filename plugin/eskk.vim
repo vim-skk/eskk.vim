@@ -81,13 +81,21 @@ endif
 " Mappings {{{
 
 noremap! <expr> <Plug>(eskk-enable)     eskk#enable()
+lnoremap <expr> <Plug>(eskk-enable)     eskk#enable()
+
 noremap! <expr> <Plug>(eskk-disable)    eskk#disable()
+lnoremap <expr> <Plug>(eskk-disable)    eskk#disable()
+
 noremap! <expr> <Plug>(eskk-toggle)     eskk#toggle()
+lnoremap <expr> <Plug>(eskk-toggle)     eskk#toggle()
+
 lnoremap <expr> <Plug>(eskk-sticky-key) eskk#sticky_key(0, {})
+
 lnoremap <expr> <Plug>(eskk-henkan-key) eskk#henkan_key(0, {})
 
 if !g:eskk_no_default_mappings
     map! <C-j>   <Plug>(eskk-toggle)
+    lmap <C-j>   <Plug>(eskk-toggle)
     lmap ;       <Plug>(eskk-sticky-key)
     lmap <Space> <Plug>(eskk-henkan-key)
 endif

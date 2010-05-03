@@ -72,6 +72,12 @@ function! eskk#map_key(char) "{{{
         return
     elseif eskk#is_sticky_key(a:char)
         return
+    elseif maparg(a:char, 'l') ==? '<plug>(eskk-enable)'
+        return
+    elseif maparg(a:char, 'l') ==? '<plug>(eskk-disable)'
+        return
+    elseif maparg(a:char, 'l') ==? '<plug>(eskk-toggle)'
+        return
     endif
 
     call s:execute_map(
