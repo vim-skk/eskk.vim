@@ -385,28 +385,28 @@ endfunction "}}}
 
 
 " Errors
-function! s:make_error(from, ...) "{{{
+function! s:build_error(from, ...) "{{{
     return join(a:from, ': ') . ' - ' . join(a:000, ': ')
 endfunction "}}}
 
 function! eskk#internal_error(from, ...) "{{{
-    return s:make_error(a:from, ['internal error'] + a:000)
+    return s:build_error(a:from, ['internal error'] + a:000)
 endfunction "}}}
 function! eskk#not_implemented_error(from, ...) "{{{
-    return s:make_error(a:from, ['not implemented'] + a:000)
+    return s:build_error(a:from, ['not implemented'] + a:000)
 endfunction "}}}
 function! eskk#never_reached_error(from, ...) "{{{
-    return s:make_error(a:from, ['this block will be never reached'] + a:000)
+    return s:build_error(a:from, ['this block will be never reached'] + a:000)
 endfunction "}}}
 function! eskk#out_of_idx_error(from, ...) "{{{
-    return s:make_error(a:from, ['out of index'] + a:000)
+    return s:build_error(a:from, ['out of index'] + a:000)
 endfunction "}}}
 function! eskk#parse_error(from, ...) "{{{
-    return s:make_error(a:from, [':map parse error'] + a:000)
+    return s:build_error(a:from, [':map parse error'] + a:000)
 endfunction "}}}
 function! eskk#assertion_failure_error(from, ...) "{{{
     " This is only used from eskk#util#assert().
-    return s:make_error(a:from, ['assertion failed'] + a:000)
+    return s:build_error(a:from, ['assertion failed'] + a:000)
 endfunction "}}}
 function! eskk#user_error(from, msg) "{{{
     " Return simple message.
