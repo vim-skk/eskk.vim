@@ -42,8 +42,7 @@ endif
 " Functions {{{
 
 " Initialize/Mappings
-function! eskk#map_key(key) "{{{
-    " Assumption: a:key must be '<Bar>' not '|'.
+function! s:is_skip_key(key) "{{{
     let char = eskk#util#eval_key(a:key)
 
     if eskk#is_henkan_key(char)
@@ -55,6 +54,13 @@ function! eskk#map_key(key) "{{{
     elseif maparg(char, 'l') ==? '<plug>(eskk-disable)'
         return
     elseif maparg(char, 'l') ==? '<plug>(eskk-toggle)'
+        return
+    endif
+endfunction "}}}
+function! eskk#map_key(key) "{{{
+    " Assumption: a:key must be '<Bar>' not '|'.
+
+    if s:is_skip_key(a:key)
         return
     endif
 
@@ -78,6 +84,12 @@ function! eskk#map_key(key) "{{{
     \   printf('eskk#filter_key(%s)', string(a:key))
 endfunction "}}}
 function! eskk#unmap_key(key) "{{{
+    " Assumption: a:key must be '<Bar>' not '|'.
+
+    if s:is_skip_key(a:key)
+        return
+    endif
+
     " Unmap a:key.
     execute
     \   'lunmap'
