@@ -68,6 +68,12 @@ function! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
     endfor
 endfunction "}}}
 function! eskk#map_key(char) "{{{
+    if eskk#is_henkan_key(a:char)
+        return
+    elseif eskk#is_sticky_key(a:char)
+        return
+    endif
+
     call s:execute_map(
     \   'l',
     \   '<buffer><expr><silent>',
