@@ -41,22 +41,7 @@ if !exists('g:eskk_no_default_mappings')
     let g:eskk_no_default_mappings = 0
 endif
 if !exists('g:eskk_mapped_key')
-    let g:eskk_mapped_key = split(
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    \  .'1234567890'
-    \  .'!"#$%&''()'
-    \  .',./;:]@[-^\'
-    \  .'>?_+*}`{=~'
-    \   ,
-    \   '\zs'
-    \) + [
-    \   "<lt>",
-    \   "<Bar>",
-    \   "<Tab>",
-    \   "<BS>",
-    \   "<C-h>",
-    \]
+    let g:eskk_mapped_key = eskk#default_mapped_keys()
 endif
 
 " Misc.

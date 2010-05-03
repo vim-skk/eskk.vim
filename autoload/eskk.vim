@@ -83,6 +83,25 @@ function! eskk#map_key(char) "{{{
     \   printf('eskk#filter_key(%s)', string(a:char))
 endfunction "}}}
 
+function! eskk#default_mapped_keys() "{{{
+    return split(
+    \   'abcdefghijklmnopqrstuvwxyz'
+    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    \  .'1234567890'
+    \  .'!"#$%&''()'
+    \  .',./;:]@[-^\'
+    \  .'>?_+*}`{=~'
+    \   ,
+    \   '\zs'
+    \) + [
+    \   "<lt>",
+    \   "<Bar>",
+    \   "<Tab>",
+    \   "<BS>",
+    \   "<C-h>",
+    \]
+endfunction "}}}
+
 
 
 " Utility functions
