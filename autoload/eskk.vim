@@ -386,8 +386,43 @@ function! s:do_enter(stash) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call buftable.reset()
     else
-        throw eskk#error#not_implemented('eskk:')
+        throw eskk#not_implemented_error('eskk:')
     endif
+endfunction "}}}
+
+
+
+" Errors
+function! s:make_error(what, from, ...) "{{{
+    if a:0 == 0
+        return join([a:from, a:what], ' ')
+    else
+        return join([a:from, a:what . ':', a:1], ' ')
+    endif
+endfunction "}}}
+
+function! eskk#internal_error(from, ...) "{{{
+    return call('s:make_error', ['internal error', a:from] + a:000)
+endfunction "}}}
+function! eskk#not_implemented_error(from, ...) "{{{
+    return call('s:make_error', ['not implemented', a:from] + a:000)
+endfunction "}}}
+function! eskk#never_reached_error(from, ...) "{{{
+    return call('s:make_error', ['this block will be never reached', a:from] + a:000)
+endfunction "}}}
+function! eskk#out_of_idx_error(from, ...) "{{{
+    return call('s:make_error', ['out of index', a:from] + a:000)
+endfunction "}}}
+function! eskk#parse_error(from, ...) "{{{
+    return call('s:make_error', [':map parse error', a:from] + a:000)
+endfunction "}}}
+function! eskk#assertion_failure_error(from, ...) "{{{
+    " This is only used from eskk#util#assert().
+    return call('s:make_error', ['assertion failed', a:from] + a:000)
+endfunction "}}}
+function! eskk#user_error(from, msg) "{{{
+    " Return simple message.
+    return printf('%s: %s', a:from, a:msg)
 endfunction "}}}
 " }}}
 
