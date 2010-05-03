@@ -91,6 +91,7 @@ function! s:filter_rom_to_hira(stash) "{{{
         " Remove rom_str[-2].
         call eskk#util#logf('%s - no candidates.', rom_str)
         call buf_str.pop_rom_str()
+        call buf_str.push_rom_str(char)
         return
     endif
 endfunction "}}}
