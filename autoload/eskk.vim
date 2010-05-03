@@ -136,7 +136,7 @@ function! eskk#get_sticky_char() "{{{
 
     return ''
 endfunction "}}}
-function! eskk#sticky_key(again) "{{{
+function! eskk#sticky_key(again, stash) "{{{
     call eskk#util#log("<Plug>(eskk-sticky-key)")
 
     if !a:again
@@ -196,6 +196,10 @@ function! eskk#get_henkan_key() "{{{
     endfor
 
     return ''
+endfunction "}}}
+function! eskk#is_henkan_key(char) "{{{
+    let maparg = tolower(maparg(a:char, 'l'))
+    return maparg ==# '<plug>(eskk-henkan-key)'
 endfunction "}}}
 
 " Big letter keys
@@ -325,6 +329,7 @@ function! eskk#has_default_filter(char) "{{{
     return a:char ==# "\<BS>"
     \   || a:char ==# "\<C-h>"
     \   || a:char ==# "\<CR>"
+    \   || eskk#is_henkan_key(a:char)
     \   || eskk#is_sticky_key(a:char)
     \   || eskk#is_big_letter(a:char)
 endfunction "}}}
@@ -332,14 +337,18 @@ function! eskk#default_filter(stash) "{{{
     call eskk#util#log('eskk#default_filter()')
 
     let char = a:stash.char
+    " TODO Changing priority?
+
     if char ==# "\<BS>" || char ==# "\<C-h>"
         call s:do_backspace(a:stash)
     elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
+    elseif eskk#is_henkan_key(char)
+        return eskk#henkan_key(1, a:stash)
     elseif eskk#is_sticky_key(char)
-        return eskk#sticky_key(1)
+        return eskk#sticky_key(1, a:stash)
     elseif eskk#is_big_letter(char)
-        return eskk#sticky_key(1)
+        return eskk#sticky_key(1, a:stash)
         \    . eskk#filter_key(tolower(char))
     else
         let a:stash.option.return = a:stash.char

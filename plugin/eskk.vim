@@ -84,8 +84,8 @@ noremap! <expr> <Plug>(eskk-enable)     eskk#enable()
 noremap! <expr> <Plug>(eskk-disable)    eskk#disable()
 noremap! <expr> <Plug>(eskk-toggle)     eskk#toggle()
 lnoremap <expr> <Plug>(eskk-init-keys)  eskk#init_keys()
-lnoremap <expr> <Plug>(eskk-sticky-key) eskk#sticky_key(0)
-lnoremap <expr> <Plug>(eskk-henkan-key) eskk#henkan_key(0)
+lnoremap <expr> <Plug>(eskk-sticky-key) eskk#sticky_key(0, {})
+lnoremap <expr> <Plug>(eskk-henkan-key) eskk#henkan_key(0, {})
 
 if !g:eskk_no_default_mappings
     map! <C-j>   <Plug>(eskk-toggle)
