@@ -189,7 +189,7 @@ function! s:buftable.step_henkan_phase() dict "{{{
         return 0    " failed to step.
     else
         " TODO
-        throw eskk#error#not_implemented('eskk: buftable:')
+        throw eskk#not_implemented_error('eskk: buftable:')
     endif
 endfunction "}}}
 
@@ -242,7 +242,7 @@ endfunction "}}}
 
 function! s:validate_table_idx(table, henkan_phase, msg) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
-        throw eskk#error#out_of_idx("eskk: buftable:")
+        throw eskk#out_of_idx_error("eskk: buftable:")
     endif
 endfunction "}}}
 
