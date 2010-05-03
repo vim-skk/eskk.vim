@@ -443,8 +443,8 @@ endfunction "}}}
 
 
 " Errors
-function! s:build_error(from, ...) "{{{
-    return join(a:from, ': ') . ' - ' . join(a:000, ': ')
+function! s:build_error(from, msg) "{{{
+    return join(a:from, ': ') . ' - ' . join(a:msg, ': ')
 endfunction "}}}
 
 function! eskk#internal_error(from, ...) "{{{
