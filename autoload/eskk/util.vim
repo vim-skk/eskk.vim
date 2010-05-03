@@ -227,19 +227,23 @@ function! eskk#util#get_local_func(funcname, sid) "{{{
 endfunction "}}}
 
 function! eskk#util#setbufline(expr, lnum, line) "{{{
-    let [cur_bufnr, expr_bufnr] = [bufnr('%'), bufnr(a:expr)]
-    let [cur_bufhidden, expr_bufhidden] = [getbufvar('%', '&bufhidden'), getbufvar(a:expr, '&bufhidden')]
+    return eskk#util#call_on_buffer(a:expr, 'setline', [a:lnum, a:line])
+endfunction "}}}
+
+function! eskk#util#call_on_buffer(expr, Fn, args) "{{{
+    let [cur_bufnr, to_bufnr] = [bufnr('%'), bufnr(a:expr)]
+    let [cur_bufhidden, to_bufhidden] = [getbufvar('%', '&bufhidden'), getbufvar(to_bufnr, '&bufhidden')]
     call setbufvar('%', '&bufhidden', 'hide')
-    call setbufvar(a:expr, '&bufhidden', 'hide')
+    call setbufvar(to_bufnr, '&bufhidden', 'hide')
     try
-        if cur_bufnr != expr_bufnr
-            execute expr_bufnr . 'buffer'
+        if cur_bufnr != to_bufnr
+            execute to_bufnr . 'buffer'
         endif
-        return setline(a:lnum, a:line)
+        return call(a:Fn, a:args)
     finally
         execute cur_bufnr . 'buffer'
         call setbufvar('%', '&bufhidden', cur_bufhidden)
-        call setbufvar(a:expr, '&bufhidden', expr_bufhidden)
+        call setbufvar(to_bufnr, '&bufhidden', to_bufhidden)
     endtry
 endfunction "}}}
 " }}}
