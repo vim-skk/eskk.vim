@@ -146,6 +146,8 @@ function! eskk#init_keys() "{{{
     " Save previous mode/state.
     call eskk#set_mode(g:eskk_initial_mode)
 endfunction "}}}
+
+" Sticky key
 function! eskk#get_sticky_char() "{{{
     if s:sticky_key_char != ''
         return s:sticky_key_char
@@ -178,11 +180,12 @@ function! eskk#sticky_key(again) "{{{
         endif
     endif
 endfunction "}}}
-
 function! eskk#is_sticky_key(char) "{{{
     let maparg = tolower(maparg(a:char, 'l'))
     return maparg ==# '<plug>(eskk-sticky-key)'
 endfunction "}}}
+
+" Big letter keys
 function! eskk#is_big_letter(char) "{{{
     return a:char =~# '^[A-Z]$'
 endfunction "}}}
