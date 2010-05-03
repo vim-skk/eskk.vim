@@ -179,19 +179,6 @@ function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase, "eskk: buftable:")
     let self.henkan_phase = a:henkan_phase
 endfunction "}}}
-function! s:buftable.step_henkan_phase() dict "{{{
-    let phase = self.get_henkan_phase()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        return 1    " stepped.
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        " TODO
-        return 0    " failed to step.
-    else
-        " TODO
-        throw eskk#not_implemented_error('eskk: buftable:')
-    endif
-endfunction "}}}
 
 
 function! s:buftable.get_lower_phases() dict "{{{

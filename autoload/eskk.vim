@@ -142,11 +142,26 @@ function! eskk#sticky_key(again) "{{{
     if !a:again
         return eskk#filter_key(eskk#get_sticky_char())
     else
-        if s:buftable.step_henkan_phase()
+        if s:step_henkan_phase(s:buftable)
             return s:buftable.get_current_marker()
         else
             return ''
         endif
+    endif
+endfunction "}}}
+function! s:step_henkan_phase(buftable) "{{{
+    let phase = a:buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        return 0    " failed.
+    else
+        throw eskk#internal_error('eskk:', '')
     endif
 endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
