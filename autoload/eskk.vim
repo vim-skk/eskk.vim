@@ -22,6 +22,12 @@ let s:available_modes = []
 let s:buftable = eskk#buftable#new()
 " }}}
 
+" Delete debug file {{{
+if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
+    call delete(expand(g:eskk_debug_file))
+endif
+" }}}
+
 " FIXME
 " 1. Enable lang mode
 " 2. Leave insert mode
