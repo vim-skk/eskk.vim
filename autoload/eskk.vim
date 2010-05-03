@@ -38,15 +38,12 @@ let s:buftable = eskk#buftable#new()
 " Functions {{{
 
 " Initialize
-function! s:reset_variables() "{{{
-    call eskk#util#log('reset variables...')
+function! s:set_up() "{{{
+    call eskk#util#log('setting up eskk...')
 
+    " Clear current variable states.
     let s:eskk_mode = ''
     call s:buftable.reset()
-endfunction "}}}
-function! s:set_up() "{{{
-    " Clear current variable states.
-    call s:reset_variables()
 
     " Register Mappings.
     call s:set_up_mappings()
@@ -117,22 +114,6 @@ function! eskk#toggle() "{{{
     else
         return eskk#enable()
     endif
-endfunction "}}}
-
-" This is for emergency use.
-function! eskk#init_keys() "{{{
-    call eskk#util#log("<Plug>(eskk-init-keys)")
-
-    " Clear current variable states.
-    call s:reset_variables()
-
-    " Register Mappings.
-    lmapclear <buffer>
-    call s:set_up_mappings()
-
-    " TODO
-    " Save previous mode/state.
-    call eskk#set_mode(g:eskk_initial_mode)
 endfunction "}}}
 
 " Sticky key
@@ -258,7 +239,7 @@ endfunction "}}}
 function! eskk#filter_key(char) "{{{
     call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
     if !eskk#is_supported_mode(s:eskk_mode)
-        call eskk#util#warn('current mode is empty! please call eskk#init_keys()...')
+        call eskk#util#warn('current mode is empty!')
         sleep 1
     endif
 
