@@ -41,46 +41,54 @@ endif
 
 " Functions {{{
 
-" Initialize
-function! s:set_up() "{{{
-    call eskk#util#log('setting up eskk...')
+" Initialize/Mappings
+function! eskk#map_key(key) "{{{
+    " Assumption: a:key must be '<Bar>' not '|'.
+    let char = eskk#util#eval_key(a:key)
 
-    " Clear current variable states.
-    let s:eskk_mode = ''
-    call s:buftable.reset()
-
-    " Register Mappings.
-    call s:set_up_mappings()
-
-    " TODO
-    " Save previous mode/state.
-    call eskk#set_mode(g:eskk_initial_mode)
-endfunction "}}}
-function! s:set_up_mappings() "{{{
-    call eskk#util#log('set up mappings...')
-
-    for key in g:eskk_mapped_key
-        call eskk#map_key(key)
-    endfor
-endfunction "}}}
-function! eskk#map_key(char) "{{{
-    if eskk#is_henkan_key(a:char)
+    if eskk#is_henkan_key(char)
         return
-    elseif eskk#is_sticky_key(a:char)
+    elseif eskk#is_sticky_key(char)
         return
-    elseif maparg(a:char, 'l') ==? '<plug>(eskk-enable)'
+    elseif maparg(char, 'l') ==? '<plug>(eskk-enable)'
         return
-    elseif maparg(a:char, 'l') ==? '<plug>(eskk-disable)'
+    elseif maparg(char, 'l') ==? '<plug>(eskk-disable)'
         return
-    elseif maparg(a:char, 'l') ==? '<plug>(eskk-toggle)'
+    elseif maparg(char, 'l') ==? '<plug>(eskk-toggle)'
         return
     endif
 
+    " Save current a:key mapping
+    "
+    " TODO Check if a:key is buffer local.
+    " Because if it is not buffer local,
+    " there is no necessity to stash current a:key.
+    if maparg(a:key, 'l') != ''
+        execute
+        \   'lnoremap'
+        \   '<buffer>'
+        \   s:stash_lang_key_map(a:key)
+        \   maparg(a:key, 'l')
+    endif
+    " Map a:key.
     execute
     \   'lnoremap'
     \   '<buffer><expr><silent>'
-    \   a:char
-    \   printf('eskk#filter_key(%s)', string(a:char))
+    \   a:key
+    \   printf('eskk#filter_key(%s)', string(a:key))
+endfunction "}}}
+function! eskk#unmap_key(key) "{{{
+    " Unmap a:key.
+    execute
+    \   'lunmap'
+    \   '<buffer>'
+    \   a:key
+
+    " TODO Restore buffer local mapping.
+
+endfunction "}}}
+function! s:stash_lang_key_map(key) "{{{
+    return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
 
 function! eskk#default_mapped_keys() "{{{
@@ -119,8 +127,20 @@ function! eskk#enable() "{{{
     if eskk#is_enabled()
         return ''
     endif
+    call eskk#util#log('enabling eskk...')
 
-    call s:set_up()
+    " Clear current variable states.
+    let s:eskk_mode = ''
+    call s:buftable.reset()
+
+    " Set up Mappings.
+    for key in g:eskk_mapped_key
+        call eskk#map_key(key)
+    endfor
+
+    " TODO Save previous mode/state.
+    call eskk#set_mode(g:eskk_initial_mode)
+
     call eskk#util#call_if_exists(s:get_mode_func('cb_im_enter'), [], 'no throw')
     return "\<C-^>"
 endfunction "}}}
@@ -128,6 +148,11 @@ function! eskk#disable() "{{{
     if !eskk#is_enabled()
         return ''
     endif
+    call eskk#util#log('disabling eskk...')
+
+    for key in g:eskk_mapped_key
+        call eskk#unmap_key(key)
+    endfor
 
     call eskk#util#call_if_exists(s:get_mode_func('cb_im_leave'), [], 'no throw')
     return "\<C-^>"
