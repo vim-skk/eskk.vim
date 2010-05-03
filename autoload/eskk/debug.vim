@@ -9,12 +9,20 @@ set cpo&vim
 " }}}
 
 
-let s:debug_msg_list = []
-
 function! eskk#debug#log(msg) "{{{
     redraw
-    call add(s:debug_msg_list, a:msg)
-    call eskk#util#warn(a:msg)
+
+    if exists('g:eskk_debug_file')
+        let file = expand(g:eskk_debug_file)
+        if filereadable(file)
+            call writefile(readfile(file) + [a:msg], file)
+        else
+            call writefile([a:msg], file)
+        endif
+    else
+        call eskk#util#warn(a:msg)
+    endif
+
     if g:eskk_debug_wait_ms !=# 0
         execute printf('sleep %dm', g:eskk_debug_wait_ms)
     endif
@@ -22,13 +30,6 @@ endfunction "}}}
 
 function! eskk#debug#logf(msg, ...) "{{{
     call eskk#debug#log(call('printf', [a:msg] + a:000))
-endfunction "}}}
-
-function! eskk#debug#list(...) "{{{
-    let cmd = a:0 != 0 ? a:1 : 'echo'
-    for msg in s:debug_msg_list
-        execute cmd string(msg)
-    endfor
 endfunction "}}}
 
 " :EskkDebugList {{{
