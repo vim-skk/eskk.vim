@@ -18,15 +18,30 @@ endfunction "}}}
 function! eskk#util#warnf(msg, ...) "{{{
     call eskk#util#warn(call('printf', [a:msg] + a:000))
 endfunction "}}}
-function! eskk#util#log(...) "{{{
-    if g:eskk_debug
-        return call('eskk#debug#log', a:000)
+function! eskk#util#log(msg) "{{{
+    if !g:eskk_debug
+        return
+    endif
+
+    redraw
+
+    if exists('g:eskk_debug_file')
+        let file = expand(g:eskk_debug_file)
+        if filereadable(file)
+            call writefile(readfile(file) + [a:msg], file)
+        else
+            call writefile([a:msg], file)
+        endif
+    else
+        call eskk#util#warn(a:msg)
+    endif
+
+    if g:eskk_debug_wait_ms !=# 0
+        execute printf('sleep %dm', g:eskk_debug_wait_ms)
     endif
 endfunction "}}}
-function! eskk#util#logf(...) "{{{
-    if g:eskk_debug
-        return call('eskk#debug#logf', a:000)
-    endif
+function! eskk#util#logf(fmt, ...) "{{{
+    call eskk#util#log(call('printf', [a:fmt] + a:000))
 endfunction "}}}
 
 function! eskk#util#mb_strlen(str) "{{{
