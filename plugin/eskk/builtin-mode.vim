@@ -25,7 +25,7 @@ if !exists('g:eskk_mode_ascii_no_default_mappings')
 endif
 
 if g:eskk_mode_ascii_no_default_mappings
-    call eskk#map('<C-j>', '<Plug>(eskk-mode-to-hira)', 'ascii')
+    lmap <C-j> <Plug>(eskk:mode:ascii:to-hira)
 endif
 
 call eskk#register_mode('ascii')
@@ -37,9 +37,9 @@ if !exists('g:eskk_mode_hira_no_default_mappings')
 endif
 
 if g:eskk_mode_hira_no_default_mappings
-    call eskk#map('q', '<Plug>(eskk-mode-to-kata)', 'hira')
-    call eskk#map('l', '<Plug>(eskk-mode-to-ascii)', 'hira')
-    call eskk#map('L', '<Plug>(eskk-mode-to-zenei)', 'hira')
+    lmap q <Plug>(eskk:mode:hira:to-kata)
+    lmap l <Plug>(eskk:mode:hira:to-ascii)
+    lmap L <Plug>(eskk:mode:hira:to-zenei)
 endif
 
 call eskk#register_mode('hira')
