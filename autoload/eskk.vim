@@ -16,8 +16,6 @@ let s:henkan_key_char = ''
 
 " Current mode.
 let s:eskk_mode = ''
-" Async support?
-let s:filter_is_async = 0
 " Supported modes.
 let s:available_modes = []
 " Buffer strings for inserted, filtered and so on.
@@ -59,14 +57,6 @@ function! s:set_up_mappings() "{{{
         call eskk#map_key(key)
     endfor
 endfunction "}}}
-function! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
-    for mode in split(a:modes, '\zs')
-        execute printf('%s%smap', mode, (a:remap_p ? '' : 'nore'))
-        \       '<buffer>' . a:options
-        \       a:lhs
-        \       a:rhs
-    endfor
-endfunction "}}}
 function! eskk#map_key(char) "{{{
     if eskk#is_henkan_key(a:char)
         return
@@ -80,14 +70,11 @@ function! eskk#map_key(char) "{{{
         return
     endif
 
-    call s:execute_map(
-    \   'l',
-    \   '<buffer><expr><silent>',
-    \   0,
-    \   a:char,
-    \   printf(
-    \       'eskk#filter_key(%s)',
-    \       string(a:char)))
+    execute
+    \   'lnoremap'
+    \   '<buffer><expr><silent>'
+    \   a:char
+    \   printf('eskk#filter_key(%s)', string(a:char))
 endfunction "}}}
 
 
@@ -99,7 +86,7 @@ endfunction "}}}
 
 
 
-" Autoload functions
+" Enable/Disable IM
 function! eskk#is_enabled() "{{{
     return &iminsert == 1
 endfunction "}}}
@@ -219,9 +206,7 @@ function! eskk#is_big_letter(char) "{{{
     return a:char =~# '^[A-Z]$'
 endfunction "}}}
 
-function! eskk#is_async() "{{{
-    return s:filter_is_async
-endfunction "}}}
+" Mode
 function! eskk#set_mode(next_mode) "{{{
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
@@ -254,7 +239,6 @@ endfunction "}}}
 function! eskk#is_supported_mode(mode) "{{{
     return !empty(filter(copy(s:available_modes), 'v:val ==# a:mode'))
 endfunction "}}}
-
 function! eskk#register_mode(mode) "{{{
     call add(s:available_modes, a:mode)
     let fmt = 'lnoremap <expr> <Plug>(eskk-mode-to-%s) eskk#set_mode(%s)'
