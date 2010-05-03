@@ -12,6 +12,7 @@ runtime! plugin/eskk.vim
 
 " Variables {{{
 let s:sticky_key_char = ''
+let s:henkan_key_char = ''
 " }}}
 " See s:initialize_once() for Variables.
 
@@ -183,6 +184,35 @@ endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
     let maparg = tolower(maparg(a:char, 'l'))
     return maparg ==# '<plug>(eskk-sticky-key)'
+endfunction "}}}
+
+" Henkan key
+function! eskk#henkan_key(again) "{{{
+    call eskk#util#log("<Plug>(eskk-henkan-key)")
+
+    if !a:again
+        return eskk#filter_key(eskk#get_henkan_key())
+    else
+    endif
+endfunction "}}}
+function! eskk#get_henkan_key() "{{{
+    if s:henkan_key_char != ''
+        return s:henkan_key_char
+    endif
+
+    redir => output
+    silent lmap <buffer>
+    redir END
+
+    for line in split(output, '\n')
+        let info = eskk#util#parse_map(line)
+        if info.rhs ==? '<plug>(eskk-henkan-key)'
+            let s:henkan_key_char = info.lhs
+            return s:henkan_key_char
+        endif
+    endfor
+
+    return ''
 endfunction "}}}
 
 " Big letter keys
