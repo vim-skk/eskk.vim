@@ -13,8 +13,16 @@ runtime! plugin/eskk.vim
 " Variables {{{
 let s:sticky_key_char = ''
 let s:henkan_key_char = ''
+
+" Current mode.
+let s:eskk_mode = ''
+" Async support?
+let s:filter_is_async = 0
+" Supported modes.
+let s:available_modes = []
+" Buffer strings for inserted, filtered and so on.
+let s:buftable = eskk#buftable#new()
 " }}}
-" See s:initialize_once() for Variables.
 
 " FIXME
 " 1. Enable lang mode
@@ -30,27 +38,6 @@ let s:henkan_key_char = ''
 " Functions {{{
 
 " Initialize
-function! s:initialize_once() "{{{
-    " FIXME:
-    " 1. On gVim, in Linux(ubuntu)
-    "   This message will appear as 'Error'.
-    " 2. But on Vim(CUI), in Linux(ubuntu)
-    "   This message will appear
-    "   as just message with WarningMsg
-    "   (this is desired behavior).
-    " 3. On gVim or Vim(CUI), in Windows
-    "   Same as 2.
-    " call eskk#util#log('Initialize variables...')
-
-    " Current mode.
-    let s:eskk_mode = ''
-    " Async support?
-    let s:filter_is_async = 0
-    " Supported modes.
-    let s:available_modes = []
-    " Buffer strings for inserted, filtered, and so on.
-    let s:buftable = eskk#buftable#new()
-endfunction "}}}
 function! s:reset_variables() "{{{
     call eskk#util#log('reset variables...')
 
@@ -425,8 +412,6 @@ function! eskk#user_error(from, msg) "{{{
     return printf('%s: %s', a:from, a:msg)
 endfunction "}}}
 " }}}
-
-call s:initialize_once()
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
