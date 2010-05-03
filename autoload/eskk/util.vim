@@ -246,6 +246,22 @@ function! eskk#util#call_on_buffer(expr, Fn, args) "{{{
         call setbufvar(to_bufnr, '&bufhidden', to_bufhidden)
     endtry
 endfunction "}}}
+
+
+function! eskk#util#parse_map(line) "{{{
+    let m = matchlist(a:line, '^\([nvoiclxs]\)\s\+\(\S\+\)\s\+\(\*\)\(@\)\(\S\+\)$')
+    if empty(m)
+        throw eskk#error#parse_error('eskk: map', "Can't parse :map output")
+    endif
+    let [mode, lhs, noremap, buffer, rhs] = m[1:]
+    return {
+    \   'mode': mode,
+    \   'lhs': lhs,
+    \   'noremap': noremap ==# '*',
+    \   'buffer': buffer ==# '@',
+    \   'rhs': rhs,
+    \}
+endfunction "}}}
 " }}}
 
 

@@ -28,7 +28,9 @@ endfunction "}}}
 function! eskk#mode#hira#filter(stash) "{{{
     " TODO Handle special keys registered in maptable.
 
+    let char = a:stash.char
     let henkan_phase = a:stash.buftable.get_henkan_phase()
+
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom_to_hira(a:stash)
     else
@@ -37,7 +39,7 @@ function! eskk#mode#hira#filter(stash) "{{{
 endfunction "}}}
 
 function! s:filter_rom_to_hira(stash) "{{{
-    let char = a:stash.key_info.char
+    let char = a:stash.char
     let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
 

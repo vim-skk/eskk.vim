@@ -10,17 +10,8 @@ set cpo&vim
 
 runtime! plugin/eskk.vim
 
-" Constants {{{
-let eskk#FROM_KEY_MAP = 'map'
-let eskk#FROM_STICKY_KEY_MAP = 'sticky'
-let eskk#FROM_BIG_LETTER = 'big'
-let eskk#FROM_MODECHANGE_KEY_MAP = 'mode'
-
-let eskk#KEY_TYPE_UNKNOWN = 0
-let eskk#KEY_TYPE_STICKY_KEY = 1
-let eskk#KEY_TYPE_BIG_LETTER = 2
-
-let s:BS = "\<BS>"
+" Variables {{{
+let s:sticky_key_char = ''
 " }}}
 " See s:initialize_once() for Variables.
 
@@ -54,8 +45,6 @@ function! s:initialize_once() "{{{
     let s:eskk_mode = ''
     " Async support?
     let s:filter_is_async = 0
-    " Database of mappings.
-    let s:map = eskk#map#new()
     " Supported modes.
     let s:available_modes = []
     " Buffer strings for inserted, filtered, and so on.
@@ -157,11 +146,30 @@ function! eskk#init_keys() "{{{
     " Save previous mode/state.
     call eskk#set_mode(g:eskk_initial_mode)
 endfunction "}}}
-function! eskk#sticky_key(again, key_info) "{{{
+function! eskk#get_sticky_char() "{{{
+    if s:sticky_key_char != ''
+        return s:sticky_key_char
+    endif
+
+    redir => output
+    silent lmap <buffer>
+    redir END
+
+    for line in split(output, '\n')
+        let info = eskk#util#parse_map(line)
+        if info.rhs ==? '<plug>(eskk-sticky-key)'
+            let s:sticky_key_char = info.lhs
+            return s:sticky_key_char
+        endif
+    endfor
+
+    return ''
+endfunction "}}}
+function! eskk#sticky_key(again) "{{{
     call eskk#util#log("<Plug>(eskk-sticky-key)")
 
     if !a:again
-        return eskk#filter_key_info(eskk#create_key_info_from_type(g:eskk#KEY_TYPE_STICKY_KEY))
+        return eskk#filter_key(eskk#get_sticky_char())
     else
         if s:buftable.step_henkan_phase()
             return s:buftable.get_current_marker()
@@ -169,6 +177,14 @@ function! eskk#sticky_key(again, key_info) "{{{
             return ''
         endif
     endif
+endfunction "}}}
+
+function! eskk#is_sticky_key(char) "{{{
+    let maparg = tolower(maparg(a:char, 'l'))
+    return maparg ==# '<plug>(eskk-sticky-key)'
+endfunction "}}}
+function! eskk#is_big_letter(char) "{{{
+    return a:char =~# '^[A-Z]$'
 endfunction "}}}
 
 function! eskk#is_async() "{{{
@@ -216,42 +232,11 @@ function! eskk#get_registered_modes() "{{{
     return s:available_modes
 endfunction "}}}
 
-function! eskk#mapclear(...) "{{{
-    let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:map.mapclear(local_mode)
-endfunction "}}}
-function! eskk#unmap(lhs, ...) "{{{
-    let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:map.unmap(a:lhs, local_mode)
-endfunction "}}}
-function! eskk#map(lhs, rhs, ...) "{{{
-    let [local_mode, force] = eskk#util#get_args(a:000, '', 0)
-    " TODO Map a:lhs also in Vim's mapping table.
-    return s:map.map(a:lhs, a:rhs, local_mode, force)
-endfunction "}}}
-function! eskk#maparg(lhs, ...) "{{{
-    let [local_mode, options] = eskk#util#get_args(a:000, '', 'e')
-    return s:map.maparg(a:lhs, local_mode, options)
-endfunction "}}}
-function! eskk#mapcheck(lhs, ...) "{{{
-    let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:map.mapcheck(a:lhs, local_mode)
-endfunction "}}}
-" TODO
-" func! eskk#hasmapto(rhs, ...) "{{{
-"     let [local_mode] = eskk#util#get_args(a:000, '')
-"     return s:map.hasmapto(a:rhs, local_mode)
-" endfunc "}}}
-
 
 
 " Dispatch functions
 function! eskk#filter_key(char) "{{{
-    return eskk#filter_key_info(eskk#create_key_info(a:char))
-endfunction "}}}
-function! eskk#filter_key_info(key_info) "{{{
-    call eskk#util#logf('a:key_info.char = %s(%d)', a:key_info.char, char2nr(a:key_info.char))
-    call eskk#util#logf('a:key_info.type = %d', a:key_info.type)
+    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
     if !eskk#is_supported_mode(s:eskk_mode)
         call eskk#util#warn('current mode is empty! please call eskk#init_keys()...')
         sleep 1
@@ -263,10 +248,9 @@ function! eskk#filter_key_info(key_info) "{{{
     \   'finalize_fn': [],
     \}
     let filter_args = [{
-    \   'key_info': a:key_info,
+    \   'char': a:char,
     \   'option': opt,
     \   'buftable': s:buftable,
-    \   'map': s:map,
     \}]
     call s:buftable.set_old_str(s:buftable.get_display_str())
 
@@ -274,7 +258,7 @@ function! eskk#filter_key_info(key_info) "{{{
         let let_me_handle = call(s:get_mode_func('cb_handle_key'), filter_args)
         call eskk#util#log('current mode handles key:'.let_me_handle)
 
-        if !let_me_handle && eskk#has_default_filter(a:key_info)
+        if !let_me_handle && eskk#has_default_filter(a:char)
             call eskk#util#log('calling eskk#default_filter()...')
             call call('eskk#default_filter', filter_args)
         else
@@ -307,13 +291,12 @@ function! eskk#filter_key_info(key_info) "{{{
             call eskk#util#warnf('rom_str: %s', buf_str.get_rom_str())
             call eskk#util#warnf('filter_str: %s', buf_str.get_filter_str())
         endfor
-        call eskk#util#warn('--- key_info ---')
-        call eskk#util#warnf('char: %s', a:key_info.char)
-        call eskk#util#warnf('type: %d', a:key_info.type)
+        call eskk#util#warn('--- char ---')
+        call eskk#util#warnf('char: %s', a:char)
         call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
 
         call s:buftable.reset()
-        return a:key_info.char
+        return a:char
 
     finally
         for Fn in opt.finalize_fn
@@ -321,51 +304,35 @@ function! eskk#filter_key_info(key_info) "{{{
         endfor
     endtry
 endfunction "}}}
-function! eskk#create_key_info(char) "{{{
-    return {
-    \   'char': a:char,
-    \   'type': s:get_key_type(a:char)
-    \}
-endfunction "}}}
-function! s:get_key_type(char) "{{{
+function! eskk#has_default_filter(char) "{{{
     let maparg = tolower(maparg(a:char, 'l'))
-    if maparg =~# '<plug>(eskk-sticky-key)'
-        return g:eskk#KEY_TYPE_STICKY_KEY
-    elseif a:char =~# '^[A-Z]$'.'\C'
-        return g:eskk#KEY_TYPE_BIG_LETTER
-    else
-        return g:eskk#KEY_TYPE_UNKNOWN
-    endif
-endfunction "}}}
-function! eskk#has_default_filter(key_info) "{{{
-    let [char, type] = [a:key_info.char, a:key_info.type]
-    return char ==# "\<BS>"
-    \   || char ==# "\<C-h>"
-    \   || char ==# "\<CR>"
-    \   || type ==# g:eskk#KEY_TYPE_STICKY_KEY
-    \   || type ==# g:eskk#KEY_TYPE_BIG_LETTER
+    return a:char ==# "\<BS>"
+    \   || a:char ==# "\<C-h>"
+    \   || a:char ==# "\<CR>"
+    \   || eskk#is_sticky_key(a:char)
+    \   || eskk#is_big_letter(a:char)
 endfunction "}}}
 function! eskk#default_filter(stash) "{{{
     call eskk#util#log('eskk#default_filter()')
 
-    let [char, type] = [a:stash.key_info.char, a:stash.key_info.type]
+    let char = a:stash.char
     if char ==# "\<BS>" || char ==# "\<C-h>"
         call s:do_backspace(a:stash)
     elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
-    elseif type ==# g:eskk#KEY_TYPE_STICKY_KEY
-        return eskk#sticky_key(1, a:stash.key_info)
-    elseif type ==# g:eskk#KEY_TYPE_BIG_LETTER
-        return eskk#sticky_key(1, a:stash.key_info)
+    elseif eskk#is_sticky_key(char)
+        return eskk#sticky_key(1)
+    elseif eskk#is_big_letter(char)
+        return eskk#sticky_key(1)
         \    . eskk#filter_key(tolower(char))
     else
-        let a:stash.option.return = a:stash.key_info.char
+        let a:stash.option.return = a:stash.char
     endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let [opt, buftable] = [a:stash.option, a:stash.buftable]
     if buftable.get_old_str() == ''
-        let opt.return = s:BS
+        let opt.return = "\<BS>"
     else
         " Build backspaces to delete previous characters.
         for buf_str in buftable.get_lower_buf_str()
