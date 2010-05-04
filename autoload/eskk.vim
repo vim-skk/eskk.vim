@@ -166,6 +166,7 @@ function! eskk#enable() "{{{
     call s:buftable.reset()
 
     " Set up Mappings.
+    lmapclear <buffer>
     for key in g:eskk_mapped_key
         call eskk#map_key(key)
     endfor
