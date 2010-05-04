@@ -147,9 +147,14 @@ endfunction "}}}
 " Inserted string contains "\<BS>"
 " to delete old characters.
 function! s:buftable.rewrite() dict "{{{
-    " TODO Rewrite mininum string as possible.
-    let bs = repeat(s:BS, eskk#util#mb_strlen(self._old_str))
-    return bs . self.get_display_str()
+    let [old, new] = [self._old_str, self.get_display_str()]
+
+    call eskk#util#logf('old string = %s', string(old))
+    call eskk#util#logf('new display string = %s', string(new))
+
+    " TODO Rewrite mininum string as possible
+    " when old or new string become too long.
+    return repeat(s:BS, eskk#util#mb_strlen(old)) . new
 endfunction "}}}
 
 function! s:buftable.get_display_str() dict "{{{
