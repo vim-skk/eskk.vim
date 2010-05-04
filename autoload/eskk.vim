@@ -45,17 +45,11 @@ endif
 function! s:is_skip_key(key) "{{{
     let char = eskk#util#eval_key(a:key)
 
-    if eskk#is_henkan_key(char)
-        return
-    elseif eskk#is_sticky_key(char)
-        return
-    elseif maparg(char, 'l') ==? '<plug>(eskk-enable)'
-        return
-    elseif maparg(char, 'l') ==? '<plug>(eskk-disable)'
-        return
-    elseif maparg(char, 'l') ==? '<plug>(eskk-toggle)'
-        return
-    endif
+    return eskk#is_henkan_key(char)
+    \   || eskk#is_sticky_key(char)
+    \   || maparg(char, 'l') ==? '<plug>(eskk-enable)'
+    \   || maparg(char, 'l') ==? '<plug>(eskk-disable)'
+    \   || maparg(char, 'l') ==? '<plug>(eskk-toggle)'
 endfunction "}}}
 function! eskk#map_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
