@@ -380,7 +380,11 @@ function! eskk#filter_key(char) "{{{
             let str = s:buftable.rewrite()
             for char in opt.redispatch_chars
                 " Avoid inifinite recursion to use feedkeys().
-                call feedkeys(eskk#util#eval_key(s:map_named_key(char)), 'm')
+                "
+                " XXX:
+                " let key = s:map_named_key(eskk#util#uneval_key(char))
+                let key = s:map_named_key(char)
+                call feedkeys(eskk#util#eval_key(key), 'm')
             endfor
             return str
         endif
