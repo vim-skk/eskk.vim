@@ -10,6 +10,8 @@ set cpo&vim
 
 " Variables {{{
 let s:rom_to_hira = eskk#table#new('rom_to_hira')
+let s:skk_dict = eskk#dictionary#new([{'path': g:eskk_dictionary, 'sorted': 0}, {'path': g:eskk_large_dictionary, 'sorted': 1}])
+let s:current_henkan_result = {}
 " }}}
 
 " Functions {{{
@@ -41,10 +43,27 @@ function! eskk#mode#hira#filter(stash) "{{{
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom_to_hira(a:stash)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        return s:filter_rom_to_hira(a:stash)
+        if eskk#is_henkan_key(char)
+            return s:henkan_key(a:stash)
+            " Assert a:stash.buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        else
+            return s:filter_rom_to_hira(a:stash)
+        endif
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
     else
         return eskk#default_filter(a:stash)
     endif
+endfunction "}}}
+
+function s:henkan_key(stash) "{{{
+    let s:current_henkan_result = s:skk_dict.refer(a:stash.buftable)
+
+    let buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    call buf_str.clear_rom_str()
+    call buf_str.set_filter_str(s:current_henkan_result.get_next())
+
+    " Change henkan phase to henkan select phase.
+    call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 endfunction "}}}
 
 function! s:filter_rom_to_hira(stash) "{{{
