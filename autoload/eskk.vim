@@ -66,7 +66,6 @@ function! eskk#map_key(key) "{{{
     if maparg(a:key, 'l') != ''
         execute
         \   'lnoremap'
-        \   '<buffer>'
         \   s:stash_lang_key_map(a:key)
         \   maparg(a:key, 'l')
     endif
@@ -87,7 +86,6 @@ function! eskk#unmap_key(key) "{{{
     " Unmap a:key.
     execute
     \   'lunmap'
-    \   '<buffer>'
     \   a:key
 
     " TODO Restore buffer local mapping.
@@ -246,7 +244,7 @@ function! eskk#get_henkan_key() "{{{
     endif
 
     redir => output
-    silent lmap <buffer>
+    silent lmap
     redir END
 
     for line in split(output, '\n')
