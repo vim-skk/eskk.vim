@@ -33,11 +33,6 @@ endif
 " 2. Leave insert mode
 " 3. Enter insert mode.
 " Lang mode is still enabled.
-"
-" TODO
-" - Trap CursorMovedI and
-" -- s:buftable.reset()
-" -- rewrite current displayed string.
 
 " Functions {{{
 
@@ -558,6 +553,13 @@ endfunction "}}}
 augroup eskk
     autocmd!
     autocmd InsertLeave * call s:buftable.reset()
+    autocmd CursorMovedI * if !exists('b:eskk_changedtick')
+                        \ |   let b:eskk_changedtick = b:changedtick
+                        \ | endif
+                        \ | if b:eskk_changedtick == b:changedtick
+                        \ |   call s:buftable.reset()
+                        \ | endif
+                        \ | let b:eskk_changedtick = b:changedtick
 augroup END
 " }}}
 
