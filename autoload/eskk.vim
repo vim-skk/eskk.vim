@@ -69,12 +69,13 @@ function! eskk#map_key(key) "{{{
         \   s:stash_lang_key_map(a:key)
         \   maparg(a:key, 'l')
     endif
+
     " Map a:key.
+    let named_key = s:map_named_key(a:key)
     execute
-    \   'lnoremap'
-    \   '<buffer><expr><silent>'
+    \   'lmap'
     \   a:key
-    \   printf('eskk#filter_key(%s)', string(a:key))
+    \   named_key
 endfunction "}}}
 function! eskk#unmap_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
@@ -93,6 +94,28 @@ function! eskk#unmap_key(key) "{{{
 endfunction "}}}
 function! s:stash_lang_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
+endfunction "}}}
+function! s:map_named_key(key) "{{{
+    " NOTE:
+    " a:key is escaped. So when a:key is '<C-a>', return value is
+    "   `<Plug>(eskk:filter:<C-a>)`
+    " not
+    "   `<Plug>(eskk:filter:^A)` (^A is control character)
+
+    let lhs = printf('<Plug>(eskk:filter:%s)', a:key)
+
+    execute
+    \   'lnoremap'
+    \   '<expr><silent>'
+    \   lhs
+    \   printf('eskk#filter_key(%s)', string(a:key))
+    execute
+    \   'noremap!'
+    \   '<expr><silent>'
+    \   lhs
+    \   printf('eskk#filter_key(%s)', string(a:key))
+
+    return lhs
 endfunction "}}}
 
 function! eskk#default_mapped_keys() "{{{
