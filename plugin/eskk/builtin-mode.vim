@@ -24,11 +24,18 @@ if !exists('g:eskk_mode_ascii_no_default_mappings')
     let g:eskk_mode_ascii_no_default_mappings = 0
 endif
 
-if g:eskk_mode_ascii_no_default_mappings
-    lmap <C-j> <Plug>(eskk:mode:ascii:to-hira)
-endif
+lnoremap <expr> <Plug>(eskk:mode:ascii:to-hira) [eskk#set_mode('hira'), ''][1]
+noremap! <expr> <Plug>(eskk:mode:ascii:to-hira) [eskk#set_mode('hira'), ''][1]
+
 
 call eskk#register_mode('ascii')
+let s:dict = eskk#get_mode_structure('ascii')
+
+if !g:eskk_mode_ascii_no_default_mappings
+    call add(s:dict.hook_fn, 'eskk#mode#ascii#hook_fn_do_lmap')
+endif
+
+unlet s:dict
 " }}}
 
 " 'hira' mode {{{
@@ -36,13 +43,24 @@ if !exists('g:eskk_mode_hira_no_default_mappings')
     let g:eskk_mode_hira_no_default_mappings = 0
 endif
 
-if g:eskk_mode_hira_no_default_mappings
-    lmap q <Plug>(eskk:mode:hira:to-kata)
-    lmap l <Plug>(eskk:mode:hira:to-ascii)
-    lmap L <Plug>(eskk:mode:hira:to-zenei)
-endif
+lnoremap <expr> <Plug>(eskk:mode:hira:to-kata) [eskk#set_mode('kata'), ''][1]
+noremap! <expr> <Plug>(eskk:mode:hira:to-kata) [eskk#set_mode('kata'), ''][1]
+
+lnoremap <expr> <Plug>(eskk:mode:hira:to-ascii) [eskk#set_mode('ascii'), ''][1]
+noremap! <expr> <Plug>(eskk:mode:hira:to-ascii) [eskk#set_mode('ascii'), ''][1]
+
+lnoremap <expr> <Plug>(eskk:mode:hira:to-zenei) [eskk#set_mode('zenei'), ''][1]
+noremap! <expr> <Plug>(eskk:mode:hira:to-zenei) [eskk#set_mode('zenei'), ''][1]
+
 
 call eskk#register_mode('hira')
+let s:dict = eskk#get_mode_structure('hira')
+
+if !g:eskk_mode_hira_no_default_mappings
+    call add(s:dict.hook_fn, 'eskk#mode#hira#hook_fn_do_lmap')
+endif
+
+unlet s:dict
 " }}}
 
 " }}}

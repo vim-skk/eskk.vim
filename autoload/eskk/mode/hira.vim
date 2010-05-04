@@ -24,6 +24,15 @@ function! eskk#mode#hira#cb_handle_key(stash) "{{{
     return 0
 endfunction "}}}
 
+
+" For mode structure.
+function! eskk#mode#hira#hook_fn_do_lmap() "{{{
+    lmap <buffer> q <Plug>(eskk:mode:hira:to-kata)
+    lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
+    lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
+endfunction "}}}
+
+
 " Filter functions
 function! eskk#mode#hira#filter(stash) "{{{
     " TODO Handle special keys registered in maptable.

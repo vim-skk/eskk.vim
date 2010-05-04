@@ -17,7 +17,7 @@ let s:henkan_key_char = ''
 " Current mode.
 let s:eskk_mode = ''
 " Supported modes.
-let s:available_modes = []
+let s:available_modes = {}
 " Buffer strings for inserted, filtered and so on.
 let s:buftable = eskk#buftable#new()
 " }}}
@@ -295,22 +295,32 @@ function! eskk#set_mode(next_mode) "{{{
         return
     endif
 
+    " cb_mode_leave
     call eskk#util#call_if_exists(
     \   s:get_mode_func('cb_mode_leave'),
-    \   [a:next_mode],
+    \   [s:eskk_mode],
     \   "no throw"
     \)
 
+    " Change mode.
     let prev_mode = s:eskk_mode
     let s:eskk_mode = a:next_mode
 
+    " Reset buftable.
     call s:buftable.reset()
 
+    " cb_mode_enter
     call eskk#util#call_if_exists(
     \   s:get_mode_func('cb_mode_enter'),
-    \   [prev_mode],
+    \   [s:eskk_mode],
     \   "no throw"
     \)
+
+    " Call current mode's hooks.
+    for Fn in eskk#get_mode_structure(s:eskk_mode).hook_fn
+        call call(Fn, [])
+        unlet Fn
+    endfor
 
     " For &statusline.
     redrawstatus
@@ -319,13 +329,22 @@ function! eskk#get_mode() "{{{
     return s:eskk_mode
 endfunction "}}}
 function! eskk#is_supported_mode(mode) "{{{
-    return !empty(filter(copy(s:available_modes), 'v:val ==# a:mode'))
+    return has_key(s:available_modes, a:mode)
 endfunction "}}}
-function! eskk#register_mode(mode) "{{{
-    call add(s:available_modes, a:mode)
+function! eskk#register_mode(mode, ...) "{{{
+    let mode_self = a:0 != 0 ? a:1 : {}
+    let s:available_modes[a:mode] = extend(mode_self, eskk#get_default_mode_structure(), 'keep')
 endfunction "}}}
-function! eskk#get_registered_modes() "{{{
-    return s:available_modes
+function! eskk#get_default_mode_structure() "{{{
+    return {
+    \   'hook_fn': [],
+    \}
+endfunction "}}}
+function! eskk#get_mode_structure(mode) "{{{
+    if !eskk#is_supported_mode(a:mode)
+        throw eskk#user_error(['eskk'], printf("mode '%s' is not available.", a:mode))
+    endif
+    return s:available_modes[a:mode]
 endfunction "}}}
 
 
