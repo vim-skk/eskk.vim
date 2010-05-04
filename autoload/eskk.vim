@@ -498,6 +498,15 @@ function! eskk#user_error(from, msg) "{{{
 endfunction "}}}
 " }}}
 
+
+" Auto commands {{{
+augroup eskk
+    autocmd!
+    autocmd InsertLeave * call s:buftable.reset()
+augroup END
+" }}}
+
+
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
 " }}}
