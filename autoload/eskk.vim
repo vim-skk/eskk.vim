@@ -208,14 +208,19 @@ function! eskk#sticky_key(again, stash) "{{{
     endif
 endfunction "}}}
 function! s:step_henkan_phase(buftable) "{{{
-    let phase = a:buftable.get_henkan_phase()
+    let phase   = a:buftable.get_henkan_phase()
+    let buf_str = a:buftable.get_current_buf_str()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         return 1    " stepped.
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
-        return 1    " stepped.
+        if !buf_str.empty()
+            call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
+            return 1    " stepped.
+        else
+            return 0    " failed.
+        endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return 0    " failed.
     else
