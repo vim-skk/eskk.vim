@@ -264,8 +264,20 @@ endfunction "}}}
 
 
 function! eskk#util#parse_map(line) "{{{
-    let m = matchlist(a:line, '^\([nvoiclxs]\)\s\+\(\S\+\)\s\+\(\*\)\(@\)\(\S\+\)$')
+    let regex =
+    \   '^'
+    \   . '\([nvoiclxs]\)'
+    \   . '\s\+'
+    \   . '\(\S\+\)'
+    \   . '\s\+'
+    \   . '\(\*\=\)'
+    \   . '\(@\=\)'
+    \   . '\(.\+\)'
+    \   . '$'
+    \   . '\C'
+    let m = matchlist(a:line, regex)
     if empty(m)
+        call eskk#util#logf("parse error! - %s is not matched to %s", string(a:line), string(regex))
         throw eskk#parse_error(['eskk', 'util'], "Can't parse :map output")
     endif
     let [mode, lhs, noremap, buffer, rhs; _] = m[1:]
