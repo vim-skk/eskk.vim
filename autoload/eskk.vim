@@ -336,6 +336,8 @@ function! eskk#register_mode(mode, ...) "{{{
     let s:available_modes[a:mode] = extend(mode_self, eskk#get_default_mode_structure(), 'keep')
 endfunction "}}}
 function! eskk#validate_mode_structure(mode) "{{{
+    " It should be good to call this function at the end of mode register.
+
     let st = eskk#get_mode_structure(a:mode)
 
     for key in ['filter', 'cb_handle_key']
