@@ -44,20 +44,20 @@ function! s:run()
     \)
 
     call simpletap#is(
-    \   eskk#util#eval_key('<Plug>(eskk-enable)'),
-    \   "\<Plug>(eskk-enable)"
+    \   eskk#util#eval_key('<Plug>(eskk:enable)'),
+    \   "\<Plug>(eskk:enable)"
     \)
     call simpletap#is(
-    \   eskk#util#eval_key('a<Plug>(eskk-enable)'),
-    \   "a\<Plug>(eskk-enable)"
+    \   eskk#util#eval_key('a<Plug>(eskk:enable)'),
+    \   "a\<Plug>(eskk:enable)"
     \)
     call simpletap#is(
-    \   eskk#util#eval_key('<Plug>(eskk-enable)b'),
-    \   "\<Plug>(eskk-enable)b"
+    \   eskk#util#eval_key('<Plug>(eskk:enable)b'),
+    \   "\<Plug>(eskk:enable)b"
     \)
     call simpletap#is(
-    \   eskk#util#eval_key('a<Plug>(eskk-enable)b'),
-    \   "a\<Plug>(eskk-enable)b"
+    \   eskk#util#eval_key('a<Plug>(eskk:enable)b'),
+    \   "a\<Plug>(eskk:enable)b"
     \)
 
     call simpletap#is(

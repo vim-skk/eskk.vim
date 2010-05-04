@@ -47,9 +47,7 @@ function! s:is_skip_key(key) "{{{
 
     return eskk#is_henkan_key(char)
     \   || eskk#is_sticky_key(char)
-    \   || maparg(char, 'l') ==? '<plug>(eskk-enable)'
-    \   || maparg(char, 'l') ==? '<plug>(eskk-disable)'
-    \   || maparg(char, 'l') ==? '<plug>(eskk-toggle)'
+    \   || maparg(char, 'l') =~? '^<plug>(eskk:\S\+)$'
 endfunction "}}}
 function! eskk#map_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
@@ -207,7 +205,7 @@ function! eskk#get_sticky_char() "{{{
 
     for line in split(output, '\n')
         let info = eskk#util#parse_map(line)
-        if info.rhs ==? '<plug>(eskk-sticky-key)'
+        if info.rhs ==? '<plug>(eskk:sticky-key)'
             let s:sticky_key_char = info.lhs
             return s:sticky_key_char
         endif
@@ -217,7 +215,7 @@ function! eskk#get_sticky_char() "{{{
     return ''
 endfunction "}}}
 function! eskk#sticky_key(again, stash) "{{{
-    call eskk#util#log("<Plug>(eskk-sticky-key)")
+    call eskk#util#log("<Plug>(eskk:sticky-key)")
 
     if !a:again
         return eskk#filter_key(eskk#get_sticky_char())
@@ -257,7 +255,7 @@ function! s:step_henkan_phase(buftable) "{{{
     endif
 endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
-    return maparg(a:char, 'l') ==? '<plug>(eskk-sticky-key)'
+    return maparg(a:char, 'l') ==? '<plug>(eskk:sticky-key)'
 endfunction "}}}
 
 " Henkan key
@@ -272,7 +270,7 @@ function! eskk#get_henkan_key() "{{{
 
     for line in split(output, '\n')
         let info = eskk#util#parse_map(line)
-        if info.rhs ==? '<plug>(eskk-henkan-key)'
+        if info.rhs ==? '<plug>(eskk:henkan-key)'
             let s:henkan_key_char = info.lhs
             return s:henkan_key_char
         endif
@@ -282,7 +280,7 @@ function! eskk#get_henkan_key() "{{{
     return ''
 endfunction "}}}
 function! eskk#is_henkan_key(char) "{{{
-    return maparg(a:char, 'l') ==? '<plug>(eskk-henkan-key)'
+    return maparg(a:char, 'l') ==? '<plug>(eskk:henkan-key)'
 endfunction "}}}
 
 " Big letter keys
