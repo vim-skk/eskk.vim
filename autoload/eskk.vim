@@ -220,8 +220,7 @@ function! s:step_henkan_phase(buftable) "{{{
     endif
 endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
-    let maparg = tolower(maparg(a:char, 'l'))
-    return maparg ==# '<plug>(eskk-sticky-key)'
+    return maparg(a:char, 'l') ==? '<plug>(eskk-sticky-key)'
 endfunction "}}}
 
 " Henkan key
@@ -253,8 +252,7 @@ function! eskk#get_henkan_key() "{{{
     return ''
 endfunction "}}}
 function! eskk#is_henkan_key(char) "{{{
-    let maparg = tolower(maparg(a:char, 'l'))
-    return maparg ==# '<plug>(eskk-henkan-key)'
+    return maparg(a:char, 'l') ==? '<plug>(eskk-henkan-key)'
 endfunction "}}}
 
 " Big letter keys
