@@ -236,6 +236,11 @@ function! s:step_henkan_phase(buftable) "{{{
     let buf_str = a:buftable.get_current_buf_str()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
+            call eskk#util#log("hmm...when is this block executed?")
+            call buf_str.clear_rom_str()
+            call buf_str.clear_filter_str()
+        endif
         call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         return 1    " stepped.
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
