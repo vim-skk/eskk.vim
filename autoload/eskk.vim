@@ -392,6 +392,7 @@ function! eskk#filter_key(char) "{{{
 
     catch
         " TODO Show v:exception only once in current mode.
+        " TODO Or open another buffer for showing this annoying messages.
         "
         " sleep 1
         "
@@ -404,8 +405,8 @@ function! eskk#filter_key(char) "{{{
             let buf_str = s:buftable.get_buf_str(phase)
             call eskk#util#warnf('phase:%d', phase)
             call eskk#util#warnf('pos: %s', string(buf_str.get_pos()))
-            call eskk#util#warnf('rom_str: %s', buf_str.get_rom_str())
-            call eskk#util#warnf('filter_str: %s', buf_str.get_filter_str())
+            call eskk#util#warnf('rom_str: %s', string(buf_str.get_rom_str()))
+            call eskk#util#warnf('filter_str: %s', string(buf_str.get_filter_str()))
         endfor
         call eskk#util#warn('--- char ---')
         call eskk#util#warnf('char: %s', a:char)
