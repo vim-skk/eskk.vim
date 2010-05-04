@@ -63,12 +63,12 @@ function! eskk#map_key(key) "{{{
     " TODO Check if a:key is buffer local.
     " Because if it is not buffer local,
     " there is no necessity to stash current a:key.
-    if maparg(a:key, 'l') != ''
-        execute
-        \   'lnoremap'
-        \   s:stash_lang_key_map(a:key)
-        \   maparg(a:key, 'l')
-    endif
+    " if maparg(a:key, 'l') != ''
+    "     execute
+    "     \   'lnoremap'
+    "     \   s:stash_lang_key_map(a:key)
+    "     \   maparg(a:key, 'l')
+    " endif
 
     " Map a:key.
     let named_key = s:map_named_key(a:key)
