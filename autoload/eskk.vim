@@ -381,6 +381,12 @@ endfunction "}}}
 
 " Dispatch functions
 function! eskk#filter_key(char) "{{{
+    return s:filter(a:char, 's:filter_body_call_mode_or_default_filter', [])
+endfunction "}}}
+function! eskk#call_via_filter(Fn, head_args) "{{{
+    return s:filter('', a:Fn, a:head_args)
+endfunction "}}}
+function! s:filter(char, Fn, head_args) "{{{
     call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
     if !eskk#is_supported_mode(s:eskk_mode)
         call eskk#util#warn('current mode is empty!')
@@ -400,16 +406,7 @@ function! eskk#filter_key(char) "{{{
     call s:buftable.set_old_str(s:buftable.get_display_str())
 
     try
-        let let_me_handle = call(s:get_mode_func('cb_handle_key'), filter_args)
-        call eskk#util#log('current mode handles key:'.let_me_handle)
-
-        if !let_me_handle && eskk#has_default_filter(a:char)
-            call eskk#util#log('calling eskk#default_filter()...')
-            call call('eskk#default_filter', filter_args)
-        else
-            call eskk#util#log('calling filter function...')
-            call call(s:get_mode_func('filter'), filter_args)
-        endif
+        call call(a:Fn, a:head_args + filter_args)
 
         if type(opt.return) == type("")
             return opt.return
@@ -455,6 +452,18 @@ function! eskk#filter_key(char) "{{{
             call call(Fn, [])
         endfor
     endtry
+endfunction "}}}
+function! s:filter_body_call_mode_or_default_filter(stash) "{{{
+    let let_me_handle = call(s:get_mode_func('cb_handle_key'), [a:stash])
+    call eskk#util#log('current mode handles key?:'.let_me_handle)
+
+    if !let_me_handle && eskk#has_default_filter(a:stash.char)
+        call eskk#util#log('calling eskk#default_filter()...')
+        call call('eskk#default_filter', [a:stash])
+    else
+        call eskk#util#log('calling filter function...')
+        call call(s:get_mode_func('filter'), [a:stash])
+    endif
 endfunction "}}}
 function! eskk#has_default_filter(char) "{{{
     let maparg = tolower(maparg(a:char, 'l'))
