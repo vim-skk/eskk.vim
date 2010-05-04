@@ -199,8 +199,10 @@ function! eskk#sticky_key(again, stash) "{{{
         return eskk#filter_key(eskk#get_sticky_char())
     else
         if s:step_henkan_phase(s:buftable)
+            call eskk#util#logf("Succeeded to step to next henkan phase. (current: %d)", s:buftable.get_henkan_phase())
             return s:buftable.get_current_marker()
         else
+            call eskk#util#logf("Failed to step to next henkan phase. (current: %d)", s:buftable.get_henkan_phase())
             return ''
         endif
     endif
