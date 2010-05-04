@@ -177,7 +177,7 @@ endfunction "}}}
 " TODO フィルタ関数実行中はいじれないようにする？
 function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
-    let self.henkan_phase = a:henkan_phase
+    let self._henkan_phase = a:henkan_phase
 endfunction "}}}
 
 
