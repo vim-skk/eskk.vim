@@ -72,6 +72,7 @@ function! eskk#map_key(key) "{{{
     let named_key = s:map_named_key(a:key)
     execute
     \   'lmap'
+    \   '<buffer>'
     \   a:key
     \   named_key
 endfunction "}}}
@@ -85,6 +86,7 @@ function! eskk#unmap_key(key) "{{{
     " Unmap a:key.
     execute
     \   'lunmap'
+    \   '<buffer>'
     \   a:key
 
     " TODO Restore buffer local mapping.
