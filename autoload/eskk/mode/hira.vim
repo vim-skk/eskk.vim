@@ -56,14 +56,14 @@ function! eskk#mode#hira#filter(stash) "{{{
 endfunction "}}}
 
 function s:henkan_key(stash) "{{{
-    let s:current_henkan_result = s:skk_dict.refer(a:stash.buftable)
-
-    let buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    call buf_str.clear_rom_str()
-    call buf_str.set_filter_str(s:current_henkan_result.get_next())
-
     " Change henkan phase to henkan select phase.
     call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+
+    let s:current_henkan_result = s:skk_dict.refer(a:stash.buftable)
+
+    let buf_str = a:stash.buftable.get_current_buf_str()
+    call buf_str.clear_rom_str()
+    call buf_str.set_filter_str(s:current_henkan_result.get_next())
 endfunction "}}}
 
 function! s:filter_rom_to_hira(stash) "{{{
