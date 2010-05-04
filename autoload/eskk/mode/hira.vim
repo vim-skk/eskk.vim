@@ -10,6 +10,9 @@ set cpo&vim
 
 " Variables {{{
 let s:rom_to_hira = eskk#table#new('rom_to_hira')
+let s:rom_to_kata = eskk#table#new('rom_to_kata')
+let s:current_table = s:rom_to_hira
+
 let s:skk_dict = eskk#dictionary#new([{'path': g:eskk_dictionary, 'sorted': 0}, {'path': g:eskk_large_dictionary, 'sorted': 1}])
 let s:current_henkan_result = {}
 " }}}
@@ -25,9 +28,26 @@ function! eskk#mode#hira#cb_handle_key(stash) "{{{
 endfunction "}}}
 
 function! eskk#mode#hira#hook_fn_do_lmap() "{{{
-    lmap <buffer> q <Plug>(eskk:mode:hira:to-kata)
+    lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
     lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
     lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
+endfunction "}}}
+
+function! eskk#mode#hira#do_q_key() "{{{
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
+    let phase = buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call buf_str.clear_rom_str()
+        call buf_str.clear_filter_str()
+
+        " Toggle current table.
+        let s:current_table = (s:current_table is s:rom_to_hira ? s:rom_to_kata : s:rom_to_hira)
+    else
+    endif
+
+    return eskk#rewrite()
 endfunction "}}}
 
 function! eskk#mode#hira#filter(stash) "{{{
@@ -65,13 +85,13 @@ function! s:filter_rom_to_hira(stash) "{{{
 
     call eskk#util#logf('mode hira - char = %s, rom_str = %s', string(char), string(rom_str))
 
-    if s:rom_to_hira.has_map(rom_str)
+    if s:current_table.has_map(rom_str)
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
 
         " Set filtered string.
         call buf_str.push_filter_str(
-        \   s:rom_to_hira.get_map_to(rom_str)
+        \   s:current_table.get_map_to(rom_str)
         \)
         call buf_str.clear_rom_str()
 
@@ -80,8 +100,8 @@ function! s:filter_rom_to_hira(stash) "{{{
         " NOTE:
         " rest must not have multibyte string.
         " rest is for rom string.
-        let rest = s:rom_to_hira.get_rest(rom_str, -1)
-        " Assumption: 's:rom_to_hira.has_map(rest)' returns false here.
+        let rest = s:current_table.get_rest(rom_str, -1)
+        " Assumption: 's:current_table.has_map(rest)' returns false here.
         if rest !=# -1
             call add(a:stash.option.redispatch_chars, rest)
         endif
@@ -102,7 +122,7 @@ function! s:filter_rom_to_hira(stash) "{{{
 
         return
 
-    elseif s:rom_to_hira.has_candidates(rom_str)
+    elseif s:current_table.has_candidates(rom_str)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
         call buf_str.push_rom_str(char)
