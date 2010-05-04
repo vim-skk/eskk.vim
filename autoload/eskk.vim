@@ -189,6 +189,7 @@ function! eskk#get_sticky_char() "{{{
         endif
     endfor
 
+    call eskk#util#log('failed to get sticky character...')
     return ''
 endfunction "}}}
 function! eskk#sticky_key(again, stash) "{{{
@@ -249,6 +250,7 @@ function! eskk#get_henkan_key() "{{{
         endif
     endfor
 
+    call eskk#util#log('failed to get henkan character...')
     return ''
 endfunction "}}}
 function! eskk#is_henkan_key(char) "{{{

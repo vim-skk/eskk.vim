@@ -43,6 +43,8 @@ function! s:filter_rom_to_hira(stash) "{{{
     let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
 
+    call eskk#util#logf('mode hira - char = %s, rom_str = %s', string(char), string(rom_str))
+
     if s:rom_to_hira.has_map(rom_str)
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
