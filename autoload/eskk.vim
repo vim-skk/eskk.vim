@@ -267,6 +267,7 @@ function! eskk#henkan_key(again, stash) "{{{
     if !a:again
         return eskk#filter_key(eskk#get_henkan_key())
     else
+        throw eskk#not_implemented_error(['eskk'])
     endif
 endfunction "}}}
 function! eskk#get_henkan_key() "{{{
