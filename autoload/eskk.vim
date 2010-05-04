@@ -113,12 +113,12 @@ function! s:map_named_key(key) "{{{
     \   'lnoremap'
     \   '<expr><silent>'
     \   lhs
-    \   printf('eskk#filter_key(%s)', string(a:key))
+    \   printf('eskk#filter(%s)', string(a:key))
     execute
     \   'noremap!'
     \   '<expr><silent>'
     \   lhs
-    \   printf('eskk#filter_key(%s)', string(a:key))
+    \   printf('eskk#filter(%s)', string(a:key))
 
     return lhs
 endfunction "}}}
@@ -226,7 +226,7 @@ function! eskk#sticky_key(again, stash) "{{{
     call eskk#util#log("<Plug>(eskk:sticky-key)")
 
     if !a:again
-        return eskk#filter_key(eskk#get_sticky_char())
+        return eskk#filter(eskk#get_sticky_char())
     else
         if s:step_henkan_phase(s:buftable)
             call eskk#util#logf("Succeeded to step to next henkan phase. (current: %d)", s:buftable.get_henkan_phase())
@@ -380,7 +380,7 @@ endfunction "}}}
 
 
 " Dispatch functions
-function! eskk#filter_key(char) "{{{
+function! eskk#filter(char) "{{{
     return s:filter(a:char, 's:filter_body_call_mode_or_default_filter', [])
 endfunction "}}}
 function! eskk#call_via_filter(Fn, head_args) "{{{
@@ -487,7 +487,7 @@ function! eskk#default_filter(stash) "{{{
         return eskk#sticky_key(1, a:stash)
     elseif eskk#is_big_letter(char)
         return eskk#sticky_key(1, a:stash)
-        \    . eskk#filter_key(tolower(char))
+        \    . eskk#filter(tolower(char))
     else
         let a:stash.option.return = a:stash.char
     endif

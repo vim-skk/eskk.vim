@@ -107,7 +107,7 @@ function! s:filter_rom_to_hira(stash) "{{{
             call add(a:stash.option.redispatch_chars, rest)
         endif
 
-        " Clear filtered string when eskk#filter_key()'s finalizing.
+        " Clear filtered string when eskk#filter()'s finalizing.
         let s:buftable = a:stash.buftable
         function! s:finalize()
             if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
