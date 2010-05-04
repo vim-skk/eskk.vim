@@ -369,6 +369,14 @@ function! eskk#get_mode_structure(mode) "{{{
     return s:available_modes[a:mode]
 endfunction "}}}
 
+" Buftable
+function! eskk#get_buftable() "{{{
+    return s:buftable
+endfunction "}}}
+function! eskk#rewrite() "{{{
+    return s:buftable.rewrite()
+endfunction "}}}
+
 
 
 " Dispatch functions
@@ -406,7 +414,6 @@ function! eskk#filter_key(char) "{{{
         if type(opt.return) == type("")
             return opt.return
         else
-            let str = s:buftable.rewrite()
             for char in opt.redispatch_chars
                 " Avoid inifinite recursion to use feedkeys().
                 "
@@ -415,7 +422,7 @@ function! eskk#filter_key(char) "{{{
                 let key = s:map_named_key(char)
                 call feedkeys(eskk#util#eval_key(key), 'm')
             endfor
-            return str
+            return eskk#rewrite()
         endif
 
     catch
