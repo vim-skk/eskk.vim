@@ -31,11 +31,20 @@ noremap! <expr> <Plug>(eskk:mode:ascii:to-hira) [eskk#set_mode('hira'), ''][1]
 call eskk#register_mode('ascii')
 let s:dict = eskk#get_mode_structure('ascii')
 
+function! s:dict.filter(...)
+    return call('eskk#mode#ascii#filter', a:000)
+endfunction
+function! s:dict.cb_handle_key(...)
+    return call('eskk#mode#ascii#cb_handle_key', a:000)
+endfunction
+
+
 if !g:eskk_mode_ascii_no_default_mappings
     call add(s:dict.hook_fn, 'eskk#mode#ascii#hook_fn_do_lmap')
 endif
 
 unlet s:dict
+call eskk#validate_mode_structure('ascii')
 " }}}
 
 " 'hira' mode {{{
@@ -56,11 +65,20 @@ noremap! <expr> <Plug>(eskk:mode:hira:to-zenei) [eskk#set_mode('zenei'), ''][1]
 call eskk#register_mode('hira')
 let s:dict = eskk#get_mode_structure('hira')
 
+function! s:dict.filter(...)
+    return call('eskk#mode#hira#filter', a:000)
+endfunction
+function! s:dict.cb_handle_key(...)
+    return call('eskk#mode#hira#cb_handle_key', a:000)
+endfunction
+
+
 if !g:eskk_mode_hira_no_default_mappings
     call add(s:dict.hook_fn, 'eskk#mode#hira#hook_fn_do_lmap')
 endif
 
 unlet s:dict
+call eskk#validate_mode_structure('hira')
 " }}}
 
 " }}}

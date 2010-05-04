@@ -335,6 +335,15 @@ function! eskk#register_mode(mode, ...) "{{{
     let mode_self = a:0 != 0 ? a:1 : {}
     let s:available_modes[a:mode] = extend(mode_self, eskk#get_default_mode_structure(), 'keep')
 endfunction "}}}
+function! eskk#validate_mode_structure(mode) "{{{
+    let st = eskk#get_mode_structure(a:mode)
+
+    for key in ['filter', 'cb_handle_key']
+        if !has_key(st, key)
+            throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
+        endif
+    endfor
+endfunction "}}}
 function! eskk#get_default_mode_structure() "{{{
     return {
     \   'hook_fn': [],
