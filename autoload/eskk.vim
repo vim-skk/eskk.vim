@@ -194,7 +194,7 @@ function! eskk#toggle() "{{{
 endfunction "}}}
 
 " Sticky key
-function! eskk#get_sticky_char() "{{{
+function! eskk#get_sticky_key() "{{{
     if s:sticky_key_char != ''
         return s:sticky_key_char
     endif
@@ -213,6 +213,9 @@ function! eskk#get_sticky_char() "{{{
 
     call eskk#util#log('failed to get sticky character...')
     return ''
+endfunction "}}}
+function! eskk#get_sticky_char() "{{{
+    return eskk#util#eval_key(eskk#get_sticky_key())
 endfunction "}}}
 function! eskk#sticky_key(again, stash) "{{{
     call eskk#util#log("<Plug>(eskk:sticky-key)")
@@ -278,6 +281,9 @@ function! eskk#get_henkan_key() "{{{
 
     call eskk#util#log('failed to get henkan character...')
     return ''
+endfunction "}}}
+function! eskk#get_henkan_char() "{{{
+    return eskk#util#eval_key(eskk#get_henkan_key())
 endfunction "}}}
 function! eskk#is_henkan_key(char) "{{{
     return maparg(a:char, 'l') ==? '<plug>(eskk:henkan-key)'
