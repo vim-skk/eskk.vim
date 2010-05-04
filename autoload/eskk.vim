@@ -239,7 +239,7 @@ function! s:step_henkan_phase(buftable) "{{{
         call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         return 1    " stepped.
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if !buf_str.empty()
+        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
             call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
             return 1    " stepped.
         else
