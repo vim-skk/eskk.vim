@@ -261,15 +261,6 @@ function! eskk#is_sticky_key(char) "{{{
 endfunction "}}}
 
 " Henkan key
-function! eskk#henkan_key(again, stash) "{{{
-    call eskk#util#log("<Plug>(eskk-henkan-key)")
-
-    if !a:again
-        return eskk#filter_key(eskk#get_henkan_key())
-    else
-        throw eskk#not_implemented_error(['eskk'])
-    endif
-endfunction "}}}
 function! eskk#get_henkan_key() "{{{
     if s:henkan_key_char != ''
         return s:henkan_key_char
@@ -426,7 +417,6 @@ function! eskk#has_default_filter(char) "{{{
     return a:char ==# "\<BS>"
     \   || a:char ==# "\<C-h>"
     \   || a:char ==# "\<CR>"
-    \   || eskk#is_henkan_key(a:char)
     \   || eskk#is_sticky_key(a:char)
     \   || eskk#is_big_letter(a:char)
 endfunction "}}}
@@ -440,8 +430,6 @@ function! eskk#default_filter(stash) "{{{
         call s:do_backspace(a:stash)
     elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
-    elseif eskk#is_henkan_key(char)
-        return eskk#henkan_key(1, a:stash)
     elseif eskk#is_sticky_key(char)
         return eskk#sticky_key(1, a:stash)
     elseif eskk#is_big_letter(char)
