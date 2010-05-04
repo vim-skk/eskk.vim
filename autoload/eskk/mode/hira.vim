@@ -33,6 +33,8 @@ function! eskk#mode#hira#filter(stash) "{{{
 
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom_to_hira(a:stash)
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        return s:filter_rom_to_hira(a:stash)
     else
         return eskk#default_filter(a:stash)
     endif
@@ -50,7 +52,7 @@ function! s:filter_rom_to_hira(stash) "{{{
         call eskk#util#logf('%s - match!', rom_str)
 
         " Set filtered string.
-        call buf_str.set_filter_str(
+        call buf_str.push_filter_str(
         \   s:rom_to_hira.get_map_to(rom_str)
         \)
         call buf_str.clear_rom_str()
@@ -69,8 +71,8 @@ function! s:filter_rom_to_hira(stash) "{{{
         " Clear filtered string when eskk#filter_key()'s finalizing.
         let s:buftable = a:stash.buftable
         function! s:finalize()
-            if s:buftable._henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = s:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = s:buftable.get_current_buf_str()
                 call buf_str.clear_filter_str()
             endif
         endfunction
