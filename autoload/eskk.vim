@@ -22,9 +22,9 @@ let s:available_modes = []
 let s:buftable = eskk#buftable#new()
 " }}}
 
-" Delete debug file {{{
+" Write timestamp to debug file {{{
 if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
-    call delete(expand(g:eskk_debug_file))
+    call writefile(['', printf('--- %s ---', strftime('%c')), ''], expand(g:eskk_debug_file))
 endif
 " }}}
 
