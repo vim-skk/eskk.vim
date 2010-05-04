@@ -132,7 +132,7 @@ endfunction "}}}
 
 
 function! s:buftable.get_buf_str(henkan_phase) dict "{{{
-    call s:validate_table_idx(self._table, a:henkan_phase, "eskk: buftable:")
+    call s:validate_table_idx(self._table, a:henkan_phase)
     return self._table[a:henkan_phase]
 endfunction "}}}
 function! s:buftable.get_current_buf_str() dict "{{{
@@ -176,7 +176,7 @@ function! s:buftable.get_henkan_phase() dict "{{{
 endfunction "}}}
 " TODO フィルタ関数実行中はいじれないようにする？
 function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
-    call s:validate_table_idx(self._table, a:henkan_phase, "eskk: buftable:")
+    call s:validate_table_idx(self._table, a:henkan_phase)
     let self.henkan_phase = a:henkan_phase
 endfunction "}}}
 
@@ -216,7 +216,7 @@ function! s:buftable.get_marker(henkan_phase) dict "{{{
     \    g:eskk_marker_henkan_select,
     \    g:eskk_marker_jisyo_touroku,
     \]
-    call s:validate_table_idx(table, a:henkan_phase, "eskk: buftable:")
+    call s:validate_table_idx(table, a:henkan_phase)
     " if a:henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     "     throw ''
     " endif
@@ -227,7 +227,7 @@ function! s:buftable.get_current_marker() "{{{
 endfunction "}}}
 
 
-function! s:validate_table_idx(table, henkan_phase, msg) "{{{
+function! s:validate_table_idx(table, henkan_phase) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
         throw eskk#out_of_idx_error(["eskk", "buftable"])
     endif
