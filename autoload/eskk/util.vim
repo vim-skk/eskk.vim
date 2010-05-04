@@ -268,7 +268,7 @@ function! eskk#util#parse_map(line) "{{{
     if empty(m)
         throw eskk#parse_error(['eskk', 'util'], "Can't parse :map output")
     endif
-    let [mode, lhs, noremap, buffer, rhs] = m[1:]
+    let [mode, lhs, noremap, buffer, rhs; _] = m[1:]
     return {
     \   'mode': mode,
     \   'lhs': lhs,
