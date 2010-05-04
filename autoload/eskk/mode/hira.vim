@@ -16,26 +16,20 @@ let s:current_henkan_result = {}
 
 " Functions {{{
 
-" :help <SID>
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 
-" Callback
 function! eskk#mode#hira#cb_handle_key(stash) "{{{
     return 0
 endfunction "}}}
 
-
-" For mode structure.
 function! eskk#mode#hira#hook_fn_do_lmap() "{{{
     lmap <buffer> q <Plug>(eskk:mode:hira:to-kata)
     lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
     lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
 endfunction "}}}
 
-
-" Filter functions
 function! eskk#mode#hira#filter(stash) "{{{
     let char = a:stash.char
     let henkan_phase = a:stash.buftable.get_henkan_phase()
@@ -54,7 +48,6 @@ function! eskk#mode#hira#filter(stash) "{{{
         return eskk#default_filter(a:stash)
     endif
 endfunction "}}}
-
 function s:henkan_key(stash) "{{{
     " Change henkan phase to henkan select phase.
     call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
@@ -65,7 +58,6 @@ function s:henkan_key(stash) "{{{
     call buf_str.clear_rom_str()
     call buf_str.set_filter_str(s:current_henkan_result.get_next())
 endfunction "}}}
-
 function! s:filter_rom_to_hira(stash) "{{{
     let char = a:stash.char
     let buf_str = a:stash.buftable.get_current_buf_str()
