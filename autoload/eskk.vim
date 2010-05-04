@@ -42,7 +42,7 @@ endif
 " Functions {{{
 
 " Initialize/Mappings
-function! s:is_skip_key(key) "{{{
+function! s:is_no_map_key(key) "{{{
     let char = eskk#util#eval_key(a:key)
 
     return eskk#is_henkan_key(char)
@@ -52,7 +52,7 @@ endfunction "}}}
 function! eskk#map_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
-    if s:is_skip_key(a:key)
+    if s:is_no_map_key(a:key)
         return
     endif
 
@@ -79,7 +79,7 @@ endfunction "}}}
 function! eskk#unmap_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
-    if s:is_skip_key(a:key)
+    if s:is_no_map_key(a:key)
         return
     endif
 
