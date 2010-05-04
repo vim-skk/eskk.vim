@@ -454,7 +454,7 @@ function! eskk#out_of_idx_error(from, ...) "{{{
     return s:build_error(a:from, ['out of index'] + a:000)
 endfunction "}}}
 function! eskk#parse_error(from, ...) "{{{
-    return s:build_error(a:from, [':map parse error'] + a:000)
+    return s:build_error(a:from, ['parse error'] + a:000)
 endfunction "}}}
 function! eskk#assertion_failure_error(from, ...) "{{{
     " This is only used from eskk#util#assert().
