@@ -323,8 +323,6 @@ function! eskk#is_supported_mode(mode) "{{{
 endfunction "}}}
 function! eskk#register_mode(mode) "{{{
     call add(s:available_modes, a:mode)
-    let fmt = 'lnoremap <expr> <Plug>(eskk-mode-to-%s) eskk#set_mode(%s)'
-    execute printf(fmt, a:mode, string(a:mode))
 endfunction "}}}
 function! eskk#get_registered_modes() "{{{
     return s:available_modes
