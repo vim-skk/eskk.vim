@@ -105,6 +105,8 @@ function! s:map_named_key(key) "{{{
         return lhs
     endif
 
+    " XXX: :lmap can't remap. It's possibly Vim's bug.
+    " So I also prepare :noremap! mappings.
     execute
     \   'lnoremap'
     \   '<expr><silent>'
