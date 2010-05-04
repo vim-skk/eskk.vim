@@ -151,18 +151,49 @@ function! s:buftable.rewrite() dict "{{{
     let bs = repeat(s:BS, eskk#util#mb_strlen(self._old_str))
     return bs . self.get_display_str()
 endfunction "}}}
+
 function! s:buftable.get_display_str() dict "{{{
-    let ret = ''
-    for phase in self.get_lower_phases()
-        let buf_str = self.get_buf_str(phase)
-        " 1. marker string
-        " 2. filter string
-        " 3. rom string
-        let ret .= self.get_marker(phase)
-        let ret .= buf_str.get_filter_str()
-        let ret .= buf_str.get_rom_str()
-    endfor
-    return ret
+    let phase = self._henkan_phase
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        return s:get_normal_display_str(self)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        return s:get_henkan_display_str(self)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        return s:get_okuri_display_str(self)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        return s:get_henkan_select_display_str(self)
+    else
+        throw eskk#not_implemented_error(['eskk', 'buftable'])
+    endif
+endfunction "}}}
+function! s:get_normal_display_str(this) "{{{
+    let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    return
+    \   buf_str.get_filter_str()
+    \   . buf_str.get_rom_str()
+endfunction "}}}
+function! s:get_henkan_display_str(this) "{{{
+    let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    return
+    \   a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    \   . buf_str.get_filter_str()
+    \   . buf_str.get_rom_str()
+endfunction "}}}
+function! s:get_okuri_display_str(this) "{{{
+    let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    return
+    \   s:get_henkan_display_str()
+    \   . a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    \   . buf_str.get_filter_str()
+    \   . buf_str.get_rom_str()
+endfunction "}}}
+function! s:get_henkan_select_display_str(this) "{{{
+    let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    return
+    \   a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    \   . buf_str.get_filter_str()
+    \   . buf_str.get_rom_str()
 endfunction "}}}
 
 
