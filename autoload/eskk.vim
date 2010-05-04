@@ -103,6 +103,9 @@ function! s:map_named_key(key) "{{{
     "   `<Plug>(eskk:filter:^A)` (^A is control character)
 
     let lhs = printf('<Plug>(eskk:filter:%s)', a:key)
+    if maparg(lhs, 'l') != ''
+        return lhs
+    endif
 
     execute
     \   'lnoremap'
