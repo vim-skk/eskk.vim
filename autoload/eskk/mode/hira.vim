@@ -35,8 +35,6 @@ endfunction "}}}
 
 " Filter functions
 function! eskk#mode#hira#filter(stash) "{{{
-    " TODO Handle special keys registered in maptable.
-
     let char = a:stash.char
     let henkan_phase = a:stash.buftable.get_henkan_phase()
 
