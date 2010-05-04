@@ -178,7 +178,7 @@ function! eskk#get_sticky_char() "{{{
     endif
 
     redir => output
-    silent lmap <buffer>
+    silent lmap
     redir END
 
     for line in split(output, '\n')
