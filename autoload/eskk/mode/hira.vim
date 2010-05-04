@@ -101,8 +101,13 @@ function! s:filter_rom_to_hira(stash) "{{{
         " No candidates.
         " Remove rom_str[-2].
         call eskk#util#logf('%s - no candidates.', rom_str)
-        call buf_str.pop_rom_str()
-        call buf_str.push_rom_str(char)
+        if strlen(rom_str) == 1
+            call buf_str.clear_rom_str()
+            let a:stash.option.return = rom_str
+        else
+            call buf_str.pop_rom_str()
+            call buf_str.push_rom_str(char)
+        endif
         return
     endif
 endfunction "}}}
