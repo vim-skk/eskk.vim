@@ -33,21 +33,22 @@ function! eskk#mode#hira#hook_fn_do_lmap() "{{{
     lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
 endfunction "}}}
 
-function! eskk#mode#hira#do_q_key() "{{{
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
-    let phase = buftable.get_henkan_phase()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call buf_str.clear_rom_str()
-        call buf_str.clear_filter_str()
-
-        " Toggle current table.
-        let s:current_table = (s:current_table is s:rom_to_hira ? s:rom_to_kata : s:rom_to_hira)
+function! eskk#mode#hira#do_q_key(again, stash) "{{{
+    if !a:again
+        return eskk#call_via_filter('eskk#mode#hira#do_q_key', [1])
     else
-    endif
+        let buf_str = a:stash.buftable.get_current_buf_str()
+        let phase = a:stash.buftable.get_henkan_phase()
 
-    return eskk#rewrite()
+        if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+            call buf_str.clear_rom_str()
+            call buf_str.clear_filter_str()
+
+            " Toggle current table.
+            let s:current_table = (s:current_table is s:rom_to_hira ? s:rom_to_kata : s:rom_to_hira)
+        else
+        endif
+    endif
 endfunction "}}}
 
 function! eskk#mode#hira#filter(stash) "{{{
