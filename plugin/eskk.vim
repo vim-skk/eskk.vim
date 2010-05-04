@@ -112,14 +112,6 @@ endfunction "}}}
 
 " }}}
 
-" :EskkReset {{{
-
-command!
-\   EskkReset
-\   call eskk#init_keys()
-
-" }}}
-
 " }}}
 
 
