@@ -20,6 +20,8 @@ let s:eskk_mode = ''
 let s:available_modes = {}
 " Buffer strings for inserted, filtered and so on.
 let s:buftable = eskk#buftable#new()
+
+let s:lock_old_str = 0
 " }}}
 
 " Write timestamp to debug file {{{
@@ -427,7 +429,9 @@ function! s:filter(char, Fn, head_args) "{{{
     \   'option': opt,
     \   'buftable': s:buftable,
     \}]
-    call s:buftable.set_old_str(s:buftable.get_display_str())
+    if !s:lock_old_str
+        call s:buftable.set_old_str(s:buftable.get_display_str())
+    endif
 
     try
         call call(a:Fn, a:head_args + filter_args)
@@ -501,18 +505,23 @@ function! eskk#default_filter(stash) "{{{
     let char = a:stash.char
     " TODO Changing priority?
 
-    if char ==# "\<BS>" || char ==# "\<C-h>"
-        call s:do_backspace(a:stash)
-    elseif char ==# "\<CR>"
-        call s:do_enter(a:stash)
-    elseif eskk#is_sticky_key(char)
-        return eskk#sticky_key(1, a:stash)
-    elseif eskk#is_big_letter(char)
-        return eskk#sticky_key(1, a:stash)
-        \    . eskk#filter(tolower(char))
-    else
-        let a:stash.option.return = a:stash.char
-    endif
+    let s:lock_old_str = 1
+    try
+        if char ==# "\<BS>" || char ==# "\<C-h>"
+            call s:do_backspace(a:stash)
+        elseif char ==# "\<CR>"
+            call s:do_enter(a:stash)
+        elseif eskk#is_sticky_key(char)
+            return eskk#sticky_key(1, a:stash)
+        elseif eskk#is_big_letter(char)
+            return eskk#sticky_key(1, a:stash)
+            \    . eskk#filter(tolower(char))
+        else
+            let a:stash.option.return = a:stash.char
+        endif
+    finally
+        let s:lock_old_str = 0
+    endtry
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let [opt, buftable] = [a:stash.option, a:stash.buftable]
