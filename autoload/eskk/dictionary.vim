@@ -38,19 +38,34 @@ function! s:search_linear(lines, key, okuri) "{{{
         if stridx(line, needle) == 0
             call eskk#util#logf('found matched line - %s', string(line))
 
-            let found = line[strlen(needle) + 2 :]
-            let semicolon = stridx(found, ';')
-            let slash = stridx(found, '/')
-            if semicolon != -1
-                return found[: semicolon - 1]
-            elseif slash != -1
-                return found[: slash - 1]
-            else
-                throw eskk#parse_error(['eskk', 'dictionary'], printf("Can't parse %s!", string(line))
-            endif
+            try
+                let candidates = s:parse_skk_dict_line(line, needle)
+            catch /^eskk: dictionary - parse error/
+                call eskk#util#log("Can't parse line...")
+                return -1
+            endtry
+            return candidates[0].result
         endif
     endfor
     return -1
+endfunction "}}}
+
+function! s:parse_skk_dict_line(line, needle) "{{{
+    let line = a:line[strlen(a:needle) + 1 :]
+    " Assert line =~# '^/.\+/$'
+    let line = line[1:-2]
+
+    let candidates = []
+    for _ in split(line, '/')
+        let semicolon = stridx(_, ';')
+        if semicolon != -1
+            call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
+        else
+            call add(candidates, {'result': _, 'annotation': ''})
+        endif
+    endfor
+
+    return candidates
 endfunction "}}}
 
 " }}}
