@@ -25,7 +25,7 @@ function! s:search_next_candidate(dict, key, okuri) "{{{
         endif
     endfor
 
-    return 'henkan!'
+    return -1
 endfunction "}}}
 
 function! s:search_binary(lines, key, okuri) "{{{

@@ -77,7 +77,13 @@ function s:henkan_key(stash) "{{{
 
     let buf_str = a:stash.buftable.get_current_buf_str()
     call buf_str.clear_rom_str()
-    call buf_str.set_filter_str(s:current_henkan_result.get_next())
+
+    let candidate = s:current_henkan_result.get_next()
+    if type(candidate) == type("")
+        call buf_str.set_filter_str(candidate)
+    else
+        " TODO Jisyo touroku
+    endif
 endfunction "}}}
 function! s:filter_rom_to_hira(stash) "{{{
     let char = a:stash.char
