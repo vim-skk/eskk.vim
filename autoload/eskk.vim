@@ -542,14 +542,7 @@ function! s:do_enter(stash) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         let a:stash.option.return = "\<CR>"
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call normal_buf_str.clear_rom_str()
-        call normal_buf_str.set_filter_str(
-        \   henkan_buf_str.get_filter_str()
-        \   . henkan_buf_str.get_rom_str()
-        \)
-
-        call henkan_buf_str.clear_filter_str()
-        call henkan_buf_str.clear_rom_str()
+        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
         function! s:finalize()
             if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -564,18 +557,7 @@ function! s:do_enter(stash) "{{{
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call normal_buf_str.clear_rom_str()
-        call normal_buf_str.set_filter_str(
-        \   henkan_buf_str.get_filter_str()
-        \   . henkan_buf_str.get_rom_str()
-        \   . okuri_buf_str.get_filter_str()
-        \   . okuri_buf_str.get_rom_str()
-        \)
-
-        call henkan_buf_str.clear_filter_str()
-        call henkan_buf_str.clear_rom_str()
-        call okuri_buf_str.clear_filter_str()
-        call okuri_buf_str.clear_rom_str()
+        call buftable.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
         function! s:finalize()
             if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -590,14 +572,7 @@ function! s:do_enter(stash) "{{{
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        call normal_buf_str.clear_rom_str()
-        call normal_buf_str.set_filter_str(
-        \   henkan_select_buf_str.get_filter_str()
-        \   . henkan_select_buf_str.get_rom_str()
-        \)
-
-        call henkan_select_buf_str.clear_filter_str()
-        call henkan_select_buf_str.clear_rom_str()
+        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
         function! s:finalize()
             if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL

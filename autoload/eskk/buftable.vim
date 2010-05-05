@@ -288,6 +288,26 @@ function! s:buftable.register_phase_leave_hook_fn(phases, Fn) dict "{{{
 endfunction "}}}
 
 
+function! s:buftable.move_buf_str(from_phases, to_phase) dict "{{{
+    if type(a:from_phases) != type([])
+        return self.move_buf_str([a:from_phases], a:to_phase)
+    endif
+
+    let str = ''
+    for phase in a:from_phases
+        let buf_str = self.get_buf_str(phase)
+        let str .= buf_str.get_filter_str()
+        let str .= buf_str.get_rom_str()
+        call buf_str.clear_filter_str()
+        call buf_str.clear_rom_str()
+    endfor
+
+    let buf_str = self.get_buf_str(a:to_phase)
+    call buf_str.clear_rom_str()
+    call buf_str.set_filter_str(str)
+endfunction "}}}
+
+
 function! s:validate_table_idx(table, henkan_phase) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
         throw eskk#out_of_idx_error(["eskk", "buftable"])
