@@ -51,6 +51,14 @@ function! eskk#mode#hira#do_q_key(again, stash) "{{{
     endif
 endfunction "}}}
 
+function! s:finalize() "{{{
+    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        let buf_str = eskk#get_buftable().get_current_buf_str()
+        call buf_str.clear_filter_str()
+    endif
+endfunction "}}}
+
+
 function! eskk#mode#hira#filter(stash) "{{{
     let char = a:stash.char
     let henkan_phase = a:stash.buftable.get_henkan_phase()
@@ -114,13 +122,6 @@ function! s:filter_rom_to_hira(stash) "{{{
         endif
 
         " Clear filtered string when eskk#filter()'s finalizing.
-        function! s:finalize()
-            if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = eskk#get_buftable().get_current_buf_str()
-                call buf_str.clear_filter_str()
-            endif
-        endfunction
-
         call add(
         \   a:stash.option.finalize_fn,
         \   eskk#util#get_local_func('finalize', s:SID())
