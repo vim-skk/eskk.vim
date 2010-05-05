@@ -160,6 +160,9 @@ endfunction "}}}
 function! s:get_mode_func(func_str) "{{{
     return printf('eskk#mode#%s#%s', eskk#get_mode(), a:func_str)
 endfunction "}}}
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
 
 
 
@@ -529,11 +532,63 @@ function! s:do_backspace(stash) "{{{
     endif
 endfunction "}}}
 function! s:do_enter(stash) "{{{
-    let buftable = a:stash.buftable
-    let phase = buftable.get_henkan_phase()
+    call eskk#util#log("s:do_enter()")
+
+    let normal_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str  = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let phase = a:stash.buftable.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call buftable.reset()
+        let a:stash.option.return = "\<CR>"
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call normal_buf_str.clear_rom_str()
+        call normal_buf_str.set_filter_str(
+        \   henkan_buf_str.get_filter_str()
+        \   . henkan_buf_str.get_rom_str()
+        \)
+
+        call henkan_buf_str.clear_filter_str()
+        call henkan_buf_str.clear_rom_str()
+
+        function! s:finalize()
+            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = eskk#get_buftable().get_current_buf_str()
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+        call add(
+        \   a:stash.option.finalize_fn,
+        \   eskk#util#get_local_func('finalize', s:SID())
+        \)
+
+        call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call normal_buf_str.clear_rom_str()
+        call normal_buf_str.set_filter_str(
+        \   henkan_buf_str.get_filter_str()
+        \   . henkan_buf_str.get_rom_str()
+        \   . okuri_buf_str.get_filter_str()
+        \   . okuri_buf_str.get_rom_str()
+        \)
+
+        call henkan_buf_str.clear_filter_str()
+        call henkan_buf_str.clear_rom_str()
+        call okuri_buf_str.clear_filter_str()
+        call okuri_buf_str.clear_rom_str()
+
+        function! s:finalize()
+            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = eskk#get_buftable().get_current_buf_str()
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+        call add(
+        \   a:stash.option.finalize_fn,
+        \   eskk#util#get_local_func('finalize', s:SID())
+        \)
+
+        call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     else
         throw eskk#not_implemented_error(['eskk'])
     endif
