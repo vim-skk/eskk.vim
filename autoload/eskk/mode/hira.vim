@@ -91,28 +91,45 @@ function! eskk#mode#hira#filter(stash) "{{{
     endif
 endfunction "}}}
 function s:henkan_key(stash) "{{{
-    " Change henkan phase to henkan select phase.
-    call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    let phase = a:stash.buftable.get_henkan_phase()
 
-    let s:current_henkan_result = s:skk_dict.refer(a:stash.buftable)
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        " Enter henkan select phase.
+        call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
-    " Clear phase henkan/okuri buffer string.
-    let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    call henkan_buf_str.clear_rom_str()
-    call henkan_buf_str.clear_filter_str()
-    let okuri_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    call okuri_buf_str.clear_rom_str()
-    call okuri_buf_str.clear_filter_str()
+        let s:current_henkan_result = s:skk_dict.refer(a:stash.buftable)
 
-    let buf_str = a:stash.buftable.get_current_buf_str()
-    call buf_str.clear_rom_str()
-    let candidate = s:current_henkan_result.get_next()
-    if type(candidate) == type("")
-        " Set candidate.
-        call buf_str.set_filter_str(candidate)
+        " Clear phase henkan/okuri buffer string.
+        " Assumption: `s:skk_dict.refer()` saves necessary strings.
+        let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        call henkan_buf_str.clear_rom_str()
+        call henkan_buf_str.clear_filter_str()
+        let okuri_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        call okuri_buf_str.clear_rom_str()
+        call okuri_buf_str.clear_filter_str()
+
+        let buf_str = a:stash.buftable.get_current_buf_str()
+        let candidate = s:current_henkan_result.get_next()
+        if type(candidate) == type("")
+            " Set candidate.
+            call buf_str.set_filter_str(candidate)
+        else
+            " No candidates.
+            " TODO Jisyo touroku
+        endif
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        let buf_str = a:stash.buftable.get_current_buf_str()
+        let candidate = s:current_henkan_result.get_next()
+        if type(candidate) == type("")
+            " Set candidate.
+            call buf_str.set_filter_str(candidate)
+        else
+            throw eskk#never_reached_error(['eskk', 'mode', 'hira'])
+        endif
     else
-        " No candidates.
-        " TODO Jisyo touroku
+        let msg = printf("s:henkan_key() does not support phase %d.", phase)
+        throw eskk#internal_error(['eskk', 'mode', 'hira'], msg)
     endif
 endfunction "}}}
 function! s:filter_rom_to_hira(stash) "{{{
