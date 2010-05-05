@@ -376,6 +376,12 @@ endfunction "}}}
 function! eskk#rewrite() "{{{
     return s:buftable.rewrite()
 endfunction "}}}
+function! eskk#register_phase_enter_hook_fn(...) "{{{
+    call call(s:buftable.register_phase_enter_hook_fn, a:000, s:buftable)
+endfunction "}}}
+function! eskk#register_phase_leave_hook_fn(...) "{{{
+    call call(s:buftable.register_phase_leave_hook_fn, a:000, s:buftable)
+endfunction "}}}
 
 
 

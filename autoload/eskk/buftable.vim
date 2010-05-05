@@ -104,6 +104,8 @@ let s:buftable = {
 \       s:buffer_string_new(),
 \       s:buffer_string_new(),
 \   ],
+\   '_phase_enter_hook_fn': map(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, g:eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU), '[]'),
+\   '_phase_leave_hook_fn': map(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, g:eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU), '[]'),
 \   '_old_str': '',
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
@@ -209,7 +211,18 @@ endfunction "}}}
 " TODO フィルタ関数実行中はいじれないようにする？
 function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
+
+    for Fn in self._phase_leave_hook_fn[self._henkan_phase]
+        call call(Fn, [])
+        unlet Fn
+    endfor
+
     let self._henkan_phase = a:henkan_phase
+
+    for Fn in self._phase_enter_hook_fn[self._henkan_phase]
+        call call(Fn, [])
+        unlet Fn
+    endfor
 endfunction "}}}
 
 
@@ -243,6 +256,24 @@ function! s:buftable.get_marker(henkan_phase) dict "{{{
 endfunction "}}}
 function! s:buftable.get_current_marker() "{{{
     return self.get_marker(self.get_henkan_phase())
+endfunction "}}}
+
+
+function! s:buftable.register_phase_enter_hook_fn(phase, Fn) dict "{{{
+    if !eskk#util#has_idx(self._phase_enter_hook_fn, a:phase)
+        let msg = printf("self._phase_enter_hook_fn[%d] - No such index", a:phase)
+        throw eskk#out_of_idx_error(['eskk'], msg)
+    endif
+
+    call add(self._phase_enter_hook_fn[a:phase], a:Fn)
+endfunction "}}}
+function! s:buftable.register_phase_leave_hook_fn(phase, Fn) dict "{{{
+    if !eskk#util#has_idx(self._phase_leave_hook_fn, a:phase)
+        let msg = printf("self._phase_leave_hook_fn[%d] - No such index", a:phase)
+        throw eskk#out_of_idx_error(['eskk'], msg)
+    endif
+
+    call add(self._phase_leave_hook_fn[a:phase], a:Fn)
 endfunction "}}}
 
 
