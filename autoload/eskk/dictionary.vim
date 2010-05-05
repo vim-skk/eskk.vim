@@ -14,12 +14,13 @@ set cpo&vim
 " Searching Functions {{{
 
 function! s:search_next_candidate(dict, key_filter, okuri_rom, okuri_filter) "{{{
-    let needle = a:key_filter . (a:okuri_rom != '' ? a:okuri_rom[0] : '') . ' '
+    let has_okuri = a:okuri_rom != ''
+    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
     for ph_dict in a:dict._dicts
         if ph_dict.sorted
-            let result = s:search_binary(ph_dict.get_lines(), needle, 10)
+            let result = s:search_binary(ph_dict, needle, has_okuri, 10)
         else
-            let result = s:search_linear(ph_dict.get_lines(), needle)
+            let result = s:search_linear(ph_dict, needle, has_okuri)
         endif
         if type(result) == type("")
             return result . a:okuri_filter
@@ -42,10 +43,10 @@ function! s:search_binary(lines, needle, limit) "{{{
     return s:search_linear(a:lines, a:needle, min)
 endfunction "}}}
 
-function! s:search_linear(lines, needle, ...) "{{{
-    let begin_pos = a:0 != 0 ? a:1 : 0
-    while eskk#util#has_idx(a:lines, begin_pos)
-        let line = a:lines[begin_pos]
+function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
+    let begin_pos = a:has_okuri ? a:ph_dict.okuri_ari_lnum : a:ph_dict.okuri_nasi_lnum
+    while eskk#util#has_idx(a:ph_dict.get_lines(), begin_pos)
+        let line = a:ph_dict.get_lines()[begin_pos]
         if stridx(line, a:needle) == 0
             call eskk#util#logf('found matched line - %s', string(line))
 
@@ -126,6 +127,8 @@ lockvar s:henkan_result
 let s:physical_dict = {
 \   '_content_lines': [],
 \   '_loaded': 0,
+\   'okuri_ari_lnum': 0,
+\   'okuri_nasi_lnum': 0,
 \   'path': '',
 \   'sorted': 0,
 \   'encoding': '',
@@ -146,15 +149,9 @@ function! s:physical_dict.get_lines() dict "{{{
 
     let path = expand(self.path)
     if filereadable(path)
-        let self._content_lines = readfile(path)
-        call filter(self._content_lines, 'v:val !~# "^;;"')
-
-        " TODO I don't know what it means...so avoid reading.
-        call filter(self._content_lines, 'v:val !~# "^#[^ ]"')
-        call filter(self._content_lines, 'v:val !~# "^>[^ ]"')
-
-        call sort(self._content_lines)
-        call map(self._content_lines, 's:iconv(v:val, self.encoding, &l:encoding)')
+        let self._content_lines   = readfile(path, 'b')
+        let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
+        let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
     else
         call eskk#util#logf("Can't read '%s'!", path)
     endif
