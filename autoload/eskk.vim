@@ -273,6 +273,8 @@ function! s:step_henkan_phase(buftable) "{{{
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return 0    " failed.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        return 0    " failed.
     else
         throw eskk#internal_error(['eskk'])
     endif
