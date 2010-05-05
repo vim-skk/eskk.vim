@@ -83,6 +83,14 @@ function s:henkan_key(stash) "{{{
 
     let s:current_henkan_result = s:skk_dict.refer(a:stash.buftable)
 
+    " Clear phase henkan/okuri buffer string.
+    let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    call henkan_buf_str.clear_rom_str()
+    call henkan_buf_str.clear_filter_str()
+    let okuri_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    call okuri_buf_str.clear_rom_str()
+    call okuri_buf_str.clear_filter_str()
+
     let buf_str = a:stash.buftable.get_current_buf_str()
     call buf_str.clear_rom_str()
 
