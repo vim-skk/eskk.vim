@@ -258,21 +258,33 @@ function! s:buftable.get_current_marker() "{{{
 endfunction "}}}
 
 
-function! s:buftable.register_phase_enter_hook_fn(phase, Fn) dict "{{{
-    if !eskk#util#has_idx(self._phase_enter_hook_fn, a:phase)
-        let msg = printf("self._phase_enter_hook_fn[%d] - No such index", a:phase)
-        throw eskk#out_of_idx_error(['eskk'], msg)
+function! s:buftable.register_phase_enter_hook_fn(phases, Fn) dict "{{{
+    if type(a:phases) != type([])
+        return self.register_phase_enter_hook_fn([a:phases], a:Fn)
     endif
 
-    call add(self._phase_enter_hook_fn[a:phase], a:Fn)
+    for phase in a:phases
+        if !eskk#util#has_idx(self._phase_enter_hook_fn, phase)
+            let msg = printf("self._phase_enter_hook_fn[%d] - No such index", phase)
+            throw eskk#out_of_idx_error(['eskk'], msg)
+        endif
+
+        call add(self._phase_enter_hook_fn[phase], a:Fn)
+    endfor
 endfunction "}}}
-function! s:buftable.register_phase_leave_hook_fn(phase, Fn) dict "{{{
-    if !eskk#util#has_idx(self._phase_leave_hook_fn, a:phase)
-        let msg = printf("self._phase_leave_hook_fn[%d] - No such index", a:phase)
-        throw eskk#out_of_idx_error(['eskk'], msg)
+function! s:buftable.register_phase_leave_hook_fn(phases, Fn) dict "{{{
+    if type(a:phases) != type([])
+        return self.register_phase_leave_hook_fn([a:phases], a:Fn)
     endif
 
-    call add(self._phase_leave_hook_fn[a:phase], a:Fn)
+    for phase in a:phases
+        if !eskk#util#has_idx(self._phase_leave_hook_fn, phase)
+            let msg = printf("self._phase_leave_hook_fn[%d] - No such index", phase)
+            throw eskk#out_of_idx_error(['eskk'], msg)
+        endif
+
+        call add(self._phase_leave_hook_fn[phase], a:Fn)
+    endfor
 endfunction "}}}
 
 
