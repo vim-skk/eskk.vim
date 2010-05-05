@@ -13,7 +13,7 @@ let s:rom_to_hira = eskk#table#new('rom_to_hira')
 let s:rom_to_kata = eskk#table#new('rom_to_kata')
 let s:current_table = s:rom_to_hira
 
-let s:skk_dict = eskk#dictionary#new([{'path': g:eskk_dictionary, 'sorted': 0}, {'path': g:eskk_large_dictionary, 'sorted': 1}])
+let s:skk_dict = eskk#dictionary#new([g:eskk_dictionary, g:eskk_large_dictionary])
 let s:current_henkan_result = {}
 " }}}
 

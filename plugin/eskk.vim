@@ -29,11 +29,42 @@ endif
 if !exists("g:eskk_dictionary")
   let g:eskk_dictionary = "~/.skk-jisyo"
 endif
-if !exists("g:eskk_backup_dictionary")
-  let g:eskk_backup_dictionary = g:eskk_dictionary . ".BAK"
+if type(g:eskk_dictionary) == type("")
+    let s:temp = g:eskk_dictionary
+    unlet g:eskk_dictionary
+    let g:eskk_dictionary = {
+    \   'path': s:temp,
+    \   'sorted': 0,
+    \   'encoding': 'euc-jp',
+    \}
+    unlet s:temp
+elseif type(g:eskk_dictionary) != type({})
+    call eskk#util#warn(
+    \   eskk#user_error(['eskk'], "g:eskk_dictionary's type is either String or Dictionary.")
+    \)
 endif
+
+
 if !exists("g:eskk_large_dictionary")
   let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
+endif
+if type(g:eskk_large_dictionary) == type("")
+    let s:temp = g:eskk_large_dictionary
+    unlet g:eskk_large_dictionary
+    let g:eskk_large_dictionary = {
+    \   'path': s:temp,
+    \   'sorted': 1,
+    \   'encoding': 'euc-jp',
+    \}
+    unlet s:temp
+elseif type(g:eskk_large_dictionary) != type({})
+    call eskk#util#warn(
+    \   eskk#user_error(['eskk'], "g:eskk_large_dictionary's type is either String or Dictionary.")
+    \)
+endif
+
+if !exists("g:eskk_backup_dictionary")
+    let g:eskk_backup_dictionary = g:eskk_dictionary.path . ".BAK"
 endif
 
 " Mappings
