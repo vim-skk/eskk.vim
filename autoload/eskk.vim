@@ -150,6 +150,7 @@ function! eskk#default_mapped_keys() "{{{
     \   "<Tab>",
     \   "<BS>",
     \   "<C-h>",
+    \   "<CR>",
     \]
 endfunction "}}}
 
