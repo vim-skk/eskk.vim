@@ -75,6 +75,17 @@ function! eskk#mode#hira#filter(stash) "{{{
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return s:filter_rom_to_hira(a:stash)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        if eskk#is_henkan_key(char)
+            return s:henkan_key(a:stash)
+        else
+            " Leave phase henkan select
+            " unless char is one of some specific characters.
+            call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+            " Move henkan select buffer string to normal.
+            call a:stash.buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+            return s:filter_rom_to_hira(a:stash)
+        endif
     else
         return eskk#default_filter(a:stash)
     endif
