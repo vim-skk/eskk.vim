@@ -116,12 +116,13 @@ let s:physical_dict = {
 \   '_loaded': 0,
 \   'path': '',
 \   'sorted': 0,
+\   'encoding': '',
 \}
 
-function! s:physical_dict_new(path, sorted) "{{{
+function! s:physical_dict_new(path, sorted, encoding) "{{{
     return extend(
     \   deepcopy(s:physical_dict),
-    \   {'path': a:path, 'sorted': a:sorted},
+    \   {'path': a:path, 'sorted': a:sorted, 'encoding': a:encoding},
     \   'force'
     \)
 endfunction "}}}
@@ -133,13 +134,21 @@ function! s:physical_dict.get_lines() dict "{{{
 
     let path = expand(self.path)
     if filereadable(path)
-        let self._content_lines = readfile(path)
+        let self._content_lines = map(readfile(path), 's:iconv(v:val, self.encoding, &l:encoding)')
     else
         call eskk#util#logf("Can't read '%s'!", path)
     endif
     let self._loaded = 1
 
     return self._content_lines
+endfunction "}}}
+
+function! s:iconv(expr, from, to) "{{{
+    if a:from == '' || a:to == '' || a:from ==? a:to
+        return a:expr
+    endif
+    let result = iconv(a:expr, a:from, a:to)
+    return result != '' ? result : a:expr
 endfunction "}}}
 
 lockvar s:physical_dict
@@ -160,7 +169,7 @@ let s:dict = {
 
 function! eskk#dictionary#new(dict_info) "{{{
     if type(a:dict_info) == type([])
-        let dicts = map(copy(a:dict_info), 's:physical_dict_new(v:val.path, v:val.sorted)')
+        let dicts = map(copy(a:dict_info), 's:physical_dict_new(v:val.path, v:val.sorted, v:val.encoding)')
     elseif type(a:dict_info) == type({})
         return eskk#dictionary#new([a:dict_info])
     else
