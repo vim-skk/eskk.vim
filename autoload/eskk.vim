@@ -496,8 +496,6 @@ function! eskk#has_default_filter(char) "{{{
     \   || eskk#is_big_letter(a:char)
 endfunction "}}}
 function! eskk#default_filter(stash) "{{{
-    call eskk#util#log('eskk#default_filter()')
-
     let char = a:stash.char
     " TODO Changing priority?
 
