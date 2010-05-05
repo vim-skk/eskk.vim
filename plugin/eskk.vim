@@ -22,7 +22,7 @@ if !exists('g:eskk_debug')
     let g:eskk_debug = 0
 endif
 if !exists('g:eskk_debug_wait_ms')
-    let g:eskk_debug_wait_ms = 500
+    let g:eskk_debug_wait_ms = 0
 endif
 
 " Dictionary
