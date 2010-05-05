@@ -111,12 +111,12 @@ function! s:map_named_key(key) "{{{
     " So I also prepare :noremap! mappings.
     execute
     \   'lnoremap'
-    \   '<expr><silent>'
+    \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
     execute
     \   'noremap!'
-    \   '<expr><silent>'
+    \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
 
