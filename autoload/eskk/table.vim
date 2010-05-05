@@ -43,7 +43,7 @@ function! s:parse_arg(arg) "{{{
             if opt_name ==# 'rest'
                 let opt.rest = opt_value
             else
-                throw eskk#error#user_error('eskk', printf("unknown option '%s'.", opt_name))
+                throw eskk#user_error(['eskk', 'table'], printf("unknown option '%s'.", opt_name))
             endif
         else
             let arg = eskk#util#unget_arg(arg, a)
@@ -65,7 +65,7 @@ function! s:parse_arg(arg) "{{{
     endwhile
     if lhs == '' && rhs == ''
         call eskk#util#logf('lhs = %s, rhs = %s', lhs, rhs)
-        throw eskk#error#user_error('eskk', 'Map [-rest=...] lhs rhs')
+        throw eskk#user_error(['eskk', 'table'], 'Map [-rest=...] lhs rhs')
     endif
 
     return {
@@ -185,7 +185,7 @@ function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
     if eskk#util#has_key_f(s:table_defs, [a:table_name, a:lhs])
         unlet s:table_defs[a:table_name][a:lhs]
     elseif !a:silent
-        throw eskk#error#user_error('eskk', 'No table mapping.')
+        throw eskk#user_error(['eskk', 'table'], 'No table mapping.')
     endif
 endfunction "}}}
 
@@ -217,7 +217,7 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
     call s:load_table(a:table_name)
 
     if empty(a:str_buf)
-        throw eskk#error#internal_error('eskk: table:')
+        throw eskk#internal_error(['eskk', 'table'])
     endif
 
     let no_table = {}
@@ -249,7 +249,7 @@ function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
 
     if !eskk#table#has_map(a:table_name, a:lhs)
         if a:0 == 0
-            throw eskk#error#argument_error('eskk: table:')
+            throw eskk#error#argument_error(['eskk', 'table'])
         else
             return a:1
         endif
@@ -269,7 +269,7 @@ function! eskk#table#get_rest(table_name, lhs, ...) "{{{
 
     if !eskk#table#has_rest(a:table_name, a:lhs)
         if a:0 == 0
-            throw eskk#error#argument_error('eskk: table:')
+            throw eskk#error#argument_error(['eskk', 'table'])
         else
             return a:1
         endif
@@ -281,12 +281,12 @@ endfunction "}}}
 
 
 " OO interface {{{
-let s:objective = {}
+let s:table_obj = {}
 
 function! eskk#table#new(table_name) "{{{
     call s:load_table(a:table_name)
 
-    let obj = deepcopy(s:objective)
+    let obj = deepcopy(s:table_obj)
     let obj.table_name = a:table_name
 
     return obj
@@ -295,32 +295,32 @@ endfunction "}}}
 
 " I need meta programming in Vim script!!
 
-function! s:objective.has_candidates(...) dict "{{{
+function! s:table_obj.has_candidates(...) dict "{{{
     return call('eskk#table#has_candidates', [self.table_name] + a:000)
 endfunction "}}}
 
-function! s:objective.get_candidates(...) dict "{{{
+function! s:table_obj.get_candidates(...) dict "{{{
     return call('eskk#table#get_candidates', [self.table_name] + a:000)
 endfunction "}}}
 
-function! s:objective.has_map(...) dict "{{{
+function! s:table_obj.has_map(...) dict "{{{
     return call('eskk#table#has_map', [self.table_name] + a:000)
 endfunction "}}}
 
-function! s:objective.get_map_to(...) dict "{{{
+function! s:table_obj.get_map_to(...) dict "{{{
     return call('eskk#table#get_map_to', [self.table_name] + a:000)
 endfunction "}}}
 
-function! s:objective.has_rest(...) dict "{{{
+function! s:table_obj.has_rest(...) dict "{{{
     return call('eskk#table#has_rest', [self.table_name] + a:000)
 endfunction "}}}
 
-function! s:objective.get_rest(...) dict "{{{
+function! s:table_obj.get_rest(...) dict "{{{
     return call('eskk#table#get_rest', [self.table_name] + a:000)
 endfunction "}}}
 
 
-lockvar s:objective
+lockvar s:table_obj
 " }}}
 
 " }}}

@@ -8,6 +8,11 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+function! eskk#table#rom_to_kata#load()
+    " dummy
+endfunction
+
+
 
 call eskk#table#define_macro()
 TableBegin rom_to_kata

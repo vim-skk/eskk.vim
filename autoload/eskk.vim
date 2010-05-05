@@ -10,19 +10,23 @@ set cpo&vim
 
 runtime! plugin/eskk.vim
 
-" Constants {{{
-let eskk#FROM_KEY_MAP = 'map'
-let eskk#FROM_STICKY_KEY_MAP = 'sticky'
-let eskk#FROM_BIG_LETTER = 'big'
-let eskk#FROM_MODECHANGE_KEY_MAP = 'mode'
+" Variables {{{
+let s:sticky_key_char = ''
+let s:henkan_key_char = ''
 
-let eskk#KEY_TYPE_UNKNOWN = 0
-let eskk#KEY_TYPE_STICKY_KEY = 1
-let eskk#KEY_TYPE_BIG_LETTER = 2
-
-let s:BS = "\<BS>"
+" Current mode.
+let s:eskk_mode = ''
+" Supported modes.
+let s:available_modes = {}
+" Buffer strings for inserted, filtered and so on.
+let s:buftable = eskk#buftable#new()
 " }}}
-" See s:initialize_once() for Variables.
+
+" Write timestamp to debug file {{{
+if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
+    call writefile(['', printf('--- %s ---', strftime('%c')), ''], expand(g:eskk_debug_file))
+endif
+" }}}
 
 " FIXME
 " 1. Enable lang mode
@@ -37,71 +41,117 @@ let s:BS = "\<BS>"
 
 " Functions {{{
 
-" Initialize
-function! s:initialize_once() "{{{
-    " FIXME:
-    " 1. On gVim, in Linux(ubuntu)
-    "   This message will appear as 'Error'.
-    " 2. But on Vim(CUI), in Linux(ubuntu)
-    "   This message will appear
-    "   as just message with WarningMsg
-    "   (this is desired behavior).
-    " 3. On gVim or Vim(CUI), in Windows
-    "   Same as 2.
-    " call eskk#util#log('Initialize variables...')
+" Initialize/Mappings
+function! s:is_no_map_key(key) "{{{
+    let char = eskk#util#eval_key(a:key)
 
-    " Current mode.
-    let s:eskk_mode = ''
-    " Async support?
-    let s:filter_is_async = 0
-    " Database of mappings.
-    let s:map = eskk#map#new()
-    " Supported modes.
-    let s:available_modes = []
-    " Buffer strings for inserted, filtered, and so on.
-    let s:buftable = eskk#buftable#new()
+    return eskk#is_henkan_key(char)
+    \   || eskk#is_sticky_key(char)
+    \   || maparg(char, 'l') =~? '^<plug>(eskk:\S\+)$'
 endfunction "}}}
-function! s:reset_variables() "{{{
-    call eskk#util#log('reset variables...')
+function! eskk#map_key(key) "{{{
+    " Assumption: a:key must be '<Bar>' not '|'.
 
-    let s:eskk_mode = ''
-    call s:buftable.reset()
-endfunction "}}}
-function! s:set_up() "{{{
-    " Clear current variable states.
-    call s:reset_variables()
+    if s:is_no_map_key(a:key)
+        return
+    endif
 
-    " Register Mappings.
-    call s:set_up_mappings()
+    " Save current a:key mapping
+    "
+    " TODO Check if a:key is buffer local.
+    " Because if it is not buffer local,
+    " there is no necessity to stash current a:key.
+    " if maparg(a:key, 'l') != ''
+    "     execute
+    "     \   'lnoremap'
+    "     \   s:stash_lang_key_map(a:key)
+    "     \   maparg(a:key, 'l')
+    " endif
 
-    " TODO
-    " Save previous mode/state.
-    call eskk#set_mode(g:eskk_initial_mode)
+    " Map a:key.
+    let named_key = s:map_named_key(a:key)
+    execute
+    \   'lmap'
+    \   '<buffer>'
+    \   a:key
+    \   named_key
 endfunction "}}}
-function! s:set_up_mappings() "{{{
-    call eskk#util#log('set up mappings...')
+function! eskk#unmap_key(key) "{{{
+    " Assumption: a:key must be '<Bar>' not '|'.
 
-    for key in g:eskk_mapped_key
-        call eskk#map_key(key)
-    endfor
+    if s:is_no_map_key(a:key)
+        return
+    endif
+
+    " Unmap a:key.
+    execute
+    \   'lunmap'
+    \   '<buffer>'
+    \   a:key
+
+    " TODO Restore buffer local mapping.
+
 endfunction "}}}
-function! s:execute_map(modes, options, remap_p, lhs, rhs) "{{{
-    for mode in split(a:modes, '\zs')
-        execute printf('%s%smap', mode, (a:remap_p ? '' : 'nore'))
-        \       a:options
-        \       a:lhs
-        \       a:rhs
-    endfor
+function! s:stash_lang_key_map(key) "{{{
+    return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
-function! eskk#map_key(char) "{{{
-    call s:execute_map(
-    \   'l',
-    \   '<buffer><expr><silent>',
-    \   0,
-    \   a:char,
-    \   printf(
-    \       'eskk#filter_key(%s)',
-    \       string(a:char)))
+function! s:map_named_key(key) "{{{
+    " NOTE:
+    " a:key is escaped. So when a:key is '<C-a>', return value is
+    "   `<Plug>(eskk:filter:<C-a>)`
+    " not
+    "   `<Plug>(eskk:filter:^A)` (^A is control character)
+
+    let lhs = printf('<Plug>(eskk:filter:%s)', a:key)
+    if maparg(lhs, 'l') != ''
+        return lhs
+    endif
+
+    " XXX: :lmap can't remap. It's possibly Vim's bug.
+    " So I also prepare :noremap! mappings.
+    execute
+    \   'lnoremap'
+    \   '<expr>'
+    \   lhs
+    \   printf('eskk#filter(%s)', string(a:key))
+    execute
+    \   'noremap!'
+    \   '<expr>'
+    \   lhs
+    \   printf('eskk#filter(%s)', string(a:key))
+
+    execute
+    \   'lnoremap'
+    \   '<expr>'
+    \   printf('<Plug>(eskk:default:filter:%s)', a:key)
+    \   printf('eskk#call_via_filter("eskk#default_filter", [], %s)', string(a:key))
+    execute
+    \   'noremap!'
+    \   '<expr>'
+    \   printf('<Plug>(eskk:default:filter:%s)', a:key)
+    \   printf('eskk#call_via_filter("eskk#default_filter", [], %s)', string(a:key))
+
+    return lhs
+endfunction "}}}
+
+function! eskk#default_mapped_keys() "{{{
+    return split(
+    \   'abcdefghijklmnopqrstuvwxyz'
+    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    \  .'1234567890'
+    \  .'!"#$%&''()'
+    \  .',./;:]@[-^\'
+    \  .'>?_+*}`{=~'
+    \   ,
+    \   '\zs'
+    \) + [
+    \   "<lt>",
+    \   "<Bar>",
+    \   "<Tab>",
+    \   "<BS>",
+    \   "<C-h>",
+    \   "<CR>",
+    \]
 endfunction "}}}
 
 
@@ -110,10 +160,13 @@ endfunction "}}}
 function! s:get_mode_func(func_str) "{{{
     return printf('eskk#mode#%s#%s', eskk#get_mode(), a:func_str)
 endfunction "}}}
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
 
 
 
-" Autoload functions
+" Enable/Disable IM
 function! eskk#is_enabled() "{{{
     return &iminsert == 1
 endfunction "}}}
@@ -121,8 +174,21 @@ function! eskk#enable() "{{{
     if eskk#is_enabled()
         return ''
     endif
+    call eskk#util#log('enabling eskk...')
 
-    call s:set_up()
+    " Clear current variable states.
+    let s:eskk_mode = ''
+    call s:buftable.reset()
+
+    " Set up Mappings.
+    lmapclear <buffer>
+    for key in g:eskk_mapped_key
+        call eskk#map_key(key)
+    endfor
+
+    " TODO Save previous mode/state.
+    call eskk#set_mode(g:eskk_initial_mode)
+
     call eskk#util#call_if_exists(s:get_mode_func('cb_im_enter'), [], 'no throw')
     return "\<C-^>"
 endfunction "}}}
@@ -130,6 +196,11 @@ function! eskk#disable() "{{{
     if !eskk#is_enabled()
         return ''
     endif
+    call eskk#util#log('disabling eskk...')
+
+    for key in g:eskk_mapped_key
+        call eskk#unmap_key(key)
+    endfor
 
     call eskk#util#call_if_exists(s:get_mode_func('cb_im_leave'), [], 'no throw')
     return "\<C-^>"
@@ -142,60 +213,142 @@ function! eskk#toggle() "{{{
     endif
 endfunction "}}}
 
-" This is for emergency use.
-function! eskk#init_keys() "{{{
-    call eskk#util#log("<Plug>(eskk-init-keys)")
+" Sticky key
+function! eskk#get_sticky_key() "{{{
+    if s:sticky_key_char != ''
+        return s:sticky_key_char
+    endif
 
-    " Clear current variable states.
-    call s:reset_variables()
+    redir => output
+    silent lmap
+    redir END
 
-    " Register Mappings.
-    lmapclear <buffer>
-    call s:set_up_mappings()
+    for line in split(output, '\n')
+        let info = eskk#util#parse_map(line)
+        if info.rhs ==? '<plug>(eskk:sticky-key)'
+            let s:sticky_key_char = info.lhs
+            return s:sticky_key_char
+        endif
+    endfor
 
-    " TODO
-    " Save previous mode/state.
-    call eskk#set_mode(g:eskk_initial_mode)
+    call eskk#util#log('failed to get sticky character...')
+    return ''
 endfunction "}}}
-function! eskk#sticky_key(again, key_info) "{{{
-    call eskk#util#log("<Plug>(eskk-sticky-key)")
+function! eskk#get_sticky_char() "{{{
+    return eskk#util#eval_key(eskk#get_sticky_key())
+endfunction "}}}
+function! eskk#sticky_key(again, stash) "{{{
+    call eskk#util#log("<Plug>(eskk:sticky-key)")
 
     if !a:again
-        return eskk#filter_key_info(eskk#create_key_info_from_type(g:eskk#KEY_TYPE_STICKY_KEY))
+        return eskk#filter(eskk#get_sticky_char())
     else
-        if s:buftable.step_henkan_phase()
+        if s:step_henkan_phase(s:buftable)
+            call eskk#util#logf("Succeeded to step to next henkan phase. (current: %d)", s:buftable.get_henkan_phase())
             return s:buftable.get_current_marker()
         else
+            call eskk#util#logf("Failed to step to next henkan phase. (current: %d)", s:buftable.get_henkan_phase())
             return ''
         endif
     endif
 endfunction "}}}
+function! s:step_henkan_phase(buftable) "{{{
+    let phase   = a:buftable.get_henkan_phase()
+    let buf_str = a:buftable.get_current_buf_str()
 
-function! eskk#is_async() "{{{
-    return s:filter_is_async
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
+            call eskk#util#log("hmm...when is this block executed?")
+            call buf_str.clear_rom_str()
+            call buf_str.clear_filter_str()
+        endif
+        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
+            call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
+            return 1    " stepped.
+        else
+            return 0    " failed.
+        endif
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        return 0    " failed.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        return 0    " failed.
+    else
+        throw eskk#internal_error(['eskk'])
+    endif
 endfunction "}}}
+function! eskk#is_sticky_key(char) "{{{
+    return maparg(a:char, 'l') ==? '<plug>(eskk:sticky-key)'
+endfunction "}}}
+
+" Henkan key
+function! eskk#get_henkan_key() "{{{
+    if s:henkan_key_char != ''
+        return s:henkan_key_char
+    endif
+
+    redir => output
+    silent lmap
+    redir END
+
+    for line in split(output, '\n')
+        let info = eskk#util#parse_map(line)
+        if info.rhs ==? '<plug>(eskk:henkan-key)'
+            let s:henkan_key_char = info.lhs
+            return s:henkan_key_char
+        endif
+    endfor
+
+    call eskk#util#log('failed to get henkan character...')
+    return ''
+endfunction "}}}
+function! eskk#get_henkan_char() "{{{
+    return eskk#util#eval_key(eskk#get_henkan_key())
+endfunction "}}}
+function! eskk#is_henkan_key(char) "{{{
+    return maparg(a:char, 'l') ==? '<plug>(eskk:henkan-key)'
+endfunction "}}}
+
+" Big letter keys
+function! eskk#is_big_letter(char) "{{{
+    return a:char =~# '^[A-Z]$'
+endfunction "}}}
+
+" Mode
 function! eskk#set_mode(next_mode) "{{{
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
         return
     endif
 
+    " cb_mode_leave
     call eskk#util#call_if_exists(
     \   s:get_mode_func('cb_mode_leave'),
-    \   [a:next_mode],
+    \   [s:eskk_mode],
     \   "no throw"
     \)
 
+    " Change mode.
     let prev_mode = s:eskk_mode
     let s:eskk_mode = a:next_mode
 
+    " Reset buftable.
     call s:buftable.reset()
 
+    " cb_mode_enter
     call eskk#util#call_if_exists(
     \   s:get_mode_func('cb_mode_enter'),
-    \   [prev_mode],
+    \   [s:eskk_mode],
     \   "no throw"
     \)
+
+    " Call current mode's hooks.
+    for Fn in eskk#get_mode_structure(s:eskk_mode).hook_fn
+        call call(Fn, [])
+        unlet Fn
+    endfor
 
     " For &statusline.
     redrawstatus
@@ -204,114 +357,119 @@ function! eskk#get_mode() "{{{
     return s:eskk_mode
 endfunction "}}}
 function! eskk#is_supported_mode(mode) "{{{
-    return !empty(filter(copy(s:available_modes), 'v:val ==# a:mode'))
+    return has_key(s:available_modes, a:mode)
+endfunction "}}}
+function! eskk#register_mode(mode, ...) "{{{
+    let mode_self = a:0 != 0 ? a:1 : {}
+    let s:available_modes[a:mode] = extend(mode_self, eskk#get_default_mode_structure(), 'keep')
+endfunction "}}}
+function! eskk#validate_mode_structure(mode) "{{{
+    " It should be good to call this function at the end of mode register.
+
+    let st = eskk#get_mode_structure(a:mode)
+
+    for key in ['filter', 'cb_handle_key']
+        if !has_key(st, key)
+            throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
+        endif
+    endfor
+endfunction "}}}
+function! eskk#get_default_mode_structure() "{{{
+    return {
+    \   'hook_fn': [],
+    \}
+endfunction "}}}
+function! eskk#get_mode_structure(mode) "{{{
+    if !eskk#is_supported_mode(a:mode)
+        throw eskk#user_error(['eskk'], printf("mode '%s' is not available.", a:mode))
+    endif
+    return s:available_modes[a:mode]
 endfunction "}}}
 
-function! eskk#register_mode(mode) "{{{
-    call add(s:available_modes, a:mode)
-    let fmt = 'lnoremap <expr> <Plug>(eskk-mode-to-%s) eskk#set_mode(%s)'
-    execute printf(fmt, a:mode, string(a:mode))
+" Buftable
+function! eskk#get_buftable() "{{{
+    return s:buftable
 endfunction "}}}
-function! eskk#get_registered_modes() "{{{
-    return s:available_modes
+function! eskk#rewrite() "{{{
+    return s:buftable.rewrite()
 endfunction "}}}
-
-function! eskk#mapclear(...) "{{{
-    let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:map.mapclear(local_mode)
+function! eskk#register_phase_enter_hook_fn(...) "{{{
+    call call(s:buftable.register_phase_enter_hook_fn, a:000, s:buftable)
 endfunction "}}}
-function! eskk#unmap(lhs, ...) "{{{
-    let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:map.unmap(a:lhs, local_mode)
+function! eskk#register_phase_leave_hook_fn(...) "{{{
+    call call(s:buftable.register_phase_leave_hook_fn, a:000, s:buftable)
 endfunction "}}}
-function! eskk#map(lhs, rhs, ...) "{{{
-    let [local_mode, force] = eskk#util#get_args(a:000, '', 0)
-    " TODO Map a:lhs also in Vim's mapping table.
-    return s:map.map(a:lhs, a:rhs, local_mode, force)
-endfunction "}}}
-function! eskk#maparg(lhs, ...) "{{{
-    let [local_mode, options] = eskk#util#get_args(a:000, '', 'e')
-    return s:map.maparg(a:lhs, local_mode, options)
-endfunction "}}}
-function! eskk#mapcheck(lhs, ...) "{{{
-    let [local_mode] = eskk#util#get_args(a:000, '')
-    return s:map.mapcheck(a:lhs, local_mode)
-endfunction "}}}
-" TODO
-" func! eskk#hasmapto(rhs, ...) "{{{
-"     let [local_mode] = eskk#util#get_args(a:000, '')
-"     return s:map.hasmapto(a:rhs, local_mode)
-" endfunc "}}}
 
 
 
 " Dispatch functions
-function! eskk#filter_key(char) "{{{
-    return eskk#filter_key_info(eskk#create_key_info(a:char))
+function! eskk#filter(char) "{{{
+    return s:filter(a:char, 's:filter_body_call_mode_or_default_filter', [])
 endfunction "}}}
-function! eskk#filter_key_info(key_info) "{{{
-    call eskk#util#logf('a:key_info.char = %s(%d)', a:key_info.char, char2nr(a:key_info.char))
-    call eskk#util#logf('a:key_info.type = %d', a:key_info.type)
+function! eskk#call_via_filter(Fn, head_args, ...) "{{{
+    let char = a:0 != 0 ? a:1 : ''
+    return s:filter(char, a:Fn, a:head_args)
+endfunction "}}}
+function! s:filter(char, Fn, head_args) "{{{
+    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
     if !eskk#is_supported_mode(s:eskk_mode)
-        call eskk#util#warn('current mode is empty! please call eskk#init_keys()...')
+        call eskk#util#warn('current mode is empty!')
         sleep 1
     endif
 
     let opt = {
-    \   'redispatch_keys': [],
+    \   'redispatch_chars': [],
     \   'return': 0,
     \   'finalize_fn': [],
     \}
     let filter_args = [{
-    \   'key_info': a:key_info,
+    \   'char': a:char,
     \   'option': opt,
     \   'buftable': s:buftable,
-    \   'map': s:map,
     \}]
     call s:buftable.set_old_str(s:buftable.get_display_str())
 
     try
-        let let_me_handle = call(s:get_mode_func('cb_handle_key'), filter_args)
-        call eskk#util#log('current mode handles key:'.let_me_handle)
-
-        if !let_me_handle && eskk#has_default_filter(a:key_info)
-            call eskk#util#log('calling eskk#default_filter()...')
-            call call('eskk#default_filter', filter_args)
-        else
-            call eskk#util#log('calling filter function...')
-            call call(s:get_mode_func('filter'), filter_args)
-        endif
+        call call(a:Fn, a:head_args + filter_args)
 
         if type(opt.return) == type("")
             return opt.return
         else
-            let str = s:buftable.rewrite()
-            let rest = join(map(opt.redispatch_keys, 'eskk#filter_key(v:val)'), '')
-            return str . rest
+            for char in opt.redispatch_chars
+                " Avoid inifinite recursion to use feedkeys().
+                "
+                " XXX:
+                " let key = s:map_named_key(eskk#util#uneval_key(char))
+                let key = s:map_named_key(char)
+                call feedkeys(eskk#util#eval_key(key), 'm')
+            endfor
+            return eskk#rewrite()
         endif
 
     catch
         " TODO Show v:exception only once in current mode.
+        " TODO Or open another buffer for showing this annoying messages.
+        "
+        " sleep 1
+        "
         call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
-        sleep 1
+        call eskk#util#warn('--- exception ---')
+        call eskk#util#warnf('v:exception: %s', v:exception)
+        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
         call eskk#util#warn('--- buftable ---')
         for phase in s:buftable.get_all_phases()
             let buf_str = s:buftable.get_buf_str(phase)
             call eskk#util#warnf('phase:%d', phase)
             call eskk#util#warnf('pos: %s', string(buf_str.get_pos()))
-            call eskk#util#warnf('rom_str: %s', buf_str.get_rom_str())
-            call eskk#util#warnf('filter_str: %s', buf_str.get_filter_str())
+            call eskk#util#warnf('rom_str: %s', string(buf_str.get_rom_str()))
+            call eskk#util#warnf('filter_str: %s', string(buf_str.get_filter_str()))
         endfor
-        call eskk#util#warn('--- key_info ---')
-        call eskk#util#warnf('char: %s', a:key_info.char)
-        call eskk#util#warnf('type: %d', a:key_info.type)
-        call eskk#util#warn('--- exception ---')
-        call eskk#util#warnf('v:exception: %s', v:exception)
-        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
+        call eskk#util#warn('--- char ---')
+        call eskk#util#warnf('char: %s', a:char)
         call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
 
         call s:buftable.reset()
-        return a:key_info.char
+        return a:char
 
     finally
         for Fn in opt.finalize_fn
@@ -319,47 +477,47 @@ function! eskk#filter_key_info(key_info) "{{{
         endfor
     endtry
 endfunction "}}}
-function! eskk#create_key_info(char) "{{{
-    return {
-    \   'char': a:char,
-    \   'type': s:get_key_type(a:char)
-    \}
-endfunction "}}}
-function! s:get_key_type(char) "{{{
-    let maparg = tolower(maparg(a:char, 'l'))
-    if maparg =~# '<plug>(eskk-sticky-key)'
-        return g:eskk#KEY_TYPE_STICKY_KEY
-    elseif a:char =~# '^[A-Z]$'.'\C'
-        return g:eskk#KEY_TYPE_BIG_LETTER
+function! s:filter_body_call_mode_or_default_filter(stash) "{{{
+    let let_me_handle = call(s:get_mode_func('cb_handle_key'), [a:stash])
+    call eskk#util#log('current mode handles key?:'.let_me_handle)
+
+    if !let_me_handle && eskk#has_default_filter(a:stash.char)
+        call eskk#util#log('calling eskk#default_filter()...')
+        call call('eskk#default_filter', [a:stash])
     else
-        return g:eskk#KEY_TYPE_UNKNOWN
+        call eskk#util#log('calling filter function...')
+        call call(s:get_mode_func('filter'), [a:stash])
     endif
 endfunction "}}}
-function! eskk#has_default_filter(key_info) "{{{
-    let [char, type] = [a:key_info.char, a:key_info.type]
-    return char ==# "\<BS>"
-    \   || char ==# "\<C-h>"
-    \   || char ==# "\<CR>"
-    \   || type ==# g:eskk#KEY_TYPE_STICKY_KEY
-    \   || type ==# g:eskk#KEY_TYPE_BIG_LETTER
+function! eskk#has_default_filter(char) "{{{
+    let maparg = tolower(maparg(a:char, 'l'))
+    return a:char ==# "\<BS>"
+    \   || a:char ==# "\<C-h>"
+    \   || a:char ==# "\<CR>"
+    \   || eskk#is_sticky_key(a:char)
+    \   || eskk#is_big_letter(a:char)
 endfunction "}}}
 function! eskk#default_filter(stash) "{{{
-    let [char, type] = [a:stash.key_info.char, a:stash.key_info.type]
+    let char = a:stash.char
+    " TODO Changing priority?
+
     if char ==# "\<BS>" || char ==# "\<C-h>"
         call s:do_backspace(a:stash)
     elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
-    elseif type ==# g:eskk#KEY_TYPE_STICKY_KEY
-        return eskk#sticky_key(1, a:stash.key_info)
-    elseif type ==# g:eskk#KEY_TYPE_BIG_LETTER
-        return eskk#sticky_key(1, a:stash.key_info)
-        \    . eskk#filter_key(tolower(char))
+    elseif eskk#is_sticky_key(char)
+        return eskk#sticky_key(1, a:stash)
+    elseif eskk#is_big_letter(char)
+        return eskk#sticky_key(1, a:stash)
+        \    . eskk#filter(tolower(char))
+    else
+        let a:stash.option.return = a:stash.char
     endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let [opt, buftable] = [a:stash.option, a:stash.buftable]
     if buftable.get_old_str() == ''
-        let opt.return = s:BS
+        let opt.return = "\<BS>"
     else
         " Build backspaces to delete previous characters.
         for buf_str in buftable.get_lower_buf_str()
@@ -374,18 +532,108 @@ function! s:do_backspace(stash) "{{{
     endif
 endfunction "}}}
 function! s:do_enter(stash) "{{{
+    call eskk#util#log("s:do_enter()")
+
     let buftable = a:stash.buftable
+    let normal_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    let henkan_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str         = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     let phase = buftable.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call buftable.reset()
+        let a:stash.option.return = "\<CR>"
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        function! s:finalize()
+            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = eskk#get_buftable().get_current_buf_str()
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+        call add(
+        \   a:stash.option.finalize_fn,
+        \   eskk#util#get_local_func('finalize', s:SID())
+        \)
+
+        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call buftable.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        function! s:finalize()
+            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = eskk#get_buftable().get_current_buf_str()
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+        call add(
+        \   a:stash.option.finalize_fn,
+        \   eskk#util#get_local_func('finalize', s:SID())
+        \)
+
+        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        function! s:finalize()
+            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = eskk#get_buftable().get_current_buf_str()
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+        call add(
+        \   a:stash.option.finalize_fn,
+        \   eskk#util#get_local_func('finalize', s:SID())
+        \)
+
+        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     else
-        throw eskk#error#not_implemented('eskk:')
+        throw eskk#not_implemented_error(['eskk'])
     endif
+endfunction "}}}
+
+
+
+" Errors
+function! s:build_error(from, msg) "{{{
+    return join(a:from, ': ') . ' - ' . join(a:msg, ': ')
+endfunction "}}}
+
+function! eskk#internal_error(from, ...) "{{{
+    return s:build_error(a:from, ['internal error'] + a:000)
+endfunction "}}}
+function! eskk#not_implemented_error(from, ...) "{{{
+    return s:build_error(a:from, ['not implemented'] + a:000)
+endfunction "}}}
+function! eskk#never_reached_error(from, ...) "{{{
+    return s:build_error(a:from, ['this block will be never reached'] + a:000)
+endfunction "}}}
+function! eskk#out_of_idx_error(from, ...) "{{{
+    return s:build_error(a:from, ['out of index'] + a:000)
+endfunction "}}}
+function! eskk#parse_error(from, ...) "{{{
+    return s:build_error(a:from, ['parse error'] + a:000)
+endfunction "}}}
+function! eskk#assertion_failure_error(from, ...) "{{{
+    " This is only used from eskk#util#assert().
+    return s:build_error(a:from, ['assertion failed'] + a:000)
+endfunction "}}}
+function! eskk#user_error(from, msg) "{{{
+    " Return simple message.
+    " TODO Omit a:from to simplify message?
+    return printf('%s: %s', join(a:from, ': '), a:msg)
 endfunction "}}}
 " }}}
 
-call s:initialize_once()
+
+" Auto commands {{{
+augroup eskk
+    autocmd!
+    autocmd InsertLeave * call s:buftable.reset()
+augroup END
+" }}}
+
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo

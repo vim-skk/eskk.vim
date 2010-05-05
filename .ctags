@@ -1,0 +1,3 @@
+-R
+--verbose
+--language-force=Vim

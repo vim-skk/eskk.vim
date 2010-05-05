@@ -25,33 +25,62 @@ if !exists('g:eskk_debug_wait_ms')
     let g:eskk_debug_wait_ms = 500
 endif
 
+" Dictionary
+if !exists("g:eskk_dictionary")
+  let g:eskk_dictionary = "~/.skk-jisyo"
+endif
+if type(g:eskk_dictionary) == type("")
+    let s:temp = g:eskk_dictionary
+    unlet g:eskk_dictionary
+    let g:eskk_dictionary = {
+    \   'path': s:temp,
+    \   'sorted': 0,
+    \   'encoding': 'euc-jp',
+    \}
+    unlet s:temp
+elseif type(g:eskk_dictionary) != type({})
+    call eskk#util#warn(
+    \   eskk#user_error(['eskk'], "g:eskk_dictionary's type is either String or Dictionary.")
+    \)
+endif
+
+
+if !exists("g:eskk_large_dictionary")
+  let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
+endif
+if type(g:eskk_large_dictionary) == type("")
+    let s:temp = g:eskk_large_dictionary
+    unlet g:eskk_large_dictionary
+    let g:eskk_large_dictionary = {
+    \   'path': s:temp,
+    \   'sorted': 1,
+    \   'encoding': 'euc-jp',
+    \}
+    unlet s:temp
+elseif type(g:eskk_large_dictionary) != type({})
+    call eskk#util#warn(
+    \   eskk#user_error(['eskk'], "g:eskk_large_dictionary's type is either String or Dictionary.")
+    \)
+endif
+
+if !exists("g:eskk_backup_dictionary")
+    let g:eskk_backup_dictionary = g:eskk_dictionary.path . ".BAK"
+endif
+
 " Mappings
 if !exists('g:eskk_no_default_mappings')
     let g:eskk_no_default_mappings = 0
 endif
 if !exists('g:eskk_mapped_key')
-    let g:eskk_mapped_key = split(
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    \  .'1234567890'
-    \  .'!"#$%&''()'
-    \  .',./;:]@[-^\'
-    \  .'>?_+*}`{=~'
-    \   ,
-    \   '\zs'
-    \) + [
-    \   "<lt>",
-    \   "<Bar>",
-    \   "<Tab>",
-    \   "<BS>",
-    \   "<C-h>",
-    \]
+    let g:eskk_mapped_key = eskk#default_mapped_keys()
 endif
 
-" Misc.
+" Mode
 if !exists('g:eskk_initial_mode')
     let g:eskk_initial_mode = 'hira'
 endif
+
+" Markers
 if !exists("g:eskk_marker_henkan")
     let g:eskk_marker_henkan = '▽'
 endif
@@ -65,19 +94,35 @@ if !exists("g:eskk_marker_jisyo_touroku")
     let g:eskk_marker_jisyo_touroku = '?'
 endif
 
+" Misc.
+if !exists("g:eskk_egg_like_newline")
+    let g:eskk_egg_like_newline = 0
+endif
+
 " }}}
 
 " Mappings {{{
 
-noremap! <expr> <Plug>(eskk-enable)     eskk#enable()
-noremap! <expr> <Plug>(eskk-disable)    eskk#disable()
-noremap! <expr> <Plug>(eskk-toggle)     eskk#toggle()
-lnoremap <expr> <Plug>(eskk-init-keys)  eskk#init_keys()
-lnoremap <expr> <Plug>(eskk-sticky-key) eskk#sticky_key(0)
+noremap! <expr> <Plug>(eskk:enable)     eskk#enable()
+lnoremap <expr> <Plug>(eskk:enable)     eskk#enable()
+
+noremap! <expr> <Plug>(eskk:disable)    eskk#disable()
+lnoremap <expr> <Plug>(eskk:disable)    eskk#disable()
+
+noremap! <expr> <Plug>(eskk:toggle)     eskk#toggle()
+lnoremap <expr> <Plug>(eskk:toggle)     eskk#toggle()
+
+noremap! <expr> <Plug>(eskk:sticky-key) eskk#sticky_key(0, {})
+lnoremap <expr> <Plug>(eskk:sticky-key) eskk#sticky_key(0, {})
+
+noremap! <expr> <Plug>(eskk:henkan-key) eskk#filter(eskk#get_henkan_char())
+lnoremap <expr> <Plug>(eskk:henkan-key) eskk#filter(eskk#get_henkan_char())
 
 if !g:eskk_no_default_mappings
-    map! <C-j>  <Plug>(eskk-toggle)
-    lmap ;      <Plug>(eskk-sticky-key)
+    map! <C-j>   <Plug>(eskk:toggle)
+    lmap <C-j>   <Plug>(eskk:toggle)
+    lmap ;       <Plug>(eskk:sticky-key)
+    lmap <Space> <Plug>(eskk:henkan-key)
 endif
 
 " }}}
@@ -102,14 +147,6 @@ function! s:cmd_set_mode(...) "{{{
     endif
     echo eskk#get_mode()
 endfunction "}}}
-
-" }}}
-
-" :EskkReset {{{
-
-command!
-\   EskkReset
-\   call eskk#init_keys()
 
 " }}}
 

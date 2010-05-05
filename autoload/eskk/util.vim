@@ -18,15 +18,30 @@ endfunction "}}}
 function! eskk#util#warnf(msg, ...) "{{{
     call eskk#util#warn(call('printf', [a:msg] + a:000))
 endfunction "}}}
-function! eskk#util#log(...) "{{{
-    if g:eskk_debug
-        return call('eskk#debug#log', a:000)
+function! eskk#util#log(msg) "{{{
+    if !g:eskk_debug
+        return
+    endif
+
+    redraw
+
+    if exists('g:eskk_debug_file')
+        let file = expand(g:eskk_debug_file)
+        if filereadable(file)
+            call writefile(readfile(file) + [a:msg], file)
+        else
+            call writefile([a:msg], file)
+        endif
+    else
+        call eskk#util#warn(a:msg)
+    endif
+
+    if g:eskk_debug_wait_ms !=# 0
+        execute printf('sleep %dm', g:eskk_debug_wait_ms)
     endif
 endfunction "}}}
-function! eskk#util#logf(...) "{{{
-    if g:eskk_debug
-        return call('eskk#debug#logf', a:000)
-    endif
+function! eskk#util#logf(fmt, ...) "{{{
+    call eskk#util#log(call('printf', [a:fmt] + a:000))
 endfunction "}}}
 
 function! eskk#util#mb_strlen(str) "{{{
@@ -117,10 +132,10 @@ function! eskk#util#eval_key(key) "{{{
             let [sp_key, key] = s:split_special_key(key)
             let evaled .= eval(printf('"\%s"', sp_key))
         else
-            throw eskk#error#internal_error('eskk: util:')
+            throw eskk#internal_error(['eskk', 'util'])
         endif
     endwhile
-    throw eskk#error#never_reached('eskk: util:')
+    throw eskk#never_reached_error(['eskk', 'util'])
 endfunction "}}}
 
 " Boost.Format-like function.
@@ -154,7 +169,7 @@ endfunction "}}}
 "   Raise an exception or return value if it exists.
 function! s:follow(ret_bool, dict, follow, ...) "{{{
     if empty(a:follow)
-        throw eskk#error#internal_error('eskk: util:')
+        throw eskk#internal_error(['eskk', 'util'])
     endif
 
     if a:0 == 0
@@ -163,7 +178,7 @@ function! s:follow(ret_bool, dict, follow, ...) "{{{
                 if a:ret_bool
                     return 0
                 else
-                    throw eskk#error#internal_error('eskk: util:')
+                    throw eskk#internal_error(['eskk', 'util'])
                 endif
             endif
         elseif type(a:dict) == type({})
@@ -171,11 +186,11 @@ function! s:follow(ret_bool, dict, follow, ...) "{{{
                 if a:ret_bool
                     return 0
                 else
-                    throw eskk#error#internal_error('eskk: util:')
+                    throw eskk#internal_error(['eskk', 'util'])
                 endif
             endif
         else
-            throw eskk#error#internal_error('eskk: util:')
+            throw eskk#internal_error(['eskk', 'util'])
         endif
         let got = get(a:dict, a:follow[0])
     else
@@ -207,7 +222,7 @@ function! eskk#util#zip(list1, list2) "{{{
         let i += 1
     endwhile
 
-    call eskk#error#internal_error('eskk: util:', 'this block will be never reached')
+    call eskk#never_reached_error(['eskk', 'util'])
 endfunction "}}}
 
 function! eskk#util#make_bs(n) "{{{
@@ -216,7 +231,7 @@ endfunction "}}}
 
 function! eskk#util#assert(cond, ...) "{{{
     if !a:cond
-        throw call('eskk#error#assertion_failure', ['eskk: util:'] + a:000)
+        throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
     endif
 endfunction "}}}
 
@@ -224,6 +239,55 @@ endfunction "}}}
 function! eskk#util#get_local_func(funcname, sid) "{{{
     " :help <SID>
     return printf('<SNR>%d_%s', a:sid, a:funcname)
+endfunction "}}}
+
+function! eskk#util#setbufline(expr, lnum, line) "{{{
+    return eskk#util#call_on_buffer(a:expr, 'setline', [a:lnum, a:line])
+endfunction "}}}
+
+function! eskk#util#call_on_buffer(expr, Fn, args) "{{{
+    let [cur_bufnr, to_bufnr] = [bufnr('%'), bufnr(a:expr)]
+    let [cur_bufhidden, to_bufhidden] = [getbufvar('%', '&bufhidden'), getbufvar(to_bufnr, '&bufhidden')]
+    call setbufvar('%', '&bufhidden', 'hide')
+    call setbufvar(to_bufnr, '&bufhidden', 'hide')
+    try
+        if cur_bufnr != to_bufnr
+            execute to_bufnr . 'buffer'
+        endif
+        return call(a:Fn, a:args)
+    finally
+        execute cur_bufnr . 'buffer'
+        call setbufvar('%', '&bufhidden', cur_bufhidden)
+        call setbufvar(to_bufnr, '&bufhidden', to_bufhidden)
+    endtry
+endfunction "}}}
+
+
+function! eskk#util#parse_map(line) "{{{
+    let regex =
+    \   '^'
+    \   . '\([nvoiclxs]\)'
+    \   . '\s\+'
+    \   . '\(\S\+\)'
+    \   . '\s\+'
+    \   . '\(\*\=\)'
+    \   . '\(@\=\)'
+    \   . '\(.\+\)'
+    \   . '$'
+    \   . '\C'
+    let m = matchlist(a:line, regex)
+    if empty(m)
+        call eskk#util#logf("parse error! - %s is not matched to %s", string(a:line), string(regex))
+        throw eskk#parse_error(['eskk', 'util'], "Can't parse :map output")
+    endif
+    let [mode, lhs, noremap, buffer, rhs; _] = m[1:]
+    return {
+    \   'mode': mode,
+    \   'lhs': lhs,
+    \   'noremap': noremap ==# '*',
+    \   'buffer': buffer ==# '@',
+    \   'rhs': rhs,
+    \}
 endfunction "}}}
 " }}}
 

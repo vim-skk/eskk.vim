@@ -8,20 +8,20 @@ set cpo&vim
 
 function! s:run()
     call simpletap#throws_ok(
-    \   "throw eskk#error#internal_error('eskk:')",
-    \   '^eskk: internal error$'
+    \   "throw eskk#internal_error(['eskk'])",
+    \   '^eskk - internal error$'
     \)
     call simpletap#throws_ok(
-    \   "throw eskk#error#internal_error('eskk: foo:')",
-    \   '^eskk: foo: internal error$'
+    \   "throw eskk#internal_error(['eskk', 'foo'])",
+    \   '^eskk: foo - internal error$'
     \)
     call simpletap#throws_ok(
-    \   "throw eskk#error#out_of_idx('eskk:')",
-    \   '^eskk: out of index$'
+    \   "throw eskk#out_of_idx_error(['eskk'])",
+    \   '^eskk - out of index$'
     \)
     call simpletap#throws_ok(
-    \   "throw eskk#error#out_of_idx('eskk: foo:')",
-    \   '^eskk: foo: out of index$'
+    \   "throw eskk#out_of_idx_error(['eskk', 'foo'])",
+    \   '^eskk: foo - out of index$'
     \)
 endfunction
 

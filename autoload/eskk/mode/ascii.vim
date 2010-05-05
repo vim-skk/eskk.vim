@@ -10,16 +10,22 @@ set cpo&vim
 
 
 " Callback
-function! eskk#mode#ascii#cb_handle_key(key_info, ...) "{{{
-    let c = a:key_info.char
+function! eskk#mode#ascii#cb_handle_key(stash) "{{{
+    let c = a:stash.char
     return c =~# '^[a-zA-Z0-9]$'
     \   || c =~# '^[\-^\\!"#$%&''()=~|]$'
     \   || c =~# '^[@\[;:\],./`{+*}<>?_]$'
 endfunction "}}}
 
+
+function! eskk#mode#ascii#hook_fn_do_lmap() "{{{
+    lmap <buffer> <C-j> <Plug>(eskk:mode:ascii:to-hira)
+endfunction "}}}
+
+
 " Filter function
 function! eskk#mode#ascii#filter(stash) "{{{
-    let a:opt.return = a:stash.key_info.char
+    return eskk#default_filter(a:stash)
 endfunction "}}}
 
 
