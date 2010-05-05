@@ -16,24 +16,41 @@ set cpo&vim
 function! s:search_next_candidate(dict, key, okuri) "{{{
     for ph_dict in a:dict._dicts
         if ph_dict.sorted
-            let result = s:search_binary(ph_dict.get_lines())
+            let result = s:search_binary(ph_dict.get_lines(), a:key, a:okuri)
         else
-            let result = s:search_linear(ph_dict.get_lines())
+            let result = s:search_linear(ph_dict.get_lines(), a:key, a:okuri)
         endif
-        " if type(result) == type("")
-        "     return result
-        " endif
+        if type(result) == type("")
+            return result
+        endif
     endfor
 
     return 'henkan!'
 endfunction "}}}
 
-function! s:search_binary(lines) "{{{
+function! s:search_binary(lines, key, okuri) "{{{
     " TODO
 endfunction "}}}
 
-function! s:search_linear(lines) "{{{
-    " TODO
+function! s:search_linear(lines, key, okuri) "{{{
+    let needle = a:key . (a:okuri != '' ? a:okuri[0] : '')
+    for line in a:lines
+        if stridx(line, needle) == 0
+            call eskk#util#logf('found matched line - %s', string(line))
+
+            let found = line[strlen(needle) + 2 :]
+            let semicolon = stridx(found, ';')
+            let slash = stridx(found, '/')
+            if semicolon != -1
+                return found[: semicolon - 1]
+            elseif slash != -1
+                return found[: slash - 1]
+            else
+                throw eskk#parse_error(['eskk', 'dictionary'], printf("Can't parse %s!", string(line))
+            endif
+        endif
+    endfor
+    return -1
 endfunction "}}}
 
 " }}}
@@ -98,8 +115,11 @@ function! s:physical_dict.get_lines() dict "{{{
         return self._content_lines
     endif
 
-    if filereadable(self.path)
-        let self._content_lines = readfile(self.path)
+    let path = expand(self.path)
+    if filereadable(path)
+        let self._content_lines = readfile(path)
+    else
+        call eskk#util#logf("Can't read '%s'!", path)
     endif
     let self._loaded = 1
 
