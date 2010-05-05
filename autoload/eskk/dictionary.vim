@@ -14,11 +14,12 @@ set cpo&vim
 " Searching Functions {{{
 
 function! s:search_next_candidate(dict, key_filter, okuri_rom, okuri_filter) "{{{
+    let needle = a:key_filter . (a:okuri_rom != '' ? a:okuri_rom[0] : '') . ' '
     for ph_dict in a:dict._dicts
         if ph_dict.sorted
-            let result = s:search_binary(ph_dict.get_lines(), a:key_filter, a:okuri_rom)
+            let result = s:search_binary(ph_dict.get_lines(), needle, 10)
         else
-            let result = s:search_linear(ph_dict.get_lines(), a:key_filter, a:okuri_rom)
+            let result = s:search_linear(ph_dict.get_lines(), needle)
         endif
         if type(result) == type("")
             return result . a:okuri_filter
@@ -28,25 +29,36 @@ function! s:search_next_candidate(dict, key_filter, okuri_rom, okuri_filter) "{{
     return -1
 endfunction "}}}
 
-function! s:search_binary(lines, key, okuri) "{{{
-    " TODO
+function! s:search_binary(lines, needle, limit) "{{{
+    let [min, max] = [0, len(a:lines) - 1]
+    while max - min > a:limit
+        let mid = (min + max) / 2
+        if a:needle >=# a:lines[mid]
+            let min = mid
+        else
+            let max = mid
+        endif
+    endwhile
+    return s:search_linear(a:lines, a:needle, min)
 endfunction "}}}
 
-function! s:search_linear(lines, key, okuri) "{{{
-    let needle = a:key . (a:okuri != '' ? a:okuri[0] : '') . ' '
-    for line in a:lines
-        if stridx(line, needle) == 0
+function! s:search_linear(lines, needle, ...) "{{{
+    let begin_pos = a:0 != 0 ? a:1 : 0
+    while eskk#util#has_idx(a:lines, begin_pos)
+        let line = a:lines[begin_pos]
+        if stridx(line, a:needle) == 0
             call eskk#util#logf('found matched line - %s', string(line))
 
             try
-                let candidates = s:parse_skk_dict_line(line, needle)
+                let candidates = s:parse_skk_dict_line(line, a:needle)
             catch /^eskk: dictionary - parse error/
                 call eskk#util#log("Can't parse line...")
                 return -1
             endtry
             return candidates[0].result
         endif
-    endfor
+        let begin_pos += 1
+    endwhile
     return -1
 endfunction "}}}
 
@@ -134,7 +146,15 @@ function! s:physical_dict.get_lines() dict "{{{
 
     let path = expand(self.path)
     if filereadable(path)
-        let self._content_lines = map(readfile(path), 's:iconv(v:val, self.encoding, &l:encoding)')
+        let self._content_lines = readfile(path)
+        call filter(self._content_lines, 'v:val !~# "^;;"')
+
+        " TODO I don't know what it means...so avoid reading.
+        call filter(self._content_lines, 'v:val !~# "^#[^ ]"')
+        call filter(self._content_lines, 'v:val !~# "^>[^ ]"')
+
+        call sort(self._content_lines)
+        call map(self._content_lines, 's:iconv(v:val, self.encoding, &l:encoding)')
     else
         call eskk#util#logf("Can't read '%s'!", path)
     endif
