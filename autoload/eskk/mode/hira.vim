@@ -114,10 +114,9 @@ function! s:filter_rom_to_hira(stash) "{{{
         endif
 
         " Clear filtered string when eskk#filter()'s finalizing.
-        let s:buftable = a:stash.buftable
         function! s:finalize()
-            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = s:buftable.get_current_buf_str()
+            if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = eskk#get_buftable().get_current_buf_str()
                 call buf_str.clear_filter_str()
             endif
         endfunction
