@@ -105,15 +105,9 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
 endfunction "}}}
 
 function! s:henkan_result.get_next() dict "{{{
-    if !has_key(self, '_result')
-        let line = s:search_next_candidate(self._dict, self._key, self._okuri)
-        if type(line) != type("")
-            throw eskk#look_up_error(['eskk', 'dictionary'], "Couldn't look up candidate.")
-        endif
-        let self._result = [s:parse_skk_dict_line(line), 0]
-    endif
+    let result = s:henkan_result_get_result(self)
 
-    let [candidates, idx] = self._result
+    let [candidates, idx] = result
     try
         if eskk#util#has_idx(candidates, idx)
             return candidates[idx].result . self._okuri_filter
@@ -121,8 +115,21 @@ function! s:henkan_result.get_next() dict "{{{
             return -1
         endif
     finally
-        let self._result[1] += 1
+        let result[1] += 1
     endtry
+endfunction "}}}
+
+function! s:henkan_result_get_result(this) "{{{
+    if has_key(a:this, '_result')
+        return a:this._result
+    endif
+
+    let line = s:search_next_candidate(a:this._dict, a:this._key, a:this._okuri)
+    if type(line) != type("")
+        throw eskk#look_up_error(['eskk', 'dictionary'], "Couldn't look up candidate.")
+    endif
+    let a:this._result = [s:parse_skk_dict_line(line), 0]
+    return a:this._result
 endfunction "}}}
 
 function! s:parse_skk_dict_line(line) "{{{
