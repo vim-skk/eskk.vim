@@ -33,7 +33,7 @@ function! s:search_binary(lines, key, okuri) "{{{
 endfunction "}}}
 
 function! s:search_linear(lines, key, okuri) "{{{
-    let needle = a:key . (a:okuri != '' ? a:okuri[0] : '')
+    let needle = a:key . (a:okuri != '' ? a:okuri[0] : '') . ' '
     for line in a:lines
         if stridx(line, needle) == 0
             call eskk#util#logf('found matched line - %s', string(line))
@@ -51,7 +51,7 @@ function! s:search_linear(lines, key, okuri) "{{{
 endfunction "}}}
 
 function! s:parse_skk_dict_line(line, needle) "{{{
-    let line = a:line[strlen(a:needle) + 1 :]
+    let line = a:line[strlen(a:needle) :]
     " Assert line =~# '^/.\+/$'
     let line = line[1:-2]
 
