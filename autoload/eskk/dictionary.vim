@@ -106,7 +106,6 @@ endfunction "}}}
 
 function! s:henkan_result.get_next() dict "{{{
     let result = s:henkan_result_get_result(self)
-
     let [candidates, idx] = result
     try
         if eskk#util#has_idx(candidates, idx)
@@ -115,7 +114,25 @@ function! s:henkan_result.get_next() dict "{{{
             return -1
         endif
     finally
-        let result[1] += 1
+        if eskk#util#has_idx(candidates, result[1] + 1)
+            let result[1] += 1
+        endif
+    endtry
+endfunction "}}}
+
+function! s:henkan_result.get_previous() dict "{{{
+    let result = s:henkan_result_get_result(self)
+    let [candidates, idx] = result
+    try
+        if eskk#util#has_idx(candidates, idx)
+            return candidates[idx].result . self._okuri_filter
+        else
+            return -1
+        endif
+    finally
+        if eskk#util#has_idx(candidates, result[1] - 1)
+            let result[1] -= 1
+        endif
     endtry
 endfunction "}}}
 
