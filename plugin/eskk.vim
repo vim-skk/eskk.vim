@@ -44,10 +44,12 @@ if !exists('g:eskk_mapped_key')
     let g:eskk_mapped_key = eskk#default_mapped_keys()
 endif
 
-" Misc.
+" Mode
 if !exists('g:eskk_initial_mode')
     let g:eskk_initial_mode = 'hira'
 endif
+
+" Markers
 if !exists("g:eskk_marker_henkan")
     let g:eskk_marker_henkan = '▽'
 endif
@@ -59,6 +61,11 @@ if !exists("g:eskk_marker_henkan_select")
 endif
 if !exists("g:eskk_marker_jisyo_touroku")
     let g:eskk_marker_jisyo_touroku = '?'
+endif
+
+" Misc.
+if !exists("g:eskk_egg_like_newline")
+    let g:eskk_egg_like_newline = 0
 endif
 
 " }}}
