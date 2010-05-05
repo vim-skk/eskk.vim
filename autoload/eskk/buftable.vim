@@ -181,7 +181,7 @@ endfunction "}}}
 function! s:get_okuri_display_str(this) "{{{
     let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     return
-    \   s:get_henkan_display_str()
+    \   s:get_henkan_display_str(a:this)
     \   . a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_OKURI)
     \   . buf_str.get_filter_str()
     \   . buf_str.get_rom_str()
