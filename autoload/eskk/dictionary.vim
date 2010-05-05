@@ -13,72 +13,70 @@ set cpo&vim
 
 " Searching Functions {{{
 
-function! s:search_next_candidate(dict, key_filter, okuri_rom, okuri_filter) "{{{
+function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
     for ph_dict in a:dict._dicts
         if ph_dict.sorted
-            let result = s:search_binary(ph_dict, needle, has_okuri, 10)
+            let result = s:search_binary(ph_dict, needle, has_okuri, 50)
         else
             let result = s:search_linear(ph_dict, needle, has_okuri)
         endif
         if type(result) == type("")
-            return result . a:okuri_filter
+            return result
         endif
     endfor
 
     return -1
 endfunction "}}}
 
-function! s:search_binary(lines, needle, limit) "{{{
-    let [min, max] = [0, len(a:lines) - 1]
+function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
+    if a:has_okuri
+        let min = a:ph_dict.okuri_ari_lnum + 1
+        let max = a:ph_dict.okuri_nasi_lnum - 1
+    else
+        let min = a:ph_dict.okuri_nasi_lnum + 1
+        let max = len(a:ph_dict.get_lines())
+    endif
     while max - min > a:limit
         let mid = (min + max) / 2
-        if a:needle >=# a:lines[mid]
-            let min = mid
+        let line = a:ph_dict.get_lines()[mid]
+        let line = s:iconv(line, a:ph_dict.encoding, &l:encoding)
+        if a:needle >=# line
+            if a:has_okuri
+                let max = mid
+            else
+                let min = mid
+            endif
         else
-            let max = mid
+            if a:has_okuri
+                let min = mid
+            else
+                let max = mid
+            endif
         endif
     endwhile
-    return s:search_linear(a:lines, a:needle, min)
+    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min)
 endfunction "}}}
 
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
-    let begin_pos = a:has_okuri ? a:ph_dict.okuri_ari_lnum : a:ph_dict.okuri_nasi_lnum
-    while eskk#util#has_idx(a:ph_dict.get_lines(), begin_pos)
-        let line = a:ph_dict.get_lines()[begin_pos]
+    if a:0 != 0
+        let pos = a:1
+    elseif a:has_okuri
+        let pos = a:ph_dict.okuri_ari_lnum
+    else
+        let pos = a:ph_dict.okuri_nasi_lnum
+    endif
+    while eskk#util#has_idx(a:ph_dict.get_lines(), pos)
+        let line = a:ph_dict.get_lines()[pos]
+        let line = s:iconv(line, a:ph_dict.encoding, &l:encoding)
         if stridx(line, a:needle) == 0
             call eskk#util#logf('found matched line - %s', string(line))
-
-            try
-                let candidates = s:parse_skk_dict_line(line, a:needle)
-            catch /^eskk: dictionary - parse error/
-                call eskk#util#log("Can't parse line...")
-                return -1
-            endtry
-            return candidates[0].result
+            return line[strlen(a:needle) :]
         endif
-        let begin_pos += 1
+        let pos += 1
     endwhile
     return -1
-endfunction "}}}
-
-function! s:parse_skk_dict_line(line, needle) "{{{
-    let line = a:line[strlen(a:needle) :]
-    " Assert line =~# '^/.\+/$'
-    let line = line[1:-2]
-
-    let candidates = []
-    for _ in split(line, '/')
-        let semicolon = stridx(_, ';')
-        if semicolon != -1
-            call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
-        else
-            call add(candidates, {'result': _, 'annotation': ''})
-        endif
-    endfor
-
-    return candidates
 endfunction "}}}
 
 " }}}
@@ -107,7 +105,41 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
 endfunction "}}}
 
 function! s:henkan_result.get_next() dict "{{{
-    return s:search_next_candidate(self._dict, self._key, self._okuri, self._okuri_filter)
+    if !has_key(self, '_result')
+        let line = s:search_next_candidate(self._dict, self._key, self._okuri)
+        if type(line) != type("")
+            throw eskk#look_up_error(['eskk', 'dictionary'], "Couldn't look up candidate.")
+        endif
+        let self._result = [s:parse_skk_dict_line(line), 0]
+    endif
+
+    let [candidates, idx] = self._result
+    try
+        if eskk#util#has_idx(candidates, idx)
+            return candidates[idx].result . self._okuri_filter
+        else
+            return -1
+        endif
+    finally
+        let self._result[1] += 1
+    endtry
+endfunction "}}}
+
+function! s:parse_skk_dict_line(line) "{{{
+    " Assert line =~# '^/.\+/$'
+    let line = a:line[1:-2]
+
+    let candidates = []
+    for _ in split(line, '/')
+        let semicolon = stridx(_, ';')
+        if semicolon != -1
+            call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
+        else
+            call add(candidates, {'result': _, 'annotation': ''})
+        endif
+    endfor
+
+    return candidates
 endfunction "}}}
 
 
