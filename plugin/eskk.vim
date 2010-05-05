@@ -35,7 +35,7 @@ if type(g:eskk_dictionary) == type("")
     let g:eskk_dictionary = {
     \   'path': s:temp,
     \   'sorted': 0,
-    \   'encoding': 'euc-jp',
+    \   'encoding': 'utf-8',
     \}
     unlet s:temp
 elseif type(g:eskk_dictionary) != type({})
