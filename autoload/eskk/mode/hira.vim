@@ -93,11 +93,12 @@ function s:henkan_key(stash) "{{{
 
     let buf_str = a:stash.buftable.get_current_buf_str()
     call buf_str.clear_rom_str()
-
     let candidate = s:current_henkan_result.get_next()
     if type(candidate) == type("")
+        " Set candidate.
         call buf_str.set_filter_str(candidate)
     else
+        " No candidates.
         " TODO Jisyo touroku
     endif
 endfunction "}}}
