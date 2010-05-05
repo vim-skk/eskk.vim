@@ -389,8 +389,9 @@ endfunction "}}}
 function! eskk#filter(char) "{{{
     return s:filter(a:char, 's:filter_body_call_mode_or_default_filter', [])
 endfunction "}}}
-function! eskk#call_via_filter(Fn, head_args) "{{{
-    return s:filter('', a:Fn, a:head_args)
+function! eskk#call_via_filter(Fn, head_args, ...) "{{{
+    let char = a:0 != 0 ? a:1 : ''
+    return s:filter(char, a:Fn, a:head_args)
 endfunction "}}}
 function! s:filter(char, Fn, head_args) "{{{
     call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
