@@ -13,15 +13,15 @@ set cpo&vim
 
 " Searching Functions {{{
 
-function! s:search_next_candidate(dict, key, okuri) "{{{
+function! s:search_next_candidate(dict, key_filter, okuri_rom, okuri_filter) "{{{
     for ph_dict in a:dict._dicts
         if ph_dict.sorted
-            let result = s:search_binary(ph_dict.get_lines(), a:key, a:okuri)
+            let result = s:search_binary(ph_dict.get_lines(), a:key_filter, a:okuri_rom)
         else
-            let result = s:search_linear(ph_dict.get_lines(), a:key, a:okuri)
+            let result = s:search_linear(ph_dict.get_lines(), a:key_filter, a:okuri_rom)
         endif
         if type(result) == type("")
-            return result
+            return result . a:okuri_filter
         endif
     endfor
 
@@ -82,18 +82,19 @@ let s:henkan_result = {
 \   '_dict': {},
 \   '_key': '',
 \   '_okuri': '',
+\   '_okuri_filter': '',
 \}
 
-function! s:henkan_result_new(dict, key, okuri) "{{{
+function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
     return extend(
     \   deepcopy(s:henkan_result),
-    \   {'_dict': a:dict, '_key': a:key, '_okuri': a:okuri},
+    \   {'_dict': a:dict, '_key': a:key, '_okuri': a:okuri, '_okuri_filter': a:okuri_filter},
     \   'force'
     \)
 endfunction "}}}
 
 function! s:henkan_result.get_next() dict "{{{
-    return s:search_next_candidate(self._dict, self._key, self._okuri)
+    return s:search_next_candidate(self._dict, self._key, self._okuri, self._okuri_filter)
 endfunction "}}}
 
 
@@ -175,7 +176,12 @@ endfunction "}}}
 
 function! s:dict.refer(buftable) dict "{{{
     let buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    return s:henkan_result_new(self, buf_str.get_filter_str(), buf_str.get_rom_str())
+    return s:henkan_result_new(
+    \   self,
+    \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str(),
+    \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str(),
+    \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str(),
+    \)
 endfunction "}}}
 
 lockvar s:dict

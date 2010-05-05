@@ -72,6 +72,8 @@ function! eskk#mode#hira#filter(stash) "{{{
         else
             return s:filter_rom_to_hira(a:stash)
         endif
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        return s:filter_rom_to_hira(a:stash)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
     else
         return eskk#default_filter(a:stash)
@@ -106,6 +108,8 @@ function! s:filter_rom_to_hira(stash) "{{{
     let char = a:stash.char
     let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
+    let phase = a:stash.buftable.get_henkan_phase()
+    let buftable = a:stash.buftable
 
     call eskk#util#logf('mode hira - char = %s, rom_str = %s', string(char), string(rom_str))
 
@@ -113,28 +117,81 @@ function! s:filter_rom_to_hira(stash) "{{{
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
 
-        " Set filtered string.
-        call buf_str.push_filter_str(
-        \   s:current_table.get_map_to(rom_str)
-        \)
-        call buf_str.clear_rom_str()
+        if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+            " Set filtered string.
+            call buf_str.push_filter_str(
+            \   s:current_table.get_map_to(rom_str)
+            \)
+            call buf_str.clear_rom_str()
 
-        " Set rest string.
-        "
-        " NOTE:
-        " rest must not have multibyte string.
-        " rest is for rom string.
-        let rest = s:current_table.get_rest(rom_str, -1)
-        " Assumption: 's:current_table.has_map(rest)' returns false here.
-        if rest !=# -1
-            call add(a:stash.option.redispatch_chars, rest)
+            " Set rest string.
+            "
+            " NOTE:
+            " rest must not have multibyte string.
+            " rest is for rom string.
+            let rest = s:current_table.get_rest(rom_str, -1)
+            " Assumption: 's:current_table.has_map(rest)' returns false here.
+            if rest !=# -1
+                let a:stash.option.redispatch_chars += split(rest, '\zs')
+            endif
+
+            " Clear filtered string when eskk#filter()'s finalizing.
+            call add(
+            \   a:stash.option.finalize_fn,
+            \   eskk#util#get_local_func('finalize', s:SID())
+            \)
+        elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+            " Enter phase henkan select with henkan.
+
+            " Input: "SesSi"
+            " Convert from:
+            "   henkan buf str:
+            "     filter str: "せ"
+            "     rom str   : "s"
+            "   okuri buf str:
+            "     filter str: "し"
+            "     rom str   : "si"
+            " to:
+            "   henkan buf str:
+            "     filter str: "せっ"
+            "     rom str   : ""
+            "   okuri buf str:
+            "     filter str: "し"
+            "     rom str   : "si"
+            " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
+            let henkan_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+            let okuri_buf_str         = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+            let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+            let henkan_rom = henkan_buf_str.get_rom_str()
+            let okuri_rom  = okuri_buf_str.get_rom_str()
+            if henkan_rom != '' && s:current_table.has_map(henkan_rom . okuri_rom[0])
+                " Push "っ".
+                call henkan_buf_str.push_filter_str(
+                \   s:current_table.get_map_to(henkan_rom . okuri_rom[0])
+                \)
+                " Push "s" to rom str.
+                let rest = s:current_table.get_rest(henkan_rom . okuri_rom[0], -1)
+                if rest !=# -1
+                    call okuri_buf_str.set_rom_str(
+                    \   rest . okuri_rom[1:]
+                    \)
+                endif
+            endif
+
+            call okuri_buf_str.push_rom_str(char)
+            if s:current_table.has_map(okuri_buf_str.get_rom_str())
+                call okuri_buf_str.push_filter_str(
+                \   s:current_table.get_map_to(okuri_buf_str.get_rom_str())
+                \)
+                let rest = s:current_table.get_rest(okuri_buf_str.get_rom_str(), -1)
+                if rest !=# -1
+                    let a:stash.option.redispatch_chars += split(rest, '\zs')
+                endif
+            endif
+
+            call s:henkan_key(a:stash)
         endif
-
-        " Clear filtered string when eskk#filter()'s finalizing.
-        call add(
-        \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('finalize', s:SID())
-        \)
 
         return
 
