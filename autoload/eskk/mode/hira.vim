@@ -27,10 +27,21 @@ function! eskk#mode#hira#cb_handle_key(stash) "{{{
     return 0
 endfunction "}}}
 
-function! eskk#mode#hira#hook_fn_do_lmap() "{{{
+function! eskk#mode#hira#hook_fn_do_lmap_hira() "{{{
     lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
     lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
     lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
+endfunction "}}}
+function! eskk#mode#hira#hook_fn_do_lmap_kata() "{{{
+    lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
+    lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
+    lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
+endfunction "}}}
+function! eskk#mode#hira#hook_fn_set_rom_to_hira_table() "{{{
+    let s:current_table = s:rom_to_hira
+endfunction "}}}
+function! eskk#mode#hira#hook_fn_set_rom_to_kata_table() "{{{
+    let s:current_table = s:rom_to_kata
 endfunction "}}}
 
 function! eskk#mode#hira#do_q_key(again, stash) "{{{
@@ -90,6 +101,7 @@ function! eskk#mode#hira#filter(stash) "{{{
         return eskk#default_filter(a:stash)
     endif
 endfunction "}}}
+
 function s:henkan_key(stash) "{{{
     call eskk#util#log('henkan!')
 
