@@ -170,7 +170,7 @@ endfunction "}}}
 
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
-    return &iminsert == 1
+    return &iminsert != 0
 endfunction "}}}
 function! eskk#enable() "{{{
     if eskk#is_enabled()
