@@ -281,6 +281,26 @@ function! s:step_henkan_phase(buftable) "{{{
         throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
+function! s:step_back_henkan_phase(buftable) "{{{
+    let phase   = a:buftable.get_henkan_phase()
+    let buf_str = a:buftable.get_current_buf_str()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call buf_str.clear_rom_str()
+        call buf_str.clear_filter_str()
+        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call buf_str.clear_rom_str()
+        call buf_str.clear_filter_str()
+        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        return 0    " failed.
+    else
+        throw eskk#not_implemented_error(['eskk'])
+    endif
+endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
     return maparg(a:char, 'l') ==? '<plug>(eskk:sticky-key)'
 endfunction "}}}
@@ -530,12 +550,21 @@ function! s:do_backspace(stash) "{{{
         let opt.return = "\<BS>"
     else
         " Build backspaces to delete previous characters.
-        for buf_str in buftable.get_lower_buf_str()
+        for phase in buftable.get_lower_phases()
+            let buf_str = buftable.get_buf_str(phase)
             if buf_str.get_rom_str() != ''
                 call buf_str.pop_rom_str()
                 break
             elseif buf_str.get_filter_str() != ''
                 call buf_str.pop_filter_str()
+                break
+            elseif buftable.get_marker(phase) != ''
+                if !s:step_back_henkan_phase(buftable)
+                    let msg = "Normal phase's marker is empty, "
+                    \       . "and other phases *should* be able to change "
+                    \       . "current henkan phase."
+                    throw eskk#internal_error(['eskk'], msg)
+                endif
                 break
             endif
         endfor
