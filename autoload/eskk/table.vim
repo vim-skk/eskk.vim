@@ -173,7 +173,6 @@ function! s:create_map(table_name, lhs, rhs, rest) "{{{
     let def = s:get_table(a:table_name)
     let def[a:lhs] = {'map_to': a:rhs}
     if a:rest != ''
-        " TODO Include 'rest' always.
         let def[a:lhs].rest = a:rest
     endif
 endfunction "}}}
