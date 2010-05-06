@@ -37,10 +37,13 @@ function! eskk#mode#hira#hook_fn_do_lmap_kata() "{{{
     lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
     lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
 endfunction "}}}
-function! eskk#mode#hira#hook_fn_set_rom_to_hira_table() "{{{
+function! eskk#mode#hira#hook_fn_do_lmap_zenei() "{{{
+    lmap <buffer> <C-j> <Plug>(eskk:mode:zenei:to-hira)
+endfunction "}}}
+function! eskk#mode#hira#set_rom_to_hira_table() "{{{
     let s:current_table = s:rom_to_hira
 endfunction "}}}
-function! eskk#mode#hira#hook_fn_set_rom_to_kata_table() "{{{
+function! eskk#mode#hira#set_rom_to_kata_table() "{{{
     let s:current_table = s:rom_to_kata
 endfunction "}}}
 
