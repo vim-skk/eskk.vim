@@ -163,8 +163,9 @@ function! eskk#table#map(table_name, force, lhs, rhs, ...) "{{{
     if !s:is_mapping_table() | return | endif
 
     " a:lhs is already defined and not banged.
-    if !eskk#table#has_map(a:table_name, a:lhs) || a:force
-        call s:create_map(a:table_name, a:lhs, a:rhs, rest)
+    let evaled_lhs = eskk#util#eval_key(a:lhs)
+    if !eskk#table#has_map(a:table_name, evaled_lhs) || a:force
+        call s:create_map(a:table_name, evaled_lhs, a:rhs, rest)
     endif
 endfunction "}}}
 
@@ -182,8 +183,9 @@ function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
 
     if !s:is_mapping_table() | return | endif
 
-    if eskk#table#has_map(a:lhs)
-        call s:destroy_map(a:table_name, a:lhs)
+    let evaled_lhs = eskk#util#eval_key(a:lhs)
+    if eskk#table#has_map(evaled_lhs)
+        call s:destroy_map(a:table_name, evaled_lhs)
     elseif !a:silent
         throw eskk#user_error(['eskk', 'table'], 'No table mapping.')
     endif
