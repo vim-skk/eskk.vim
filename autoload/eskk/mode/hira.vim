@@ -117,6 +117,7 @@ function s:henkan_key(stash) "{{{
         else
             " No candidates.
             " TODO Jisyo touroku
+            throw eskk#not_implemented_error(['eskk', 'mode', 'hira'], "jisyo touroku has not been implemented yet.")
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         let buf_str = a:stash.buftable.get_current_buf_str()
