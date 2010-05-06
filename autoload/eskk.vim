@@ -292,6 +292,13 @@ function! eskk#is_big_letter(char) "{{{
     return a:char =~# '^[A-Z]$'
 endfunction "}}}
 
+" Escape key
+function! eskk#escape_key() "{{{
+    let bs_len = eskk#util#mb_strlen(s:buftable.get_display_str())
+    call s:buftable.reset()
+    return repeat("\<BS>", bs_len) . "\<Esc>"
+endfunction "}}}
+
 " Mode
 function! eskk#set_mode(next_mode) "{{{
     if !eskk#is_supported_mode(a:next_mode)

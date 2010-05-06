@@ -118,11 +118,15 @@ lnoremap <expr> <Plug>(eskk:sticky-key) eskk#sticky_key(0, {})
 noremap! <expr> <Plug>(eskk:henkan-key) eskk#filter(eskk#get_henkan_char())
 lnoremap <expr> <Plug>(eskk:henkan-key) eskk#filter(eskk#get_henkan_char())
 
+noremap! <expr> <Plug>(eskk:escape-key) eskk#escape_key()
+lnoremap <expr> <Plug>(eskk:escape-key) eskk#escape_key()
+
 if !g:eskk_no_default_mappings
     map! <C-j>   <Plug>(eskk:toggle)
     lmap <C-j>   <Plug>(eskk:toggle)
     lmap ;       <Plug>(eskk:sticky-key)
     lmap <Space> <Plug>(eskk:henkan-key)
+    lmap <Esc>   <Plug>(eskk:escape-key)
 endif
 
 " }}}
