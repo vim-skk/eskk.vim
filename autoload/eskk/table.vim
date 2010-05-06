@@ -182,7 +182,7 @@ function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
 
     if !s:is_mapping_table() | return | endif
 
-    if eskk#util#has_key_f(s:table_defs, [a:table_name, a:lhs])
+    if eskk#table#has_map(a:lhs)
         unlet s:table_defs[a:table_name][a:lhs]
     elseif !a:silent
         throw eskk#user_error(['eskk', 'table'], 'No table mapping.')
