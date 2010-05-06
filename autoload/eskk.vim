@@ -322,6 +322,7 @@ endfunction "}}}
 function! eskk#set_mode(next_mode) "{{{
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
+        call eskk#util#dump_log('s:available_modes', s:available_modes)
         return
     endif
 

@@ -289,6 +289,11 @@ function! eskk#util#parse_map(line) "{{{
     \   'rhs': rhs,
     \}
 endfunction "}}}
+
+
+function! eskk#util#dump_log(varname, value) "{{{
+    return eskk#util#logf('%s = %s', a:varname, string(a:value))
+endfunction "}}}
 " }}}
 
 
