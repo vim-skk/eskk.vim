@@ -81,17 +81,6 @@ function! eskk#util#is_callable(Fn) "{{{
     \   || exists('*' . a:Fn)
 endfunction "}}}
 
-" arg 3 is not for 'self'.
-function! eskk#util#call_if_exists(Fn, args, ...) "{{{
-    if eskk#util#is_callable(a:Fn)
-        return call(a:Fn, a:args)
-    elseif a:0 != 0
-        return a:1
-    else
-        throw printf("eskk: no such function '%s'.", a:Fn)
-    endif
-endfunction "}}}
-
 function! eskk#util#skip_spaces(str) "{{{
     return substitute(a:str, '^\s*', '', '')
 endfunction "}}}
