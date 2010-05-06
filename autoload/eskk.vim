@@ -278,7 +278,7 @@ function! s:step_henkan_phase(buftable) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         return 0    " failed.
     else
-        throw eskk#internal_error(['eskk'])
+        throw eskk#not_implemented_error(['eskk'])
     endif
 endfunction "}}}
 function! s:step_back_henkan_phase(buftable) "{{{
