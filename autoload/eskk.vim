@@ -245,60 +245,14 @@ function! eskk#sticky_key(again, stash) "{{{
     if !a:again
         return eskk#filter(eskk#get_sticky_char())
     else
-        if s:step_henkan_phase(s:buftable)
-            call eskk#util#logf("Succeeded to step to next henkan phase. (current: %d)", s:buftable.get_henkan_phase())
-            return s:buftable.get_current_marker()
+        let buftable = a:stash.buftable
+        if buftable.step_henkan_phase()
+            call eskk#util#logf("Succeeded to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
+            return buftable.get_current_marker()
         else
-            call eskk#util#logf("Failed to step to next henkan phase. (current: %d)", s:buftable.get_henkan_phase())
+            call eskk#util#logf("Failed to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
             return ''
         endif
-    endif
-endfunction "}}}
-function! s:step_henkan_phase(buftable) "{{{
-    let phase   = a:buftable.get_henkan_phase()
-    let buf_str = a:buftable.get_current_buf_str()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
-            call eskk#util#log("hmm...when is this block executed?")
-            call buf_str.clear_rom_str()
-            call buf_str.clear_filter_str()
-        endif
-        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        return 1    " stepped.
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
-            call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
-            return 1    " stepped.
-        else
-            return 0    " failed.
-        endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return 0    " failed.
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        return 0    " failed.
-    else
-        throw eskk#not_implemented_error(['eskk'])
-    endif
-endfunction "}}}
-function! s:step_back_henkan_phase(buftable) "{{{
-    let phase   = a:buftable.get_henkan_phase()
-    let buf_str = a:buftable.get_current_buf_str()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call buf_str.clear_rom_str()
-        call buf_str.clear_filter_str()
-        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        return 1    " stepped.
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call buf_str.clear_rom_str()
-        call buf_str.clear_filter_str()
-        call a:buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-        return 1    " stepped.
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return 0    " failed.
-    else
-        throw eskk#not_implemented_error(['eskk'])
     endif
 endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
@@ -559,7 +513,7 @@ function! s:do_backspace(stash) "{{{
                 call buf_str.pop_filter_str()
                 break
             elseif buftable.get_marker(phase) != ''
-                if !s:step_back_henkan_phase(buftable)
+                if !buftable.step_back_henkan_phase()
                     let msg = "Normal phase's marker is empty, "
                     \       . "and other phases *should* be able to change "
                     \       . "current henkan phase."

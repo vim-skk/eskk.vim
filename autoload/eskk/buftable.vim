@@ -228,9 +228,6 @@ endfunction "}}}
 function! s:buftable.get_lower_phases() dict "{{{
     return reverse(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, self._henkan_phase))
 endfunction "}}}
-function! s:buftable.get_lower_buf_str() dict "{{{
-    return map(self.get_lower_phases(), 'self.get_buf_str(v:val)')
-endfunction "}}}
 function! s:buftable.get_all_phases() dict "{{{
     return range(
     \   g:eskk#buftable#HENKAN_PHASE_NORMAL,
@@ -305,6 +302,55 @@ function! s:buftable.move_buf_str(from_phases, to_phase) dict "{{{
     let buf_str = self.get_buf_str(a:to_phase)
     call buf_str.clear_rom_str()
     call buf_str.set_filter_str(str)
+endfunction "}}}
+
+
+function! s:buftable.step_henkan_phase() dict "{{{
+    let phase   = self.get_henkan_phase()
+    let buf_str = self.get_current_buf_str()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
+            call eskk#util#log("hmm...when is this block executed?")
+            call buf_str.clear_rom_str()
+            call buf_str.clear_filter_str()
+        endif
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
+            call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
+            return 1    " stepped.
+        else
+            return 0    " failed.
+        endif
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        return 0    " failed.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        return 0    " failed.
+    else
+        throw eskk#not_implemented_error(['eskk'])
+    endif
+endfunction "}}}
+function! s:buftable.step_back_henkan_phase() dict "{{{
+    let phase   = self.get_henkan_phase()
+    let buf_str = self.get_current_buf_str()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call buf_str.clear_rom_str()
+        call buf_str.clear_filter_str()
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call buf_str.clear_rom_str()
+        call buf_str.clear_filter_str()
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+        return 1    " stepped.
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        return 0    " failed.
+    else
+        throw eskk#not_implemented_error(['eskk'])
+    endif
 endfunction "}}}
 
 
