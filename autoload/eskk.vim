@@ -159,8 +159,16 @@ endfunction "}}}
 
 
 " Utility functions
-function! s:get_mode_func(func_str) "{{{
-    return printf('eskk#mode#%s#%s', eskk#get_mode(), a:func_str)
+function! s:call_mode_func(func_key, args, required) "{{{
+    let st = eskk#get_mode_structure(s:eskk_mode)
+    if !has_key(st, a:func_key)
+        if a:required
+            let msg = printf("Mode '%s' does not have required function key", s:eskk_mode)
+            throw eskk#internal_error(['eskk'], msg)
+        endif
+        return
+    endif
+    return call(st[a:func_key], a:args, st)
 endfunction "}}}
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
@@ -191,7 +199,7 @@ function! eskk#enable() "{{{
     " TODO Save previous mode/state.
     call eskk#set_mode(g:eskk_initial_mode)
 
-    call eskk#util#call_if_exists(s:get_mode_func('cb_im_enter'), [], 'no throw')
+    call s:call_mode_func('cb_im_enter', [], 0)
     return "\<C-^>"
 endfunction "}}}
 function! eskk#disable() "{{{
@@ -204,7 +212,7 @@ function! eskk#disable() "{{{
         call eskk#unmap_key(key)
     endfor
 
-    call eskk#util#call_if_exists(s:get_mode_func('cb_im_leave'), [], 'no throw')
+    call s:call_mode_func('cb_im_leave', [], 0)
     return "\<C-^>"
 endfunction "}}}
 function! eskk#toggle() "{{{
@@ -308,11 +316,9 @@ function! eskk#set_mode(next_mode) "{{{
     endif
 
     " cb_mode_leave
-    call eskk#util#call_if_exists(
-    \   s:get_mode_func('cb_mode_leave'),
-    \   [s:eskk_mode],
-    \   "no throw"
-    \)
+    if s:eskk_mode != ''
+        call s:call_mode_func('cb_mode_leave', [s:eskk_mode], 0)
+    endif
 
     " Change mode.
     let prev_mode = s:eskk_mode
@@ -322,11 +328,7 @@ function! eskk#set_mode(next_mode) "{{{
     call s:buftable.reset()
 
     " cb_mode_enter
-    call eskk#util#call_if_exists(
-    \   s:get_mode_func('cb_mode_enter'),
-    \   [s:eskk_mode],
-    \   "no throw"
-    \)
+    call s:call_mode_func('cb_mode_enter', [s:eskk_mode], 0)
 
     " Call current mode's hooks.
     for Fn in eskk#get_mode_structure(s:eskk_mode).hook_fn
@@ -464,7 +466,7 @@ function! s:filter(char, Fn, head_args) "{{{
     endtry
 endfunction "}}}
 function! s:filter_body_call_mode_or_default_filter(stash) "{{{
-    let let_me_handle = call(s:get_mode_func('cb_handle_key'), [a:stash])
+    let let_me_handle = s:call_mode_func('cb_handle_key', [a:stash], 1)
     call eskk#util#log('current mode handles key?:'.let_me_handle)
 
     if !let_me_handle && eskk#has_default_filter(a:stash.char)
@@ -472,7 +474,7 @@ function! s:filter_body_call_mode_or_default_filter(stash) "{{{
         call call('eskk#default_filter', [a:stash])
     else
         call eskk#util#log('calling filter function...')
-        call call(s:get_mode_func('filter'), [a:stash])
+        call s:call_mode_func('filter', [a:stash], 1)
     endif
 endfunction "}}}
 function! eskk#has_default_filter(char) "{{{
