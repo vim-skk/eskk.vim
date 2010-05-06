@@ -164,12 +164,12 @@ function! eskk#table#map(table_name, force, lhs, rhs, ...) "{{{
 
     " a:lhs is already defined and not banged.
     if !eskk#table#has_map(a:table_name, a:lhs) || a:force
-        call s:create_map(a:lhs, a:rhs, rest)
+        call s:create_map(a:table_name, a:lhs, a:rhs, rest)
     endif
 endfunction "}}}
 
-function! s:create_map(lhs, rhs, rest) "{{{
-    let def = s:get_current_table()
+function! s:create_map(table_name, lhs, rhs, rest) "{{{
+    let def = s:get_table(a:table_name)
     let def[a:lhs] = {'map_to': a:rhs}
     if a:rest != ''
         " TODO Include 'rest' always.
@@ -183,10 +183,15 @@ function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
     if !s:is_mapping_table() | return | endif
 
     if eskk#table#has_map(a:lhs)
-        unlet s:table_defs[a:table_name][a:lhs]
+        call s:destroy_map(a:table_name, a:lhs)
     elseif !a:silent
         throw eskk#user_error(['eskk', 'table'], 'No table mapping.')
     endif
+endfunction "}}}
+
+function! s:destroy_map(table_name, lhs) "{{{
+    let def = s:get_table(a:table_name)
+    unlet def[a:lhs]
 endfunction "}}}
 
 " }}}
