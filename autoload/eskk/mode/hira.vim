@@ -9,8 +9,8 @@ set cpo&vim
 " }}}
 
 " Variables {{{
-let s:rom_to_hira = eskk#table#new('rom_to_hira')
-let s:rom_to_kata = eskk#table#new('rom_to_kata')
+let s:rom_to_hira   = eskk#table#new('rom_to_hira')
+let s:rom_to_kata   = eskk#table#new('rom_to_kata')
 let s:current_table = s:rom_to_hira
 
 let s:skk_dict = eskk#dictionary#new([g:eskk_dictionary, g:eskk_large_dictionary])
