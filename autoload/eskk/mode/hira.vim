@@ -58,6 +58,7 @@ function! eskk#mode#hira#do_q_key(again, stash) "{{{
             " Toggle current table.
             let s:current_table = (s:current_table is s:rom_to_hira ? s:rom_to_kata : s:rom_to_hira)
         else
+            " TODO Convert hira/kata string to kata/hira string respectively.
         endif
     endif
 endfunction "}}}
