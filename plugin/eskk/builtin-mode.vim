@@ -107,6 +107,7 @@ if !g:eskk_mode_hira_no_default_mappings
     call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#hook_fn_do_lmap_hira', [])
 endif
 call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#set_rom_to_hira_table', [])
+call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#clear_henkan_rom_str_list', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('hira')
@@ -133,6 +134,7 @@ if !g:eskk_mode_kata_no_default_mappings
     call eskk#register_event('enter-mode-kata', 'eskk#mode#hira#hook_fn_do_lmap_kata', [])
 endif
 call eskk#register_event('enter-mode-kata', 'eskk#mode#hira#set_rom_to_kata_table', [])
+call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#clear_henkan_rom_str_list', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('kata')
