@@ -48,6 +48,35 @@ unlet s:dict
 call eskk#validate_mode_structure('ascii')
 " }}}
 
+" 'zenei' mode {{{
+if !exists('g:eskk_mode_zenei_no_default_mappings')
+    let g:eskk_mode_zenei_no_default_mappings = 0
+endif
+
+lnoremap <expr> <Plug>(eskk:mode:zenei:to-hira) [eskk#set_mode('hira'), ''][1]
+noremap! <expr> <Plug>(eskk:mode:zenei:to-hira) [eskk#set_mode('hira'), ''][1]
+
+
+call eskk#register_mode('zenei')
+let s:dict = eskk#get_mode_structure('zenei')
+
+function! s:dict.filter(...)
+    return call('eskk#mode#ascii#filter', a:000)
+endfunction
+function! s:dict.cb_handle_key(...)
+    return call('eskk#mode#ascii#cb_handle_key', a:000)
+endfunction
+
+
+if !g:eskk_mode_zenei_no_default_mappings
+    call add(s:dict.hook_fn, 'eskk#mode#ascii#hook_fn_do_lmap_zenei')
+endif
+call add(s:dict.hook_fn, 'eskk#mode#ascii#set_rom_to_zenei_table')
+
+unlet s:dict
+call eskk#validate_mode_structure('zenei')
+" }}}
+
 " 'hira' mode {{{
 if !exists('g:eskk_mode_hira_no_default_mappings')
     let g:eskk_mode_hira_no_default_mappings = 0
@@ -107,35 +136,6 @@ call add(s:dict.hook_fn, 'eskk#mode#hira#set_rom_to_kata_table')
 
 unlet s:dict
 call eskk#validate_mode_structure('kata')
-" }}}
-
-" 'zenei' mode {{{
-if !exists('g:eskk_mode_zenei_no_default_mappings')
-    let g:eskk_mode_zenei_no_default_mappings = 0
-endif
-
-lnoremap <expr> <Plug>(eskk:mode:zenei:to-hira) [eskk#set_mode('hira'), ''][1]
-noremap! <expr> <Plug>(eskk:mode:zenei:to-hira) [eskk#set_mode('hira'), ''][1]
-
-
-call eskk#register_mode('zenei')
-let s:dict = eskk#get_mode_structure('zenei')
-
-function! s:dict.filter(...)
-    return call('eskk#mode#ascii#filter', a:000)
-endfunction
-function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#ascii#cb_handle_key', a:000)
-endfunction
-
-
-if !g:eskk_mode_zenei_no_default_mappings
-    call add(s:dict.hook_fn, 'eskk#mode#ascii#hook_fn_do_lmap_zenei')
-endif
-call add(s:dict.hook_fn, 'eskk#mode#ascii#set_rom_to_zenei_table')
-
-unlet s:dict
-call eskk#validate_mode_structure('zenei')
 " }}}
 
 " }}}
