@@ -362,11 +362,17 @@ function! eskk#rewrite() "{{{
 endfunction "}}}
 
 " Event
-function! eskk#register_event(event_name, Fn, args) "{{{
-    if !has_key(s:event_hook_fn, a:event_name)
-        let s:event_hook_fn[a:event_name] = []
+function! eskk#register_event(event_names, Fn, args) "{{{
+    if type(a:event_names) != type([])
+        return eskk#register_event([a:event_names], a:Fn, a:args)
     endif
-    call add(s:event_hook_fn[a:event_name], [a:Fn, a:args])
+
+    for name in a:event_names
+        if !has_key(s:event_hook_fn, name)
+            let s:event_hook_fn[name] = []
+        endif
+        call add(s:event_hook_fn[name], [a:Fn, a:args])
+    endfor
 endfunction "}}}
 function! eskk#throw_event(event_name) "{{{
     for [Fn, args] in get(s:event_hook_fn, a:event_name, [])
