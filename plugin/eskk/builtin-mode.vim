@@ -77,6 +77,7 @@ endfunction
 if !g:eskk_mode_hira_no_default_mappings
     call add(s:dict.hook_fn, 'eskk#mode#hira#hook_fn_do_lmap_hira')
 endif
+call add(s:dict.hook_fn, 'eskk#mode#hira#set_rom_to_hira_table')
 
 unlet s:dict
 call eskk#validate_mode_structure('hira')
