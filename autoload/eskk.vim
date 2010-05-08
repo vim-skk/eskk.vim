@@ -333,7 +333,7 @@ function! eskk#is_supported_mode(mode) "{{{
 endfunction "}}}
 function! eskk#register_mode(mode, ...) "{{{
     let mode_self = a:0 != 0 ? a:1 : {}
-    let s:available_modes[a:mode] = extend(mode_self, eskk#get_default_mode_structure(), 'force')
+    let s:available_modes[a:mode] = mode_self
 endfunction "}}}
 function! eskk#validate_mode_structure(mode) "{{{
     " It should be good to call this function at the end of mode register.
@@ -345,9 +345,6 @@ function! eskk#validate_mode_structure(mode) "{{{
             throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
         endif
     endfor
-endfunction "}}}
-function! eskk#get_default_mode_structure() "{{{
-    return {}
 endfunction "}}}
 function! eskk#get_mode_structure(mode) "{{{
     if !eskk#is_supported_mode(a:mode)
