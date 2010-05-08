@@ -90,6 +90,12 @@ function! s:buffer_string.clear_filter_str() dict "{{{
 endfunction "}}}
 
 
+function! s:buffer_string.clear() dict "{{{
+    call self.clear_rom_str()
+    call self.clear_filter_str()
+endfunction "}}}
+
+
 lockvar s:buffer_string
 " }}}
 " s:buftable {{{
