@@ -18,7 +18,7 @@ function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
     for ph_dict in a:dict._dicts
         if ph_dict.sorted
-            let result = s:search_binary(ph_dict, needle, has_okuri, 50)
+            let result = s:search_binary(ph_dict, needle, has_okuri, 5)
         else
             let result = s:search_linear(ph_dict, needle, has_okuri)
         endif
