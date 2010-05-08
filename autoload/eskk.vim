@@ -112,12 +112,12 @@ function! s:map_named_key(key) "{{{
     " XXX: :lmap can't remap. It's possibly Vim's bug.
     " So I also prepare :noremap! mappings.
     execute
-    \   'lnoremap'
+    \   'lmap'
     \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
     execute
-    \   'noremap!'
+    \   'map!'
     \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
@@ -414,15 +414,14 @@ function! s:filter(char, Fn, head_args) "{{{
         if type(opt.return) == type("")
             return opt.return
         else
-            for char in opt.redispatch_chars
-                " Avoid inifinite recursion to use feedkeys().
-                "
-                " XXX:
-                " let key = s:map_named_key(eskk#util#uneval_key(char))
-                let key = s:map_named_key(char)
-                call feedkeys(eskk#util#eval_key(key), 'm')
-            endfor
-            return eskk#rewrite()
+            " XXX:
+            "     s:map_named_key(char)
+            " should
+            "     s:map_named_key(eskk#util#uneval_key(char))
+
+            return
+            \   eskk#rewrite()
+            \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(s:map_named_key(v:val))'), '')
         endif
 
     catch
