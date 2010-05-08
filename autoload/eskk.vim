@@ -20,8 +20,10 @@ let s:eskk_mode = ''
 let s:available_modes = {}
 " Buffer strings for inserted, filtered and so on.
 let s:buftable = eskk#buftable#new()
-
+" Lock current diff old string?
 let s:lock_old_str = 0
+" Event handler functions/arguments.
+let s:event_hook_fn = {}
 " }}}
 
 " Write timestamp to debug file {{{
@@ -306,10 +308,7 @@ function! eskk#set_mode(next_mode) "{{{
         return
     endif
 
-    " cb_mode_leave
-    if s:eskk_mode != ''
-        call s:call_mode_func('cb_mode_leave', [s:eskk_mode], 0)
-    endif
+    call eskk#throw_event('leave-mode-' . s:eskk_mode)
 
     " Change mode.
     let prev_mode = s:eskk_mode
@@ -321,11 +320,7 @@ function! eskk#set_mode(next_mode) "{{{
     " cb_mode_enter
     call s:call_mode_func('cb_mode_enter', [s:eskk_mode], 0)
 
-    " Call current mode's hooks.
-    for Fn in eskk#get_mode_structure(s:eskk_mode).hook_fn
-        call call(Fn, [])
-        unlet Fn
-    endfor
+    call eskk#throw_event('enter-mode-' . s:eskk_mode)
 
     " For &statusline.
     redrawstatus
@@ -338,7 +333,7 @@ function! eskk#is_supported_mode(mode) "{{{
 endfunction "}}}
 function! eskk#register_mode(mode, ...) "{{{
     let mode_self = a:0 != 0 ? a:1 : {}
-    let s:available_modes[a:mode] = extend(mode_self, eskk#get_default_mode_structure(), 'keep')
+    let s:available_modes[a:mode] = extend(mode_self, eskk#get_default_mode_structure(), 'force')
 endfunction "}}}
 function! eskk#validate_mode_structure(mode) "{{{
     " It should be good to call this function at the end of mode register.
@@ -352,9 +347,7 @@ function! eskk#validate_mode_structure(mode) "{{{
     endfor
 endfunction "}}}
 function! eskk#get_default_mode_structure() "{{{
-    return {
-    \   'hook_fn': [],
-    \}
+    return {}
 endfunction "}}}
 function! eskk#get_mode_structure(mode) "{{{
     if !eskk#is_supported_mode(a:mode)
@@ -370,13 +363,22 @@ endfunction "}}}
 function! eskk#rewrite() "{{{
     return s:buftable.rewrite()
 endfunction "}}}
-function! eskk#register_phase_enter_hook_fn(...) "{{{
-    call call(s:buftable.register_phase_enter_hook_fn, a:000, s:buftable)
+
+" Event
+function! eskk#register_event(event_name, Fn, args) "{{{
+    if !has_key(s:event_hook_fn, a:event_name)
+        let s:event_hook_fn[a:event_name] = []
+    endif
+    call add(s:event_hook_fn[a:event_name], [a:Fn, a:args])
 endfunction "}}}
-function! eskk#register_phase_leave_hook_fn(...) "{{{
-    call call(s:buftable.register_phase_leave_hook_fn, a:000, s:buftable)
+function! eskk#throw_event(event_name) "{{{
+    for [Fn, args] in get(s:event_hook_fn, a:event_name, [])
+        call call(Fn, args)
+        unlet Fn
+    endfor
 endfunction "}}}
 
+" Locking diff old string
 function! eskk#lock_old_str() "{{{
     let s:lock_old_str = 1
 endfunction "}}}

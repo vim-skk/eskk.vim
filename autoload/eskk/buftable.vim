@@ -107,8 +107,6 @@ let s:buftable = {
 \       s:buffer_string_new(),
 \       s:buffer_string_new(),
 \   ],
-\   '_phase_enter_hook_fn': map(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, g:eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU), '[]'),
-\   '_phase_leave_hook_fn': map(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, g:eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU), '[]'),
 \   '_old_str': '',
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
@@ -214,17 +212,20 @@ endfunction "}}}
 function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
 
-    for Fn in self._phase_leave_hook_fn[self._henkan_phase]
-        call call(Fn, [])
-        unlet Fn
-    endfor
-
+    call eskk#throw_event('leave-phase-' . self.get_phase_name(self._henkan_phase))
     let self._henkan_phase = a:henkan_phase
+    call eskk#throw_event('enter-phase-' . self.get_phase_name(self._henkan_phase))
+endfunction "}}}
 
-    for Fn in self._phase_enter_hook_fn[self._henkan_phase]
-        call call(Fn, [])
-        unlet Fn
-    endfor
+
+function! s:buftable.get_phase_name(phase) dict "{{{
+    return [
+    \   'normal',
+    \   'henkan',
+    \   'okuri',
+    \   'henkan-select',
+    \   'jisyo-touroku',
+    \][a:phase]
 endfunction "}}}
 
 
@@ -255,36 +256,6 @@ function! s:buftable.get_marker(henkan_phase) dict "{{{
 endfunction "}}}
 function! s:buftable.get_current_marker() "{{{
     return self.get_marker(self.get_henkan_phase())
-endfunction "}}}
-
-
-function! s:buftable.register_phase_enter_hook_fn(phases, Fn) dict "{{{
-    if type(a:phases) != type([])
-        return self.register_phase_enter_hook_fn([a:phases], a:Fn)
-    endif
-
-    for phase in a:phases
-        if !eskk#util#has_idx(self._phase_enter_hook_fn, phase)
-            let msg = printf("self._phase_enter_hook_fn[%d] - No such index", phase)
-            throw eskk#out_of_idx_error(['eskk'], msg)
-        endif
-
-        call add(self._phase_enter_hook_fn[phase], a:Fn)
-    endfor
-endfunction "}}}
-function! s:buftable.register_phase_leave_hook_fn(phases, Fn) dict "{{{
-    if type(a:phases) != type([])
-        return self.register_phase_leave_hook_fn([a:phases], a:Fn)
-    endif
-
-    for phase in a:phases
-        if !eskk#util#has_idx(self._phase_leave_hook_fn, phase)
-            let msg = printf("self._phase_leave_hook_fn[%d] - No such index", phase)
-            throw eskk#out_of_idx_error(['eskk'], msg)
-        endif
-
-        call add(self._phase_leave_hook_fn[phase], a:Fn)
-    endfor
 endfunction "}}}
 
 

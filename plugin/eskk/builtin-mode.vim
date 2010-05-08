@@ -40,9 +40,9 @@ endfunction
 
 
 if !g:eskk_mode_ascii_no_default_mappings
-    call add(s:dict.hook_fn, 'eskk#mode#ascii#hook_fn_do_lmap_ascii')
+    call eskk#register_event('enter-mode-ascii', 'eskk#mode#ascii#hook_fn_do_lmap_ascii', [])
 endif
-call add(s:dict.hook_fn, 'eskk#mode#ascii#set_rom_to_ascii_table')
+call eskk#register_event('enter-mode-ascii', 'eskk#mode#ascii#set_rom_to_ascii_table', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('ascii')
@@ -69,9 +69,9 @@ endfunction
 
 
 if !g:eskk_mode_zenei_no_default_mappings
-    call add(s:dict.hook_fn, 'eskk#mode#ascii#hook_fn_do_lmap_zenei')
+    call eskk#register_event('enter-mode-zenei', 'eskk#mode#ascii#hook_fn_do_lmap_zenei', [])
 endif
-call add(s:dict.hook_fn, 'eskk#mode#ascii#set_rom_to_zenei_table')
+call eskk#register_event('enter-mode-zenei', 'eskk#mode#ascii#set_rom_to_zenei_table', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('zenei')
@@ -104,9 +104,9 @@ endfunction
 
 
 if !g:eskk_mode_hira_no_default_mappings
-    call add(s:dict.hook_fn, 'eskk#mode#hira#hook_fn_do_lmap_hira')
+    call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#hook_fn_do_lmap_hira', [])
 endif
-call add(s:dict.hook_fn, 'eskk#mode#hira#set_rom_to_hira_table')
+call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#set_rom_to_hira_table', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('hira')
@@ -130,9 +130,9 @@ endfunction
 
 
 if !g:eskk_mode_kata_no_default_mappings
-    call add(s:dict.hook_fn, 'eskk#mode#hira#hook_fn_do_lmap_kata')
+    call eskk#register_event('enter-mode-kata', 'eskk#mode#hira#hook_fn_do_lmap_kata', [])
 endif
-call add(s:dict.hook_fn, 'eskk#mode#hira#set_rom_to_kata_table')
+call eskk#register_event('enter-mode-kata', 'eskk#mode#hira#set_rom_to_kata_table', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('kata')
