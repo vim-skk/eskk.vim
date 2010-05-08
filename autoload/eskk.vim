@@ -377,6 +377,13 @@ function! eskk#register_phase_leave_hook_fn(...) "{{{
     call call(s:buftable.register_phase_leave_hook_fn, a:000, s:buftable)
 endfunction "}}}
 
+function! eskk#lock_old_str() "{{{
+    let s:lock_old_str = 1
+endfunction "}}}
+function! eskk#unlock_old_str() "{{{
+    let s:lock_old_str = 0
+endfunction "}}}
+
 
 
 " Dispatch functions
@@ -478,7 +485,7 @@ function! eskk#default_filter(stash) "{{{
     let char = a:stash.char
     " TODO Changing priority?
 
-    let s:lock_old_str = 1
+    call eskk#lock_old_str()
     try
         if char ==# "\<BS>" || char ==# "\<C-h>"
             call s:do_backspace(a:stash)
@@ -493,7 +500,7 @@ function! eskk#default_filter(stash) "{{{
             let a:stash.option.return = a:stash.char
         endif
     finally
-        let s:lock_old_str = 0
+        call eskk#unlock_old_str()
     endtry
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
