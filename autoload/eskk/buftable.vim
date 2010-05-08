@@ -27,9 +27,6 @@ lockvar eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
 " Choosing henkan candidates.
 let eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU = 4
 lockvar eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
-
-let s:BS = "\<BS>"
-lockvar s:BS
 " }}}
 
 " Functions {{{
@@ -156,7 +153,7 @@ function! s:buftable.rewrite() dict "{{{
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    return repeat(s:BS, eskk#util#mb_strlen(old)) . new
+    return repeat("\<C-h>", eskk#util#mb_strlen(old)) . new
 endfunction "}}}
 
 function! s:buftable.get_display_str() dict "{{{
