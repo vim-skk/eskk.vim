@@ -162,6 +162,8 @@ endfunction "}}}
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
 
 
 
@@ -545,7 +547,7 @@ function! s:do_enter(stash) "{{{
         endfunction
         call add(
         \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('finalize', s:SID())
+        \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
@@ -560,7 +562,7 @@ function! s:do_enter(stash) "{{{
         endfunction
         call add(
         \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('finalize', s:SID())
+        \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
@@ -575,7 +577,7 @@ function! s:do_enter(stash) "{{{
         endfunction
         call add(
         \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('finalize', s:SID())
+        \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
