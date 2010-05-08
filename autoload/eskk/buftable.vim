@@ -357,6 +357,18 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
 endfunction "}}}
 
 
+function! s:buftable.clear_buf_str(phases) dict "{{{
+    if type(a:phases) != type([])
+        return self.clear_buf_str([a:phases])
+    endif
+
+    for phase in a:phases
+        let buf_str = self.get_buf_str(phase)
+        call buf_str.clear()
+    endfor
+endfunction "}}}
+
+
 function! s:validate_table_idx(table, henkan_phase) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
         throw eskk#out_of_idx_error(["eskk", "buftable"])
