@@ -111,11 +111,11 @@ function! s:map_named_key(key) "{{{
 
     " XXX: :lmap can't remap. It's possibly Vim's bug.
     " So I also prepare :noremap! mappings.
-    execute
-    \   'lmap'
-    \   '<expr>'
-    \   lhs
-    \   printf('eskk#filter(%s)', string(a:key))
+    " execute
+    " \   'lmap'
+    " \   '<expr>'
+    " \   lhs
+    " \   printf('eskk#filter(%s)', string(a:key))
     execute
     \   'map!'
     \   '<expr>'
