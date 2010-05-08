@@ -446,8 +446,7 @@ function! s:filter(char, Fn, head_args) "{{{
         call eskk#util#warnf('char: %s', a:char)
         call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
 
-        call s:buftable.reset()
-        return a:char
+        return eskk#escape_key() . a:char
 
     finally
         for Fn in opt.finalize_fn
