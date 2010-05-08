@@ -122,17 +122,6 @@ function! s:map_named_key(key) "{{{
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
 
-    execute
-    \   'lnoremap'
-    \   '<expr>'
-    \   printf('<Plug>(eskk:default:filter:%s)', a:key)
-    \   printf('eskk#call_via_filter("eskk#default_filter", [], %s)', string(a:key))
-    execute
-    \   'noremap!'
-    \   '<expr>'
-    \   printf('<Plug>(eskk:default:filter:%s)', a:key)
-    \   printf('eskk#call_via_filter("eskk#default_filter", [], %s)', string(a:key))
-
     return lhs
 endfunction "}}}
 
