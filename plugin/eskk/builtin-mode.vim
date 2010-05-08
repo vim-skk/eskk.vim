@@ -53,8 +53,8 @@ if !exists('g:eskk_mode_hira_no_default_mappings')
     let g:eskk_mode_hira_no_default_mappings = 0
 endif
 
-lnoremap <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#mode#hira#do_q_key(0, {})
-noremap! <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#mode#hira#do_q_key(0, {})
+lnoremap <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#call_via_filter('eskk#mode#hira#do_q_key', [])
+noremap! <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#call_via_filter('eskk#mode#hira#do_q_key', [])
 
 lnoremap <expr> <Plug>(eskk:mode:hira:to-ascii) [eskk#set_mode('ascii'), ''][1]
 noremap! <expr> <Plug>(eskk:mode:hira:to-ascii) [eskk#set_mode('ascii'), ''][1]

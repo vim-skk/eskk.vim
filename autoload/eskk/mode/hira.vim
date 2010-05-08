@@ -49,19 +49,15 @@ function! eskk#mode#hira#set_rom_to_kata_table() "{{{
     let s:current_table = s:rom_to_kata
 endfunction "}}}
 
-function! eskk#mode#hira#do_q_key(again, stash) "{{{
-    if !a:again
-        return eskk#call_via_filter('eskk#mode#hira#do_q_key', [1])
-    else
-        let buf_str = a:stash.buftable.get_current_buf_str()
-        let phase = a:stash.buftable.get_henkan_phase()
+function! eskk#mode#hira#do_q_key(stash) "{{{
+    let buf_str = a:stash.buftable.get_current_buf_str()
+    let phase = a:stash.buftable.get_henkan_phase()
 
-        if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            " Toggle current table.
-            call eskk#set_mode(eskk#get_mode() ==# 'hira' ? 'kata' : 'hira')
-        else
-            " TODO Convert hira/kata string to kata/hira string respectively.
-        endif
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        " Toggle current table.
+        call eskk#set_mode(eskk#get_mode() ==# 'hira' ? 'kata' : 'hira')
+    else
+        " TODO Convert hira/kata string to kata/hira string respectively.
     endif
 endfunction "}}}
 
