@@ -22,6 +22,8 @@ let s:current_henkan_result = {}
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
 
 function! eskk#mode#hira#cb_handle_key(stash) "{{{
     return 0
@@ -187,7 +189,7 @@ function! s:filter_rom_to_hira(stash) "{{{
             " Clear filtered string when eskk#filter()'s finalizing.
             call add(
             \   a:stash.option.finalize_fn,
-            \   eskk#util#get_local_func('finalize', s:SID())
+            \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
             \)
         elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
             " Enter phase henkan select with henkan.
