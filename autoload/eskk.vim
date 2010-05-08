@@ -528,6 +528,12 @@ function! s:do_backspace(stash) "{{{
         endfor
     endif
 endfunction "}}}
+function! s:do_enter_finalize() "{{{
+    if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        let buf_str = s:buftable.get_current_buf_str()
+        call buf_str.clear_filter_str()
+    endif
+endfunction "}}}
 function! s:do_enter(stash) "{{{
     call eskk#util#log("s:do_enter()")
 
@@ -543,45 +549,27 @@ function! s:do_enter(stash) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        function! s:finalize()
-            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = eskk#get_buftable().get_current_buf_str()
-                call buf_str.clear_filter_str()
-            endif
-        endfunction
         call add(
         \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX)
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         call buftable.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        function! s:finalize()
-            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = eskk#get_buftable().get_current_buf_str()
-                call buf_str.clear_filter_str()
-            endif
-        endfunction
         call add(
         \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX)
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        function! s:finalize()
-            if s:buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = eskk#get_buftable().get_current_buf_str()
-                call buf_str.clear_filter_str()
-            endif
-        endfunction
         call add(
         \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX)
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
