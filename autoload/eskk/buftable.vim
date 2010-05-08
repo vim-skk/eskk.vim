@@ -298,8 +298,7 @@ function! s:buftable.move_buf_str(from_phases, to_phase) dict "{{{
         let buf_str = self.get_buf_str(phase)
         let str .= buf_str.get_filter_str()
         let str .= buf_str.get_rom_str()
-        call buf_str.clear_filter_str()
-        call buf_str.clear_rom_str()
+        call buf_str.clear()
     endfor
 
     let buf_str = self.get_buf_str(a:to_phase)
@@ -315,8 +314,7 @@ function! s:buftable.step_henkan_phase() dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
             call eskk#util#log("hmm...when is this block executed?")
-            call buf_str.clear_rom_str()
-            call buf_str.clear_filter_str()
+            call buf_str.clear()
         endif
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         return 1    " stepped.
@@ -340,13 +338,11 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     let buf_str = self.get_current_buf_str()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call buf_str.clear_rom_str()
-        call buf_str.clear_filter_str()
+        call buf_str.clear()
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         return 1    " stepped.
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call buf_str.clear_rom_str()
-        call buf_str.clear_filter_str()
+        call buf_str.clear()
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         return 1    " stepped.
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
