@@ -122,11 +122,11 @@ noremap! <expr> <Plug>(eskk:escape-key) eskk#escape_key()
 lnoremap <expr> <Plug>(eskk:escape-key) eskk#escape_key()
 
 if !g:eskk_no_default_mappings
-    map! <C-j>   <Plug>(eskk:toggle)
-    lmap <C-j>   <Plug>(eskk:toggle)
-    lmap ;       <Plug>(eskk:sticky-key)
-    lmap <Space> <Plug>(eskk:henkan-key)
-    lmap <Esc>   <Plug>(eskk:escape-key)
+    silent! map! <unique> <C-j>   <Plug>(eskk:toggle)
+    silent! lmap <unique> <C-j>   <Plug>(eskk:toggle)
+    silent! lmap <unique> ;       <Plug>(eskk:sticky-key)
+    silent! lmap <unique> <Space> <Plug>(eskk:henkan-key)
+    silent! lmap <unique> <Esc>   <Plug>(eskk:escape-key)
 endif
 
 " }}}
