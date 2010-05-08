@@ -57,11 +57,8 @@ function! eskk#mode#hira#do_q_key(again, stash) "{{{
         let phase = a:stash.buftable.get_henkan_phase()
 
         if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            call buf_str.clear_rom_str()
-            call buf_str.clear_filter_str()
-
             " Toggle current table.
-            let s:current_table = (s:current_table is s:rom_to_hira ? s:rom_to_kata : s:rom_to_hira)
+            call eskk#set_mode(eskk#get_mode() ==# 'hira' ? 'kata' : 'hira')
         else
             " TODO Convert hira/kata string to kata/hira string respectively.
         endif
