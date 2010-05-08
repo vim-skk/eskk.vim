@@ -295,9 +295,9 @@ endfunction "}}}
 
 " Escape key
 function! eskk#escape_key() "{{{
-    let bs_len = eskk#util#mb_strlen(s:buftable.get_display_str())
+    let current_str = s:buftable.get_display_str()
     call s:buftable.reset()
-    return repeat("\<BS>", bs_len) . "\<Esc>"
+    return repeat("\<C-h>", eskk#util#mb_strlen(current_str)) . "\<Esc>"
 endfunction "}}}
 
 " Mode
