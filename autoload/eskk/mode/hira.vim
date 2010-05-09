@@ -90,6 +90,18 @@ function! eskk#mode#hira#do_q_key(stash) "{{{
     endif
 endfunction "}}}
 
+function! eskk#mode#hira#do_lmap_non_egg_like_newline(do_map) "{{{
+    if a:do_map
+        " Enter phase. Map NON egg like newline.
+        call eskk#util#log("Map egg like newline...")
+        lmap <buffer> <CR> <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)
+    else
+        " Leave phase. Restore <CR> mapping.
+        call eskk#util#log("Restore egg like newline...")
+        lmap <buffer> <CR> <Plug>(eskk:filter:<CR>)
+    endif
+endfunction "}}}
+
 function! s:finalize() "{{{
     if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         let buf_str = eskk#get_buftable().get_current_buf_str()
