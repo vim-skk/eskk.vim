@@ -81,9 +81,14 @@ function! s:is_mapping_table() "{{{
 endfunction "}}}
 
 function! s:load_table(table_name) "{{{
+    if has_key(s:table_defs, a:table_name)
+        return 1
+    endif
+
     " Lazy loading.
     try
         call eskk#table#{a:table_name}#load()
+        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
         return 1
     catch
         call eskk#util#logf("can't load table '%s'.", a:table_name)
@@ -92,9 +97,14 @@ function! s:load_table(table_name) "{{{
 endfunction "}}}
 
 function! s:get_table(table_name, ...) "{{{
-    call s:load_table(a:table_name)
-
-    return call('get', [s:table_defs, a:table_name] + a:000)
+    if s:load_table(a:table_name)
+        call eskk#util#assert(has_key(s:table_defs, a:table_name))
+        return s:table_defs[a:table_name]
+    else
+        let msg = printf("can't load table '%s'.", a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+        return {}
+    endif
 endfunction "}}}
 
 function! s:get_current_table(...) "{{{
@@ -226,10 +236,12 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
     " But this uses a lot of memory.
     "
 
-    call s:load_table(a:table_name)
-
+    if !s:load_table(a:table_name)
+        let msg = printf("can't load table '%s'.", a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+    endif
     if empty(a:str_buf)
-        throw eskk#internal_error(['eskk', 'table'])
+        throw eskk#internal_error(['eskk', 'table'], "a:str_buf is empty.")
     endif
 
     let no_table = {}
@@ -250,52 +262,42 @@ function! eskk#table#has_table(name) "{{{
 endfunction "}}}
 
 function! eskk#table#has_map(table_name, lhs) "{{{
-    call s:load_table(a:table_name)
-
-    return eskk#util#has_key_f(s:table_defs, [a:table_name, a:lhs])
+    return has_key(s:get_table(a:table_name), a:lhs)
 endfunction "}}}
 
 
 function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
-    call s:load_table(a:table_name)
-
-    if !eskk#table#has_map(a:table_name, a:lhs)
+    let def = s:get_table(a:table_name)
+    if empty(def) || !eskk#table#has_map(a:table_name, a:lhs)
         if a:0 == 0
-            throw eskk#error#argument_error(['eskk', 'table'])
+            throw eskk#internal_error(['eskk', 'table'])
         else
             return a:1
         endif
     endif
-    return s:table_defs[a:table_name][a:lhs].map_to
+    return def[a:lhs].map_to
 endfunction "}}}
 
 
 function! eskk#table#has_rest(table_name, lhs) "{{{
-    call s:load_table(a:table_name)
-
-    return eskk#util#has_key_f(s:table_defs, [a:table_name, a:lhs, 'rest'])
+    return eskk#util#has_key_f(s:get_table(a:table_name), [a:lhs, 'rest'])
 endfunction "}}}
 
 function! eskk#table#get_rest(table_name, lhs, ...) "{{{
-    call s:load_table(a:table_name)
-
-    if !eskk#table#has_rest(a:table_name, a:lhs)
+    let def = s:get_table(a:table_name)
+    if empty(def) || !eskk#table#has_rest(a:table_name, a:lhs)
         if a:0 == 0
-            throw eskk#error#argument_error(['eskk', 'table'])
+            throw eskk#internal_error(['eskk', 'table'])
         else
             return a:1
         endif
     endif
-    return s:table_defs[a:table_name][a:lhs].rest
+    return def[a:lhs].rest
 endfunction "}}}
 
 
 function! eskk#table#get_definition(table_name) "{{{
-    if s:load_table(a:table_name)
-        return s:get_table(a:table_name, {})
-    else
-        return {}
-    endif
+    return s:get_table(a:table_name)
 endfunction "}}}
 
 " }}}
