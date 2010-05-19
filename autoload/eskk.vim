@@ -504,6 +504,7 @@ function! s:filter(char, Fn, head_args) "{{{
     finally
         for Fn in opt.finalize_fn
             call call(Fn, [])
+            unlet Fn
         endfor
     endtry
 endfunction "}}}
