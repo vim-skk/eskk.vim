@@ -30,6 +30,8 @@ let s:buftable = eskk#buftable#new()
 let s:lock_old_str = 0
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
+" Called and cleared each first time calling s:filter().
+let s:each_first_filter_fn = []
 " }}}
 
 " Write timestamp to debug file {{{
@@ -453,6 +455,11 @@ function! s:filter(char, Fn, head_args) "{{{
         call s:buftable.set_old_str(s:buftable.get_display_str())
     endif
 
+    for [Fn, head_args] in s:each_first_filter_fn
+        call call(Fn, a:head_args)
+    endfor
+    let s:each_first_filter_fn = []
+
     try
         call call(a:Fn, a:head_args + filter_args)
 
@@ -615,6 +622,9 @@ function! s:do_enter(stash) "{{{
     else
         throw eskk#not_implemented_error(['eskk'])
     endif
+endfunction "}}}
+function! eskk#do_next_filter(Fn, head_args) "{{{
+    call add(s:each_first_filter_fn, [a:Fn, a:head_args])
 endfunction "}}}
 
 
