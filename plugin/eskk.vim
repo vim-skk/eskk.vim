@@ -115,8 +115,10 @@ if !exists("g:eskk_egg_like_newline")
     let g:eskk_egg_like_newline = 0
 endif
 if !g:eskk_egg_like_newline
+    " Default behavior is `egg like newline`.
+    " Turns it to `Non egg like newline` during henkan phase.
     call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
-    call eskk#register_event(['enter-phase-normal', 'enter-phase-henkan-select', 'enter-phase-jisyo-touroku'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
+    call eskk#register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
 
     " Restore <CR> mapping when InsertLeave.
     augroup eskk-plugin-egg-like-newline

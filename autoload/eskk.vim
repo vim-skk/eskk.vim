@@ -455,8 +455,9 @@ function! s:filter(char, Fn, head_args) "{{{
         call s:buftable.set_old_str(s:buftable.get_display_str())
     endif
 
-    for [Fn, head_args] in s:each_first_filter_fn
-        call call(Fn, a:head_args)
+    for [Fn, args] in s:each_first_filter_fn
+        call call(Fn, args)
+        unlet Fn
     endfor
     let s:each_first_filter_fn = []
 

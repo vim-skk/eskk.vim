@@ -41,10 +41,16 @@ function! eskk#mode#builtin#asym_cb_handle_key(stash) "{{{
     return 0
 endfunction "}}}
 
-function! eskk#mode#builtin#hook_fn_do_lmap_hira() "{{{
-    lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
-    lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
-    lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
+function! eskk#mode#builtin#hook_fn_do_lmap_hira(do_map) "{{{
+    if a:do_map
+        call eskk#map_temp_key('q', '<Plug>(eskk:mode:hira:convert/switch-to-kata)')
+        call eskk#map_temp_key('l', '<Plug>(eskk:mode:hira:to-ascii)')
+        call eskk#map_temp_key('L', '<Plug>(eskk:mode:hira:to-zenei)')
+    else
+        call eskk#map_temp_key_restore('q')
+        call eskk#map_temp_key_restore('l')
+        call eskk#map_temp_key_restore('L')
+    endif
 endfunction "}}}
 function! eskk#mode#builtin#hook_fn_do_lmap_kata() "{{{
     lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
@@ -102,13 +108,11 @@ endfunction "}}}
 
 function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
     if a:do_map
-        " Enter phase. Map NON egg like newline.
-        call eskk#util#log("Map egg like newline...")
-        lmap <buffer> <CR> <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)
+        call eskk#util#log("Map *non* egg like newline...")
+        call eskk#map_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
     else
-        " Leave phase. Restore <CR> mapping.
-        call eskk#util#log("Restore egg like newline...")
-        lmap <buffer> <CR> <Plug>(eskk:filter:<CR>)
+        call eskk#util#log("Restore *non* egg like newline...")
+        call eskk#do_next_filter('eskk#map_temp_key_restore', ['<CR>'])
     endif
 endfunction "}}}
 

@@ -104,7 +104,8 @@ endfunction
 
 
 if !g:eskk_mode_hira_no_default_mappings
-    call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#hook_fn_do_lmap_hira', [])
+    call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#hook_fn_do_lmap_hira', [1])
+    call eskk#register_event('leave-mode-hira', 'eskk#mode#builtin#hook_fn_do_lmap_hira', [0])
 endif
 call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#set_rom_to_hira_table', [])
 call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#clear_henkan_rom_str_list', [])
