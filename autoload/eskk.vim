@@ -394,16 +394,16 @@ function! eskk#rewrite() "{{{
 endfunction "}}}
 
 " Event
-function! eskk#register_event(event_names, Fn, args) "{{{
+function! eskk#register_event(event_names, Fn, head_args) "{{{
     if type(a:event_names) != type([])
-        return eskk#register_event([a:event_names], a:Fn, a:args)
+        return eskk#register_event([a:event_names], a:Fn, a:head_args)
     endif
 
     for name in a:event_names
         if !has_key(s:event_hook_fn, name)
             let s:event_hook_fn[name] = []
         endif
-        call add(s:event_hook_fn[name], [a:Fn, a:args])
+        call add(s:event_hook_fn[name], [a:Fn, a:head_args])
     endfor
 endfunction "}}}
 function! eskk#throw_event(event_name) "{{{
