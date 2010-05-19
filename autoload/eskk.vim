@@ -14,6 +14,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+
 runtime! plugin/eskk.vim
 
 " Variables {{{
@@ -39,17 +40,6 @@ if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_deb
     call writefile(['', printf('--- %s ---', strftime('%c')), ''], expand(g:eskk_debug_file))
 endif
 " }}}
-
-" FIXME
-" 1. Enable lang mode
-" 2. Leave insert mode
-" 3. Enter insert mode.
-" Lang mode is still enabled.
-"
-" TODO
-" - Trap CursorMovedI and
-" -- s:buftable.reset()
-" -- rewrite current displayed string.
 
 " Functions {{{
 
@@ -661,7 +651,6 @@ function! eskk#user_error(from, msg) "{{{
     return printf('%s: %s', join(a:from, ': '), a:msg)
 endfunction "}}}
 " }}}
-
 
 " Auto commands {{{
 augroup eskk
