@@ -24,6 +24,22 @@ endif
 if !exists('g:eskk_debug_wait_ms')
     let g:eskk_debug_wait_ms = 0
 endif
+if !exists('g:eskk_debug_profile')
+    let g:eskk_debug_profile = 0
+endif
+if !exists('g:eskk_debug_profile_file')
+    let g:eskk_debug_profile_file = expand('~/eskk-debug-profile.log')
+endif
+
+if g:eskk_debug_profile
+    execute 'profile start' g:eskk_debug_profile_file
+    for s:p in split(globpath(&rtp, 'plugin/eskk**') . globpath(&rtp, 'autoload/eskk**'), '\n')
+        if filereadable(s:p)
+            execute 'profile file' s:p
+        endif
+    endfor
+    unlet s:p
+endif
 
 " Dictionary
 if !exists("g:eskk_dictionary")
