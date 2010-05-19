@@ -51,7 +51,8 @@ function! s:is_no_map_key(key) "{{{
 
     return eskk#is_henkan_key(char)
     \   || eskk#is_sticky_key(char)
-    \   || maparg(char, 'l') =~? '^<plug>(eskk:\S\+)$'
+    \   || (maparg(char, 'l') !~? '^<plug>(eskk:filter:\S\+)$'
+    \       && maparg(char, 'l') =~? '^<plug>(eskk:\S\+)$')
 endfunction "}}}
 function! eskk#map_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
