@@ -8,6 +8,16 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
+
+" Asymmetric built-in modes. {{{
+
 " Variables {{{
 let s:rom_to_hira   = eskk#table#new('rom_to_hira')
 let s:rom_to_kata   = eskk#table#new('rom_to_kata')
@@ -19,42 +29,36 @@ let s:current_henkan_result = {}
 let s:henkan_rom_str_list = []
 " }}}
 
-" Functions {{{
 
-function! s:SID() "{{{
-    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
-endfunction "}}}
-let s:SID_PREFIX = s:SID()
-delfunc s:SID
 
-function! eskk#mode#hira#cb_handle_key(stash) "{{{
+function! eskk#mode#builtin#asym_cb_handle_key(stash) "{{{
     return 0
 endfunction "}}}
 
-function! eskk#mode#hira#hook_fn_do_lmap_hira() "{{{
+function! eskk#mode#builtin#hook_fn_do_lmap_hira() "{{{
     lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
     lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
     lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
 endfunction "}}}
-function! eskk#mode#hira#hook_fn_do_lmap_kata() "{{{
+function! eskk#mode#builtin#hook_fn_do_lmap_kata() "{{{
     lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
     lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
     lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
 endfunction "}}}
-function! eskk#mode#hira#hook_fn_do_lmap_zenei() "{{{
+function! eskk#mode#builtin#hook_fn_do_lmap_zenei() "{{{
     lmap <buffer> <C-j> <Plug>(eskk:mode:zenei:to-hira)
 endfunction "}}}
-function! eskk#mode#hira#set_rom_to_hira_table() "{{{
+function! eskk#mode#builtin#set_rom_to_hira_table() "{{{
     let s:current_table = s:rom_to_hira
 endfunction "}}}
-function! eskk#mode#hira#set_rom_to_kata_table() "{{{
+function! eskk#mode#builtin#set_rom_to_kata_table() "{{{
     let s:current_table = s:rom_to_kata
 endfunction "}}}
-function! eskk#mode#hira#clear_henkan_rom_str_list() "{{{
+function! eskk#mode#builtin#clear_henkan_rom_str_list() "{{{
     let s:henkan_rom_str_list = []
 endfunction "}}}
 
-function! eskk#mode#hira#do_q_key(stash) "{{{
+function! eskk#mode#builtin#do_q_key(stash) "{{{
     let buf_str = a:stash.buftable.get_current_buf_str()
     let phase = a:stash.buftable.get_henkan_phase()
 
@@ -90,7 +94,7 @@ function! eskk#mode#hira#do_q_key(stash) "{{{
     endif
 endfunction "}}}
 
-function! eskk#mode#hira#do_lmap_non_egg_like_newline(do_map) "{{{
+function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
     if a:do_map
         " Enter phase. Map NON egg like newline.
         call eskk#util#log("Map egg like newline...")
@@ -110,7 +114,7 @@ function! s:finalize() "{{{
 endfunction "}}}
 
 
-function! eskk#mode#hira#filter(stash) "{{{
+function! eskk#mode#builtin#asym_filter(stash) "{{{
     let char = a:stash.char
     let henkan_phase = a:stash.buftable.get_henkan_phase()
 
@@ -143,7 +147,7 @@ function! eskk#mode#hira#filter(stash) "{{{
     endif
 endfunction "}}}
 
-function s:henkan_key(stash) "{{{
+function! s:henkan_key(stash) "{{{
     call eskk#util#log('henkan!')
 
     let phase = a:stash.buftable.get_henkan_phase()
@@ -302,6 +306,54 @@ function! s:filter_rom_to_hira(stash) "{{{
 endfunction "}}}
 
 " }}}
+
+
+" Symmetric built-in modes. {{{
+
+" Variables {{{
+let s:rom_to_ascii  = {}
+let s:rom_to_zenei  = eskk#table#new('rom_to_zenei')
+let s:current_table = s:rom_to_ascii
+" }}}
+
+
+
+function! eskk#mode#builtin#sym_cb_handle_key(stash) "{{{
+    let c = a:stash.char
+    return c =~# '^[a-zA-Z0-9]$'
+    \   || c =~# '^[\-^\\!"#$%&''()=~|]$'
+    \   || c =~# '^[@\[;:\],./`{+*}<>?_]$'
+endfunction "}}}
+
+function! eskk#mode#builtin#hook_fn_do_lmap_ascii() "{{{
+    lmap <buffer> <C-j> <Plug>(eskk:mode:ascii:to-hira)
+endfunction "}}}
+function! eskk#mode#builtin#hook_fn_do_lmap_zenei() "{{{
+    lmap <buffer> <C-j> <Plug>(eskk:mode:zenei:to-hira)
+endfunction "}}}
+function! eskk#mode#builtin#set_rom_to_ascii_table() "{{{
+    let s:current_table = s:rom_to_ascii
+endfunction "}}}
+function! eskk#mode#builtin#set_rom_to_zenei_table() "{{{
+    let s:current_table = s:rom_to_zenei
+endfunction "}}}
+
+" Filter function
+function! eskk#mode#builtin#sym_filter(stash) "{{{
+    if s:current_table is s:rom_to_ascii
+        call eskk#default_filter(a:stash)
+    else
+        let c = a:stash.char
+        if s:current_table.has_map(c)
+            let a:stash.option.return = s:current_table.get_map_to(c)
+        else
+            call eskk#default_filter(a:stash)
+        endif
+    endif
+endfunction "}}}
+
+" }}}
+
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo

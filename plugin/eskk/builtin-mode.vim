@@ -32,17 +32,17 @@ call eskk#register_mode('ascii')
 let s:dict = eskk#get_mode_structure('ascii')
 
 function! s:dict.filter(...)
-    return call('eskk#mode#ascii#filter', a:000)
+    return call('eskk#mode#builtin#sym_filter', a:000)
 endfunction
 function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#ascii#cb_handle_key', a:000)
+    return call('eskk#mode#builtin#sym_cb_handle_key', a:000)
 endfunction
 
 
 if !g:eskk_mode_ascii_no_default_mappings
-    call eskk#register_event('enter-mode-ascii', 'eskk#mode#ascii#hook_fn_do_lmap_ascii', [])
+    call eskk#register_event('enter-mode-ascii', 'eskk#mode#builtin#hook_fn_do_lmap_ascii', [])
 endif
-call eskk#register_event('enter-mode-ascii', 'eskk#mode#ascii#set_rom_to_ascii_table', [])
+call eskk#register_event('enter-mode-ascii', 'eskk#mode#builtin#set_rom_to_ascii_table', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('ascii')
@@ -61,17 +61,17 @@ call eskk#register_mode('zenei')
 let s:dict = eskk#get_mode_structure('zenei')
 
 function! s:dict.filter(...)
-    return call('eskk#mode#ascii#filter', a:000)
+    return call('eskk#mode#builtin#sym_filter', a:000)
 endfunction
 function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#ascii#cb_handle_key', a:000)
+    return call('eskk#mode#builtin#sym_cb_handle_key', a:000)
 endfunction
 
 
 if !g:eskk_mode_zenei_no_default_mappings
-    call eskk#register_event('enter-mode-zenei', 'eskk#mode#ascii#hook_fn_do_lmap_zenei', [])
+    call eskk#register_event('enter-mode-zenei', 'eskk#mode#builtin#hook_fn_do_lmap_zenei', [])
 endif
-call eskk#register_event('enter-mode-zenei', 'eskk#mode#ascii#set_rom_to_zenei_table', [])
+call eskk#register_event('enter-mode-zenei', 'eskk#mode#builtin#set_rom_to_zenei_table', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('zenei')
@@ -82,8 +82,8 @@ if !exists('g:eskk_mode_hira_no_default_mappings')
     let g:eskk_mode_hira_no_default_mappings = 0
 endif
 
-lnoremap <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#call_via_filter('eskk#mode#hira#do_q_key', [])
-noremap! <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#call_via_filter('eskk#mode#hira#do_q_key', [])
+lnoremap <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
+noremap! <expr> <Plug>(eskk:mode:hira:convert/switch-to-kata) eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
 
 lnoremap <expr> <Plug>(eskk:mode:hira:to-ascii) [eskk#set_mode('ascii'), ''][1]
 noremap! <expr> <Plug>(eskk:mode:hira:to-ascii) [eskk#set_mode('ascii'), ''][1]
@@ -96,18 +96,18 @@ call eskk#register_mode('hira')
 let s:dict = eskk#get_mode_structure('hira')
 
 function! s:dict.filter(...)
-    return call('eskk#mode#hira#filter', a:000)
+    return call('eskk#mode#builtin#asym_filter', a:000)
 endfunction
 function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#hira#cb_handle_key', a:000)
+    return call('eskk#mode#builtin#asym_cb_handle_key', a:000)
 endfunction
 
 
 if !g:eskk_mode_hira_no_default_mappings
-    call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#hook_fn_do_lmap_hira', [])
+    call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#hook_fn_do_lmap_hira', [])
 endif
-call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#set_rom_to_hira_table', [])
-call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#clear_henkan_rom_str_list', [])
+call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#set_rom_to_hira_table', [])
+call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#clear_henkan_rom_str_list', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('hira')
@@ -123,18 +123,18 @@ call eskk#register_mode('kata')
 let s:dict = eskk#get_mode_structure('kata')
 
 function! s:dict.filter(...)
-    return call('eskk#mode#hira#filter', a:000)
+    return call('eskk#mode#builtin#asym_filter', a:000)
 endfunction
 function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#hira#cb_handle_key', a:000)
+    return call('eskk#mode#builtin#asym_cb_handle_key', a:000)
 endfunction
 
 
 if !g:eskk_mode_kata_no_default_mappings
-    call eskk#register_event('enter-mode-kata', 'eskk#mode#hira#hook_fn_do_lmap_kata', [])
+    call eskk#register_event('enter-mode-kata', 'eskk#mode#builtin#hook_fn_do_lmap_kata', [])
 endif
-call eskk#register_event('enter-mode-kata', 'eskk#mode#hira#set_rom_to_kata_table', [])
-call eskk#register_event('enter-mode-hira', 'eskk#mode#hira#clear_henkan_rom_str_list', [])
+call eskk#register_event('enter-mode-kata', 'eskk#mode#builtin#set_rom_to_kata_table', [])
+call eskk#register_event('enter-mode-kata', 'eskk#mode#builtin#clear_henkan_rom_str_list', [])
 
 unlet s:dict
 call eskk#validate_mode_structure('kata')

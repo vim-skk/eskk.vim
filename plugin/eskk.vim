@@ -115,11 +115,13 @@ if !exists("g:eskk_egg_like_newline")
     let g:eskk_egg_like_newline = 0
 endif
 if !g:eskk_egg_like_newline
-    call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#mode#hira#do_lmap_non_egg_like_newline', [1])
-    call eskk#register_event(['enter-phase-normal', 'enter-phase-henkan-select', 'enter-phase-jisyo-touroku'], 'eskk#mode#hira#do_lmap_non_egg_like_newline', [0])
+    call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
+    call eskk#register_event(['enter-phase-normal', 'enter-phase-henkan-select', 'enter-phase-jisyo-touroku'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
+
+    " Restore <CR> mapping when InsertLeave.
     augroup eskk-plugin-egg-like-newline
         autocmd!
-        autocmd InsertLeave * call eskk#mode#hira#do_lmap_non_egg_like_newline(0)
+        autocmd InsertLeave * call eskk#mode#builtin#do_lmap_non_egg_like_newline(0)
     augroup END
 endif
 
