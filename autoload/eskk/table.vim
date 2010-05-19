@@ -82,7 +82,13 @@ endfunction "}}}
 
 function! s:load_table(table_name) "{{{
     " Lazy loading.
-    call eskk#table#{a:table_name}#load()
+    try
+        call eskk#table#{a:table_name}#load()
+        return 1
+    catch
+        call eskk#util#logf("can't load table '%s'.", a:table_name)
+        return 0
+    endtry
 endfunction "}}}
 
 function! s:get_table(table_name, ...) "{{{
@@ -198,7 +204,7 @@ endfunction "}}}
 " }}}
 
 
-" Autoload functions for mode. {{{
+" Autoload functions {{{
 
 function! eskk#table#has_candidates(...) "{{{
     return !empty(call('eskk#table#get_candidates', a:000))
@@ -281,6 +287,15 @@ function! eskk#table#get_rest(table_name, lhs, ...) "{{{
         endif
     endif
     return s:table_defs[a:table_name][a:lhs].rest
+endfunction "}}}
+
+
+function! eskk#table#get_definition(table_name) "{{{
+    if s:load_table(a:table_name)
+        return s:get_table(a:table_name, {})
+    else
+        return {}
+    endif
 endfunction "}}}
 
 " }}}
