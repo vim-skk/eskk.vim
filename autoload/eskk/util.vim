@@ -102,30 +102,19 @@ function! s:split_special_key(key) "{{{
     return [head, strpart(a:key, strlen(head))]
 endfunction "}}}
 function! eskk#util#eval_key(key) "{{{
-    let key = a:key
-    let evaled = ''
-    while 1
-        let [left, key] = s:split_key(key)
-        let evaled .= left
-        if key == ''
-            return evaled
-        elseif key[0] ==# '<' && key[1] ==# '>'
-            " '<>'
-            let evaled .= strpart(key, 0, 2)
-            let key = strpart(key, 2)
-        elseif key[0] ==# '<' && key =~# '^<[^>]*$'
-            " No '>'
-            return evaled . key
-        elseif key[0] ==# '<'
-            " Special key.
-            let [sp_key, key] = s:split_special_key(key)
-            let evaled .= eval(printf('"\%s"', sp_key))
-        else
-            throw eskk#internal_error(['eskk', 'util'])
-        endif
-    endwhile
-    throw eskk#never_reached_error(['eskk', 'util'])
+    " From arpeggio.vim
+
+    let keys = s:split_to_keys(a:key)
+    call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
+    return join(keys, '')
 endfunction "}}}
+function! s:split_to_keys(lhs)  "{{{2
+    " From arpeggio.vim
+    "
+    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
+    "             a:lhs doesn't directly contain any escape sequences.
+    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
+endfunction
 
 " Boost.Format-like function.
 " This is useful for embedding values in string.
