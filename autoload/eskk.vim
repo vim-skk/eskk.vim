@@ -61,18 +61,6 @@ function! eskk#map_key(key) "{{{
         return
     endif
 
-    " Save current a:key mapping
-    "
-    " TODO Check if a:key is buffer local.
-    " Because if it is not buffer local,
-    " there is no necessity to stash current a:key.
-    " if maparg(a:key, 'l') != ''
-    "     execute
-    "     \   'lnoremap'
-    "     \   s:stash_lang_key_map(a:key)
-    "     \   maparg(a:key, 'l')
-    " endif
-
     " Map a:key.
     let named_key = s:map_named_key(a:key)
     execute
@@ -80,6 +68,42 @@ function! eskk#map_key(key) "{{{
     \   '<buffer>'
     \   a:key
     \   named_key
+endfunction "}}}
+function! eskk#map_temp_key(lhs, rhs) "{{{
+    " Assumption: a:lhs must be '<Bar>' not '|'.
+
+    " Save current a:lhs mapping.
+    if maparg(a:lhs, 'l') != ''
+        " TODO Check if a:lhs is buffer local.
+        execute
+        \   'lmap'
+        \   '<buffer>'
+        \   s:temp_key_map(a:lhs)
+        \   maparg(a:lhs, 'l')
+    endif
+
+    if s:is_no_map_key(a:lhs)
+        return
+    endif
+
+    " Map a:lhs.
+    execute
+    \   'lmap'
+    \   '<buffer>'
+    \   a:lhs
+    \   a:rhs
+endfunction "}}}
+function! eskk#map_temp_key_restore(lhs) "{{{
+    let temp_key = s:temp_key_map(a:lhs)
+    let saved_rhs = maparg(temp_key, 'l')
+
+    if saved_rhs != ''
+        execute 'lunmap <buffer>' temp_key
+        execute 'lmap <buffer>' a:lhs saved_rhs
+    else
+        call eskk#util#logf("called eskk#map_temp_key_restore() but no '%s' key is stashed.", a:lhs)
+        call eskk#map_key(a:lhs)
+    endif
 endfunction "}}}
 function! eskk#unmap_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
@@ -97,7 +121,7 @@ function! eskk#unmap_key(key) "{{{
     " TODO Restore buffer local mapping.
 
 endfunction "}}}
-function! s:stash_lang_key_map(key) "{{{
+function! s:temp_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
 function! s:map_named_key(key) "{{{
