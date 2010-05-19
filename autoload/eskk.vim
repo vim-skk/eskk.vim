@@ -107,7 +107,7 @@ function! eskk#map_temp_key_restore(lhs) "{{{
         execute 'lunmap <buffer>' temp_key
         execute 'lmap <buffer>' a:lhs saved_rhs
     else
-        call eskk#util#logf("called eskk#map_temp_key_restore() but no '%s' key is stashed.", a:lhs)
+        call eskk#util#logf("warning: called eskk#map_temp_key_restore() but no '%s' key is stashed.", a:lhs)
         call eskk#map_key(a:lhs)
     endif
 endfunction "}}}
@@ -333,6 +333,7 @@ endfunction "}}}
 
 " Mode
 function! eskk#set_mode(next_mode) "{{{
+    call eskk#util#logf("mode change: %s => %s", s:eskk_mode, a:next_mode)
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
         call eskk#util#warnf('s:available_modes = %s', string(s:available_modes))
@@ -406,6 +407,7 @@ function! eskk#register_event(event_names, Fn, args) "{{{
     endfor
 endfunction "}}}
 function! eskk#throw_event(event_name) "{{{
+    call eskk#util#log("Do event - " . a:event_name)
     for [Fn, args] in get(s:event_hook_fn, a:event_name, [])
         call call(Fn, args)
         unlet Fn
@@ -505,7 +507,7 @@ function! s:filter_body_call_mode_or_default_filter(stash) "{{{
         call eskk#util#log('calling eskk#default_filter()...')
         call call('eskk#default_filter', [a:stash])
     else
-        call eskk#util#log('calling filter function...')
+        call eskk#util#log('calling mode filter function...')
         call s:call_mode_func('filter', [a:stash], 1)
     endif
 endfunction "}}}
