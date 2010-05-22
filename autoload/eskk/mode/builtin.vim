@@ -112,7 +112,7 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
         call eskk#map_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
     else
         call eskk#util#log("Restore *non* egg like newline...")
-        call eskk#do_next_filter('eskk#map_temp_key_restore', ['<CR>'])
+        call eskk#register_temp_event('filter-begin', 'eskk#map_temp_key_restore', ['<CR>'])
     endif
 endfunction "}}}
 
