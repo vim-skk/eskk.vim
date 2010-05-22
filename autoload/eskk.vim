@@ -387,6 +387,12 @@ endfunction "}}}
 
 " Event
 function! eskk#register_event(event_names, Fn, head_args) "{{{
+    return s:register_event(a:event_names, a:Fn, a:head_args, 0)
+endfunction "}}}
+function! eskk#register_temp_event(event_names, Fn, head_args) "{{{
+    return s:register_event(a:event_names, a:Fn, a:head_args, 1)
+endfunction "}}}
+function! s:register_event(event_names, Fn, head_args, is_temporary) "{{{
     if type(a:event_names) != type([])
         return eskk#register_event([a:event_names], a:Fn, a:head_args)
     endif
@@ -395,15 +401,26 @@ function! eskk#register_event(event_names, Fn, head_args) "{{{
         if !has_key(s:event_hook_fn, name)
             let s:event_hook_fn[name] = []
         endif
-        call add(s:event_hook_fn[name], [a:Fn, a:head_args])
+        call add(s:event_hook_fn[name], [a:Fn, a:head_args, a:is_temporary])
     endfor
 endfunction "}}}
 function! eskk#throw_event(event_name) "{{{
     call eskk#util#log("Do event - " . a:event_name)
-    for [Fn, args] in get(s:event_hook_fn, a:event_name, [])
+
+    let list = get(s:event_hook_fn, a:event_name, [])
+    let len = len(list)
+    let i = 0
+
+    while i < len
+        let [Fn, args, is_temporary] = list[i]
+        if is_temporary
+            call remove(list, i)
+        endif
         call call(Fn, args)
+
+        let i += 1
         unlet Fn
-    endfor
+    endwhile
 endfunction "}}}
 
 " Locking diff old string
