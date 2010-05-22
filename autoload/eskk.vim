@@ -451,7 +451,6 @@ function! s:filter(char, Fn, head_args) "{{{
     let opt = {
     \   'redispatch_chars': [],
     \   'return': 0,
-    \   'finalize_fn': [],
     \}
     let filter_args = [{
     \   'char': a:char,
@@ -509,10 +508,7 @@ function! s:filter(char, Fn, head_args) "{{{
         return eskk#escape_key() . a:char
 
     finally
-        for Fn in opt.finalize_fn
-            call call(Fn, [])
-            unlet Fn
-        endfor
+        call eskk#throw_event('filter-finalize')
     endtry
 endfunction "}}}
 function! s:filter_body_call_mode_or_default_filter(stash) "{{{
@@ -604,27 +600,30 @@ function! s:do_enter(stash) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        call add(
-        \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX)
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         call buftable.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        call add(
-        \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX)
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        call add(
-        \   a:stash.option.finalize_fn,
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX)
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
         \)
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)

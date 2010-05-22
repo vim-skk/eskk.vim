@@ -236,9 +236,10 @@ function! s:filter_rom_to_hira(stash) "{{{
             endif
 
             " Clear filtered string when eskk#filter()'s finalizing.
-            call add(
-            \   a:stash.option.finalize_fn,
-            \   eskk#util#get_local_func('finalize', s:SID_PREFIX)
+            call eskk#register_temp_event(
+            \   'filter-finalize',
+            \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
+            \   []
             \)
         elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
             " Enter phase henkan select with henkan.
