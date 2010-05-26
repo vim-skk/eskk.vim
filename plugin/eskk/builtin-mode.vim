@@ -6,6 +6,11 @@ scriptencoding utf-8
 
 runtime! plugin/eskk.vim
 
+" g:eskk_disable {{{
+if g:eskk_disable
+    finish
+endif
+" }}}
 " Load Once {{{
 if exists('g:loaded_eskk_builtin_mode') && g:loaded_eskk_builtin_mode
     finish
