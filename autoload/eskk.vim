@@ -478,6 +478,7 @@ function! s:filter(char, Fn, head_args) "{{{
             " should
             "     s:map_named_key(eskk#util#uneval_key(char))
 
+            " TODO: Do not remap.
             return
             \   eskk#rewrite()
             \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(s:map_named_key(v:val))'), '')
