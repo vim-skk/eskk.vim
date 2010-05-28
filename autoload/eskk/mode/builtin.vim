@@ -144,8 +144,6 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
         if eskk#is_henkan_key(char)
             return s:henkan_key(a:stash)
         else
-            " Leave phase henkan select
-            " unless char is one of some specific characters.
             call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
             " Move henkan select buffer string to normal.
             call a:stash.buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
