@@ -116,7 +116,7 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
     endif
 endfunction "}}}
 
-function! s:finalize() "{{{
+function! eskk#mode#builtin#finalize_clear_current_buf_str() "{{{
     if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         let buf_str = eskk#get_buftable().get_current_buf_str()
         call buf_str.clear_filter_str()
@@ -236,7 +236,7 @@ function! s:filter_rom_to_hira(stash) "{{{
             " Clear filtered string when eskk#filter()'s finalizing.
             call eskk#register_temp_event(
             \   'filter-finalize',
-            \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
+            \   'eskk#mode#builtin#finalize_clear_current_buf_str',
             \   []
             \)
         elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
