@@ -291,13 +291,10 @@ function! s:filter_rom_to_hira(stash) "{{{
             call s:henkan_key(a:stash)
         endif
 
-        return
-
     elseif s:current_table.has_candidates(rom_str)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
         call buf_str.push_rom_str(char)
-        return
 
     else
         " No candidates.
