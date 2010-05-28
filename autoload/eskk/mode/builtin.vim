@@ -294,11 +294,12 @@ function! s:filter_rom_to_hira(stash) "{{{
     elseif s:current_table.has_candidates(rom_str)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
+
+        " NOTE: This will be run in all phases.
         call buf_str.push_rom_str(char)
 
     else
         " No candidates.
-        " Remove rom_str[-2].
         call eskk#util#logf('%s - no candidates.', rom_str)
         if rom_str != ''
             call buf_str.pop_rom_str()
