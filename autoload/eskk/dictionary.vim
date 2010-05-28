@@ -117,7 +117,12 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
 endfunction "}}}
 
 function! s:henkan_result.get_next() dict "{{{
-    let result = s:henkan_result_get_result(self)
+    try
+        let result = s:henkan_result_get_result(self)
+    catch /^eskk:.*can't find any candidate$/
+        return -1
+    endtry
+
     let [candidates, idx] = result
     try
         if eskk#util#has_idx(candidates, idx)
