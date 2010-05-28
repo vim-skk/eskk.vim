@@ -31,6 +31,8 @@ let s:buftable = eskk#buftable#new()
 let s:lock_old_str = 0
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
+" True if eskk#enable() is called.
+let s:enabled = 0
 " }}}
 
 " Write timestamp to debug file {{{
@@ -192,7 +194,7 @@ delfunc s:SID
 
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
-    return &iminsert != 0
+    return s:enabled
 endfunction "}}}
 function! eskk#enable() "{{{
     if eskk#is_enabled()
@@ -214,6 +216,8 @@ function! eskk#enable() "{{{
     call eskk#set_mode(g:eskk_initial_mode)
 
     call s:call_mode_func('cb_im_enter', [], 0)
+
+    let s:enabled = 1
     return "\<C-^>"
 endfunction "}}}
 function! eskk#disable() "{{{
@@ -227,6 +231,8 @@ function! eskk#disable() "{{{
     endfor
 
     call s:call_mode_func('cb_im_leave', [], 0)
+
+    let s:enabled = 0
     return "\<C-^>"
 endfunction "}}}
 function! eskk#toggle() "{{{
