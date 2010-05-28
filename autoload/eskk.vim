@@ -86,10 +86,6 @@ function! eskk#map_temp_key(lhs, rhs) "{{{
         \   maparg(a:lhs, 'l')
     endif
 
-    if s:is_special_key(a:lhs)
-        return
-    endif
-
     " Map a:lhs.
     execute
     \   'lmap'
