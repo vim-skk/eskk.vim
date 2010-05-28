@@ -66,6 +66,9 @@ elseif type(g:eskk_dictionary) != type({})
     \   eskk#user_error(['eskk'], "g:eskk_dictionary's type is either String or Dictionary.")
     \)
 endif
+if !exists('g:eskk_dictionary_internal_encoding')
+    let g:eskk_dictionary_internal_encoding = 'utf-8'
+endif
 
 
 if !exists("g:eskk_large_dictionary")

@@ -22,6 +22,8 @@ set cpo&vim
 function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
+    let needle = s:iconv(needle, &l:encoding, g:eskk_dictionary_internal_encoding)
+
     for ph_dict in a:dict._dicts
         if ph_dict.sorted
             let result = s:search_binary(ph_dict, needle, has_okuri, 5)
@@ -37,17 +39,19 @@ function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
 endfunction "}}}
 
 function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
+    " Assumption: `a:needle` is encoded to `g:eskk_dictionary_internal_encoding`.
+
+    let whole_lines = a:ph_dict.get_lines()
     if a:has_okuri
         let min = a:ph_dict.okuri_ari_lnum + 1
         let max = a:ph_dict.okuri_nasi_lnum - 1
     else
         let min = a:ph_dict.okuri_nasi_lnum + 1
-        let max = len(a:ph_dict.get_lines())
+        let max = len(whole_lines)
     endif
     while max - min > a:limit
         let mid = (min + max) / 2
-        let line = a:ph_dict.get_lines()[mid]
-        let line = s:iconv(line, a:ph_dict.encoding, &l:encoding)
+        let line = whole_lines[mid]
         if a:needle >=# line
             if a:has_okuri
                 let max = mid
@@ -66,6 +70,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 endfunction "}}}
 
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
+    " Assumption: `a:needle` is encoded to `g:eskk_dictionary_internal_encoding`.
+
     if a:0 != 0
         let pos = a:1
     elseif a:has_okuri
@@ -73,9 +79,9 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     else
         let pos = a:ph_dict.okuri_nasi_lnum
     endif
-    while eskk#util#has_idx(a:ph_dict.get_lines(), pos)
-        let line = a:ph_dict.get_lines()[pos]
-        let line = s:iconv(line, a:ph_dict.encoding, &l:encoding)
+    let whole_lines = a:ph_dict.get_lines()
+    while eskk#util#has_idx(whole_lines, pos)
+        let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
             call eskk#util#logf('found matched line - %s', string(line))
             return line[strlen(a:needle) :]
@@ -221,6 +227,12 @@ function! s:physical_dict.get_lines() dict "{{{
     endif
     let self._loaded = 1
 
+    " NOTE: I know `self._content_lines` will be changed.
+    " I don't want to assign big lines explicitly.
+    call map(
+    \   self._content_lines,
+    \   's:iconv(v:val, self.encoding, g:eskk_dictionary_internal_encoding)'
+    \)
     return self._content_lines
 endfunction "}}}
 
