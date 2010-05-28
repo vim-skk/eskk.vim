@@ -213,99 +213,118 @@ function! s:filter_rom_to_hira(stash) "{{{
     if s:current_table.has_map(rom_str)
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
-
-        if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-            " Set filtered string.
-            call buf_str.push_filter_str(
-            \   s:current_table.get_map_to(rom_str)
-            \)
-            call buf_str.clear_rom_str()
-
-            " Set rest string.
-            "
-            " NOTE:
-            " rest must not have multibyte string.
-            " rest is for rom string.
-            let rest = s:current_table.get_rest(rom_str, -1)
-            " Assumption: 's:current_table.has_map(rest)' returns false here.
-            if rest !=# -1
-                let a:stash.option.redispatch_chars += split(rest, '\zs')
-            endif
-
-            " Clear filtered string when eskk#filter()'s finalizing.
-            call eskk#register_temp_event(
-            \   'filter-finalize',
-            \   'eskk#mode#builtin#finalize_clear_current_buf_str',
-            \   []
-            \)
-        elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-            " Enter phase henkan select with henkan.
-
-            " Input: "SesSi"
-            " Convert from:
-            "   henkan buf str:
-            "     filter str: "せ"
-            "     rom str   : "s"
-            "   okuri buf str:
-            "     filter str: "し"
-            "     rom str   : "si"
-            " to:
-            "   henkan buf str:
-            "     filter str: "せっ"
-            "     rom str   : ""
-            "   okuri buf str:
-            "     filter str: "し"
-            "     rom str   : "si"
-            " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
-            let henkan_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-            let okuri_buf_str         = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-            let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-            let henkan_rom = henkan_buf_str.get_rom_str()
-            let okuri_rom  = okuri_buf_str.get_rom_str()
-            if henkan_rom != '' && s:current_table.has_map(henkan_rom . okuri_rom[0])
-                " Push "っ".
-                call henkan_buf_str.push_filter_str(
-                \   s:current_table.get_map_to(henkan_rom . okuri_rom[0])
-                \)
-                " Push "s" to rom str.
-                let rest = s:current_table.get_rest(henkan_rom . okuri_rom[0], -1)
-                if rest !=# -1
-                    call okuri_buf_str.set_rom_str(
-                    \   rest . okuri_rom[1:]
-                    \)
-                endif
-            endif
-
-            call okuri_buf_str.push_rom_str(char)
-            if s:current_table.has_map(okuri_buf_str.get_rom_str())
-                call okuri_buf_str.push_filter_str(
-                \   s:current_table.get_map_to(okuri_buf_str.get_rom_str())
-                \)
-                let rest = s:current_table.get_rest(okuri_buf_str.get_rom_str(), -1)
-                if rest !=# -1
-                    let a:stash.option.redispatch_chars += split(rest, '\zs')
-                endif
-            endif
-
-            call s:henkan_key(a:stash)
-        endif
+        return s:filter_rom_to_hira_exact_match(a:stash)
 
     elseif s:current_table.has_candidates(rom_str)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
-
-        " NOTE: This will be run in all phases.
-        call buf_str.push_rom_str(char)
+        return s:filter_rom_to_hira_has_candidates(a:stash)
 
     else
         " No candidates.
         call eskk#util#logf('%s - no candidates.', rom_str)
-        if rom_str != ''
-            call buf_str.pop_rom_str()
-        endif
-        call buf_str.push_rom_str(char)
+        return s:filter_rom_to_hira_no_match(a:stash)
     endif
+endfunction "}}}
+function! s:filter_rom_to_hira_exact_match(stash) "{{{
+    let char = a:stash.char
+    let buf_str = a:stash.buftable.get_current_buf_str()
+    let rom_str = buf_str.get_rom_str() . char
+    let phase = a:stash.buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        " Set filtered string.
+        call buf_str.push_filter_str(
+        \   s:current_table.get_map_to(rom_str)
+        \)
+        call buf_str.clear_rom_str()
+
+        " Set rest string.
+        "
+        " NOTE:
+        " rest must not have multibyte string.
+        " rest is for rom string.
+        let rest = s:current_table.get_rest(rom_str, -1)
+        " Assumption: 's:current_table.has_map(rest)' returns false here.
+        if rest !=# -1
+            let a:stash.option.redispatch_chars += split(rest, '\zs')
+        endif
+
+        " Clear filtered string when eskk#filter()'s finalizing.
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   'eskk#mode#builtin#finalize_clear_current_buf_str',
+        \   []
+        \)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        " Enter phase henkan select with henkan.
+
+        " Input: "SesSi"
+        " Convert from:
+        "   henkan buf str:
+        "     filter str: "せ"
+        "     rom str   : "s"
+        "   okuri buf str:
+        "     filter str: "し"
+        "     rom str   : "si"
+        " to:
+        "   henkan buf str:
+        "     filter str: "せっ"
+        "     rom str   : ""
+        "   okuri buf str:
+        "     filter str: "し"
+        "     rom str   : "si"
+        " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
+        let henkan_buf_str        = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        let okuri_buf_str         = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        let henkan_select_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+        let henkan_rom = henkan_buf_str.get_rom_str()
+        let okuri_rom  = okuri_buf_str.get_rom_str()
+        if henkan_rom != '' && s:current_table.has_map(henkan_rom . okuri_rom[0])
+            " Push "っ".
+            call henkan_buf_str.push_filter_str(
+            \   s:current_table.get_map_to(henkan_rom . okuri_rom[0])
+            \)
+            " Push "s" to rom str.
+            let rest = s:current_table.get_rest(henkan_rom . okuri_rom[0], -1)
+            if rest !=# -1
+                call okuri_buf_str.set_rom_str(
+                \   rest . okuri_rom[1:]
+                \)
+            endif
+        endif
+
+        call okuri_buf_str.push_rom_str(char)
+        if s:current_table.has_map(okuri_buf_str.get_rom_str())
+            call okuri_buf_str.push_filter_str(
+            \   s:current_table.get_map_to(okuri_buf_str.get_rom_str())
+            \)
+            let rest = s:current_table.get_rest(okuri_buf_str.get_rom_str(), -1)
+            if rest !=# -1
+                let a:stash.option.redispatch_chars += split(rest, '\zs')
+            endif
+        endif
+
+        call s:henkan_key(a:stash)
+    endif
+endfunction "}}}
+function! s:filter_rom_to_hira_has_candidates(stash) "{{{{
+    let char = a:stash.char
+    let buf_str = a:stash.buftable.get_current_buf_str()
+
+    " NOTE: This will be run in all phases.
+    call buf_str.push_rom_str(char)
+endfunction "}}}
+function! s:filter_rom_to_hira_no_match(stash) "{{{
+    let char = a:stash.char
+    let buf_str = a:stash.buftable.get_current_buf_str()
+    let rom_str = buf_str.get_rom_str() . char
+
+    if rom_str != ''
+        call buf_str.pop_rom_str()
+    endif
+    call buf_str.push_rom_str(char)
 endfunction "}}}
 
 " }}}
