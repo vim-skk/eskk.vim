@@ -44,7 +44,7 @@ endif
 " Functions {{{
 
 " Initialize/Mappings
-function! s:is_no_map_key(key) "{{{
+function! s:is_special_key(key) "{{{
     let char = eskk#util#eval_key(a:key)
 
     return eskk#is_henkan_key(char)
@@ -55,17 +55,23 @@ endfunction "}}}
 function! eskk#map_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
-    if s:is_no_map_key(a:key)
-        return
-    endif
-
     " Map a:key.
-    let named_key = s:map_named_key(a:key)
-    execute
-    \   'lmap'
-    \   '<buffer>'
-    \   a:key
-    \   named_key
+    if s:is_special_key(a:key)
+        " Map with <buffer> again.
+        let maparg = maparg(a:key, 'l')
+        execute
+        \   'lmap'
+        \   '<buffer>'
+        \   a:key
+        \   maparg
+    else
+        let named_key = s:map_named_key(a:key)
+        execute
+        \   'lmap'
+        \   '<buffer>'
+        \   a:key
+        \   named_key
+    endif
 endfunction "}}}
 function! eskk#map_temp_key(lhs, rhs) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
@@ -80,7 +86,7 @@ function! eskk#map_temp_key(lhs, rhs) "{{{
         \   maparg(a:lhs, 'l')
     endif
 
-    if s:is_no_map_key(a:lhs)
+    if s:is_special_key(a:lhs)
         return
     endif
 
@@ -106,18 +112,16 @@ endfunction "}}}
 function! eskk#unmap_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
-    if s:is_no_map_key(a:key)
-        return
-    endif
-
     " Unmap a:key.
+    " NOTE: This unmaps also special key (s:is_special_key()).
+    " But I asssume that special key has been mapped
+    " in non-<buffer> lang-mode mapping.
     execute
     \   'lunmap'
     \   '<buffer>'
     \   a:key
 
-    " TODO Restore buffer local mapping.
-
+    " TODO Restore buffer local mapping?
 endfunction "}}}
 function! s:temp_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
