@@ -134,6 +134,10 @@ if !g:eskk_egg_like_newline
     augroup END
 endif
 
+if !exists("g:eskk_keep_state")
+    let g:eskk_keep_state = 0
+endif
+
 " }}}
 
 " Mappings {{{

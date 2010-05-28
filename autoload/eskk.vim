@@ -660,9 +660,18 @@ endfunction "}}}
 " }}}
 
 " Auto commands {{{
+function! s:autocmd_insert_leave() "{{{
+    call s:buftable.reset()
+
+    if !g:eskk_keep_state && eskk#is_enabled()
+        let disable = eskk#disable()
+        noautocmd execute 'normal! i' . disable
+    endif
+endfunction "}}}
+
 augroup eskk
     autocmd!
-    autocmd InsertLeave * call s:buftable.reset()
+    autocmd InsertLeave * call s:autocmd_insert_leave()
 augroup END
 " }}}
 
