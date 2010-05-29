@@ -97,6 +97,9 @@ endif
 if !exists('g:eskk_no_default_mappings')
     let g:eskk_no_default_mappings = 0
 endif
+if !exists('g:eskk_dont_map_default_if_already_mapped')
+    let g:eskk_dont_map_default_if_already_mapped = 1
+endif
 if !exists('g:eskk_mapped_key')
     let g:eskk_mapped_key = eskk#default_mapped_keys()
 endif
@@ -164,11 +167,33 @@ noremap! <expr> <Plug>(eskk:escape-key) eskk#escape_key()
 lnoremap <expr> <Plug>(eskk:escape-key) eskk#escape_key()
 
 if !g:eskk_no_default_mappings
-    silent! map! <unique> <C-j>   <Plug>(eskk:toggle)
-    silent! lmap <unique> <C-j>   <Plug>(eskk:toggle)
-    silent! lmap <unique> ;       <Plug>(eskk:sticky-key)
-    silent! lmap <unique> <Space> <Plug>(eskk:henkan-key)
-    silent! lmap <unique> <Esc>   <Plug>(eskk:escape-key)
+    function! s:do_map(rhs, mode)
+        let map_default_even_if_already_mapped = !g:eskk_dont_map_default_if_already_mapped
+        return
+        \   map_default_even_if_already_mapped
+        \   || !hasmapto(a:rhs, a:mode)
+    endfunction
+
+    if s:do_map('<Plug>(eskk:toggle)', 'i')
+        silent! imap <unique> <C-j>   <Plug>(eskk:toggle)
+    endif
+    if s:do_map('<Plug>(eskk:toggle)', 'c')
+        silent! cmap <unique> <C-j>   <Plug>(eskk:toggle)
+    endif
+    if s:do_map('<Plug>(eskk:toggle)', 'l')
+        silent! lmap <unique> <C-j>   <Plug>(eskk:toggle)
+    endif
+    if s:do_map('<Plug>(eskk:sticky-key)', 'l')
+        silent! lmap <unique> ;       <Plug>(eskk:sticky-key)
+    endif
+    if s:do_map('<Plug>(eskk:henkan-key)', 'l')
+        silent! lmap <unique> <Space> <Plug>(eskk:henkan-key)
+    endif
+    if s:do_map('<Plug>(eskk:escape-key)', 'l')
+        silent! lmap <unique> <Esc>   <Plug>(eskk:escape-key)
+    endif
+
+    delfunc s:do_map
 endif
 
 " }}}
