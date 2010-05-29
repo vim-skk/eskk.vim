@@ -116,13 +116,6 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
     endif
 endfunction "}}}
 
-function! eskk#mode#builtin#finalize_clear_current_buf_str() "{{{
-    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        let buf_str = eskk#get_buftable().get_current_buf_str()
-        call buf_str.clear_filter_str()
-    endif
-endfunction "}}}
-
 
 function! eskk#mode#builtin#asym_filter(stash) "{{{
     let char = a:stash.char
@@ -240,6 +233,7 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         \)
         call buf_str.clear_rom_str()
 
+
         " Set rest string.
         "
         " NOTE:
@@ -251,10 +245,18 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
             let a:stash.option.redispatch_chars += split(rest, '\zs')
         endif
 
+
         " Clear filtered string when eskk#filter()'s finalizing.
+        function! s:finalize()
+            let buftable = eskk#get_buftable()
+            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                call buftable.get_current_buf_str().clear_filter_str()
+            endif
+        endfunction
+
         call eskk#register_temp_event(
         \   'filter-finalize',
-        \   'eskk#mode#builtin#finalize_clear_current_buf_str',
+        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
         \   []
         \)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
@@ -295,7 +297,9 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
             endif
         endif
 
+        call eskk#util#assert(char != '')
         call okuri_buf_str.push_rom_str(char)
+
         if s:current_table.has_map(okuri_buf_str.get_rom_str())
             call okuri_buf_str.push_filter_str(
             \   s:current_table.get_map_to(okuri_buf_str.get_rom_str())
@@ -325,6 +329,33 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
         call buf_str.pop_rom_str()
     endif
     call buf_str.push_rom_str(char)
+
+    let cur_rom_str = buf_str.get_rom_str()
+    if s:current_table.has_map(cur_rom_str)
+        " Set a:stash.char to ''.
+        " I feel this a little bit tricky, though...
+        let a:stash.char = ''
+        call s:filter_rom_to_hira_exact_match(a:stash)
+    elseif s:current_table.has_candidates(cur_rom_str)
+        " Already pushed char. Nop.
+    else
+        " Pushed current char but no match,
+        " then dispose that char.
+        call eskk#util#logf("yet no match. dispose '%s'.", char)
+
+        function! s:finalize()
+            let buftable = eskk#get_buftable()
+            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                call buftable.get_current_buf_str().clear_rom_str()
+            endif
+        endfunction
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
+        \   []
+        \)
+    endif
 endfunction "}}}
 
 " }}}
