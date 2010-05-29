@@ -342,6 +342,17 @@ function! s:buftable.clear_buf_str(phases) dict "{{{
 endfunction "}}}
 
 
+function! s:buftable.dump_print() dict "{{{
+    for phase in self.get_all_phases()
+        let buf_str = self.get_buf_str(phase)
+        call eskk#util#warnf('phase:%d', phase)
+        call eskk#util#warnf('pos: %s', string(buf_str.get_pos()))
+        call eskk#util#warnf('rom_str: %s', string(buf_str.get_rom_str()))
+        call eskk#util#warnf('filter_str: %s', string(buf_str.get_filter_str()))
+    endfor
+endfunction "}}}
+
+
 function! s:validate_table_idx(table, henkan_phase) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
         throw eskk#out_of_idx_error(["eskk", "buftable"])
