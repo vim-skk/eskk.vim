@@ -250,7 +250,8 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         function! s:finalize()
             let buftable = eskk#get_buftable()
             if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                call buftable.get_current_buf_str().clear_filter_str()
+                let buf_str = buftable.get_current_buf_str()
+                call buf_str.clear_filter_str()
             endif
         endfunction
 
@@ -346,7 +347,8 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
         function! s:finalize()
             let buftable = eskk#get_buftable()
             if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                call buftable.get_current_buf_str().clear_rom_str()
+                let buf_str = buftable.get_current_buf_str()
+                call buf_str.clear_rom_str()
             endif
         endfunction
 
