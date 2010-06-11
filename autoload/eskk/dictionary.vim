@@ -121,7 +121,7 @@ endfunction "}}}
 
 function! s:henkan_result_advance(self, advance) "{{{
     let result = s:henkan_result_get_result(a:self)
-    if type(result) != type("")
+    if type(result) == type(-1)
         return -1
     endif
 
