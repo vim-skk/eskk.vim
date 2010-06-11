@@ -24,9 +24,7 @@ function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
     for ph_dict in a:dict._dicts
-        call eskk#util#log(needle)
         let converted = s:iconv(needle, &l:encoding, ph_dict.encoding)
-        call eskk#util#log(converted)
         if ph_dict.sorted
             let result = s:search_binary(ph_dict, converted, has_okuri, 5)
         else
