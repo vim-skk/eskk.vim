@@ -126,17 +126,14 @@ function! s:henkan_result_advance(self, advance) "{{{
     endif
 
     let [candidates, idx] = result
-    try
-        if eskk#util#has_idx(candidates, idx)
-            return candidates[idx].result . a:self._okuri_filter
-        else
-            return -1
-        endif
-    finally
-        if eskk#util#has_idx(candidates, result[1] + (a:advance ? 1 : -1))
-            let result[1] += (a:advance ? 1 : -1)
-        endif
-    endtry
+    if !eskk#util#has_idx(candidates, idx)
+        return -1
+    endif
+
+    if eskk#util#has_idx(candidates, result[1] + (a:advance ? 1 : -1))
+        let result[1] += (a:advance ? 1 : -1)
+    endif
+    return candidates[idx].result . a:self._okuri_filter
 endfunction "}}}
 
 function! s:henkan_result.get_next() dict "{{{
