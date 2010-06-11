@@ -33,6 +33,7 @@ function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
         if type(result) == type("")
             return result
         endif
+        call eskk#util#logf("no maches in '%s'.", ph_dict.path)
     endfor
 
     return -1
@@ -40,6 +41,7 @@ endfunction "}}}
 
 function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to `g:eskk_dictionary_internal_encoding`.
+    call eskk#util#log('s:search_binary()')
 
     let whole_lines = a:ph_dict.get_lines()
     if a:has_okuri
@@ -71,6 +73,7 @@ endfunction "}}}
 
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to `g:eskk_dictionary_internal_encoding`.
+    call eskk#util#log('s:search_linear()')
 
     if a:0 != 0
         let pos = a:1
