@@ -13,8 +13,6 @@ let s:loaded = 1
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
-
-" For global variables.
 runtime! plugin/eskk.vim
 
 " Variables {{{

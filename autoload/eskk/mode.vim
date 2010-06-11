@@ -13,6 +13,7 @@ let s:loaded = 1
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
+runtime! plugin/eskk.vim
 
 
 

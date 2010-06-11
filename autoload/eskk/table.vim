@@ -13,6 +13,7 @@ let s:loaded = 1
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
+runtime! plugin/eskk.vim
 
 " NOTE: Argument for table's name must be a:table_name.
 " Because of readability to call s:load_table().

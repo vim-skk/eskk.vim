@@ -13,6 +13,8 @@ let s:loaded = 1
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
+runtime! plugin/eskk.vim
+
 
 function! eskk#table#rom_to_kata#load()
     " dummy
