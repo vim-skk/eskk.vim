@@ -22,16 +22,18 @@ set cpo&vim
 function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
-    let needle = s:iconv(needle, &l:encoding, g:eskk_dictionary_internal_encoding)
 
     for ph_dict in a:dict._dicts
+        call eskk#util#log(needle)
+        let converted = s:iconv(needle, &l:encoding, ph_dict.encoding)
+        call eskk#util#log(converted)
         if ph_dict.sorted
-            let result = s:search_binary(ph_dict, needle, has_okuri, 5)
+            let result = s:search_binary(ph_dict, converted, has_okuri, 5)
         else
-            let result = s:search_linear(ph_dict, needle, has_okuri)
+            let result = s:search_linear(ph_dict, converted, has_okuri)
         endif
         if type(result) == type("")
-            return result
+            return s:iconv(result, ph_dict.encoding, &l:encoding)
         endif
         call eskk#util#logf("no maches in '%s'.", ph_dict.path)
     endfor
@@ -40,7 +42,7 @@ function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
 endfunction "}}}
 
 function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
-    " Assumption: `a:needle` is encoded to `g:eskk_dictionary_internal_encoding`.
+    " Assumption: `a:needle` is encoded to dictionary file encoding.
     call eskk#util#log('s:search_binary()')
 
     let whole_lines = a:ph_dict.get_lines()
@@ -72,7 +74,7 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 endfunction "}}}
 
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
-    " Assumption: `a:needle` is encoded to `g:eskk_dictionary_internal_encoding`.
+    " Assumption: `a:needle` is encoded to dictionary file encoding.
     call eskk#util#log('s:search_linear()')
 
     if a:0 != 0
@@ -235,12 +237,6 @@ function! s:physical_dict.get_lines() dict "{{{
     endif
     let self._loaded = 1
 
-    " NOTE: I know `self._content_lines` will be changed.
-    " I don't want to assign big lines explicitly.
-    call map(
-    \   self._content_lines,
-    \   's:iconv(v:val, self.encoding, g:eskk_dictionary_internal_encoding)'
-    \)
     return self._content_lines
 endfunction "}}}
 
