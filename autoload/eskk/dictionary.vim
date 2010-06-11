@@ -121,9 +121,9 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
     \)
 endfunction "}}}
 
-function! s:henkan_result.get_next() dict "{{{
+function! s:henkan_result_advance(self, advance) "{{{
     try
-        let result = s:henkan_result_get_result(self)
+        let result = s:henkan_result_get_result(a:self)
     catch /^eskk:.*can't find any candidate$/
         return -1
     endtry
@@ -131,31 +131,23 @@ function! s:henkan_result.get_next() dict "{{{
     let [candidates, idx] = result
     try
         if eskk#util#has_idx(candidates, idx)
-            return candidates[idx].result . self._okuri_filter
+            return candidates[idx].result . a:self._okuri_filter
         else
             return -1
         endif
     finally
-        if eskk#util#has_idx(candidates, result[1] + 1)
-            let result[1] += 1
+        if eskk#util#has_idx(candidates, result[1] + (a:advance ? 1 : -1))
+            let result[1] += (a:advance ? 1 : -1)
         endif
     endtry
 endfunction "}}}
 
+function! s:henkan_result.get_next() dict "{{{
+    return s:henkan_result_advance(self, 1)
+endfunction "}}}
+
 function! s:henkan_result.get_previous() dict "{{{
-    let result = s:henkan_result_get_result(self)
-    let [candidates, idx] = result
-    try
-        if eskk#util#has_idx(candidates, idx)
-            return candidates[idx].result . self._okuri_filter
-        else
-            return -1
-        endif
-    finally
-        if eskk#util#has_idx(candidates, result[1] - 1)
-            let result[1] -= 1
-        endif
-    endtry
+    return s:henkan_result_advance(self, 0)
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
