@@ -649,9 +649,6 @@ endfunction "}}}
 function! eskk#parse_error(from, ...) "{{{
     return s:build_error(a:from, ['parse error'] + a:000)
 endfunction "}}}
-function! eskk#look_up_error(from, ...) "{{{
-    return s:build_error(a:from, ["can't find any candidate"] + a:000)
-endfunction "}}}
 function! eskk#assertion_failure_error(from, ...) "{{{
     " This is only used from eskk#util#assert().
     return s:build_error(a:from, ['assertion failed'] + a:000)

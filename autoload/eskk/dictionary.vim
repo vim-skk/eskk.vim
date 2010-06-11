@@ -122,11 +122,10 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
 endfunction "}}}
 
 function! s:henkan_result_advance(self, advance) "{{{
-    try
-        let result = s:henkan_result_get_result(a:self)
-    catch /^eskk:.*can't find any candidate$/
+    let result = s:henkan_result_get_result(a:self)
+    if type(result) != type("")
         return -1
-    endtry
+    endif
 
     let [candidates, idx] = result
     try
@@ -157,7 +156,7 @@ function! s:henkan_result_get_result(this) "{{{
 
     let line = s:search_next_candidate(a:this._dict, a:this._key, a:this._okuri)
     if type(line) != type("")
-        throw eskk#look_up_error(['eskk', 'dictionary'], "Couldn't look up candidate.")
+        return -1
     endif
     let a:this._result = [s:parse_skk_dict_line(line), 0]
     return a:this._result
