@@ -60,6 +60,12 @@ endif
 
 " Functions {{{
 
+function! eskk#load() "{{{
+    runtime! plugin/eskk.vim
+endfunction "}}}
+
+
+
 " Initialize/Mappings
 function! s:is_special_key(key) "{{{
     let char = eskk#util#eval_key(a:key)
