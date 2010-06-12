@@ -381,6 +381,7 @@ function! eskk#toggle() "{{{
     endif
 endfunction "}}}
 
+" Manipulate display string.
 function! eskk#remove_display_str() "{{{
     let current_str = s:buftable.get_display_str()
     return repeat("\<C-h>", eskk#util#mb_strlen(current_str))
