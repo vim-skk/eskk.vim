@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 0, 2))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 0, 3))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -99,8 +99,28 @@ endif
 if !exists('g:eskk_dont_map_default_if_already_mapped')
     let g:eskk_dont_map_default_if_already_mapped = 1
 endif
+
+function! EskkDefaultMappedKeys() "{{{
+    return split(
+    \   'abcdefghijklmnopqrstuvwxyz'
+    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    \  .'1234567890'
+    \  .'!"#$%&''()'
+    \  .',./;:]@[-^\'
+    \  .'>?_+*}`{=~'
+    \   ,
+    \   '\zs'
+    \) + [
+    \   "<lt>",
+    \   "<Bar>",
+    \   "<Tab>",
+    \   "<BS>",
+    \   "<C-h>",
+    \   "<CR>",
+    \]
+endfunction "}}}
 if !exists('g:eskk_mapped_key')
-    let g:eskk_mapped_key = eskk#default_mapped_keys()
+    let g:eskk_mapped_key = EskkDefaultMappedKeys()
 endif
 
 " Mode
@@ -125,18 +145,6 @@ endif
 " Misc.
 if !exists("g:eskk_egg_like_newline")
     let g:eskk_egg_like_newline = 0
-endif
-if !g:eskk_egg_like_newline
-    " Default behavior is `egg like newline`.
-    " Turns it to `Non egg like newline` during henkan phase.
-    call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
-    call eskk#register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
-
-    " Restore <CR> mapping when InsertLeave.
-    augroup eskk-plugin-egg-like-newline
-        autocmd!
-        autocmd InsertLeave * call eskk#mode#builtin#do_lmap_non_egg_like_newline(0)
-    augroup END
 endif
 
 if !exists("g:eskk_keep_state")

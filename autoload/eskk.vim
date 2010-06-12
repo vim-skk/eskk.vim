@@ -36,10 +36,26 @@ let s:enabled = 0
 let s:map = {}
 " }}}
 
+" Initialization {{{
 " Write timestamp to debug file {{{
 if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
     call writefile(['', printf('--- %s ---', strftime('%c')), ''], expand(g:eskk_debug_file))
 endif
+" }}}
+" Egg-like-newline {{{
+if !g:eskk_egg_like_newline
+    " Default behavior is `egg like newline`.
+    " Turns it to `Non egg like newline` during henkan phase.
+    call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
+    call eskk#register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
+
+    " Restore <CR> mapping when InsertLeave.
+    augroup eskk-plugin-egg-like-newline
+        autocmd!
+        autocmd InsertLeave * call eskk#mode#builtin#do_lmap_non_egg_like_newline(0)
+    augroup END
+endif
+" }}}
 " }}}
 
 " Functions {{{
@@ -149,26 +165,6 @@ function! s:map_named_key(key) "{{{
     \   printf('eskk#filter(%s)', string(a:key))
 
     return lhs
-endfunction "}}}
-
-function! eskk#default_mapped_keys() "{{{
-    return split(
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    \  .'1234567890'
-    \  .'!"#$%&''()'
-    \  .',./;:]@[-^\'
-    \  .'>?_+*}`{=~'
-    \   ,
-    \   '\zs'
-    \) + [
-    \   "<lt>",
-    \   "<Bar>",
-    \   "<Tab>",
-    \   "<BS>",
-    \   "<C-h>",
-    \   "<CR>",
-    \]
 endfunction "}}}
 
 function! eskk#map(options, lhs, rhs) "{{{
