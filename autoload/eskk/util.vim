@@ -115,13 +115,13 @@ function! eskk#util#eval_key(key) "{{{
     call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
     return join(keys, '')
 endfunction "}}}
-function! s:split_to_keys(lhs)  "{{{2
+function! s:split_to_keys(lhs)  "{{{
     " From arpeggio.vim
     "
     " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
     "             a:lhs doesn't directly contain any escape sequences.
     return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
-endfunction
+endfunction "}}}
 
 " Boost.Format-like function.
 " This is useful for embedding values in string.
