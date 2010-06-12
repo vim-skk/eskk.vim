@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 0, 1))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 0, 2))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -198,27 +198,6 @@ endif
 " }}}
 
 " Commands {{{
-
-" :EskkSetMode {{{
-
-command!
-\   -nargs=?
-\   EskkSetMode
-\   call s:cmd_set_mode(<f-args>)
-
-function! s:cmd_set_mode(...) "{{{
-    if a:0 != 0
-        if eskk#is_supported_mode(a:1)
-            call eskk#set_mode(a:1)
-        else
-            call eskk#util#warnf("mode '%s' is not supported.", a:1)
-            return
-        endif
-    endif
-    echo eskk#get_mode()
-endfunction "}}}
-
-" }}}
 
 " :EskkMap {{{
 command!
