@@ -232,7 +232,10 @@ function! eskk#disable() "{{{
     call s:call_mode_func('cb_im_leave', [], 0)
 
     let s:enabled = 0
-    return "\<C-^>"
+
+    let kakutei_str = eskk#kakutei_str()
+    call s:buftable.reset()
+    return kakutei_str . "\<C-^>"
 endfunction "}}}
 function! eskk#toggle() "{{{
     if eskk#is_enabled()
@@ -240,6 +243,14 @@ function! eskk#toggle() "{{{
     else
         return eskk#enable()
     endif
+endfunction "}}}
+
+function! eskk#remove_display_str() "{{{
+    let current_str = s:buftable.get_display_str()
+    return repeat("\<C-h>", eskk#util#mb_strlen(current_str))
+endfunction "}}}
+function! eskk#kakutei_str() "{{{
+    return eskk#remove_display_str() . s:buftable.get_display_str(0)
 endfunction "}}}
 
 " Sticky key
@@ -321,9 +332,9 @@ endfunction "}}}
 
 " Escape key
 function! eskk#escape_key() "{{{
-    let current_str = s:buftable.get_display_str()
+    let kakutei_str = eskk#kakutei_str()
     call s:buftable.reset()
-    return repeat("\<C-h>", eskk#util#mb_strlen(current_str)) . "\<Esc>"
+    return kakutei_str . "\<Esc>"
 endfunction "}}}
 
 " Mode
