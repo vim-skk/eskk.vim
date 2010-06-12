@@ -393,7 +393,8 @@ endfunction "}}}
 
 " Statusline
 function! eskk#get_stl() "{{{
-    return eskk#is_enabled() ? printf('[eskk:%s]', s:eskk_mode) : ''
+    let mode_str = {'hira': 'あ', 'kata': 'ア'}
+    return eskk#is_enabled() ? printf('[eskk:%s]', get(mode_str, s:eskk_mode, '??')) : ''
 endfunction "}}}
 
 " Buftable
