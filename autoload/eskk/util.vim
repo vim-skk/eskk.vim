@@ -275,6 +275,22 @@ function! eskk#util#parse_map(line) "{{{
     \}
 endfunction "}}}
 
+function! eskk#util#get_lhs_by(expr) "{{{
+    redir => output
+    silent lmap
+    redir END
+
+    for line in split(output, '\n')
+        let info = eskk#util#parse_map(line)
+        let rhs = info.rhs
+        if eval(a:expr)
+            return info.lhs
+        endif
+    endfor
+
+    throw eskk#internal_error(['eskk', 'util'], 'failed to get lhs...')
+endfunction "}}}
+
 " }}}
 
 

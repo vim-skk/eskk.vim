@@ -395,20 +395,8 @@ function! eskk#get_sticky_key() "{{{
         return s:sticky_key_char
     endif
 
-    redir => output
-    silent lmap
-    redir END
-
-    for line in split(output, '\n')
-        let info = eskk#util#parse_map(line)
-        if info.rhs ==? '<plug>(eskk:sticky-key)'
-            let s:sticky_key_char = info.lhs
-            return s:sticky_key_char
-        endif
-    endfor
-
-    call eskk#util#log('failed to get sticky character...')
-    return ''
+    let s:sticky_key_char = eskk#util#get_lhs_by('rhs ==? "<plug>(eskk:sticky-key)"')
+    return s:sticky_key_char
 endfunction "}}}
 function! eskk#get_sticky_char() "{{{
     return eskk#util#eval_key(eskk#get_sticky_key())
@@ -439,20 +427,8 @@ function! eskk#get_henkan_key() "{{{
         return s:henkan_key_char
     endif
 
-    redir => output
-    silent lmap
-    redir END
-
-    for line in split(output, '\n')
-        let info = eskk#util#parse_map(line)
-        if info.rhs ==? '<plug>(eskk:henkan-key)'
-            let s:henkan_key_char = info.lhs
-            return s:henkan_key_char
-        endif
-    endfor
-
-    call eskk#util#log('failed to get henkan character...')
-    return ''
+    let s:henkan_key_char = eskk#util#get_lhs_by('rhs ==? "<plug>(eskk:henkan-key)"')
+    return s:henkan_key_char
 endfunction "}}}
 function! eskk#get_henkan_char() "{{{
     return eskk#util#eval_key(eskk#get_henkan_key())
