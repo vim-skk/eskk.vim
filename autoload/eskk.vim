@@ -32,6 +32,8 @@ let s:lock_old_str = 0
 let s:event_hook_fn = {}
 " True if eskk#enable() is called.
 let s:enabled = 0
+" Temporary mappings while eskk.vim is on.
+let s:map = {}
 " }}}
 
 " Write timestamp to debug file {{{
@@ -169,6 +171,119 @@ function! eskk#default_mapped_keys() "{{{
     \]
 endfunction "}}}
 
+function! eskk#map(options, lhs, rhs) "{{{
+    return s:map_raw_options(s:mapopt_chars2dict(a:options), a:lhs, a:rhs)
+endfunction "}}}
+function! s:map_raw_options(raw_options, lhs, rhs) "{{{
+    let lhs = eskk#util#eval_key(a:lhs)
+    if lhs == ''
+        echoerr "lhs must not be empty string."
+        return
+    endif
+
+    if has_key(s:map, lhs) && a:raw_options.unique
+        " <unique> but no warnings.
+        return
+    endif
+
+    let s:map[lhs] = {
+    \   'options': a:raw_options,
+    \   'rhs': (a:rhs == '' ? '' : eskk#util#eval_key(a:rhs)),
+    \}
+endfunction "}}}
+function! s:mapopt_chars2dict(options) "{{{
+    let opt = {
+    \   'buffer': 0,
+    \   'expr': 0,
+    \   'silent': 0,
+    \   'unique': 0,
+    \   'remap': 0,
+    \}
+    for c in split(a:options, '\zs')
+        if c ==# 'b'
+            let opt.buffer = 1
+        elseif c ==# 'e'
+            let opt.expr = 1
+        elseif c ==# 's'
+            let opt.silent = 1
+        elseif c ==# 'u'
+            let opt.unique = 1
+        elseif c ==# 'r'
+            let opt.remap = 1
+        endif
+    endfor
+    return opt
+endfunction "}}}
+function! s:mapopt_dict2raw(options) "{{{
+    let ret = ''
+    for [key, val] in items(a:options)
+        if key ==# 'remap'
+            continue
+        endif
+        if val
+            let ret .= printf('<%s>', key)
+        endif
+    endfor
+    return ret
+endfunction "}}}
+
+function! s:skip_white(args) "{{{
+    return substitute(a:args, '^\s*', '', '')
+endfunction "}}}
+function! s:parse_one_arg_from_q_args(args) "{{{
+    let arg = s:skip_white(a:args)
+    let head = matchstr(arg, '^.\{-}[^\\]\ze\([ \t]\|$\)')
+    let rest = strpart(arg, strlen(head))
+    return [head, rest]
+endfunction "}}}
+function! s:parse_options(args) "{{{
+    let args = a:args
+    let opt = {
+    \   'buffer': 0,
+    \   'expr': 0,
+    \   'silent': 0,
+    \   'unique': 0,
+    \   'noremap': 0,
+    \}
+    while 1
+        let args = s:skip_white(args)
+        let matched = 0
+        for map_opt in [
+        \   'buffer',
+        \   'expr',
+        \   'silent',
+        \   'unique',
+        \   'noremap'
+        \]
+            let m = matchstr(args, '\c'.printf('^<%s>', map_opt))
+            if m != ''
+                let opt[map_opt] = 1
+                let args = args[strlen(m) :]
+                let matched = 1
+                break
+            endif
+        endfor
+        if !matched
+            let opt.remap = !remove(opt, 'noremap')
+            return [opt, args]
+        endif
+    endwhile
+endfunction "}}}
+function! eskk#_cmd_eskk_map(args) "{{{
+    let [options, args] = s:parse_options(a:args)
+
+    let args = s:skip_white(args)
+    let [lhs, args] = s:parse_one_arg_from_q_args(args)
+
+    let args = s:skip_white(args)
+    if args == ''
+        call s:map_raw_options(options, lhs, '')
+        return
+    endif
+
+    call s:map_raw_options(options, lhs, args)
+endfunction "}}}
+
 
 
 " Utility functions
@@ -201,15 +316,31 @@ function! eskk#enable() "{{{
     endif
     call eskk#util#log('enabling eskk...')
 
+
     " Clear current variable states.
     let s:eskk_mode = ''
     call s:buftable.reset()
 
+
     " Set up Mappings.
     lmapclear <buffer>
+
     for key in g:eskk_mapped_key
         call eskk#map_key(key)
     endfor
+
+    for [key, opt] in items(s:map)
+        if opt.rhs == ''
+            call eskk#map_key(key)
+        else
+            execute
+            \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
+            \   '<buffer>' . s:mapopt_dict2raw(opt.options)
+            \   key
+            \   opt.rhs
+        endif
+    endfor
+
 
     " TODO Save previous mode/state.
     call eskk#set_mode(g:eskk_initial_mode)

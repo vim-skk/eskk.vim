@@ -220,6 +220,13 @@ endfunction "}}}
 
 " }}}
 
+" :EskkMap {{{
+command!
+\   -nargs=+
+\   EskkMap
+\   call eskk#_cmd_eskk_map(<q-args>)
+" }}}
+
 " }}}
 
 
