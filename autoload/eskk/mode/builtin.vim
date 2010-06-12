@@ -32,8 +32,6 @@ let s:current_table = s:rom_to_hira
 
 let s:skk_dict = eskk#dictionary#new([g:eskk_dictionary, g:eskk_large_dictionary])
 let s:current_henkan_result = {}
-
-let s:henkan_rom_str_list = []
 " }}}
 
 
@@ -67,9 +65,6 @@ endfunction "}}}
 function! eskk#mode#builtin#set_rom_to_kata_table() "{{{
     let s:current_table = s:rom_to_kata
 endfunction "}}}
-function! eskk#mode#builtin#clear_henkan_rom_str_list() "{{{
-    let s:henkan_rom_str_list = []
-endfunction "}}}
 
 function! eskk#mode#builtin#do_q_key(stash) "{{{
     let buf_str = a:stash.buftable.get_current_buf_str()
@@ -85,6 +80,9 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
         let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let okuri_buf_str  = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
 
+        call a:stash.buftable.dump_print()
+        let rom_str = henkan_buf_str.get_phase_str()
+
         call henkan_buf_str.clear()
         call okuri_buf_str.clear()
 
@@ -94,12 +92,11 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
         let prev_table = s:current_table
         let s:current_table = to_table
         try
-            for char in s:henkan_rom_str_list
+            for char in split(rom_str, '\zs')
                 let a:stash.char = char
                 call s:filter_rom_to_hira(a:stash)
             endfor
         finally
-            let s:henkan_rom_str_list = []
             let s:current_table = prev_table
         endtry
     else
@@ -125,7 +122,6 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom_to_hira(a:stash)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call add(s:henkan_rom_str_list, char)
         if eskk#is_henkan_key(char)
             return s:henkan_key(a:stash)
             " Assert a:stash.buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
@@ -315,7 +311,7 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         call s:henkan_key(a:stash)
     endif
 endfunction "}}}
-function! s:filter_rom_to_hira_has_candidates(stash) "{{{{
+function! s:filter_rom_to_hira_has_candidates(stash) "{{{
     let char = a:stash.char
     let buf_str = a:stash.buftable.get_current_buf_str()
 

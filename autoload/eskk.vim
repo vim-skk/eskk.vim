@@ -476,9 +476,12 @@ function! s:filter(char, Fn, head_args) "{{{
     \   'option': opt,
     \   'buftable': s:buftable,
     \}]
+
     if !s:lock_old_str
         call s:buftable.set_old_str(s:buftable.get_display_str())
     endif
+
+    call s:buftable.get_current_buf_str().push_phase_str(a:char)
 
     call eskk#throw_event('filter-begin')
 

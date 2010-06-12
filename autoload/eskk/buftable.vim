@@ -35,7 +35,7 @@ lockvar eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
 
 " Functions {{{
 " s:buffer_string {{{
-let s:buffer_string = {'_pos': [], '_rom_str': '', '_filter_str': ''}
+let s:buffer_string = {'_pos': [], '_rom_str': '', '_filter_str': '', '_phase_str': ''}
 
 function! s:buffer_string_new() "{{{
     return deepcopy(s:buffer_string)
@@ -93,6 +93,23 @@ function! s:buffer_string.clear_filter_str() dict "{{{
     let self._filter_str = ''
 endfunction "}}}
 
+
+function! s:buffer_string.get_phase_str() dict "{{{
+    return self._phase_str
+endfunction "}}}
+function! s:buffer_string.set_phase_str(str) dict "{{{
+    let self._phase_str = a:str
+endfunction "}}}
+function! s:buffer_string.push_phase_str(str) dict "{{{
+    call self.set_phase_str(self.get_phase_str() . a:str)
+endfunction "}}}
+function! s:buffer_string.pop_phase_str() dict "{{{
+    let s = self.get_phase_str()
+    call self.set_phase_str(strpart(s, 0, strlen(s) - 1))
+endfunction "}}}
+function! s:buffer_string.clear_phase_str() dict "{{{
+    let self._phase_str = ''
+endfunction "}}}
 
 function! s:buffer_string.clear() dict "{{{
     call self.clear_rom_str()
@@ -223,9 +240,15 @@ endfunction "}}}
 function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
 
+    " "s:buffer_string._phase_str" is cleared only here.
+
     call eskk#throw_event('leave-phase-' . self.get_phase_name(self._henkan_phase))
+    call self.get_current_buf_str().clear_phase_str()
+
     let self._henkan_phase = a:henkan_phase
+
     call eskk#throw_event('enter-phase-' . self.get_phase_name(self._henkan_phase))
+    call self.get_current_buf_str().clear_phase_str()
 endfunction "}}}
 
 
