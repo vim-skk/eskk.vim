@@ -195,8 +195,6 @@ function! s:filter_rom_to_hira(stash) "{{{
     let char = a:stash.char
     let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
-    let phase = a:stash.buftable.get_henkan_phase()
-    let buftable = a:stash.buftable
 
     call eskk#util#logf('mode hira - char = %s, rom_str = %s', string(char), string(rom_str))
 
