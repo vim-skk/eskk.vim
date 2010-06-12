@@ -318,6 +318,9 @@ function! eskk#enable() "{{{
     endif
     call eskk#util#log('enabling eskk...')
 
+    " If skk.vim exists and enabled, disable it.
+    let disable_skk_vim = exists('g:skk_version') ? SkkDisable() : ''
+
 
     " Clear current variable states.
     let s:eskk_mode = ''
@@ -350,7 +353,7 @@ function! eskk#enable() "{{{
     call s:call_mode_func('cb_im_enter', [], 0)
 
     let s:enabled = 1
-    return "\<C-^>"
+    return disable_skk_vim . "\<C-^>"
 endfunction "}}}
 function! eskk#disable() "{{{
     if !eskk#is_enabled()
