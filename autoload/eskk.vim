@@ -391,6 +391,11 @@ function! eskk#get_mode_structure(mode) "{{{
     return s:available_modes[a:mode]
 endfunction "}}}
 
+" Statusline
+function! eskk#get_stl() "{{{
+    return eskk#is_enabled() ? printf('[eskk:%s]', s:eskk_mode) : ''
+endfunction "}}}
+
 " Buftable
 function! eskk#get_buftable() "{{{
     return s:buftable
