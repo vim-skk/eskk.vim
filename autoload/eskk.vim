@@ -175,7 +175,7 @@ function! eskk#map(options, lhs, rhs) "{{{
     return s:map_raw_options(s:mapopt_chars2dict(a:options), a:lhs, a:rhs)
 endfunction "}}}
 function! s:map_raw_options(raw_options, lhs, rhs) "{{{
-    let lhs = eskk#util#eval_key(a:lhs)
+    let lhs = a:lhs
     if lhs == ''
         echoerr "lhs must not be empty string."
         return
@@ -188,7 +188,7 @@ function! s:map_raw_options(raw_options, lhs, rhs) "{{{
 
     let s:map[lhs] = {
     \   'options': a:raw_options,
-    \   'rhs': (a:rhs == '' ? '' : eskk#util#eval_key(a:rhs)),
+    \   'rhs': (a:rhs == '' ? '' : a:rhs),
     \}
 endfunction "}}}
 function! s:mapopt_chars2dict(options) "{{{
