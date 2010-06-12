@@ -34,6 +34,8 @@ let s:event_hook_fn = {}
 let s:enabled = 0
 " Temporary mappings while eskk.vim is on.
 let s:map = {}
+" Cache for getting lhs mappings correspond to rhs.
+let s:cache_map = {}
 " }}}
 
 " Initialization {{{
@@ -392,15 +394,13 @@ endfunction "}}}
 
 " Sticky key
 function! eskk#get_sticky_key() "{{{
-    if s:sticky_key_char != ''
-        return s:sticky_key_char
-    endif
-
-    let s:sticky_key_char = eskk#util#get_lhs_by('rhs ==? "<plug>(eskk:sticky-key)"')
-    return s:sticky_key_char
+    return eskk#get_lhs_of('sticky', 'rhs ==? "<plug>(eskk:sticky-key)"', '')
 endfunction "}}}
 function! eskk#get_sticky_char() "{{{
     return eskk#util#eval_key(eskk#get_sticky_key())
+endfunction "}}}
+function! eskk#is_sticky_key(char) "{{{
+    return maparg(a:char, 'l') ==? '<plug>(eskk:sticky-key)'
 endfunction "}}}
 function! eskk#sticky_key(again, stash) "{{{
     call eskk#util#log("<Plug>(eskk:sticky-key)")
@@ -418,24 +418,33 @@ function! eskk#sticky_key(again, stash) "{{{
         endif
     endif
 endfunction "}}}
-function! eskk#is_sticky_key(char) "{{{
-    return maparg(a:char, 'l') ==? '<plug>(eskk:sticky-key)'
-endfunction "}}}
 
 " Henkan key
 function! eskk#get_henkan_key() "{{{
-    if s:henkan_key_char != ''
-        return s:henkan_key_char
-    endif
-
-    let s:henkan_key_char = eskk#util#get_lhs_by('rhs ==? "<plug>(eskk:henkan-key)"')
-    return s:henkan_key_char
+    return eskk#get_lhs_of('henkan', 'rhs ==? "<plug>(eskk:henkan-key)"', '')
 endfunction "}}}
 function! eskk#get_henkan_char() "{{{
     return eskk#util#eval_key(eskk#get_henkan_key())
 endfunction "}}}
 function! eskk#is_henkan_key(char) "{{{
     return maparg(a:char, 'l') ==? '<plug>(eskk:henkan-key)'
+endfunction "}}}
+
+function! eskk#get_lhs_of(cache_name, expr, default) "{{{
+    if has_key(s:cache_map, a:cache_name)
+        return s:cache_map[a:cache_name]
+    endif
+
+    try
+        let s:cache_map[a:cache_name] = eskk#util#get_lhs_by(a:expr)
+    catch
+        call eskk#util#logf("warning: can't get lhs of '%s', Use '%s' instead.", a:expr, a:default)
+        let s:cache_map[a:cache_name] = a:default
+    endtry
+    return s:cache_map[a:cache_name]
+endfunction "}}}
+function! eskk#get_lhs_char_of(...) "{{{
+    return eskk#util#eval_key(call('eskk#get_lhs_of', a:000))
 endfunction "}}}
 
 " Big letter keys

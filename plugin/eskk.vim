@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 0, 8))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 0, 9))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -173,6 +173,12 @@ lnoremap <expr> <Plug>(eskk:henkan-key) eskk#filter(eskk#get_henkan_char())
 noremap! <expr> <Plug>(eskk:escape-key) eskk#escape_key()
 lnoremap <expr> <Plug>(eskk:escape-key) eskk#escape_key()
 
+noremap! <expr> <Plug>(eskk:henkan-select:choose-next) eskk#filter(eskk#get_lhs_char_of('henkan-select:choose-next', 'rhs ==? <plug>(eskk:henkan-select:choose-next)"', "\<Space>"))
+lnoremap <expr> <Plug>(eskk:henkan-select:choose-next) eskk#filter(eskk#get_lhs_char_of('henkan-select:choose-next', 'rhs ==? <plug>(eskk:henkan-select:choose-next)"', "\<Space>"))
+
+noremap! <expr> <Plug>(eskk:henkan-select:choose-prev) eskk#filter(eskk#get_lhs_char_of('henkan-select:choose-prev', 'rhs ==? <plug>(eskk:henkan-select:choose-prev)"', "x"))
+lnoremap <expr> <Plug>(eskk:henkan-select:choose-prev) eskk#filter(eskk#get_lhs_char_of('henkan-select:choose-prev', 'rhs ==? <plug>(eskk:henkan-select:choose-prev)"', "x"))
+
 if !g:eskk_no_default_mappings
     function! s:do_map(rhs, mode)
         let map_default_even_if_already_mapped = !g:eskk_dont_map_default_if_already_mapped
@@ -198,6 +204,12 @@ if !g:eskk_no_default_mappings
     endif
     if s:do_map('<Plug>(eskk:escape-key)', 'l')
         silent! lmap <unique> <Esc>   <Plug>(eskk:escape-key)
+    endif
+    if s:do_map('<Plug>(eskk:henkan-select:choose-next)', 'l')
+        silent! lmap <unique> <Space> <Plug>(eskk:henkan-select:choose-next)
+    endif
+    if s:do_map('<Plug>(eskk:henkan-select:choose-prev)', 'l')
+        silent! lmap <unique> x       <Plug>(eskk:henkan-select:choose-prev)
     endif
 
     delfunc s:do_map
