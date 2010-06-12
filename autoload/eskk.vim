@@ -393,7 +393,8 @@ endfunction "}}}
 
 " Statusline
 function! eskk#get_stl() "{{{
-    let mode_str = {'hira': 'あ', 'kata': 'ア'}
+    " TODO Add these strings to each mode structure.
+    let mode_str = {'hira': 'あ', 'kata': 'ア', 'ascii': 'a', 'zenei': 'ａ'}
     return eskk#is_enabled() ? printf('[eskk:%s]', get(mode_str, s:eskk_mode, '??')) : ''
 endfunction "}}}
 
