@@ -76,7 +76,9 @@ function! eskk#util#get_args(args, ...) "{{{
 endfunction "}}}
 
 function! eskk#util#has_idx(list, idx) "{{{
-    let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
+    " Return true when negative idx.
+    " let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
+    let idx = a:idx
     return 0 <= idx && idx < len(a:list)
 endfunction "}}}
 
