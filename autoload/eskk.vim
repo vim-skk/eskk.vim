@@ -161,9 +161,9 @@ function! s:map_named_key(key) "{{{
 endfunction "}}}
 
 function! eskk#map(type, options, lhs, rhs) "{{{
-    return s:map_raw_options(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs)
+    return s:map_raw_options(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
 endfunction "}}}
-function! s:map_raw_options(type, raw_options, lhs, rhs) "{{{
+function! s:map_raw_options(type, raw_options, lhs, rhs, from) "{{{
     let lhs = a:lhs
     if lhs == ''
         echoerr "lhs must not be empty string."
@@ -176,7 +176,7 @@ function! s:map_raw_options(type, raw_options, lhs, rhs) "{{{
 
     if a:type ==# 'general'
         if has_key(s:map.general, lhs) && a:raw_options.unique
-            echoerr printf("Already mapped to '%s'.", lhs)
+            echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
             return
         endif
 
@@ -292,11 +292,11 @@ function! eskk#_cmd_eskk_map(args) "{{{
 
     let args = s:skip_white(args)
     if args == ''
-        call s:map_raw_options(type, options, lhs, '')
+        call s:map_raw_options(type, options, lhs, '', 'EskkMap')
         return
     endif
 
-    call s:map_raw_options(type, options, lhs, args)
+    call s:map_raw_options(type, options, lhs, args, 'EskkMap')
 endfunction "}}}
 
 
