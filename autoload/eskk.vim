@@ -415,13 +415,14 @@ endfunction "}}}
 
 " Sticky key
 function! eskk#get_sticky_key() "{{{
-    return eskk#get_lhs_of('sticky', 'rhs ==? "<plug>(eskk:sticky-key)"', '')
+    return s:map.sticky.lhs
 endfunction "}}}
 function! eskk#get_sticky_char() "{{{
     return eskk#util#eval_key(eskk#get_sticky_key())
 endfunction "}}}
 function! eskk#is_sticky_key(char) "{{{
-    return maparg(a:char, 'l') ==? '<plug>(eskk:sticky-key)'
+    " TODO Cache result of eskk#util#eval_key() ?
+    return eskk#util#eval_key(s:map.sticky.lhs) ==# a:char
 endfunction "}}}
 function! eskk#sticky_key(again, stash) "{{{
     call eskk#util#log("<Plug>(eskk:sticky-key)")
@@ -442,13 +443,14 @@ endfunction "}}}
 
 " Henkan key
 function! eskk#get_henkan_key() "{{{
-    return eskk#get_lhs_of('henkan', 'rhs ==? "<plug>(eskk:henkan-key)"', '')
+    return s:map.henkan.lhs
 endfunction "}}}
 function! eskk#get_henkan_char() "{{{
     return eskk#util#eval_key(eskk#get_henkan_key())
 endfunction "}}}
 function! eskk#is_henkan_key(char) "{{{
-    return maparg(a:char, 'l') ==? '<plug>(eskk:henkan-key)'
+    " TODO Cache result of eskk#util#eval_key() ?
+    return eskk#util#eval_key(s:map.henkan.lhs) ==# a:char
 endfunction "}}}
 
 function! eskk#get_lhs_of(cache_name, expr, default) "{{{
