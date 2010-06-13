@@ -80,7 +80,6 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
         let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let okuri_buf_str  = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
 
-        call a:stash.buftable.dump_print()
         let rom_str = henkan_buf_str.get_phase_str()
 
         call henkan_buf_str.clear()
