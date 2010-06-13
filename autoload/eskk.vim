@@ -104,6 +104,7 @@ function! eskk#map_temp_key(lhs, rhs) "{{{
     " Save current a:lhs mapping.
     if maparg(a:lhs, 'l') != ''
         " TODO Check if a:lhs is buffer local.
+        call eskk#util#log('Save temp key: ' . maparg(a:lhs, 'l'))
         execute
         \   'lmap'
         \   '<buffer>'
@@ -123,6 +124,7 @@ function! eskk#map_temp_key_restore(lhs) "{{{
     let saved_rhs = maparg(temp_key, 'l')
 
     if saved_rhs != ''
+        call eskk#util#log('Restore saved temp key: ' . saved_rhs)
         execute 'lunmap <buffer>' temp_key
         execute 'lmap <buffer>' a:lhs saved_rhs
     else
