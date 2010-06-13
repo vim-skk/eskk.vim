@@ -141,7 +141,7 @@ function! s:henkan_result.get_next() dict "{{{
     return s:henkan_result_advance(self, 1)
 endfunction "}}}
 
-function! s:henkan_result.get_previous() dict "{{{
+function! s:henkan_result.get_prev() dict "{{{
     return s:henkan_result_advance(self, 0)
 endfunction "}}}
 
