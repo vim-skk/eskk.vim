@@ -131,18 +131,12 @@ function! s:henkan_result_advance(self, advance) "{{{
         return -1
     endif
 
+    " Advance "result[1]" but not "idx".
     if eskk#util#has_idx(candidates, result[1] + (a:advance ? 1 : -1))
         let result[1] += (a:advance ? 1 : -1)
     endif
+
     return candidates[idx].result . a:self._okuri_filter
-endfunction "}}}
-
-function! s:henkan_result.get_next() dict "{{{
-    return s:henkan_result_advance(self, 1)
-endfunction "}}}
-
-function! s:henkan_result.get_prev() dict "{{{
-    return s:henkan_result_advance(self, 0)
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
@@ -176,6 +170,15 @@ function! s:parse_skk_dict_line(line) "{{{
 endfunction "}}}
 
 
+
+function! s:henkan_result.get_next() dict "{{{
+    return s:henkan_result_advance(self, 1)
+endfunction "}}}
+
+function! s:henkan_result.get_prev() dict "{{{
+    return s:henkan_result_advance(self, 0)
+endfunction "}}}
+
 lockvar s:henkan_result
 " }}}
 
@@ -207,6 +210,16 @@ function! s:physical_dict_new(path, sorted, encoding) "{{{
     \)
 endfunction "}}}
 
+function! s:iconv(expr, from, to) "{{{
+    if a:from == '' || a:to == '' || a:from ==? a:to
+        return a:expr
+    endif
+    let result = iconv(a:expr, a:from, a:to)
+    return result != '' ? result : a:expr
+endfunction "}}}
+
+
+
 function! s:physical_dict.get_lines() dict "{{{
     if self._loaded
         return self._content_lines
@@ -225,14 +238,6 @@ function! s:physical_dict.get_lines() dict "{{{
     let self._loaded = 1
 
     return self._content_lines
-endfunction "}}}
-
-function! s:iconv(expr, from, to) "{{{
-    if a:from == '' || a:to == '' || a:from ==? a:to
-        return a:expr
-    endif
-    let result = iconv(a:expr, a:from, a:to)
-    return result != '' ? result : a:expr
 endfunction "}}}
 
 lockvar s:physical_dict
@@ -266,6 +271,8 @@ function! eskk#dictionary#new(dict_info) "{{{
     \   'force'
     \)
 endfunction "}}}
+
+
 
 function! s:dict.refer(buftable) dict "{{{
     let buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
