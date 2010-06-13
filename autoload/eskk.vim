@@ -401,17 +401,15 @@ function! eskk#is_sticky_key(char) "{{{
     return eskk#util#eval_key(s:map.sticky.lhs) ==# a:char
 endfunction "}}}
 function! eskk#sticky_key(again, stash) "{{{
-    call eskk#util#log("<Plug>(eskk:sticky-key)")
-
     if !a:again
         return eskk#filter(eskk#get_sticky_char())
     else
         let buftable = a:stash.buftable
         if buftable.step_henkan_phase()
-            call eskk#util#logf("Succeeded to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
+            call eskk#util#logf("eskk#sticky_key(): Succeeded to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
             return buftable.get_current_marker()
         else
-            call eskk#util#logf("Failed to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
+            call eskk#util#logf("eskk#sticky_key(): Failed to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
             return ''
         endif
     endif
