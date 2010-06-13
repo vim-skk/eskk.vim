@@ -231,29 +231,40 @@ function! s:parse_options(args) "{{{
     \   'unique': 0,
     \   'noremap': 0,
     \}
-    while 1
-        let args = s:skip_white(args)
-        let matched = 0
-        for map_opt in [
-        \   'buffer',
-        \   'expr',
-        \   'silent',
-        \   'unique',
-        \   'noremap'
-        \]
-            let m = matchstr(args, '\c'.printf('^<%s>', map_opt))
-            if m != ''
-                let opt[map_opt] = 1
-                let args = args[strlen(m) :]
-                let matched = 1
-                break
+
+    while !empty(args)
+        let [a, rest] = s:parse_one_arg_from_q_args(args)
+        if a[0] !=# '-'
+            break
+        endif
+        let args = rest
+
+        if a ==# '--'
+            break
+        elseif a[0] ==# '-'
+            if a[1:] ==# 'expr'
+                let opt.expr = 1
+            elseif a[1:] ==# 'noremap'
+                let opt.noremap = 1
+            elseif a[1:] ==# 'buffer'
+                let opt.buffer = 1
+            elseif a[1:] ==# 'silent'
+                let opt.silent = 1
+            elseif a[1:] ==# 'special'
+                let opt.special = 1
+            elseif a[1:] ==# 'script'
+                let opt.script = 1
+            elseif a[1:] ==# 'unique'
+                let opt.unique = 1
+            else
+                throw s:parse_error(printf("unknown option '%s'.", a))
             endif
-        endfor
-        if !matched
-            let opt.remap = !remove(opt, 'noremap')
-            return [opt, args]
         endif
     endwhile
+
+    let opt.remap = !opt.noremap
+    call remove(opt, 'noremap')
+    return [opt, args]
 endfunction "}}}
 function! eskk#_cmd_eskk_map(args) "{{{
     let [options, args] = s:parse_options(a:args)
