@@ -321,6 +321,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
     let buftable  = a:henkan_result._buftable
     let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str()
     let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str()
+    let okuri_rom = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str()
 
     let success = 0
     if inputsave() !=# success
@@ -332,7 +333,91 @@ function! s:dict.register_word(henkan_result) dict "{{{
         call eskk#util#log("warning: inputrestore() failed")
     endif
 
-    call add(self._added_words, [input, key, okuri])
+    call add(self._added_words, [input, key, okuri, okuri_rom])
+
+    return input . okuri
+endfunction "}}}
+
+function! s:dict.is_modified() dict "{{{
+    return !empty(self._added_words)
+endfunction "}}}
+
+function! s:dict.update_dictionary() dict "{{{
+    if !self.is_modified()
+        return
+    endif
+
+    let user_dict_lines = self._user_dict.get_lines()
+
+    " Check if a:self.user_dict really does not have added words.
+    for [input, key, okuri, okuri_rom] in self._added_words
+        let line = s:search_next_candidate(self._user_dict, key, okuri_rom)
+        if okuri_rom != ''
+            let lnum = self._user_dict.okuri_ari_lnum + 1
+        else
+            let lnum = self._user_dict.okuri_nasi_lnum + 1
+        endif
+        call insert(
+        \   user_dict_lines,
+        \   s:create_new_entry(input, key, okuri, okuri_rom, (type(line) == type("") ? line : '')),
+        \   lnum
+        \)
+    endfor
+
+
+    " Write to dictionary.
+    let save_msg = printf("Saving to '%s'...", self._user_dict.path)
+    echo save_msg
+
+    let ret_success = 0
+    try
+        if writefile(user_dict_lines, self._user_dict.path) ==# ret_success
+            echo "\r" . save_msg . 'Done.'
+        else
+            throw printf("can't write to '%s'.", self._user_dict.path)
+        endif
+    catch
+        echohl WarningMsg
+        echo "\r" . save_msg . "Error. Please check permission of"
+        \    "'" . self._user_dict.path . "' - " . v:exception
+        echohl None
+    endtry
+endfunction "}}}
+
+
+
+function! s:create_new_entry(new_word, key, okuri, okuri_rom, existing_line) "{{{
+    " TODO:
+    " Rewrite for eskk.
+    " This function is from skk.vim's s:SkkMakeNewEntry().
+
+    " Modify to make same input to original s:SkkMakeNewEntry().
+    let key = a:key . (a:okuri_rom == '' ? '' : a:okuri_rom[0]) . ' '
+    let cand = a:new_word
+    let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
+
+
+    let entry = key . '/' . cand . '/'
+    let sla1 = match(line, '/', 0)
+    if line[sla1 + 1] == '['
+        let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
+    else
+        let sla2 = match(line, '/', sla1 + 1)
+    endif
+    while sla2 != -1
+        let s = strpart(line, sla1 + 1, sla2 - sla1 - 1)
+        let sla1 = sla2
+        if line[sla1 + 1] == '['
+            let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
+        else
+            let sla2 = match(line, '/', sla1 + 1)
+        endif
+        if s ==# cand
+            continue
+        endif
+        let entry = entry . s . '/'
+    endwhile
+    return entry
 endfunction "}}}
 
 lockvar s:dict

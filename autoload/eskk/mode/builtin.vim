@@ -115,6 +115,10 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
         call eskk#register_temp_event('filter-begin', 'eskk#map_temp_key_restore', ['<CR>'])
     endif
 endfunction "}}}
+
+function! eskk#mode#builtin#update_dictionary() "{{{
+    call s:skk_dict.update_dictionary()
+endfunction "}}}
 " }}}
 
 function! s:do_backspace(stash) "{{{
@@ -224,7 +228,8 @@ function! s:henkan_key(stash) "{{{
             call buf_str.set_filter_str(candidate)
         else
             " No candidates.
-            call s:skk_dict.register_word(s:current_henkan_result)
+            let input = s:skk_dict.register_word(s:current_henkan_result)
+            call buf_str.set_filter_str(input)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         throw eskk#internal_error(['eskk', 'mode', 'builtin'])
@@ -234,16 +239,17 @@ function! s:henkan_key(stash) "{{{
     endif
 endfunction "}}}
 function! s:get_next_candidate(stash, next) "{{{
+    let buf_str = a:stash.buftable.get_current_buf_str()
     if s:current_henkan_result[a:next ? 'advance' : 'back']()
         let candidate = s:current_henkan_result.get_candidate()
         " Assert type(candidate) == type("")
 
         " Set candidate.
-        let buf_str = a:stash.buftable.get_current_buf_str()
         call buf_str.set_filter_str(candidate)
     else
         " No more candidates.
-        call s:skk_dict.register_word(s:current_henkan_result)
+        let input = s:skk_dict.register_word(s:current_henkan_result)
+        call buf_str.set_filter_str(input)
     endif
 endfunction "}}}
 function! s:filter_rom_to_hira(stash) "{{{
