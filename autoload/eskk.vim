@@ -52,16 +52,20 @@ endfunction "}}}
 
 " Initialize/Mappings
 function! eskk#map_key(key, ...) "{{{
+    if a:0
+        return s:map_key(a:key, s:mapopt_chars2dict(a:1))
+    else
+        return s:map_key(a:key, s:create_default_mapopt())
+    endif
+endfunction "}}}
+function! s:map_key(key, raw_options) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
-
-    let unique = a:0 != 0 ? a:1 : 0
-    let unique = (unique ? '<unique>' : '')
 
     " Map a:key.
     let named_key = s:map_named_key(a:key)
     execute
     \   'lmap'
-    \   '<buffer>' . unique
+    \   '<buffer>' . s:mapopt_dict2raw(a:raw_options)
     \   a:key
     \   named_key
 endfunction "}}}
