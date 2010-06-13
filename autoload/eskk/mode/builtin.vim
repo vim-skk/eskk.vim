@@ -23,7 +23,7 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 
-" Variables {{{
+" Common variables {{{
 let s:current_table = {}
 " }}}
 
@@ -39,6 +39,7 @@ let s:current_henkan_result = {}
 
 
 
+" Functions called by events. {{{
 function! eskk#mode#builtin#hook_fn_do_lmap_hira(do_map) "{{{
     if a:do_map
         call eskk#map_temp_key('q', '<Plug>(eskk:mode:hira:convert/switch-to-kata)')
@@ -112,67 +113,7 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
         call eskk#register_temp_event('filter-begin', 'eskk#map_temp_key_restore', ['<CR>'])
     endif
 endfunction "}}}
-
-
-
-function! eskk#mode#builtin#asym_filter(stash) "{{{
-    let char = a:stash.char
-    let henkan_phase = a:stash.buftable.get_henkan_phase()
-
-
-    " Handle special char.
-    " These characters are handled regardless of current phase.
-    call eskk#lock_old_str()
-    try
-        if char ==# "\<BS>" || char ==# "\<C-h>"
-            call s:do_backspace(a:stash)
-            return
-        elseif char ==# "\<CR>"
-            call s:do_enter(a:stash)
-            return
-        elseif eskk#is_sticky_key(char)
-            call eskk#sticky_key(a:stash)
-            return
-        elseif eskk#is_big_letter(char)
-            call eskk#sticky_key(a:stash)
-            call eskk#filter(tolower(char))
-            return
-        else
-            " Fall through.
-        endif
-    finally
-        call eskk#unlock_old_str()
-    endtry
-
-
-    if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return s:filter_rom_to_hira(a:stash)
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if eskk#is_henkan_key(char)
-            return s:henkan_key(a:stash)
-            " Assert a:stash.buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        else
-            return s:filter_rom_to_hira(a:stash)
-        endif
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return s:filter_rom_to_hira(a:stash)
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        if eskk#is_henkan_key(char)
-            return s:henkan_key(a:stash)
-        else
-            call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-            " Move henkan select buffer string to normal.
-            call a:stash.buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-            return s:filter_rom_to_hira(a:stash)
-        endif
-    else
-        let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", phase)
-        throw eskk#internal_error(['eskk'], msg)
-    endif
-endfunction "}}}
-
-
+" }}}
 
 function! s:do_backspace(stash) "{{{
     let [opt, buftable] = [a:stash.option, a:stash.buftable]
@@ -462,8 +403,66 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
     endif
 endfunction "}}}
 
-" }}}
 
+
+function! eskk#mode#builtin#asym_filter(stash) "{{{
+    let char = a:stash.char
+    let henkan_phase = a:stash.buftable.get_henkan_phase()
+
+
+    " Handle special char.
+    " These characters are handled regardless of current phase.
+    call eskk#lock_old_str()
+    try
+        if char ==# "\<BS>" || char ==# "\<C-h>"
+            call s:do_backspace(a:stash)
+            return
+        elseif char ==# "\<CR>"
+            call s:do_enter(a:stash)
+            return
+        elseif eskk#is_sticky_key(char)
+            call eskk#sticky_key(a:stash)
+            return
+        elseif eskk#is_big_letter(char)
+            call eskk#sticky_key(a:stash)
+            call eskk#filter(tolower(char))
+            return
+        else
+            " Fall through.
+        endif
+    finally
+        call eskk#unlock_old_str()
+    endtry
+
+
+    if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        return s:filter_rom_to_hira(a:stash)
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        if eskk#is_henkan_key(char)
+            return s:henkan_key(a:stash)
+            " Assert a:stash.buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        else
+            return s:filter_rom_to_hira(a:stash)
+        endif
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        return s:filter_rom_to_hira(a:stash)
+    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        if eskk#is_henkan_key(char)
+            return s:henkan_key(a:stash)
+        else
+            call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+            " Move henkan select buffer string to normal.
+            call a:stash.buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+            return s:filter_rom_to_hira(a:stash)
+        endif
+    else
+        let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", phase)
+        throw eskk#internal_error(['eskk'], msg)
+    endif
+endfunction "}}}
+
+" }}}
 
 " Symmetric built-in modes. {{{
 
@@ -487,7 +486,8 @@ function! eskk#mode#builtin#set_rom_to_zenei_table() "{{{
     let s:current_table = s:rom_to_zenei
 endfunction "}}}
 
-" Filter function
+
+
 function! eskk#mode#builtin#sym_filter(stash) "{{{
     if s:current_table is s:rom_to_ascii
         let a:stash.option.return = a:stash.char
