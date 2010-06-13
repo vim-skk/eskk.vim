@@ -40,8 +40,6 @@ let s:map = {
 \   'henkan-select:choose-next': {},
 \   'henkan-select:choose-prev': {},
 \}
-" Cache for getting lhs mappings correspond to rhs.
-let s:cache_map = {}
 " }}}
 
 " Functions {{{
@@ -421,23 +419,6 @@ endfunction "}}}
 function! eskk#is_henkan_key(char) "{{{
     " TODO Cache result of eskk#util#eval_key() ?
     return eskk#util#eval_key(s:map.henkan.lhs) ==# a:char
-endfunction "}}}
-
-function! eskk#get_lhs_of(cache_name, expr, default) "{{{
-    if has_key(s:cache_map, a:cache_name)
-        return s:cache_map[a:cache_name]
-    endif
-
-    try
-        let s:cache_map[a:cache_name] = eskk#util#get_lhs_by(a:expr)
-    catch
-        call eskk#util#logf("warning: can't get lhs of '%s', Use '%s' instead.", a:expr, a:default)
-        let s:cache_map[a:cache_name] = a:default
-    endtry
-    return s:cache_map[a:cache_name]
-endfunction "}}}
-function! eskk#get_lhs_char_of(...) "{{{
-    return eskk#util#eval_key(call('eskk#get_lhs_of', a:000))
 endfunction "}}}
 
 " Big letter keys
