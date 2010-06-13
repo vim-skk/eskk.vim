@@ -15,6 +15,8 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
+augroup eskk
+autocmd!
 
 " Variables {{{
 let s:sticky_key_char = ''
@@ -36,28 +38,6 @@ let s:enabled = 0
 let s:map = {}
 " Cache for getting lhs mappings correspond to rhs.
 let s:cache_map = {}
-" }}}
-
-" Initialization {{{
-" Write timestamp to debug file {{{
-if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
-    call writefile(['', printf('--- %s ---', strftime('%c')), ''], expand(g:eskk_debug_file))
-endif
-" }}}
-" Egg-like-newline {{{
-if !g:eskk_egg_like_newline
-    " Default behavior is `egg like newline`.
-    " Turns it to `Non egg like newline` during henkan phase.
-    call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
-    call eskk#register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
-
-    " Restore <CR> mapping when InsertLeave.
-    augroup eskk-plugin-egg-like-newline
-        autocmd!
-        autocmd InsertLeave * call eskk#mode#builtin#do_lmap_non_egg_like_newline(0)
-    augroup END
-endif
-" }}}
 " }}}
 
 " Functions {{{
@@ -800,7 +780,23 @@ function! eskk#user_error(from, msg) "{{{
 endfunction "}}}
 " }}}
 
-" Auto commands {{{
+" Write timestamp to debug file {{{
+if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
+    call writefile(['', printf('--- %s ---', strftime('%c')), ''], expand(g:eskk_debug_file))
+endif
+" }}}
+" Egg-like-newline {{{
+if !g:eskk_egg_like_newline
+    function! s:register_egg_like_newline_event()
+        " Default behavior is `egg like newline`.
+        " Turns it to `Non egg like newline` during henkan phase.
+        call eskk#register_event('enter-phase-henkan-select', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
+        call eskk#register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
+    endfunction
+    autocmd VimEnter * call s:register_egg_like_newline_event()
+endif
+" }}}
+" InsertLeave {{{
 function! s:autocmd_insert_leave() "{{{
     call s:buftable.reset()
 
@@ -809,13 +805,10 @@ function! s:autocmd_insert_leave() "{{{
         noautocmd execute 'normal! i' . disable
     endif
 endfunction "}}}
-
-augroup eskk
-    autocmd!
-    autocmd InsertLeave * call s:autocmd_insert_leave()
-augroup END
+autocmd InsertLeave * call s:autocmd_insert_leave()
 " }}}
 
+augroup END
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
