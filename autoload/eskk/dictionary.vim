@@ -245,7 +245,7 @@ function! s:physical_dict.get_lines() dict "{{{
     let path = self.path
     if filereadable(path)
         call eskk#util#logf('reading %s...', path)
-        let self._content_lines   = readfile(path, 'b')
+        let self._content_lines   = readfile(path)
         let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
         let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
         call eskk#util#logf('reading %s... - done.', path)
