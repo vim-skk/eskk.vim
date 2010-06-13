@@ -182,15 +182,19 @@ function! s:map_raw_options(type, raw_options, lhs, rhs, from) "{{{
     endif
     let type_st = s:map[a:type]
 
-    if has_key(type_st, lhs) && a:raw_options.unique
-        echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
-        return
+    if a:type ==# 'general'
+        if has_key(type_st, lhs) && a:raw_options.unique
+            echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
+            return
+        endif
+        let type_st[lhs] = {
+        \   'options': a:raw_options,
+        \   'rhs': a:rhs
+        \}
+    else
+        let type_st.options = a:raw_options
+        let type_st.lhs = lhs
     endif
-
-    let type_st[lhs] = {
-    \   'options': a:raw_options,
-    \   'rhs': (a:rhs == '' ? '' : a:rhs),
-    \}
 endfunction "}}}
 function! s:mapopt_chars2dict(options) "{{{
     let opt = {
