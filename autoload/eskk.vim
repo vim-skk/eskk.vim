@@ -35,7 +35,7 @@ let s:event_hook_fn = {}
 " True if eskk#enable() is called.
 let s:enabled = 0
 " Temporary mappings while eskk.vim is on.
-let s:map = {'general': {}, 'sticky': {}, 'henkan': {}}
+let s:map = {'general': {}, 'sticky': {}, 'henkan': {}, 'escape': {}, 'henkan-select:choose-next': {}, 'henkan-select:choose-prev': {}}
 " Cache for getting lhs mappings correspond to rhs.
 let s:cache_map = {}
 " }}}
@@ -173,18 +173,17 @@ function! s:map_raw_options(type, raw_options, lhs, rhs, from) "{{{
         echoerr "eskk#map(): unknown type: " . a:type
         return
     endif
+    let type_st = s:map[a:type]
 
-    if a:type ==# 'general'
-        if has_key(s:map.general, lhs) && a:raw_options.unique
-            echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
-            return
-        endif
-
-        let s:map.general[lhs] = {
-        \   'options': a:raw_options,
-        \   'rhs': (a:rhs == '' ? '' : a:rhs),
-        \}
+    if has_key(type_st, lhs) && a:raw_options.unique
+        echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
+        return
     endif
+
+    let type_st[lhs] = {
+    \   'options': a:raw_options,
+    \   'rhs': (a:rhs == '' ? '' : a:rhs),
+    \}
 endfunction "}}}
 function! s:mapopt_chars2dict(options) "{{{
     let opt = {
@@ -266,7 +265,7 @@ function! s:parse_options(args) "{{{
                 let opt.script = 1
             elseif a[1:] ==# 'unique'
                 let opt.unique = 1
-            elseif a[1:] ==# 'type'
+            elseif a[1:4] ==# 'type'
                 if a =~# '^-type='
                     " TODO Allow -type="..." style?
                     " But I don't suppose that -type's argument cotains whitespaces.
@@ -835,6 +834,16 @@ function! s:autocmd_insert_leave() "{{{
     endif
 endfunction "}}}
 autocmd InsertLeave * call s:autocmd_insert_leave()
+" }}}
+" Default mappings - :EskkMap {{{
+function! s:do_default_mappings() "{{{
+    EskkMap -type=sticky -unique ;
+    EskkMap -type=henkan -unique <Space>
+    EskkMap -type=escape -unique <Esc>
+    EskkMap -type=henkan-select:choose-next -unique <Space>
+    EskkMap -type=henkan-select:choose-prev -unique x
+endfunction "}}}
+autocmd VimEnter * call s:do_default_mappings()
 " }}}
 
 augroup END
