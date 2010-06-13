@@ -215,7 +215,7 @@ function! s:henkan_key(stash) "{{{
         call okuri_buf_str.clear_filter_str()
 
         let buf_str = a:stash.buftable.get_current_buf_str()
-        let candidate = s:current_henkan_result.get_next()
+        let candidate = s:current_henkan_result.get_candidate()
 
         if type(candidate) == type("")
             " Set candidate.
@@ -226,17 +226,23 @@ function! s:henkan_key(stash) "{{{
             throw eskk#not_implemented_error(['eskk', 'mode', 'hira'], "jisyo touroku has not been implemented yet.")
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        let buf_str = a:stash.buftable.get_current_buf_str()
-        let candidate = s:current_henkan_result.get_next()
-        if type(candidate) == type("")
-            " Set candidate.
-            call buf_str.set_filter_str(candidate)
-        else
-            throw eskk#never_reached_error(['eskk', 'mode', 'hira'])
-        endif
+        throw eskk#internal_error(['eskk', 'mode', 'builtin'])
     else
         let msg = printf("s:henkan_key() does not support phase %d.", phase)
         throw eskk#internal_error(['eskk', 'mode', 'hira'], msg)
+    endif
+endfunction "}}}
+function! s:get_next_candidate(stash, next) "{{{
+    if s:current_henkan_result[a:next ? 'advance' : 'back']()
+        let candidate = s:current_henkan_result.get_candidate()
+        " Assert type(candidate) == type("")
+
+        " Set candidate.
+        let buf_str = a:stash.buftable.get_current_buf_str()
+        call buf_str.set_filter_str(candidate)
+    else
+        " No more candidates.
+        " TODO Jisyo touroku
     endif
 endfunction "}}}
 function! s:filter_rom_to_hira(stash) "{{{
@@ -447,8 +453,10 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return s:filter_rom_to_hira(a:stash)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        if eskk#is_henkan_key(char)
-            return s:henkan_key(a:stash)
+        if eskk#is_lhs_char(char, 'henkan-select:choose-next')
+            return s:get_next_candidate(a:stash, 1)
+        elseif eskk#is_lhs_char(char, 'henkan-select:choose-prev')
+            return s:get_next_candidate(a:stash, 0)
         else
             call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
             " Move henkan select buffer string to normal.

@@ -127,16 +127,12 @@ function! s:henkan_result_advance(self, advance) "{{{
     endif
 
     let [candidates, idx] = result
-    if !eskk#util#has_idx(candidates, idx)
-        return -1
-    endif
-
-    " Advance "result[1]" but not "idx".
-    if eskk#util#has_idx(candidates, result[1] + (a:advance ? 1 : -1))
+    if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
         let result[1] += (a:advance ? 1 : -1)
+        return 1
+    else
+        return 0
     endif
-
-    return candidates[idx].result . a:self._okuri_filter
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
@@ -170,12 +166,25 @@ function! s:parse_skk_dict_line(line) "{{{
 endfunction "}}}
 
 
+function! s:henkan_result.get_candidate() dict "{{{
+    let result = s:henkan_result_get_result(self)
+    if type(result) == type(-1)
+        return -1
+    endif
 
-function! s:henkan_result.get_next() dict "{{{
+    let [candidates, idx] = result
+    if eskk#util#has_idx(candidates, idx)
+        return candidates[idx].result . self._okuri_filter
+    else
+        return -1
+    endif
+endfunction "}}}
+
+function! s:henkan_result.advance() dict "{{{
     return s:henkan_result_advance(self, 1)
 endfunction "}}}
 
-function! s:henkan_result.get_prev() dict "{{{
+function! s:henkan_result.back() dict "{{{
     return s:henkan_result_advance(self, 0)
 endfunction "}}}
 

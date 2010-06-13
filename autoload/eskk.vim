@@ -145,6 +145,12 @@ function! s:map_named_key(key) "{{{
     return lhs
 endfunction "}}}
 
+" s:map related functions.
+function! eskk#is_lhs_char(char, type) "{{{
+    return has_key(s:map, a:type)
+    \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
+endfunction "}}}
+
 " eskk#map()
 function! eskk#map(type, options, lhs, rhs) "{{{
     return s:create_map(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
