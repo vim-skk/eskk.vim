@@ -538,11 +538,7 @@ function! eskk#register_temp_event(event_names, Fn, head_args) "{{{
     return s:register_event(a:event_names, a:Fn, a:head_args, 1)
 endfunction "}}}
 function! s:register_event(event_names, Fn, head_args, is_temporary) "{{{
-    if type(a:event_names) != type([])
-        return eskk#register_event([a:event_names], a:Fn, a:head_args)
-    endif
-
-    for name in a:event_names
+    for name in (type(a:event_names) == type([]) ? a:event_names : [a:event_names])
         if !has_key(s:event_hook_fn, name)
             let s:event_hook_fn[name] = []
         endif
