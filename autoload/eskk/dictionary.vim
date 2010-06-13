@@ -24,7 +24,7 @@ function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
-    for ph_dict in a:dict._dicts
+    for ph_dict in a:dict._physical_dicts
         let converted = s:iconv(needle, &l:encoding, ph_dict.encoding)
         if ph_dict.sorted
             let result = s:search_binary(ph_dict, converted, has_okuri, 5)
@@ -115,7 +115,12 @@ let s:henkan_result = {
 function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
     return extend(
     \   deepcopy(s:henkan_result),
-    \   {'_dict': a:dict, '_key': a:key, '_okuri': a:okuri, '_okuri_filter': a:okuri_filter},
+    \   {
+    \       '_dict': a:dict,
+    \       '_key': a:key,
+    \       '_okuri': a:okuri,
+    \       '_okuri_filter': a:okuri_filter
+    \   },
     \   'force'
     \)
 endfunction "}}}
@@ -259,7 +264,7 @@ lockvar s:physical_dict
 " implementation of searching dictionaries.
 
 let s:dict = {
-\   '_dicts': [],
+\   '_physical_dicts': [],
 \}
 
 function! eskk#dictionary#new(dict_info) "{{{
@@ -273,7 +278,7 @@ function! eskk#dictionary#new(dict_info) "{{{
 
     return extend(
     \   deepcopy(s:dict),
-    \   {'_dicts': dicts},
+    \   {'_physical_dicts': dicts},
     \   'force'
     \)
 endfunction "}}}
@@ -281,7 +286,6 @@ endfunction "}}}
 
 
 function! s:dict.refer(buftable) dict "{{{
-    let buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     return s:henkan_result_new(
     \   self,
     \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str(),
