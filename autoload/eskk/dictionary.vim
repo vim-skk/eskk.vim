@@ -121,18 +121,17 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
 endfunction "}}}
 
 function! s:henkan_result_advance(self, advance) "{{{
-    let result = s:henkan_result_get_result(a:self)
-    if type(result) == type(-1)
+    try
+        let result = s:henkan_result_get_result(a:self)
+        if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
+            let result[1] += (a:advance ? 1 : -1)
+            return 1
+        else
+            return 0
+        endif
+    catch /^eskk: dictionary - internal error/
         return -1
-    endif
-
-    let [candidates, idx] = result
-    if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
-        let result[1] += (a:advance ? 1 : -1)
-        return 1
-    else
-        return 0
-    endif
+    endtry
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
@@ -142,7 +141,9 @@ function! s:henkan_result_get_result(this) "{{{
 
     let line = s:search_next_candidate(a:this._dict, a:this._key, a:this._okuri)
     if type(line) != type("")
-        return -1
+        let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
+        \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri)
+        throw eskk#internal_error(['eskk', 'dictionary'], msg)
     endif
     let a:this._result = [s:parse_skk_dict_line(line), 0]
     return a:this._result
@@ -167,17 +168,13 @@ endfunction "}}}
 
 
 function! s:henkan_result.get_candidate() dict "{{{
-    let result = s:henkan_result_get_result(self)
-    if type(result) == type(-1)
-        return -1
-    endif
-
-    let [candidates, idx] = result
-    if eskk#util#has_idx(candidates, idx)
+    try
+        let [candidates, idx] = s:henkan_result_get_result(self)
+        " Assert eskk#util#has_idx(candidates, idx)
         return candidates[idx].result . self._okuri_filter
-    else
+    catch /^eskk: dictionary - internal error/
         return -1
-    endif
+    endtry
 endfunction "}}}
 
 function! s:henkan_result.advance() dict "{{{
