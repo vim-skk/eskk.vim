@@ -20,24 +20,21 @@ runtime! plugin/eskk.vim
 
 " Searching Functions {{{
 
-function! s:search_next_candidate(dict, key_filter, okuri_rom) "{{{
+function! s:search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
-    for ph_dict in a:dict._physical_dicts
-        let converted = s:iconv(needle, &l:encoding, ph_dict.encoding)
-        if ph_dict.sorted
-            let result = s:search_binary(ph_dict, converted, has_okuri, 5)
-        else
-            let result = s:search_linear(ph_dict, converted, has_okuri)
-        endif
-        if type(result) == type("")
-            return s:iconv(result, ph_dict.encoding, &l:encoding)
-        endif
-        call eskk#util#logf("no maches in '%s'.", ph_dict.path)
-    endfor
-
-    return -1
+    let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
+    if a:physical_dict.sorted
+        let result = s:search_binary(a:physical_dict, converted, has_okuri, 5)
+    else
+        let result = s:search_linear(a:physical_dict, converted, has_okuri)
+    endif
+    if type(result) == type("")
+        return s:iconv(result, a:physical_dict.encoding, &l:encoding)
+    else
+        return -1
+    endif
 endfunction "}}}
 
 function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
@@ -146,8 +143,15 @@ function! s:henkan_result_get_result(this) "{{{
         return a:this._result
     endif
 
-    let line = s:search_next_candidate(a:this._dict, a:this._key, a:this._okuri)
-    if type(line) != type("")
+    let found = 0
+    for dict in a:this._dict._physical_dicts
+        let line = s:search_next_candidate(dict, a:this._key, a:this._okuri)
+        if type(line) == type("")
+            let found = 1
+            break
+        endif
+    endfor
+    if !found
         let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
         \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri)
         throw eskk#internal_error(['eskk', 'dictionary'], msg)
