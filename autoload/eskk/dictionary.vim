@@ -222,7 +222,7 @@ let s:physical_dict = {
 function! s:physical_dict_new(path, sorted, encoding, is_user_dict) "{{{
     return extend(
     \   deepcopy(s:physical_dict),
-    \   {'path': a:path, 'sorted': a:sorted, 'encoding': a:encoding, 'is_user_dict': a:is_user_dict},
+    \   {'path': expand(a:path), 'sorted': a:sorted, 'encoding': a:encoding, 'is_user_dict': a:is_user_dict},
     \   'force'
     \)
 endfunction "}}}
@@ -242,7 +242,7 @@ function! s:physical_dict.get_lines() dict "{{{
         return self._content_lines
     endif
 
-    let path = expand(self.path)
+    let path = self.path
     if filereadable(path)
         call eskk#util#logf('reading %s...', path)
         let self._content_lines   = readfile(path, 'b')
