@@ -35,7 +35,14 @@ let s:event_hook_fn = {}
 " True if eskk#enable() is called.
 let s:enabled = 0
 " Temporary mappings while eskk.vim is on.
-let s:map = {'general': {}, 'sticky': {}, 'henkan': {}, 'escape': {}, 'henkan-select:choose-next': {}, 'henkan-select:choose-prev': {}}
+let s:map = {
+\   'general': {},
+\   'sticky': {},
+\   'henkan': {},
+\   'escape': {},
+\   'henkan-select:choose-next': {},
+\   'henkan-select:choose-prev': {},
+\}
 " Cache for getting lhs mappings correspond to rhs.
 let s:cache_map = {}
 " }}}
