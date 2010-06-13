@@ -23,22 +23,21 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 
+" Variables {{{
+let s:current_table = {}
+" }}}
+
 " Asymmetric built-in modes. {{{
 
 " Variables {{{
 let s:rom_to_hira   = eskk#table#new('rom_to_hira')
 let s:rom_to_kata   = eskk#table#new('rom_to_kata')
-let s:current_table = s:rom_to_hira
 
 let s:skk_dict = eskk#dictionary#new([g:eskk_dictionary, g:eskk_large_dictionary])
 let s:current_henkan_result = {}
 " }}}
 
 
-
-function! eskk#mode#builtin#asym_cb_handle_key(stash) "{{{
-    return 0
-endfunction "}}}
 
 function! eskk#mode#builtin#hook_fn_do_lmap_hira(do_map) "{{{
     if a:do_map
@@ -115,9 +114,36 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
 endfunction "}}}
 
 
+
 function! eskk#mode#builtin#asym_filter(stash) "{{{
     let char = a:stash.char
     let henkan_phase = a:stash.buftable.get_henkan_phase()
+
+
+    " Handle special char.
+    " These characters are handled regardless of current phase.
+    call eskk#lock_old_str()
+    try
+        if char ==# "\<BS>" || char ==# "\<C-h>"
+            call s:do_backspace(a:stash)
+            return
+        elseif char ==# "\<CR>"
+            call s:do_enter(a:stash)
+            return
+        elseif eskk#is_sticky_key(char)
+            call eskk#sticky_key(1, a:stash)
+            return
+        elseif eskk#is_big_letter(char)
+            call eskk#sticky_key(1, a:stash)
+            call eskk#filter(tolower(char))
+            return
+        else
+            " Fall through.
+        endif
+    finally
+        call eskk#unlock_old_str()
+    endtry
+
 
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom_to_hira(a:stash)
@@ -141,10 +167,91 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
             return s:filter_rom_to_hira(a:stash)
         endif
     else
-        return eskk#default_filter(a:stash)
+        let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", phase)
+        throw eskk#internal_error(['eskk'], msg)
     endif
 endfunction "}}}
 
+
+
+function! s:do_backspace(stash) "{{{
+    let [opt, buftable] = [a:stash.option, a:stash.buftable]
+    if buftable.get_old_str() == ''
+        let opt.return = "\<BS>"
+    else
+        " Build backspaces to delete previous characters.
+        for phase in buftable.get_lower_phases()
+            let buf_str = buftable.get_buf_str(phase)
+            if buf_str.get_rom_str() != ''
+                call buf_str.pop_rom_str()
+                break
+            elseif buf_str.get_filter_str() != ''
+                call buf_str.pop_filter_str()
+                break
+            elseif buftable.get_marker(phase) != ''
+                if !buftable.step_back_henkan_phase()
+                    let msg = "Normal phase's marker is empty, "
+                    \       . "and other phases *should* be able to change "
+                    \       . "current henkan phase."
+                    throw eskk#internal_error(['eskk'], msg)
+                endif
+                break
+            endif
+        endfor
+    endif
+endfunction "}}}
+function! s:do_enter_finalize() "{{{
+    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        let buf_str = eskk#get_buftable().get_current_buf_str()
+        call buf_str.clear_filter_str()
+    endif
+endfunction "}}}
+function! s:do_enter(stash) "{{{
+    call eskk#util#log("s:do_enter()")
+
+    let buftable = a:stash.buftable
+    let normal_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    let henkan_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str         = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    let phase = buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        let a:stash.option.return = "\<CR>"
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
+        \)
+
+        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call buftable.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
+        \)
+
+        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
+        \)
+
+        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    else
+        throw eskk#not_implemented_error(['eskk'])
+    endif
+endfunction "}}}
 function! s:henkan_key(stash) "{{{
     call eskk#util#log('henkan!')
 
@@ -363,17 +470,9 @@ endfunction "}}}
 " Variables {{{
 let s:rom_to_ascii  = {}
 let s:rom_to_zenei  = eskk#table#new('rom_to_zenei')
-let s:current_table = s:rom_to_ascii
 " }}}
 
 
-
-function! eskk#mode#builtin#sym_cb_handle_key(stash) "{{{
-    let c = a:stash.char
-    return c =~# '^[a-zA-Z0-9]$'
-    \   || c =~# '^[\-^\\!"#$%&''()=~|]$'
-    \   || c =~# '^[@\[;:\],./`{+*}<>?_]$'
-endfunction "}}}
 
 function! eskk#mode#builtin#hook_fn_do_lmap_ascii() "{{{
     lmap <buffer> <C-j> <Plug>(eskk:mode:ascii:to-hira)
@@ -391,13 +490,13 @@ endfunction "}}}
 " Filter function
 function! eskk#mode#builtin#sym_filter(stash) "{{{
     if s:current_table is s:rom_to_ascii
-        call eskk#default_filter(a:stash)
+        let a:stash.option.return = a:stash.char
     else
         let c = a:stash.char
         if s:current_table.has_map(c)
             let a:stash.option.return = s:current_table.get_map_to(c)
         else
-            call eskk#default_filter(a:stash)
+            let a:stash.option.return = a:stash.char
         endif
     endif
 endfunction "}}}

@@ -39,9 +39,6 @@ let s:dict = eskk#get_mode_structure('ascii')
 function! s:dict.filter(...)
     return call('eskk#mode#builtin#sym_filter', a:000)
 endfunction
-function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#builtin#sym_cb_handle_key', a:000)
-endfunction
 
 
 if !g:eskk_mode_ascii_no_default_mappings
@@ -67,9 +64,6 @@ let s:dict = eskk#get_mode_structure('zenei')
 
 function! s:dict.filter(...)
     return call('eskk#mode#builtin#sym_filter', a:000)
-endfunction
-function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#builtin#sym_cb_handle_key', a:000)
 endfunction
 
 
@@ -103,9 +97,6 @@ let s:dict = eskk#get_mode_structure('hira')
 function! s:dict.filter(...)
     return call('eskk#mode#builtin#asym_filter', a:000)
 endfunction
-function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#builtin#asym_cb_handle_key', a:000)
-endfunction
 
 
 if !g:eskk_mode_hira_no_default_mappings
@@ -129,9 +120,6 @@ let s:dict = eskk#get_mode_structure('kata')
 
 function! s:dict.filter(...)
     return call('eskk#mode#builtin#asym_filter', a:000)
-endfunction
-function! s:dict.cb_handle_key(...)
-    return call('eskk#mode#builtin#asym_cb_handle_key', a:000)
 endfunction
 
 
