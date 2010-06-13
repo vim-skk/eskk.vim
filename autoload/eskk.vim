@@ -171,13 +171,7 @@ function! s:map_raw_options(type, raw_options, lhs, rhs, from) "{{{
     endif
 endfunction "}}}
 function! s:mapopt_chars2dict(options) "{{{
-    let opt = {
-    \   'buffer': 0,
-    \   'expr': 0,
-    \   'silent': 0,
-    \   'unique': 0,
-    \   'remap': 0,
-    \}
+    let opt = s:create_default_mapopt()
     for c in split(a:options, '\zs')
         if c ==# 'b'
             let opt.buffer = 1
@@ -205,6 +199,15 @@ function! s:mapopt_dict2raw(options) "{{{
     endfor
     return ret
 endfunction "}}}
+function! s:create_default_mapopt() "{{{
+    return {
+    \   'buffer': 0,
+    \   'expr': 0,
+    \   'silent': 0,
+    \   'unique': 0,
+    \   'remap': 0,
+    \}
+endfunction "}}}
 
 function! s:skip_white(args) "{{{
     return substitute(a:args, '^\s*', '', '')
@@ -218,13 +221,8 @@ endfunction "}}}
 function! s:parse_options(args) "{{{
     let args = a:args
     let type = 'general'
-    let opt = {
-    \   'buffer': 0,
-    \   'expr': 0,
-    \   'silent': 0,
-    \   'unique': 0,
-    \   'noremap': 0,
-    \}
+    let opt = s:create_default_mapopt()
+    let opt.noremap = 0
 
     while !empty(args)
         let [a, rest] = s:parse_one_arg_from_q_args(args)
