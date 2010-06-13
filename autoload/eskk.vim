@@ -702,6 +702,11 @@ function! s:do_default_mappings() "{{{
 endfunction "}}}
 autocmd VimEnter * call s:do_default_mappings()
 " }}}
+" Save dictionary if modified {{{
+if g:eskk_auto_save_dictionary_at_exit
+    autocmd VimLeavePre * call eskk#mode#builtin#update_dictionary()
+endif
+" }}}
 
 augroup END
 
