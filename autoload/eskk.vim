@@ -58,14 +58,14 @@ function! eskk#map_key(key, ...) "{{{
         return s:map_key(a:key, s:create_default_mapopt())
     endif
 endfunction "}}}
-function! s:map_key(key, raw_options) "{{{
+function! s:map_key(key, options) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
     " Map a:key.
     let named_key = s:map_named_key(a:key)
     execute
     \   'lmap'
-    \   '<buffer>' . s:mapopt_dict2raw(a:raw_options)
+    \   '<buffer>' . s:mapopt_dict2raw(a:options)
     \   a:key
     \   named_key
 endfunction "}}}
@@ -146,9 +146,9 @@ function! s:map_named_key(key) "{{{
 endfunction "}}}
 
 function! eskk#map(type, options, lhs, rhs) "{{{
-    return s:map_raw_options(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
+    return s:create_map(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
 endfunction "}}}
-function! s:map_raw_options(type, raw_options, lhs, rhs, from) "{{{
+function! s:create_map(type, options, lhs, rhs, from) "{{{
     let lhs = a:lhs
     if lhs == ''
         echoerr "lhs must not be empty string."
@@ -161,16 +161,16 @@ function! s:map_raw_options(type, raw_options, lhs, rhs, from) "{{{
     let type_st = s:map[a:type]
 
     if a:type ==# 'general'
-        if has_key(type_st, lhs) && a:raw_options.unique
+        if has_key(type_st, lhs) && a:options.unique
             echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
             return
         endif
         let type_st[lhs] = {
-        \   'options': a:raw_options,
+        \   'options': a:options,
         \   'rhs': a:rhs
         \}
     else
-        let type_st.options = a:raw_options
+        let type_st.options = a:options
         let type_st.lhs = lhs
     endif
 endfunction "}}}
@@ -278,11 +278,11 @@ function! eskk#_cmd_eskk_map(args) "{{{
 
     let args = s:skip_white(args)
     if args == ''
-        call s:map_raw_options(type, options, lhs, '', 'EskkMap')
+        call s:create_map(type, options, lhs, '', 'EskkMap')
         return
     endif
 
-    call s:map_raw_options(type, options, lhs, args, 'EskkMap')
+    call s:create_map(type, options, lhs, args, 'EskkMap')
 endfunction "}}}
 
 
