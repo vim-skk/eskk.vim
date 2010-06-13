@@ -35,7 +35,7 @@ let s:event_hook_fn = {}
 " True if eskk#enable() is called.
 let s:enabled = 0
 " Temporary mappings while eskk.vim is on.
-let s:map = {}
+let s:map = {'general': {}, 'sticky': {}, 'henkan': {}}
 " Cache for getting lhs mappings correspond to rhs.
 let s:cache_map = {}
 " }}}
@@ -157,25 +157,31 @@ function! s:map_named_key(key) "{{{
     return lhs
 endfunction "}}}
 
-function! eskk#map(options, lhs, rhs) "{{{
-    return s:map_raw_options(s:mapopt_chars2dict(a:options), a:lhs, a:rhs)
+function! eskk#map(type, options, lhs, rhs) "{{{
+    return s:map_raw_options(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs)
 endfunction "}}}
-function! s:map_raw_options(raw_options, lhs, rhs) "{{{
+function! s:map_raw_options(type, raw_options, lhs, rhs) "{{{
     let lhs = a:lhs
     if lhs == ''
         echoerr "lhs must not be empty string."
         return
     endif
-
-    if has_key(s:map, lhs) && a:raw_options.unique
-        " <unique> but no warnings.
+    if !has_key(s:map, a:type)
+        echoerr "eskk#map(): unknown type: " . a:type
         return
     endif
 
-    let s:map[lhs] = {
-    \   'options': a:raw_options,
-    \   'rhs': (a:rhs == '' ? '' : a:rhs),
-    \}
+    if a:type ==# 'general'
+        if has_key(s:map.general, lhs) && a:raw_options.unique
+            " <unique> but no warnings.
+            return
+        endif
+
+        let s:map.general[lhs] = {
+        \   'options': a:raw_options,
+        \   'rhs': (a:rhs == '' ? '' : a:rhs),
+        \}
+    endif
 endfunction "}}}
 function! s:mapopt_chars2dict(options) "{{{
     let opt = {
@@ -224,6 +230,7 @@ function! s:parse_one_arg_from_q_args(args) "{{{
 endfunction "}}}
 function! s:parse_options(args) "{{{
     let args = a:args
+    let type = 'general'
     let opt = {
     \   'buffer': 0,
     \   'expr': 0,
@@ -256,6 +263,14 @@ function! s:parse_options(args) "{{{
                 let opt.script = 1
             elseif a[1:] ==# 'unique'
                 let opt.unique = 1
+            elseif a[1:] ==# 'type'
+                if a =~# '^-type='
+                    " TODO Allow -type="..." style?
+                    " But I don't suppose that -type's argument cotains whitespaces.
+                    let type = substitute(a, '^-type=', '', '')
+                else
+                    throw s:parse_error("-type must be '-type=...' style.")
+                endif
             else
                 throw s:parse_error(printf("unknown option '%s'.", a))
             endif
@@ -264,21 +279,21 @@ function! s:parse_options(args) "{{{
 
     let opt.remap = !opt.noremap
     call remove(opt, 'noremap')
-    return [opt, args]
+    return [opt, type, args]
 endfunction "}}}
 function! eskk#_cmd_eskk_map(args) "{{{
-    let [options, args] = s:parse_options(a:args)
+    let [options, type, args] = s:parse_options(a:args)
 
     let args = s:skip_white(args)
     let [lhs, args] = s:parse_one_arg_from_q_args(args)
 
     let args = s:skip_white(args)
     if args == ''
-        call s:map_raw_options(options, lhs, '')
+        call s:map_raw_options(type, options, lhs, '')
         return
     endif
 
-    call s:map_raw_options(options, lhs, args)
+    call s:map_raw_options(type, options, lhs, args)
 endfunction "}}}
 
 
@@ -329,7 +344,7 @@ function! eskk#enable() "{{{
         call eskk#map_key(key)
     endfor
 
-    for [key, opt] in items(s:map)
+    for [key, opt] in items(s:map.general)
         if opt.rhs == ''
             call eskk#map_key(key)
         else
