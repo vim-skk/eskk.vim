@@ -50,7 +50,7 @@ endfunction "}}}
 
 
 
-" Initialize/Mappings
+" These mapping functions actually map key using ":lmap".
 function! eskk#map_key(key, ...) "{{{
     if a:0
         return s:map_key(a:key, s:mapopt_chars2dict(a:1))
@@ -145,6 +145,7 @@ function! s:map_named_key(key) "{{{
     return lhs
 endfunction "}}}
 
+" eskk#map()
 function! eskk#map(type, options, lhs, rhs) "{{{
     return s:create_map(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
 endfunction "}}}
@@ -213,6 +214,7 @@ function! s:create_default_mapopt() "{{{
     \}
 endfunction "}}}
 
+" :EskkMap - Ex command for eskk#map()
 function! s:skip_white(args) "{{{
     return substitute(a:args, '^\s*', '', '')
 endfunction "}}}
