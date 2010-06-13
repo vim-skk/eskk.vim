@@ -57,8 +57,11 @@ function! s:is_special_key(key) "{{{
     \   || (maparg(char, 'l') !~? '^<plug>(eskk:filter:\S\+)$'
     \       && maparg(char, 'l') =~? '^<plug>(eskk:\S\+)$')
 endfunction "}}}
-function! eskk#map_key(key) "{{{
+function! eskk#map_key(key, ...) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
+
+    let unique = a:0 != 0 ? a:1 : 0
+    let unique = (unique ? '<unique>' : '')
 
     " Map a:key.
     if s:is_special_key(a:key)
@@ -66,14 +69,14 @@ function! eskk#map_key(key) "{{{
         let maparg = maparg(a:key, 'l')
         execute
         \   'lmap'
-        \   '<buffer>'
+        \   '<buffer>' . unique
         \   a:key
         \   maparg
     else
         let named_key = s:map_named_key(a:key)
         execute
         \   'lmap'
-        \   '<buffer>'
+        \   '<buffer>' . unique
         \   a:key
         \   named_key
     endif
@@ -173,7 +176,7 @@ function! s:map_raw_options(type, raw_options, lhs, rhs) "{{{
 
     if a:type ==# 'general'
         if has_key(s:map.general, lhs) && a:raw_options.unique
-            " <unique> but no warnings.
+            echoerr printf("Already mapped to '%s'.", lhs)
             return
         endif
 
@@ -346,7 +349,7 @@ function! eskk#enable() "{{{
 
     for [key, opt] in items(s:map.general)
         if opt.rhs == ''
-            call eskk#map_key(key)
+            call eskk#map_key(key, opt.unique)
         else
             execute
             \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
