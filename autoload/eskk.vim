@@ -272,10 +272,10 @@ function! s:parse_options(args) "{{{
                     " But I don't suppose that -type's argument cotains whitespaces.
                     let type = substitute(a, '^-type=', '', '')
                 else
-                    throw s:parse_error("-type must be '-type=...' style.")
+                    throw eskk#parse_error(['eskk'], "-type must be '-type=...' style.")
                 endif
             else
-                throw s:parse_error(printf("unknown option '%s'.", a))
+                throw eskk#parse_error(['eskk'], printf("unknown option '%s'.", a))
             endif
         endif
     endwhile
