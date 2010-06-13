@@ -110,16 +110,18 @@ let s:henkan_result = {
 \   '_key': '',
 \   '_okuri': '',
 \   '_okuri_filter': '',
+\   '_buftable': {},
 \}
 
-function! s:henkan_result_new(dict, key, okuri, okuri_filter) "{{{
+function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable) "{{{
     return extend(
     \   deepcopy(s:henkan_result),
     \   {
     \       '_dict': a:dict,
     \       '_key': a:key,
     \       '_okuri': a:okuri,
-    \       '_okuri_filter': a:okuri_filter
+    \       '_okuri_filter': a:okuri_filter,
+    \       '_buftable': a:buftable,
     \   },
     \   'force'
     \)
@@ -266,6 +268,7 @@ lockvar s:physical_dict
 let s:dict = {
 \   '_physical_dicts': [],
 \   '_user_dict': {},
+\   '_added_words': [],
 \}
 
 function! eskk#dictionary#new(dict_info) "{{{
@@ -306,7 +309,26 @@ function! s:dict.refer(buftable) dict "{{{
     \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str(),
     \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str(),
     \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str(),
+    \   deepcopy(a:buftable, 1)
     \)
+endfunction "}}}
+
+function! s:dict.register_word(henkan_result) dict "{{{
+    let buftable  = a:henkan_result._buftable
+    let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str()
+    let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str()
+
+    let success = 0
+    if inputsave() !=# success
+        call eskk#util#log("warning: inputsave() failed")
+    endif
+    let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+    let input  = input(prompt)
+    if inputrestore() !=# success
+        call eskk#util#log("warning: inputrestore() failed")
+    endif
+
+    call add(self._added_words, [input, key, okuri])
 endfunction "}}}
 
 lockvar s:dict

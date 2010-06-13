@@ -224,8 +224,7 @@ function! s:henkan_key(stash) "{{{
             call buf_str.set_filter_str(candidate)
         else
             " No candidates.
-            " TODO Jisyo touroku
-            throw eskk#not_implemented_error(['eskk', 'mode', 'hira'], "jisyo touroku has not been implemented yet.")
+            call s:skk_dict.register_word(s:current_henkan_result)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         throw eskk#internal_error(['eskk', 'mode', 'builtin'])
@@ -244,7 +243,7 @@ function! s:get_next_candidate(stash, next) "{{{
         call buf_str.set_filter_str(candidate)
     else
         " No more candidates.
-        " TODO Jisyo touroku
+        call s:skk_dict.register_word(s:current_henkan_result)
     endif
 endfunction "}}}
 function! s:filter_rom_to_hira(stash) "{{{
