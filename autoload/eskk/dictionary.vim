@@ -213,10 +213,10 @@ let s:physical_dict = {
 \   'encoding': '',
 \}
 
-function! s:physical_dict_new(path, sorted, encoding) "{{{
+function! s:physical_dict_new(path, sorted, encoding, is_user_dict) "{{{
     return extend(
     \   deepcopy(s:physical_dict),
-    \   {'path': a:path, 'sorted': a:sorted, 'encoding': a:encoding},
+    \   {'path': a:path, 'sorted': a:sorted, 'encoding': a:encoding, 'is_user_dict': a:is_user_dict},
     \   'force'
     \)
 endfunction "}}}
@@ -265,20 +265,35 @@ lockvar s:physical_dict
 
 let s:dict = {
 \   '_physical_dicts': [],
+\   '_user_dict': {},
 \}
 
 function! eskk#dictionary#new(dict_info) "{{{
     if type(a:dict_info) == type([])
-        let dicts = map(copy(a:dict_info), 's:physical_dict_new(v:val.path, v:val.sorted, v:val.encoding)')
+        let dicts = map(copy(a:dict_info), 's:physical_dict_new(v:val.path, v:val.sorted, v:val.encoding, get(v:val, "is_user_dict", 0))')
     elseif type(a:dict_info) == type({})
         return eskk#dictionary#new([a:dict_info])
     else
         throw eskk#internal_error(['eskk', 'dictionary'], "eskk#dictionary#new(): invalid argument")
     endif
 
+    " Check if any dictionary has "is_user_dict" key.
+    let user_dict = {}
+    let found = 0
+    for d in dicts
+        if d.is_user_dict
+            let user_dict = d
+            let found = 1
+            break
+        endif
+    endfor
+    if !found
+        throw eskk#internal_error(['eskk', 'dictionary'], "No 'is_user_dict' key in dictionaries.")
+    endif
+
     return extend(
     \   deepcopy(s:dict),
-    \   {'_physical_dicts': dicts},
+    \   {'_physical_dicts': dicts, '_user_dict': user_dict},
     \   'force'
     \)
 endfunction "}}}

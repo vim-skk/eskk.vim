@@ -33,7 +33,10 @@ let s:current_table = {}
 let s:rom_to_hira   = eskk#table#new('rom_to_hira')
 let s:rom_to_kata   = eskk#table#new('rom_to_kata')
 
-let s:skk_dict = eskk#dictionary#new([g:eskk_dictionary, g:eskk_large_dictionary])
+let s:skk_dict = eskk#dictionary#new([
+\   extend(deepcopy(g:eskk_dictionary), {'is_user_dict': 1}),
+\   g:eskk_large_dictionary,
+\])
 let s:current_henkan_result = {}
 " }}}
 
