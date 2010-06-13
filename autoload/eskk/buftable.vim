@@ -377,6 +377,7 @@ function! s:buftable.dump_print() dict "{{{
         call eskk#util#warnf('pos: %s', string(buf_str.get_pos()))
         call eskk#util#warnf('rom_str: %s', string(buf_str.get_rom_str()))
         call eskk#util#warnf('filter_str: %s', string(buf_str.get_filter_str()))
+        call eskk#util#warnf('phase_str: %s', string(buf_str.get_phase_str()))
     endfor
 endfunction "}}}
 
