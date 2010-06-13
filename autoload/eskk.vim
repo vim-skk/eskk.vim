@@ -19,9 +19,6 @@ augroup eskk
 autocmd!
 
 " Variables {{{
-let s:sticky_key_char = ''
-let s:henkan_key_char = ''
-
 " Current mode.
 let s:eskk_mode = ''
 " Supported modes.
@@ -56,14 +53,6 @@ endfunction "}}}
 
 
 " Initialize/Mappings
-function! s:is_special_key(key) "{{{
-    let char = eskk#util#eval_key(a:key)
-
-    return eskk#is_henkan_key(char)
-    \   || eskk#is_sticky_key(char)
-    \   || (maparg(char, 'l') !~? '^<plug>(eskk:filter:\S\+)$'
-    \       && maparg(char, 'l') =~? '^<plug>(eskk:\S\+)$')
-endfunction "}}}
 function! eskk#map_key(key, ...) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
@@ -71,22 +60,12 @@ function! eskk#map_key(key, ...) "{{{
     let unique = (unique ? '<unique>' : '')
 
     " Map a:key.
-    if s:is_special_key(a:key)
-        " Map with <buffer> again.
-        let maparg = maparg(a:key, 'l')
-        execute
-        \   'lmap'
-        \   '<buffer>' . unique
-        \   a:key
-        \   maparg
-    else
-        let named_key = s:map_named_key(a:key)
-        execute
-        \   'lmap'
-        \   '<buffer>' . unique
-        \   a:key
-        \   named_key
-    endif
+    let named_key = s:map_named_key(a:key)
+    execute
+    \   'lmap'
+    \   '<buffer>' . unique
+    \   a:key
+    \   named_key
 endfunction "}}}
 function! eskk#map_temp_key(lhs, rhs) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
@@ -126,9 +105,6 @@ function! eskk#unmap_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
     " Unmap a:key.
-    " NOTE: This unmaps also special key (s:is_special_key()).
-    " But I asssume that special key has been mapped
-    " in non-<buffer> lang-mode mapping.
     execute
     \   'lunmap'
     \   '<buffer>'
