@@ -327,8 +327,17 @@ function! s:dict.register_word(henkan_result) dict "{{{
     if inputsave() !=# success
         call eskk#util#log("warning: inputsave() failed")
     endif
-    let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
-    let input  = input(prompt)
+
+    let save_imsearch = &l:imsearch
+    let &l:imsearch = 1
+    try
+        let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+        redraw
+        let input  = input(prompt)
+    finally
+        let &l:imsearch = save_imsearch
+    endtry
+
     if inputrestore() !=# success
         call eskk#util#log("warning: inputrestore() failed")
     endif
