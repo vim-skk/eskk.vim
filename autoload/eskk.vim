@@ -270,20 +270,15 @@ endfunction "}}}
 function! s:eskk.throw_event(event_name) dict "{{{
     call eskk#util#log("Do event - " . a:event_name)
 
-    let list = get(s:event_hook_fn, a:event_name, [])
+    let list = get(self.event_hook_fn, a:event_name, [])
     let len = len(list)
     let i = 0
 
-    while i < len
-        let [Fn, args, is_temporary] = list[i]
-        if is_temporary
-            call remove(list, i)
-        endif
-        call call(Fn, args)
-
-        let i += 1
-        unlet Fn
-    endwhile
+    let [fn_idx, args_idx, is_temporary_idx] = [0, 1, 2]
+    " Call hook functions.
+    call map(copy(list), 'call(v:val[fn_idx], v:val[args_idx])')
+    " Remove temporary hook. (eskk#register_temp_event())
+    call filter(list, '! v:val[is_temporary_idx]')
 endfunction "}}}
 
 " Locking diff old string
