@@ -18,28 +18,376 @@ runtime! plugin/eskk.vim
 augroup eskk
 autocmd!
 
-" Variables {{{
-" Current mode.
-let s:eskk_mode = ''
-" Supported modes.
-let s:available_modes = {}
-" Buffer strings for inserted, filtered and so on.
-let s:buftable = eskk#buftable#new()
-" Lock current diff old string?
-let s:lock_old_str = 0
-" Event handler functions/arguments.
-let s:event_hook_fn = {}
-" True if eskk#enable() is called.
-let s:enabled = 0
-" Temporary mappings while eskk.vim is on.
-let s:map = {
-\   'general': {},
-\   'sticky': {},
-\   'henkan': {},
-\   'escape': {},
-\   'henkan-select:choose-next': {},
-\   'henkan-select:choose-prev': {},
+" s:eskk {{{
+" mode: Current mode.
+" available_modes: Supported modes.
+" buftable: Buffer strings for inserted, filtered and so on.
+" is_locked_old_str: Lock current diff old string?
+" event_hook_fn: Event handler functions/arguments.
+" enabled: True if eskk#enable() is called.
+" map: Temporary mappings while eskk.vim is on. FIXME Incorrect
+
+let s:eskk = {
+\   'mode': '',
+\   'available_modes': {},
+\   'buftable': eskk#buftable#new(),
+\   'is_locked_old_str': 0,
+\   'event_hook_fn': {},
+\   'enabled': 0,
+\   'map': {
+\      'general': {},
+\      'sticky': {},
+\      'henkan': {},
+\      'escape': {},
+\      'henkan-select:choose-next': {},
+\      'henkan-select:choose-prev': {},
+\   },
 \}
+
+function! s:eskk_new() "{{{
+    return deepcopy(s:eskk, 1)
+endfunction "}}}
+
+" Enable/Disable IM
+function! s:eskk.enable() dict "{{{
+    if self.is_enabled()
+        return ''
+    endif
+    call eskk#util#log('enabling eskk...')
+
+    " If skk.vim exists and enabled, disable it.
+    let disable_skk_vim = exists('g:skk_version') ? SkkDisable() : ''
+
+
+    " Clear current variable states.
+    let self.mode = ''
+    call self.buftable.reset()
+
+
+    " Set up Mappings.
+    lmapclear <buffer>
+
+    for key in g:eskk_mapped_key
+        call eskk#map_key(key)
+    endfor
+
+    for [key, opt] in items(self.map.general)
+        if opt.rhs == ''
+            call eskk#map_key(key, opt.unique)
+        else
+            execute
+            \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
+            \   '<buffer>' . s:mapopt_dict2raw(opt.options)
+            \   key
+            \   opt.rhs
+        endif
+    endfor
+
+
+    " TODO Save previous mode/state.
+    call eskk#set_mode(g:eskk_initial_mode)
+
+    call self.call_mode_func('cb_im_enter', [], 0)
+
+    let self.enabled = 1
+    return disable_skk_vim . "\<C-^>"
+endfunction "}}}
+function! s:eskk.disable() dict "{{{
+    if !self.is_enabled()
+        return ''
+    endif
+    call eskk#util#log('disabling eskk...')
+
+    for key in g:eskk_mapped_key
+        call eskk#unmap_key(key)
+    endfor
+
+    call self.call_mode_func('cb_im_leave', [], 0)
+
+    let self.enabled = 0
+
+    let kakutei_str = eskk#kakutei_str()
+    call self.buftable.reset()
+    return kakutei_str . "\<C-^>"
+endfunction "}}}
+function! s:eskk.toggle() dict "{{{
+    return self[self.is_enabled() ? 'disable' : 'enable']()
+endfunction "}}}
+function! s:eskk.is_enabled() dict "{{{
+    return self.enabled
+endfunction "}}}
+
+" Manipulate display string.
+function! s:eskk.remove_display_str() dict "{{{
+    let current_str = self.buftable.get_display_str()
+    return repeat("\<C-h>", eskk#util#mb_strlen(current_str))
+endfunction "}}}
+function! s:eskk.kakutei_str() dict "{{{
+    return self.remove_display_str() . self.buftable.get_display_str(0)
+endfunction "}}}
+
+" Sticky key
+function! s:eskk.get_sticky_key() dict "{{{
+    return self.map.sticky.lhs
+endfunction "}}}
+function! s:eskk.get_sticky_char() dict "{{{
+    return eskk#util#eval_key(self.get_sticky_key())
+endfunction "}}}
+function! s:eskk.is_sticky_key(char) dict "{{{
+    " TODO Cache result of eskk#util#eval_key() ?
+    return eskk#util#eval_key(self.map.sticky.lhs) ==# a:char
+endfunction "}}}
+function! s:eskk.sticky_key(stash) dict "{{{
+    let buftable = a:stash.buftable
+    if buftable.step_henkan_phase()
+        call eskk#util#logf("eskk#sticky_key(): Succeeded to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
+        return buftable.get_current_marker()
+    else
+        call eskk#util#logf("eskk#sticky_key(): Failed to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
+        return ''
+    endif
+endfunction "}}}
+
+" Henkan key
+function! s:eskk.get_henkan_key() dict "{{{
+    return self.map.henkan.lhs
+endfunction "}}}
+function! s:eskk.get_henkan_char() dict "{{{
+    return eskk#util#eval_key(self.get_henkan_key())
+endfunction "}}}
+function! s:eskk.is_henkan_key(char) dict "{{{
+    " TODO Cache result of eskk#util#eval_key() ?
+    return eskk#util#eval_key(self.map.henkan.lhs) ==# a:char
+endfunction "}}}
+
+" Big letter keys
+function! s:eskk.is_big_letter(char) dict "{{{
+    return a:char =~# '^[A-Z]$'
+endfunction "}}}
+
+" Escape key
+function! s:eskk.escape_key() dict "{{{
+    let kakutei_str = self.kakutei_str()
+    call self.buftable.reset()
+    return kakutei_str . "\<Esc>"
+endfunction "}}}
+
+" Mode
+function! s:eskk.set_mode(next_mode) dict "{{{
+    call eskk#util#logf("mode change: %s => %s", self.mode, a:next_mode)
+    if !self.is_supported_mode(a:next_mode)
+        call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
+        call eskk#util#warnf('self.available_modes = %s', string(self.available_modes))
+        return
+    endif
+
+    call self.throw_event('leave-mode-' . self.mode)
+
+    " Change mode.
+    let prev_mode = self.mode
+    let self.mode = a:next_mode
+
+    " Reset buftable.
+    call self.buftable.reset()
+
+    " cb_mode_enter
+    call self.call_mode_func('cb_mode_enter', [self.mode], 0)
+
+    call self.throw_event('enter-mode-' . self.mode)
+
+    " For &statusline.
+    redrawstatus
+endfunction "}}}
+function! s:eskk.get_mode() dict "{{{
+    return self.mode
+endfunction "}}}
+function! s:eskk.is_supported_mode(mode) dict "{{{
+    return has_key(self.available_modes, a:mode)
+endfunction "}}}
+function! s:eskk.register_mode(mode, ...) dict "{{{
+    let mode_self = a:0 != 0 ? a:1 : {}
+    let self.available_modes[a:mode] = mode_self
+endfunction "}}}
+function! s:eskk.validate_mode_structure(mode) dict "{{{
+    " It should be good to call this function at the end of mode register.
+
+    let st = self.get_mode_structure(a:mode)
+
+    for key in ['filter']
+        if !has_key(st, key)
+            throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
+        endif
+    endfor
+endfunction "}}}
+function! s:eskk.get_mode_structure(mode) dict "{{{
+    if !self.is_supported_mode(a:mode)
+        throw eskk#user_error(['eskk'], printf("mode '%s' is not available.", a:mode))
+    endif
+    return self.available_modes[a:mode]
+endfunction "}}}
+function! s:eskk.call_mode_func(func_key, args, required) dict "{{{
+    let st = self.get_mode_structure(self.mode)
+    if !has_key(st, a:func_key)
+        if a:required
+            let msg = printf("Mode '%s' does not have required function key", self.mode)
+            throw eskk#internal_error(['eskk'], msg)
+        endif
+        return
+    endif
+    return call(st[a:func_key], a:args, st)
+endfunction "}}}
+
+" Statusline
+function! s:eskk.get_stl() dict "{{{
+    " TODO Add these strings to each mode structure.
+    let mode_str = {'hira': 'あ', 'kata': 'ア', 'ascii': 'a', 'zenei': 'ａ'}
+    return self.is_enabled() ? printf('[eskk:%s]', get(mode_str, self.mode, '??')) : ''
+endfunction "}}}
+
+" Buftable
+function! s:eskk.get_buftable() dict "{{{
+    return self.buftable
+endfunction "}}}
+function! s:eskk.rewrite() dict "{{{
+    return self.buftable.rewrite()
+endfunction "}}}
+
+" Event
+function! s:eskk.register_event(event_names, Fn, head_args) dict "{{{
+    return s:register_event(self, a:event_names, a:Fn, a:head_args, 0)
+endfunction "}}}
+function! s:eskk.register_temp_event(event_names, Fn, head_args) dict "{{{
+    return s:register_event(self, a:event_names, a:Fn, a:head_args, 1)
+endfunction "}}}
+function! s:register_event(self, event_names, Fn, head_args, is_temporary) "{{{
+    for name in (type(a:event_names) == type([]) ? a:event_names : [a:event_names])
+        if !has_key(a:self.event_hook_fn, name)
+            let a:self.event_hook_fn[name] = []
+        endif
+        call add(a:self.event_hook_fn[name], [a:Fn, a:head_args, a:is_temporary])
+    endfor
+endfunction "}}}
+function! s:eskk.throw_event(event_name) dict "{{{
+    call eskk#util#log("Do event - " . a:event_name)
+
+    let list = get(s:event_hook_fn, a:event_name, [])
+    let len = len(list)
+    let i = 0
+
+    while i < len
+        let [Fn, args, is_temporary] = list[i]
+        if is_temporary
+            call remove(list, i)
+        endif
+        call call(Fn, args)
+
+        let i += 1
+        unlet Fn
+    endwhile
+endfunction "}}}
+
+" Locking diff old string
+function! s:eskk.lock_old_str() dict "{{{
+    let self.is_locked_old_str = 1
+endfunction "}}}
+function! s:eskk.unlock_old_str() dict "{{{
+    let self.is_locked_old_str = 0
+endfunction "}}}
+
+" Dispatch functions
+function! s:eskk.filter(char) dict "{{{
+    return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
+endfunction "}}}
+function! s:eskk.call_via_filter(Fn, head_args, ...) dict "{{{
+    let char = a:0 != 0 ? a:1 : ''
+    return s:filter(self, char, a:Fn, a:head_args)
+endfunction "}}}
+function! s:filter(self, char, Fn, head_args) "{{{
+    let self = a:self
+
+    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
+    if !self.is_supported_mode(self.mode)
+        call eskk#util#warn('current mode is empty!')
+        sleep 1
+    endif
+
+    let opt = {
+    \   'redispatch_chars': [],
+    \   'return': 0,
+    \}
+    let filter_args = [{
+    \   'char': a:char,
+    \   'option': opt,
+    \   'buftable': self.buftable,
+    \}]
+
+    if !self.is_locked_old_str
+        call self.buftable.set_old_str(self.buftable.get_display_str())
+    endif
+
+    call self.buftable.get_current_buf_str().push_phase_str(a:char)
+
+    call self.throw_event('filter-begin')
+
+    try
+        call call(a:Fn, a:head_args + filter_args)
+
+        if type(opt.return) == type("")
+            return opt.return
+        else
+            " XXX:
+            "     s:map_named_key(char)
+            " should
+            "     s:map_named_key(eskk#util#uneval_key(char))
+
+            " TODO: Do not remap.
+            return
+            \   self.rewrite()
+            \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(s:map_named_key(v:val))'), '')
+        endif
+
+    catch
+        " TODO Show v:exception only once in current mode.
+        " TODO Or open another buffer for showing this annoying messages.
+        "
+        " sleep 1
+        "
+        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        call eskk#util#warn('--- exception ---')
+        call eskk#util#warnf('v:exception: %s', v:exception)
+        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
+        call eskk#util#warn('--- buftable ---')
+        call self.buftable.dump_print()
+        call eskk#util#warn('--- char ---')
+        call eskk#util#warnf('char: %s', a:char)
+        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+
+        return self.escape_key() . a:char
+
+    finally
+        call self.throw_event('filter-finalize')
+    endtry
+endfunction "}}}
+function! s:filter_body_call_mode_or_default_filter(self, stash) "{{{
+    let self = a:self
+    call self.call_mode_func('filter', [a:stash], 1)
+endfunction "}}}
+
+" Misc.
+
+" s:map related functions.
+" TODO Move this to self.map
+function! s:eskk.is_lhs_char(char, type) dict "{{{
+    return has_key(self.map, a:type)
+    \   && eskk#util#eval_key(self.map[a:type].lhs) ==# a:char
+endfunction "}}}
+
+lockvar s:eskk
+" }}}
+
+" Variables {{{
+let s:eskk_instances = [s:eskk_new()]
+let s:instance_id = 0
 " }}}
 
 " Functions {{{
@@ -145,27 +493,23 @@ function! s:map_named_key(key) "{{{
     return lhs
 endfunction "}}}
 
-" s:map related functions.
-function! eskk#is_lhs_char(char, type) "{{{
-    return has_key(s:map, a:type)
-    \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
-endfunction "}}}
-
 " eskk#map()
 function! eskk#map(type, options, lhs, rhs) "{{{
-    return s:create_map(a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
+    return s:create_map(eskk#get_current_instance(), a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
 endfunction "}}}
-function! s:create_map(type, options, lhs, rhs, from) "{{{
+function! s:create_map(self, type, options, lhs, rhs, from) "{{{
+    let self = a:self
+
     let lhs = a:lhs
     if lhs == ''
         echoerr "lhs must not be empty string."
         return
     endif
-    if !has_key(s:map, a:type)
+    if !has_key(self.map, a:type)
         echoerr "eskk#map(): unknown type: " . a:type
         return
     endif
-    let type_st = s:map[a:type]
+    let type_st = self.map[a:type]
 
     if a:type ==# 'general'
         if has_key(type_st, lhs) && a:options.unique
@@ -286,355 +630,180 @@ function! eskk#_cmd_eskk_map(args) "{{{
 
     let args = s:skip_white(args)
     if args == ''
-        call s:create_map(type, options, lhs, '', 'EskkMap')
+        call s:create_map(eskk#get_current_instance(), type, options, lhs, '', 'EskkMap')
         return
     endif
 
-    call s:create_map(type, options, lhs, args, 'EskkMap')
+    call s:create_map(eskk#get_current_instance(), type, options, lhs, args, 'EskkMap')
 endfunction "}}}
 
 
-
-" Utility functions
-function! s:call_mode_func(func_key, args, required) "{{{
-    let st = eskk#get_mode_structure(s:eskk_mode)
-    if !has_key(st, a:func_key)
-        if a:required
-            let msg = printf("Mode '%s' does not have required function key", s:eskk_mode)
-            throw eskk#internal_error(['eskk'], msg)
-        endif
-        return
-    endif
-    return call(st[a:func_key], a:args, st)
+" Manipulate eskk instances.
+function! eskk#get_current_instance() "{{{
+    return s:eskk_instances[s:instance_id]
 endfunction "}}}
-function! s:SID() "{{{
-    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
-endfunction "}}}
-let s:SID_PREFIX = s:SID()
-delfunc s:SID
 
 
+" Stubs for current eskk instance. {{{
 
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
-    return s:enabled
+    let self = eskk#get_current_instance()
+    return call(self.is_enabled, [], self)
 endfunction "}}}
 function! eskk#enable() "{{{
-    if eskk#is_enabled()
-        return ''
-    endif
-    call eskk#util#log('enabling eskk...')
-
-    " If skk.vim exists and enabled, disable it.
-    let disable_skk_vim = exists('g:skk_version') ? SkkDisable() : ''
-
-
-    " Clear current variable states.
-    let s:eskk_mode = ''
-    call s:buftable.reset()
-
-
-    " Set up Mappings.
-    lmapclear <buffer>
-
-    for key in g:eskk_mapped_key
-        call eskk#map_key(key)
-    endfor
-
-    for [key, opt] in items(s:map.general)
-        if opt.rhs == ''
-            call eskk#map_key(key, opt.unique)
-        else
-            execute
-            \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
-            \   '<buffer>' . s:mapopt_dict2raw(opt.options)
-            \   key
-            \   opt.rhs
-        endif
-    endfor
-
-
-    " TODO Save previous mode/state.
-    call eskk#set_mode(g:eskk_initial_mode)
-
-    call s:call_mode_func('cb_im_enter', [], 0)
-
-    let s:enabled = 1
-    return disable_skk_vim . "\<C-^>"
+    let self = eskk#get_current_instance()
+    return call(self.enable, [], self)
 endfunction "}}}
 function! eskk#disable() "{{{
-    if !eskk#is_enabled()
-        return ''
-    endif
-    call eskk#util#log('disabling eskk...')
-
-    for key in g:eskk_mapped_key
-        call eskk#unmap_key(key)
-    endfor
-
-    call s:call_mode_func('cb_im_leave', [], 0)
-
-    let s:enabled = 0
-
-    let kakutei_str = eskk#kakutei_str()
-    call s:buftable.reset()
-    return kakutei_str . "\<C-^>"
+    let self = eskk#get_current_instance()
+    return call(self.disable, [], self)
 endfunction "}}}
 function! eskk#toggle() "{{{
-    if eskk#is_enabled()
-        return eskk#disable()
-    else
-        return eskk#enable()
-    endif
+    let self = eskk#get_current_instance()
+    return call(self.toggle, [], self)
+endfunction "}}}
+
+function! eskk#is_lhs_char(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.is_lhs_char, a:000, self)
 endfunction "}}}
 
 " Manipulate display string.
-function! eskk#remove_display_str() "{{{
-    let current_str = s:buftable.get_display_str()
-    return repeat("\<C-h>", eskk#util#mb_strlen(current_str))
+function! eskk#remove_display_str(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.remove_display_str, a:000, self)
 endfunction "}}}
-function! eskk#kakutei_str() "{{{
-    return eskk#remove_display_str() . s:buftable.get_display_str(0)
+function! eskk#kakutei_str(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.kakutei_str, a:000, self)
 endfunction "}}}
 
 " Sticky key
-function! eskk#get_sticky_key() "{{{
-    return s:map.sticky.lhs
+function! eskk#get_sticky_key(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_sticky_key, a:000, self)
 endfunction "}}}
-function! eskk#get_sticky_char() "{{{
-    return eskk#util#eval_key(eskk#get_sticky_key())
+function! eskk#get_sticky_char(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_sticky_char, a:000, self)
 endfunction "}}}
-function! eskk#is_sticky_key(char) "{{{
-    " TODO Cache result of eskk#util#eval_key() ?
-    return eskk#util#eval_key(s:map.sticky.lhs) ==# a:char
+function! eskk#is_sticky_key(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.is_sticky_key, a:000, self)
 endfunction "}}}
-function! eskk#sticky_key(stash) "{{{
-    let buftable = a:stash.buftable
-    if buftable.step_henkan_phase()
-        call eskk#util#logf("eskk#sticky_key(): Succeeded to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
-        return buftable.get_current_marker()
-    else
-        call eskk#util#logf("eskk#sticky_key(): Failed to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
-        return ''
-    endif
+function! eskk#sticky_key(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.sticky_key, a:000, self)
 endfunction "}}}
 
 " Henkan key
-function! eskk#get_henkan_key() "{{{
-    return s:map.henkan.lhs
+function! eskk#get_henkan_key(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_henkan_key, a:000, self)
 endfunction "}}}
-function! eskk#get_henkan_char() "{{{
-    return eskk#util#eval_key(eskk#get_henkan_key())
+function! eskk#get_henkan_char(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_henkan_char, a:000, self)
 endfunction "}}}
-function! eskk#is_henkan_key(char) "{{{
-    " TODO Cache result of eskk#util#eval_key() ?
-    return eskk#util#eval_key(s:map.henkan.lhs) ==# a:char
+function! eskk#is_henkan_key(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.is_henkan_key, a:000, self)
 endfunction "}}}
 
 " Big letter keys
-function! eskk#is_big_letter(char) "{{{
-    return a:char =~# '^[A-Z]$'
+function! eskk#is_big_letter(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.is_big_letter, a:000, self)
 endfunction "}}}
 
 " Escape key
-function! eskk#escape_key() "{{{
-    let kakutei_str = eskk#kakutei_str()
-    call s:buftable.reset()
-    return kakutei_str . "\<Esc>"
+function! eskk#escape_key(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.escape_key, a:000, self)
 endfunction "}}}
 
 " Mode
-function! eskk#set_mode(next_mode) "{{{
-    call eskk#util#logf("mode change: %s => %s", s:eskk_mode, a:next_mode)
-    if !eskk#is_supported_mode(a:next_mode)
-        call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
-        call eskk#util#warnf('s:available_modes = %s', string(s:available_modes))
-        return
-    endif
-
-    call eskk#throw_event('leave-mode-' . s:eskk_mode)
-
-    " Change mode.
-    let prev_mode = s:eskk_mode
-    let s:eskk_mode = a:next_mode
-
-    " Reset buftable.
-    call s:buftable.reset()
-
-    " cb_mode_enter
-    call s:call_mode_func('cb_mode_enter', [s:eskk_mode], 0)
-
-    call eskk#throw_event('enter-mode-' . s:eskk_mode)
-
-    " For &statusline.
-    redrawstatus
+function! eskk#set_mode(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.set_mode, a:000, self)
 endfunction "}}}
-function! eskk#get_mode() "{{{
-    return s:eskk_mode
+function! eskk#get_mode(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_mode, a:000, self)
 endfunction "}}}
-function! eskk#is_supported_mode(mode) "{{{
-    return has_key(s:available_modes, a:mode)
+function! eskk#is_supported_mode(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.is_supported_mode, a:000, self)
 endfunction "}}}
-function! eskk#register_mode(mode, ...) "{{{
-    let mode_self = a:0 != 0 ? a:1 : {}
-    let s:available_modes[a:mode] = mode_self
+function! eskk#register_mode(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.register_mode, a:000, self)
 endfunction "}}}
-function! eskk#validate_mode_structure(mode) "{{{
-    " It should be good to call this function at the end of mode register.
-
-    let st = eskk#get_mode_structure(a:mode)
-
-    for key in ['filter']
-        if !has_key(st, key)
-            throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
-        endif
-    endfor
+function! eskk#validate_mode_structure(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.validate_mode_structure, a:000, self)
 endfunction "}}}
-function! eskk#get_mode_structure(mode) "{{{
-    if !eskk#is_supported_mode(a:mode)
-        throw eskk#user_error(['eskk'], printf("mode '%s' is not available.", a:mode))
-    endif
-    return s:available_modes[a:mode]
+function! eskk#get_mode_structure(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_mode_structure, a:000, self)
 endfunction "}}}
 
 " Statusline
-function! eskk#get_stl() "{{{
-    " TODO Add these strings to each mode structure.
-    let mode_str = {'hira': 'あ', 'kata': 'ア', 'ascii': 'a', 'zenei': 'ａ'}
-    return eskk#is_enabled() ? printf('[eskk:%s]', get(mode_str, s:eskk_mode, '??')) : ''
+function! eskk#get_stl(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_stl, a:000, self)
 endfunction "}}}
 
 " Buftable
-function! eskk#get_buftable() "{{{
-    return s:buftable
+function! eskk#get_buftable(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_buftable, a:000, self)
 endfunction "}}}
-function! eskk#rewrite() "{{{
-    return s:buftable.rewrite()
+function! eskk#rewrite(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.rewrite, a:000, self)
 endfunction "}}}
 
 " Event
-function! eskk#register_event(event_names, Fn, head_args) "{{{
-    return s:register_event(a:event_names, a:Fn, a:head_args, 0)
+function! eskk#register_event(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.register_event, a:000, self)
 endfunction "}}}
-function! eskk#register_temp_event(event_names, Fn, head_args) "{{{
-    return s:register_event(a:event_names, a:Fn, a:head_args, 1)
+function! eskk#register_temp_event(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.register_temp_event, a:000, self)
 endfunction "}}}
-function! s:register_event(event_names, Fn, head_args, is_temporary) "{{{
-    for name in (type(a:event_names) == type([]) ? a:event_names : [a:event_names])
-        if !has_key(s:event_hook_fn, name)
-            let s:event_hook_fn[name] = []
-        endif
-        call add(s:event_hook_fn[name], [a:Fn, a:head_args, a:is_temporary])
-    endfor
-endfunction "}}}
-function! eskk#throw_event(event_name) "{{{
-    call eskk#util#log("Do event - " . a:event_name)
-
-    let list = get(s:event_hook_fn, a:event_name, [])
-    let len = len(list)
-    let i = 0
-
-    while i < len
-        let [Fn, args, is_temporary] = list[i]
-        if is_temporary
-            call remove(list, i)
-        endif
-        call call(Fn, args)
-
-        let i += 1
-        unlet Fn
-    endwhile
+function! eskk#throw_event(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.throw_event, a:000, self)
 endfunction "}}}
 
 " Locking diff old string
-function! eskk#lock_old_str() "{{{
-    let s:lock_old_str = 1
+function! eskk#lock_old_str(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.lock_old_str, a:000, self)
 endfunction "}}}
-function! eskk#unlock_old_str() "{{{
-    let s:lock_old_str = 0
+function! eskk#unlock_old_str(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.unlock_old_str, a:000, self)
 endfunction "}}}
-
-
 
 " Dispatch functions
-function! eskk#filter(char) "{{{
-    return s:filter(a:char, 's:filter_body_call_mode_or_default_filter', [])
+function! eskk#filter(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.filter, a:000, self)
 endfunction "}}}
-function! eskk#call_via_filter(Fn, head_args, ...) "{{{
-    let char = a:0 != 0 ? a:1 : ''
-    return s:filter(char, a:Fn, a:head_args)
-endfunction "}}}
-function! s:filter(char, Fn, head_args) "{{{
-    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
-    if !eskk#is_supported_mode(s:eskk_mode)
-        call eskk#util#warn('current mode is empty!')
-        sleep 1
-    endif
-
-    let opt = {
-    \   'redispatch_chars': [],
-    \   'return': 0,
-    \}
-    let filter_args = [{
-    \   'char': a:char,
-    \   'option': opt,
-    \   'buftable': s:buftable,
-    \}]
-
-    if !s:lock_old_str
-        call s:buftable.set_old_str(s:buftable.get_display_str())
-    endif
-
-    call s:buftable.get_current_buf_str().push_phase_str(a:char)
-
-    call eskk#throw_event('filter-begin')
-
-    try
-        call call(a:Fn, a:head_args + filter_args)
-
-        if type(opt.return) == type("")
-            return opt.return
-        else
-            " XXX:
-            "     s:map_named_key(char)
-            " should
-            "     s:map_named_key(eskk#util#uneval_key(char))
-
-            " TODO: Do not remap.
-            return
-            \   eskk#rewrite()
-            \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(s:map_named_key(v:val))'), '')
-        endif
-
-    catch
-        " TODO Show v:exception only once in current mode.
-        " TODO Or open another buffer for showing this annoying messages.
-        "
-        " sleep 1
-        "
-        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
-        call eskk#util#warn('--- exception ---')
-        call eskk#util#warnf('v:exception: %s', v:exception)
-        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
-        call eskk#util#warn('--- buftable ---')
-        call s:buftable.dump_print()
-        call eskk#util#warn('--- char ---')
-        call eskk#util#warnf('char: %s', a:char)
-        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
-
-        return eskk#escape_key() . a:char
-
-    finally
-        call eskk#throw_event('filter-finalize')
-    endtry
-endfunction "}}}
-function! s:filter_body_call_mode_or_default_filter(stash) "{{{
-    call s:call_mode_func('filter', [a:stash], 1)
+function! eskk#call_via_filter(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.call_via_filter, a:000, self)
 endfunction "}}}
 
+" }}}
 
+" }}}
 
-" Errors
+" Exceptions {{{
 function! s:build_error(from, msg) "{{{
     return join(a:from, ': ') . ' - ' . join(a:msg, ': ')
 endfunction "}}}
@@ -673,20 +842,23 @@ endif
 " Egg-like-newline {{{
 if !g:eskk_egg_like_newline
     function! s:register_egg_like_newline_event()
+        let self = eskk#get_current_instance()
+
         " Default behavior is `egg like newline`.
         " Turns it to `Non egg like newline` during henkan phase.
-        call eskk#register_event('enter-phase-henkan-select', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
-        call eskk#register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
+        call self.register_event('enter-phase-henkan-select', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
+        call self.register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
     endfunction
     autocmd VimEnter * call s:register_egg_like_newline_event()
 endif
 " }}}
 " InsertLeave {{{
 function! s:autocmd_insert_leave() "{{{
-    call s:buftable.reset()
+    let self = eskk#get_current_instance()
+    call self.buftable.reset()
 
-    if !g:eskk_keep_state && eskk#is_enabled()
-        let disable = eskk#disable()
+    if !g:eskk_keep_state && self.is_enabled()
+        let disable = self.disable()
         noautocmd execute 'normal! i' . disable
     endif
 endfunction "}}}
