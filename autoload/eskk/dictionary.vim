@@ -350,8 +350,8 @@ function! s:dict.register_word(henkan_result) dict "{{{
             call eskk#log('warning: ' . eskk#get_exception_message(v:exception))
         endtry
 
-        " Enable eskk if it has been disabled.
-        call eskk#get_current_instance().enable()
+        " Enable eskk mapping if it has been disabled.
+        call eskk#get_current_instance().map_all_keys()
 
         " Restore `&imsearch`.
         let &l:imsearch = save_imsearch

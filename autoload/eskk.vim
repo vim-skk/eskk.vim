@@ -51,7 +51,9 @@ function! s:eskk_new() "{{{
 endfunction "}}}
 
 " Enable/Disable IM
-function! s:eskk.enable() dict "{{{
+function! s:eskk.enable(...) dict "{{{
+    let do_map = a:0 != 0 ? a:1 : 1
+
     if self.is_enabled()
         return ''
     endif
@@ -67,25 +69,8 @@ function! s:eskk.enable() dict "{{{
 
 
     " Set up Mappings.
-    if !s:has_mapped
-        lmapclear <buffer>
-
-        for key in g:eskk_mapped_key
-            call eskk#map_key(key)
-        endfor
-
-        for [key, opt] in items(s:map.general)
-            if opt.rhs == ''
-                call eskk#map_key(key, opt.unique)
-            else
-                execute
-                \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
-                \   '<buffer>' . s:mapopt_dict2raw(opt.options)
-                \   key
-                \   opt.rhs
-            endif
-        endfor
-        let s:has_mapped = 1
+    if do_map
+        call self.map_all_keys()
     endif
 
 
@@ -97,17 +82,40 @@ function! s:eskk.enable() dict "{{{
     let self.enabled = 1
     return disable_skk_vim . "\<C-^>"
 endfunction "}}}
-function! s:eskk.disable() dict "{{{
+function! s:eskk.map_all_keys() dict "{{{
+    if s:has_mapped
+        return
+    endif
+
+    lmapclear <buffer>
+
+    for key in g:eskk_mapped_key
+        call eskk#map_key(key)
+    endfor
+
+    for [key, opt] in items(s:map.general)
+        if opt.rhs == ''
+            call eskk#map_key(key, opt.unique)
+        else
+            execute
+            \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
+            \   '<buffer>' . s:mapopt_dict2raw(opt.options)
+            \   key
+            \   opt.rhs
+        endif
+    endfor
+    let s:has_mapped = 1
+endfunction "}}}
+function! s:eskk.disable(...) dict "{{{
+    let do_unmap = a:0 != 0 ? a:1 : 1
+
     if !self.is_enabled()
         return ''
     endif
     call eskk#util#log('disabling eskk...')
 
-    if s:has_mapped
-        for key in g:eskk_mapped_key
-            call eskk#unmap_key(key)
-        endfor
-        let s:has_mapped = 0
+    if do_unmap
+        call self.unmap_all_keys()
     endif
 
     call self.call_mode_func('cb_im_leave', [], 0)
@@ -117,6 +125,16 @@ function! s:eskk.disable() dict "{{{
     let kakutei_str = eskk#kakutei_str()
     call self.buftable.reset()
     return kakutei_str . "\<C-^>"
+endfunction "}}}
+function! s:eskk.unmap_all_keys() dict "{{{
+    if !s:has_mapped
+        return
+    endif
+
+    for key in g:eskk_mapped_key
+        call eskk#unmap_key(key)
+    endfor
+    let s:has_mapped = 0
 endfunction "}}}
 function! s:eskk.toggle() dict "{{{
     return self[self.is_enabled() ? 'disable' : 'enable']()
