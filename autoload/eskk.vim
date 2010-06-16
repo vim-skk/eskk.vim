@@ -95,12 +95,12 @@ function! s:eskk.map_all_keys() dict "{{{
     lmapclear <buffer>
 
     for key in g:eskk_mapped_key
-        call eskk#map_key(key)
+        call eskk#set_up_key(key)
     endfor
 
     for [key, opt] in items(s:map.general)
         if opt.rhs == ''
-            call eskk#map_key(key, opt.unique)
+            call eskk#set_up_key(key, opt.unique)
         else
             execute
             \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
@@ -424,7 +424,7 @@ endfunction "}}}
 
 
 " These mapping functions actually map key using ":lmap".
-function! eskk#map_key(key, ...) "{{{
+function! eskk#set_up_key(key, ...) "{{{
     if a:0
         return s:map_key(a:key, s:mapopt_chars2dict(a:1))
     else
@@ -442,7 +442,7 @@ function! s:map_key(key, options) "{{{
     \   a:key
     \   named_key
 endfunction "}}}
-function! eskk#map_temp_key(lhs, rhs) "{{{
+function! eskk#set_up_temp_key(lhs, rhs) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
 
     " Save current a:lhs mapping.
@@ -463,7 +463,7 @@ function! eskk#map_temp_key(lhs, rhs) "{{{
     \   a:lhs
     \   a:rhs
 endfunction "}}}
-function! eskk#map_temp_key_restore(lhs) "{{{
+function! eskk#set_up_temp_key_restore(lhs) "{{{
     let temp_key = s:temp_key_map(a:lhs)
     let saved_rhs = maparg(temp_key, 'l')
 
@@ -472,8 +472,8 @@ function! eskk#map_temp_key_restore(lhs) "{{{
         execute 'lunmap <buffer>' temp_key
         execute 'lmap <buffer>' a:lhs saved_rhs
     else
-        call eskk#util#logf("warning: called eskk#map_temp_key_restore() but no '%s' key is stashed.", a:lhs)
-        call eskk#map_key(a:lhs)
+        call eskk#util#logf("warning: called eskk#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
+        call eskk#set_up_key(a:lhs)
     endif
 endfunction "}}}
 function! eskk#unmap_key(key) "{{{

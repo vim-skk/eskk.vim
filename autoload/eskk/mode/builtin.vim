@@ -47,13 +47,13 @@ call s:stash.init('current_henkan_result', {})
 " Functions called by events. {{{
 function! eskk#mode#builtin#hook_fn_do_lmap_hira(do_map) "{{{
     if a:do_map
-        call eskk#map_temp_key('q', '<Plug>(eskk:mode:hira:convert/switch-to-kata)')
-        call eskk#map_temp_key('l', '<Plug>(eskk:mode:hira:to-ascii)')
-        call eskk#map_temp_key('L', '<Plug>(eskk:mode:hira:to-zenei)')
+        call eskk#set_up_temp_key('q', '<Plug>(eskk:mode:hira:convert/switch-to-kata)')
+        call eskk#set_up_temp_key('l', '<Plug>(eskk:mode:hira:to-ascii)')
+        call eskk#set_up_temp_key('L', '<Plug>(eskk:mode:hira:to-zenei)')
     else
-        call eskk#map_temp_key_restore('q')
-        call eskk#map_temp_key_restore('l')
-        call eskk#map_temp_key_restore('L')
+        call eskk#set_up_temp_key_restore('q')
+        call eskk#set_up_temp_key_restore('l')
+        call eskk#set_up_temp_key_restore('L')
     endif
 endfunction "}}}
 function! eskk#mode#builtin#hook_fn_do_lmap_kata() "{{{
@@ -111,10 +111,10 @@ endfunction "}}}
 function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
     if a:do_map
         call eskk#util#log("Map *non* egg like newline...: <CR> => <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)")
-        call eskk#map_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
+        call eskk#set_up_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
     else
         call eskk#util#log("Restore *non* egg like newline...: <CR>")
-        call eskk#register_temp_event('filter-begin', 'eskk#map_temp_key_restore', ['<CR>'])
+        call eskk#register_temp_event('filter-begin', 'eskk#set_up_temp_key_restore', ['<CR>'])
     endif
 endfunction "}}}
 
