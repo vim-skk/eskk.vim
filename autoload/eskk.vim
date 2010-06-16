@@ -19,15 +19,9 @@ augroup eskk
 autocmd!
 
 " s:eskk {{{
-" mode: Current mode.
-" available_modes: Supported modes.
-" buftable: Buffer strings for inserted, filtered and so on.
-" is_locked_old_str: Lock current diff old string?
-" event_hook_fn: Event handler functions/arguments.
-" enabled: True if eskk#enable() is called.
-" map: Temporary mappings while eskk.vim is on. FIXME Incorrect
-
+" s:available_modes: Supported modes and their structures.
 let s:available_modes = {}
+" s:map: Database for misc. keys.
 let s:map = {
 \   'general': {},
 \   'sticky': {},
@@ -36,6 +30,11 @@ let s:map = {
 \   'henkan-select:choose-next': {},
 \   'henkan-select:choose-prev': {},
 \}
+" mode: Current mode.
+" buftable: Buffer strings for inserted, filtered and so on.
+" is_locked_old_str: Lock current diff old string?
+" event_hook_fn: Event handler functions/arguments.
+" enabled: True if s:eskk.enable() is called.
 let s:eskk = {
 \   'mode': '',
 \   'buftable': eskk#buftable#new(),
