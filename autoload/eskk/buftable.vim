@@ -371,6 +371,7 @@ endfunction "}}}
 
 
 function! s:buftable.dump_print() dict "{{{
+    call eskk#util#warnf('current phase:%d', self._henkan_phase)
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call eskk#util#warnf('phase:%d', phase)
