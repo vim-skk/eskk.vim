@@ -32,16 +32,18 @@ let s:map = {
 \}
 " Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
 let s:stash_prototype = {}
+" s:event_hook_fn: Event handler functions/arguments.
+let s:event_hook_fn = {}
 " mode: Current mode.
 " buftable: Buffer strings for inserted, filtered and so on.
 " is_locked_old_str: Lock current diff old string?
-" event_hook_fn: Event handler functions/arguments.
+" temp_event_hook_fn: Temporary event handler functions/arguments.
 " enabled: True if s:eskk.enable() is called.
 let s:eskk = {
 \   'mode': '',
 \   'buftable': eskk#buftable#new(),
 \   'is_locked_old_str': 0,
-\   'event_hook_fn': {},
+\   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'stash': {},
 \}
@@ -283,31 +285,30 @@ endfunction "}}}
 
 " Event
 function! s:eskk.register_event(event_names, Fn, head_args) dict "{{{
-    return s:register_event(self, a:event_names, a:Fn, a:head_args, 0)
+    return s:register_event(s:event_hook_fn, a:event_names, a:Fn, a:head_args)
 endfunction "}}}
 function! s:eskk.register_temp_event(event_names, Fn, head_args) dict "{{{
-    return s:register_event(self, a:event_names, a:Fn, a:head_args, 1)
+    return s:register_event(self.temp_event_hook_fn, a:event_names, a:Fn, a:head_args)
 endfunction "}}}
-function! s:register_event(self, event_names, Fn, head_args, is_temporary) "{{{
+function! s:register_event(st, event_names, Fn, head_args) "{{{
     for name in (type(a:event_names) == type([]) ? a:event_names : [a:event_names])
-        if !has_key(a:self.event_hook_fn, name)
-            let a:self.event_hook_fn[name] = []
+        if !has_key(a:st, name)
+            let a:st[name] = []
         endif
-        call add(a:self.event_hook_fn[name], [a:Fn, a:head_args, a:is_temporary])
+        call add(a:st[name], [a:Fn, a:head_args])
     endfor
 endfunction "}}}
 function! s:eskk.throw_event(event_name) dict "{{{
     call eskk#util#log("Do event - " . a:event_name)
 
-    let list = get(self.event_hook_fn, a:event_name, [])
-    let len = len(list)
-    let i = 0
+    let event      = get(s:event_hook_fn, a:event_name, [])
+    let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
+    for [Fn, args] in event + temp_event
+        call call(Fn, args)
+    endfor
 
-    let [fn_idx, args_idx, is_temporary_idx] = [0, 1, 2]
-    " Call hook functions.
-    call map(copy(list), 'call(v:val[fn_idx], v:val[args_idx])')
-    " Remove temporary hook. (eskk#register_temp_event())
-    call filter(list, '! v:val[is_temporary_idx]')
+    " Clear temporary hooks.
+    let self.temp_event_hook_fn[a:event_name] = []
 endfunction "}}}
 
 " Locking diff old string
