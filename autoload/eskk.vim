@@ -70,7 +70,7 @@ function! s:eskk.enable(...) dict "{{{
     return disable_skk_vim . "\<C-^>"
 endfunction "}}}
 function! s:eskk.disable(...) dict "{{{
-    let do_unmap = a:0 != 0 ? a:1 : 1
+    let do_unmap = a:0 != 0 ? a:1 : 0
 
     if !self.is_enabled()
         return ''
