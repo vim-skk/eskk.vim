@@ -85,7 +85,7 @@ function! s:eskk.enable() dict "{{{
 
 
     " TODO Save previous mode/state.
-    call eskk#set_mode(g:eskk_initial_mode)
+    call self.set_mode(g:eskk_initial_mode)
 
     call self.call_mode_func('cb_im_enter', [], 0)
 
