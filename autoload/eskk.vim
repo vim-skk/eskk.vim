@@ -30,6 +30,8 @@ let s:map = {
 \   'henkan-select:choose-next': {},
 \   'henkan-select:choose-prev': {},
 \}
+" Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
+let s:stash_prototype = {}
 " mode: Current mode.
 " buftable: Buffer strings for inserted, filtered and so on.
 " is_locked_old_str: Lock current diff old string?
@@ -41,6 +43,7 @@ let s:eskk = {
 \   'is_locked_old_str': 0,
 \   'event_hook_fn': {},
 \   'enabled': 0,
+\   'stash': {},
 \}
 
 " NOTE: This is global between instances
@@ -681,6 +684,71 @@ function! eskk#destroy_current_instance() "{{{
     call remove(s:eskk_instances, s:instance_id)
     let s:instance_id -= 1
 endfunction "}}}
+function! eskk#get_mutable_stash(namespace) "{{{
+    let obj = deepcopy(s:mutable_stash, 1)
+    let obj.namespace = join(a:namespace, '-')
+    return obj
+endfunction "}}}
+
+" s:mutable_stash "{{{
+let s:mutable_stash = {}
+
+" NOTE: Constructor is eskk#get_mutable_stash().
+
+" This a:value will be set when new eskk instances are created.
+function! s:mutable_stash.init(varname, value) dict "{{{
+    call eskk#util#logf("s:mutable_stash - Initialize %s with %s.", a:varname, string(a:value))
+
+    if !has_key(s:stash_prototype, self.namespace)
+        let s:stash_prototype[self.namespace] = {}
+    endif
+
+    if !has_key(s:stash_prototype[self.namespace], a:varname)
+        let s:stash_prototype[self.namespace][a:varname] = a:value
+    else
+        throw eskk#internal_error(['eskk'])
+    endif
+endfunction "}}}
+
+function! s:mutable_stash.get(varname) dict "{{{
+    call eskk#util#logf("s:mutable_stash - Get %s.", a:varname)
+
+    let inst = eskk#get_current_instance()
+    if !has_key(inst.stash, self.namespace)
+        let inst.stash[self.namespace] = {}
+    endif
+
+    if has_key(inst.stash[self.namespace], a:varname)
+        return inst.stash[self.namespace][a:varname]
+    else
+        " Find prototype for this variable.
+        " These prototypes are set by `s:mutable_stash.init()`.
+        if !has_key(s:stash_prototype, self.namespace)
+            let s:stash_prototype[self.namespace] = {}
+        endif
+
+        if has_key(s:stash_prototype[self.namespace], a:varname)
+            return s:stash_prototype[self.namespace][a:varname]
+        else
+            " No more stash.
+            throw eskk#internal_error(['eskk'])
+        endif
+    endif
+endfunction "}}}
+
+function! s:mutable_stash.set(varname, value) dict "{{{
+    call eskk#util#logf("s:mutable_stash - Set %s '%s'.", a:varname, string(a:value))
+
+    let inst = eskk#get_current_instance()
+    if !has_key(inst.stash, self.namespace)
+        let inst.stash[self.namespace] = {}
+    endif
+
+    let inst.stash[self.namespace][a:varname] = a:value
+endfunction "}}}
+
+lockvar s:mutable_stash
+" }}}
 
 
 " Stubs for current eskk instance. {{{
