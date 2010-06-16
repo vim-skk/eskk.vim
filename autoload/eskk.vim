@@ -668,7 +668,7 @@ function! eskk#create_new_instance() "{{{
 
     " Initialize instance.
     let inst = s:eskk_new()
-    call inst.enable()
+    call inst.enable(0)
 
     call add(s:eskk_instances, inst)
     let s:instance_id += 1
