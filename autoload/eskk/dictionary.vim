@@ -323,24 +323,45 @@ function! s:dict.register_word(henkan_result) dict "{{{
     let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str()
     let okuri_rom = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str()
 
+
+    " inputsave()
     let success = 0
     if inputsave() !=# success
         call eskk#util#log("warning: inputsave() failed")
     endif
 
+    " Save `&imsearch`.
     let save_imsearch = &l:imsearch
     let &l:imsearch = 1
+
+    " Create new eskk instance.
+    call eskk#create_new_instance()
+
     try
+        " Get input from command-line.
         let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
         redraw
         let input  = input(prompt)
     finally
+        " Destroy current eskk instance.
+        try
+            call eskk#destroy_current_instance()
+        catch /^eskk -/
+            call eskk#log('warning: ' . eskk#get_exception_message(v:exception))
+        endtry
+
+        " Enable eskk if it has been disabled.
+        call eskk#get_current_instance().enable()
+
+        " Restore `&imsearch`.
         let &l:imsearch = save_imsearch
+
+        " inputrestore()
+        if inputrestore() !=# success
+            call eskk#util#log("warning: inputrestore() failed")
+        endif
     endtry
 
-    if inputrestore() !=# success
-        call eskk#util#log("warning: inputrestore() failed")
-    endif
 
     call add(self._added_words, [input, key, okuri, okuri_rom])
 

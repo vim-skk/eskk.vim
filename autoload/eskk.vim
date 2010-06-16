@@ -829,6 +829,12 @@ endfunction "}}}
 function! s:build_error(from, msg) "{{{
     return join(a:from, ': ') . ' - ' . join(a:msg, ': ')
 endfunction "}}}
+function! eskk#get_exception_message(error_str) "{{{
+    " Get only `a:msg` of s:build_error().
+    let s = a:error_str
+    let s = substitute(s, '^.\{-} - ', '', '')
+    return s
+endfunction "}}}
 
 function! eskk#internal_error(from, ...) "{{{
     return s:build_error(a:from, ['internal error'] + a:000)
