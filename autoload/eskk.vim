@@ -44,6 +44,9 @@ let s:eskk = {
 \   'enabled': 0,
 \}
 
+" NOTE: This is global between instances
+let s:has_mapped = 0
+
 function! s:eskk_new() "{{{
     return deepcopy(s:eskk, 1)
 endfunction "}}}
@@ -65,23 +68,26 @@ function! s:eskk.enable() dict "{{{
 
 
     " Set up Mappings.
-    lmapclear <buffer>
+    if !s:has_mapped
+        lmapclear <buffer>
 
-    for key in g:eskk_mapped_key
-        call eskk#map_key(key)
-    endfor
+        for key in g:eskk_mapped_key
+            call eskk#map_key(key)
+        endfor
 
-    for [key, opt] in items(self.map.general)
-        if opt.rhs == ''
-            call eskk#map_key(key, opt.unique)
-        else
-            execute
-            \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
-            \   '<buffer>' . s:mapopt_dict2raw(opt.options)
-            \   key
-            \   opt.rhs
-        endif
-    endfor
+        for [key, opt] in items(s:map.general)
+            if opt.rhs == ''
+                call eskk#map_key(key, opt.unique)
+            else
+                execute
+                \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
+                \   '<buffer>' . s:mapopt_dict2raw(opt.options)
+                \   key
+                \   opt.rhs
+            endif
+        endfor
+        let s:has_mapped = 1
+    endif
 
 
     " TODO Save previous mode/state.
@@ -98,9 +104,12 @@ function! s:eskk.disable() dict "{{{
     endif
     call eskk#util#log('disabling eskk...')
 
-    for key in g:eskk_mapped_key
-        call eskk#unmap_key(key)
-    endfor
+    if s:has_mapped
+        for key in g:eskk_mapped_key
+            call eskk#unmap_key(key)
+        endfor
+        let s:has_mapped = 0
+    endif
 
     call self.call_mode_func('cb_im_leave', [], 0)
 
