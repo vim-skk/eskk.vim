@@ -27,21 +27,21 @@ autocmd!
 " enabled: True if eskk#enable() is called.
 " map: Temporary mappings while eskk.vim is on. FIXME Incorrect
 
+let s:available_modes = {}
+let s:map = {
+\   'general': {},
+\   'sticky': {},
+\   'henkan': {},
+\   'escape': {},
+\   'henkan-select:choose-next': {},
+\   'henkan-select:choose-prev': {},
+\}
 let s:eskk = {
 \   'mode': '',
-\   'available_modes': {},
 \   'buftable': eskk#buftable#new(),
 \   'is_locked_old_str': 0,
 \   'event_hook_fn': {},
 \   'enabled': 0,
-\   'map': {
-\      'general': {},
-\      'sticky': {},
-\      'henkan': {},
-\      'escape': {},
-\      'henkan-select:choose-next': {},
-\      'henkan-select:choose-prev': {},
-\   },
 \}
 
 function! s:eskk_new() "{{{
@@ -128,14 +128,14 @@ endfunction "}}}
 
 " Sticky key
 function! s:eskk.get_sticky_key() dict "{{{
-    return self.map.sticky.lhs
+    return s:map.sticky.lhs
 endfunction "}}}
 function! s:eskk.get_sticky_char() dict "{{{
     return eskk#util#eval_key(self.get_sticky_key())
 endfunction "}}}
 function! s:eskk.is_sticky_key(char) dict "{{{
     " TODO Cache result of eskk#util#eval_key() ?
-    return eskk#util#eval_key(self.map.sticky.lhs) ==# a:char
+    return eskk#util#eval_key(s:map.sticky.lhs) ==# a:char
 endfunction "}}}
 function! s:eskk.sticky_key(stash) dict "{{{
     let buftable = a:stash.buftable
@@ -150,14 +150,14 @@ endfunction "}}}
 
 " Henkan key
 function! s:eskk.get_henkan_key() dict "{{{
-    return self.map.henkan.lhs
+    return s:map.henkan.lhs
 endfunction "}}}
 function! s:eskk.get_henkan_char() dict "{{{
     return eskk#util#eval_key(self.get_henkan_key())
 endfunction "}}}
 function! s:eskk.is_henkan_key(char) dict "{{{
     " TODO Cache result of eskk#util#eval_key() ?
-    return eskk#util#eval_key(self.map.henkan.lhs) ==# a:char
+    return eskk#util#eval_key(s:map.henkan.lhs) ==# a:char
 endfunction "}}}
 
 " Big letter keys
@@ -177,7 +177,7 @@ function! s:eskk.set_mode(next_mode) dict "{{{
     call eskk#util#logf("mode change: %s => %s", self.mode, a:next_mode)
     if !self.is_supported_mode(a:next_mode)
         call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
-        call eskk#util#warnf('self.available_modes = %s', string(self.available_modes))
+        call eskk#util#warnf('s:available_modes = %s', string(s:available_modes))
         return
     endif
 
@@ -202,11 +202,11 @@ function! s:eskk.get_mode() dict "{{{
     return self.mode
 endfunction "}}}
 function! s:eskk.is_supported_mode(mode) dict "{{{
-    return has_key(self.available_modes, a:mode)
+    return has_key(s:available_modes, a:mode)
 endfunction "}}}
 function! s:eskk.register_mode(mode, ...) dict "{{{
     let mode_self = a:0 != 0 ? a:1 : {}
-    let self.available_modes[a:mode] = mode_self
+    let s:available_modes[a:mode] = mode_self
 endfunction "}}}
 function! s:eskk.validate_mode_structure(mode) dict "{{{
     " It should be good to call this function at the end of mode register.
@@ -223,7 +223,7 @@ function! s:eskk.get_mode_structure(mode) dict "{{{
     if !self.is_supported_mode(a:mode)
         throw eskk#user_error(['eskk'], printf("mode '%s' is not available.", a:mode))
     endif
-    return self.available_modes[a:mode]
+    return s:available_modes[a:mode]
 endfunction "}}}
 function! s:eskk.call_mode_func(func_key, args, required) dict "{{{
     let st = self.get_mode_structure(self.mode)
@@ -371,10 +371,10 @@ endfunction "}}}
 " Misc.
 
 " s:map related functions.
-" TODO Move this to self.map
+" TODO Move this to s:map
 function! s:eskk.is_lhs_char(char, type) dict "{{{
-    return has_key(self.map, a:type)
-    \   && eskk#util#eval_key(self.map[a:type].lhs) ==# a:char
+    return has_key(s:map, a:type)
+    \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
 
 lockvar s:eskk
@@ -500,11 +500,11 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
         echoerr "lhs must not be empty string."
         return
     endif
-    if !has_key(self.map, a:type)
+    if !has_key(s:map, a:type)
         echoerr "eskk#map(): unknown type: " . a:type
         return
     endif
-    let type_st = self.map[a:type]
+    let type_st = s:map[a:type]
 
     if a:type ==# 'general'
         if has_key(type_st, lhs) && a:options.unique
