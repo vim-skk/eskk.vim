@@ -19,21 +19,6 @@ augroup eskk
 autocmd!
 
 " s:eskk {{{
-" s:available_modes: Supported modes and their structures.
-let s:available_modes = {}
-" s:map: Database for misc. keys.
-let s:map = {
-\   'general': {},
-\   'sticky': {},
-\   'henkan': {},
-\   'escape': {},
-\   'henkan-select:choose-next': {},
-\   'henkan-select:choose-prev': {},
-\}
-" Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
-let s:stash_prototype = {}
-" s:event_hook_fn: Event handler functions/arguments.
-let s:event_hook_fn = {}
 " mode: Current mode.
 " buftable: Buffer strings for inserted, filtered and so on.
 " is_locked_old_str: Lock current diff old string?
@@ -47,9 +32,6 @@ let s:eskk = {
 \   'enabled': 0,
 \   'stash': {},
 \}
-
-" NOTE: This is global between instances
-let s:has_mapped = 0
 
 function! s:eskk_new() "{{{
     return deepcopy(s:eskk, 1)
@@ -87,6 +69,34 @@ function! s:eskk.enable(...) dict "{{{
     let self.enabled = 1
     return disable_skk_vim . "\<C-^>"
 endfunction "}}}
+function! s:eskk.disable(...) dict "{{{
+    let do_unmap = a:0 != 0 ? a:1 : 1
+
+    if !self.is_enabled()
+        return ''
+    endif
+    call eskk#util#log('disabling eskk...')
+
+    if do_unmap
+        call self.unmap_all_keys()
+    endif
+
+    call self.call_mode_func('cb_im_leave', [], 0)
+
+    let self.enabled = 0
+
+    let kakutei_str = eskk#kakutei_str()
+    call self.buftable.reset()
+    return kakutei_str . "\<C-^>"
+endfunction "}}}
+function! s:eskk.toggle() dict "{{{
+    return self[self.is_enabled() ? 'disable' : 'enable']()
+endfunction "}}}
+function! s:eskk.is_enabled() dict "{{{
+    return self.enabled
+endfunction "}}}
+
+" Mappings
 function! s:eskk.map_all_keys() dict "{{{
     if s:has_mapped
         return
@@ -111,26 +121,6 @@ function! s:eskk.map_all_keys() dict "{{{
     endfor
     let s:has_mapped = 1
 endfunction "}}}
-function! s:eskk.disable(...) dict "{{{
-    let do_unmap = a:0 != 0 ? a:1 : 1
-
-    if !self.is_enabled()
-        return ''
-    endif
-    call eskk#util#log('disabling eskk...')
-
-    if do_unmap
-        call self.unmap_all_keys()
-    endif
-
-    call self.call_mode_func('cb_im_leave', [], 0)
-
-    let self.enabled = 0
-
-    let kakutei_str = eskk#kakutei_str()
-    call self.buftable.reset()
-    return kakutei_str . "\<C-^>"
-endfunction "}}}
 function! s:eskk.unmap_all_keys() dict "{{{
     if !s:has_mapped
         return
@@ -140,12 +130,6 @@ function! s:eskk.unmap_all_keys() dict "{{{
         call eskk#unmap_key(key)
     endfor
     let s:has_mapped = 0
-endfunction "}}}
-function! s:eskk.toggle() dict "{{{
-    return self[self.is_enabled() ? 'disable' : 'enable']()
-endfunction "}}}
-function! s:eskk.is_enabled() dict "{{{
-    return self.enabled
 endfunction "}}}
 
 " Manipulate display string.
@@ -411,8 +395,32 @@ lockvar s:eskk
 " }}}
 
 " Variables {{{
+
+" These instances are created, destroyed
+" at word-register mode.
 let s:eskk_instances = [s:eskk_new()]
+" Index number of s:eskk_instances for current instance.
 let s:instance_id = 0
+
+" NOTE: Following variables are non-local between instances.
+
+" s:available_modes: Supported modes and their structures.
+let s:available_modes = {}
+" s:map: Database for misc. keys.
+let s:map = {
+\   'general': {},
+\   'sticky': {},
+\   'henkan': {},
+\   'escape': {},
+\   'henkan-select:choose-next': {},
+\   'henkan-select:choose-prev': {},
+\}
+" Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
+let s:stash_prototype = {}
+" s:event_hook_fn: Event handler functions/arguments.
+let s:event_hook_fn = {}
+
+let s:has_mapped = 0
 " }}}
 
 " Functions {{{
