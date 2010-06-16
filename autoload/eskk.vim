@@ -646,6 +646,24 @@ endfunction "}}}
 function! eskk#get_current_instance() "{{{
     return s:eskk_instances[s:instance_id]
 endfunction "}}}
+function! eskk#create_new_instance() "{{{
+    " TODO: CoW
+
+    " Initialize instance.
+    let inst = s:eskk_new()
+    call inst.enable()
+
+    call add(s:eskk_instances, inst)
+    let s:instance_id += 1
+endfunction "}}}
+function! eskk#destroy_current_instance() "{{{
+    if s:instance_id == 0
+        throw eskk#internal_error(['eskk'], "No more instances.")
+    endif
+
+    call remove(s:eskk_instances, s:instance_id)
+    let s:instance_id -= 1
+endfunction "}}}
 
 
 " Stubs for current eskk instance. {{{
