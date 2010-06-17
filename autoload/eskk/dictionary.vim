@@ -265,7 +265,6 @@ function! s:henkan_result.get_candidate() dict "{{{
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
     try
         let [candidates, idx] = s:henkan_result_get_result(self)
-        call eskk#util#logf('get_candidate(), idx = %d, counter - %d', idx, counter)
         if idx >= counter
             return s:henkan_result_select_candidates(self) . self._okuri
         else
