@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 37))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 38))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -93,6 +93,15 @@ if !exists("g:eskk_backup_dictionary")
 endif
 if !exists("g:eskk_auto_save_dictionary_at_exit")
     let g:eskk_auto_save_dictionary_at_exit = 1
+endif
+
+" Henkan
+if !exists("eskk_select_cand_keys")
+  let eskk_select_cand_keys = "asdfjkl"
+endif
+
+if !exists("eskk_show_candidates_count")
+  let eskk_show_candidates_count = 4
 endif
 
 " Mappings

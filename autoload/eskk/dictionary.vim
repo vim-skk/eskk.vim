@@ -142,6 +142,8 @@ function! s:henkan_result_advance(self, advance) "{{{
     try
         let result = s:henkan_result_get_result(a:self)
         if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
+            " Next time to call s:henkan_result_get_result(),
+            " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
             let result[1] += (a:advance ? 1 : -1)
             return 1
         else
@@ -164,6 +166,7 @@ function! s:henkan_result_get_result(this) "{{{
             throw cant_get_result
         endif
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
+        " Look up this henkan result in dictionaries.
         let found = 0
         for dict in a:this._dict._physical_dicts
             let line = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
@@ -179,6 +182,60 @@ function! s:henkan_result_get_result(this) "{{{
         let a:this._status = s:GOT_RESULT
         return a:this._result
     endif
+endfunction "}}}
+
+function! s:henkan_result_select_candidates(this) "{{{
+    " Select candidates by getchar()'s character.
+    let words = copy(a:this._result[0])
+    let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))
+    let page_index = 0
+    let pages = []
+    while !empty(words)
+        let words_in_page = []
+        " Add words to `words_in_page` as number of
+        " string length of `g:eskk_select_cand_keys`.
+        for c in split(g:eskk_select_cand_keys, '\zs')
+            if empty(words)
+                break
+            endif
+            call add(words_in_page, [c, remove(words, 0)])
+        endfor
+        call add(pages, words_in_page)
+    endwhile
+
+    while 1
+        " Show candidates.
+        redraw
+        for [c, word] in pages[page_index]
+            echon printf('%s:%s  ', c, word.result)
+        endfor
+
+        " Get char for selected candidate.
+        let char = s:getchar()
+        if eskk#is_lhs_char(char, 'henkan-select:next-page')
+            if eskk#util#has_idx(pages, page_index + 1)
+                let page_index += 1
+            else
+                " TODO: No more pages. Register new word.
+            endif
+        elseif eskk#is_lhs_char(char, 'henkan-select:prev-page')
+            if eskk#util#has_idx(pages, page_index - 1)
+                let page_index -= 1
+            else
+                " TODO: Return to henkan select phase.
+            endif
+        elseif stridx(g:eskk_select_cand_keys, char) != -1
+            let selected = g:eskk_select_cand_keys[stridx(g:eskk_select_cand_keys, char)]
+            call eskk#util#logf("Selected char '%s'.", selected)
+            for [c, word] in pages[page_index]
+                if c ==# selected
+                    " Dummy result list for `word`.
+                    " Note that assigning to index number is useless.
+                    return word.result
+                endif
+            endfor
+        endif
+    endwhile
 endfunction "}}}
 
 function! s:parse_skk_dict_line(line) "{{{
@@ -198,12 +255,24 @@ function! s:parse_skk_dict_line(line) "{{{
     return candidates
 endfunction "}}}
 
+function! s:getchar(...) "{{{
+    let c = call('getchar', a:000)
+    return type(c) == type("") ? c : nr2char(c)
+endfunction "}}}
+
 
 function! s:henkan_result.get_candidate() dict "{{{
+    let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
     try
         let [candidates, idx] = s:henkan_result_get_result(self)
-        return candidates[idx].result . self._okuri
+        call eskk#util#logf('get_candidate(), idx = %d, counter - %d', idx, counter)
+        if idx >= counter
+            return s:henkan_result_select_candidates(self) . self._okuri
+        else
+            return candidates[idx].result . self._okuri
+        endif
     catch /^eskk: dictionary - internal error/
+        " TODO: Catch look up error
         return -1
     endtry
 endfunction "}}}

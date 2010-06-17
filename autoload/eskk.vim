@@ -420,6 +420,8 @@ let s:map = {
 \   'escape': {},
 \   'henkan-select:choose-next': {},
 \   'henkan-select:choose-prev': {},
+\   'henkan-select:next-page': {},
+\   'henkan-select:prev-page': {},
 \}
 " Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
 let s:stash_prototype = {}
@@ -996,6 +998,8 @@ function! s:do_default_mappings() "{{{
     EskkMap -type=escape -unique <Esc>
     EskkMap -type=henkan-select:choose-next -unique <Space>
     EskkMap -type=henkan-select:choose-prev -unique x
+    EskkMap -type=henkan-select:next-page -unique <Space>
+    EskkMap -type=henkan-select:prev-page -unique x
 endfunction "}}}
 autocmd VimEnter * call s:do_default_mappings()
 " }}}
