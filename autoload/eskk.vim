@@ -269,6 +269,10 @@ endfunction "}}}
 function! s:eskk.get_buftable() dict "{{{
     return self.buftable
 endfunction "}}}
+function! s:eskk.set_buftable(buftable) dict "{{{
+    call a:buftable.set_old_str(self.buftable.get_old_str())
+    let self.buftable = a:buftable
+endfunction "}}}
 function! s:eskk.rewrite() dict "{{{
     return self.buftable.rewrite()
 endfunction "}}}
@@ -886,6 +890,10 @@ endfunction "}}}
 function! eskk#get_buftable(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.get_buftable, a:000, self)
+endfunction "}}}
+function! eskk#set_buftable(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.set_buftable, a:000, self)
 endfunction "}}}
 function! eskk#rewrite(...) "{{{
     let self = eskk#get_current_instance()

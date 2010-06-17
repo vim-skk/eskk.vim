@@ -240,9 +240,8 @@ function! s:henkan_key(stash) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         " Enter henkan select phase.
-        call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-
         let s:current_henkan_result = s:stash.get('skk_dict').refer(a:stash.buftable)
+        call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
         " Clear phase henkan/okuri buffer string.
         " Assumption: `s:stash.get('skk_dict').refer()` saves necessary strings.
@@ -272,17 +271,33 @@ function! s:henkan_key(stash) "{{{
     endif
 endfunction "}}}
 function! s:get_next_candidate(stash, next) "{{{
-    let buf_str = a:stash.buftable.get_current_buf_str()
+    let cur_buf_str = a:stash.buftable.get_current_buf_str()
     if s:current_henkan_result[a:next ? 'advance' : 'back']()
         let candidate = s:current_henkan_result.get_candidate()
         call eskk#util#assert(type(candidate) == type(""))
 
         " Set candidate.
-        call buf_str.set_filter_str(candidate)
+        call cur_buf_str.set_filter_str(candidate)
     else
         " No more candidates.
-        let input = s:stash.get('skk_dict').register_word(s:current_henkan_result)
-        call buf_str.set_filter_str(input)
+        if a:next
+            " Register new word when it advanced or backed current result index,
+            " And tried to step at last candidates but failed.
+            let input = s:stash.get('skk_dict').register_word(s:current_henkan_result)
+            call cur_buf_str.set_filter_str(input)
+        else
+            " Restore previous buftable state: "■書く" => "▽か*k"
+
+            let buftable = s:current_henkan_result._buftable
+
+            let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+            if okuri_buf_str.get_rom_str() != ''
+                call okuri_buf_str.set_rom_str(okuri_buf_str.get_rom_str()[0])
+                call okuri_buf_str.clear_filter_str()
+            endif
+
+            call eskk#set_buftable(buftable)
+        endif
     endif
 endfunction "}}}
 function! s:filter_rom_to_hira(stash) "{{{
