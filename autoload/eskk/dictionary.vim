@@ -99,14 +99,12 @@ endfunction "}}}
 " Interface for henkan result.
 " This provides a method `get_next()`
 " to get next candidate string.
-"
-" NOTE: '_okuri' is all rom str. not only one character.
 
 let s:henkan_result = {
 \   '_dict': {},
 \   '_key': '',
+\   '_okuri_rom': '',
 \   '_okuri': '',
-\   '_okuri_filter': '',
 \   '_buftable': {},
 \}
 
@@ -116,8 +114,8 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable) "{{{
     \   {
     \       '_dict': a:dict,
     \       '_key': a:key,
-    \       '_okuri': a:okuri,
-    \       '_okuri_filter': a:okuri_filter,
+    \       '_okuri_rom': a:okuri,
+    \       '_okuri': a:okuri_filter,
     \       '_buftable': a:buftable,
     \   },
     \   'force'
@@ -145,7 +143,7 @@ function! s:henkan_result_get_result(this) "{{{
 
     let found = 0
     for dict in a:this._dict._physical_dicts
-        let line = s:search_next_candidate(dict, a:this._key, a:this._okuri)
+        let line = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
         if type(line) == type("")
             let found = 1
             break
@@ -153,7 +151,7 @@ function! s:henkan_result_get_result(this) "{{{
     endfor
     if !found
         let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
-        \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri)
+        \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
         throw eskk#internal_error(['eskk', 'dictionary'], msg)
     endif
     let a:this._result = [s:parse_skk_dict_line(line), 0]
@@ -182,7 +180,7 @@ function! s:henkan_result.get_candidate() dict "{{{
     try
         let [candidates, idx] = s:henkan_result_get_result(self)
         " Assert eskk#util#has_idx(candidates, idx)
-        return candidates[idx].result . self._okuri_filter
+        return candidates[idx].result . self._okuri
     catch /^eskk: dictionary - internal error/
         return -1
     endtry
