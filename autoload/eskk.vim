@@ -108,6 +108,12 @@ function! s:eskk.map_all_keys() dict "{{{
         call eskk#set_up_key(key)
     endfor
 
+    execute
+    \   'lnoremap'
+    \   '<buffer><expr>'
+    \   s:map.escape.lhs
+    \   'eskk#escape_key()'
+
     for [key, opt] in items(s:map.general)
         if opt.rhs == ''
             call eskk#set_up_key(key, opt.unique)
