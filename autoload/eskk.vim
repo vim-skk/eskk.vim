@@ -678,13 +678,15 @@ endfunction "}}}
 function! eskk#create_new_instance() "{{{
     " TODO: CoW
 
-    " Initialize instance.
+    " Create instance.
     let inst = s:eskk_new()
-
     call add(s:eskk_instances, inst)
     let s:instance_id += 1
 
+    " Initialize instance.
     call inst.enable(0)
+
+    return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
     if s:instance_id == 0
