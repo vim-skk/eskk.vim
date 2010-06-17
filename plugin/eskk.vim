@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 17))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 18))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -65,7 +65,7 @@ if type(g:eskk_dictionary) == type("")
     unlet s:temp
 elseif type(g:eskk_dictionary) != type({})
     call eskk#util#warn(
-    \   eskk#user_error(['eskk'], "g:eskk_dictionary's type is either String or Dictionary.")
+    \   "g:eskk_dictionary's type is either String or Dictionary."
     \)
 endif
 
@@ -84,7 +84,7 @@ if type(g:eskk_large_dictionary) == type("")
     unlet s:temp
 elseif type(g:eskk_large_dictionary) != type({})
     call eskk#util#warn(
-    \   eskk#user_error(['eskk'], "g:eskk_large_dictionary's type is either String or Dictionary.")
+    \   "g:eskk_large_dictionary's type is either String or Dictionary."
     \)
 endif
 
