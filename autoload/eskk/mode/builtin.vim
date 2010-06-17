@@ -85,26 +85,42 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
         let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let okuri_buf_str  = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
 
-        let rom_str = henkan_buf_str.get_phase_str()
+        let filter_str = henkan_buf_str.get_filter_str()
 
         call henkan_buf_str.clear()
         call okuri_buf_str.clear()
 
         call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        let to_table = (s:stash.get('current_table') is s:rom_to_hira ? s:rom_to_kata : s:rom_to_hira)
-        let prev_table = s:stash.get('current_table')
-        call s:stash.set('current_table', to_table)
-        try
-            for char in split(rom_str, '\zs')
-                let a:stash.char = char
-                call s:filter_rom_to_hira(a:stash)
-            endfor
-        finally
-            call s:stash.set('current_table', prev_table)
-        endtry
+        let table = (s:stash.get('current_table') is s:rom_to_hira ? s:get_table_lazy('hira_to_kata') : s:get_table_lazy('kata_to_hira'))
+        for wchar in split(filter_str, '\zs')
+            call normal_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
+        endfor
+
+        function! s:finalize()
+            let buftable = eskk#get_buftable()
+            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = buftable.get_current_buf_str()
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
+        \   []
+        \)
     else
         throw eskk#internal_error(['eskk', 'mode', 'hira'])
+    endif
+endfunction "}}}
+function! s:get_table_lazy(table_name) "{{{
+    let varname = 's:' . a:table_name
+    if exists(varname)
+        return {varname}
+    else
+        let {varname} = eskk#table#new(a:table_name)
+        return {varname}
     endif
 endfunction "}}}
 
