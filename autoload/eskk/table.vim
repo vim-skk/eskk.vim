@@ -175,7 +175,6 @@ function! eskk#table#table_begin(name) "{{{
 endfunction "}}}
 
 function! eskk#table#table_end() "{{{
-    lockvar s:table_defs[s:current_table_name]
     let s:current_table_name = ''
 endfunction "}}}
 
