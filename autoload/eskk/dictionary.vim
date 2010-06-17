@@ -382,6 +382,8 @@ function! s:dict.register_word(henkan_result) dict "{{{
         let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
         redraw
         let input  = input(prompt)
+    catch /^Vim:Interrupt$/
+        let input = ''
     finally
         " Destroy current eskk instance.
         try
