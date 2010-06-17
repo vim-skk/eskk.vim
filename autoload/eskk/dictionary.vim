@@ -157,7 +157,7 @@ endfunction "}}}
 function! s:henkan_result_get_result(this) "{{{
     let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
     \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
-    let cant_get_result = eskk#internal_error(['eskk', 'dictionary'], msg)
+    let cant_get_result = eskk#dictionary_look_up_error(['eskk', 'dictionary'], msg)
 
     if a:this._status ==# s:REGISTERED_WORD || a:this._status ==# s:GOT_RESULT
         if !empty(a:this._result)
@@ -271,8 +271,7 @@ function! s:henkan_result.get_candidate() dict "{{{
         else
             return candidates[idx].result . self._okuri
         endif
-    catch /^eskk: dictionary - internal error/
-        " TODO: Catch look up error
+    catch /^eskk: dictionary - dictionary look up error/
         return -1
     endtry
 endfunction "}}}

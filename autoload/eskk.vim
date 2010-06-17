@@ -944,6 +944,9 @@ endfunction "}}}
 function! eskk#internal_error(from, ...) "{{{
     return s:build_error(a:from, ['internal error'] + a:000)
 endfunction "}}}
+function! eskk#dictionary_look_up_error(from, ...) "{{{
+    return s:build_error(a:from, ['dictionary look up error'] + a:000)
+endfunction "}}}
 function! eskk#out_of_idx_error(from, ...) "{{{
     return s:build_error(a:from, ['out of index'] + a:000)
 endfunction "}}}
