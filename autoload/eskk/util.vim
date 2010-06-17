@@ -208,7 +208,7 @@ function! eskk#util#zip(list1, list2) "{{{
         let i += 1
     endwhile
 
-    call eskk#never_reached_error(['eskk', 'util'])
+    call eskk#internal_error(['eskk', 'util'])
 endfunction "}}}
 
 function! eskk#util#make_bs(n) "{{{

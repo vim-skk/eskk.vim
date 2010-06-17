@@ -933,12 +933,6 @@ endfunction "}}}
 function! eskk#internal_error(from, ...) "{{{
     return s:build_error(a:from, ['internal error'] + a:000)
 endfunction "}}}
-function! eskk#not_implemented_error(from, ...) "{{{
-    return s:build_error(a:from, ['not implemented'] + a:000)
-endfunction "}}}
-function! eskk#never_reached_error(from, ...) "{{{
-    return s:build_error(a:from, ['this block will be never reached'] + a:000)
-endfunction "}}}
 function! eskk#out_of_idx_error(from, ...) "{{{
     return s:build_error(a:from, ['out of index'] + a:000)
 endfunction "}}}

@@ -198,7 +198,7 @@ function! s:do_enter(stash) "{{{
 
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     else
-        throw eskk#not_implemented_error(['eskk'])
+        throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
 function! s:henkan_key(stash) "{{{

@@ -194,7 +194,7 @@ function! s:buftable.get_display_str(...) dict "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         return s:get_henkan_select_display_str(self, with_marker)
     else
-        throw eskk#not_implemented_error(['eskk', 'buftable'])
+        throw eskk#internal_error(['eskk', 'buftable'])
     endif
 endfunction "}}}
 function! s:get_normal_display_str(this) "{{{
@@ -335,7 +335,7 @@ function! s:buftable.step_henkan_phase() dict "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         return 0    " failed.
     else
-        throw eskk#not_implemented_error(['eskk'])
+        throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
 function! s:buftable.step_back_henkan_phase() dict "{{{
@@ -353,7 +353,7 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return 0    " failed.
     else
-        throw eskk#not_implemented_error(['eskk'])
+        throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
 
