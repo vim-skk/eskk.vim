@@ -244,7 +244,7 @@ function! s:get_next_candidate(stash, next) "{{{
     let buf_str = a:stash.buftable.get_current_buf_str()
     if s:current_henkan_result[a:next ? 'advance' : 'back']()
         let candidate = s:current_henkan_result.get_candidate()
-        " Assert type(candidate) == type("")
+        call eskk#util#assert(type(candidate) == type(""))
 
         " Set candidate.
         call buf_str.set_filter_str(candidate)
@@ -455,7 +455,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_henkan_key(char)
             return s:henkan_key(a:stash)
-            " Assert a:stash.buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+            call eskk#util#assert(a:stash.buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
             return s:filter_rom_to_hira(a:stash)
         endif

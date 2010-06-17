@@ -179,7 +179,7 @@ function! s:henkan_result_get_result(this) "{{{
 endfunction "}}}
 
 function! s:parse_skk_dict_line(line) "{{{
-    " Assert line =~# '^/.\+/$'
+    call eskk#util#assert(a:line =~# '^/.\+/$')
     let line = a:line[1:-2]
 
     let candidates = []
@@ -199,7 +199,6 @@ endfunction "}}}
 function! s:henkan_result.get_candidate() dict "{{{
     try
         let [candidates, idx] = s:henkan_result_get_result(self)
-        " Assert eskk#util#has_idx(candidates, idx)
         return candidates[idx].result . self._okuri
     catch /^eskk: dictionary - internal error/
         return -1
