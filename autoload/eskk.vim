@@ -684,6 +684,8 @@ function! eskk#create_new_instance() "{{{
 
     call add(s:eskk_instances, inst)
     let s:instance_id += 1
+
+    call eskk#mode#builtin#set_rom_to_hira_table()
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
     if s:instance_id == 0
