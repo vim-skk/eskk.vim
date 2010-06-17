@@ -403,9 +403,12 @@ function! s:dict.register_word(henkan_result) dict "{{{
     endtry
 
 
-    call add(self._added_words, [input, key, okuri, okuri_rom])
-
-    return input . okuri
+    if input != ''
+        call add(self._added_words, [input, key, okuri, okuri_rom])
+        return input . okuri
+    else
+        return key . okuri
+    endif
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
