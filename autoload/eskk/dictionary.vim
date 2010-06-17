@@ -223,7 +223,8 @@ function! s:henkan_result_select_candidates(this) "{{{
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
-                " TODO: Return to henkan select phase.
+                " Return to henkan select phase.
+                throw 'eskk: leave henkan select'
             endif
         elseif stridx(g:eskk_select_cand_keys, char) != -1
             let selected = g:eskk_select_cand_keys[stridx(g:eskk_select_cand_keys, char)]
@@ -265,9 +266,18 @@ endfunction "}}}
 function! s:henkan_result.get_candidate() dict "{{{
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
     try
-        let [candidates, idx] = s:henkan_result_get_result(self)
+        let result = s:henkan_result_get_result(self)
+        let [candidates, idx] = result
+        call eskk#util#logf('idx = %d, counter = %d', idx, counter)
         if idx >= counter
-            return s:henkan_result_select_candidates(self)
+            try
+                return s:henkan_result_select_candidates(self)
+            catch /^eskk: leave henkan select$/
+                if result[1] > 0
+                    let result[1] -= 1
+                endif
+                return candidates[result[1]].result . self._okuri
+            endtry
         else
             return candidates[idx].result . self._okuri
         endif
