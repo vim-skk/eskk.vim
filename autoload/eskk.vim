@@ -410,9 +410,9 @@ let s:instance_id = 0
 
 " NOTE: Following variables are non-local between instances.
 
-" s:available_modes: Supported modes and their structures.
+" Supported modes and their structures.
 let s:available_modes = {}
-" s:map: Database for misc. keys.
+" Database for misc. keys.
 let s:map = {
 \   'general': {},
 \   'sticky': {},
@@ -423,9 +423,9 @@ let s:map = {
 \}
 " Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
 let s:stash_prototype = {}
-" s:event_hook_fn: Event handler functions/arguments.
+" Event handler functions/arguments.
 let s:event_hook_fn = {}
-
+" `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
 let s:has_mapped = 0
 " }}}
 
