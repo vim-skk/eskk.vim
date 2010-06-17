@@ -176,6 +176,7 @@ function! s:henkan_result_get_result(this) "{{{
             throw eskk#internal_error(['eskk', 'dictionary'], msg)
         endif
         let a:this._result = [s:parse_skk_dict_line(line), 0]
+        let a:this._status = s:GOT_RESULT
         return a:this._result
     endif
 endfunction "}}}
