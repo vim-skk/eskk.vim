@@ -400,6 +400,13 @@ function! s:eskk.is_lhs_char(char, type) dict "{{{
     return has_key(s:map, a:type)
     \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
+function! s:eskk.get_special_key(type) dict "{{{
+    if has_key(s:map, a:type)
+        return s:map[a:type].lhs
+    else
+        throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
+    endif
+endfunction "}}}
 
 lockvar s:eskk
 " }}}
@@ -470,7 +477,7 @@ function! s:map_key(key, options) "{{{
     \   a:key
     \   named_key
 endfunction "}}}
-function! eskk#set_up_temp_key(lhs, rhs) "{{{
+function! eskk#set_up_temp_key(lhs, ...) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
 
     " Save current a:lhs mapping.
@@ -484,12 +491,15 @@ function! eskk#set_up_temp_key(lhs, rhs) "{{{
         \   maparg(a:lhs, 'l')
     endif
 
-    " Map a:lhs.
-    execute
-    \   'lmap'
-    \   '<buffer>'
-    \   a:lhs
-    \   a:rhs
+    if a:0
+        execute
+        \   'lmap'
+        \   '<buffer>'
+        \   a:lhs
+        \   a:1
+    else
+        call eskk#set_up_key(a:lhs)
+    endif
 endfunction "}}}
 function! eskk#set_up_temp_key_restore(lhs) "{{{
     let temp_key = s:temp_key_map(a:lhs)
@@ -807,6 +817,10 @@ function! eskk#is_lhs_char(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.is_lhs_char, a:000, self)
 endfunction "}}}
+function! eskk#get_special_key(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_special_key, a:000, self)
+endfunction "}}}
 
 " Manipulate display string.
 function! eskk#remove_display_str(...) "{{{
@@ -1035,6 +1049,46 @@ function! s:do_default_mappings() "{{{
     EskkMap -type=mode:zenei:to-hira -unique <C-j>
 endfunction "}}}
 autocmd VimEnter * call s:do_default_mappings()
+" }}}
+" Map temporary key to keys to use in that mode {{{
+function! eskk#map_mode_local_keys() "{{{
+    let mode = eskk#get_mode()
+    let keys = {
+    \   'hira': [
+    \       'henkan-select:choose-next',
+    \       'henkan-select:choose-prev',
+    \       'henkan-select:next-page',
+    \       'henkan-select:prev-page',
+    \       'mode:hira:q-key',
+    \       'mode:hira:to-ascii',
+    \       'mode:hira:to-zenei',
+    \   ],
+    \   'kata': [
+    \       'henkan-select:choose-next',
+    \       'henkan-select:choose-prev',
+    \       'henkan-select:next-page',
+    \       'henkan-select:prev-page',
+    \       'mode:kata:q-key',
+    \       'mode:kata:to-ascii',
+    \       'mode:kata:to-zenei',
+    \   ],
+    \   'ascii': [
+    \       'mode:ascii:to-hira',
+    \   ],
+    \   'zenei': [
+    \       'mode:zenei:to-hira',
+    \   ],
+    \}
+
+    if has_key(keys, mode)
+        for key in keys[mode]
+            let real_key = eskk#get_special_key(key)
+            call eskk#set_up_temp_key(real_key)
+            call eskk#register_temp_event('leave-mode-' . mode, 'eskk#set_up_temp_key_restore', [real_key])
+        endfor
+    endif
+endfunction "}}}
+call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-ascii', 'enter-mode-zenei'], 'eskk#map_mode_local_keys', [])
 " }}}
 " Save dictionary if modified {{{
 if g:eskk_auto_save_dictionary_at_exit
