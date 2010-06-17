@@ -110,7 +110,6 @@ function! s:get_table(table_name, ...) "{{{
     else
         let msg = printf("can't load table '%s'.", a:table_name)
         throw eskk#internal_error(['eskk', 'table'], msg)
-        return {}
     endif
 endfunction "}}}
 
