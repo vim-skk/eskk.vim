@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 0, 37))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 24))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -52,7 +52,7 @@ endif
 
 " Dictionary
 if !exists("g:eskk_dictionary")
-  let g:eskk_dictionary = "~/.skk-jisyo"
+    let g:eskk_dictionary = "~/.skk-jisyo"
 endif
 if type(g:eskk_dictionary) == type("")
     let s:temp = g:eskk_dictionary
@@ -65,13 +65,13 @@ if type(g:eskk_dictionary) == type("")
     unlet s:temp
 elseif type(g:eskk_dictionary) != type({})
     call eskk#util#warn(
-    \   eskk#user_error(['eskk'], "g:eskk_dictionary's type is either String or Dictionary.")
+    \   "g:eskk_dictionary's type is either String or Dictionary."
     \)
 endif
 
 
 if !exists("g:eskk_large_dictionary")
-  let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
+    let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
 endif
 if type(g:eskk_large_dictionary) == type("")
     let s:temp = g:eskk_large_dictionary
@@ -84,12 +84,15 @@ if type(g:eskk_large_dictionary) == type("")
     unlet s:temp
 elseif type(g:eskk_large_dictionary) != type({})
     call eskk#util#warn(
-    \   eskk#user_error(['eskk'], "g:eskk_large_dictionary's type is either String or Dictionary.")
+    \   "g:eskk_large_dictionary's type is either String or Dictionary."
     \)
 endif
 
 if !exists("g:eskk_backup_dictionary")
     let g:eskk_backup_dictionary = g:eskk_dictionary.path . ".BAK"
+endif
+if !exists("g:eskk_auto_save_dictionary_at_exit")
+    let g:eskk_auto_save_dictionary_at_exit = 1
 endif
 
 " Mappings
@@ -164,6 +167,8 @@ lnoremap <expr> <Plug>(eskk:disable)    eskk#disable()
 
 noremap! <expr> <Plug>(eskk:toggle)     eskk#toggle()
 lnoremap <expr> <Plug>(eskk:toggle)     eskk#toggle()
+
+nnoremap        <Plug>(eskk:save-dictionary) :<C-u>call eskk#mode#builtin#update_dictionary()<CR>
 
 if !g:eskk_no_default_mappings
     function! s:do_map(rhs, mode)
