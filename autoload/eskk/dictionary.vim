@@ -66,29 +66,32 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
             endif
         endif
     endwhile
-    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min)
+    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
 endfunction "}}}
 
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     call eskk#util#log('s:search_linear()')
 
-    if a:0 != 0
-        let pos = a:1
-    elseif a:has_okuri
-        let pos = a:ph_dict.okuri_ari_lnum
-    else
-        let pos = a:ph_dict.okuri_nasi_lnum
-    endif
     let whole_lines = a:ph_dict.get_lines()
-    while eskk#util#has_idx(whole_lines, pos)
+
+    if a:0 >= 2
+        let [pos, end] = a:000
+    elseif a:has_okuri
+        let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines)]
+    else
+        let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines)]
+    endif
+
+    while pos < end
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
-            call eskk#util#logf('found matched line - %s', string(line))
+            call eskk#util#logf('s:search_linear() - found matched line - %s', string(line))
             return line[strlen(a:needle) :]
         endif
         let pos += 1
     endwhile
+    call eskk#util#log('s:search_linear() - not found.')
     return -1
 endfunction "}}}
 
