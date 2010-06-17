@@ -216,7 +216,8 @@ function! s:henkan_result_select_candidates(this) "{{{
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
-                " TODO: No more pages. Register new word.
+                " No more pages. Register new word.
+                return a:this._dict.register_word(a:this)
             endif
         elseif eskk#is_lhs_char(char, 'henkan-select:prev-page')
             if eskk#util#has_idx(pages, page_index - 1)
@@ -231,7 +232,7 @@ function! s:henkan_result_select_candidates(this) "{{{
                 if c ==# selected
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
-                    return word.result
+                    return word.result . self._okuri
                 endif
             endfor
         endif
@@ -266,7 +267,7 @@ function! s:henkan_result.get_candidate() dict "{{{
     try
         let [candidates, idx] = s:henkan_result_get_result(self)
         if idx >= counter
-            return s:henkan_result_select_candidates(self) . self._okuri
+            return s:henkan_result_select_candidates(self)
         else
             return candidates[idx].result . self._okuri
         endif
