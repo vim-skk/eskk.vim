@@ -519,7 +519,8 @@ function! s:dict.update_dictionary() dict "{{{
         if writefile(user_dict_lines, self._user_dict.path) ==# ret_success
             echo "\r" . save_msg . 'Done.'
         else
-            throw printf("can't write to '%s'.", self._user_dict.path)
+            let msg = printf("can't write to '%s'.", self._user_dict.path)
+            throw eskk#internal_error(['eskk', 'dictionary'], msg)
         endif
     catch
         echohl WarningMsg
