@@ -283,9 +283,6 @@ function! s:buftable.get_marker(henkan_phase) dict "{{{
     \    g:eskk_marker_jisyo_touroku,
     \]
     call s:validate_table_idx(table, a:henkan_phase)
-    " if a:henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    "     throw ''
-    " endif
     return table[a:henkan_phase]
 endfunction "}}}
 function! s:buftable.get_current_marker() "{{{
