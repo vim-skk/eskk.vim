@@ -128,39 +128,38 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable, register
     \       '_okuri': a:okuri_filter,
     \       '_buftable': a:buftable,
     \       '_registered_input': a:registered_input,
-    \       '_status': (a:registered_input != '' ? s:REGISTERED_WORD : s:LOOK_UP_DICTIONARY),
+    \       '_status': (empty(a:registered_input) ? s:LOOK_UP_DICTIONARY : s:REGISTERED_WORD),
+    \       '_result': (empty(a:registered_input) ? [] : [map(copy(a:registered_input), '{"result": v:val, "annotation": ""}'), 0]),
     \   },
     \   'force'
     \)
 endfunction "}}}
 
 function! s:henkan_result_advance(self, advance) "{{{
-    if a:self._status ==# s:REGISTERED_WORD
-        let a:self._status = s:LOOK_UP_DICTIONARY
-    else
-        try
-            let result = s:henkan_result_get_result(a:self)
-            if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
-                let result[1] += (a:advance ? 1 : -1)
-                return 1
-            else
-                return 0
-            endif
-        catch /^eskk: dictionary - internal error/
-            return -1
-        endtry
-    endif
+    try
+        let result = s:henkan_result_get_result(a:self)
+        if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
+            let result[1] += (a:advance ? 1 : -1)
+            return 1
+        else
+            return 0
+        endif
+    catch /^eskk: dictionary - internal error/
+        return -1
+    endtry
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
-    if a:this._status ==# s:REGISTERED_WORD
-        let a:this._result = [
-        \   [{'result': a:this._registered_input, 'annotation': ''}],
-        \   -1
-        \]
-        return a:this._result
-    elseif a:this._status ==# s:GOT_RESULT
-        return a:this._result
+    let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
+    \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
+    let cant_get_result = eskk#internal_error(['eskk', 'dictionary'], msg)
+
+    if a:this._status ==# s:REGISTERED_WORD || a:this._status ==# s:GOT_RESULT
+        if !empty(a:this._result)
+            return a:this._result
+        else
+            throw cant_get_result
+        endif
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
         let found = 0
         for dict in a:this._dict._physical_dicts
@@ -171,9 +170,7 @@ function! s:henkan_result_get_result(this) "{{{
             endif
         endfor
         if !found
-            let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
-            \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
-            throw eskk#internal_error(['eskk', 'dictionary'], msg)
+            throw cant_get_result
         endif
         let a:this._result = [s:parse_skk_dict_line(line), 0]
         let a:this._status = s:GOT_RESULT
@@ -333,18 +330,22 @@ function! s:dict.refer(buftable) dict "{{{
     let okuri     = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str()
     let okuri_rom = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str()
 
+    let added = []
     for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
         if added_key ==# key && added_okuri_rom[0] ==# okuri_rom[0]
-            return s:henkan_result_new(
-            \   self,
-            \   key,
-            \   okuri_rom,
-            \   okuri,
-            \   deepcopy(a:buftable, 1),
-            \   added_input
-            \)
+            call add(added, added_input)
         endif
     endfor
+    if !empty(added)
+        return s:henkan_result_new(
+        \   self,
+        \   key,
+        \   okuri_rom,
+        \   okuri,
+        \   deepcopy(a:buftable, 1),
+        \   added
+        \)
+    endif
 
     return s:henkan_result_new(
     \   self,
@@ -352,7 +353,7 @@ function! s:dict.refer(buftable) dict "{{{
     \   okuri_rom,
     \   okuri,
     \   deepcopy(a:buftable, 1),
-    \   ''
+    \   [],
     \)
 endfunction "}}}
 
