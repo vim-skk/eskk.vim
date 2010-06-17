@@ -100,15 +100,25 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
+let s:REGISTERED_WORD = 0
+lockvar s:REGISTERED_WORD
+let s:LOOK_UP_DICTIONARY = 1
+lockvar s:LOOK_UP_DICTIONARY
+let s:GOT_RESULT = 2
+lockvar s:GOT_RESULT
+
 let s:henkan_result = {
 \   '_dict': {},
 \   '_key': '',
 \   '_okuri_rom': '',
 \   '_okuri': '',
 \   '_buftable': {},
+\   '_registered_input': '',
+\   '_status': s:REGISTERED_WORD,
+\   '_result': [],
 \}
 
-function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable) "{{{
+function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable, registered_input) "{{{
     return extend(
     \   deepcopy(s:henkan_result),
     \   {
@@ -117,45 +127,57 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable) "{{{
     \       '_okuri_rom': a:okuri,
     \       '_okuri': a:okuri_filter,
     \       '_buftable': a:buftable,
+    \       '_registered_input': a:registered_input,
+    \       '_status': (a:registered_input != '' ? s:REGISTERED_WORD : s:LOOK_UP_DICTIONARY),
     \   },
     \   'force'
     \)
 endfunction "}}}
 
 function! s:henkan_result_advance(self, advance) "{{{
-    try
-        let result = s:henkan_result_get_result(a:self)
-        if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
-            let result[1] += (a:advance ? 1 : -1)
-            return 1
-        else
-            return 0
-        endif
-    catch /^eskk: dictionary - internal error/
-        return -1
-    endtry
+    if a:self._status ==# s:REGISTERED_WORD
+        let a:self._status = s:LOOK_UP_DICTIONARY
+    else
+        try
+            let result = s:henkan_result_get_result(a:self)
+            if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
+                let result[1] += (a:advance ? 1 : -1)
+                return 1
+            else
+                return 0
+            endif
+        catch /^eskk: dictionary - internal error/
+            return -1
+        endtry
+    endif
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
-    if has_key(a:this, '_result')
+    if a:this._status ==# s:REGISTERED_WORD
+        let a:this._result = [
+        \   [{'result': a:this._registered_input, 'annotation': ''}],
+        \   -1
+        \]
+        return a:this._result
+    elseif a:this._status ==# s:GOT_RESULT
+        return a:this._result
+    elseif a:this._status ==# s:LOOK_UP_DICTIONARY
+        let found = 0
+        for dict in a:this._dict._physical_dicts
+            let line = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
+            if type(line) == type("")
+                let found = 1
+                break
+            endif
+        endfor
+        if !found
+            let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
+            \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
+            throw eskk#internal_error(['eskk', 'dictionary'], msg)
+        endif
+        let a:this._result = [s:parse_skk_dict_line(line), 0]
         return a:this._result
     endif
-
-    let found = 0
-    for dict in a:this._dict._physical_dicts
-        let line = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
-        if type(line) == type("")
-            let found = 1
-            break
-        endif
-    endfor
-    if !found
-        let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
-        \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
-        throw eskk#internal_error(['eskk', 'dictionary'], msg)
-    endif
-    let a:this._result = [s:parse_skk_dict_line(line), 0]
-    return a:this._result
 endfunction "}}}
 
 function! s:parse_skk_dict_line(line) "{{{
@@ -306,12 +328,30 @@ endfunction "}}}
 
 
 function! s:dict.refer(buftable) dict "{{{
+    let key       = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str()
+    let okuri     = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str()
+    let okuri_rom = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str()
+
+    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
+        if added_key ==# key && added_okuri_rom[0] ==# okuri_rom[0]
+            return s:henkan_result_new(
+            \   self,
+            \   key,
+            \   okuri_rom,
+            \   okuri,
+            \   deepcopy(a:buftable, 1),
+            \   added_input
+            \)
+        endif
+    endfor
+
     return s:henkan_result_new(
     \   self,
-    \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str(),
-    \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str(),
-    \   a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str(),
-    \   deepcopy(a:buftable, 1)
+    \   key,
+    \   okuri_rom,
+    \   okuri,
+    \   deepcopy(a:buftable, 1),
+    \   ''
     \)
 endfunction "}}}
 
