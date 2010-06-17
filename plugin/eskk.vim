@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 16))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 17))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -52,7 +52,7 @@ endif
 
 " Dictionary
 if !exists("g:eskk_dictionary")
-  let g:eskk_dictionary = "~/.skk-jisyo"
+    let g:eskk_dictionary = "~/.skk-jisyo"
 endif
 if type(g:eskk_dictionary) == type("")
     let s:temp = g:eskk_dictionary
@@ -71,7 +71,7 @@ endif
 
 
 if !exists("g:eskk_large_dictionary")
-  let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
+    let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
 endif
 if type(g:eskk_large_dictionary) == type("")
     let s:temp = g:eskk_large_dictionary
@@ -92,7 +92,7 @@ if !exists("g:eskk_backup_dictionary")
     let g:eskk_backup_dictionary = g:eskk_dictionary.path . ".BAK"
 endif
 if !exists("g:eskk_auto_save_dictionary_at_exit")
-  let g:eskk_auto_save_dictionary_at_exit = 1
+    let g:eskk_auto_save_dictionary_at_exit = 1
 endif
 
 " Mappings
