@@ -24,8 +24,13 @@ delfunc s:SID
 
 let s:stash = eskk#get_mutable_stash(['mode', 'builtin'])
 
-" Common variables {{{
+" Common {{{
 call s:stash.init('current_table', {})
+
+function! eskk#mode#builtin#set_table(table_name) "{{{
+    call eskk#util#logf("Set '%s' table to s:current_table.", a:table_name)
+    call s:stash.set('current_table', s:[a:table_name])
+endfunction "}}}
 " }}}
 
 " Asymmetric built-in modes. {{{
@@ -43,33 +48,6 @@ call s:stash.init('current_henkan_result', {})
 " }}}
 
 
-
-" Functions called by events. {{{
-function! eskk#mode#builtin#hook_fn_do_lmap_hira(do_map) "{{{
-    if a:do_map
-        call eskk#set_up_temp_key('q', '<Plug>(eskk:mode:hira:convert/switch-to-kata)')
-        call eskk#set_up_temp_key('l', '<Plug>(eskk:mode:hira:to-ascii)')
-        call eskk#set_up_temp_key('L', '<Plug>(eskk:mode:hira:to-zenei)')
-    else
-        call eskk#set_up_temp_key_restore('q')
-        call eskk#set_up_temp_key_restore('l')
-        call eskk#set_up_temp_key_restore('L')
-    endif
-endfunction "}}}
-function! eskk#mode#builtin#hook_fn_do_lmap_kata() "{{{
-    lmap <buffer> q <Plug>(eskk:mode:hira:convert/switch-to-kata)
-    lmap <buffer> l <Plug>(eskk:mode:hira:to-ascii)
-    lmap <buffer> L <Plug>(eskk:mode:hira:to-zenei)
-endfunction "}}}
-function! eskk#mode#builtin#hook_fn_do_lmap_zenei() "{{{
-    lmap <buffer> <C-j> <Plug>(eskk:mode:zenei:to-hira)
-endfunction "}}}
-function! eskk#mode#builtin#set_rom_to_hira_table() "{{{
-    call s:stash.set('current_table', s:rom_to_hira)
-endfunction "}}}
-function! eskk#mode#builtin#set_rom_to_kata_table() "{{{
-    call s:stash.set('current_table', s:rom_to_kata)
-endfunction "}}}
 
 function! eskk#mode#builtin#do_q_key(stash) "{{{
     let buf_str = a:stash.buftable.get_current_buf_str()
@@ -137,7 +115,6 @@ endfunction "}}}
 function! eskk#mode#builtin#update_dictionary() "{{{
     call s:stash.get('skk_dict').update_dictionary()
 endfunction "}}}
-" }}}
 
 function! s:do_backspace(stash) "{{{
     let [opt, buftable] = [a:stash.option, a:stash.buftable]
@@ -471,10 +448,11 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     let henkan_phase = a:stash.buftable.get_henkan_phase()
 
 
-    " Handle special char.
-    " These characters are handled regardless of current phase.
+    " In order not to change current buftable old string.
     call eskk#lock_old_str()
     try
+        " Handle special char.
+        " These characters are handled regardless of current phase.
         if char ==# "\<BS>" || char ==# "\<C-h>"
             call s:do_backspace(a:stash)
             return
@@ -494,6 +472,35 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     finally
         call eskk#unlock_old_str()
     endtry
+
+
+    if s:stash.get('current_table') is s:rom_to_hira    " hira
+        if eskk#is_lhs_char(char, 'mode:hira:q-key')
+            call eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
+            return
+        elseif eskk#is_lhs_char(char, 'mode:hira:to-ascii')
+            call eskk#set_mode('ascii')
+            return
+        elseif eskk#is_lhs_char(char, 'mode:hira:to-zenei')
+            call eskk#set_mode('zenei')
+            return
+        else
+            " Fall through.
+        endif
+    else    " kata
+        if eskk#is_lhs_char(char, 'mode:kata:q-key')
+            call eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
+            return
+        elseif eskk#is_lhs_char(char, 'mode:kata:to-ascii')
+            call eskk#set_mode('ascii')
+            return
+        elseif eskk#is_lhs_char(char, 'mode:kata:to-zenei')
+            call eskk#set_mode('zenei')
+            return
+        else
+            " Fall through.
+        endif
+    endif
 
 
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -536,30 +543,21 @@ let s:rom_to_zenei  = eskk#table#new('rom_to_zenei')
 
 
 
-function! eskk#mode#builtin#hook_fn_do_lmap_ascii() "{{{
-    lmap <buffer> <C-j> <Plug>(eskk:mode:ascii:to-hira)
-endfunction "}}}
-function! eskk#mode#builtin#hook_fn_do_lmap_zenei() "{{{
-    lmap <buffer> <C-j> <Plug>(eskk:mode:zenei:to-hira)
-endfunction "}}}
-function! eskk#mode#builtin#set_rom_to_ascii_table() "{{{
-    call s:stash.set('current_table', s:rom_to_ascii)
-endfunction "}}}
-function! eskk#mode#builtin#set_rom_to_zenei_table() "{{{
-    call s:stash.set('current_table', s:rom_to_zenei)
-endfunction "}}}
-
-
-
 function! eskk#mode#builtin#sym_filter(stash) "{{{
-    if s:stash.get('current_table') is s:rom_to_ascii
-        let a:stash.option.return = a:stash.char
-    else
-        let c = a:stash.char
-        if s:stash.get('current_table').has_map(c)
+    let c = a:stash.char
+    if s:stash.get('current_table') is s:rom_to_ascii    " ascii
+        if eskk#is_lhs_char(c, 'mode:ascii:to-hira')
+            call eskk#set_mode('hira')
+        else
+            let a:stash.option.return = c
+        endif
+    else    " zenei
+        if eskk#is_lhs_char(c, 'mode:zenei:to-hira')
+            call eskk#set_mode('hira')
+        elseif s:stash.get('current_table').has_map(c)
             let a:stash.option.return = s:stash.get('current_table').get_map_to(c)
         else
-            let a:stash.option.return = a:stash.char
+            let a:stash.option.return = c
         endif
     endif
 endfunction "}}}

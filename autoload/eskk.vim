@@ -426,6 +426,14 @@ let s:map = {
 \   'henkan-select:choose-prev': {},
 \   'henkan-select:next-page': {},
 \   'henkan-select:prev-page': {},
+\   'mode:hira:q-key': {},
+\   'mode:hira:to-ascii': {},
+\   'mode:hira:to-zenei': {},
+\   'mode:kata:q-key': {},
+\   'mode:kata:to-ascii': {},
+\   'mode:kata:to-zenei': {},
+\   'mode:ascii:to-hira': {},
+\   'mode:zenei:to-hira': {},
 \}
 " Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
 let s:stash_prototype = {}
@@ -1007,10 +1015,24 @@ function! s:do_default_mappings() "{{{
     EskkMap -type=sticky -unique ;
     EskkMap -type=henkan -unique <Space>
     EskkMap -type=escape -unique <Esc>
+
     EskkMap -type=henkan-select:choose-next -unique <Space>
     EskkMap -type=henkan-select:choose-prev -unique x
+
     EskkMap -type=henkan-select:next-page -unique <Space>
     EskkMap -type=henkan-select:prev-page -unique x
+
+    EskkMap -type=mode:hira:q-key -unique q
+    EskkMap -type=mode:hira:to-ascii -unique l
+    EskkMap -type=mode:hira:to-zenei -unique L
+
+    EskkMap -type=mode:kata:q-key -unique q
+    EskkMap -type=mode:kata:to-ascii -unique l
+    EskkMap -type=mode:kata:to-zenei -unique L
+
+    EskkMap -type=mode:ascii:to-hira -unique <C-j>
+
+    EskkMap -type=mode:zenei:to-hira -unique <C-j>
 endfunction "}}}
 autocmd VimEnter * call s:do_default_mappings()
 " }}}
