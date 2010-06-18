@@ -218,8 +218,9 @@ function! s:henkan_key(stash) "{{{
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        " Enter henkan select phase.
         let s:current_henkan_result = s:stash.get('skk_dict').refer(a:stash.buftable)
+
+        " Enter henkan select phase.
         call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
         " Clear phase henkan/okuri buffer string.
