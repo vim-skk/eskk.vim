@@ -47,7 +47,10 @@ function! s:eskk.enable(...) dict "{{{
     call eskk#util#log('enabling eskk...')
 
     " If skk.vim exists and enabled, disable it.
-    let disable_skk_vim = exists('g:skk_version') ? SkkDisable() : ''
+    let disable_skk_vim = ''
+    if exists('g:skk_version') && exists('b:skk_on') && b:skk_on
+        let disable_skk_vim = SkkDisable()
+    endif
 
 
     " Clear current variable states.
