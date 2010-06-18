@@ -238,7 +238,7 @@ function! s:henkan_result_select_candidates(this) "{{{
                 if c ==# selected
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
-                    return word.result . self._okuri
+                    return word.result . a:this._okuri
                 endif
             endfor
         endif
