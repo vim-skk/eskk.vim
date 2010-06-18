@@ -292,6 +292,21 @@ function! eskk#util#get_lhs_by(expr) "{{{
     throw eskk#internal_error(['eskk', 'util'], 'failed to get lhs...')
 endfunction "}}}
 
+function! eskk#util#option_value(value, list, default) "{{{
+    let match = 0
+    for _ in a:list
+        if _ ==# a:value
+            let match = 1
+            break
+        endif
+    endfor
+    if match
+        return a:value
+    else
+        return a:default
+    endif
+endfunction "}}}
+
 " }}}
 
 
