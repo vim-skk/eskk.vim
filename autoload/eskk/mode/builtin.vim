@@ -327,19 +327,60 @@ function! s:get_next_candidate(stash, next) "{{{
         endif
     endif
 endfunction "}}}
+
+function! s:generate_map_list(str, ...) "{{{
+    " "abc" => ["abc", "ab", "a"]
+
+    let result = a:0 != 0 ? a:1 : []
+    if a:str == ''
+        return result
+    else
+        call add(result, a:str)
+        return s:generate_map_list(strpart(a:str, 0, strlen(a:str) - 1), result)
+    endif
+endfunction "}}}
+function! s:get_matched_and_rest(table, rom_str) "{{{
+    " For e.g., if table has map "n" to "ん" and "j" to none.
+    " rom_str: "nj" => [["ん"], "j"]
+    let matched = []
+    let rest = a:rom_str
+    while 1
+        let has_map_str = -1
+        for str in s:generate_map_list(rest)
+            if a:table.has_map(str)
+                let has_map_str = str
+                break
+            endif
+        endfor
+        if has_map_str ==# -1
+            return [matched, rest]
+        endif
+        call add(matched, a:table.get_map_to(has_map_str))
+        let rest = rest[strlen(has_map_str) :]
+    endwhile
+endfunction "}}}
+
 function! s:filter_rom_to_hira(stash) "{{{
     let char = a:stash.char
     let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
+    let table = s:stash.get('current_table')
+    let match_exactly  = table.has_map(rom_str)
+    let candidates     = table.get_candidates(rom_str)
 
     call eskk#util#logf('mode hira - char = %s, rom_str = %s', string(char), string(rom_str))
+    call eskk#util#logf('candidates = %s', string(candidates))
 
-    if s:stash.get('current_table').has_map(rom_str)
+    if match_exactly
+        call eskk#util#assert(!empty(candidates))
+    endif
+
+    if match_exactly && len(candidates) == 1
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
         return s:filter_rom_to_hira_exact_match(a:stash)
 
-    elseif s:stash.get('current_table').has_candidates(rom_str)
+    elseif !empty(candidates)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
         return s:filter_rom_to_hira_has_candidates(a:stash)
@@ -455,39 +496,21 @@ endfunction "}}}
 function! s:filter_rom_to_hira_no_match(stash) "{{{
     let char = a:stash.char
     let buf_str = a:stash.buftable.get_current_buf_str()
-    let rom_str = buf_str.get_rom_str() . char
+    let rom_str_without_char = buf_str.get_rom_str()
+    let rom_str = rom_str_without_char . char
+    let table = s:stash.get('current_table')
 
-    if rom_str != ''
-        call buf_str.pop_rom_str()
-    endif
-    call buf_str.push_rom_str(char)
-
-    let cur_rom_str = buf_str.get_rom_str()
-    if s:stash.get('current_table').has_map(cur_rom_str)
-        " Set a:stash.char to ''.
-        " I feel this a little bit tricky, though...
-        let a:stash.char = ''
-        call s:filter_rom_to_hira_exact_match(a:stash)
-    elseif s:stash.get('current_table').has_candidates(cur_rom_str)
-        " Already pushed char. Nop.
+    let [matched_map_list, rest] = s:get_matched_and_rest(table, rom_str)
+    if empty(matched_map_list)
+        if rest != ''
+            let rest = strpart(rest, 0, strlen(rest) - 2) . char
+        endif
+        call buf_str.set_rom_str(rest)
     else
-        " Pushed current char but no match,
-        " then dispose that char.
-        call eskk#util#logf("yet no match. dispose '%s'.", char)
-
-        function! s:finalize()
-            let buftable = eskk#get_buftable()
-            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = buftable.get_current_buf_str()
-                call buf_str.clear_rom_str()
-            endif
-        endfunction
-
-        call eskk#register_temp_event(
-        \   'filter-finalize',
-        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
-        \   []
-        \)
+        for matched in matched_map_list
+            call buf_str.push_filter_str(matched)
+        endfor
+        call buf_str.set_rom_str(rest)
     endif
 endfunction "}}}
 

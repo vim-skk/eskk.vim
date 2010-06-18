@@ -132,6 +132,7 @@ Map mye みぇ
 Map myi みぃ
 Map myo みょ
 Map myu みゅ
+Map n ん
 Map n' ん
 Map na な
 Map ne ね
