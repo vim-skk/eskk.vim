@@ -514,6 +514,11 @@ function! eskk#set_up_temp_key_restore(lhs) "{{{
         call eskk#set_up_key(a:lhs)
     endif
 endfunction "}}}
+function! eskk#has_temp_key(lhs) "{{{
+    let temp_key = s:temp_key_map(a:lhs)
+    let saved_rhs = maparg(temp_key, 'l')
+    return saved_rhs != ''
+endfunction "}}}
 function! eskk#unmap_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
@@ -1006,7 +1011,7 @@ if !g:eskk_egg_like_newline
 
         " Default behavior is `egg like newline`.
         " Turns it to `Non egg like newline` during henkan phase.
-        call self.register_event('enter-phase-henkan-select', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
+        call self.register_event(['enter-phase-henkan', 'enter-phase-okuri', 'enter-phase-henkan-select'], 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [1])
         call self.register_event('enter-phase-normal', 'eskk#mode#builtin#do_lmap_non_egg_like_newline', [0])
     endfunction
     autocmd VimEnter * call s:register_egg_like_newline_event()
