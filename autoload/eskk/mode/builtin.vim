@@ -328,25 +328,33 @@ function! s:get_next_candidate(stash, next) "{{{
     endif
 endfunction "}}}
 
-function! s:generate_map_list(str, ...) "{{{
-    " "abc" => ["abc", "ab", "a"]
-
+function! s:generate_map_list(str, tail, ...) "{{{
+    let str = a:str
     let result = a:0 != 0 ? a:1 : []
-    if a:str == ''
+    " NOTE: `str` must come to empty string.
+    if str == ''
         return result
     else
-        call add(result, a:str)
-        return s:generate_map_list(strpart(a:str, 0, strlen(a:str) - 1), result)
+        call add(result, str)
+        " a:tail is true, Delete tail one character.
+        " a:tail is false, Delete first one character.
+        return s:generate_map_list(
+        \   (a:tail ? strpart(str, 0, strlen(str) - 1) : strpart(str, 1)),
+        \   a:tail,
+        \   result
+        \)
     endif
 endfunction "}}}
-function! s:get_matched_and_rest(table, rom_str) "{{{
+function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     " For e.g., if table has map "n" to "ん" and "j" to none.
     " rom_str: "nj" => [["ん"], "j"]
     let matched = []
     let rest = a:rom_str
     while 1
+        let counter = 0
         let has_map_str = -1
-        for str in s:generate_map_list(rest)
+        for str in s:generate_map_list(rest, a:tail)
+            let counter += 1
             if a:table.has_map(str)
                 let has_map_str = str
                 break
@@ -356,7 +364,13 @@ function! s:get_matched_and_rest(table, rom_str) "{{{
             return [matched, rest]
         endif
         call add(matched, a:table.get_map_to(has_map_str))
-        let rest = rest[strlen(has_map_str) :]
+        if a:tail
+            " Delete first `has_map_str` bytes.
+            let rest = strpart(rest, strlen(has_map_str))
+        else
+            " Delete last `has_map_str` bytes.
+            let rest = strpart(rest, 0, strlen(rest) - strlen(has_map_str))
+        endif
     endwhile
 endfunction "}}}
 
@@ -499,13 +513,27 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
     let rom_str_without_char = buf_str.get_rom_str()
     let rom_str = rom_str_without_char . char
     let table = s:stash.get('current_table')
+    let input_style = eskk#util#option_value(g:eskk_hira_input_style, ['skk', 'msime', 'quickmatch'], 'skk')
 
-    let [matched_map_list, rest] = s:get_matched_and_rest(table, rom_str)
+    let [matched_map_list, rest] = s:get_matched_and_rest(table, rom_str, 1)
     if empty(matched_map_list)
-        if rest != ''
-            let rest = strpart(rest, 0, strlen(rest) - 2) . char
+        if input_style ==# 'skk'
+            if rest != ''
+                let rest = strpart(rest, 0, strlen(rest) - 2) . char
+            endif
+            call buf_str.set_rom_str(rest)
+        else
+            let [matched_map_list, rest2] = s:get_matched_and_rest(table, rom_str, 0)
+            if empty(matched_map_list)
+                call buf_str.set_rom_str(rest2)
+            else
+                call buf_str.push_filter_str(rest2)
+                for matched in matched_map_list
+                    call buf_str.push_filter_str(matched)
+                endfor
+                call buf_str.clear_rom_str()
+            endif
         endif
-        call buf_str.set_rom_str(rest)
     else
         for matched in matched_map_list
             call buf_str.push_filter_str(matched)
