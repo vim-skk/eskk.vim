@@ -218,6 +218,22 @@ function! s:henkan_key(stash) "{{{
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
+            let table = s:get_table_lazy('kata_to_hira')
+            let henkan_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+            let filter_str = henkan_buf_str.get_filter_str()
+            call henkan_buf_str.clear_filter_str()
+            for wchar in split(filter_str, '\zs')
+                call henkan_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
+            endfor
+            let okuri_buf_str = a:stash.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+            let filter_str = okuri_buf_str.get_filter_str()
+            call okuri_buf_str.clear_filter_str()
+            for wchar in split(filter_str, '\zs')
+                call okuri_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
+            endfor
+        endif
+
         let s:current_henkan_result = s:stash.get('skk_dict').refer(a:stash.buftable)
 
         " Enter henkan select phase.
