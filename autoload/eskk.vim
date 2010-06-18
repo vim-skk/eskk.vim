@@ -396,7 +396,7 @@ endfunction "}}}
 
 " s:map related functions.
 " TODO Move this to s:map
-function! s:eskk.is_lhs_char(char, type) dict "{{{
+function! s:eskk.is_special_lhs(char, type) dict "{{{
     return has_key(s:map, a:type)
     \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
@@ -813,9 +813,9 @@ function! eskk#toggle() "{{{
     return call(self.toggle, [], self)
 endfunction "}}}
 
-function! eskk#is_lhs_char(...) "{{{
+function! eskk#is_special_lhs(...) "{{{
     let self = eskk#get_current_instance()
-    return call(self.is_lhs_char, a:000, self)
+    return call(self.is_special_lhs, a:000, self)
 endfunction "}}}
 function! eskk#get_special_key(...) "{{{
     let self = eskk#get_current_instance()

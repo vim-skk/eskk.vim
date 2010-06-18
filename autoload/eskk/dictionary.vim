@@ -212,14 +212,14 @@ function! s:henkan_result_select_candidates(this) "{{{
 
         " Get char for selected candidate.
         let char = s:getchar()
-        if eskk#is_lhs_char(char, 'henkan-select:next-page')
+        if eskk#is_special_lhs(char, 'henkan-select:next-page')
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
                 " No more pages. Register new word.
                 return a:this._dict.register_word(a:this)
             endif
-        elseif eskk#is_lhs_char(char, 'henkan-select:prev-page')
+        elseif eskk#is_special_lhs(char, 'henkan-select:prev-page')
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else

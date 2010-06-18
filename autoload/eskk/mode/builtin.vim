@@ -475,26 +475,26 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
 
 
     if s:stash.get('current_table') is s:rom_to_hira    " hira
-        if eskk#is_lhs_char(char, 'mode:hira:q-key')
+        if eskk#is_special_lhs(char, 'mode:hira:q-key')
             call eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
             return
-        elseif eskk#is_lhs_char(char, 'mode:hira:to-ascii')
+        elseif eskk#is_special_lhs(char, 'mode:hira:to-ascii')
             call eskk#set_mode('ascii')
             return
-        elseif eskk#is_lhs_char(char, 'mode:hira:to-zenei')
+        elseif eskk#is_special_lhs(char, 'mode:hira:to-zenei')
             call eskk#set_mode('zenei')
             return
         else
             " Fall through.
         endif
     else    " kata
-        if eskk#is_lhs_char(char, 'mode:kata:q-key')
+        if eskk#is_special_lhs(char, 'mode:kata:q-key')
             call eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
             return
-        elseif eskk#is_lhs_char(char, 'mode:kata:to-ascii')
+        elseif eskk#is_special_lhs(char, 'mode:kata:to-ascii')
             call eskk#set_mode('ascii')
             return
-        elseif eskk#is_lhs_char(char, 'mode:kata:to-zenei')
+        elseif eskk#is_special_lhs(char, 'mode:kata:to-zenei')
             call eskk#set_mode('zenei')
             return
         else
@@ -515,9 +515,9 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return s:filter_rom_to_hira(a:stash)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        if eskk#is_lhs_char(char, 'henkan-select:choose-next')
+        if eskk#is_special_lhs(char, 'henkan-select:choose-next')
             return s:get_next_candidate(a:stash, 1)
-        elseif eskk#is_lhs_char(char, 'henkan-select:choose-prev')
+        elseif eskk#is_special_lhs(char, 'henkan-select:choose-prev')
             return s:get_next_candidate(a:stash, 0)
         else
             call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
@@ -546,13 +546,13 @@ let s:rom_to_zenei  = eskk#table#new('rom_to_zenei')
 function! eskk#mode#builtin#sym_filter(stash) "{{{
     let c = a:stash.char
     if s:stash.get('current_table') is s:rom_to_ascii    " ascii
-        if eskk#is_lhs_char(c, 'mode:ascii:to-hira')
+        if eskk#is_special_lhs(c, 'mode:ascii:to-hira')
             call eskk#set_mode('hira')
         else
             let a:stash.option.return = c
         endif
     else    " zenei
-        if eskk#is_lhs_char(c, 'mode:zenei:to-hira')
+        if eskk#is_special_lhs(c, 'mode:zenei:to-hira')
             call eskk#set_mode('hira')
         elseif s:stash.get('current_table').has_map(c)
             let a:stash.option.return = s:stash.get('current_table').get_map_to(c)
