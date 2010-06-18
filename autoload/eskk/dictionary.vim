@@ -207,7 +207,12 @@ function! s:henkan_result_select_candidates(this) "{{{
         " Show candidates.
         redraw
         for [c, word] in pages[page_index]
-            echon printf('%s:%s  ', c, word.result)
+            if g:eskk_show_annotation
+                echon printf('%s:%s%s  ', c, word.result,
+                \       (word.annotation != '' ? ';' . word.annotation : ''))
+            else
+                echon printf('%s:%s  ', c, word.result)
+            endif
         endfor
 
         " Get char for selected candidate.
