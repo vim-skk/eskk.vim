@@ -476,7 +476,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
 
     if s:stash.get('current_table') is s:rom_to_hira    " hira
         if eskk#is_special_lhs(char, 'mode:hira:q-key')
-            call eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
+            call eskk#mode#builtin#do_q_key(a:stash)
             return
         elseif eskk#is_special_lhs(char, 'mode:hira:to-ascii')
             call eskk#set_mode('ascii')
@@ -489,7 +489,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
         endif
     else    " kata
         if eskk#is_special_lhs(char, 'mode:kata:q-key')
-            call eskk#call_via_filter('eskk#mode#builtin#do_q_key', [])
+            call eskk#mode#builtin#do_q_key(a:stash)
             return
         elseif eskk#is_special_lhs(char, 'mode:kata:to-ascii')
             call eskk#set_mode('ascii')
