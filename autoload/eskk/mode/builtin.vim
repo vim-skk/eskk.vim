@@ -89,7 +89,7 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
         \   []
         \)
     else
-        throw eskk#internal_error(['eskk', 'mode', 'hira'])
+        throw eskk#internal_error(['eskk', 'mode', 'builtin'])
     endif
 endfunction "}}}
 function! s:get_table_lazy(table_name) "{{{
@@ -263,7 +263,7 @@ function! s:henkan_key(stash) "{{{
         throw eskk#internal_error(['eskk', 'mode', 'builtin'])
     else
         let msg = printf("s:henkan_key() does not support phase %d.", phase)
-        throw eskk#internal_error(['eskk', 'mode', 'hira'], msg)
+        throw eskk#internal_error(['eskk', 'mode', 'builtin'], msg)
     endif
 endfunction "}}}
 function! s:get_next_candidate(stash, next) "{{{
@@ -319,6 +319,8 @@ function! s:get_next_candidate(stash, next) "{{{
                     call okuri_buf_str.clear_filter_str()
                     call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
+            else
+                throw eskk#internal_error(['eskk', 'mode', 'builtin'])
             endif
 
             call eskk#set_buftable(buftable)
