@@ -347,7 +347,9 @@ function! s:generate_map_list(str, tail, ...) "{{{
 endfunction "}}}
 function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     " For e.g., if table has map "n" to "ん" and "j" to none.
-    " rom_str: "nj" => [["ん"], "j"]
+    " rom_str(a:tail is true): "nj" => [["ん"], "j"]
+    " rom_str(a:tail is false): "nj" => [[], "nj"]
+
     let matched = []
     let rest = a:rom_str
     while 1
