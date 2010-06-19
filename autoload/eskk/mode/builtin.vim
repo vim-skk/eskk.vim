@@ -289,7 +289,7 @@ function! s:get_next_candidate(stash, next) "{{{
             let revert_style = eskk#util#option_value(
             \   g:eskk_revert_henkan_style,
             \   ['eskk', 'aquaskk', 'skk'],
-            \   'eskk'
+            \   0
             \)
             if revert_style ==# 'eskk'
                 " "▼書く" => "▽か*k"
@@ -515,7 +515,7 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
     let rom_str_without_char = buf_str.get_rom_str()
     let rom_str = rom_str_without_char . char
     let table = s:stash.get('current_table')
-    let input_style = eskk#util#option_value(g:eskk_hira_input_style, ['skk', 'msime', 'quickmatch'], 'skk')
+    let input_style = eskk#util#option_value(g:eskk_hira_input_style, ['skk', 'msime', 'quickmatch'], 0)
 
     let [matched_map_list, rest] = s:get_matched_and_rest(table, rom_str, 1)
     if empty(matched_map_list)

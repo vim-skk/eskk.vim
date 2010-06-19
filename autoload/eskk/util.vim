@@ -292,7 +292,7 @@ function! eskk#util#get_lhs_by(expr) "{{{
     throw eskk#internal_error(['eskk', 'util'], 'failed to get lhs...')
 endfunction "}}}
 
-function! eskk#util#option_value(value, list, default) "{{{
+function! eskk#util#option_value(value, list, default_index) "{{{
     let match = 0
     for _ in a:list
         if _ ==# a:value
@@ -303,7 +303,7 @@ function! eskk#util#option_value(value, list, default) "{{{
     if match
         return a:value
     else
-        return a:default
+        return a:list[a:default_index]
     endif
 endfunction "}}}
 
