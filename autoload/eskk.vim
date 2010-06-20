@@ -282,17 +282,19 @@ endfunction "}}}
 
 " Event
 function! s:eskk.register_event(event_names, Fn, head_args) dict "{{{
-    return s:register_event(s:event_hook_fn, a:event_names, a:Fn, a:head_args)
+    let args = [s:event_hook_fn, a:event_names, a:Fn, a:head_args, (a:0 ? a:1 : -1)]
+    return call('s:register_event', args)
 endfunction "}}}
-function! s:eskk.register_temp_event(event_names, Fn, head_args) dict "{{{
-    return s:register_event(self.temp_event_hook_fn, a:event_names, a:Fn, a:head_args)
+function! s:eskk.register_temp_event(event_names, Fn, head_args, ...) dict "{{{
+    let args = [self.temp_event_hook_fn, a:event_names, a:Fn, a:head_args, (a:0 ? a:1 : -1)]
+    return call('s:register_event', args)
 endfunction "}}}
-function! s:register_event(st, event_names, Fn, head_args) "{{{
+function! s:register_event(st, event_names, Fn, head_args, self) "{{{
     for name in (type(a:event_names) == type([]) ? a:event_names : [a:event_names])
         if !has_key(a:st, name)
             let a:st[name] = []
         endif
-        call add(a:st[name], [a:Fn, a:head_args])
+        call add(a:st[name], [a:Fn, a:head_args, a:self])
     endfor
 endfunction "}}}
 function! s:eskk.throw_event(event_name) dict "{{{
@@ -300,8 +302,12 @@ function! s:eskk.throw_event(event_name) dict "{{{
 
     let event      = get(s:event_hook_fn, a:event_name, [])
     let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
-    for [Fn, args] in event + temp_event
-        call call(Fn, args)
+    for [Fn, args, method_self] in event + temp_event
+        if type(method_self) != type(-1)
+            call call(Fn, args, method_self)
+        else
+            call call(Fn, args)
+        endif
     endfor
 
     " Clear temporary hooks.
