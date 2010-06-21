@@ -346,6 +346,7 @@ function! s:buftable.do_enter(stash) dict "{{{
 endfunction "}}}
 
 function! s:buftable.step_henkan_phase() dict "{{{
+    let step    = 0
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
 
@@ -355,16 +356,16 @@ function! s:buftable.step_henkan_phase() dict "{{{
             call buf_str.clear()
         endif
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        return 1    " stepped.
+        let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
-            return 1    " stepped.
+            let step = 1
         else
-            return 0    " failed.
+            let step = 0
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return 0    " failed.
+        let step = 0
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         function! s:step_henkan_phase_finalize()
             if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -389,10 +390,12 @@ function! s:buftable.step_henkan_phase() dict "{{{
         call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        return 1    " stepped.
+        let step = 1
     else
         throw eskk#internal_error(['eskk'])
     endif
+
+    return step ? self.get_current_marker() : ''
 endfunction "}}}
 function! s:buftable.step_back_henkan_phase() dict "{{{
     let phase   = self.get_henkan_phase()
