@@ -335,7 +335,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
         call eskk#register_temp_event(
-        \   'filter-finalize',
+        \   'filter-begin',
         \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
         \   []
         \)
@@ -345,7 +345,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         call self.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
         call eskk#register_temp_event(
-        \   'filter-finalize',
+        \   'filter-begin',
         \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
         \   []
         \)
@@ -355,7 +355,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
         call eskk#register_temp_event(
-        \   'filter-finalize',
+        \   'filter-begin',
         \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
         \   []
         \)

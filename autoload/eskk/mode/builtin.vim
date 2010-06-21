@@ -84,7 +84,7 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
         endfunction
 
         call eskk#register_temp_event(
-        \   'filter-finalize',
+        \   'filter-begin',
         \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
         \   []
         \)
@@ -398,7 +398,7 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         endfunction
 
         call eskk#register_temp_event(
-        \   'filter-finalize',
+        \   'filter-begin',
         \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
         \   []
         \)
