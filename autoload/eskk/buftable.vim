@@ -387,7 +387,30 @@ function! s:buftable.step_henkan_phase() dict "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return 0    " failed.
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        return 0    " failed.
+        function! s:step_henkan_phase_finalize()
+            if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = eskk#get_buftable().get_current_buf_str()
+                call buf_str.clear_filter_str()
+            endif
+        endfunction
+
+        call eskk#register_temp_event(
+        \   'filter-begin',
+        \   eskk#util#get_local_func('step_henkan_phase_finalize', s:SID_PREFIX),
+        \   []
+        \)
+
+        call eskk#register_temp_event(
+        \   'filter-redispatch',
+        \   'eskk#sticky_key',
+        \   []
+        \)
+
+
+        call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        return 1    " stepped.
     else
         throw eskk#internal_error(['eskk'])
     endif
