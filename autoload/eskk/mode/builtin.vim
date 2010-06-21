@@ -159,58 +159,6 @@ function! s:do_backspace(stash) "{{{
         endif
     endfor
 endfunction "}}}
-function! s:do_enter_finalize() "{{{
-    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        let buf_str = eskk#get_buftable().get_current_buf_str()
-        call buf_str.clear_filter_str()
-    endif
-endfunction "}}}
-function! s:do_enter(stash) "{{{
-    call eskk#util#log("s:do_enter()")
-
-    let buftable = a:stash.buftable
-    let normal_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-    let henkan_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str         = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-    let phase = buftable.get_henkan_phase()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        let a:stash.option.return = "\<CR>"
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-        call eskk#register_temp_event(
-        \   'filter-finalize',
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
-        \   []
-        \)
-
-        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call buftable.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-        call eskk#register_temp_event(
-        \   'filter-finalize',
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
-        \   []
-        \)
-
-        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        call buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-        call eskk#register_temp_event(
-        \   'filter-finalize',
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
-        \   []
-        \)
-
-        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-    else
-        throw eskk#internal_error(['eskk'])
-    endif
-endfunction "}}}
 function! s:henkan_key(stash) "{{{
     call eskk#util#log('henkan!')
 
@@ -562,7 +510,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
             call s:do_backspace(a:stash)
             return
         elseif char ==# "\<CR>"
-            call s:do_enter(a:stash)
+            call a:stash.buftable.do_enter()
             return
         elseif eskk#is_sticky_key(char)
             call eskk#sticky_key(a:stash)

@@ -15,6 +15,12 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
 " Variables {{{
 " Normal
 let eskk#buftable#HENKAN_PHASE_NORMAL = 0
@@ -308,6 +314,57 @@ function! s:buftable.move_buf_str(from_phases, to_phase) dict "{{{
     call buf_str.set_filter_str(str)
 endfunction "}}}
 
+function! s:do_enter_finalize() "{{{
+    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        let buf_str = eskk#get_buftable().get_current_buf_str()
+        call buf_str.clear_filter_str()
+    endif
+endfunction "}}}
+function! s:buftable.do_enter() dict "{{{
+    call eskk#util#log("s:buftable.do_enter()")
+
+    let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    let henkan_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    let phase = self.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        let a:stash.option.return = "\<CR>"
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
+        \)
+
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call self.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
+        \)
+
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
+        \   []
+        \)
+
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    else
+        throw eskk#internal_error(['eskk'])
+    endif
+endfunction "}}}
 
 function! s:buftable.step_henkan_phase() dict "{{{
     let phase   = self.get_henkan_phase()
