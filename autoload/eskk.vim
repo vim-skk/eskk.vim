@@ -100,26 +100,30 @@ function! s:eskk.is_enabled() dict "{{{
 endfunction "}}}
 
 " Mappings
-function! s:eskk.map_all_keys() dict "{{{
+function! s:eskk.map_all_keys(...) dict "{{{
     if s:has_mapped
         return
     endif
 
+
     lmapclear <buffer>
 
+    " Map mapped keys.
     for key in g:eskk_mapped_key
-        call eskk#set_up_key(key)
+        call call('eskk#set_up_key', [key] + a:000)
     endfor
 
+    " Map escape key.
     execute
     \   'lnoremap'
-    \   '<buffer><expr>'
+    \   '<buffer><expr>' . (a:0 ? s:mapopt_chars2raw(a:1) : '')
     \   s:map.escape.lhs
     \   'eskk#escape_key()'
 
+    " Map `:EskkMap -general` keys.
     for [key, opt] in items(s:map.general)
         if opt.rhs == ''
-            call eskk#set_up_key(key, opt.unique)
+            call s:map_key(key, opt.options)
         else
             execute
             \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
@@ -128,6 +132,7 @@ function! s:eskk.map_all_keys() dict "{{{
             \   opt.rhs
         endif
     endfor
+
     let s:has_mapped = 1
 endfunction "}}}
 function! s:eskk.unmap_all_keys() dict "{{{
@@ -630,6 +635,9 @@ function! s:mapopt_dict2raw(options) "{{{
         endif
     endfor
     return ret
+endfunction "}}}
+function! s:mapopt_chars2raw(options) "{{{
+    return s:mapopt_dict2raw(s:mapopt_chars2dict(a:options))
 endfunction "}}}
 function! s:create_default_mapopt() "{{{
     return {
