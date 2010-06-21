@@ -345,6 +345,9 @@ function! s:filter(self, char, Fn, head_args) "{{{
         sleep 1
     endif
 
+
+    call self.throw_event('filter-begin')
+
     let opt = {
     \   'return': 0,
     \}
@@ -359,8 +362,6 @@ function! s:filter(self, char, Fn, head_args) "{{{
     endif
 
     call self.buftable.get_current_buf_str().push_phase_str(a:char)
-
-    call self.throw_event('filter-begin')
 
     try
         call call(a:Fn, a:head_args + filter_args)
