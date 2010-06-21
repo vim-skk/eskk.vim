@@ -369,10 +369,6 @@ function! s:filter(self, char, Fn, head_args) "{{{
         if type(opt.return) == type("")
             return opt.return
         else
-            " XXX:
-            "     eskk#get_named_map(char)
-            " should
-            "     eskk#get_named_map(eskk#util#uneval_key(char))
 
             " TODO: Do not remap.
             return

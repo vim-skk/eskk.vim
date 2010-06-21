@@ -378,6 +378,10 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         let rest = s:stash.get('current_table').get_rest(rom_str, -1)
         " Assumption: 's:stash.get('current_table').has_map(rest)' returns false here.
         if rest !=# -1
+            " XXX:
+            "     eskk#get_named_map(char)
+            " should
+            "     eskk#get_named_map(eskk#util#uneval_key(char))
             for rest_char in split(rest, '\zs')
                 call eskk#register_temp_event(
                 \   'filter-redispatch',
@@ -449,6 +453,10 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
             \)
             let rest = s:stash.get('current_table').get_rest(okuri_buf_str.get_rom_str(), -1)
             if rest !=# -1
+                " XXX:
+                "     eskk#get_named_map(char)
+                " should
+                "     eskk#get_named_map(eskk#util#uneval_key(char))
                 for rest_char in split(rest, '\zs')
                     call eskk#register_temp_event(
                     \   'filter-redispatch',
@@ -516,7 +524,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     " In order not to change current buftable old string.
     call eskk#lock_old_str()
     try
-        " Handle special char.
+        " Handle special characters.
         " These characters are handled regardless of current phase.
         if char ==# "\<BS>" || char ==# "\<C-h>"
             call s:do_backspace(a:stash)
