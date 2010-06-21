@@ -533,10 +533,10 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
             call a:stash.buftable.do_enter(a:stash)
             return
         elseif eskk#is_sticky_key(char)
-            call eskk#sticky_key()
+            call eskk#sticky_key(a:stash)
             return
         elseif eskk#is_big_letter(char)
-            call eskk#sticky_key()
+            call eskk#sticky_key(a:stash)
             call eskk#filter(tolower(char))
             return
         else

@@ -166,8 +166,8 @@ function! s:eskk.is_sticky_key(char) dict "{{{
     " TODO Cache result of eskk#util#eval_key() ?
     return eskk#util#eval_key(s:map.sticky.lhs) ==# a:char
 endfunction "}}}
-function! s:eskk.sticky_key() dict "{{{
-    return self.buftable.step_henkan_phase()
+function! s:eskk.sticky_key(stash) dict "{{{
+    return self.buftable.step_henkan_phase(a:stash)
 endfunction "}}}
 
 " Henkan key

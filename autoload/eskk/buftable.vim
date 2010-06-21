@@ -345,7 +345,7 @@ function! s:buftable.do_enter(stash) dict "{{{
     endif
 endfunction "}}}
 
-function! s:buftable.step_henkan_phase() dict "{{{
+function! s:buftable.step_henkan_phase(stash) dict "{{{
     let step    = 0
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
