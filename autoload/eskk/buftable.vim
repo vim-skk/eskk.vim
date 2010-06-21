@@ -320,7 +320,7 @@ function! s:do_enter_finalize() "{{{
         call buf_str.clear_filter_str()
     endif
 endfunction "}}}
-function! s:buftable.do_enter() dict "{{{
+function! s:buftable.do_enter(stash) dict "{{{
     call eskk#util#log("s:buftable.do_enter()")
 
     let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)

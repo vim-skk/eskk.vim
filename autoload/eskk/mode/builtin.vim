@@ -510,7 +510,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
             call s:do_backspace(a:stash)
             return
         elseif char ==# "\<CR>"
-            call a:stash.buftable.do_enter()
+            call a:stash.buftable.do_enter(a:stash)
             return
         elseif eskk#is_sticky_key(char)
             call eskk#sticky_key(a:stash)
