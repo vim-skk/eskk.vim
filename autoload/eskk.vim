@@ -364,8 +364,6 @@ function! s:filter(self, char, Fn, head_args) "{{{
         call self.buftable.set_old_str(self.buftable.get_display_str())
     endif
 
-    call self.buftable.get_current_buf_str().push_phase_str(a:char)
-
     try
         call call(a:Fn, a:head_args + filter_args)
 
