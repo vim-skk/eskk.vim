@@ -520,10 +520,12 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
     let [matched_map_list, rest] = s:get_matched_and_rest(table, rom_str, 1)
     if empty(matched_map_list)
         if input_style ==# 'skk'
-            if rest != ''
+            if rest == char
+                let a:stash.option.return = char
+            else
                 let rest = strpart(rest, 0, strlen(rest) - 2) . char
+                call buf_str.set_rom_str(rest)
             endif
-            call buf_str.set_rom_str(rest)
         else
             let [matched_map_list, rest2] = s:get_matched_and_rest(table, rom_str, 0)
             if empty(matched_map_list)
