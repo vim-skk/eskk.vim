@@ -369,14 +369,14 @@ function! s:filter(self, char, Fn, head_args) "{{{
             return opt.return
         else
             " XXX:
-            "     s:map_named_key(char)
+            "     eskk#get_named_map(char)
             " should
-            "     s:map_named_key(eskk#util#uneval_key(char))
+            "     eskk#get_named_map(eskk#util#uneval_key(char))
 
             " TODO: Do not remap.
             return
             \   self.rewrite()
-            \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(s:map_named_key(v:val))'), '')
+            \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(eskk#get_named_map(v:val))'), '')
         endif
 
     catch
@@ -484,7 +484,7 @@ function! s:map_key(key, options) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
     " Map a:key.
-    let named_key = s:map_named_key(a:key)
+    let named_key = eskk#get_named_map(a:key)
     execute
     \   'lmap'
     \   '<buffer>' . s:mapopt_dict2raw(a:options)
@@ -547,7 +547,7 @@ endfunction "}}}
 function! s:temp_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
-function! s:map_named_key(key) "{{{
+function! eskk#get_named_map(key) "{{{
     " NOTE:
     " a:key is escaped. So when a:key is '<C-a>', return value is
     "   `<Plug>(eskk:filter:<C-a>)`
