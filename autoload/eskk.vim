@@ -374,11 +374,18 @@ function! s:filter(self, char, Fn, head_args) "{{{
         if type(opt.return) == type("")
             return opt.return
         else
+            " NOTE: Because of Vim's bug, `:lmap` can't remap to `:lmap`.
+            execute
+            \   'map!'
+            \   '<buffer><expr>'
+            \   '<Plug>(eskk:_filter_redispatch)'
+            \   (self.has_events('filter-redispatch') ?
+            \       'join(eskk#throw_event("filter-redispatch"))'
+            \       : '""')
 
-            " TODO: Do not remap.
             return
             \   self.rewrite()
-            \   . join(self.throw_event('filter-redispatch'), '')
+            \   . "\<Plug>(eskk:_filter_redispatch)"
         endif
 
     catch
