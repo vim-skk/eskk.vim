@@ -346,7 +346,6 @@ function! s:filter(self, char, Fn, head_args) "{{{
     endif
 
     let opt = {
-    \   'redispatch_chars': [],
     \   'return': 0,
     \}
     let filter_args = [{
@@ -377,7 +376,7 @@ function! s:filter(self, char, Fn, head_args) "{{{
             " TODO: Do not remap.
             return
             \   self.rewrite()
-            \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(eskk#get_named_map(v:val))'), '')
+            \   . join(self.throw_event('filter-redispatch'), '')
         endif
 
     catch

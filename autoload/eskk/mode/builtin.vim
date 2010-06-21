@@ -378,7 +378,13 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         let rest = s:stash.get('current_table').get_rest(rom_str, -1)
         " Assumption: 's:stash.get('current_table').has_map(rest)' returns false here.
         if rest !=# -1
-            let a:stash.option.redispatch_chars += split(rest, '\zs')
+            for rest_char in split(rest, '\zs')
+                call eskk#register_temp_event(
+                \   'filter-redispatch',
+                \   'eskk#util#eval_key',
+                \   [eskk#get_named_map(rest_char)]
+                \)
+            endfor
         endif
 
 
@@ -443,7 +449,13 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
             \)
             let rest = s:stash.get('current_table').get_rest(okuri_buf_str.get_rom_str(), -1)
             if rest !=# -1
-                let a:stash.option.redispatch_chars += split(rest, '\zs')
+                for rest_char in split(rest, '\zs')
+                    call eskk#register_temp_event(
+                    \   'filter-redispatch',
+                    \   'eskk#util#eval_key',
+                    \   [eskk#get_named_map(rest_char)]
+                    \)
+                endfor
             endif
         endif
 
