@@ -299,7 +299,7 @@ function! s:register_event(st, event_names, Fn, head_args, self) "{{{
         if !has_key(a:st, name)
             let a:st[name] = []
         endif
-        call add(a:st[name], [a:Fn, a:head_args, a:self])
+        call add(a:st[name], [a:Fn, a:head_args] + (a:self !=# -1 ? [a:self] : []))
     endfor
 endfunction "}}}
 function! s:eskk.has_events(event_name) dict "{{{
@@ -313,10 +313,8 @@ function! s:eskk.throw_event(event_name) dict "{{{
     let ret        = []
     let event      = get(s:event_hook_fn, a:event_name, [])
     let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
-    for [Fn, args, method_self] in event + temp_event
-        let r = call('call', [Fn, args]
-        \                   + (type(method_self) != type(-1) ? [method_self] : []))
-        call add(ret, r)
+    for call_args in event + temp_event
+        call add(ret, call('call', call_args))
     endfor
 
     " Clear temporary hooks.
