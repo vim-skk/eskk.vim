@@ -302,6 +302,11 @@ function! s:register_event(st, event_names, Fn, head_args, self) "{{{
         call add(a:st[name], [a:Fn, a:head_args, a:self])
     endfor
 endfunction "}}}
+function! s:eskk.has_events(event_name) dict "{{{
+    return
+    \   has_key(s:event_hook_fn, a:event_name)
+    \   || has_key(self.temp_event_hook_fn, a:event_name)
+endfunction "}}}
 function! s:eskk.throw_event(event_name) dict "{{{
     call eskk#util#log("Do event - " . a:event_name)
 
