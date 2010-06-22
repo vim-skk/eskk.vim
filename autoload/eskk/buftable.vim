@@ -119,6 +119,7 @@ let s:buftable = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
+\   '_sandbox': {},
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
 
@@ -235,10 +236,10 @@ function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
 
     call eskk#throw_event('leave-phase-' . self.get_phase_name(self._henkan_phase))
-
     let self._henkan_phase = a:henkan_phase
-
     call eskk#throw_event('enter-phase-' . self.get_phase_name(self._henkan_phase))
+
+    let self._sandbox = {}
 endfunction "}}}
 
 
@@ -405,6 +406,10 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     else
         throw eskk#internal_error(['eskk'])
     endif
+endfunction "}}}
+
+function! s:buftable.get_sandbox() dict "{{{
+    return self._sandbox
 endfunction "}}}
 
 
