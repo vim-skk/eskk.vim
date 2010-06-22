@@ -314,6 +314,47 @@ function! s:buftable.do_enter(stash) dict "{{{
         throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
+function! s:buftable.do_backspace(stash) dict "{{{
+    let opt = a:stash.option
+    if self.get_old_str() == ''
+        let opt.return = "\<BS>"
+        return
+    endif
+
+    let phase = self.get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        " Pretend skk.vim behavior.
+        " Enter normal phase and delete one character.
+        call self.move_buf_str(
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
+        \   g:eskk#buftable#HENKAN_PHASE_NORMAL
+        \)
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+        let normal_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+        call normal_buf_str.pop_filter_str()
+        return
+    endif
+
+    " Build backspaces to delete previous characters.
+    for phase in self.get_lower_phases()
+        let buf_str = self.get_buf_str(phase)
+        if buf_str.get_rom_str() != ''
+            call buf_str.pop_rom_str()
+            break
+        elseif buf_str.get_filter_str() != ''
+            call buf_str.pop_filter_str()
+            break
+        elseif self.get_marker(phase) != ''
+            if !self.step_back_henkan_phase()
+                let msg = "Normal phase's marker is empty, "
+                \       . "and other phases *should* be able to change "
+                \       . "current henkan phase."
+                throw eskk#internal_error(['eskk'], msg)
+            endif
+            break
+        endif
+    endfor
+endfunction "}}}
 
 function! s:buftable.step_henkan_phase(stash) dict "{{{
     let step    = 0
