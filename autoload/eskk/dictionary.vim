@@ -30,10 +30,13 @@ function! s:search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
     else
         let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
-    if type(result) == type("")
-        return s:iconv(result, a:physical_dict.encoding, &l:encoding)
+    if type(result[1]) !=# -1
+        return [
+        \   s:iconv(result[0], a:physical_dict.encoding, &l:encoding),
+        \   result[1]
+        \]
     else
-        return -1
+        return ['', -1]
     endif
 endfunction "}}}
 
@@ -87,12 +90,12 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
             call eskk#util#logf('s:search_linear() - found matched line - %s', string(line))
-            return line[strlen(a:needle) :]
+            return [line[strlen(a:needle) :], pos]
         endif
         let pos += 1
     endwhile
     call eskk#util#log('s:search_linear() - not found.')
-    return -1
+    return ['', -1]
 endfunction "}}}
 
 " }}}
@@ -168,9 +171,10 @@ function! s:henkan_result_get_result(this) "{{{
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
         " Look up this henkan result in dictionaries.
         let found = 0
+        let line = ''
         for dict in [a:this._dict._user_dict, a:this._dict._system_dict]
-            let line = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
-            if type(line) == type("")
+            let [line, index] = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
+            if index !=# -1
                 let found = 1
                 break
             endif
@@ -501,7 +505,7 @@ function! s:dict.update_dictionary() dict "{{{
 
     " Check if a:self.user_dict really does not have added words.
     for [input, key, okuri, okuri_rom] in self._added_words
-        let line = s:search_next_candidate(self._user_dict, key, okuri_rom)
+        let [line, index] = s:search_next_candidate(self._user_dict, key, okuri_rom)
         if okuri_rom != ''
             let lnum = self._user_dict.okuri_ari_lnum + 1
         else
@@ -509,7 +513,7 @@ function! s:dict.update_dictionary() dict "{{{
         endif
         call insert(
         \   user_dict_lines,
-        \   s:create_new_entry(input, key, okuri, okuri_rom, (type(line) == type("") ? line : '')),
+        \   s:create_new_entry(input, key, okuri, okuri_rom, line),
         \   lnum
         \)
     endfor
