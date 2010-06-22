@@ -16,7 +16,7 @@ set cpo&vim
 runtime! plugin/eskk.vim
 
 
-function! eskk#table#rom_to_hira#load()
+function! eskk#table#hira_to_kata#load()
     return {
     \   'あ': ['ア', ''],
     \   'っ': ['ッ', ''],
