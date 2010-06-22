@@ -511,6 +511,11 @@ function! s:dict.update_dictionary() dict "{{{
         else
             let lnum = self._user_dict.okuri_nasi_lnum + 1
         endif
+        " Delete old entry.
+        if index !=# -1
+            call remove(user_dict_lines, index)
+        endif
+        " Merge old one and create new entry.
         call insert(
         \   user_dict_lines,
         \   s:create_new_entry(input, key, okuri, okuri_rom, line),
