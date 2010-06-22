@@ -489,54 +489,47 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     endtry
 
 
-    let mode_table = {
-    \   'hira': 'rom_to_hira',
-    \   'kata': 'rom_to_kata',
-    \   'hankata': 'rom_to_hankata',
-    \}
+    " Handle special mode-local mapping.
     let cur_mode = eskk#get_mode()
-    let phase = buftable.get_henkan_phase()
+    let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
+    let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
+    let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
+    let q_key = printf('mode:%s:q-key', cur_mode)
+    let to_ascii = printf('mode:%s:to-ascii', cur_mode)
+    let to_zenei = printf('mode:%s:to-zenei', cur_mode)
 
-    if has_key(mode_table, cur_mode) && a:table_name ==# mode_table[cur_mode]
-        let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
-        let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
-        let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
-        let q_key = printf('mode:%s:q-key', cur_mode)
-        let to_ascii = printf('mode:%s:to-ascii', cur_mode)
-        let to_zenei = printf('mode:%s:to-zenei', cur_mode)
-
-        if eskk#is_special_lhs(char, toggle_hankata)
-        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
-            return
-        elseif eskk#is_special_lhs(char, ctrl_q_key)
-        \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
-            call eskk#mode#builtin#do_ctrl_q_key(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, toggle_kata)
-        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
-            return
-        elseif eskk#is_special_lhs(char, q_key)
-        \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
-            call eskk#mode#builtin#do_q_key(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, to_ascii)
-        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            call eskk#set_mode('ascii')
-            return
-        elseif eskk#is_special_lhs(char, to_zenei)
-        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            call eskk#set_mode('zenei')
-            return
-        else
-            " Fall through.
-        endif
+    if eskk#is_special_lhs(char, toggle_hankata)
+    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
+        return
+    elseif eskk#is_special_lhs(char, ctrl_q_key)
+    \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
+        call eskk#mode#builtin#do_ctrl_q_key(a:stash)
+        return
+    elseif eskk#is_special_lhs(char, toggle_kata)
+    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
+        return
+    elseif eskk#is_special_lhs(char, q_key)
+    \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
+        call eskk#mode#builtin#do_q_key(a:stash)
+        return
+    elseif eskk#is_special_lhs(char, to_ascii)
+    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call eskk#set_mode('ascii')
+        return
+    elseif eskk#is_special_lhs(char, to_zenei)
+    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call eskk#set_mode('zenei')
+        return
+    else
+        " Fall through.
     endif
 
 
+    " Handle other characters.
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom_to_hira(a:stash, a:table_name)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
