@@ -26,78 +26,75 @@ set cpo&vim
 
 " 'ascii' mode {{{
 call eskk#register_mode('ascii')
-let s:dict = eskk#get_mode_structure('ascii')
+let dict = eskk#get_mode_structure('ascii')
 
-function! s:dict.filter(...)
+function! dict.filter(...)
     return call('eskk#mode#builtin#sym_filter', a:000)
 endfunction
 
+call eskk#validate_mode_structure('ascii')
+
 
 call eskk#register_event('enter-mode-ascii', 'eskk#mode#builtin#set_table', ['rom_to_ascii'])
-
-unlet s:dict
-call eskk#validate_mode_structure('ascii')
 " }}}
 
 " 'zenei' mode {{{
 call eskk#register_mode('zenei')
-let s:dict = eskk#get_mode_structure('zenei')
+let dict = eskk#get_mode_structure('zenei')
 
-function! s:dict.filter(...)
+function! dict.filter(...)
     return call('eskk#mode#builtin#sym_filter', a:000)
 endfunction
 
+call eskk#validate_mode_structure('zenei')
+
 
 call eskk#register_event('enter-mode-zenei', 'eskk#mode#builtin#set_table', ['rom_to_zenei'])
-
-unlet s:dict
-call eskk#validate_mode_structure('zenei')
 " }}}
 
 " 'hira' mode {{{
 call eskk#register_mode('hira')
-let s:dict = eskk#get_mode_structure('hira')
+let dict = eskk#get_mode_structure('hira')
 
-function! s:dict.filter(...)
+function! dict.filter(...)
     return call('eskk#mode#builtin#asym_filter', a:000)
 endfunction
 
+call eskk#validate_mode_structure('hira')
+
 
 call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#set_table', ['rom_to_hira'])
-
-unlet s:dict
-call eskk#validate_mode_structure('hira')
 " }}}
 
 " 'kata' mode {{{
 call eskk#register_mode('kata')
-let s:dict = eskk#get_mode_structure('kata')
+let dict = eskk#get_mode_structure('kata')
 
-function! s:dict.filter(...)
+function! dict.filter(...)
     return call('eskk#mode#builtin#asym_filter', a:000)
 endfunction
 
+call eskk#validate_mode_structure('kata')
+
 
 call eskk#register_event('enter-mode-kata', 'eskk#mode#builtin#set_table', ['rom_to_kata'])
-
-unlet s:dict
-call eskk#validate_mode_structure('kata')
 " }}}
 
 " 'hankata' mode {{{
 call eskk#register_mode('hankata')
-let s:dict = eskk#get_mode_structure('hankata')
+let dict = eskk#get_mode_structure('hankata')
 
-function! s:dict.filter(...)
+function! dict.filter(...)
     return call('eskk#mode#builtin#asym_filter', a:000)
 endfunction
 
+call eskk#validate_mode_structure('hankata')
+
 
 call eskk#register_event('enter-mode-hankata', 'eskk#mode#builtin#set_table', ['rom_to_hankata'])
-
-unlet s:dict
-call eskk#validate_mode_structure('hankata')
 " }}}
+
+unlet dict
 
 " }}}
 
