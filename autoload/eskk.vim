@@ -441,6 +441,7 @@ let s:map = {
 \   'henkan-select:choose-prev': {},
 \   'henkan-select:next-page': {},
 \   'henkan-select:prev-page': {},
+\   'henkan-select:escape': {},
 \   'mode:hira:toggle-hankata': {},
 \   'mode:hira:ctrl-q-key': {},
 \   'mode:hira:toggle-kata': {},
@@ -1084,6 +1085,8 @@ function! s:do_default_mappings() "{{{
 
     silent EskkMap -type=henkan-select:next-page -unique <Space>
     silent EskkMap -type=henkan-select:prev-page -unique x
+
+    silent EskkMap -type=henkan-select:escape -unique <C-g>
 
     silent EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
     silent EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
