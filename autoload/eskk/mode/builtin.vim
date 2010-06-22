@@ -537,12 +537,14 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
         if eskk#is_special_lhs(char, toggle_hankata)
         \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
             call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
+            return
         elseif eskk#is_special_lhs(char, ctrl_q_key)
             call eskk#mode#builtin#do_ctrl_q_key(a:stash)
             return
         elseif eskk#is_special_lhs(char, toggle_kata)
         \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
             call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
+            return
         elseif eskk#is_special_lhs(char, q_key)
             call eskk#mode#builtin#do_q_key(a:stash)
             return
