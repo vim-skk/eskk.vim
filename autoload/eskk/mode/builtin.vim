@@ -46,16 +46,17 @@ function! eskk#mode#builtin#do_q_key(stash, table_name) "{{{
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
 
-    let filter_str = henkan_buf_str.get_filter_str()
+    " Get sandbox before leaving current phase.
+    let sandbox = buftable.get_sandbox()
 
     call henkan_buf_str.clear()
     call okuri_buf_str.clear()
 
     call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-    let table = (a:table_name ==# 'rom_to_hira' ? s:get_table_lazy('hira_to_kata') : s:get_table_lazy('kata_to_hira'))
-    for wchar in split(filter_str, '\zs')
-        call normal_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
+    let table = s:get_table_lazy(a:table_name ==# 'rom_to_hira' ? 'rom_to_kata' : 'rom_to_hira')
+    for rom in sandbox.map_rom_list
+        call normal_buf_str.push_filter_str(table.get_map_to(rom))
     endfor
 
     function! s:finalize()
@@ -251,7 +252,7 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
         if has_map_str ==# -1
             return [matched, rest]
         endif
-        call add(matched, a:table.get_map_to(has_map_str))
+        call add(matched, has_map_str)
         if a:tail
             " Delete first `has_map_str` bytes.
             let rest = strpart(rest, strlen(has_map_str))
@@ -308,6 +309,11 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         \   a:table.get_map_to(rom_str)
         \)
         call buf_str.clear_rom_str()
+
+        " Save matched rom strings.
+        let sandbox = buftable.get_sandbox()
+        let sandbox.map_rom_list = get(sandbox, 'map_rom_list', [])
+        call add(sandbox.map_rom_list, rom_str)
 
 
         " Set rest string.
@@ -442,16 +448,21 @@ function! s:filter_rom_no_match(stash, table) "{{{
             else
                 call buf_str.push_filter_str(rest2)
                 for matched in matched_map_list
-                    call buf_str.push_filter_str(matched)
+                    call buf_str.push_filter_str(a:table.get_map_to(matched))
                 endfor
                 call buf_str.clear_rom_str()
             endif
         endif
     else
         for matched in matched_map_list
-            call buf_str.push_filter_str(matched)
+            call buf_str.push_filter_str(a:table.get_map_to(matched))
         endfor
         call buf_str.set_rom_str(rest)
+
+        " Save matched rom strings.
+        let sandbox = buftable.get_sandbox()
+        let sandbox.map_rom_list = get(sandbox, 'map_rom_list', [])
+        let sandbox.map_rom_list += matched_map_list
     endif
 endfunction "}}}
 
