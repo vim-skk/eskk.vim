@@ -404,6 +404,7 @@ endfunction "}}}
 " s:map related functions.
 " TODO Move this to s:map
 function! s:eskk.is_special_lhs(char, type) dict "{{{
+    " NOTE: This function must not show error when `s:map[a:type]` does not exist.
     return has_key(s:map, a:type)
     \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
