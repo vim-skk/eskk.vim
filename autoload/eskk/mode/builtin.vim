@@ -108,10 +108,6 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
     endif
 endfunction "}}}
 
-function! eskk#mode#builtin#update_dictionary() "{{{
-    call eskk#get_dictionary().update_dictionary()
-endfunction "}}}
-
 function! s:henkan_key(stash) "{{{
     call eskk#util#log('henkan!')
 
