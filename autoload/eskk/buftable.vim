@@ -294,6 +294,7 @@ function! s:buftable.do_enter(stash) dict "{{{
     let phase = self.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call normal_buf_str.clear()
         let a:stash.return = "\<CR>"
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         call self.push_kakutei_str(self.get_display_str(0))
