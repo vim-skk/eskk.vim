@@ -99,7 +99,7 @@ function! s:load_table(table_name) "{{{
 
     " Lazy loading.
     try
-        call eskk#table#{a:table_name}#load()
+        let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
         call eskk#util#logf("table '%s' has been loaded.", a:table_name)
         return 1
     catch
