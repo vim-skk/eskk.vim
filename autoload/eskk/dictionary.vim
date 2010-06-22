@@ -170,24 +170,53 @@ function! s:henkan_result_get_result(this) "{{{
         endif
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
         " Look up this henkan result in dictionaries.
-        let found = 0
-        let line = ''
-        for dict in [a:this._dict._user_dict, a:this._dict._system_dict]
-            let [line, index] = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
-            if index !=# -1
-                let found = 1
-                break
-            endif
-        endfor
-        if !found
+        let user_dict_result = s:search_next_candidate(
+        \   a:this._dict._user_dict, a:this._key, a:this._okuri_rom
+        \)
+        let system_dict_result = s:search_next_candidate(
+        \   a:this._dict._system_dict, a:this._key, a:this._okuri_rom
+        \)
+        if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
             throw cant_get_result
         endif
-        let a:this._result = [s:parse_skk_dict_line(line), 0]
+        " Merge and unique user dict result and system dict result.
+        let a:this._result = [
+        \   s:merge_results(user_dict_result, system_dict_result),
+        \   0
+        \]
         let a:this._status = s:GOT_RESULT
         return a:this._result
     endif
 endfunction "}}}
 
+function! s:merge_results(user_dict_result, system_dict_result) "{{{
+    " Merge.
+    let results =
+    \   (a:user_dict_result[1] !=# -1 ? s:parse_skk_dict_line(a:user_dict_result[0]) : [])
+    \   + (a:system_dict_result[1] !=# -1 ? s:parse_skk_dict_line(a:system_dict_result[0]) : [])
+
+    " Unique.
+    let unique = {}
+    let i = 0
+    while i < len(results)
+        let r = results[i]
+        let str = r.result
+
+        if has_key(unique, str)
+            if r.annotation ==# unique[str].annotation
+                " If `result` and `annotation` is same as old one, Remove new one.
+                call remove(results, i)
+                " Next element is results[i], Don't increment.
+                continue
+            endif
+        else
+            let unique[str] = r
+        endif
+        let i += 1
+    endwhile
+
+    return results
+endfunction "}}}
 function! s:henkan_result_select_candidates(this) "{{{
     " Select candidates by getchar()'s character.
     let words = copy(a:this._result[0])
