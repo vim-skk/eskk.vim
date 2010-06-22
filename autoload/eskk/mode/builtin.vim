@@ -455,7 +455,7 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
     if empty(matched_map_list)
         if input_style ==# 'skk'
             if rest ==# char
-                let a:stash.option.return = char
+                let a:stash.return = char
             else
                 let rest = strpart(rest, 0, strlen(rest) - 2) . char
                 call buf_str.set_rom_str(rest)
@@ -588,15 +588,15 @@ function! eskk#mode#builtin#sym_filter(stash) "{{{
         if eskk#is_special_lhs(c, 'mode:ascii:to-hira')
             call eskk#set_mode('hira')
         else
-            let a:stash.option.return = c
+            let a:stash.return = c
         endif
     else    " zenei
         if eskk#is_special_lhs(c, 'mode:zenei:to-hira')
             call eskk#set_mode('hira')
         elseif s:stash.get('current_table').has_map(c)
-            let a:stash.option.return = s:stash.get('current_table').get_map_to(c)
+            let a:stash.return = s:stash.get('current_table').get_map_to(c)
         else
-            let a:stash.option.return = c
+            let a:stash.return = c
         endif
     endif
 endfunction "}}}

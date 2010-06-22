@@ -294,7 +294,7 @@ function! s:buftable.do_enter(stash) dict "{{{
     let phase = self.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        let a:stash.option.return = "\<CR>"
+        let a:stash.return = "\<CR>"
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         call self.push_kakutei_str(self.get_display_str(0))
         call self.clear_all()
@@ -315,9 +315,8 @@ function! s:buftable.do_enter(stash) dict "{{{
     endif
 endfunction "}}}
 function! s:buftable.do_backspace(stash) dict "{{{
-    let opt = a:stash.option
     if self.get_old_str() == ''
-        let opt.return = "\<BS>"
+        let a:stash.return = "\<BS>"
         return
     endif
 

@@ -344,12 +344,9 @@ function! s:filter(self, char, Fn, head_args) "{{{
 
     call self.throw_event('filter-begin')
 
-    let opt = {
-    \   'return': 0,
-    \}
     let filter_args = [{
     \   'char': a:char,
-    \   'option': opt,
+    \   'return': 0,
     \}]
 
     if !self.is_locked_old_str
@@ -359,8 +356,9 @@ function! s:filter(self, char, Fn, head_args) "{{{
     try
         call call(a:Fn, a:head_args + filter_args)
 
-        if type(opt.return) == type("")
-            return opt.return
+        let ret_str = filter_args[0].return
+        if type(ret_str) == type("")
+            return ret_str
         else
             " NOTE: Because of Vim's bug, `:lmap` can't remap to `:lmap`.
             execute
