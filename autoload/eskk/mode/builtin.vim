@@ -460,7 +460,7 @@ endfunction "}}}
 function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
-    let henkan_phase = buftable.get_henkan_phase()
+    let phase = buftable.get_henkan_phase()
 
 
     " In order not to change current buftable old string.
@@ -530,18 +530,18 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
 
 
     " Handle other characters.
-    if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom(a:stash, a:table_name)
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_henkan_key(char)
             return s:henkan_key(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return s:filter_rom(a:stash, a:table_name)
-    elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         if eskk#is_special_lhs(char, 'henkan-select:choose-next')
             return s:get_next_candidate(a:stash, 1)
         elseif eskk#is_special_lhs(char, 'henkan-select:choose-prev')
@@ -553,7 +553,7 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
             call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         endif
     else
-        let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", henkan_phase)
+        let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", phase)
         throw eskk#internal_error(['eskk'], msg)
     endif
 endfunction "}}}
