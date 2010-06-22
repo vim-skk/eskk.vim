@@ -18,11 +18,16 @@ runtime! plugin/eskk.vim
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base)"{{{
     if a:findstart
-        return matchstr(s:get_cur_text(), g:eskk_marker_henkan . '.*$')
+        return match(s:get_cur_text(), g:eskk_marker_henkan . '.\+$')
     endif
 
     " Test.
-    return ['ほげ', 'ぴよ']
+    return [
+          \ { 'word' : g:eskk_marker_henkan.'ほげら', 'menu' : 'あ' },
+          \ { 'word' : '上', 'menu' : '亜' },
+          \ { 'word' : '下', 'menu' : '亜' },
+          \ { 'word' : g:eskk_marker_henkan.'ぴよぴよ', 'menu' : 'あ' },
+          \]
 endfunction "}}}
 function! s:get_cur_text()"{{{
     return col('.') < 2 ? '' : matchstr(getline('.'), '.*')[: col('.') - 2]

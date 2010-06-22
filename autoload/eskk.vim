@@ -1,4 +1,4 @@
-" vim:foldmethod=marker:fen:
+" vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
 " See 'plugin/eskk.vim' about the license.
@@ -69,6 +69,12 @@ function! s:eskk.enable(...) dict "{{{
 
     call self.call_mode_func('cb_im_enter', [], 0)
 
+    " Save previous omnifunc.
+    let self.omnifunc_save = &l:omnifunc
+    
+    " Set omnifunc.
+    let &l:omnifunc = 'eskk#complete#eskkcomplete'
+
     let self.enabled = 1
     return disable_skk_vim . "\<C-^>"
 endfunction "}}}
@@ -85,6 +91,9 @@ function! s:eskk.disable(...) dict "{{{
     endif
 
     call self.call_mode_func('cb_im_leave', [], 0)
+    
+    " Restore previous omnifunc.
+    let &l:omnifunc = self.omnifunc_save
 
     let self.enabled = 0
 
