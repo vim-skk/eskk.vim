@@ -44,11 +44,13 @@ call eskk#register_mode('zenei')
 let dict = eskk#get_mode_structure('zenei')
 
 function! dict.filter(stash)
-    if eskk#is_special_lhs(c, 'mode:zenei:to-hira')
+    if eskk#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
         call eskk#set_mode('hira')
     else
-        let table = eskk#table#get_definition('rom_to_zenei')
-        let a:stash.return = table.get_map_to(a:stash.char, a:stash.char)
+        if !has_key(self.sandbox, 'table')
+            let self.sandbox.table = eskk#table#new('rom_to_zenei')
+        endif
+        let a:stash.return = self.sandbox.table.get_map_to(a:stash.char, a:stash.char)
     endif
 endfunction
 
