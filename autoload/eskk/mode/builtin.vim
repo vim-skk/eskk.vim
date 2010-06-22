@@ -424,7 +424,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let buf_str = buftable.get_current_buf_str()
     let rom_str_without_char = buf_str.get_rom_str()
     let rom_str = rom_str_without_char . char
-    let input_style = eskk#util#option_value(g:eskk_hira_input_style, ['skk', 'msime', 'quickmatch'], 0)
+    let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
 
     let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
     if empty(matched_map_list)
