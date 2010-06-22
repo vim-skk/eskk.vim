@@ -552,11 +552,10 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
         elseif eskk#is_special_lhs(char, 'henkan-select:choose-prev')
             return s:get_next_candidate(a:stash, 0)
         else
-            call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-            " Move henkan select buffer string to normal.
-            call a:stash.buftable.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
+            call a:stash.buftable.push_kakutei_str(a:stash.buftable.get_display_str(0))
+            call eskk#register_temp_event('filter-redispatch', 'eskk#filter', [a:stash.char])
 
-            return s:filter_rom_to_hira(a:stash)
+            call a:stash.buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         endif
     else
         let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", phase)
