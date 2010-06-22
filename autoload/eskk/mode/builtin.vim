@@ -262,7 +262,7 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     endwhile
 endfunction "}}}
 
-function! s:filter_rom_to_hira(stash, table_name) "{{{
+function! s:filter_rom(stash, table_name) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
@@ -271,7 +271,7 @@ function! s:filter_rom_to_hira(stash, table_name) "{{{
     let match_exactly  = table.has_map(rom_str)
     let candidates     = table.get_candidates(rom_str)
 
-    call eskk#util#logf('mode hira - char = %s, rom_str = %s', string(char), string(rom_str))
+    call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
     call eskk#util#logf('candidates = %s', string(candidates))
 
     if match_exactly
@@ -281,20 +281,20 @@ function! s:filter_rom_to_hira(stash, table_name) "{{{
     if match_exactly && len(candidates) == 1
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
-        return s:filter_rom_to_hira_exact_match(a:stash, table)
+        return s:filter_rom_exact_match(a:stash, table)
 
     elseif !empty(candidates)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
-        return s:filter_rom_to_hira_has_candidates(a:stash)
+        return s:filter_rom_has_candidates(a:stash)
 
     else
         " No candidates.
         call eskk#util#logf('%s - no candidates.', rom_str)
-        return s:filter_rom_to_hira_no_match(a:stash, table)
+        return s:filter_rom_no_match(a:stash, table)
     endif
 endfunction "}}}
-function! s:filter_rom_to_hira_exact_match(stash, table) "{{{
+function! s:filter_rom_exact_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
@@ -410,7 +410,7 @@ function! s:filter_rom_to_hira_exact_match(stash, table) "{{{
         call s:henkan_key(a:stash)
     endif
 endfunction "}}}
-function! s:filter_rom_to_hira_has_candidates(stash) "{{{
+function! s:filter_rom_has_candidates(stash) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
@@ -418,7 +418,7 @@ function! s:filter_rom_to_hira_has_candidates(stash) "{{{
     " NOTE: This will be run in all phases.
     call buf_str.push_rom_str(char)
 endfunction "}}}
-function! s:filter_rom_to_hira_no_match(stash, table) "{{{
+function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
@@ -531,16 +531,16 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
 
     " Handle other characters.
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return s:filter_rom_to_hira(a:stash, a:table_name)
+        return s:filter_rom(a:stash, a:table_name)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_henkan_key(char)
             return s:henkan_key(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
-            return s:filter_rom_to_hira(a:stash, a:table_name)
+            return s:filter_rom(a:stash, a:table_name)
         endif
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return s:filter_rom_to_hira(a:stash, a:table_name)
+        return s:filter_rom(a:stash, a:table_name)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         if eskk#is_special_lhs(char, 'henkan-select:choose-next')
             return s:get_next_candidate(a:stash, 1)
