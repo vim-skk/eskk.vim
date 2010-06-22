@@ -463,32 +463,6 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     let phase = buftable.get_henkan_phase()
 
 
-    " In order not to change current buftable old string.
-    call eskk#lock_old_str()
-    try
-        " Handle special characters.
-        " These characters are handled regardless of current phase.
-        if char ==# "\<BS>" || char ==# "\<C-h>"
-            call buftable.do_backspace(a:stash)
-            return
-        elseif char ==# "\<CR>"
-            call buftable.do_enter(a:stash)
-            return
-        elseif eskk#is_sticky_key(char)
-            call eskk#sticky_key(a:stash)
-            return
-        elseif eskk#is_big_letter(char)
-            call eskk#sticky_key(a:stash)
-            call eskk#register_temp_event('filter-redispatch', 'eskk#filter', [tolower(char)])
-            return
-        else
-            " Fall through.
-        endif
-    finally
-        call eskk#unlock_old_str()
-    endtry
-
-
     " Handle special mode-local mapping.
     let cur_mode = eskk#get_mode()
     let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
@@ -527,6 +501,32 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     else
         " Fall through.
     endif
+
+
+    " In order not to change current buftable old string.
+    call eskk#lock_old_str()
+    try
+        " Handle special characters.
+        " These characters are handled regardless of current phase.
+        if char ==# "\<BS>" || char ==# "\<C-h>"
+            call buftable.do_backspace(a:stash)
+            return
+        elseif char ==# "\<CR>"
+            call buftable.do_enter(a:stash)
+            return
+        elseif eskk#is_sticky_key(char)
+            call eskk#sticky_key(a:stash)
+            return
+        elseif eskk#is_big_letter(char)
+            call eskk#sticky_key(a:stash)
+            call eskk#register_temp_event('filter-redispatch', 'eskk#filter', [tolower(char)])
+            return
+        else
+            " Fall through.
+        endif
+    finally
+        call eskk#unlock_old_str()
+    endtry
 
 
     " Handle other characters.
