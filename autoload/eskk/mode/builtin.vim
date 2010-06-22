@@ -33,12 +33,12 @@ call s:stash.init('current_henkan_result', {})
 
 
 function! eskk#mode#builtin#do_ctrl_q_key(stash) "{{{
-    let buftable = eskk#get_buftable()
-    let phase = buftable.get_henkan_phase()
-
-    " TODO
+    return s:convert_map_rom_list(s:get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! eskk#mode#builtin#do_q_key(stash, table_name) "{{{
+    return s:convert_map_rom_list(s:get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+endfunction "}}}
+function! s:convert_map_rom_list(table) "{{{
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
 
@@ -54,9 +54,8 @@ function! eskk#mode#builtin#do_q_key(stash, table_name) "{{{
 
     call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-    let table = s:get_table_lazy(a:table_name ==# 'rom_to_hira' ? 'rom_to_kata' : 'rom_to_hira')
     for rom in sandbox.map_rom_list
-        call normal_buf_str.push_filter_str(table.get_map_to(rom))
+        call normal_buf_str.push_filter_str(a:table.get_map_to(rom))
     endfor
 
     function! s:finalize()
