@@ -325,13 +325,13 @@ function! s:buftable.do_backspace(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         " Pretend skk.vim behavior.
         " Enter normal phase and delete one character.
-        call self.move_buf_str(
-        \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
-        \   g:eskk#buftable#HENKAN_PHASE_NORMAL
-        \)
+        let filter_str = eskk#util#mb_chop(self.get_display_str(0))
+        call self.push_kakutei_str(filter_str)
+        let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+        call henkan_buf_str.clear()
+
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-        let normal_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-        call normal_buf_str.pop_filter_str()
+
         return
     endif
 
