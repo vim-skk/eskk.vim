@@ -350,7 +350,6 @@ function! s:filter(self, char, Fn, head_args) "{{{
     let filter_args = [{
     \   'char': a:char,
     \   'option': opt,
-    \   'buftable': self.buftable,
     \}]
 
     if !self.is_locked_old_str
