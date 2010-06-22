@@ -37,8 +37,9 @@ endfunction "}}}
 
 " Variables {{{
 " Local between instances.
-let s:rom_to_hira   = eskk#table#new('rom_to_hira')
-let s:rom_to_kata   = eskk#table#new('rom_to_kata')
+let s:rom_to_hira    = eskk#table#new('rom_to_hira')
+let s:rom_to_kata    = eskk#table#new('rom_to_kata')
+let s:rom_to_hankata = eskk#table#new('rom_to_hankata')
 
 call s:stash.init('skk_dict', eskk#dictionary#new([
 \   extend(deepcopy(g:eskk_dictionary), {'is_user_dict': 1}),
@@ -49,6 +50,17 @@ call s:stash.init('current_henkan_result', {})
 
 
 
+function! eskk#mode#builtin#do_ctrl_q_key(stash) "{{{
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        " Toggle current table.
+        call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
+    else
+        " TODO
+    endif
+endfunction "}}}
 function! eskk#mode#builtin#do_q_key(stash) "{{{
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
@@ -515,7 +527,10 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
 
 
     if s:stash.get('current_table') is s:rom_to_hira    " hira
-        if eskk#is_special_lhs(char, 'mode:hira:q-key')
+        if eskk#is_special_lhs(char, 'mode:hira:ctrl-q-key')
+            call eskk#mode#builtin#do_ctrl_q_key(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'mode:hira:q-key')
             call eskk#mode#builtin#do_q_key(a:stash)
             return
         elseif eskk#is_special_lhs(char, 'mode:hira:to-ascii')
@@ -527,14 +542,33 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
         else
             " Fall through.
         endif
-    else    " kata
-        if eskk#is_special_lhs(char, 'mode:kata:q-key')
+    elseif s:stash.get('current_table') is s:rom_to_kata    " kata
+        if eskk#is_special_lhs(char, 'mode:kata:ctrl-q-key')
+            call eskk#mode#builtin#do_ctrl_q_key(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'mode:kata:q-key')
             call eskk#mode#builtin#do_q_key(a:stash)
             return
         elseif eskk#is_special_lhs(char, 'mode:kata:to-ascii')
             call eskk#set_mode('ascii')
             return
         elseif eskk#is_special_lhs(char, 'mode:kata:to-zenei')
+            call eskk#set_mode('zenei')
+            return
+        else
+            " Fall through.
+        endif
+    elseif s:stash.get('current_table') is s:rom_to_hankata    " hankata
+        if eskk#is_special_lhs(char, 'mode:hankata:ctrl-q-key')
+            call eskk#mode#builtin#do_ctrl_q_key(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'mode:hankata:q-key')
+            call eskk#mode#builtin#do_q_key(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'mode:hankata:to-ascii')
+            call eskk#set_mode('ascii')
+            return
+        elseif eskk#is_special_lhs(char, 'mode:hankata:to-zenei')
             call eskk#set_mode('zenei')
             return
         else

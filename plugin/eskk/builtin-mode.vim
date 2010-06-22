@@ -84,6 +84,21 @@ unlet s:dict
 call eskk#validate_mode_structure('kata')
 " }}}
 
+" 'hankata' mode {{{
+call eskk#register_mode('hankata')
+let s:dict = eskk#get_mode_structure('hankata')
+
+function! s:dict.filter(...)
+    return call('eskk#mode#builtin#asym_filter', a:000)
+endfunction
+
+
+call eskk#register_event('enter-mode-hankata', 'eskk#mode#builtin#set_table', ['rom_to_hankata'])
+
+unlet s:dict
+call eskk#validate_mode_structure('hankata')
+" }}}
+
 " }}}
 
 " Restore 'cpoptions' {{{
