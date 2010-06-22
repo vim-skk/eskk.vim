@@ -444,16 +444,19 @@ let s:map = {
 \   'henkan-select:prev-page': {},
 \   'mode:hira:toggle-hankata': {},
 \   'mode:hira:ctrl-q-key': {},
+\   'mode:hira:toggle-kata': {},
 \   'mode:hira:q-key': {},
 \   'mode:hira:to-ascii': {},
 \   'mode:hira:to-zenei': {},
 \   'mode:kata:toggle-hankata': {},
 \   'mode:kata:ctrl-q-key': {},
+\   'mode:kata:toggle-kata': {},
 \   'mode:kata:q-key': {},
 \   'mode:kata:to-ascii': {},
 \   'mode:kata:to-zenei': {},
 \   'mode:hankata:toggle-hankata': {},
 \   'mode:hankata:ctrl-q-key': {},
+\   'mode:hankata:toggle-kata': {},
 \   'mode:hankata:q-key': {},
 \   'mode:hankata:to-ascii': {},
 \   'mode:hankata:to-zenei': {},
@@ -1064,18 +1067,21 @@ function! s:do_default_mappings() "{{{
 
     EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
     EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
+    EskkMap -type=mode:hira:toggle-kata -unique q
     EskkMap -type=mode:hira:q-key -unique q
     EskkMap -type=mode:hira:to-ascii -unique l
     EskkMap -type=mode:hira:to-zenei -unique L
 
     EskkMap -type=mode:kata:toggle-hankata -unique <C-q>
     EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
+    EskkMap -type=mode:kata:toggle-kata -unique q
     EskkMap -type=mode:kata:q-key -unique q
     EskkMap -type=mode:kata:to-ascii -unique l
     EskkMap -type=mode:kata:to-zenei -unique L
 
     EskkMap -type=mode:hankata:toggle-hankata -unique <C-q>
     EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
+    EskkMap -type=mode:hankata:toggle-kata -unique q
     EskkMap -type=mode:hankata:q-key -unique q
     EskkMap -type=mode:hankata:to-ascii -unique l
     EskkMap -type=mode:hankata:to-zenei -unique L

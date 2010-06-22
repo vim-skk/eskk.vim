@@ -61,10 +61,7 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
     let buf_str = buftable.get_current_buf_str()
     let phase = buftable.get_henkan_phase()
 
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        " Toggle current table.
-        call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
 
         let normal_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
@@ -532,6 +529,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     if has_key(mode_table, cur_mode) && s:stash.get('current_table') is mode_table[cur_mode]
         let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
         let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
+        let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
         let q_key = printf('mode:%s:q-key', cur_mode)
         let to_ascii = printf('mode:%s:to-ascii', cur_mode)
         let to_zenei = printf('mode:%s:to-zenei', cur_mode)
@@ -542,6 +540,9 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
         elseif eskk#is_special_lhs(char, ctrl_q_key)
             call eskk#mode#builtin#do_ctrl_q_key(a:stash)
             return
+        elseif eskk#is_special_lhs(char, toggle_kata)
+        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+            call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
         elseif eskk#is_special_lhs(char, q_key)
             call eskk#mode#builtin#do_q_key(a:stash)
             return
