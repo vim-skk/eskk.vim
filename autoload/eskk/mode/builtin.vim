@@ -59,43 +59,36 @@ endfunction "}}}
 function! eskk#mode#builtin#do_q_key(stash) "{{{
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
-    let phase = buftable.get_henkan_phase()
 
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    let normal_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
 
-        let normal_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-        let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let filter_str = henkan_buf_str.get_filter_str()
 
-        let filter_str = henkan_buf_str.get_filter_str()
+    call henkan_buf_str.clear()
+    call okuri_buf_str.clear()
 
-        call henkan_buf_str.clear()
-        call okuri_buf_str.clear()
+    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    let table = (s:stash.get('current_table') is s:rom_to_hira ? s:get_table_lazy('hira_to_kata') : s:get_table_lazy('kata_to_hira'))
+    for wchar in split(filter_str, '\zs')
+        call normal_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
+    endfor
 
-        let table = (s:stash.get('current_table') is s:rom_to_hira ? s:get_table_lazy('hira_to_kata') : s:get_table_lazy('kata_to_hira'))
-        for wchar in split(filter_str, '\zs')
-            call normal_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
-        endfor
+    function! s:finalize()
+        let buftable = eskk#get_buftable()
+        if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+            let buf_str = buftable.get_current_buf_str()
+            call buf_str.clear_filter_str()
+        endif
+    endfunction
 
-        function! s:finalize()
-            let buftable = eskk#get_buftable()
-            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = buftable.get_current_buf_str()
-                call buf_str.clear_filter_str()
-            endif
-        endfunction
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
-        \   []
-        \)
-    else
-        throw eskk#internal_error(['eskk', 'mode', 'builtin'])
-    endif
+    call eskk#register_temp_event(
+    \   'filter-begin',
+    \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
+    \   []
+    \)
 endfunction "}}}
 function! s:get_table_lazy(table_name) "{{{
     let varname = 's:' . a:table_name
@@ -539,6 +532,8 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
             call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
             return
         elseif eskk#is_special_lhs(char, ctrl_q_key)
+        \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
             call eskk#mode#builtin#do_ctrl_q_key(a:stash)
             return
         elseif eskk#is_special_lhs(char, toggle_kata)
@@ -546,12 +541,16 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
             call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
             return
         elseif eskk#is_special_lhs(char, q_key)
+        \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
             call eskk#mode#builtin#do_q_key(a:stash)
             return
         elseif eskk#is_special_lhs(char, to_ascii)
+        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
             call eskk#set_mode('ascii')
             return
         elseif eskk#is_special_lhs(char, to_zenei)
+        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
             call eskk#set_mode('zenei')
             return
         else
