@@ -28,6 +28,11 @@ runtime! plugin/eskk.vim
 " Variables {{{
 let s:current_table_name = ''
 let s:table_defs = {}
+
+let s:MAP_TO_INDEX = 0
+let s:REST_INDEX = 1
+lockvar s:MAP_TO_INDEX
+lockvar s:REST_INDEX
 " }}}
 
 
@@ -192,10 +197,7 @@ endfunction "}}}
 
 function! s:create_map(table_name, lhs, rhs, rest) "{{{
     let def = s:get_table(a:table_name)
-    let def[a:lhs] = {'map_to': a:rhs}
-    if a:rest != ''
-        let def[a:lhs].rest = a:rest
-    endif
+    let def[a:lhs] = [a:rhs, a:rest]
 endfunction "}}}
 
 function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
@@ -280,7 +282,7 @@ function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    return def[a:lhs].map_to
+    return def[a:lhs][s:MAP_TO_INDEX]
 endfunction "}}}
 
 
@@ -297,7 +299,7 @@ function! eskk#table#get_rest(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    return def[a:lhs].rest
+    return def[a:lhs][s:REST_INDEX]
 endfunction "}}}
 
 
