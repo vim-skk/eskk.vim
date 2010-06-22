@@ -553,7 +553,7 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
             call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         endif
     else
-        let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", phase)
+        let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", henkan_phase)
         throw eskk#internal_error(['eskk'], msg)
     endif
 endfunction "}}}
