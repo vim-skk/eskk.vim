@@ -68,7 +68,7 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         " Toggle current table.
-        call eskk#set_mode(eskk#get_mode() ==# 'hira' ? 'kata' : 'hira')
+        call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
 
