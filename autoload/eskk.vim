@@ -768,7 +768,7 @@ function! eskk#destroy_current_instance() "{{{
     let s:instance_id -= 1
 
     " Update s:skk_dict. Assign current instance's `added_words`.
-    let s:skk_dict._added_words = inst.added_words
+    let s:skk_dict._added_words = s:eskk_instances[s:instance_id].added_words
 endfunction "}}}
 function! eskk#get_mutable_stash(namespace) "{{{
     let obj = deepcopy(s:mutable_stash, 1)

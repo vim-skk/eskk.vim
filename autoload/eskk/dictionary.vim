@@ -264,7 +264,6 @@ function! s:henkan_result_select_candidates(this) "{{{
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
-                " Return to henkan select phase.
                 throw 'eskk: leave henkan select'
             endif
         elseif stridx(g:eskk_select_cand_keys, char) != -1

@@ -171,6 +171,7 @@ endfunction "}}}
 function! s:get_next_candidate(stash, next) "{{{
     let buftable = eskk#get_buftable()
     let cur_buf_str = buftable.get_current_buf_str()
+
     if s:current_henkan_result[a:next ? 'advance' : 'back']()
         let candidate = s:current_henkan_result.get_candidate()
         call eskk#util#assert(type(candidate) == type(""))
