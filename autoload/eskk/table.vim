@@ -99,6 +99,7 @@ function! s:load_table(table_name) "{{{
         return 1
     catch
         call eskk#util#logf("can't load table '%s'.", a:table_name)
+        call eskk#util#log(v:exception)
         return 0
     endtry
 endfunction "}}}
