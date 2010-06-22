@@ -117,6 +117,7 @@ let s:buftable = {
 \       s:buffer_string_new(),
 \       s:buffer_string_new(),
 \   ],
+\   '_kakutei_str': '',
 \   '_old_str': '',
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
@@ -162,12 +163,16 @@ endfunction "}}}
 function! s:buftable.rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
 
+    let kakutei = self._kakutei_str
+    let self._kakutei_str = ''
+
     call eskk#util#logf('old string = %s', string(old))
+    call eskk#util#logf('kakutei string = %s', string(kakutei))
     call eskk#util#logf('new display string = %s', string(new))
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    return repeat("\<C-h>", eskk#util#mb_strlen(old)) . new
+    return repeat("\<C-h>", eskk#util#mb_strlen(old)) . kakutei . new
 endfunction "}}}
 
 function! s:buftable.get_display_str(...) dict "{{{
@@ -275,6 +280,10 @@ function! s:buftable.get_current_marker() "{{{
 endfunction "}}}
 
 
+function! s:buftable.push_kakutei_str(str) dict "{{{
+    let self._kakutei_str .= a:str
+endfunction "}}}
+
 function! s:buftable.move_buf_str(from_phases, to_phase) dict "{{{
     if type(a:from_phases) != type([])
         return self.move_buf_str([a:from_phases], a:to_phase)
@@ -311,33 +320,18 @@ function! s:buftable.do_enter(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         let a:stash.option.return = "\<CR>"
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
-        \   []
-        \)
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
 
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call self.move_buf_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI], g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
-        \   []
-        \)
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
 
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('do_enter_finalize', s:SID_PREFIX),
-        \   []
-        \)
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
 
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     else
@@ -367,28 +361,12 @@ function! s:buftable.step_henkan_phase(stash) dict "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         let step = 0
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        function! s:step_henkan_phase_finalize()
-            if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = eskk#get_buftable().get_current_buf_str()
-                call buf_str.clear_filter_str()
-            endif
-        endfunction
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('step_henkan_phase_finalize', s:SID_PREFIX),
-        \   []
-        \)
-
+        call self.do_enter(a:stash)
         call eskk#register_temp_event(
         \   'filter-redispatch',
-        \   'eskk#sticky_key',
-        \   []
+        \   'eskk#call_via_filter',
+        \   ['eskk#sticky_key', []]
         \)
-
-
-        call self.move_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, g:eskk#buftable#HENKAN_PHASE_NORMAL)
-        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
         let step = 1
     else
@@ -416,6 +394,13 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     endif
 endfunction "}}}
 
+
+function! s:buftable.clear_all() dict "{{{
+    for phase in self.get_all_phases()
+        let buf_str = self.get_buf_str(phase)
+        call buf_str.clear()
+    endfor
+endfunction "}}}
 
 function! s:buftable.clear_buf_str(phases) dict "{{{
     if type(a:phases) != type([])
