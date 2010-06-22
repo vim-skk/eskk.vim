@@ -261,9 +261,7 @@ endfunction "}}}
 
 " Statusline
 function! s:eskk.get_stl() dict "{{{
-    " TODO Add these strings to each mode structure.
-    let mode_str = {'hira': 'あ', 'kata': 'ア', 'ascii': 'a', 'zenei': 'ａ'}
-    return self.is_enabled() ? printf('[eskk:%s]', get(mode_str, self.mode, '??')) : ''
+    return self.is_enabled() ? printf('[eskk:%s]', get(g:eskk_statusline_mode_strings, self.mode, '??')) : ''
 endfunction "}}}
 
 " Buftable

@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 107))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 108))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -148,6 +148,9 @@ endif
 " Mode
 if !exists('g:eskk_initial_mode')
     let g:eskk_initial_mode = 'hira'
+endif
+if !exists('g:eskk_statusline_mode_strings')
+    let g:eskk_statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ'}
 endif
 
 " Markers
