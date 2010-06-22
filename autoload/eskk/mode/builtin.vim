@@ -41,10 +41,6 @@ let s:rom_to_hira    = eskk#table#new('rom_to_hira')
 let s:rom_to_kata    = eskk#table#new('rom_to_kata')
 let s:rom_to_hankata = eskk#table#new('rom_to_hankata')
 
-call s:stash.init('skk_dict', eskk#dictionary#new(
-\   g:eskk_dictionary,
-\   g:eskk_large_dictionary,
-\))
 call s:stash.init('current_henkan_result', {})
 " }}}
 
@@ -113,7 +109,7 @@ function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
 endfunction "}}}
 
 function! eskk#mode#builtin#update_dictionary() "{{{
-    call s:stash.get('skk_dict').update_dictionary()
+    call eskk#get_dictionary().update_dictionary()
 endfunction "}}}
 
 function! s:henkan_key(stash) "{{{
@@ -140,13 +136,13 @@ function! s:henkan_key(stash) "{{{
             endfor
         endif
 
-        let s:current_henkan_result = s:stash.get('skk_dict').refer(buftable)
+        let s:current_henkan_result = eskk#get_dictionary().refer(buftable)
 
         " Enter henkan select phase.
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
         " Clear phase henkan/okuri buffer string.
-        " Assumption: `s:stash.get('skk_dict').refer()` saves necessary strings.
+        " Assumption: `eskk#get_dictionary().refer()` saves necessary strings.
         let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         call henkan_buf_str.clear_rom_str()
         call henkan_buf_str.clear_filter_str()
@@ -162,7 +158,7 @@ function! s:henkan_key(stash) "{{{
             call buf_str.set_filter_str(candidate)
         else
             " No candidates.
-            let input = s:stash.get('skk_dict').register_word(s:current_henkan_result)
+            let input = eskk#get_dictionary().register_word(s:current_henkan_result)
             call buf_str.set_filter_str(input)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
@@ -186,7 +182,7 @@ function! s:get_next_candidate(stash, next) "{{{
         if a:next
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
-            let input = s:stash.get('skk_dict').register_word(s:current_henkan_result)
+            let input = eskk#get_dictionary().register_word(s:current_henkan_result)
             call cur_buf_str.set_filter_str(input)
         else
             " Restore previous buftable state

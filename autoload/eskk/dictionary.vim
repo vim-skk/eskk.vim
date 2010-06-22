@@ -378,7 +378,7 @@ let s:dict = {
 \   '_added_words': [],
 \}
 
-function! eskk#dictionary#new(user_dict, system_dict) "{{{
+function! eskk#dictionary#new(user_dict, system_dict, added_word) "{{{
     return extend(
     \   deepcopy(s:dict),
     \   {
@@ -392,6 +392,7 @@ function! eskk#dictionary#new(user_dict, system_dict) "{{{
     \           a:system_dict.sorted,
     \           a:system_dict.encoding,
     \       ),
+    \       '_added_words': a:added_word,
     \   },
     \   'force'
     \)

@@ -31,6 +31,7 @@ let s:eskk = {
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'stash': {},
+\   'added_words': [],
 \}
 
 function! s:eskk_new() "{{{
@@ -467,6 +468,8 @@ let s:stash_prototype = {}
 let s:event_hook_fn = {}
 " `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
 let s:has_mapped = 0
+" SKK dicionary.
+let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary, s:eskk_instances[s:instance_id].added_words)
 " }}}
 
 " Functions {{{
@@ -749,6 +752,9 @@ function! eskk#create_new_instance() "{{{
     " Initialize instance.
     call inst.enable(0)
 
+    " Update s:skk_dict. Assign current instance's `added_words`.
+    let s:skk_dict._added_words = inst.added_words
+
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
@@ -756,8 +762,12 @@ function! eskk#destroy_current_instance() "{{{
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
 
+    " Destroy current instance.
     call remove(s:eskk_instances, s:instance_id)
     let s:instance_id -= 1
+
+    " Update s:skk_dict. Assign current instance's `added_words`.
+    let s:skk_dict._added_words = inst.added_words
 endfunction "}}}
 function! eskk#get_mutable_stash(namespace) "{{{
     let obj = deepcopy(s:mutable_stash, 1)
@@ -824,6 +834,12 @@ endfunction "}}}
 
 lockvar s:mutable_stash
 " }}}
+
+
+" Getter for scope-local variables.
+function! eskk#get_dictionary() "{{{
+    return s:skk_dict
+endfunction "}}}
 
 
 " Stubs for current eskk instance. {{{
