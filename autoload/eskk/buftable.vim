@@ -284,30 +284,6 @@ function! s:buftable.push_kakutei_str(str) dict "{{{
     let self._kakutei_str .= a:str
 endfunction "}}}
 
-function! s:buftable.move_buf_str(from_phases, to_phase) dict "{{{
-    if type(a:from_phases) != type([])
-        return self.move_buf_str([a:from_phases], a:to_phase)
-    endif
-
-    let str = ''
-    for phase in a:from_phases
-        let buf_str = self.get_buf_str(phase)
-        let str .= buf_str.get_filter_str()
-        let str .= buf_str.get_rom_str()
-        call buf_str.clear()
-    endfor
-
-    let buf_str = self.get_buf_str(a:to_phase)
-    call buf_str.clear_rom_str()
-    call buf_str.set_filter_str(str)
-endfunction "}}}
-
-function! s:do_enter_finalize() "{{{
-    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        let buf_str = eskk#get_buftable().get_current_buf_str()
-        call buf_str.clear_filter_str()
-    endif
-endfunction "}}}
 function! s:buftable.do_enter(stash) dict "{{{
     call eskk#util#log("s:buftable.do_enter()")
 
@@ -397,17 +373,6 @@ endfunction "}}}
 
 function! s:buftable.clear_all() dict "{{{
     for phase in self.get_all_phases()
-        let buf_str = self.get_buf_str(phase)
-        call buf_str.clear()
-    endfor
-endfunction "}}}
-
-function! s:buftable.clear_buf_str(phases) dict "{{{
-    if type(a:phases) != type([])
-        return self.clear_buf_str([a:phases])
-    endif
-
-    for phase in a:phases
         let buf_str = self.get_buf_str(phase)
         call buf_str.clear()
     endfor
