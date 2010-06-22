@@ -526,49 +526,29 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     endtry
 
 
-    if s:stash.get('current_table') is s:rom_to_hira    " hira
-        if eskk#is_special_lhs(char, 'mode:hira:ctrl-q-key')
+    let mode_table = {
+    \   'hira': s:rom_to_hira,
+    \   'kata': s:rom_to_kata,
+    \   'hankata': s:rom_to_hankata,
+    \}
+    let cur_mode = eskk#get_mode()
+
+    if has_key(mode_table, cur_mode) && s:stash.get('current_table') is mode_table[cur_mode]
+        let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
+        let q_key = printf('mode:%s:q-key', cur_mode)
+        let to_ascii = printf('mode:%s:to-ascii', cur_mode)
+        let to_zenei = printf('mode:%s:to-zenei', cur_mode)
+
+        if eskk#is_special_lhs(char, ctrl_q_key)
             call eskk#mode#builtin#do_ctrl_q_key(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'mode:hira:q-key')
+        elseif eskk#is_special_lhs(char, q_key)
             call eskk#mode#builtin#do_q_key(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'mode:hira:to-ascii')
+        elseif eskk#is_special_lhs(char, to_ascii)
             call eskk#set_mode('ascii')
             return
-        elseif eskk#is_special_lhs(char, 'mode:hira:to-zenei')
-            call eskk#set_mode('zenei')
-            return
-        else
-            " Fall through.
-        endif
-    elseif s:stash.get('current_table') is s:rom_to_kata    " kata
-        if eskk#is_special_lhs(char, 'mode:kata:ctrl-q-key')
-            call eskk#mode#builtin#do_ctrl_q_key(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, 'mode:kata:q-key')
-            call eskk#mode#builtin#do_q_key(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, 'mode:kata:to-ascii')
-            call eskk#set_mode('ascii')
-            return
-        elseif eskk#is_special_lhs(char, 'mode:kata:to-zenei')
-            call eskk#set_mode('zenei')
-            return
-        else
-            " Fall through.
-        endif
-    elseif s:stash.get('current_table') is s:rom_to_hankata    " hankata
-        if eskk#is_special_lhs(char, 'mode:hankata:ctrl-q-key')
-            call eskk#mode#builtin#do_ctrl_q_key(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, 'mode:hankata:q-key')
-            call eskk#mode#builtin#do_q_key(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, 'mode:hankata:to-ascii')
-            call eskk#set_mode('ascii')
-            return
-        elseif eskk#is_special_lhs(char, 'mode:hankata:to-zenei')
+        elseif eskk#is_special_lhs(char, to_zenei)
             call eskk#set_mode('zenei')
             return
         else
