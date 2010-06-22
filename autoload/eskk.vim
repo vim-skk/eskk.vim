@@ -327,11 +327,11 @@ endfunction "}}}
 function! s:eskk.filter(char) dict "{{{
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
 endfunction "}}}
-function! s:eskk.call_via_filter(Fn, head_args, ...) dict "{{{
+function! s:eskk.call_via_filter(Fn, tail_args, ...) dict "{{{
     let char = a:0 != 0 ? a:1 : ''
-    return s:filter(self, char, a:Fn, a:head_args)
+    return s:filter(self, char, a:Fn, a:tail_args)
 endfunction "}}}
-function! s:filter(self, char, Fn, head_args) "{{{
+function! s:filter(self, char, Fn, tail_args) "{{{
     let self = a:self
 
     call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
@@ -353,7 +353,7 @@ function! s:filter(self, char, Fn, head_args) "{{{
     endif
 
     try
-        call call(a:Fn, a:head_args + filter_args)
+        call call(a:Fn, filter_args + a:tail_args)
 
         let ret_str = filter_args[0].return
         if type(ret_str) == type("")
@@ -395,9 +395,8 @@ function! s:filter(self, char, Fn, head_args) "{{{
         call self.throw_event('filter-finalize')
     endtry
 endfunction "}}}
-function! s:filter_body_call_mode_or_default_filter(self, stash) "{{{
-    let self = a:self
-    call self.call_mode_func('filter', [a:stash], 1)
+function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
+    call a:self.call_mode_func('filter', [a:stash], 1)
 endfunction "}}}
 
 " Misc.
@@ -996,7 +995,7 @@ function! eskk#unlock_old_str(...) "{{{
     return call(self.unlock_old_str, a:000, self)
 endfunction "}}}
 
-" Dispatch functions
+" Filter functions
 function! eskk#filter(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.filter, a:000, self)

@@ -28,28 +28,31 @@ set cpo&vim
 call eskk#register_mode('ascii')
 let dict = eskk#get_mode_structure('ascii')
 
-function! dict.filter(...)
-    return call('eskk#mode#builtin#sym_filter', a:000)
+function! dict.filter(stash)
+    if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
+        call eskk#set_mode('hira')
+    else
+        let a:stash.return = a:stash.char
+    endif
 endfunction
 
 call eskk#validate_mode_structure('ascii')
-
-
-call eskk#register_event('enter-mode-ascii', 'eskk#mode#builtin#set_table', ['rom_to_ascii'])
 " }}}
 
 " 'zenei' mode {{{
 call eskk#register_mode('zenei')
 let dict = eskk#get_mode_structure('zenei')
 
-function! dict.filter(...)
-    return call('eskk#mode#builtin#sym_filter', a:000)
+function! dict.filter(stash)
+    if eskk#is_special_lhs(c, 'mode:zenei:to-hira')
+        call eskk#set_mode('hira')
+    else
+        let table = eskk#table#get_definition('rom_to_zenei')
+        let a:stash.return = table.get_map_to(a:stash.char, a:stash.char)
+    endif
 endfunction
 
 call eskk#validate_mode_structure('zenei')
-
-
-call eskk#register_event('enter-mode-zenei', 'eskk#mode#builtin#set_table', ['rom_to_zenei'])
 " }}}
 
 " 'hira' mode {{{
@@ -57,13 +60,10 @@ call eskk#register_mode('hira')
 let dict = eskk#get_mode_structure('hira')
 
 function! dict.filter(...)
-    return call('eskk#mode#builtin#asym_filter', a:000)
+    return call('eskk#mode#builtin#asym_filter', a:000 + ['rom_to_hira'])
 endfunction
 
 call eskk#validate_mode_structure('hira')
-
-
-call eskk#register_event('enter-mode-hira', 'eskk#mode#builtin#set_table', ['rom_to_hira'])
 " }}}
 
 " 'kata' mode {{{
@@ -71,13 +71,10 @@ call eskk#register_mode('kata')
 let dict = eskk#get_mode_structure('kata')
 
 function! dict.filter(...)
-    return call('eskk#mode#builtin#asym_filter', a:000)
+    return call('eskk#mode#builtin#asym_filter', a:000 + ['rom_to_kata'])
 endfunction
 
 call eskk#validate_mode_structure('kata')
-
-
-call eskk#register_event('enter-mode-kata', 'eskk#mode#builtin#set_table', ['rom_to_kata'])
 " }}}
 
 " 'hankata' mode {{{
@@ -85,13 +82,10 @@ call eskk#register_mode('hankata')
 let dict = eskk#get_mode_structure('hankata')
 
 function! dict.filter(...)
-    return call('eskk#mode#builtin#asym_filter', a:000)
+    return call('eskk#mode#builtin#asym_filter', a:000 + ['rom_to_hankata'])
 endfunction
 
 call eskk#validate_mode_structure('hankata')
-
-
-call eskk#register_event('enter-mode-hankata', 'eskk#mode#builtin#set_table', ['rom_to_hankata'])
 " }}}
 
 unlet dict

@@ -24,23 +24,9 @@ delfunc s:SID
 
 let s:stash = eskk#get_mutable_stash(['mode', 'builtin'])
 
-" Common {{{
-call s:stash.init('current_table', {})
-
-function! eskk#mode#builtin#set_table(table_name) "{{{
-    call eskk#util#logf("Set '%s' table to s:current_table.", a:table_name)
-    call s:stash.set('current_table', s:[a:table_name])
-endfunction "}}}
-" }}}
-
 " Asymmetric built-in modes. {{{
 
 " Variables {{{
-" Local between instances.
-let s:rom_to_hira    = eskk#table#new('rom_to_hira')
-let s:rom_to_kata    = eskk#table#new('rom_to_kata')
-let s:rom_to_hankata = eskk#table#new('rom_to_hankata')
-
 call s:stash.init('current_henkan_result', {})
 " }}}
 
@@ -67,7 +53,7 @@ function! eskk#mode#builtin#do_q_key(stash) "{{{
 
     call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-    let table = (s:stash.get('current_table') is s:rom_to_hira ? s:get_table_lazy('hira_to_kata') : s:get_table_lazy('kata_to_hira'))
+    let table = (a:table_name ==# 'rom_to_hira' ? s:get_table_lazy('hira_to_kata') : s:get_table_lazy('kata_to_hira'))
     for wchar in split(filter_str, '\zs')
         call normal_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
     endfor
@@ -276,12 +262,12 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     endwhile
 endfunction "}}}
 
-function! s:filter_rom_to_hira(stash) "{{{
+function! s:filter_rom_to_hira(stash, table_name) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
-    let table = s:stash.get('current_table')
+    let table = s:get_table_lazy(a:table_name)
     let match_exactly  = table.has_map(rom_str)
     let candidates     = table.get_candidates(rom_str)
 
@@ -295,7 +281,7 @@ function! s:filter_rom_to_hira(stash) "{{{
     if match_exactly && len(candidates) == 1
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
-        return s:filter_rom_to_hira_exact_match(a:stash)
+        return s:filter_rom_to_hira_exact_match(a:stash, table)
 
     elseif !empty(candidates)
         " Has candidates but not match.
@@ -305,10 +291,10 @@ function! s:filter_rom_to_hira(stash) "{{{
     else
         " No candidates.
         call eskk#util#logf('%s - no candidates.', rom_str)
-        return s:filter_rom_to_hira_no_match(a:stash)
+        return s:filter_rom_to_hira_no_match(a:stash, table)
     endif
 endfunction "}}}
-function! s:filter_rom_to_hira_exact_match(stash) "{{{
+function! s:filter_rom_to_hira_exact_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
@@ -319,7 +305,7 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         " Set filtered string.
         call buf_str.push_filter_str(
-        \   s:stash.get('current_table').get_map_to(rom_str)
+        \   a:table.get_map_to(rom_str)
         \)
         call buf_str.clear_rom_str()
 
@@ -329,8 +315,8 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         " NOTE:
         " rest must not have multibyte string.
         " rest is for rom string.
-        let rest = s:stash.get('current_table').get_rest(rom_str, -1)
-        " Assumption: 's:stash.get('current_table').has_map(rest)' returns false here.
+        let rest = a:table.get_rest(rom_str, -1)
+        " Assumption: 'a:table.has_map(rest)' returns false here.
         if rest !=# -1
             " XXX:
             "     eskk#get_named_map(char)
@@ -384,13 +370,13 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         let henkan_rom = henkan_buf_str.get_rom_str()
         let okuri_rom  = okuri_buf_str.get_rom_str()
-        if henkan_rom != '' && s:stash.get('current_table').has_map(henkan_rom . okuri_rom[0])
+        if henkan_rom != '' && a:table.has_map(henkan_rom . okuri_rom[0])
             " Push "っ".
             call henkan_buf_str.push_filter_str(
-            \   s:stash.get('current_table').get_map_to(henkan_rom . okuri_rom[0])
+            \   a:table.get_map_to(henkan_rom . okuri_rom[0])
             \)
             " Push "s" to rom str.
-            let rest = s:stash.get('current_table').get_rest(henkan_rom . okuri_rom[0], -1)
+            let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
             if rest !=# -1
                 call okuri_buf_str.set_rom_str(
                 \   rest . okuri_rom[1:]
@@ -401,11 +387,11 @@ function! s:filter_rom_to_hira_exact_match(stash) "{{{
         call eskk#util#assert(char != '')
         call okuri_buf_str.push_rom_str(char)
 
-        if s:stash.get('current_table').has_map(okuri_buf_str.get_rom_str())
+        if a:table.has_map(okuri_buf_str.get_rom_str())
             call okuri_buf_str.push_filter_str(
-            \   s:stash.get('current_table').get_map_to(okuri_buf_str.get_rom_str())
+            \   a:table.get_map_to(okuri_buf_str.get_rom_str())
             \)
-            let rest = s:stash.get('current_table').get_rest(okuri_buf_str.get_rom_str(), -1)
+            let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
             if rest !=# -1
                 " XXX:
                 "     eskk#get_named_map(char)
@@ -432,16 +418,15 @@ function! s:filter_rom_to_hira_has_candidates(stash) "{{{
     " NOTE: This will be run in all phases.
     call buf_str.push_rom_str(char)
 endfunction "}}}
-function! s:filter_rom_to_hira_no_match(stash) "{{{
+function! s:filter_rom_to_hira_no_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
     let rom_str_without_char = buf_str.get_rom_str()
     let rom_str = rom_str_without_char . char
-    let table = s:stash.get('current_table')
     let input_style = eskk#util#option_value(g:eskk_hira_input_style, ['skk', 'msime', 'quickmatch'], 0)
 
-    let [matched_map_list, rest] = s:get_matched_and_rest(table, rom_str, 1)
+    let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
     if empty(matched_map_list)
         if input_style ==# 'skk'
             if rest ==# char
@@ -451,7 +436,7 @@ function! s:filter_rom_to_hira_no_match(stash) "{{{
                 call buf_str.set_rom_str(rest)
             endif
         else
-            let [matched_map_list, rest2] = s:get_matched_and_rest(table, rom_str, 0)
+            let [matched_map_list, rest2] = s:get_matched_and_rest(a:table, rom_str, 0)
             if empty(matched_map_list)
                 call buf_str.set_rom_str(rest2)
             else
@@ -472,7 +457,7 @@ endfunction "}}}
 
 
 
-function! eskk#mode#builtin#asym_filter(stash) "{{{
+function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let henkan_phase = buftable.get_henkan_phase()
@@ -505,14 +490,14 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
 
 
     let mode_table = {
-    \   'hira': s:rom_to_hira,
-    \   'kata': s:rom_to_kata,
-    \   'hankata': s:rom_to_hankata,
+    \   'hira': 'rom_to_hira',
+    \   'kata': 'rom_to_kata',
+    \   'hankata': 'rom_to_hankata',
     \}
     let cur_mode = eskk#get_mode()
     let phase = buftable.get_henkan_phase()
 
-    if has_key(mode_table, cur_mode) && s:stash.get('current_table') is mode_table[cur_mode]
+    if has_key(mode_table, cur_mode) && a:table_name ==# mode_table[cur_mode]
         let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
         let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
         let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
@@ -553,16 +538,16 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
 
 
     if henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return s:filter_rom_to_hira(a:stash)
+        return s:filter_rom_to_hira(a:stash, a:table_name)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_henkan_key(char)
             return s:henkan_key(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
-            return s:filter_rom_to_hira(a:stash)
+            return s:filter_rom_to_hira(a:stash, a:table_name)
         endif
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return s:filter_rom_to_hira(a:stash)
+        return s:filter_rom_to_hira(a:stash, a:table_name)
     elseif henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         if eskk#is_special_lhs(char, 'henkan-select:choose-next')
             return s:get_next_candidate(a:stash, 1)
@@ -577,36 +562,6 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
     else
         let msg = printf("eskk#mode#builtin#asym_filter() does not support phase %d.", phase)
         throw eskk#internal_error(['eskk'], msg)
-    endif
-endfunction "}}}
-
-" }}}
-
-" Symmetric built-in modes. {{{
-
-" Variables {{{
-let s:rom_to_ascii  = {}
-let s:rom_to_zenei  = eskk#table#new('rom_to_zenei')
-" }}}
-
-
-
-function! eskk#mode#builtin#sym_filter(stash) "{{{
-    let c = a:stash.char
-    if s:stash.get('current_table') is s:rom_to_ascii    " ascii
-        if eskk#is_special_lhs(c, 'mode:ascii:to-hira')
-            call eskk#set_mode('hira')
-        else
-            let a:stash.return = c
-        endif
-    else    " zenei
-        if eskk#is_special_lhs(c, 'mode:zenei:to-hira')
-            call eskk#set_mode('hira')
-        elseif s:stash.get('current_table').has_map(c)
-            let a:stash.return = s:stash.get('current_table').get_map_to(c)
-        else
-            let a:stash.return = c
-        endif
     endif
 endfunction "}}}
 
