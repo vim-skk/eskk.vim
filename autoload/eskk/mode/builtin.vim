@@ -38,7 +38,7 @@ function! eskk#mode#builtin#do_ctrl_q_key(stash) "{{{
 
     " TODO
 endfunction "}}}
-function! eskk#mode#builtin#do_q_key(stash) "{{{
+function! eskk#mode#builtin#do_q_key(stash, table_name) "{{{
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
 
@@ -488,7 +488,7 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     elseif eskk#is_special_lhs(char, q_key)
     \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
-        call eskk#mode#builtin#do_q_key(a:stash)
+        call eskk#mode#builtin#do_q_key(a:stash, a:table_name)
         return
     elseif eskk#is_special_lhs(char, to_ascii)
     \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
