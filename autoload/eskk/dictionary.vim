@@ -168,7 +168,7 @@ function! s:henkan_result_get_result(this) "{{{
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
         " Look up this henkan result in dictionaries.
         let found = 0
-        for dict in a:this._dict._physical_dicts
+        for dict in [a:this._dict._user_dict, a:this._dict._system_dict]
             let line = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
             if type(line) == type("")
                 let found = 1
@@ -322,10 +322,10 @@ let s:physical_dict = {
 \   'encoding': '',
 \}
 
-function! s:physical_dict_new(path, sorted, encoding, is_user_dict) "{{{
+function! s:physical_dict_new(path, sorted, encoding) "{{{
     return extend(
     \   deepcopy(s:physical_dict),
-    \   {'path': expand(a:path), 'sorted': a:sorted, 'encoding': a:encoding, 'is_user_dict': a:is_user_dict},
+    \   {'path': expand(a:path), 'sorted': a:sorted, 'encoding': a:encoding},
     \   'force'
     \)
 endfunction "}}}
@@ -373,37 +373,26 @@ lockvar s:physical_dict
 " implementation of searching dictionaries.
 
 let s:dict = {
-\   '_physical_dicts': [],
 \   '_user_dict': {},
+\   '_system_dict': {},
 \   '_added_words': [],
 \}
 
-function! eskk#dictionary#new(dict_info) "{{{
-    if type(a:dict_info) == type([])
-        let dicts = map(copy(a:dict_info), 's:physical_dict_new(v:val.path, v:val.sorted, v:val.encoding, get(v:val, "is_user_dict", 0))')
-    elseif type(a:dict_info) == type({})
-        return eskk#dictionary#new([a:dict_info])
-    else
-        throw eskk#internal_error(['eskk', 'dictionary'], "eskk#dictionary#new(): invalid argument")
-    endif
-
-    " Check if any dictionary has "is_user_dict" key.
-    let user_dict = {}
-    let found = 0
-    for d in dicts
-        if d.is_user_dict
-            let user_dict = d
-            let found = 1
-            break
-        endif
-    endfor
-    if !found
-        throw eskk#internal_error(['eskk', 'dictionary'], "No 'is_user_dict' key in dictionaries.")
-    endif
-
+function! eskk#dictionary#new(user_dict, system_dict) "{{{
     return extend(
     \   deepcopy(s:dict),
-    \   {'_physical_dicts': dicts, '_user_dict': user_dict},
+    \   {
+    \       '_user_dict': s:physical_dict_new(
+    \           a:user_dict.path,
+    \           a:user_dict.sorted,
+    \           a:user_dict.encoding,
+    \       ),
+    \       '_system_dict': s:physical_dict_new(
+    \           a:system_dict.path,
+    \           a:system_dict.sorted,
+    \           a:system_dict.encoding,
+    \       ),
+    \   },
     \   'force'
     \)
 endfunction "}}}

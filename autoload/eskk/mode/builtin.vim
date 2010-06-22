@@ -41,10 +41,10 @@ let s:rom_to_hira    = eskk#table#new('rom_to_hira')
 let s:rom_to_kata    = eskk#table#new('rom_to_kata')
 let s:rom_to_hankata = eskk#table#new('rom_to_hankata')
 
-call s:stash.init('skk_dict', eskk#dictionary#new([
-\   extend(deepcopy(g:eskk_dictionary), {'is_user_dict': 1}),
+call s:stash.init('skk_dict', eskk#dictionary#new(
+\   g:eskk_dictionary,
 \   g:eskk_large_dictionary,
-\]))
+\))
 call s:stash.init('current_henkan_result', {})
 " }}}
 
