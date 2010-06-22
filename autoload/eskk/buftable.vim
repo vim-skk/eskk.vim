@@ -338,11 +338,7 @@ function! s:buftable.step_henkan_phase(stash) dict "{{{
         let step = 0
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         call self.do_enter(a:stash)
-        call eskk#register_temp_event(
-        \   'filter-redispatch',
-        \   'eskk#call_via_filter',
-        \   ['eskk#sticky_key', []]
-        \)
+        call eskk#sticky_key(a:stash)
 
         let step = 1
     else

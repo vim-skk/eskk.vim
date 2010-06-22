@@ -537,7 +537,7 @@ function! eskk#mode#builtin#asym_filter(stash) "{{{
             return
         elseif eskk#is_big_letter(char)
             call eskk#sticky_key(a:stash)
-            call eskk#filter(tolower(char))
+            call eskk#register_temp_event('filter-redispatch', 'eskk#filter', [tolower(char)])
             return
         else
             " Fall through.
