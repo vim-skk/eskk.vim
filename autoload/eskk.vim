@@ -588,28 +588,34 @@ function! eskk#map(type, options, lhs, rhs) "{{{
 endfunction "}}}
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
     let self = a:self
-
     let lhs = a:lhs
-    if lhs == ''
-        echoerr "lhs must not be empty string."
-        return
-    endif
+    let rhs = a:rhs
+
     if !has_key(s:map, a:type)
-        echoerr "eskk#map(): unknown type: " . a:type
+        call eskk#util#warn('%s: unknown type: %s', a:from, a:type)
         return
     endif
     let type_st = s:map[a:type]
 
     if a:type ==# 'general'
+        if lhs == ''
+            call eskk#util#warn("lhs must not be empty string.")
+            return
+        endif
         if has_key(type_st, lhs) && a:options.unique
-            echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
+            call eskk#util#warnf("%s: Already mapped to '%s'.", a:from, lhs)
             return
         endif
         let type_st[lhs] = {
         \   'options': a:options,
-        \   'rhs': a:rhs
+        \   'rhs': rhs
         \}
     else
+        if a:options.unique && has_key(type_st, 'lhs')
+            let msg = printf('%s: -unique is specified and mapping already exists. skip.', a:type)
+            call eskk#util#warn(msg)
+            return
+        endif
         let type_st.options = a:options
         let type_st.lhs = lhs
     endif
