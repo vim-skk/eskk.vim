@@ -228,15 +228,18 @@ function! s:eskk.is_supported_mode(mode) dict "{{{
     return has_key(s:available_modes, a:mode)
 endfunction "}}}
 function! s:eskk.register_mode(mode, ...) dict "{{{
-    let mode_self = a:0 != 0 ? a:1 : {}
-    let s:available_modes[a:mode] = mode_self
+    let s:available_modes[a:mode] = extend(
+    \   (a:0 ? a:1 : {}),
+    \   {'sandbox': {}},
+    \   'keep'
+    \)
 endfunction "}}}
 function! s:eskk.validate_mode_structure(mode) dict "{{{
     " It should be good to call this function at the end of mode register.
 
     let st = self.get_mode_structure(a:mode)
 
-    for key in ['filter']
+    for key in ['filter', 'sandbox']
         if !has_key(st, key)
             throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
         endif
