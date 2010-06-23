@@ -48,7 +48,7 @@ function! dict.filter(stash)
         call eskk#set_mode('hira')
     else
         if !has_key(self.sandbox, 'table')
-            let self.sandbox.table = eskk#table#new('rom_to_zenei')
+            let self.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
         endif
         let a:stash.return = self.sandbox.table.get_map_to(a:stash.char, a:stash.char)
     endif
@@ -62,7 +62,7 @@ call eskk#register_mode('hira')
 let dict = eskk#get_mode_structure('hira')
 
 function! dict.filter(...)
-    return call('eskk#mode#builtin#asym_filter', a:000 + ['rom_to_hira'])
+    return call('eskk#mode#builtin#asym_filter', a:000 + [g:eskk_mode_use_tables.hira])
 endfunction
 
 call eskk#validate_mode_structure('hira')
@@ -73,7 +73,7 @@ call eskk#register_mode('kata')
 let dict = eskk#get_mode_structure('kata')
 
 function! dict.filter(...)
-    return call('eskk#mode#builtin#asym_filter', a:000 + ['rom_to_kata'])
+    return call('eskk#mode#builtin#asym_filter', a:000 + [g:eskk_mode_use_tables.kata])
 endfunction
 
 call eskk#validate_mode_structure('kata')
@@ -84,7 +84,7 @@ call eskk#register_mode('hankata')
 let dict = eskk#get_mode_structure('hankata')
 
 function! dict.filter(...)
-    return call('eskk#mode#builtin#asym_filter', a:000 + ['rom_to_hankata'])
+    return call('eskk#mode#builtin#asym_filter', a:000 + [g:eskk_mode_use_tables.hankata])
 endfunction
 
 call eskk#validate_mode_structure('hankata')
