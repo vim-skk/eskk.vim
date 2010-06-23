@@ -395,8 +395,8 @@ function! s:get_next_candidate(self, stash, next) "{{{
 
             let revert_style = eskk#util#option_value(
             \   g:eskk_revert_henkan_style,
-            \   ['okuri-one', 'delete-okuri', 'concat-okuri'],
-            \   0
+            \   ['okuri-one', 'okuri', 'delete-okuri', 'concat-okuri'],
+            \   1
             \)
             if revert_style ==# 'okuri-one'
                 " "▼書く" => "▽か*k"
@@ -405,6 +405,10 @@ function! s:get_next_candidate(self, stash, next) "{{{
                     call okuri_buf_str.set_rom_str(okuri_buf_str.get_rom_str()[0])
                     call okuri_buf_str.clear_matched()
                 endif
+            elseif revert_style ==# 'okuri'
+                " "▼書く" => "▽か*く"
+                let okuri_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                call okuri_buf_str.clear_rom_str()
             elseif revert_style ==# 'delete-okuri'
                 " "▼書く" => "▽か"
                 let henkan_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)

@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 12))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 13))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -164,7 +164,7 @@ if !exists("g:eskk_keep_state")
 endif
 
 if !exists("g:eskk_revert_henkan_style")
-    let g:eskk_revert_henkan_style = 'okuri-one'
+    let g:eskk_revert_henkan_style = 'okuri'
 endif
 
 if !exists("g:eskk_delete_implies_kakutei")
