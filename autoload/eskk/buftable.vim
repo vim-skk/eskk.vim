@@ -356,6 +356,76 @@ function! s:buftable.do_backspace(stash) dict "{{{
         endif
     endfor
 endfunction "}}}
+function! s:buftable.choose_next_candidate(stash) dict "{{{
+    return s:get_next_candidate(a:stash, 1)
+endfunction "}}}
+function! s:buftable.choose_prev_candidate(stash) dict "{{{
+    return s:get_next_candidate(a:stash, 0)
+endfunction "}}}
+function! s:get_next_candidate(stash, next) "{{{
+    let buftable = eskk#get_buftable()
+    let cur_buf_str = buftable.get_current_buf_str()
+    let henkan_result = eskk#get_henkan_result()
+
+    if henkan_result[a:next ? 'advance' : 'back']()
+        let candidate = henkan_result.get_candidate()
+        call eskk#util#assert(type(candidate) == type(""))
+
+        " Set candidate.
+        call cur_buf_str.set_filter_str(candidate)
+    else
+        " No more candidates.
+        if a:next
+            " Register new word when it advanced or backed current result index,
+            " And tried to step at last candidates but failed.
+            let input = eskk#get_dictionary().register_word(henkan_result)
+            call cur_buf_str.set_filter_str(input)
+        else
+            " Restore previous buftable state
+
+            let buftable = henkan_result._buftable
+
+            let revert_style = eskk#util#option_value(
+            \   g:eskk_revert_henkan_style,
+            \   ['eskk', 'aquaskk', 'skk'],
+            \   0
+            \)
+            if revert_style ==# 'eskk'
+                " "▼書く" => "▽か*k"
+                let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                if okuri_buf_str.get_rom_str() != ''
+                    call okuri_buf_str.set_rom_str(okuri_buf_str.get_rom_str()[0])
+                    call okuri_buf_str.clear_filter_str()
+                endif
+            elseif revert_style ==# 'aquaskk'
+                " "▼書く" => "▽か"
+                let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                if okuri_buf_str.get_rom_str() != ''
+                    call henkan_buf_str.clear_rom_str()
+                    call okuri_buf_str.clear_rom_str()
+                    call okuri_buf_str.clear_filter_str()
+                    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                endif
+            elseif revert_style ==# 'skk'
+                " "▼書く" => "▽かく"
+                let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                if okuri_buf_str.get_rom_str() != ''
+                    call henkan_buf_str.push_filter_str(okuri_buf_str.get_filter_str())
+                    call henkan_buf_str.clear_rom_str()
+                    call okuri_buf_str.clear_rom_str()
+                    call okuri_buf_str.clear_filter_str()
+                    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                endif
+            else
+                throw eskk#internal_error(['eskk', 'mode', 'builtin'])
+            endif
+
+            call eskk#set_buftable(buftable)
+        endif
+    endif
+endfunction "}}}
 
 function! s:buftable.step_henkan_phase(stash) dict "{{{
     let step    = 0
