@@ -123,7 +123,7 @@ function! s:eskk.map_all_keys(...) dict "{{{
 
     " Map escape key.
     execute
-    \   'lnoremap'
+    \   'lmap'
     \   '<buffer><expr>' . (a:0 ? s:mapopt_chars2raw(a:1) : '')
     \   s:map.escape.lhs
     \   'eskk#escape_key()'
@@ -174,7 +174,7 @@ endfunction "}}}
 function! s:eskk.escape_key() dict "{{{
     let kakutei_str = self.kakutei_str()
     call self.buftable.reset()
-    return kakutei_str . "\<Esc>"
+    return kakutei_str . "\<Plug>(eskk:internal:escape-key)"
 endfunction "}}}
 
 " Mode
