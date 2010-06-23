@@ -1461,7 +1461,7 @@ autocmd InsertLeave * call s:autocmd_insert_leave()
 function! s:do_default_mappings() "{{{
     silent EskkMap -type=sticky -unique ;
     silent EskkMap -type=henkan -unique <Space>
-    silent silent EskkMap -type=escape -unique <Esc>
+    silent EskkMap -type=escape -unique <Esc>
 
     silent EskkMap -type=henkan-select:choose-next -unique <Space>
     silent EskkMap -type=henkan-select:choose-prev -unique x
