@@ -41,7 +41,7 @@ lockvar eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
 
 " Functions {{{
 " s:buffer_string {{{
-let s:buffer_string = {'_pos': [], '_rom_str': '', '_matched_pairs': []}
+let s:buffer_string = {'_rom_str': '', '_matched_pairs': []}
 
 function! s:buffer_string_new() "{{{
     return deepcopy(s:buffer_string)
@@ -54,13 +54,6 @@ function! s:buffer_string.reset() dict "{{{
             let self[k] = deepcopy(s:buftable[k])
         endif
     endfor
-endfunction "}}}
-
-function! s:buffer_string.set_pos(expr) dict "{{{
-    let self._pos = getpos(a:expr)
-endfunction "}}}
-function! s:buffer_string.get_pos() dict "{{{
-    return self._pos
 endfunction "}}}
 
 
@@ -126,6 +119,7 @@ let s:buftable = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
+\   '_begin_pos': [],
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
 
@@ -608,13 +602,21 @@ function! s:buftable.clear_all() dict "{{{
 endfunction "}}}
 
 
+function! s:buftable.get_begin_pos() dict "{{{
+    return self._begin_pos
+endfunction "}}}
+function! s:buftable.set_begin_pos(expr) dict "{{{
+    let self._begin_pos = getpos(a:expr)
+endfunction "}}}
+
+
 function! s:buftable.dump() dict "{{{
     let lines = []
     call add(lines, printf('current phase:%d', self._henkan_phase))
+    call add(lines, printf('begin pos: %s', string(self.get_begin_pos())))
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call add(lines, printf('phase:%d', phase))
-        call add(lines, printf('pos: %s', string(buf_str.get_pos())))
         call add(lines, printf('rom_str: %s', string(buf_str.get_rom_str())))
         call add(lines, printf('matched pairs: %s', string(buf_str.get_matched())))
     endfor
