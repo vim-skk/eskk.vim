@@ -217,6 +217,7 @@ function! s:merge_results(user_dict_result, system_dict_result) "{{{
 
     return results
 endfunction "}}}
+
 function! s:henkan_result_select_candidates(this) "{{{
     " Select candidates by getchar()'s character.
     let words = copy(a:this._result[0])
@@ -249,7 +250,12 @@ function! s:henkan_result_select_candidates(this) "{{{
         endfor
 
         " Get char for selected candidate.
-        let char = s:getchar()
+        try
+            let char = s:getchar()
+        catch /^Vim:Interrupt$/
+            throw 'eskk: leave henkan select'
+        endtry
+
 
         if eskk#is_special_lhs(char, 'henkan-select:escape')
             throw 'eskk: leave henkan select'
