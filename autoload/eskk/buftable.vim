@@ -487,7 +487,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = s:get_table_lazy('kata_to_hira')
+            let table = eskk#util#get_table_lazy('kata_to_hira')
             let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
             let filter_str = henkan_buf_str.get_filter_str()
             call henkan_buf_str.clear_filter_str()
@@ -535,10 +535,10 @@ function! s:buftable.do_henkan(stash) dict "{{{
     endif
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
-    return s:convert_map_rom_list(self, s:get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+    return s:convert_map_rom_list(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_q_key() dict "{{{
-    return s:convert_map_rom_list(self, s:get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+    return s:convert_map_rom_list(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:convert_map_rom_list(self, table) "{{{
     let self = a:self
@@ -573,15 +573,6 @@ function! s:convert_map_rom_list(self, table) "{{{
     \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
     \   []
     \)
-endfunction "}}}
-function! s:get_table_lazy(table_name) "{{{
-    let varname = 's:' . a:table_name
-    if exists(varname)
-        return {varname}
-    else
-        let {varname} = eskk#table#new(a:table_name)
-        return {varname}
-    endif
 endfunction "}}}
 
 function! s:buftable.get_sandbox() dict "{{{
