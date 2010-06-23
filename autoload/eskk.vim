@@ -376,15 +376,17 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 
     catch
         let lines = []
-        call add(lines, '!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        call add(lines, '--- char ---')
+        call add(lines, printf('char: %s', a:char))
+        call add(lines, '--- char ---')
         call add(lines, '--- exception ---')
         call add(lines, printf('v:exception: %s', v:exception))
         call add(lines, printf('v:throwpoint: %s', v:throwpoint))
+        call add(lines, '--- exception ---')
         call add(lines, '--- buftable ---')
         let lines += self.get_buftable().dump()
-        call add(lines, '--- char ---')
-        call add(lines, printf('char: %s', a:char))
-        call add(lines, '!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        call add(lines, '--- buftable ---')
+        call add(lines, '')
         call add(lines, '')
         call add(lines, "Please report this error to author.")
         call add(lines, "`:help eskk` to see author's e-mail address.")
