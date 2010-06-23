@@ -350,18 +350,15 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         if type(ret_str) == type("")
             return ret_str
         else
-            " NOTE: Because of Vim's bug, `:lmap` can't remap to `:lmap`.
-            execute
-            \   'map!'
-            \   '<buffer><expr>'
-            \   '<Plug>(eskk:_filter_redispatch)'
-            \   (self.has_events('filter-redispatch') ?
-            \       'join(eskk#throw_event("filter-redispatch"))'
-            \       : '""')
-
-            return
-            \   self.rewrite()
-            \   . "\<Plug>(eskk:_filter_redispatch)"
+            if self.has_events('filter-redispatch')
+                " NOTE: Because of Vim's bug, `:lmap` can't remap to `:lmap`.
+                noremap! <buffer><expr> <Plug>(eskk:_filter_redispatch) join(eskk#throw_event("filter-redispatch"))
+                return
+                \   self.rewrite()
+                \   . "\<Plug>(eskk:_filter_redispatch)"
+            else
+                return self.rewrite()
+            endif
         endif
 
     catch
