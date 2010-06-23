@@ -286,8 +286,6 @@ function! s:buftable.push_kakutei_str(str) dict "{{{
 endfunction "}}}
 
 function! s:buftable.do_enter(stash) dict "{{{
-    call eskk#util#log("s:buftable.do_enter()")
-
     let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     let henkan_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
@@ -480,8 +478,6 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     endif
 endfunction "}}}
 function! s:buftable.do_henkan(stash) dict "{{{
-    call eskk#util#log('henkan!')
-
     let phase = self.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
