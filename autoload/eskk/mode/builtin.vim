@@ -78,63 +78,6 @@ function! s:get_table_lazy(table_name) "{{{
     endif
 endfunction "}}}
 
-function! s:henkan_key(stash) "{{{
-    call eskk#util#log('henkan!')
-
-    let buftable = eskk#get_buftable()
-    let phase = buftable.get_henkan_phase()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = s:get_table_lazy('kata_to_hira')
-            let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-            let filter_str = henkan_buf_str.get_filter_str()
-            call henkan_buf_str.clear_filter_str()
-            for wchar in split(filter_str, '\zs')
-                call henkan_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
-            endfor
-            let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-            let filter_str = okuri_buf_str.get_filter_str()
-            call okuri_buf_str.clear_filter_str()
-            for wchar in split(filter_str, '\zs')
-                call okuri_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
-            endfor
-        endif
-
-        call eskk#set_henkan_result(eskk#get_dictionary().refer(buftable))
-
-        " Enter henkan select phase.
-        call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-
-        " Clear phase henkan/okuri buffer string.
-        " Assumption: `eskk#get_dictionary().refer()` saves necessary strings.
-        let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        call henkan_buf_str.clear_rom_str()
-        call henkan_buf_str.clear_filter_str()
-        let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-        call okuri_buf_str.clear_rom_str()
-        call okuri_buf_str.clear_filter_str()
-
-        let buf_str = buftable.get_current_buf_str()
-        let candidate = eskk#get_henkan_result().get_candidate()
-
-        if type(candidate) == type("")
-            " Set candidate.
-            call buf_str.set_filter_str(candidate)
-        else
-            " No candidates.
-            let input = eskk#get_dictionary().register_word(eskk#get_henkan_result())
-            call buf_str.set_filter_str(input)
-        endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        throw eskk#internal_error(['eskk', 'mode', 'builtin'])
-    else
-        let msg = printf("s:henkan_key() does not support phase %d.", phase)
-        throw eskk#internal_error(['eskk', 'mode', 'builtin'], msg)
-    endif
-endfunction "}}}
-
 function! s:generate_map_list(str, tail, ...) "{{{
     let str = a:str
     let result = a:0 != 0 ? a:1 : []
@@ -333,7 +276,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endif
         endif
 
-        call s:henkan_key(a:stash)
+        call buftable.do_henkan(a:stash)
     endif
 endfunction "}}}
 function! s:filter_rom_has_candidates(stash) "{{{
@@ -465,7 +408,7 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
         return s:filter_rom(a:stash, a:table_name)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_special_lhs(char, 'henkan')
-            return s:henkan_key(a:stash)
+            return buftable.do_henkan(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
             return s:filter_rom(a:stash, a:table_name)
