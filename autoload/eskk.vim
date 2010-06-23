@@ -430,8 +430,9 @@ let s:available_modes = {}
 let s:map = {
 \   'general': {},
 \   'sticky': {},
-\   'henkan': {},
 \   'escape': {},
+\   'phase:henkan:henkan-key': {},
+\   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
 \   'phase:henkan-select:choose-prev': {},
 \   'phase:henkan-select:next-page': {},
@@ -461,6 +462,8 @@ let s:map = {
 " Keys used by only its mode.
 let s:mode_local_keys = {
 \   'hira': [
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
 \       'phase:henkan-select:choose-prev',
 \       'phase:henkan-select:next-page',
@@ -474,6 +477,8 @@ let s:mode_local_keys = {
 \       'mode:hira:to-zenei',
 \   ],
 \   'kata': [
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
 \       'phase:henkan-select:choose-prev',
 \       'phase:henkan-select:next-page',
@@ -487,6 +492,8 @@ let s:mode_local_keys = {
 \       'mode:kata:to-zenei',
 \   ],
 \   'hankata': [
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
 \       'phase:henkan-select:choose-prev',
 \       'phase:henkan-select:next-page',
@@ -969,14 +976,19 @@ function! eskk#asym_filter(stash, table_name) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom(a:stash, a:table_name)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if eskk#is_special_lhs(char, 'henkan')
+        if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
             return buftable.do_henkan(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return s:filter_rom(a:stash, a:table_name)
+        if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
+            return buftable.do_henkan(a:stash)
+            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+        else
+            return s:filter_rom(a:stash, a:table_name)
+        endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
             call buftable.choose_next_candidate(a:stash)
@@ -1462,6 +1474,10 @@ function! s:do_default_mappings() "{{{
     silent EskkMap -type=sticky -unique ;
     silent EskkMap -type=henkan -unique <Space>
     silent EskkMap -type=escape -unique <Esc>
+
+    silent EskkMap -type=phase:henkan:henkan-key -unique <Space>
+
+    silent EskkMap -type=phase:okuri:henkan-key -unique <Space>
 
     silent EskkMap -type=phase:henkan-select:choose-next -unique <Space>
     silent EskkMap -type=phase:henkan-select:choose-prev -unique x
