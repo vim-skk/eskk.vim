@@ -1488,12 +1488,12 @@ endfunction "}}}
 
 " Exceptions {{{
 function! s:build_error(from, msg) "{{{
-    return join(a:from, ': ') . ' - ' . join(a:msg, ': ')
+    return 'eskk: ' . join(a:msg, ': ') . ' at ' . join(a:from, '#')
 endfunction "}}}
 function! eskk#get_exception_message(error_str) "{{{
     " Get only `a:msg` of s:build_error().
     let s = a:error_str
-    let s = substitute(s, '^.\{-} - ', '', '')
+    let s = substitute(s, '^eskk: ', '', '')
     return s
 endfunction "}}}
 

@@ -152,7 +152,7 @@ function! s:henkan_result_advance(self, advance) "{{{
         else
             return 0
         endif
-    catch /^eskk: dictionary - dictionary look up error/
+    catch /^eskk: dictionary look up error:/
         return 0
     endtry
 endfunction "}}}
@@ -328,7 +328,7 @@ function! s:henkan_result.get_candidate() dict "{{{
         else
             return candidates[idx].result . self._okuri
         endif
-    catch /^eskk: dictionary - dictionary look up error/
+    catch /^eskk: dictionary look up error:/
         return -1
     endtry
 endfunction "}}}
