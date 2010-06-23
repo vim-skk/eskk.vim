@@ -324,16 +324,19 @@ function! s:buftable.do_backspace(stash) dict "{{{
 
     let phase = self.get_henkan_phase()
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        " Pretend skk.vim behavior.
-        " Enter normal phase and delete one character.
-        let filter_str = eskk#util#mb_chop(self.get_display_str(0))
-        call self.push_kakutei_str(filter_str)
-        let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-        call henkan_buf_str.clear()
+        if g:eskk_delete_implies_kakutei
+            " Enter normal phase and delete one character.
+            let filter_str = eskk#util#mb_chop(self.get_display_str(0))
+            call self.push_kakutei_str(filter_str)
+            let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+            call henkan_buf_str.clear()
 
-        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-        return
+            call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+            return
+        else
+            call self.choose_prev_candidate(a:stash)
+            return
+        endif
     endif
 
     " Build backspaces to delete previous characters.
