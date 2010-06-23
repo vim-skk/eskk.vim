@@ -395,17 +395,17 @@ function! s:get_next_candidate(self, stash, next) "{{{
 
             let revert_style = eskk#util#option_value(
             \   g:eskk_revert_henkan_style,
-            \   ['eskk', 'aquaskk', 'skk'],
+            \   ['okuri-one', 'delete-okuri', 'concat-okuri'],
             \   0
             \)
-            if revert_style ==# 'eskk'
+            if revert_style ==# 'okuri-one'
                 " "▼書く" => "▽か*k"
                 let okuri_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 if okuri_buf_str.get_rom_str() != ''
                     call okuri_buf_str.set_rom_str(okuri_buf_str.get_rom_str()[0])
                     call okuri_buf_str.clear_matched()
                 endif
-            elseif revert_style ==# 'aquaskk'
+            elseif revert_style ==# 'delete-okuri'
                 " "▼書く" => "▽か"
                 let henkan_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 let okuri_buf_str  = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
@@ -414,7 +414,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
                     call okuri_buf_str.clear()
                     call prev_buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
-            elseif revert_style ==# 'skk'
+            elseif revert_style ==# 'concat-okuri'
                 " "▼書く" => "▽かく"
                 let henkan_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 let okuri_buf_str  = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
