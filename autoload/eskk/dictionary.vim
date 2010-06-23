@@ -16,11 +16,9 @@ runtime! plugin/eskk.vim
 " TODO
 " - Compile dictionary (s:dict._dict_info) to refer to result.
 
-" Functions {{{
+" Utility autoload functions {{{
 
-" Searching Functions {{{
-
-function! s:search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
+function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
@@ -39,7 +37,6 @@ function! s:search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
         return ['', -1]
     endif
 endfunction "}}}
-
 function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     call eskk#util#log('s:search_binary()')
@@ -71,7 +68,6 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     endwhile
     return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
 endfunction "}}}
-
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     call eskk#util#log('s:search_linear()')
@@ -98,7 +94,89 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     return ['', -1]
 endfunction "}}}
 
+function! eskk#dictionary#parse_skk_dict_line(line) "{{{
+    call eskk#util#assert(a:line =~# '^/.\+/$')
+    let line = a:line[1:-2]
+
+    let candidates = []
+    for _ in split(line, '/')
+        let semicolon = stridx(_, ';')
+        if semicolon != -1
+            call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
+        else
+            call add(candidates, {'result': _, 'annotation': ''})
+        endif
+    endfor
+
+    return candidates
+endfunction "}}}
+
+function! eskk#dictionary#merge_results(user_dict_result, system_dict_result) "{{{
+    " Merge.
+    let results =
+    \   (a:user_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:user_dict_result[0]) : [])
+    \   + (a:system_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:system_dict_result[0]) : [])
+
+    " Unique.
+    let unique = {}
+    let i = 0
+    while i < len(results)
+        let r = results[i]
+        let str = r.result
+
+        if has_key(unique, str)
+            if r.annotation ==# unique[str].annotation
+                " If `result` and `annotation` is same as old one, Remove new one.
+                call remove(results, i)
+                " Next element is results[i], Don't increment.
+                continue
+            endif
+        else
+            let unique[str] = r
+        endif
+        let i += 1
+    endwhile
+
+    return results
+endfunction "}}}
+
+function! eskk#dictionary#create_new_entry(new_word, key, okuri, okuri_rom, existing_line) "{{{
+    " TODO:
+    " Rewrite for eskk.
+    " This function is from skk.vim's s:SkkMakeNewEntry().
+
+    " Modify to make same input to original s:SkkMakeNewEntry().
+    let key = a:key . (a:okuri_rom == '' ? '' : a:okuri_rom[0]) . ' '
+    let cand = a:new_word
+    let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
+
+
+    let entry = key . '/' . cand . '/'
+    let sla1 = match(line, '/', 0)
+    if line[sla1 + 1] == '['
+        let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
+    else
+        let sla2 = match(line, '/', sla1 + 1)
+    endif
+    while sla2 != -1
+        let s = strpart(line, sla1 + 1, sla2 - sla1 - 1)
+        let sla1 = sla2
+        if line[sla1 + 1] == '['
+            let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
+        else
+            let sla2 = match(line, '/', sla1 + 1)
+        endif
+        if s ==# cand
+            continue
+        endif
+        let entry = entry . s . '/'
+    endwhile
+    return entry
+endfunction "}}}
+
 " }}}
+
+" Functions {{{
 
 " s:henkan_result {{{
 
@@ -170,10 +248,10 @@ function! s:henkan_result_get_result(this) "{{{
         endif
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
         " Look up this henkan result in dictionaries.
-        let user_dict_result = s:search_next_candidate(
+        let user_dict_result = eskk#dictionary#search_next_candidate(
         \   a:this._dict._user_dict, a:this._key, a:this._okuri_rom
         \)
-        let system_dict_result = s:search_next_candidate(
+        let system_dict_result = eskk#dictionary#search_next_candidate(
         \   a:this._dict._system_dict, a:this._key, a:this._okuri_rom
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
@@ -181,41 +259,12 @@ function! s:henkan_result_get_result(this) "{{{
         endif
         " Merge and unique user dict result and system dict result.
         let a:this._result = [
-        \   s:merge_results(user_dict_result, system_dict_result),
+        \   eskk#dictionary#merge_results(user_dict_result, system_dict_result),
         \   0
         \]
         let a:this._status = s:GOT_RESULT
         return a:this._result
     endif
-endfunction "}}}
-
-function! s:merge_results(user_dict_result, system_dict_result) "{{{
-    " Merge.
-    let results =
-    \   (a:user_dict_result[1] !=# -1 ? s:parse_skk_dict_line(a:user_dict_result[0]) : [])
-    \   + (a:system_dict_result[1] !=# -1 ? s:parse_skk_dict_line(a:system_dict_result[0]) : [])
-
-    " Unique.
-    let unique = {}
-    let i = 0
-    while i < len(results)
-        let r = results[i]
-        let str = r.result
-
-        if has_key(unique, str)
-            if r.annotation ==# unique[str].annotation
-                " If `result` and `annotation` is same as old one, Remove new one.
-                call remove(results, i)
-                " Next element is results[i], Don't increment.
-                continue
-            endif
-        else
-            let unique[str] = r
-        endif
-        let i += 1
-    endwhile
-
-    return results
 endfunction "}}}
 
 function! s:henkan_result_select_candidates(this) "{{{
@@ -284,23 +333,6 @@ function! s:henkan_result_select_candidates(this) "{{{
             endfor
         endif
     endwhile
-endfunction "}}}
-
-function! s:parse_skk_dict_line(line) "{{{
-    call eskk#util#assert(a:line =~# '^/.\+/$')
-    let line = a:line[1:-2]
-
-    let candidates = []
-    for _ in split(line, '/')
-        let semicolon = stridx(_, ';')
-        if semicolon != -1
-            call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
-        else
-            call add(candidates, {'result': _, 'annotation': ''})
-        endif
-    endfor
-
-    return candidates
 endfunction "}}}
 
 function! s:getchar(...) "{{{
@@ -542,7 +574,7 @@ function! s:dict.update_dictionary() dict "{{{
 
     " Check if a:self.user_dict really does not have added words.
     for [input, key, okuri, okuri_rom] in self._added_words
-        let [line, index] = s:search_next_candidate(self._user_dict, key, okuri_rom)
+        let [line, index] = eskk#dictionary#search_next_candidate(self._user_dict, key, okuri_rom)
         if okuri_rom != ''
             let lnum = self._user_dict.okuri_ari_lnum + 1
         else
@@ -555,7 +587,7 @@ function! s:dict.update_dictionary() dict "{{{
         " Merge old one and create new entry.
         call insert(
         \   user_dict_lines,
-        \   s:create_new_entry(input, key, okuri, okuri_rom, line),
+        \   eskk#dictionary#create_new_entry(input, key, okuri, okuri_rom, line),
         \   lnum
         \)
     endfor
@@ -579,42 +611,6 @@ function! s:dict.update_dictionary() dict "{{{
         \    "'" . self._user_dict.path . "' - " . v:exception
         echohl None
     endtry
-endfunction "}}}
-
-
-
-function! s:create_new_entry(new_word, key, okuri, okuri_rom, existing_line) "{{{
-    " TODO:
-    " Rewrite for eskk.
-    " This function is from skk.vim's s:SkkMakeNewEntry().
-
-    " Modify to make same input to original s:SkkMakeNewEntry().
-    let key = a:key . (a:okuri_rom == '' ? '' : a:okuri_rom[0]) . ' '
-    let cand = a:new_word
-    let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
-
-
-    let entry = key . '/' . cand . '/'
-    let sla1 = match(line, '/', 0)
-    if line[sla1 + 1] == '['
-        let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
-    else
-        let sla2 = match(line, '/', sla1 + 1)
-    endif
-    while sla2 != -1
-        let s = strpart(line, sla1 + 1, sla2 - sla1 - 1)
-        let sla1 = sla2
-        if line[sla1 + 1] == '['
-            let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
-        else
-            let sla2 = match(line, '/', sla1 + 1)
-        endif
-        if s ==# cand
-            continue
-        endif
-        let entry = entry . s . '/'
-    endwhile
-    return entry
 endfunction "}}}
 
 lockvar s:dict
