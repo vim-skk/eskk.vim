@@ -1201,7 +1201,11 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endif
         endif
 
-        call buftable.do_henkan(a:stash)
+        call okuri_buf_str.clear_rom_str()
+
+        if g:eskk_auto_henkan_at_okuri_match
+            call buftable.do_henkan(a:stash)
+        endif
     endif
 endfunction "}}}
 function! s:filter_rom_has_candidates(stash) "{{{
