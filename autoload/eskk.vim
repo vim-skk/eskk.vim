@@ -301,7 +301,7 @@ function! s:eskk.throw_event(event_name) dict "{{{
 endfunction "}}}
 
 " Henkan result
-function! s:eskk.get_henkan_result() dict "{{{
+function! s:eskk.get_prev_henkan_result() dict "{{{
     return self.prev_henkan_result
 endfunction "}}}
 function! s:eskk.set_henkan_result(henkan_result) dict "{{{
@@ -1448,9 +1448,9 @@ function! eskk#throw_event(...) "{{{
 endfunction "}}}
 
 " Henkan result
-function! eskk#get_henkan_result(...) "{{{
+function! eskk#get_prev_henkan_result(...) "{{{
     let self = eskk#get_current_instance()
-    return call(self.get_henkan_result, a:000, self)
+    return call(self.get_prev_henkan_result, a:000, self)
 endfunction "}}}
 function! eskk#set_henkan_result(...) "{{{
     let self = eskk#get_current_instance()

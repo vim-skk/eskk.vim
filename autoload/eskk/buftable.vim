@@ -365,7 +365,7 @@ endfunction "}}}
 function! s:get_next_candidate(self, stash, next) "{{{
     let self = a:self
     let cur_buf_str = self.get_current_buf_str()
-    let henkan_result = eskk#get_henkan_result()
+    let henkan_result = eskk#get_prev_henkan_result()
     let prev_buftable = henkan_result._buftable
     let rom_str = cur_buf_str.get_matched_rom()
 
@@ -515,7 +515,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
         let okuri_matched_rom = okuri_buf_str.get_matched_rom()
         call okuri_buf_str.clear()
 
-        let candidate = eskk#get_henkan_result().get_candidate()
+        let candidate = eskk#get_prev_henkan_result().get_candidate()
 
         let buf_str = self.get_current_buf_str()
         let rom_str = henkan_matched_rom . okuri_matched_rom
@@ -524,7 +524,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
             call buf_str.push_matched(rom_str, candidate)
         else
             " No candidates.
-            let input = eskk#get_dictionary().register_word(eskk#get_henkan_result())
+            let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
             call buf_str.push_matched(rom_str, input)
         endif
     else
