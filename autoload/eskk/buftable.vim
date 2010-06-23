@@ -126,7 +126,6 @@ let s:buftable = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
-\   '_sandbox': {},
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
 
@@ -245,8 +244,6 @@ function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call eskk#throw_event('leave-phase-' . self.get_phase_name(self._henkan_phase))
     let self._henkan_phase = a:henkan_phase
     call eskk#throw_event('enter-phase-' . self.get_phase_name(self._henkan_phase))
-
-    let self._sandbox = {}
 endfunction "}}}
 
 
@@ -589,10 +586,6 @@ function! s:convert_map_rom_list(self, table) "{{{
     \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
     \   []
     \)
-endfunction "}}}
-
-function! s:buftable.get_sandbox() dict "{{{
-    return self._sandbox
 endfunction "}}}
 
 
