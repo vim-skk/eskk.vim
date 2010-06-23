@@ -366,7 +366,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
     let self = a:self
     let cur_buf_str = self.get_current_buf_str()
     let henkan_result = eskk#get_prev_henkan_result()
-    let prev_buftable = henkan_result._buftable
+    let prev_buftable = henkan_result.buftable
     let rom_str = cur_buf_str.get_matched_rom()
 
     call eskk#util#assert(self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, "current phase is henkan select phase.")
