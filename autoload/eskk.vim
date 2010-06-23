@@ -1087,15 +1087,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         " Set filtered string.
-        call buf_str.push_filter_str(
-        \   a:table.get_map_to(rom_str)
-        \)
+        call buf_str.push_matched(rom_str, a:table.get_map_to(rom_str))
         call buf_str.clear_rom_str()
-
-        " Save matched rom strings.
-        let sandbox = buftable.get_sandbox()
-        let sandbox.map_rom_list = get(sandbox, 'map_rom_list', [])
-        call add(sandbox.map_rom_list, rom_str)
 
 
         " Set rest string.
@@ -1125,7 +1118,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             let buftable = eskk#get_buftable()
             if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
                 let buf_str = buftable.get_current_buf_str()
-                call buf_str.clear_filter_str()
+                call buf_str.clear_matched()
             endif
         endfunction
 
@@ -1160,8 +1153,10 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         let okuri_rom  = okuri_buf_str.get_rom_str()
         if henkan_rom != '' && a:table.has_map(henkan_rom . okuri_rom[0])
             " Push "っ".
-            call henkan_buf_str.push_filter_str(
-            \   a:table.get_map_to(henkan_rom . okuri_rom[0])
+            let match_rom = henkan_rom . okuri_rom[0]
+            call henkan_buf_str.push_matched(
+            \   match_rom,
+            \   a:table.get_map_to(match_rom)
             \)
             " Push "s" to rom str.
             let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
@@ -1176,7 +1171,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call okuri_buf_str.push_rom_str(char)
 
         if a:table.has_map(okuri_buf_str.get_rom_str())
-            call okuri_buf_str.push_filter_str(
+            call okuri_buf_str.push_matched(
+            \   okuri_buf_str.get_rom_str(),
             \   a:table.get_map_to(okuri_buf_str.get_rom_str())
             \)
             let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
@@ -1228,23 +1224,18 @@ function! s:filter_rom_no_match(stash, table) "{{{
             if empty(matched_map_list)
                 call buf_str.set_rom_str(rest2)
             else
-                call buf_str.push_filter_str(rest2)
+                call buftable.push_kakutei_str(rest2)
                 for matched in matched_map_list
-                    call buf_str.push_filter_str(a:table.get_map_to(matched))
+                    call buf_str.push_matched(matched, a:table.get_map_to(matched))
                 endfor
                 call buf_str.clear_rom_str()
             endif
         endif
     else
         for matched in matched_map_list
-            call buf_str.push_filter_str(a:table.get_map_to(matched))
+            call buf_str.push_matched(matched, a:table.get_map_to(matched))
         endfor
         call buf_str.set_rom_str(rest)
-
-        " Save matched rom strings.
-        let sandbox = buftable.get_sandbox()
-        let sandbox.map_rom_list = get(sandbox, 'map_rom_list', [])
-        let sandbox.map_rom_list += matched_map_list
     endif
 endfunction "}}}
 

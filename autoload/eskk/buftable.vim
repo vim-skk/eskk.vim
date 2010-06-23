@@ -41,7 +41,7 @@ lockvar eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
 
 " Functions {{{
 " s:buffer_string {{{
-let s:buffer_string = {'_pos': [], '_rom_str': '', '_filter_str': ''}
+let s:buffer_string = {'_pos': [], '_rom_str': '', '_matched_pairs': []}
 
 function! s:buffer_string_new() "{{{
     return deepcopy(s:buffer_string)
@@ -83,26 +83,29 @@ endfunction "}}}
 
 
 function! s:buffer_string.get_filter_str() dict "{{{
-    return self._filter_str
+    return join(map(copy(self._matched_pairs), 'v:val[1]'), '')
 endfunction "}}}
-function! s:buffer_string.set_filter_str(str) dict "{{{
-    let self._filter_str = a:str
+
+
+function! s:buffer_string.get_matched() dict "{{{
+    return self._matched_pairs
 endfunction "}}}
-function! s:buffer_string.push_filter_str(str) dict "{{{
-    call self.set_filter_str(self.get_filter_str() . a:str)
+function! s:buffer_string.push_matched(rom_str, filter_str) dict "{{{
+    call add(self._matched_pairs, [a:rom_str, a:filter_str])
 endfunction "}}}
-function! s:buffer_string.pop_filter_str() dict "{{{
-    let s = self.get_filter_str()
-    call self.set_filter_str(eskk#util#mb_chop(s))
+function! s:buffer_string.pop_matched() dict "{{{
+    if !empty(self._matched_pairs)
+        call remove(self._matched_pairs, -1)
+    endif
 endfunction "}}}
-function! s:buffer_string.clear_filter_str() dict "{{{
-    let self._filter_str = ''
+function! s:buffer_string.clear_matched() dict "{{{
+    let self._matched_pairs = []
 endfunction "}}}
 
 
 function! s:buffer_string.clear() dict "{{{
     call self.clear_rom_str()
-    call self.clear_filter_str()
+    call self.clear_matched()
 endfunction "}}}
 
 
@@ -343,8 +346,8 @@ function! s:buftable.do_backspace(stash) dict "{{{
         if buf_str.get_rom_str() != ''
             call buf_str.pop_rom_str()
             break
-        elseif buf_str.get_filter_str() != ''
-            call buf_str.pop_filter_str()
+        elseif !empty(buf_str.get_matched()) != ''
+            call buf_str.pop_matched()
             break
         elseif self.get_marker(phase) != ''
             if !self.step_back_henkan_phase()
