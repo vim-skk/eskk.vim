@@ -554,14 +554,16 @@ function! eskk#set_up_temp_key(lhs, ...) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
 
     " Save current a:lhs mapping.
-    if maparg(a:lhs, 'l') != ''
+    let save_lhs = s:temp_key_map(a:lhs)
+    let save_rhs = maparg(a:lhs, 'l')
+    if save_rhs != '' && maparg(save_lhs) == ''
         " TODO Check if a:lhs is buffer local.
         call eskk#util#log('Save temp key: ' . maparg(a:lhs, 'l'))
         execute
         \   'lmap'
         \   '<buffer>'
-        \   s:temp_key_map(a:lhs)
-        \   maparg(a:lhs, 'l')
+        \   save_lhs
+        \   save_rhs
     endif
 
     if a:0
