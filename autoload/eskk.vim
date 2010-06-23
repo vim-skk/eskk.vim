@@ -32,6 +32,7 @@ let s:eskk = {
 \   'enabled': 0,
 \   'stash': {},
 \   'added_words': [],
+\   'prev_henkan_result': {},
 \}
 
 function! s:eskk_new() "{{{
@@ -316,6 +317,14 @@ function! s:eskk.throw_event(event_name) dict "{{{
     let self.temp_event_hook_fn[a:event_name] = []
 
     return ret
+endfunction "}}}
+
+" Henkan result
+function! s:eskk.get_henkan_result() dict "{{{
+    return self.prev_henkan_result
+endfunction "}}}
+function! s:eskk.set_henkan_result(henkan_result) dict "{{{
+    let self.prev_henkan_result = a:henkan_result
 endfunction "}}}
 
 " Locking diff old string
@@ -1049,6 +1058,16 @@ endfunction "}}}
 function! eskk#throw_event(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.throw_event, a:000, self)
+endfunction "}}}
+
+" Henkan result
+function! eskk#get_henkan_result(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.get_henkan_result, a:000, self)
+endfunction "}}}
+function! eskk#set_henkan_result(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.set_henkan_result, a:000, self)
 endfunction "}}}
 
 " Locking diff old string

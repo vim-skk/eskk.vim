@@ -26,10 +26,6 @@ let s:stash = eskk#get_mutable_stash(['mode', 'builtin'])
 
 " Asymmetric built-in modes. {{{
 
-" Variables {{{
-call s:stash.init('current_henkan_result', {})
-" }}}
-
 
 
 function! eskk#mode#builtin#do_ctrl_q_key() "{{{
@@ -118,7 +114,7 @@ function! s:henkan_key(stash) "{{{
             endfor
         endif
 
-        let s:current_henkan_result = eskk#get_dictionary().refer(buftable)
+        call eskk#set_henkan_result(eskk#get_dictionary().refer(buftable))
 
         " Enter henkan select phase.
         call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
@@ -133,14 +129,14 @@ function! s:henkan_key(stash) "{{{
         call okuri_buf_str.clear_filter_str()
 
         let buf_str = buftable.get_current_buf_str()
-        let candidate = s:current_henkan_result.get_candidate()
+        let candidate = eskk#get_henkan_result().get_candidate()
 
         if type(candidate) == type("")
             " Set candidate.
             call buf_str.set_filter_str(candidate)
         else
             " No candidates.
-            let input = eskk#get_dictionary().register_word(s:current_henkan_result)
+            let input = eskk#get_dictionary().register_word(eskk#get_henkan_result())
             call buf_str.set_filter_str(input)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
@@ -153,9 +149,10 @@ endfunction "}}}
 function! s:get_next_candidate(stash, next) "{{{
     let buftable = eskk#get_buftable()
     let cur_buf_str = buftable.get_current_buf_str()
+    let henkan_result = eskk#get_henkan_result()
 
-    if s:current_henkan_result[a:next ? 'advance' : 'back']()
-        let candidate = s:current_henkan_result.get_candidate()
+    if henkan_result[a:next ? 'advance' : 'back']()
+        let candidate = henkan_result.get_candidate()
         call eskk#util#assert(type(candidate) == type(""))
 
         " Set candidate.
@@ -165,12 +162,12 @@ function! s:get_next_candidate(stash, next) "{{{
         if a:next
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
-            let input = eskk#get_dictionary().register_word(s:current_henkan_result)
+            let input = eskk#get_dictionary().register_word(henkan_result)
             call cur_buf_str.set_filter_str(input)
         else
             " Restore previous buftable state
 
-            let buftable = s:current_henkan_result._buftable
+            let buftable = henkan_result._buftable
 
             let revert_style = eskk#util#option_value(
             \   g:eskk_revert_henkan_style,
