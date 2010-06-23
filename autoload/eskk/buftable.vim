@@ -375,11 +375,11 @@ function! s:get_next_candidate(self, stash, next) "{{{
     let prev_buftable = henkan_result._buftable
     let rom_str = cur_buf_str.get_matched_rom()
 
-    call eskk#util#assert(self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    call eskk#util#assert(self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, "current phase is henkan select phase.")
 
     if henkan_result[a:next ? 'advance' : 'back']()
         let candidate = henkan_result.get_candidate()
-        call eskk#util#assert(type(candidate) == type(""))
+        call eskk#util#assert(type(candidate) == type(""), "henkan_result.get_candidate()'s return value is String.")
 
         " Set candidate.
         call cur_buf_str.set_matched(rom_str, candidate)

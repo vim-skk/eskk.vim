@@ -152,8 +152,8 @@ function! s:henkan_result_advance(self, advance) "{{{
         else
             return 0
         endif
-    catch /^eskk: dictionary - internal error/
-        return -1
+    catch /^eskk: dictionary - dictionary look up error/
+        return 0
     endtry
 endfunction "}}}
 
