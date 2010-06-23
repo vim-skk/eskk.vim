@@ -421,15 +421,17 @@ function! s:buftable.clear_all() dict "{{{
 endfunction "}}}
 
 
-function! s:buftable.dump_print() dict "{{{
-    call eskk#util#warnf('current phase:%d', self._henkan_phase)
+function! s:buftable.dump() dict "{{{
+    let lines = []
+    call add(lines, printf('current phase:%d', self._henkan_phase))
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
-        call eskk#util#warnf('phase:%d', phase)
-        call eskk#util#warnf('pos: %s', string(buf_str.get_pos()))
-        call eskk#util#warnf('rom_str: %s', string(buf_str.get_rom_str()))
-        call eskk#util#warnf('filter_str: %s', string(buf_str.get_filter_str()))
+        call add(lines, printf('phase:%d', phase))
+        call add(lines, printf('pos: %s', string(buf_str.get_pos())))
+        call add(lines, printf('rom_str: %s', string(buf_str.get_rom_str())))
+        call add(lines, printf('filter_str: %s', string(buf_str.get_filter_str())))
     endfor
+    return lines
 endfunction "}}}
 
 

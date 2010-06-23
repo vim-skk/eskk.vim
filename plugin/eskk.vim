@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 136))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 137))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -169,6 +169,10 @@ endif
 
 if !exists("g:eskk_rom_input_style")
     let g:eskk_rom_input_style = 'skk'
+endif
+
+if !exists("g:eskk_error_log_file")
+    let g:eskk_error_log_file = '~/eskk-error.log'
 endif
 
 " }}}

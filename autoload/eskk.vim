@@ -377,20 +377,27 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         endif
 
     catch
-        " TODO Show v:exception only once in current mode.
-        " TODO Or open another buffer for showing this annoying messages.
-        "
-        " sleep 1
-        "
-        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
-        call eskk#util#warn('--- exception ---')
-        call eskk#util#warnf('v:exception: %s', v:exception)
-        call eskk#util#warnf('v:throwpoint: %s', v:throwpoint)
-        call eskk#util#warn('--- buftable ---')
-        call self.buftable.dump_print()
-        call eskk#util#warn('--- char ---')
-        call eskk#util#warnf('char: %s', a:char)
-        call eskk#util#warn('!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        let lines = []
+        call add(lines, '!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        call add(lines, '--- exception ---')
+        call add(lines, printf('v:exception: %s', v:exception))
+        call add(lines, printf('v:throwpoint: %s', v:throwpoint))
+        call add(lines, '--- buftable ---')
+        let lines += self.buftable.dump()
+        call add(lines, '--- char ---')
+        call add(lines, printf('char: %s', a:char))
+        call add(lines, '!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        call add(lines, '')
+        call add(lines, "Please report this error to author.")
+        call add(lines, "`:help eskk` to see author's e-mail address.")
+
+        let log_file = expand(g:eskk_error_log_file)
+        call writefile(lines, log_file)
+
+        call eskk#util#warnf(
+        \   "Error has occurred!! Please see '%s' to check and please report to plugin author.",
+        \   log_file
+        \)
 
         return self.escape_key() . a:char
 
