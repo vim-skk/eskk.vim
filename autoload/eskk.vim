@@ -352,7 +352,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         else
             if self.has_events('filter-redispatch')
                 " NOTE: Because of Vim's bug, `:lmap` can't remap to `:lmap`.
-                noremap! <buffer><expr> <Plug>(eskk:_filter_redispatch) join(eskk#throw_event("filter-redispatch"))
+                map! <buffer><expr> <Plug>(eskk:_filter_redispatch) join(eskk#throw_event("filter-redispatch"))
                 return
                 \   self.rewrite()
                 \   . "\<Plug>(eskk:_filter_redispatch)"
