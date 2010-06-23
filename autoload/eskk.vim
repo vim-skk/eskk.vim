@@ -159,7 +159,7 @@ endfunction "}}}
 " Manipulate display string.
 function! s:eskk.remove_display_str() dict "{{{
     let current_str = self.buftable.get_display_str()
-    return repeat("\<Plug>(eskk:_delete-char)", eskk#util#mb_strlen(current_str))
+    return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! s:eskk.kakutei_str() dict "{{{
     return self.remove_display_str() . self.buftable.get_display_str(0)

@@ -159,7 +159,7 @@ function! s:buftable.get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
 " Return inserted string.
-" Inserted string contains "\<Plug>(eskk:_delete-char)"
+" Inserted string contains "\<Plug>(eskk:internal:backspace-key)"
 " to delete old characters.
 function! s:buftable.rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
@@ -173,7 +173,7 @@ function! s:buftable.rewrite() dict "{{{
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    return repeat("\<Plug>(eskk:_delete-char)", eskk#util#mb_strlen(old)) . kakutei . new
+    return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(old)) . kakutei . new
 endfunction "}}}
 
 function! s:buftable.get_display_str(...) dict "{{{
@@ -314,7 +314,7 @@ function! s:buftable.do_enter(stash) dict "{{{
 endfunction "}}}
 function! s:buftable.do_backspace(stash) dict "{{{
     if self.get_old_str() == ''
-        let a:stash.return = "\<Plug>(eskk:_delete-char)"
+        let a:stash.return = "\<Plug>(eskk:internal:backspace-key)"
         return
     endif
 
