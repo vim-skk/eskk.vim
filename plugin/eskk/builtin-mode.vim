@@ -32,7 +32,14 @@ function! dict.filter(stash)
     if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
         call eskk#set_mode('hira')
     else
-        let a:stash.return = a:stash.char
+        if has_key(g:eskk_mode_use_tables, 'ascii')
+            if !has_key(self.sandbox, 'table')
+                let self.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
+            endif
+            let a:stash.return = self.sandbox.table.get_map_to(a:stash.char, a:stash.char)
+        else
+            let a:stash.return = a:stash.char
+        endif
     endif
 endfunction
 
