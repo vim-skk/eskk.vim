@@ -901,6 +901,13 @@ function! eskk#get_dictionary() "{{{
 endfunction "}}}
 
 
+" Dictionary
+function! eskk#update_dictionary() "{{{
+    call eskk#get_dictionary().update_dictionary()
+endfunction "}}}
+
+
+
 " Stubs for current eskk instance. {{{
 
 " Enable/Disable IM
@@ -1189,7 +1196,7 @@ call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-asci
 " }}}
 " Save dictionary if modified {{{
 if g:eskk_auto_save_dictionary_at_exit
-    autocmd VimLeavePre * call eskk#get_dictionary().update_dictionary()
+    autocmd VimLeavePre * call eskk#update_dictionary()
 endif
 " }}}
 
