@@ -560,14 +560,18 @@ function! eskk#handle_q_key(stash) "{{{
     return 0
 endfunction "}}}
 function! eskk#handle_to_ascii(stash) "{{{
-    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    let buftable = eskk#get_buftable()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
         call eskk#set_mode('ascii')
         return 1
     endif
     return 0
 endfunction "}}}
 function! eskk#handle_to_zenei(stash) "{{{
-    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    let buftable = eskk#get_buftable()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
         call eskk#set_mode('zenei')
         return 1
     endif
@@ -1003,6 +1007,7 @@ function! eskk#asym_filter(stash, table_name) "{{{
     for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei]
         if eskk#handle_special_lhs(char, key, a:stash)
             " Handled.
+            call eskk#util#logf("Handled '%s' key.", key)
             return
         endif
     endfor
