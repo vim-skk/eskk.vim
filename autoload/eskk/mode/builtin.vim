@@ -464,7 +464,7 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom(a:stash, a:table_name)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if eskk#is_henkan_key(char)
+        if eskk#is_special_lhs(char, 'henkan')
             return s:henkan_key(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else

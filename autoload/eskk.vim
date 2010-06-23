@@ -172,18 +172,6 @@ function! s:eskk.sticky_key(stash) dict "{{{
     return self.buftable.step_henkan_phase(a:stash)
 endfunction "}}}
 
-" Henkan key
-function! s:eskk.get_henkan_key() dict "{{{
-    return s:map.henkan.lhs
-endfunction "}}}
-function! s:eskk.get_henkan_char() dict "{{{
-    return eskk#util#eval_key(self.get_henkan_key())
-endfunction "}}}
-function! s:eskk.is_henkan_key(char) dict "{{{
-    " TODO Cache result of eskk#util#eval_key() ?
-    return eskk#util#eval_key(s:map.henkan.lhs) ==# a:char
-endfunction "}}}
-
 " Big letter keys
 function! s:eskk.is_big_letter(char) dict "{{{
     return a:char =~# '^[A-Z]$'
@@ -972,20 +960,6 @@ endfunction "}}}
 function! eskk#sticky_key(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.sticky_key, a:000, self)
-endfunction "}}}
-
-" Henkan key
-function! eskk#get_henkan_key(...) "{{{
-    let self = eskk#get_current_instance()
-    return call(self.get_henkan_key, a:000, self)
-endfunction "}}}
-function! eskk#get_henkan_char(...) "{{{
-    let self = eskk#get_current_instance()
-    return call(self.get_henkan_char, a:000, self)
-endfunction "}}}
-function! eskk#is_henkan_key(...) "{{{
-    let self = eskk#get_current_instance()
-    return call(self.is_henkan_key, a:000, self)
 endfunction "}}}
 
 " Big letter keys
