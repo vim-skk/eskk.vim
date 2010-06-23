@@ -1234,11 +1234,11 @@ function! s:filter_rom_no_match(stash, table) "{{{
                 call buf_str.set_rom_str(rest)
             endif
         else
-            let [matched_map_list, rest2] = s:get_matched_and_rest(a:table, rom_str, 0)
+            let [matched_map_list, head_no_match] = s:get_matched_and_rest(a:table, rom_str, 0)
             if empty(matched_map_list)
-                call buf_str.set_rom_str(rest2)
+                call buf_str.set_rom_str(head_no_match)
             else
-                call buftable.push_kakutei_str(rest2)
+                call buf_str.push_matched(head_no_match, head_no_match)
                 for matched in matched_map_list
                     call buf_str.push_matched(matched, a:table.get_map_to(matched))
                 endfor
