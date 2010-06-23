@@ -44,7 +44,7 @@ autocmd!
 "   See `s:henkan_result` in `autoload/eskk/dictionary.vim`.
 let s:eskk = {
 \   'mode': '',
-\   'buftable': eskk#buftable#new(),
+\   'buftable': {},
 \   'is_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
@@ -72,17 +72,18 @@ function! s:eskk.enable(...) dict "{{{
         let disable_skk_vim = SkkDisable()
     endif
 
+    if empty(self.buftable)
+        let self.buftable = eskk#buftable#new()
+    endif
 
     " Clear current variable states.
     let self.mode = ''
     call self.buftable.reset()
 
-
     " Set up Mappings.
     if do_map
         call self.map_all_keys()
     endif
-
 
     " TODO Save previous mode/state.
     call self.set_mode(g:eskk_initial_mode)
