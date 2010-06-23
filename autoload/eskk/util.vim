@@ -82,12 +82,6 @@ function! eskk#util#has_idx(list, idx) "{{{
 endfunction "}}}
 
 " a:func is string.
-"
-" NOTE: This returns 0 for script local function.
-function! eskk#util#is_callable(Fn) "{{{
-    return type(a:Fn) == type(function('tr'))
-    \   || exists('*' . a:Fn)
-endfunction "}}}
 
 function! eskk#util#skip_spaces(str) "{{{
     return substitute(a:str, '^\s*', '', '')
@@ -122,20 +116,6 @@ function! s:split_to_keys(lhs)  "{{{
     " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
     "             a:lhs doesn't directly contain any escape sequences.
     return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
-endfunction "}}}
-
-" Boost.Format-like function.
-" This is useful for embedding values in string.
-function! eskk#util#bind(fmt, ...) "{{{
-    let ret = a:fmt
-    for i in range(len(a:000))
-        let regex = '%' . (i + 1) . '%'
-        let ret = substitute(ret, regex, string(a:000[i]), 'g')
-    endfor
-    return ret
-endfunction "}}}
-function! eskk#util#stringf(fmt, ...) "{{{
-    return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
 
 function! eskk#util#get_f(...) "{{{
@@ -190,31 +170,6 @@ function! s:follow(ret_bool, dict, follow, ...) "{{{
     endif
 endfunction "}}}
 
-function! eskk#util#zip(list1, list2) "{{{
-    let ret = []
-    let i = 0
-    while 1
-        let list1_has_idx = eskk#util#has_idx(a:list1, i)
-        let list2_has_idx = eskk#util#has_idx(a:list2, i)
-        if !list1_has_idx && !list2_has_idx
-            return ret
-        else
-            call add(
-            \   ret,
-            \   (list1_has_idx ? [a:list1[i]] : [])
-            \       + (list2_has_idx ? [a:list2[i]] : [])
-            \)
-        endif
-        let i += 1
-    endwhile
-
-    call eskk#internal_error(['eskk', 'util'])
-endfunction "}}}
-
-function! eskk#util#make_bs(n) "{{{
-    return repeat("\<BS>", a:n)
-endfunction "}}}
-
 function! eskk#util#assert(cond, ...) "{{{
     if !a:cond
         throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
@@ -227,70 +182,6 @@ function! eskk#util#get_local_func(funcname, sid) "{{{
     return printf('<SNR>%d_%s', a:sid, a:funcname)
 endfunction "}}}
 
-function! eskk#util#setbufline(expr, lnum, line) "{{{
-    return eskk#util#call_on_buffer(a:expr, 'setline', [a:lnum, a:line])
-endfunction "}}}
-
-function! eskk#util#call_on_buffer(expr, Fn, args) "{{{
-    let [cur_bufnr, to_bufnr] = [bufnr('%'), bufnr(a:expr)]
-    let [cur_bufhidden, to_bufhidden] = [getbufvar('%', '&bufhidden'), getbufvar(to_bufnr, '&bufhidden')]
-    call setbufvar('%', '&bufhidden', 'hide')
-    call setbufvar(to_bufnr, '&bufhidden', 'hide')
-    try
-        if cur_bufnr != to_bufnr
-            execute to_bufnr . 'buffer'
-        endif
-        return call(a:Fn, a:args)
-    finally
-        execute cur_bufnr . 'buffer'
-        call setbufvar('%', '&bufhidden', cur_bufhidden)
-        call setbufvar(to_bufnr, '&bufhidden', to_bufhidden)
-    endtry
-endfunction "}}}
-
-
-function! eskk#util#parse_map(line) "{{{
-    let regex =
-    \   '^'
-    \   . '\([nvoiclxs]\)'
-    \   . '\s\+'
-    \   . '\(\S\+\)'
-    \   . '\s\+'
-    \   . '\(\*\=\)'
-    \   . '\(@\=\)'
-    \   . '\(.\+\)'
-    \   . '$'
-    \   . '\C'
-    let m = matchlist(a:line, regex)
-    if empty(m)
-        call eskk#util#logf("parse error! - %s is not matched to %s", string(a:line), string(regex))
-        throw eskk#parse_error(['eskk', 'util'], "Can't parse :map output")
-    endif
-    let [mode, lhs, noremap, buffer, rhs; _] = m[1:]
-    return {
-    \   'mode': mode,
-    \   'lhs': lhs,
-    \   'noremap': noremap ==# '*',
-    \   'buffer': buffer ==# '@',
-    \   'rhs': rhs,
-    \}
-endfunction "}}}
-
-function! eskk#util#get_lhs_by(expr) "{{{
-    redir => output
-    silent lmap
-    redir END
-
-    for line in split(output, '\n')
-        let info = eskk#util#parse_map(line)
-        let rhs = info.rhs
-        if eval(a:expr)
-            return info.lhs
-        endif
-    endfor
-
-    throw eskk#internal_error(['eskk', 'util'], 'failed to get lhs...')
-endfunction "}}}
 
 function! eskk#util#option_value(value, list, default_index) "{{{
     let match = 0
