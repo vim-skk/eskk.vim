@@ -257,16 +257,16 @@ function! s:henkan_result_select_candidates(this) "{{{
         endtry
 
 
-        if eskk#is_special_lhs(char, 'henkan-select:escape')
+        if eskk#is_special_lhs(char, 'phase:henkan-select:escape')
             throw 'eskk: leave henkan select'
-        elseif eskk#is_special_lhs(char, 'henkan-select:next-page')
+        elseif eskk#is_special_lhs(char, 'phase:henkan-select:next-page')
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
                 " No more pages. Register new word.
                 return a:this._dict.register_word(a:this)
             endif
-        elseif eskk#is_special_lhs(char, 'henkan-select:prev-page')
+        elseif eskk#is_special_lhs(char, 'phase:henkan-select:prev-page')
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else

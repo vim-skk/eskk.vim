@@ -432,11 +432,11 @@ let s:map = {
 \   'sticky': {},
 \   'henkan': {},
 \   'escape': {},
-\   'henkan-select:choose-next': {},
-\   'henkan-select:choose-prev': {},
-\   'henkan-select:next-page': {},
-\   'henkan-select:prev-page': {},
-\   'henkan-select:escape': {},
+\   'phase:henkan-select:choose-next': {},
+\   'phase:henkan-select:choose-prev': {},
+\   'phase:henkan-select:next-page': {},
+\   'phase:henkan-select:prev-page': {},
+\   'phase:henkan-select:escape': {},
 \   'mode:hira:toggle-hankata': {},
 \   'mode:hira:ctrl-q-key': {},
 \   'mode:hira:toggle-kata': {},
@@ -461,11 +461,11 @@ let s:map = {
 " Keys used by only its mode.
 let s:mode_local_keys = {
 \   'hira': [
-\       'henkan-select:choose-next',
-\       'henkan-select:choose-prev',
-\       'henkan-select:next-page',
-\       'henkan-select:prev-page',
-\       'henkan-select:escape',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
 \       'mode:hira:toggle-hankata',
 \       'mode:hira:ctrl-q-key',
 \       'mode:hira:toggle-kata',
@@ -474,11 +474,11 @@ let s:mode_local_keys = {
 \       'mode:hira:to-zenei',
 \   ],
 \   'kata': [
-\       'henkan-select:choose-next',
-\       'henkan-select:choose-prev',
-\       'henkan-select:next-page',
-\       'henkan-select:prev-page',
-\       'henkan-select:escape',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
 \       'mode:kata:toggle-hankata',
 \       'mode:kata:ctrl-q-key',
 \       'mode:kata:toggle-kata',
@@ -487,11 +487,11 @@ let s:mode_local_keys = {
 \       'mode:kata:to-zenei',
 \   ],
 \   'hankata': [
-\       'henkan-select:choose-next',
-\       'henkan-select:choose-prev',
-\       'henkan-select:next-page',
-\       'henkan-select:prev-page',
-\       'henkan-select:escape',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
 \       'mode:hankata:toggle-hankata',
 \       'mode:hankata:ctrl-q-key',
 \       'mode:hankata:toggle-kata',
@@ -978,10 +978,10 @@ function! eskk#asym_filter(stash, table_name) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         return s:filter_rom(a:stash, a:table_name)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        if eskk#is_special_lhs(char, 'henkan-select:choose-next')
+        if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
             call buftable.choose_next_candidate(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'henkan-select:choose-prev')
+        elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
             call buftable.choose_prev_candidate(a:stash)
             return
         else
@@ -1463,13 +1463,13 @@ function! s:do_default_mappings() "{{{
     silent EskkMap -type=henkan -unique <Space>
     silent EskkMap -type=escape -unique <Esc>
 
-    silent EskkMap -type=henkan-select:choose-next -unique <Space>
-    silent EskkMap -type=henkan-select:choose-prev -unique x
+    silent EskkMap -type=phase:henkan-select:choose-next -unique <Space>
+    silent EskkMap -type=phase:henkan-select:choose-prev -unique x
 
-    silent EskkMap -type=henkan-select:next-page -unique <Space>
-    silent EskkMap -type=henkan-select:prev-page -unique x
+    silent EskkMap -type=phase:henkan-select:next-page -unique <Space>
+    silent EskkMap -type=phase:henkan-select:prev-page -unique x
 
-    silent EskkMap -type=henkan-select:escape -unique <C-g>
+    silent EskkMap -type=phase:henkan-select:escape -unique <C-g>
 
     silent EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
     silent EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
