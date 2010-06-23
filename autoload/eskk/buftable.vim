@@ -363,19 +363,19 @@ function! s:buftable.do_backspace(stash) dict "{{{
     endfor
 endfunction "}}}
 function! s:buftable.choose_next_candidate(stash) dict "{{{
-    return s:get_next_candidate(a:stash, 1)
+    return s:get_next_candidate(self, a:stash, 1)
 endfunction "}}}
 function! s:buftable.choose_prev_candidate(stash) dict "{{{
-    return s:get_next_candidate(a:stash, 0)
+    return s:get_next_candidate(self, a:stash, 0)
 endfunction "}}}
-function! s:get_next_candidate(stash, next) "{{{
-    let cur_buf_str = buftable.get_current_buf_str()
+function! s:get_next_candidate(self, stash, next) "{{{
+    let self = a:self
+    let cur_buf_str = self.get_current_buf_str()
     let henkan_result = eskk#get_henkan_result()
-    let buftable = eskk#get_buftable()
     let prev_buftable = henkan_result._buftable
     let rom_str = cur_buf_str.get_matched_rom()
 
-    call eskk#util#assert(buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    call eskk#util#assert(self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
     if henkan_result[a:next ? 'advance' : 'back']()
         let candidate = henkan_result.get_candidate()
@@ -389,7 +389,7 @@ function! s:get_next_candidate(stash, next) "{{{
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
             let input = eskk#get_dictionary().register_word(henkan_result)
-            call cur_buf_str.set_matched(input)
+            call cur_buf_str.set_matched(rom_str, input)
         else
             " Restore previous buftable state
 
