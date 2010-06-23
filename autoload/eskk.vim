@@ -644,7 +644,7 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
     let rhs = a:rhs
 
     if !has_key(s:map, a:type)
-        call eskk#util#warn('%s: unknown type: %s', a:from, a:type)
+        call eskk#util#warnf('%s: unknown type: %s', a:from, a:type)
         return
     endif
     let type_st = s:map[a:type]
@@ -664,8 +664,7 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
         \}
     else
         if a:options.unique && has_key(type_st, 'lhs')
-            let msg = printf('%s: -unique is specified and mapping already exists. skip.', a:type)
-            call eskk#util#warn(msg)
+            call eskk#util#warnf('%s: -unique is specified and mapping already exists. skip.', a:type)
             return
         endif
         let type_st.options = a:options
