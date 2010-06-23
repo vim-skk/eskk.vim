@@ -157,21 +157,6 @@ function! s:eskk.kakutei_str() dict "{{{
     return self.remove_display_str() . self.buftable.get_display_str(0)
 endfunction "}}}
 
-" Sticky key
-function! s:eskk.get_sticky_key() dict "{{{
-    return s:map.sticky.lhs
-endfunction "}}}
-function! s:eskk.get_sticky_char() dict "{{{
-    return eskk#util#eval_key(self.get_sticky_key())
-endfunction "}}}
-function! s:eskk.is_sticky_key(char) dict "{{{
-    " TODO Cache result of eskk#util#eval_key() ?
-    return eskk#util#eval_key(s:map.sticky.lhs) ==# a:char
-endfunction "}}}
-function! s:eskk.sticky_key(stash) dict "{{{
-    return self.buftable.step_henkan_phase(a:stash)
-endfunction "}}}
-
 " Big letter keys
 function! s:eskk.is_big_letter(char) dict "{{{
     return a:char =~# '^[A-Z]$'
@@ -942,24 +927,6 @@ endfunction "}}}
 function! eskk#kakutei_str(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.kakutei_str, a:000, self)
-endfunction "}}}
-
-" Sticky key
-function! eskk#get_sticky_key(...) "{{{
-    let self = eskk#get_current_instance()
-    return call(self.get_sticky_key, a:000, self)
-endfunction "}}}
-function! eskk#get_sticky_char(...) "{{{
-    let self = eskk#get_current_instance()
-    return call(self.get_sticky_char, a:000, self)
-endfunction "}}}
-function! eskk#is_sticky_key(...) "{{{
-    let self = eskk#get_current_instance()
-    return call(self.is_sticky_key, a:000, self)
-endfunction "}}}
-function! eskk#sticky_key(...) "{{{
-    let self = eskk#get_current_instance()
-    return call(self.sticky_key, a:000, self)
 endfunction "}}}
 
 " Big letter keys

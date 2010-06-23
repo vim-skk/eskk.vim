@@ -445,11 +445,11 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
         elseif char ==# "\<CR>"
             call buftable.do_enter(a:stash)
             return
-        elseif eskk#is_sticky_key(char)
-            call eskk#sticky_key(a:stash)
+        elseif eskk#is_special_lhs(char, 'sticky')
+            call buftable.do_sticky(a:stash)
             return
         elseif eskk#is_big_letter(char)
-            call eskk#sticky_key(a:stash)
+            call buftable.do_sticky(a:stash)
             call eskk#register_temp_event('filter-redispatch', 'eskk#filter', [tolower(char)])
             return
         else

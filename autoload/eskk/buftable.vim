@@ -429,8 +429,7 @@ function! s:get_next_candidate(stash, next) "{{{
         endif
     endif
 endfunction "}}}
-
-function! s:buftable.step_henkan_phase(stash) dict "{{{
+function! s:buftable.do_sticky(stash) dict "{{{
     let step    = 0
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
