@@ -82,13 +82,17 @@ function! s:buffer_string.clear_rom_str() dict "{{{
 endfunction "}}}
 
 
-function! s:buffer_string.get_filter_str() dict "{{{
-    return join(map(copy(self._matched_pairs), 'v:val[1]'), '')
-endfunction "}}}
-
-
 function! s:buffer_string.get_matched() dict "{{{
     return self._matched_pairs
+endfunction "}}}
+function! s:buffer_string.get_matched_rom() dict "{{{
+    return join(map(copy(self._matched_pairs), 'v:val[0]'), '')
+endfunction "}}}
+function! s:buffer_string.get_matched_filter() dict "{{{
+    return join(map(copy(self._matched_pairs), 'v:val[1]'), '')
+endfunction "}}}
+function! s:buffer_string.set_matched(rom_str, filter_str) dict "{{{
+    let self._matched_pairs = [a:rom_str, a:filter_str]
 endfunction "}}}
 function! s:buffer_string.push_matched(rom_str, filter_str) dict "{{{
     call add(self._matched_pairs, [a:rom_str, a:filter_str])
@@ -198,7 +202,7 @@ endfunction "}}}
 function! s:get_normal_display_str(this) "{{{
     let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     return
-    \   buf_str.get_filter_str()
+    \   buf_str.get_matched_filter()
     \   . buf_str.get_rom_str()
 endfunction "}}}
 function! s:get_okuri_display_str(this, with_marker) "{{{
@@ -208,7 +212,7 @@ function! s:get_okuri_display_str(this, with_marker) "{{{
     \   . (a:with_marker ?
     \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_OKURI)
     \       : '')
-    \   . buf_str.get_filter_str()
+    \   . buf_str.get_matched_filter()
     \   . buf_str.get_rom_str()
 endfunction "}}}
 function! s:get_henkan_display_str(this, with_marker) "{{{
@@ -217,7 +221,7 @@ function! s:get_henkan_display_str(this, with_marker) "{{{
     \   (a:with_marker ?
     \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     \       : '')
-    \   . buf_str.get_filter_str()
+    \   . buf_str.get_matched_filter()
     \   . buf_str.get_rom_str()
 endfunction "}}}
 function! s:get_henkan_select_display_str(this, with_marker) "{{{
@@ -226,7 +230,7 @@ function! s:get_henkan_select_display_str(this, with_marker) "{{{
     \   (a:with_marker ?
     \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     \       : '')
-    \   . buf_str.get_filter_str()
+    \   . buf_str.get_matched_filter()
     \   . buf_str.get_rom_str()
 endfunction "}}}
 
@@ -335,6 +339,7 @@ function! s:buftable.do_backspace(stash) dict "{{{
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
             return
         else
+            " Leave henkan select or back to previous candidate if it exists.
             call self.choose_prev_candidate(a:stash)
             return
         endif
@@ -367,27 +372,29 @@ function! s:buftable.choose_prev_candidate(stash) dict "{{{
     return s:get_next_candidate(a:stash, 0)
 endfunction "}}}
 function! s:get_next_candidate(stash, next) "{{{
-    let buftable = eskk#get_buftable()
     let cur_buf_str = buftable.get_current_buf_str()
     let henkan_result = eskk#get_henkan_result()
+    let buftable = eskk#get_buftable()
+    let prev_buftable = henkan_result._buftable
+    let rom_str = cur_buf_str.get_matched_rom()
+
+    call eskk#util#assert(buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
     if henkan_result[a:next ? 'advance' : 'back']()
         let candidate = henkan_result.get_candidate()
         call eskk#util#assert(type(candidate) == type(""))
 
         " Set candidate.
-        call cur_buf_str.set_filter_str(candidate)
+        call cur_buf_str.set_matched(rom_str, candidate)
     else
         " No more candidates.
         if a:next
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
             let input = eskk#get_dictionary().register_word(henkan_result)
-            call cur_buf_str.set_filter_str(input)
+            call cur_buf_str.set_matched(input)
         else
             " Restore previous buftable state
-
-            let buftable = henkan_result._buftable
 
             let revert_style = eskk#util#option_value(
             \   g:eskk_revert_henkan_style,
@@ -396,37 +403,38 @@ function! s:get_next_candidate(stash, next) "{{{
             \)
             if revert_style ==# 'eskk'
                 " "▼書く" => "▽か*k"
-                let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                let okuri_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 if okuri_buf_str.get_rom_str() != ''
                     call okuri_buf_str.set_rom_str(okuri_buf_str.get_rom_str()[0])
-                    call okuri_buf_str.clear_filter_str()
+                    call okuri_buf_str.clear_matched()
                 endif
             elseif revert_style ==# 'aquaskk'
                 " "▼書く" => "▽か"
-                let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-                let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                let henkan_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                let okuri_buf_str  = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 if okuri_buf_str.get_rom_str() != ''
-                    call henkan_buf_str.clear_rom_str()
-                    call okuri_buf_str.clear_rom_str()
-                    call okuri_buf_str.clear_filter_str()
-                    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                    " Clear roms of `okuri_buf_str`.
+                    " XXX
+                    " call henkan_buf_str.clear_rom_str()
+                    call okuri_buf_str.clear()
+                    call prev_buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
             elseif revert_style ==# 'skk'
                 " "▼書く" => "▽かく"
-                let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-                let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                let henkan_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                let okuri_buf_str  = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 if okuri_buf_str.get_rom_str() != ''
-                    call henkan_buf_str.push_filter_str(okuri_buf_str.get_filter_str())
-                    call henkan_buf_str.clear_rom_str()
-                    call okuri_buf_str.clear_rom_str()
-                    call okuri_buf_str.clear_filter_str()
-                    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                    " Copy roms of `okuri_buf_str` to `henkan_buf_str`.
+                    let okuri_matched = okuri_buf_str.get_matched()
+                    call henkan_buf_str.push_matched(okuri_matched[0], okuri_matched[1])
+                    call okuri_buf_str.clear()
+                    call prev_buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
             else
                 throw eskk#internal_error(['eskk', 'mode', 'builtin'])
             endif
 
-            call eskk#set_buftable(buftable)
+            call eskk#set_buftable(prev_buftable)
         endif
     endif
 endfunction "}}}
@@ -436,14 +444,14 @@ function! s:buftable.do_sticky(stash) dict "{{{
     let buf_str = self.get_current_buf_str()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
+        if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
             call eskk#util#log("hmm...when is this block executed?")
             call buf_str.clear()
         endif
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
+        if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
             let step = 1
         else
@@ -486,19 +494,9 @@ function! s:buftable.do_henkan(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = eskk#util#get_table_lazy('kata_to_hira')
-            let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-            let filter_str = henkan_buf_str.get_filter_str()
-            call henkan_buf_str.clear_filter_str()
-            for wchar in split(filter_str, '\zs')
-                call henkan_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
-            endfor
-            let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-            let filter_str = okuri_buf_str.get_filter_str()
-            call okuri_buf_str.clear_filter_str()
-            for wchar in split(filter_str, '\zs')
-                call okuri_buf_str.push_filter_str(table.get_map_to(wchar, wchar))
-            endfor
+            let table = eskk#util#get_table_lazy('rom_to_hira')
+            call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
+            call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
         endif
 
         call eskk#set_henkan_result(eskk#get_dictionary().refer(self))
@@ -509,29 +507,49 @@ function! s:buftable.do_henkan(stash) dict "{{{
         " Clear phase henkan/okuri buffer string.
         " Assumption: `eskk#get_dictionary().refer()` saves necessary strings.
         let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        call henkan_buf_str.clear_rom_str()
-        call henkan_buf_str.clear_filter_str()
-        let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-        call okuri_buf_str.clear_rom_str()
-        call okuri_buf_str.clear_filter_str()
+        let henkan_matched_rom = henkan_buf_str.get_matched_rom()
+        call henkan_buf_str.clear()
 
-        let buf_str = self.get_current_buf_str()
+        let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        let okuri_matched_rom = okuri_buf_str.get_matched_rom()
+        call okuri_buf_str.clear()
+
         let candidate = eskk#get_henkan_result().get_candidate()
 
+        let buf_str = self.get_current_buf_str()
+        let rom_str = henkan_matched_rom . okuri_matched_rom
         if type(candidate) == type("")
             " Set candidate.
-            call buf_str.set_filter_str(candidate)
+            call buf_str.push_matched(rom_str, candidate)
         else
             " No candidates.
             let input = eskk#get_dictionary().register_word(eskk#get_henkan_result())
-            call buf_str.set_filter_str(input)
+            call buf_str.push_matched(rom_str, input)
         endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        throw eskk#internal_error(['eskk', 'mode', 'builtin'])
     else
         let msg = printf("s:buftable.do_henkan() does not support phase %d.", phase)
         throw eskk#internal_error(['eskk', 'mode', 'builtin'], msg)
     endif
+endfunction "}}}
+function! s:filter_rom_again(buf_str, table) "{{{
+    let buf_str = a:buf_str
+    let table   = a:table
+
+    let matched = buf_str.get_matched()
+    call buf_str.clear_matched()
+    for [rom_str, filter_str] in matched
+        if table.has_map(rom_str)
+            call buf_str.push_matched(
+            \   rom_str,
+            \   table.get_map_to(rom_str)
+            \)
+        else
+            call buf_str.push_matched(
+            \   rom_str,
+            \   rom_str,
+            \)
+        endif
+    endfor
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
     return s:convert_map_rom_list(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
@@ -547,23 +565,22 @@ function! s:convert_map_rom_list(self, table) "{{{
     let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str  = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
 
-    " Get sandbox before leaving current phase.
-    let sandbox = self.get_sandbox()
+    for buf_str in [henkan_buf_str, okuri_buf_str]
+        for m in buf_str.get_matched()
+            call normal_buf_str.push_matched(m[0], a:table.get_map_to(m[0]))
+        endfor
+    endfor
 
     call henkan_buf_str.clear()
     call okuri_buf_str.clear()
 
     call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
-    for rom in sandbox.map_rom_list
-        call normal_buf_str.push_filter_str(a:table.get_map_to(rom))
-    endfor
-
     function! s:finalize()
         let self = eskk#get_buftable()
         if self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
             let buf_str = self.get_current_buf_str()
-            call buf_str.clear_filter_str()
+            call buf_str.clear_matched()
         endif
     endfunction
 
@@ -595,7 +612,7 @@ function! s:buftable.dump() dict "{{{
         call add(lines, printf('phase:%d', phase))
         call add(lines, printf('pos: %s', string(buf_str.get_pos())))
         call add(lines, printf('rom_str: %s', string(buf_str.get_rom_str())))
-        call add(lines, printf('filter_str: %s', string(buf_str.get_filter_str())))
+        call add(lines, printf('filter_str: %s', string(buf_str.get_matched_filter())))
     endfor
     return lines
 endfunction "}}}
