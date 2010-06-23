@@ -473,6 +473,54 @@ let s:map = {
 \   'mode:ascii:to-hira': {},
 \   'mode:zenei:to-hira': {},
 \}
+" Keys used by only its mode.
+let s:mode_local_keys = {
+\   'hira': [
+\       'henkan-select:choose-next',
+\       'henkan-select:choose-prev',
+\       'henkan-select:next-page',
+\       'henkan-select:prev-page',
+\       'henkan-select:escape',
+\       'mode:hira:toggle-hankata',
+\       'mode:hira:ctrl-q-key',
+\       'mode:hira:toggle-kata',
+\       'mode:hira:q-key',
+\       'mode:hira:to-ascii',
+\       'mode:hira:to-zenei',
+\   ],
+\   'kata': [
+\       'henkan-select:choose-next',
+\       'henkan-select:choose-prev',
+\       'henkan-select:next-page',
+\       'henkan-select:prev-page',
+\       'henkan-select:escape',
+\       'mode:kata:toggle-hankata',
+\       'mode:kata:ctrl-q-key',
+\       'mode:kata:toggle-kata',
+\       'mode:kata:q-key',
+\       'mode:kata:to-ascii',
+\       'mode:kata:to-zenei',
+\   ],
+\   'hankata': [
+\       'henkan-select:choose-next',
+\       'henkan-select:choose-prev',
+\       'henkan-select:next-page',
+\       'henkan-select:prev-page',
+\       'henkan-select:escape',
+\       'mode:hankata:toggle-hankata',
+\       'mode:hankata:ctrl-q-key',
+\       'mode:hankata:toggle-kata',
+\       'mode:hankata:q-key',
+\       'mode:hankata:to-ascii',
+\       'mode:hankata:to-zenei',
+\   ],
+\   'ascii': [
+\       'mode:ascii:to-hira',
+\   ],
+\   'zenei': [
+\       'mode:zenei:to-hira',
+\   ],
+\}
 " Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
 let s:stash_prototype = {}
 " Event handler functions/arguments.
@@ -1128,35 +1176,9 @@ autocmd VimEnter * call s:do_default_mappings()
 " Map temporary key to keys to use in that mode {{{
 function! eskk#map_mode_local_keys() "{{{
     let mode = eskk#get_mode()
-    let keys = {
-    \   'hira': [
-    \       'henkan-select:choose-next',
-    \       'henkan-select:choose-prev',
-    \       'henkan-select:next-page',
-    \       'henkan-select:prev-page',
-    \       'mode:hira:q-key',
-    \       'mode:hira:to-ascii',
-    \       'mode:hira:to-zenei',
-    \   ],
-    \   'kata': [
-    \       'henkan-select:choose-next',
-    \       'henkan-select:choose-prev',
-    \       'henkan-select:next-page',
-    \       'henkan-select:prev-page',
-    \       'mode:kata:q-key',
-    \       'mode:kata:to-ascii',
-    \       'mode:kata:to-zenei',
-    \   ],
-    \   'ascii': [
-    \       'mode:ascii:to-hira',
-    \   ],
-    \   'zenei': [
-    \       'mode:zenei:to-hira',
-    \   ],
-    \}
 
-    if has_key(keys, mode)
-        for key in keys[mode]
+    if has_key(s:mode_local_keys, mode)
+        for key in s:mode_local_keys[mode]
             let real_key = eskk#get_special_key(key)
             call eskk#set_up_temp_key(real_key)
             call eskk#register_temp_event('leave-mode-' . mode, 'eskk#set_up_temp_key_restore', [real_key])
