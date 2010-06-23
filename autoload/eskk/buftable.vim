@@ -605,7 +605,7 @@ function! s:buftable.dump() dict "{{{
         call add(lines, printf('phase:%d', phase))
         call add(lines, printf('pos: %s', string(buf_str.get_pos())))
         call add(lines, printf('rom_str: %s', string(buf_str.get_rom_str())))
-        call add(lines, printf('filter_str: %s', string(buf_str.get_matched_filter())))
+        call add(lines, printf('matched pairs: %s', string(buf_str.get_matched())))
     endfor
     return lines
 endfunction "}}}
