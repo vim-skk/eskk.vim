@@ -26,48 +26,6 @@ let s:stash = eskk#get_mutable_stash(['mode', 'builtin'])
 
 " Asymmetric built-in modes. {{{
 
-
-
-function! eskk#mode#builtin#do_ctrl_q_key() "{{{
-    return s:convert_map_rom_list(s:get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
-endfunction "}}}
-function! eskk#mode#builtin#do_q_key() "{{{
-    return s:convert_map_rom_list(s:get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
-endfunction "}}}
-function! s:convert_map_rom_list(table) "{{{
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
-
-    let normal_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str  = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-
-    " Get sandbox before leaving current phase.
-    let sandbox = buftable.get_sandbox()
-
-    call henkan_buf_str.clear()
-    call okuri_buf_str.clear()
-
-    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-
-    for rom in sandbox.map_rom_list
-        call normal_buf_str.push_filter_str(a:table.get_map_to(rom))
-    endfor
-
-    function! s:finalize()
-        let buftable = eskk#get_buftable()
-        if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            let buf_str = buftable.get_current_buf_str()
-            call buf_str.clear_filter_str()
-        endif
-    endfunction
-
-    call eskk#register_temp_event(
-    \   'filter-begin',
-    \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
-    \   []
-    \)
-endfunction "}}}
 function! s:get_table_lazy(table_name) "{{{
     let varname = 's:' . a:table_name
     if exists(varname)
@@ -353,7 +311,7 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     elseif eskk#is_special_lhs(char, ctrl_q_key)
     \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
-        call eskk#mode#builtin#do_ctrl_q_key()
+        call buftable.do_ctrl_q_key()
         return
     elseif eskk#is_special_lhs(char, toggle_kata)
     \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -362,7 +320,7 @@ function! eskk#mode#builtin#asym_filter(stash, table_name) "{{{
     elseif eskk#is_special_lhs(char, q_key)
     \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
-        call eskk#mode#builtin#do_q_key()
+        call buftable.do_q_key()
         return
     elseif eskk#is_special_lhs(char, to_ascii)
     \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
