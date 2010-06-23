@@ -411,8 +411,6 @@ function! s:get_next_candidate(self, stash, next) "{{{
                 let okuri_buf_str  = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 if okuri_buf_str.get_rom_str() != ''
                     " Clear roms of `okuri_buf_str`.
-                    " XXX
-                    " call henkan_buf_str.clear_rom_str()
                     call okuri_buf_str.clear()
                     call prev_buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
@@ -422,8 +420,9 @@ function! s:get_next_candidate(self, stash, next) "{{{
                 let okuri_buf_str  = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 if okuri_buf_str.get_rom_str() != ''
                     " Copy roms of `okuri_buf_str` to `henkan_buf_str`.
-                    let okuri_matched = okuri_buf_str.get_matched()
-                    call henkan_buf_str.push_matched(okuri_matched[0], okuri_matched[1])
+                    for okuri_matched in okuri_buf_str.get_matched()
+                        call henkan_buf_str.push_matched(okuri_matched[0], okuri_matched[1])
+                    endfor
                     call okuri_buf_str.clear()
                     call prev_buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
