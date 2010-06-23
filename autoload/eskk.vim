@@ -25,11 +25,23 @@ augroup eskk
 autocmd!
 
 " s:eskk {{{
-" mode: Current mode.
-" buftable: Buffer strings for inserted, filtered and so on.
-" is_locked_old_str: Lock current diff old string?
-" temp_event_hook_fn: Temporary event handler functions/arguments.
-" enabled: True if s:eskk.enable() is called.
+" mode:
+"   Current mode.
+" buftable:
+"   Buffer strings for inserted, filtered and so on.
+" is_locked_old_str:
+"   Lock current diff old string?
+" temp_event_hook_fn:
+"   Temporary event handler functions/arguments.
+" enabled:
+"   True if s:eskk.enable() is called.
+" stash:
+"   Stash for instance-local variables. See `s:mutable_stash`.
+" added_words:
+"   Words that this instance learnt.
+" prev_henkan_result:
+"   Previous henkan result.
+"   See `s:henkan_result` in `autoload/eskk/dictionary.vim`.
 let s:eskk = {
 \   'mode': '',
 \   'buftable': eskk#buftable#new(),
