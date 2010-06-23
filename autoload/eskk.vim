@@ -109,7 +109,7 @@ endfunction "}}}
 
 " Mappings
 function! s:eskk.map_all_keys(...) dict "{{{
-    if s:has_mapped
+    if has_key(s:has_mapped, bufnr('%'))
         return
     endif
 
@@ -141,17 +141,19 @@ function! s:eskk.map_all_keys(...) dict "{{{
         endif
     endfor
 
-    let s:has_mapped = 1
+    call eskk#util#assert(!has_key(s:has_mapped, bufnr('%')))
+    let s:has_mapped[bufnr('%')] = 1
 endfunction "}}}
 function! s:eskk.unmap_all_keys() dict "{{{
-    if !s:has_mapped
+    if !has_key(s:has_mapped, bufnr('%'))
         return
     endif
 
     for key in g:eskk_mapped_key
         call eskk#unmap_key(key)
     endfor
-    let s:has_mapped = 0
+
+    unlet s:has_mapped[bufnr('%')]
 endfunction "}}}
 
 " Manipulate display string.
@@ -518,7 +520,7 @@ let s:stash_prototype = {}
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
 " `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
-let s:has_mapped = 0
+let s:has_mapped = {}
 " SKK dicionary.
 let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary, s:eskk_instances[s:instance_id].added_words)
 " }}}
@@ -1285,6 +1287,16 @@ function! eskk#get_special_key(...) "{{{
     return call(self.get_special_key, a:000, self)
 endfunction "}}}
 
+" Mappings
+function! eskk#map_all_keys(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.map_all_keys, a:000, self)
+endfunction "}}}
+function! eskk#unmap_all_keys(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.unmap_all_keys, a:000, self)
+endfunction "}}}
+
 " Manipulate display string.
 function! eskk#remove_display_str(...) "{{{
     let self = eskk#get_current_instance()
@@ -1617,6 +1629,14 @@ call eskk#validate_mode_structure('hankata')
 
 unlet dict
 
+" }}}
+" Map keys when BufEnter {{{
+function! s:map_all_keys_if_enabled() "{{{
+    if eskk#is_enabled()
+        call eskk#map_all_keys()
+    endif
+endfunction "}}}
+autocmd InsertEnter * call s:map_all_keys_if_enabled()
 " }}}
 
 augroup END
