@@ -438,8 +438,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
-            call eskk#util#log("hmm...when is this block executed?")
-            call buf_str.clear()
+            call self.push_kakutei_str(self.get_display_str(0))
         endif
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
