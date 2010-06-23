@@ -550,12 +550,12 @@ function! s:filter_rom_again(buf_str, table) "{{{
     endfor
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
-    return s:convert_map_rom_list(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_q_key() dict "{{{
-    return s:convert_map_rom_list(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
-function! s:convert_map_rom_list(self, table) "{{{
+function! s:convert_again_with_table(self, table) "{{{
     let self = a:self
     let buf_str = self.get_current_buf_str()
 
