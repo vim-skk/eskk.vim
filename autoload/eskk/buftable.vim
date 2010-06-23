@@ -46,9 +46,9 @@ endfunction "}}}
 
 
 function! s:buffer_string.reset() dict "{{{
-    for k in keys(s:buftable)
+    for k in keys(s:buffer_string)
         if has_key(self, k)
-            let self[k] = deepcopy(s:buftable[k])
+            let self[k] = deepcopy(s:buffer_string[k])
         endif
     endfor
 endfunction "}}}
