@@ -617,10 +617,8 @@ let s:stash_prototype = {}
 let s:event_hook_fn = {}
 " `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
 let s:has_mapped = {}
-" Words that this instance learnt.
-let s:added_words = []
 " SKK dicionary.
-let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary, s:added_words)
+let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
 " }}}
 
 " Functions {{{
