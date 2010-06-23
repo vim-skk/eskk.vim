@@ -78,18 +78,6 @@ function! s:get_table_lazy(table_name) "{{{
     endif
 endfunction "}}}
 
-function! eskk#mode#builtin#do_lmap_non_egg_like_newline(do_map) "{{{
-    if a:do_map
-        if !eskk#has_temp_key('<CR>')
-            call eskk#util#log("Map *non* egg like newline...: <CR> => <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)")
-            call eskk#set_up_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
-        endif
-    else
-        call eskk#util#log("Restore *non* egg like newline...: <CR>")
-        call eskk#register_temp_event('filter-begin', 'eskk#set_up_temp_key_restore', ['<CR>'])
-    endif
-endfunction "}}}
-
 function! s:henkan_key(stash) "{{{
     call eskk#util#log('henkan!')
 
