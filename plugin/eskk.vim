@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 1, 132))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 22))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -32,22 +32,6 @@ if !exists('g:eskk_debug')
 endif
 if !exists('g:eskk_debug_wait_ms')
     let g:eskk_debug_wait_ms = 0
-endif
-if !exists('g:eskk_debug_profile')
-    let g:eskk_debug_profile = 0
-endif
-if !exists('g:eskk_debug_profile_file')
-    let g:eskk_debug_profile_file = expand('~/eskk-debug-profile.log')
-endif
-
-if g:eskk_debug_profile
-    execute 'profile start' g:eskk_debug_profile_file
-    for s:p in split(globpath(&rtp, 'plugin/eskk**') . globpath(&rtp, 'autoload/eskk**'), '\n')
-        if filereadable(s:p)
-            execute 'profile file' s:p
-        endif
-    endfor
-    unlet s:p
 endif
 
 " Dictionary
@@ -152,6 +136,9 @@ endif
 if !exists('g:eskk_statusline_mode_strings')
     let g:eskk_statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ'}
 endif
+if !exists('g:eskk_mode_use_tables')
+    let g:eskk_mode_use_tables =  {'hira': 'rom_to_hira', 'kata': 'rom_to_kata', 'zenei': 'rom_to_zenei', 'hankata': 'rom_to_hankata'}
+endif
 
 " Markers
 if !exists("g:eskk_marker_henkan")
@@ -177,11 +164,23 @@ if !exists("g:eskk_keep_state")
 endif
 
 if !exists("g:eskk_revert_henkan_style")
-    let g:eskk_revert_henkan_style = 'eskk'
+    let g:eskk_revert_henkan_style = 'okuri'
+endif
+
+if !exists("g:eskk_delete_implies_kakutei")
+    let g:eskk_delete_implies_kakutei = 0
 endif
 
 if !exists("g:eskk_rom_input_style")
     let g:eskk_rom_input_style = 'skk'
+endif
+
+if !exists("g:eskk_auto_henkan_at_okuri_match")
+    let g:eskk_auto_henkan_at_okuri_match = 1
+endif
+
+if !exists("g:eskk_error_log_file")
+    let g:eskk_error_log_file = '~/eskk-error.log'
 endif
 
 " }}}
@@ -197,7 +196,7 @@ lnoremap <expr> <Plug>(eskk:disable)    eskk#disable()
 noremap! <expr> <Plug>(eskk:toggle)     eskk#toggle()
 lnoremap <expr> <Plug>(eskk:toggle)     eskk#toggle()
 
-nnoremap        <Plug>(eskk:save-dictionary) :<C-u>call eskk#mode#builtin#update_dictionary()<CR>
+nnoremap        <Plug>(eskk:save-dictionary) :<C-u>call eskk#update_dictionary()<CR>
 
 if !g:eskk_no_default_mappings
     function! s:do_map(rhs, mode)

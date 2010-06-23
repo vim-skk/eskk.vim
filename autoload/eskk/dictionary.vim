@@ -217,6 +217,7 @@ function! s:merge_results(user_dict_result, system_dict_result) "{{{
 
     return results
 endfunction "}}}
+
 function! s:henkan_result_select_candidates(this) "{{{
     " Select candidates by getchar()'s character.
     let words = copy(a:this._result[0])
@@ -249,18 +250,23 @@ function! s:henkan_result_select_candidates(this) "{{{
         endfor
 
         " Get char for selected candidate.
-        let char = s:getchar()
-
-        if eskk#is_special_lhs(char, 'henkan-select:escape')
+        try
+            let char = s:getchar()
+        catch /^Vim:Interrupt$/
             throw 'eskk: leave henkan select'
-        elseif eskk#is_special_lhs(char, 'henkan-select:next-page')
+        endtry
+
+
+        if eskk#is_special_lhs(char, 'phase:henkan-select:escape')
+            throw 'eskk: leave henkan select'
+        elseif eskk#is_special_lhs(char, 'phase:henkan-select:next-page')
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
                 " No more pages. Register new word.
                 return a:this._dict.register_word(a:this)
             endif
-        elseif eskk#is_special_lhs(char, 'henkan-select:prev-page')
+        elseif eskk#is_special_lhs(char, 'phase:henkan-select:prev-page')
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
@@ -436,9 +442,9 @@ endfunction "}}}
 
 
 function! s:dict.refer(buftable) dict "{{{
-    let key       = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str()
-    let okuri     = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str()
-    let okuri_rom = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str()
+    let key       = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_matched_filter()
+    let okuri     = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_filter()
+    let okuri_rom = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_rom()
 
     let added = []
     for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
@@ -469,9 +475,9 @@ endfunction "}}}
 
 function! s:dict.register_word(henkan_result) dict "{{{
     let buftable  = a:henkan_result._buftable
-    let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_filter_str()
-    let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_filter_str()
-    let okuri_rom = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_rom_str()
+    let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_matched_filter()
+    let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_filter()
+    let okuri_rom = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_rom()
 
 
     " inputsave()
