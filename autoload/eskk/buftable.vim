@@ -473,7 +473,16 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
 
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        call buf_str.clear()
+        let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        call self.set_henkan_phase(
+        \   !empty(okuri_buf_str.get_matched()) ?
+        \       g:eskk#buftable#HENKAN_PHASE_OKURI
+        \       : g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \)
+        return 1
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         call buf_str.clear()
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         return 1    " stepped.
