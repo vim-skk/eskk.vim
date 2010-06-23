@@ -92,7 +92,7 @@ function! s:buffer_string.get_matched_filter() dict "{{{
     return join(map(copy(self._matched_pairs), 'v:val[1]'), '')
 endfunction "}}}
 function! s:buffer_string.set_matched(rom_str, filter_str) dict "{{{
-    let self._matched_pairs = [a:rom_str, a:filter_str]
+    let self._matched_pairs = [[a:rom_str, a:filter_str]]
 endfunction "}}}
 function! s:buffer_string.push_matched(rom_str, filter_str) dict "{{{
     call add(self._matched_pairs, [a:rom_str, a:filter_str])
