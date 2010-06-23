@@ -17,258 +17,249 @@ runtime! plugin/eskk.vim
 
 
 function! eskk#table#rom_to_kata#load()
-    " dummy
+    return {
+    \   'a': ['ア', ''],
+    \   'bb': ['ッ', 'b'],
+    \   'ba': ['バ', ''],
+    \   'be': ['ベ', ''],
+    \   'bi': ['ビ', ''],
+    \   'bo': ['ボ', ''],
+    \   'bu': ['ブ', ''],
+    \   'bya': ['ビャ', ''],
+    \   'bye': ['ビェ', ''],
+    \   'byi': ['ビィ', ''],
+    \   'byo': ['ビョ', ''],
+    \   'byu': ['ビュ', ''],
+    \   'cc': ['ッ', 'c'],
+    \   'cha': ['チャ', ''],
+    \   'che': ['チェ', ''],
+    \   'chi': ['チ', ''],
+    \   'cho': ['チョ', ''],
+    \   'chu': ['チュ', ''],
+    \   'cya': ['チャ', ''],
+    \   'cye': ['チェ', ''],
+    \   'cyi': ['チィ', ''],
+    \   'cyo': ['チョ', ''],
+    \   'cyu': ['チュ', ''],
+    \   'dd': ['ッ', 'd'],
+    \   'da': ['ダ', ''],
+    \   'de': ['デ', ''],
+    \   'dha': ['デャ', ''],
+    \   'dhe': ['デェ', ''],
+    \   'dhi': ['ディ', ''],
+    \   'dho': ['デョ', ''],
+    \   'dhu': ['デュ', ''],
+    \   'di': ['ヂ', ''],
+    \   'do': ['ド', ''],
+    \   'du': ['ヅ', ''],
+    \   'dya': ['ヂャ', ''],
+    \   'dye': ['ヂェ', ''],
+    \   'dyi': ['ヂィ', ''],
+    \   'dyo': ['ヂョ', ''],
+    \   'dyu': ['ヂュ', ''],
+    \   'e': ['エ', ''],
+    \   'ff': ['ッ', 'f'],
+    \   'fa': ['ファ', ''],
+    \   'fe': ['フェ', ''],
+    \   'fi': ['フィ', ''],
+    \   'fo': ['フォ', ''],
+    \   'fu': ['フ', ''],
+    \   'fya': ['フャ', ''],
+    \   'fye': ['フェ', ''],
+    \   'fyi': ['フィ', ''],
+    \   'fyo': ['フョ', ''],
+    \   'fyu': ['フュ', ''],
+    \   'gg': ['ッ', 'g'],
+    \   'ga': ['ガ', ''],
+    \   'ge': ['ゲ', ''],
+    \   'gi': ['ギ', ''],
+    \   'go': ['ゴ', ''],
+    \   'gu': ['グ', ''],
+    \   'gya': ['ギャ', ''],
+    \   'gye': ['ギェ', ''],
+    \   'gyi': ['ギィ', ''],
+    \   'gyo': ['ギョ', ''],
+    \   'gyu': ['ギュ', ''],
+    \   'hh': ['ッ', 'h'],
+    \   'ha': ['ハ', ''],
+    \   'he': ['ヘ', ''],
+    \   'hi': ['ヒ', ''],
+    \   'ho': ['ホ', ''],
+    \   'hu': ['フ', ''],
+    \   'hya': ['ヒャ', ''],
+    \   'hye': ['ヒェ', ''],
+    \   'hyi': ['ヒィ', ''],
+    \   'hyo': ['ヒョ', ''],
+    \   'hyu': ['ヒュ', ''],
+    \   'i': ['イ', ''],
+    \   'jj': ['ッ', 'j'],
+    \   'ja': ['ジャ', ''],
+    \   'je': ['ジェ', ''],
+    \   'ji': ['ジ', ''],
+    \   'jo': ['ジョ', ''],
+    \   'ju': ['ジュ', ''],
+    \   'jya': ['ジャ', ''],
+    \   'jye': ['ジェ', ''],
+    \   'jyi': ['ジィ', ''],
+    \   'jyo': ['ジョ', ''],
+    \   'jyu': ['ジュ', ''],
+    \   'kk': ['ッ', 'k'],
+    \   'ka': ['カ', ''],
+    \   'ke': ['ケ', ''],
+    \   'ki': ['キ', ''],
+    \   'ko': ['コ', ''],
+    \   'ku': ['ク', ''],
+    \   'kya': ['キャ', ''],
+    \   'kye': ['キェ', ''],
+    \   'kyi': ['キィ', ''],
+    \   'kyo': ['キョ', ''],
+    \   'kyu': ['キュ', ''],
+    \   'mm': ['ッ', 'm'],
+    \   'ma': ['マ', ''],
+    \   'me': ['メ', ''],
+    \   'mi': ['ミ', ''],
+    \   'mo': ['モ', ''],
+    \   'mu': ['ム', ''],
+    \   'mya': ['ミャ', ''],
+    \   'mye': ['ミェ', ''],
+    \   'myi': ['ミィ', ''],
+    \   'myo': ['ミョ', ''],
+    \   'myu': ['ミュ', ''],
+    \   'n': ['ン', ''],
+    \   "n'": ['ン', ''],
+    \   'na': ['ナ', ''],
+    \   'ne': ['ネ', ''],
+    \   'ni': ['ニ', ''],
+    \   'nn': ['ン', ''],
+    \   'no': ['ノ', ''],
+    \   'nu': ['ヌ', ''],
+    \   'nya': ['ニャ', ''],
+    \   'nye': ['ニェ', ''],
+    \   'nyi': ['ニィ', ''],
+    \   'nyo': ['ニョ', ''],
+    \   'nyu': ['ニュ', ''],
+    \   'o': ['オ', ''],
+    \   'pp': ['ッ', 'p'],
+    \   'pa': ['パ', ''],
+    \   'pe': ['ペ', ''],
+    \   'pi': ['ピ', ''],
+    \   'po': ['ポ', ''],
+    \   'pu': ['プ', ''],
+    \   'pya': ['ピャ', ''],
+    \   'pye': ['ピェ', ''],
+    \   'pyi': ['ピィ', ''],
+    \   'pyo': ['ピョ', ''],
+    \   'pyu': ['ピュ', ''],
+    \   'rr': ['ッ', 'r'],
+    \   'ra': ['ラ', ''],
+    \   're': ['レ', ''],
+    \   'ri': ['リ', ''],
+    \   'ro': ['ロ', ''],
+    \   'ru': ['ル', ''],
+    \   'rya': ['リャ', ''],
+    \   'rye': ['リェ', ''],
+    \   'ryi': ['リィ', ''],
+    \   'ryo': ['リョ', ''],
+    \   'ryu': ['リュ', ''],
+    \   'ss': ['ッ', 's'],
+    \   'sa': ['サ', ''],
+    \   'se': ['セ', ''],
+    \   'sha': ['シャ', ''],
+    \   'she': ['シェ', ''],
+    \   'shi': ['シ', ''],
+    \   'sho': ['ショ', ''],
+    \   'shu': ['シュ', ''],
+    \   'si': ['シ', ''],
+    \   'so': ['ソ', ''],
+    \   'su': ['ス', ''],
+    \   'sya': ['シャ', ''],
+    \   'sye': ['シェ', ''],
+    \   'syi': ['シィ', ''],
+    \   'syo': ['ショ', ''],
+    \   'syu': ['シュ', ''],
+    \   'tt': ['ッ', 't'],
+    \   'ta': ['タ', ''],
+    \   'te': ['テ', ''],
+    \   'tha': ['テァ', ''],
+    \   'the': ['テェ', ''],
+    \   'thi': ['ティ', ''],
+    \   'tho': ['テョ', ''],
+    \   'thu': ['テュ', ''],
+    \   'ti': ['チ', ''],
+    \   'to': ['ト', ''],
+    \   'tsu': ['ツ', ''],
+    \   'tu': ['ツ', ''],
+    \   'tya': ['チャ', ''],
+    \   'tye': ['チェ', ''],
+    \   'tyi': ['チィ', ''],
+    \   'tyo': ['チョ', ''],
+    \   'tyu': ['チュ', ''],
+    \   'u': ['ウ', ''],
+    \   'vv': ['ッ', 'v'],
+    \   'va': ['ヴァ', ''],
+    \   've': ['ヴェ', ''],
+    \   'vi': ['ヴィ', ''],
+    \   'vo': ['ヴォ', ''],
+    \   'vu': ['ヴ', ''],
+    \   'ww': ['ッ', 'w'],
+    \   'wa': ['ワ', ''],
+    \   'we': ['ウェ', ''],
+    \   'wi': ['ウィ', ''],
+    \   'wo': ['ヲ', ''],
+    \   'wu': ['ウ', ''],
+    \   'xx': ['ッ', 'x'],
+    \   'xa': ['ァ', ''],
+    \   'xe': ['ェ', ''],
+    \   'xi': ['ィ', ''],
+    \   'xka': ['ヵ', ''],
+    \   'xke': ['ヶ', ''],
+    \   'xo': ['ォ', ''],
+    \   'xtsu': ['ッ', ''],
+    \   'xtu': ['ッ', ''],
+    \   'xu': ['ゥ', ''],
+    \   'xwa': ['ヮ', ''],
+    \   'xwe': ['ヱ', ''],
+    \   'xwi': ['ヰ', ''],
+    \   'xya': ['ャ', ''],
+    \   'xyo': ['ョ', ''],
+    \   'xyu': ['ュ', ''],
+    \   'yy': ['ッ', 'y'],
+    \   'ya': ['ヤ', ''],
+    \   'ye': ['イェ', ''],
+    \   'yo': ['ヨ', ''],
+    \   'yu': ['ユ', ''],
+    \   'zz': ['ッ', 'z'],
+    \   'z,': ['‥', ''],
+    \   'z-': ['～', ''],
+    \   'z.': ['…', ''],
+    \   'z/': ['・', ''],
+    \   'z[': ['『', ''],
+    \   'z]': ['』', ''],
+    \   'za': ['ザ', ''],
+    \   'ze': ['ゼ', ''],
+    \   'zh': ['←', ''],
+    \   'zi': ['ジ', ''],
+    \   'zj': ['↓', ''],
+    \   'zk': ['↑', ''],
+    \   'zl': ['→', ''],
+    \   'zo': ['ゾ', ''],
+    \   'zu': ['ズ', ''],
+    \   'zya': ['ジャ', ''],
+    \   'zye': ['ジェ', ''],
+    \   'zyi': ['ジィ', ''],
+    \   'zyo': ['ジョ', ''],
+    \   'zyu': ['ジュ', ''],
+    \   '-': ['ー', ''],
+    \   ':': ['：', ''],
+    \   ';': ['；', ''],
+    \   '!': ['！', ''],
+    \   '?': ['？', ''],
+    \   '[': ['「', ''],
+    \   ']': ['」', ''],
+    \   '.': ['。', ''],
+    \   ',': ['、', ''],
+    \}
 endfunction
-
-
-
-call eskk#table#define_macro()
-TableBegin rom_to_kata
-
-Map a ア
-Map -rest=b bb ッ
-Map ba バ
-Map be ベ
-Map bi ビ
-Map bo ボ
-Map bu ブ
-Map bya ビャ
-Map bye ビェ
-Map byi ビィ
-Map byo ビョ
-Map byu ビュ
-Map -rest=c cc ッ
-Map cha チャ
-Map che チェ
-Map chi チ
-Map cho チョ
-Map chu チュ
-Map cya チャ
-Map cye チェ
-Map cyi チィ
-Map cyo チョ
-Map cyu チュ
-Map -rest=d dd ッ
-Map da ダ
-Map de デ
-Map dha デャ
-Map dhe デェ
-Map dhi ディ
-Map dho デョ
-Map dhu デュ
-Map di ヂ
-Map do ド
-Map du ヅ
-Map dya ヂャ
-Map dye ヂェ
-Map dyi ヂィ
-Map dyo ヂョ
-Map dyu ヂュ
-Map e エ
-Map -rest=f ff ッ
-Map fa ファ
-Map fe フェ
-Map fi フィ
-Map fo フォ
-Map fu フ
-Map fya フャ
-Map fye フェ
-Map fyi フィ
-Map fyo フョ
-Map fyu フュ
-Map -rest=g gg ッ
-Map ga ガ
-Map ge ゲ
-Map gi ギ
-Map go ゴ
-Map gu グ
-Map gya ギャ
-Map gye ギェ
-Map gyi ギィ
-Map gyo ギョ
-Map gyu ギュ
-Map -rest=h hh ッ
-Map ha ハ
-Map he ヘ
-Map hi ヒ
-Map ho ホ
-Map hu フ
-Map hya ヒャ
-Map hye ヒェ
-Map hyi ヒィ
-Map hyo ヒョ
-Map hyu ヒュ
-Map i イ
-Map -rest=j jj ッ
-Map ja ジャ
-Map je ジェ
-Map ji ジ
-Map jo ジョ
-Map ju ジュ
-Map jya ジャ
-Map jye ジェ
-Map jyi ジィ
-Map jyo ジョ
-Map jyu ジュ
-Map -rest=k kk ッ
-Map ka カ
-Map ke ケ
-Map ki キ
-Map ko コ
-Map ku ク
-Map kya キャ
-Map kye キェ
-Map kyi キィ
-Map kyo キョ
-Map kyu キュ
-Map -rest=m mm ッ
-Map ma マ
-Map me メ
-Map mi ミ
-Map mo モ
-Map mu ム
-Map mya ミャ
-Map mye ミェ
-Map myi ミィ
-Map myo ミョ
-Map myu ミュ
-Map n ン
-Map n' ン
-Map na ナ
-Map ne ネ
-Map ni ニ
-Map nn ン
-Map no ノ
-Map nu ヌ
-Map nya ニャ
-Map nye ニェ
-Map nyi ニィ
-Map nyo ニョ
-Map nyu ニュ
-Map o オ
-Map -rest=p pp ッ
-Map pa パ
-Map pe ペ
-Map pi ピ
-Map po ポ
-Map pu プ
-Map pya ピャ
-Map pye ピェ
-Map pyi ピィ
-Map pyo ピョ
-Map pyu ピュ
-Map -rest=r rr ッ
-Map ra ラ
-Map re レ
-Map ri リ
-Map ro ロ
-Map ru ル
-Map rya リャ
-Map rye リェ
-Map ryi リィ
-Map ryo リョ
-Map ryu リュ
-Map -rest=s ss ッ
-Map sa サ
-Map se セ
-Map sha シャ
-Map she シェ
-Map shi シ
-Map sho ショ
-Map shu シュ
-Map si シ
-Map so ソ
-Map su ス
-Map sya シャ
-Map sye シェ
-Map syi シィ
-Map syo ショ
-Map syu シュ
-Map -rest=t tt ッ
-Map ta タ
-Map te テ
-Map tha テァ
-Map the テェ
-Map thi ティ
-Map tho テョ
-Map thu テュ
-Map ti チ
-Map to ト
-Map tsu ツ
-Map tu ツ
-Map tya チャ
-Map tye チェ
-Map tyi チィ
-Map tyo チョ
-Map tyu チュ
-Map u ウ
-Map -rest=v vv ッ
-Map va ヴァ
-Map ve ヴェ
-Map vi ヴィ
-Map vo ヴォ
-Map vu ヴ
-Map -rest=w ww ッ
-Map wa ワ
-Map we ウェ
-Map wi ウィ
-Map wo ヲ
-Map wu ウ
-Map -rest=x xx ッ
-Map xa ァ
-Map xe ェ
-Map xi ィ
-Map xka ヵ
-Map xke ヶ
-Map xo ォ
-Map xtsu ッ
-Map xtu ッ
-Map xu ゥ
-Map xwa ヮ
-Map xwe ヱ
-Map xwi ヰ
-Map xya ャ
-Map xyo ョ
-Map xyu ュ
-Map -rest=y yy ッ
-Map ya ヤ
-Map ye イェ
-Map yo ヨ
-Map yu ユ
-Map -rest=z zz ッ
-Map z, ‥
-Map z- ～
-Map z. …
-Map z/ ・
-Map z[ 『
-Map z] 』
-Map za ザ
-Map ze ゼ
-Map zh ←
-Map zi ジ
-Map zj ↓
-Map zk ↑
-Map zl →
-Map zo ゾ
-Map zu ズ
-Map zya ジャ
-Map zye ジェ
-Map zyi ジィ
-Map zyo ジョ
-Map zyu ジュ
-Map - ー
-Map : ：
-Map ; ；
-Map ! ！
-Map ? ？
-Map [ 「
-Map ] 」
-Map . 。
-Map , 、
-
-TableEnd
-call eskk#table#undefine_macro()
-
 
 
 " Restore 'cpoptions' {{{

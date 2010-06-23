@@ -30,10 +30,13 @@ function! s:search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
     else
         let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
-    if type(result) == type("")
-        return s:iconv(result, a:physical_dict.encoding, &l:encoding)
+    if type(result[1]) !=# -1
+        return [
+        \   s:iconv(result[0], a:physical_dict.encoding, &l:encoding),
+        \   result[1]
+        \]
     else
-        return -1
+        return ['', -1]
     endif
 endfunction "}}}
 
@@ -87,12 +90,12 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
             call eskk#util#logf('s:search_linear() - found matched line - %s', string(line))
-            return line[strlen(a:needle) :]
+            return [line[strlen(a:needle) :], pos]
         endif
         let pos += 1
     endwhile
     call eskk#util#log('s:search_linear() - not found.')
-    return -1
+    return ['', -1]
 endfunction "}}}
 
 " }}}
@@ -167,23 +170,53 @@ function! s:henkan_result_get_result(this) "{{{
         endif
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
         " Look up this henkan result in dictionaries.
-        let found = 0
-        for dict in a:this._dict._physical_dicts
-            let line = s:search_next_candidate(dict, a:this._key, a:this._okuri_rom)
-            if type(line) == type("")
-                let found = 1
-                break
-            endif
-        endfor
-        if !found
+        let user_dict_result = s:search_next_candidate(
+        \   a:this._dict._user_dict, a:this._key, a:this._okuri_rom
+        \)
+        let system_dict_result = s:search_next_candidate(
+        \   a:this._dict._system_dict, a:this._key, a:this._okuri_rom
+        \)
+        if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
             throw cant_get_result
         endif
-        let a:this._result = [s:parse_skk_dict_line(line), 0]
+        " Merge and unique user dict result and system dict result.
+        let a:this._result = [
+        \   s:merge_results(user_dict_result, system_dict_result),
+        \   0
+        \]
         let a:this._status = s:GOT_RESULT
         return a:this._result
     endif
 endfunction "}}}
 
+function! s:merge_results(user_dict_result, system_dict_result) "{{{
+    " Merge.
+    let results =
+    \   (a:user_dict_result[1] !=# -1 ? s:parse_skk_dict_line(a:user_dict_result[0]) : [])
+    \   + (a:system_dict_result[1] !=# -1 ? s:parse_skk_dict_line(a:system_dict_result[0]) : [])
+
+    " Unique.
+    let unique = {}
+    let i = 0
+    while i < len(results)
+        let r = results[i]
+        let str = r.result
+
+        if has_key(unique, str)
+            if r.annotation ==# unique[str].annotation
+                " If `result` and `annotation` is same as old one, Remove new one.
+                call remove(results, i)
+                " Next element is results[i], Don't increment.
+                continue
+            endif
+        else
+            let unique[str] = r
+        endif
+        let i += 1
+    endwhile
+
+    return results
+endfunction "}}}
 function! s:henkan_result_select_candidates(this) "{{{
     " Select candidates by getchar()'s character.
     let words = copy(a:this._result[0])
@@ -217,7 +250,10 @@ function! s:henkan_result_select_candidates(this) "{{{
 
         " Get char for selected candidate.
         let char = s:getchar()
-        if eskk#is_special_lhs(char, 'henkan-select:next-page')
+
+        if eskk#is_special_lhs(char, 'henkan-select:escape')
+            throw 'eskk: leave henkan select'
+        elseif eskk#is_special_lhs(char, 'henkan-select:next-page')
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
@@ -228,7 +264,6 @@ function! s:henkan_result_select_candidates(this) "{{{
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
-                " Return to henkan select phase.
                 throw 'eskk: leave henkan select'
             endif
         elseif stridx(g:eskk_select_cand_keys, char) != -1
@@ -322,10 +357,10 @@ let s:physical_dict = {
 \   'encoding': '',
 \}
 
-function! s:physical_dict_new(path, sorted, encoding, is_user_dict) "{{{
+function! s:physical_dict_new(path, sorted, encoding) "{{{
     return extend(
     \   deepcopy(s:physical_dict),
-    \   {'path': expand(a:path), 'sorted': a:sorted, 'encoding': a:encoding, 'is_user_dict': a:is_user_dict},
+    \   {'path': expand(a:path), 'sorted': a:sorted, 'encoding': a:encoding},
     \   'force'
     \)
 endfunction "}}}
@@ -373,37 +408,27 @@ lockvar s:physical_dict
 " implementation of searching dictionaries.
 
 let s:dict = {
-\   '_physical_dicts': [],
 \   '_user_dict': {},
+\   '_system_dict': {},
 \   '_added_words': [],
 \}
 
-function! eskk#dictionary#new(dict_info) "{{{
-    if type(a:dict_info) == type([])
-        let dicts = map(copy(a:dict_info), 's:physical_dict_new(v:val.path, v:val.sorted, v:val.encoding, get(v:val, "is_user_dict", 0))')
-    elseif type(a:dict_info) == type({})
-        return eskk#dictionary#new([a:dict_info])
-    else
-        throw eskk#internal_error(['eskk', 'dictionary'], "eskk#dictionary#new(): invalid argument")
-    endif
-
-    " Check if any dictionary has "is_user_dict" key.
-    let user_dict = {}
-    let found = 0
-    for d in dicts
-        if d.is_user_dict
-            let user_dict = d
-            let found = 1
-            break
-        endif
-    endfor
-    if !found
-        throw eskk#internal_error(['eskk', 'dictionary'], "No 'is_user_dict' key in dictionaries.")
-    endif
-
+function! eskk#dictionary#new(user_dict, system_dict, added_word) "{{{
     return extend(
     \   deepcopy(s:dict),
-    \   {'_physical_dicts': dicts, '_user_dict': user_dict},
+    \   {
+    \       '_user_dict': s:physical_dict_new(
+    \           a:user_dict.path,
+    \           a:user_dict.sorted,
+    \           a:user_dict.encoding,
+    \       ),
+    \       '_system_dict': s:physical_dict_new(
+    \           a:system_dict.path,
+    \           a:system_dict.sorted,
+    \           a:system_dict.encoding,
+    \       ),
+    \       '_added_words': a:added_word,
+    \   },
     \   'force'
     \)
 endfunction "}}}
@@ -511,15 +536,20 @@ function! s:dict.update_dictionary() dict "{{{
 
     " Check if a:self.user_dict really does not have added words.
     for [input, key, okuri, okuri_rom] in self._added_words
-        let line = s:search_next_candidate(self._user_dict, key, okuri_rom)
+        let [line, index] = s:search_next_candidate(self._user_dict, key, okuri_rom)
         if okuri_rom != ''
             let lnum = self._user_dict.okuri_ari_lnum + 1
         else
             let lnum = self._user_dict.okuri_nasi_lnum + 1
         endif
+        " Delete old entry.
+        if index !=# -1
+            call remove(user_dict_lines, index)
+        endif
+        " Merge old one and create new entry.
         call insert(
         \   user_dict_lines,
-        \   s:create_new_entry(input, key, okuri, okuri_rom, (type(line) == type("") ? line : '')),
+        \   s:create_new_entry(input, key, okuri, okuri_rom, line),
         \   lnum
         \)
     endfor

@@ -31,6 +31,7 @@ let s:eskk = {
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'stash': {},
+\   'added_words': [],
 \}
 
 function! s:eskk_new() "{{{
@@ -176,14 +177,7 @@ function! s:eskk.is_sticky_key(char) dict "{{{
     return eskk#util#eval_key(s:map.sticky.lhs) ==# a:char
 endfunction "}}}
 function! s:eskk.sticky_key(stash) dict "{{{
-    let buftable = a:stash.buftable
-    if buftable.step_henkan_phase()
-        call eskk#util#logf("eskk#sticky_key(): Succeeded to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
-        return buftable.get_current_marker()
-    else
-        call eskk#util#logf("eskk#sticky_key(): Failed to step to next henkan phase. (current: %d)", buftable.get_henkan_phase())
-        return ''
-    endif
+    return self.buftable.step_henkan_phase(a:stash)
 endfunction "}}}
 
 " Henkan key
@@ -243,15 +237,18 @@ function! s:eskk.is_supported_mode(mode) dict "{{{
     return has_key(s:available_modes, a:mode)
 endfunction "}}}
 function! s:eskk.register_mode(mode, ...) dict "{{{
-    let mode_self = a:0 != 0 ? a:1 : {}
-    let s:available_modes[a:mode] = mode_self
+    let s:available_modes[a:mode] = extend(
+    \   (a:0 ? a:1 : {}),
+    \   {'sandbox': {}},
+    \   'keep'
+    \)
 endfunction "}}}
 function! s:eskk.validate_mode_structure(mode) dict "{{{
     " It should be good to call this function at the end of mode register.
 
     let st = self.get_mode_structure(a:mode)
 
-    for key in ['filter']
+    for key in ['filter', 'sandbox']
         if !has_key(st, key)
             throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
         endif
@@ -277,9 +274,7 @@ endfunction "}}}
 
 " Statusline
 function! s:eskk.get_stl() dict "{{{
-    " TODO Add these strings to each mode structure.
-    let mode_str = {'hira': 'あ', 'kata': 'ア', 'ascii': 'a', 'zenei': 'ａ'}
-    return self.is_enabled() ? printf('[eskk:%s]', get(mode_str, self.mode, '??')) : ''
+    return self.is_enabled() ? printf('[eskk:%s]', get(g:eskk_statusline_mode_strings, self.mode, '??')) : ''
 endfunction "}}}
 
 " Buftable
@@ -308,24 +303,28 @@ function! s:register_event(st, event_names, Fn, head_args, self) "{{{
         if !has_key(a:st, name)
             let a:st[name] = []
         endif
-        call add(a:st[name], [a:Fn, a:head_args, a:self])
+        call add(a:st[name], [a:Fn, a:head_args] + (a:self !=# -1 ? [a:self] : []))
     endfor
+endfunction "}}}
+function! s:eskk.has_events(event_name) dict "{{{
+    return
+    \   has_key(s:event_hook_fn, a:event_name)
+    \   || has_key(self.temp_event_hook_fn, a:event_name)
 endfunction "}}}
 function! s:eskk.throw_event(event_name) dict "{{{
     call eskk#util#log("Do event - " . a:event_name)
 
+    let ret        = []
     let event      = get(s:event_hook_fn, a:event_name, [])
     let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
-    for [Fn, args, method_self] in event + temp_event
-        if type(method_self) != type(-1)
-            call call(Fn, args, method_self)
-        else
-            call call(Fn, args)
-        endif
+    for call_args in event + temp_event
+        call add(ret, call('call', call_args))
     endfor
 
     " Clear temporary hooks.
     let self.temp_event_hook_fn[a:event_name] = []
+
+    return ret
 endfunction "}}}
 
 " Locking diff old string
@@ -340,11 +339,11 @@ endfunction "}}}
 function! s:eskk.filter(char) dict "{{{
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
 endfunction "}}}
-function! s:eskk.call_via_filter(Fn, head_args, ...) dict "{{{
+function! s:eskk.call_via_filter(Fn, tail_args, ...) dict "{{{
     let char = a:0 != 0 ? a:1 : ''
-    return s:filter(self, char, a:Fn, a:head_args)
+    return s:filter(self, char, a:Fn, a:tail_args)
 endfunction "}}}
-function! s:filter(self, char, Fn, head_args) "{{{
+function! s:filter(self, char, Fn, tail_args) "{{{
     let self = a:self
 
     call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
@@ -353,39 +352,37 @@ function! s:filter(self, char, Fn, head_args) "{{{
         sleep 1
     endif
 
-    let opt = {
-    \   'redispatch_chars': [],
-    \   'return': 0,
-    \}
+
+    call self.throw_event('filter-begin')
+
     let filter_args = [{
     \   'char': a:char,
-    \   'option': opt,
-    \   'buftable': self.buftable,
+    \   'return': 0,
     \}]
 
     if !self.is_locked_old_str
         call self.buftable.set_old_str(self.buftable.get_display_str())
     endif
 
-    call self.buftable.get_current_buf_str().push_phase_str(a:char)
-
-    call self.throw_event('filter-begin')
-
     try
-        call call(a:Fn, a:head_args + filter_args)
+        call call(a:Fn, filter_args + a:tail_args)
 
-        if type(opt.return) == type("")
-            return opt.return
+        let ret_str = filter_args[0].return
+        if type(ret_str) == type("")
+            return ret_str
         else
-            " XXX:
-            "     s:map_named_key(char)
-            " should
-            "     s:map_named_key(eskk#util#uneval_key(char))
+            " NOTE: Because of Vim's bug, `:lmap` can't remap to `:lmap`.
+            execute
+            \   'map!'
+            \   '<buffer><expr>'
+            \   '<Plug>(eskk:_filter_redispatch)'
+            \   (self.has_events('filter-redispatch') ?
+            \       'join(eskk#throw_event("filter-redispatch"))'
+            \       : '""')
 
-            " TODO: Do not remap.
             return
             \   self.rewrite()
-            \   . join(map(opt.redispatch_chars, 'eskk#util#eval_key(s:map_named_key(v:val))'), '')
+            \   . "\<Plug>(eskk:_filter_redispatch)"
         endif
 
     catch
@@ -410,9 +407,8 @@ function! s:filter(self, char, Fn, head_args) "{{{
         call self.throw_event('filter-finalize')
     endtry
 endfunction "}}}
-function! s:filter_body_call_mode_or_default_filter(self, stash) "{{{
-    let self = a:self
-    call self.call_mode_func('filter', [a:stash], 1)
+function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
+    call a:self.call_mode_func('filter', [a:stash], 1)
 endfunction "}}}
 
 " Misc.
@@ -420,6 +416,7 @@ endfunction "}}}
 " s:map related functions.
 " TODO Move this to s:map
 function! s:eskk.is_special_lhs(char, type) dict "{{{
+    " NOTE: This function must not show error when `s:map[a:type]` does not exist.
     return has_key(s:map, a:type)
     \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
@@ -456,12 +453,25 @@ let s:map = {
 \   'henkan-select:choose-prev': {},
 \   'henkan-select:next-page': {},
 \   'henkan-select:prev-page': {},
+\   'henkan-select:escape': {},
+\   'mode:hira:toggle-hankata': {},
+\   'mode:hira:ctrl-q-key': {},
+\   'mode:hira:toggle-kata': {},
 \   'mode:hira:q-key': {},
 \   'mode:hira:to-ascii': {},
 \   'mode:hira:to-zenei': {},
+\   'mode:kata:toggle-hankata': {},
+\   'mode:kata:ctrl-q-key': {},
+\   'mode:kata:toggle-kata': {},
 \   'mode:kata:q-key': {},
 \   'mode:kata:to-ascii': {},
 \   'mode:kata:to-zenei': {},
+\   'mode:hankata:toggle-hankata': {},
+\   'mode:hankata:ctrl-q-key': {},
+\   'mode:hankata:toggle-kata': {},
+\   'mode:hankata:q-key': {},
+\   'mode:hankata:to-ascii': {},
+\   'mode:hankata:to-zenei': {},
 \   'mode:ascii:to-hira': {},
 \   'mode:zenei:to-hira': {},
 \}
@@ -471,6 +481,8 @@ let s:stash_prototype = {}
 let s:event_hook_fn = {}
 " `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
 let s:has_mapped = 0
+" SKK dicionary.
+let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary, s:eskk_instances[s:instance_id].added_words)
 " }}}
 
 " Functions {{{
@@ -493,7 +505,7 @@ function! s:map_key(key, options) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
     " Map a:key.
-    let named_key = s:map_named_key(a:key)
+    let named_key = eskk#get_named_map(a:key)
     execute
     \   'lmap'
     \   '<buffer>' . s:mapopt_dict2raw(a:options)
@@ -556,7 +568,7 @@ endfunction "}}}
 function! s:temp_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
-function! s:map_named_key(key) "{{{
+function! eskk#get_named_map(key) "{{{
     " NOTE:
     " a:key is escaped. So when a:key is '<C-a>', return value is
     "   `<Plug>(eskk:filter:<C-a>)`
@@ -590,28 +602,34 @@ function! eskk#map(type, options, lhs, rhs) "{{{
 endfunction "}}}
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
     let self = a:self
-
     let lhs = a:lhs
-    if lhs == ''
-        echoerr "lhs must not be empty string."
-        return
-    endif
+    let rhs = a:rhs
+
     if !has_key(s:map, a:type)
-        echoerr "eskk#map(): unknown type: " . a:type
+        call eskk#util#warn('%s: unknown type: %s', a:from, a:type)
         return
     endif
     let type_st = s:map[a:type]
 
     if a:type ==# 'general'
+        if lhs == ''
+            call eskk#util#warn("lhs must not be empty string.")
+            return
+        endif
         if has_key(type_st, lhs) && a:options.unique
-            echoerr printf("%s: Already mapped to '%s'.", a:from, lhs)
+            call eskk#util#warnf("%s: Already mapped to '%s'.", a:from, lhs)
             return
         endif
         let type_st[lhs] = {
         \   'options': a:options,
-        \   'rhs': a:rhs
+        \   'rhs': rhs
         \}
     else
+        if a:options.unique && has_key(type_st, 'lhs')
+            let msg = printf('%s: -unique is specified and mapping already exists. skip.', a:type)
+            call eskk#util#warn(msg)
+            return
+        endif
         let type_st.options = a:options
         let type_st.lhs = lhs
     endif
@@ -747,6 +765,9 @@ function! eskk#create_new_instance() "{{{
     " Initialize instance.
     call inst.enable(0)
 
+    " Update s:skk_dict. Assign current instance's `added_words`.
+    let s:skk_dict._added_words = inst.added_words
+
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
@@ -754,8 +775,12 @@ function! eskk#destroy_current_instance() "{{{
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
 
+    " Destroy current instance.
     call remove(s:eskk_instances, s:instance_id)
     let s:instance_id -= 1
+
+    " Update s:skk_dict. Assign current instance's `added_words`.
+    let s:skk_dict._added_words = s:eskk_instances[s:instance_id].added_words
 endfunction "}}}
 function! eskk#get_mutable_stash(namespace) "{{{
     let obj = deepcopy(s:mutable_stash, 1)
@@ -822,6 +847,12 @@ endfunction "}}}
 
 lockvar s:mutable_stash
 " }}}
+
+
+" Getter for scope-local variables.
+function! eskk#get_dictionary() "{{{
+    return s:skk_dict
+endfunction "}}}
 
 
 " Stubs for current eskk instance. {{{
@@ -977,7 +1008,7 @@ function! eskk#unlock_old_str(...) "{{{
     return call(self.unlock_old_str, a:000, self)
 endfunction "}}}
 
-" Dispatch functions
+" Filter functions
 function! eskk#filter(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.filter, a:000, self)
@@ -1057,27 +1088,42 @@ autocmd InsertLeave * call s:autocmd_insert_leave()
 " }}}
 " Default mappings - :EskkMap {{{
 function! s:do_default_mappings() "{{{
-    EskkMap -type=sticky -unique ;
-    EskkMap -type=henkan -unique <Space>
-    EskkMap -type=escape -unique <Esc>
+    silent EskkMap -type=sticky -unique ;
+    silent EskkMap -type=henkan -unique <Space>
+    silent silent EskkMap -type=escape -unique <Esc>
 
-    EskkMap -type=henkan-select:choose-next -unique <Space>
-    EskkMap -type=henkan-select:choose-prev -unique x
+    silent EskkMap -type=henkan-select:choose-next -unique <Space>
+    silent EskkMap -type=henkan-select:choose-prev -unique x
 
-    EskkMap -type=henkan-select:next-page -unique <Space>
-    EskkMap -type=henkan-select:prev-page -unique x
+    silent EskkMap -type=henkan-select:next-page -unique <Space>
+    silent EskkMap -type=henkan-select:prev-page -unique x
 
-    EskkMap -type=mode:hira:q-key -unique q
-    EskkMap -type=mode:hira:to-ascii -unique l
-    EskkMap -type=mode:hira:to-zenei -unique L
+    silent EskkMap -type=henkan-select:escape -unique <C-g>
 
-    EskkMap -type=mode:kata:q-key -unique q
-    EskkMap -type=mode:kata:to-ascii -unique l
-    EskkMap -type=mode:kata:to-zenei -unique L
+    silent EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
+    silent EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
+    silent EskkMap -type=mode:hira:toggle-kata -unique q
+    silent EskkMap -type=mode:hira:q-key -unique q
+    silent EskkMap -type=mode:hira:to-ascii -unique l
+    silent EskkMap -type=mode:hira:to-zenei -unique L
 
-    EskkMap -type=mode:ascii:to-hira -unique <C-j>
+    silent EskkMap -type=mode:kata:toggle-hankata -unique <C-q>
+    silent EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
+    silent EskkMap -type=mode:kata:toggle-kata -unique q
+    silent EskkMap -type=mode:kata:q-key -unique q
+    silent EskkMap -type=mode:kata:to-ascii -unique l
+    silent EskkMap -type=mode:kata:to-zenei -unique L
 
-    EskkMap -type=mode:zenei:to-hira -unique <C-j>
+    silent EskkMap -type=mode:hankata:toggle-hankata -unique <C-q>
+    silent EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
+    silent EskkMap -type=mode:hankata:toggle-kata -unique q
+    silent EskkMap -type=mode:hankata:q-key -unique q
+    silent EskkMap -type=mode:hankata:to-ascii -unique l
+    silent EskkMap -type=mode:hankata:to-zenei -unique L
+
+    silent EskkMap -type=mode:ascii:to-hira -unique <C-j>
+
+    silent EskkMap -type=mode:zenei:to-hira -unique <C-j>
 endfunction "}}}
 autocmd VimEnter * call s:do_default_mappings()
 " }}}
@@ -1123,7 +1169,7 @@ call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-asci
 " }}}
 " Save dictionary if modified {{{
 if g:eskk_auto_save_dictionary_at_exit
-    autocmd VimLeavePre * call eskk#mode#builtin#update_dictionary()
+    autocmd VimLeavePre * call eskk#get_dictionary().update_dictionary()
 endif
 " }}}
 

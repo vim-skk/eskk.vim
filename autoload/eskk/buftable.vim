@@ -15,6 +15,12 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
 " Variables {{{
 " Normal
 let eskk#buftable#HENKAN_PHASE_NORMAL = 0
@@ -35,7 +41,7 @@ lockvar eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
 
 " Functions {{{
 " s:buffer_string {{{
-let s:buffer_string = {'_pos': [], '_rom_str': '', '_filter_str': '', '_phase_str': ''}
+let s:buffer_string = {'_pos': [], '_rom_str': '', '_filter_str': ''}
 
 function! s:buffer_string_new() "{{{
     return deepcopy(s:buffer_string)
@@ -94,23 +100,6 @@ function! s:buffer_string.clear_filter_str() dict "{{{
 endfunction "}}}
 
 
-function! s:buffer_string.get_phase_str() dict "{{{
-    return self._phase_str
-endfunction "}}}
-function! s:buffer_string.set_phase_str(str) dict "{{{
-    let self._phase_str = a:str
-endfunction "}}}
-function! s:buffer_string.push_phase_str(str) dict "{{{
-    call self.set_phase_str(self.get_phase_str() . a:str)
-endfunction "}}}
-function! s:buffer_string.pop_phase_str() dict "{{{
-    let s = self.get_phase_str()
-    call self.set_phase_str(strpart(s, 0, strlen(s) - 1))
-endfunction "}}}
-function! s:buffer_string.clear_phase_str() dict "{{{
-    let self._phase_str = ''
-endfunction "}}}
-
 function! s:buffer_string.clear() dict "{{{
     call self.clear_rom_str()
     call self.clear_filter_str()
@@ -128,7 +117,9 @@ let s:buftable = {
 \       s:buffer_string_new(),
 \       s:buffer_string_new(),
 \   ],
+\   '_kakutei_str': '',
 \   '_old_str': '',
+\   '_sandbox': {},
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
 
@@ -173,12 +164,16 @@ endfunction "}}}
 function! s:buftable.rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
 
+    let kakutei = self._kakutei_str
+    let self._kakutei_str = ''
+
     call eskk#util#logf('old string = %s', string(old))
+    call eskk#util#logf('kakutei string = %s', string(kakutei))
     call eskk#util#logf('new display string = %s', string(new))
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    return repeat("\<C-h>", eskk#util#mb_strlen(old)) . new
+    return repeat("\<C-h>", eskk#util#mb_strlen(old)) . kakutei . new
 endfunction "}}}
 
 function! s:buftable.get_display_str(...) dict "{{{
@@ -240,15 +235,11 @@ endfunction "}}}
 function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
 
-    " "s:buffer_string._phase_str" is cleared only here.
-
     call eskk#throw_event('leave-phase-' . self.get_phase_name(self._henkan_phase))
-    call self.get_current_buf_str().clear_phase_str()
-
     let self._henkan_phase = a:henkan_phase
-
     call eskk#throw_event('enter-phase-' . self.get_phase_name(self._henkan_phase))
-    call self.get_current_buf_str().clear_phase_str()
+
+    let self._sandbox = {}
 endfunction "}}}
 
 
@@ -290,26 +281,84 @@ function! s:buftable.get_current_marker() "{{{
 endfunction "}}}
 
 
-function! s:buftable.move_buf_str(from_phases, to_phase) dict "{{{
-    if type(a:from_phases) != type([])
-        return self.move_buf_str([a:from_phases], a:to_phase)
-    endif
-
-    let str = ''
-    for phase in a:from_phases
-        let buf_str = self.get_buf_str(phase)
-        let str .= buf_str.get_filter_str()
-        let str .= buf_str.get_rom_str()
-        call buf_str.clear()
-    endfor
-
-    let buf_str = self.get_buf_str(a:to_phase)
-    call buf_str.clear_rom_str()
-    call buf_str.set_filter_str(str)
+function! s:buftable.push_kakutei_str(str) dict "{{{
+    let self._kakutei_str .= a:str
 endfunction "}}}
 
+function! s:buftable.do_enter(stash) dict "{{{
+    call eskk#util#log("s:buftable.do_enter()")
 
-function! s:buftable.step_henkan_phase() dict "{{{
+    let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    let henkan_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    let phase = self.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call normal_buf_str.clear()
+        let a:stash.return = "\<CR>"
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
+
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
+
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
+
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    else
+        throw eskk#internal_error(['eskk'])
+    endif
+endfunction "}}}
+function! s:buftable.do_backspace(stash) dict "{{{
+    if self.get_old_str() == ''
+        let a:stash.return = "\<BS>"
+        return
+    endif
+
+    let phase = self.get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        " Pretend skk.vim behavior.
+        " Enter normal phase and delete one character.
+        let filter_str = eskk#util#mb_chop(self.get_display_str(0))
+        call self.push_kakutei_str(filter_str)
+        let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+        call henkan_buf_str.clear()
+
+        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+        return
+    endif
+
+    " Build backspaces to delete previous characters.
+    for phase in self.get_lower_phases()
+        let buf_str = self.get_buf_str(phase)
+        if buf_str.get_rom_str() != ''
+            call buf_str.pop_rom_str()
+            break
+        elseif buf_str.get_filter_str() != ''
+            call buf_str.pop_filter_str()
+            break
+        elseif self.get_marker(phase) != ''
+            if !self.step_back_henkan_phase()
+                let msg = "Normal phase's marker is empty, "
+                \       . "and other phases *should* be able to change "
+                \       . "current henkan phase."
+                throw eskk#internal_error(['eskk'], msg)
+            endif
+            break
+        endif
+    endfor
+endfunction "}}}
+
+function! s:buftable.step_henkan_phase(stash) dict "{{{
+    let step    = 0
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
 
@@ -319,21 +368,26 @@ function! s:buftable.step_henkan_phase() dict "{{{
             call buf_str.clear()
         endif
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        return 1    " stepped.
+        let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if buf_str.get_rom_str() != '' || buf_str.get_filter_str() != ''
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
-            return 1    " stepped.
+            let step = 1
         else
-            return 0    " failed.
+            let step = 0
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return 0    " failed.
+        let step = 0
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        return 0    " failed.
+        call self.do_enter(a:stash)
+        call eskk#sticky_key(a:stash)
+
+        let step = 1
     else
         throw eskk#internal_error(['eskk'])
     endif
+
+    return step ? self.get_current_marker() : ''
 endfunction "}}}
 function! s:buftable.step_back_henkan_phase() dict "{{{
     let phase   = self.get_henkan_phase()
@@ -354,13 +408,13 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     endif
 endfunction "}}}
 
+function! s:buftable.get_sandbox() dict "{{{
+    return self._sandbox
+endfunction "}}}
 
-function! s:buftable.clear_buf_str(phases) dict "{{{
-    if type(a:phases) != type([])
-        return self.clear_buf_str([a:phases])
-    endif
 
-    for phase in a:phases
+function! s:buftable.clear_all() dict "{{{
+    for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call buf_str.clear()
     endfor
@@ -375,7 +429,6 @@ function! s:buftable.dump_print() dict "{{{
         call eskk#util#warnf('pos: %s', string(buf_str.get_pos()))
         call eskk#util#warnf('rom_str: %s', string(buf_str.get_rom_str()))
         call eskk#util#warnf('filter_str: %s', string(buf_str.get_filter_str()))
-        call eskk#util#warnf('phase_str: %s', string(buf_str.get_phase_str()))
     endfor
 endfunction "}}}
 

@@ -26,8 +26,12 @@ runtime! plugin/eskk.vim
 
 
 " Variables {{{
-let s:current_table_name = ''
 let s:table_defs = {}
+
+let s:MAP_TO_INDEX = 0
+let s:REST_INDEX = 1
+lockvar s:MAP_TO_INDEX
+lockvar s:REST_INDEX
 " }}}
 
 
@@ -83,10 +87,6 @@ function! s:parse_arg(arg) "{{{
 endfunction "}}}
 
 
-function! s:is_mapping_table() "{{{
-    return s:current_table_name != ''
-endfunction "}}}
-
 function! s:load_table(table_name) "{{{
     if has_key(s:table_defs, a:table_name)
         return 1
@@ -94,11 +94,12 @@ function! s:load_table(table_name) "{{{
 
     " Lazy loading.
     try
-        call eskk#table#{a:table_name}#load()
+        let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
         call eskk#util#logf("table '%s' has been loaded.", a:table_name)
         return 1
     catch
         call eskk#util#logf("can't load table '%s'.", a:table_name)
+        call eskk#util#log(v:exception)
         return 0
     endtry
 endfunction "}}}
@@ -120,68 +121,9 @@ endfunction "}}}
 
 " Autoload functions for writing table. {{{
 
-function! eskk#table#define_macro() "{{{
-    command!
-    \   -buffer -nargs=1
-    \   TableBegin
-    \   call s:cmd_table_begin(<f-args>)
-    command!
-    \   -buffer
-    \   TableEnd
-    \   call s:cmd_table_end()
-    command!
-    \   -buffer -nargs=+ -bang
-    \   Map
-    \   call s:cmd_map(<q-args>, "<bang>")
-    command!
-    \   -buffer -nargs=+ -bang
-    \   Unmap
-    \   call s:cmd_unmap(<q-args>, "<bang>")
-endfunction "}}}
-
-function! eskk#table#undefine_macro() "{{{
-    delcommand TableBegin
-    delcommand TableEnd
-    delcommand Map
-    delcommand Unmap
-endfunction "}}}
-
-function! s:cmd_table_begin(arg) "{{{
-    return eskk#table#table_begin(a:arg)
-endfunction "}}}
-
-function! s:cmd_table_end() "{{{
-    return eskk#table#table_end()
-endfunction "}}}
-
-function! s:cmd_map(arg, bang) "{{{
-    let parsed = s:parse_arg(a:arg)
-    let [lhs, rhs, rest] = [parsed.lhs, parsed.rhs, parsed.rest]
-    return call('eskk#table#map', [s:current_table_name, (a:bang != '' ? 1 : 0), lhs, rhs, rest])
-endfunction "}}}
-
-function! s:cmd_unmap(arg, bang) "{{{
-    let parsed = s:parse_arg(a:arg)
-    let [lhs, rhs, rest] = [parsed.lhs, parsed.rhs, parsed.rest]
-    return call('eskk#table#unmap', [s:current_table_name, (a:bang != '' ? 1 : 0), lhs, rest])
-endfunction "}}}
-
-function! eskk#table#table_begin(name) "{{{
-    let s:current_table_name = a:name
-    if !has_key(s:table_defs, s:current_table_name)
-        let s:table_defs[s:current_table_name] = {}
-    endif
-endfunction "}}}
-
-function! eskk#table#table_end() "{{{
-    let s:current_table_name = ''
-endfunction "}}}
-
 " Force overwrite if a:bang is true.
 function! eskk#table#map(table_name, force, lhs, rhs, ...) "{{{
     let [rest] = eskk#util#get_args(a:000, '')
-
-    if !s:is_mapping_table() | return | endif
 
     " a:lhs is already defined and not banged.
     let evaled_lhs = eskk#util#eval_key(a:lhs)
@@ -192,16 +134,11 @@ endfunction "}}}
 
 function! s:create_map(table_name, lhs, rhs, rest) "{{{
     let def = s:get_table(a:table_name)
-    let def[a:lhs] = {'map_to': a:rhs}
-    if a:rest != ''
-        let def[a:lhs].rest = a:rest
-    endif
+    let def[a:lhs] = [a:rhs, a:rest]
 endfunction "}}}
 
 function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
     let [rest] = eskk#util#get_args(a:000, '')
-
-    if !s:is_mapping_table() | return | endif
 
     let evaled_lhs = eskk#util#eval_key(a:lhs)
     if eskk#table#has_map(evaled_lhs)
@@ -280,7 +217,7 @@ function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    return def[a:lhs].map_to
+    return def[a:lhs][s:MAP_TO_INDEX]
 endfunction "}}}
 
 
@@ -297,7 +234,7 @@ function! eskk#table#get_rest(table_name, lhs, ...) "{{{
             return a:1
         endif
     endif
-    return def[a:lhs].rest
+    return def[a:lhs][s:REST_INDEX]
 endfunction "}}}
 
 
