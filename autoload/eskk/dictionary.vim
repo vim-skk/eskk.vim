@@ -310,6 +310,7 @@ endfunction "}}}
 
 
 function! s:henkan_result.get_candidate() dict "{{{
+    call eskk#util#logf('Get candidate for: buftable.dump() = %s', string(self.buftable.dump()))
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
     try
         let result = s:henkan_result_get_result(self)
