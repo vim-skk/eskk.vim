@@ -431,7 +431,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
                     call prev_buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
             else
-                throw eskk#internal_error(['eskk', 'mode', 'builtin'])
+                throw eskk#internal_error(['eskk', 'mode', 'builtin'], "This will never be reached")
             endif
 
             call eskk#set_buftable(prev_buftable)
