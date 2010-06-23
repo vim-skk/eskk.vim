@@ -34,9 +34,6 @@ lockvar eskk#buftable#HENKAN_PHASE_OKURI
 " Choosing henkan candidates.
 let eskk#buftable#HENKAN_PHASE_HENKAN_SELECT = 3
 lockvar eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-" Choosing henkan candidates.
-let eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU = 4
-lockvar eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
 " }}}
 
 " Functions {{{
@@ -258,7 +255,7 @@ endfunction "}}}
 function! s:buftable.get_all_phases() dict "{{{
     return range(
     \   g:eskk#buftable#HENKAN_PHASE_NORMAL,
-    \   g:eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
+    \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
     \)
 endfunction "}}}
 
