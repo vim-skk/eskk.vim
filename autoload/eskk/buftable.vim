@@ -348,7 +348,7 @@ function! s:buftable.do_backspace(stash) dict "{{{
         if buf_str.get_rom_str() != ''
             call buf_str.pop_rom_str()
             break
-        elseif !empty(buf_str.get_matched()) != ''
+        elseif !empty(buf_str.get_matched())
             call buf_str.pop_matched()
             break
         elseif self.get_marker(phase) != ''

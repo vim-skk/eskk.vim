@@ -1238,7 +1238,9 @@ function! s:filter_rom_no_match(stash, table) "{{{
             if empty(matched_map_list)
                 call buf_str.set_rom_str(head_no_match)
             else
-                call buf_str.push_matched(head_no_match, head_no_match)
+                for char in split(head_no_match, '\zs')
+                    call buf_str.push_matched(char, char)
+                endfor
                 for matched in matched_map_list
                     call buf_str.push_matched(matched, a:table.get_map_to(matched))
                 endfor
