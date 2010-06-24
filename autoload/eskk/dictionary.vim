@@ -422,9 +422,16 @@ function! s:physical_dict.get_lines() dict "{{{
     let path = self.path
     if filereadable(path)
         call eskk#util#logf('reading %s...', path)
-        let self._content_lines   = readfile(path)
+        let self._content_lines  = readfile(path)
         let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
+        if self.okuri_ari_lnum ==# -1
+            throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+        endif
         let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
+        if self.okuri_nasi_lnum ==# -1
+            throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+        endif
+
         call eskk#util#logf('reading %s... - done.', path)
     else
         call eskk#util#logf("Can't read '%s'!", path)
