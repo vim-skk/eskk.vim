@@ -107,7 +107,7 @@ function! s:eskk.disable(...) dict "{{{
 
     let self.enabled = 0
 
-    let kakutei_str = eskk#kakutei_str()
+    let kakutei_str = self.kakutei_str()
     call self.get_buftable().reset()
     return kakutei_str . "\<C-^>"
 endfunction "}}}
@@ -134,7 +134,7 @@ function! s:eskk.map_all_keys(...) dict "{{{
 
     " Map escape key.
     execute
-    \   'lmap'
+    \   'lnoremap'
     \   '<buffer><expr>' . (a:0 ? s:mapopt_chars2raw(a:1) : '')
     \   s:map.escape.lhs
     \   'eskk#escape_key()'
@@ -170,7 +170,12 @@ endfunction "}}}
 " Manipulate display string.
 function! s:eskk.remove_display_str() dict "{{{
     let current_str = self.get_buftable().get_display_str()
-    return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(current_str))
+
+    " NOTE: This function return value is not remapped.
+    let bs = maparg('<Plug>(eskk:internal:backspace-key)', 'ic')
+    call eskk#util#assert(bs != '')
+
+    return repeat(eskk#util#eval_key(bs), eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! s:eskk.kakutei_str() dict "{{{
     return self.remove_display_str() . self.get_buftable().get_display_str(0)
@@ -185,7 +190,12 @@ endfunction "}}}
 function! s:eskk.escape_key() dict "{{{
     let kakutei_str = self.kakutei_str()
     call self.get_buftable().reset()
-    return kakutei_str . "\<Plug>(eskk:internal:escape-key)"
+
+    " NOTE: This function return value is not remapped.
+    let esc = maparg('<Plug>(eskk:internal:escape-key)', 'ic')
+    call eskk#util#assert(esc != '')
+
+    return kakutei_str . eskk#util#eval_key(esc)
 endfunction "}}}
 
 " Mode
