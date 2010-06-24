@@ -81,7 +81,7 @@ function! s:eskk.enable(...) dict "{{{
     " TODO Save previous mode/state.
     call self.set_mode(g:eskk_initial_mode)
 
-    call self.call_mode_func('cb_im_enter', [], 0)
+    call eskk#throw_event('enable-im')
 
     let self.enabled = 1
     return disable_skk_vim . "\<C-^>"
@@ -98,7 +98,7 @@ function! s:eskk.disable(...) dict "{{{
         call self.unmap_all_keys()
     endif
 
-    call self.call_mode_func('cb_im_leave', [], 0)
+    call eskk#throw_event('disable-im')
 
     let self.enabled = 0
 
@@ -200,9 +200,6 @@ function! s:eskk.set_mode(next_mode) dict "{{{
 
     " Reset buftable.
     call self.get_buftable().reset()
-
-    " cb_mode_enter
-    call self.call_mode_func('cb_mode_enter', [self.mode], 0)
 
     call self.throw_event('enter-mode-' . self.mode)
 
