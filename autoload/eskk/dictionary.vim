@@ -114,11 +114,11 @@ let s:GOT_RESULT = 2
 lockvar s:GOT_RESULT
 
 let s:henkan_result = {
+\   'buftable': {},
 \   '_dict': {},
 \   '_key': '',
 \   '_okuri_rom': '',
 \   '_okuri': '',
-\   '_buftable': {},
 \   '_registered_input': '',
 \   '_status': s:REGISTERED_WORD,
 \   '_result': [],
@@ -128,11 +128,11 @@ function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable, register
     return extend(
     \   deepcopy(s:henkan_result),
     \   {
+    \       'buftable': a:buftable,
     \       '_dict': a:dict,
     \       '_key': a:key,
     \       '_okuri_rom': a:okuri,
     \       '_okuri': a:okuri_filter,
-    \       '_buftable': a:buftable,
     \       '_registered_input': a:registered_input,
     \       '_status': (empty(a:registered_input) ? s:LOOK_UP_DICTIONARY : s:REGISTERED_WORD),
     \       '_result': (empty(a:registered_input) ? [] : [map(copy(a:registered_input), '{"result": v:val, "annotation": ""}'), 0]),
@@ -152,8 +152,8 @@ function! s:henkan_result_advance(self, advance) "{{{
         else
             return 0
         endif
-    catch /^eskk: dictionary - internal error/
-        return -1
+    catch /^eskk: dictionary - dictionary look up error/
+        return 0
     endtry
 endfunction "}}}
 
@@ -310,6 +310,7 @@ endfunction "}}}
 
 
 function! s:henkan_result.get_candidate() dict "{{{
+    call eskk#util#logf('Get candidate for: buftable.dump() = %s', string(self.buftable.dump()))
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
     try
         let result = s:henkan_result_get_result(self)
@@ -474,7 +475,7 @@ function! s:dict.refer(buftable) dict "{{{
 endfunction "}}}
 
 function! s:dict.register_word(henkan_result) dict "{{{
-    let buftable  = a:henkan_result._buftable
+    let buftable  = a:henkan_result.buftable
     let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_matched_filter()
     let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_filter()
     let okuri_rom = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_rom()

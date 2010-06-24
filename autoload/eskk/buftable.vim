@@ -41,7 +41,7 @@ lockvar eskk#buftable#HENKAN_PHASE_JISYO_TOUROKU
 
 " Functions {{{
 " s:buffer_string {{{
-let s:buffer_string = {'_pos': [], '_rom_str': '', '_matched_pairs': []}
+let s:buffer_string = {'_rom_str': '', '_matched_pairs': []}
 
 function! s:buffer_string_new() "{{{
     return deepcopy(s:buffer_string)
@@ -54,13 +54,6 @@ function! s:buffer_string.reset() dict "{{{
             let self[k] = deepcopy(s:buftable[k])
         endif
     endfor
-endfunction "}}}
-
-function! s:buffer_string.set_pos(expr) dict "{{{
-    let self._pos = getpos(a:expr)
-endfunction "}}}
-function! s:buffer_string.get_pos() dict "{{{
-    return self._pos
 endfunction "}}}
 
 
@@ -126,6 +119,7 @@ let s:buftable = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
+\   '_begin_pos': [],
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
 
@@ -165,7 +159,7 @@ function! s:buftable.get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
 " Return inserted string.
-" Inserted string contains "\<BS>"
+" Inserted string contains "\<Plug>(eskk:internal:backspace-key)"
 " to delete old characters.
 function! s:buftable.rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
@@ -179,7 +173,7 @@ function! s:buftable.rewrite() dict "{{{
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    return repeat("\<C-h>", eskk#util#mb_strlen(old)) . kakutei . new
+    return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(old)) . kakutei . new
 endfunction "}}}
 
 function! s:buftable.get_display_str(...) dict "{{{
@@ -320,7 +314,7 @@ function! s:buftable.do_enter(stash) dict "{{{
 endfunction "}}}
 function! s:buftable.do_backspace(stash) dict "{{{
     if self.get_old_str() == ''
-        let a:stash.return = "\<BS>"
+        let a:stash.return = "\<Plug>(eskk:internal:backspace-key)"
         return
     endif
 
@@ -371,15 +365,15 @@ endfunction "}}}
 function! s:get_next_candidate(self, stash, next) "{{{
     let self = a:self
     let cur_buf_str = self.get_current_buf_str()
-    let henkan_result = eskk#get_henkan_result()
-    let prev_buftable = henkan_result._buftable
+    let henkan_result = eskk#get_prev_henkan_result()
+    let prev_buftable = henkan_result.buftable
     let rom_str = cur_buf_str.get_matched_rom()
 
-    call eskk#util#assert(self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+    call eskk#util#assert(self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, "current phase is henkan select phase.")
 
     if henkan_result[a:next ? 'advance' : 'back']()
         let candidate = henkan_result.get_candidate()
-        call eskk#util#assert(type(candidate) == type(""))
+        call eskk#util#assert(type(candidate) == type(""), "henkan_result.get_candidate()'s return value is String.")
 
         " Set candidate.
         call cur_buf_str.set_matched(rom_str, candidate)
@@ -444,8 +438,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
-            call eskk#util#log("hmm...when is this block executed?")
-            call buf_str.clear()
+            call self.push_kakutei_str(self.get_display_str(0))
         endif
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
@@ -473,7 +466,16 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
 
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        call buf_str.clear()
+        let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        call self.set_henkan_phase(
+        \   !empty(okuri_buf_str.get_matched()) ?
+        \       g:eskk#buftable#HENKAN_PHASE_OKURI
+        \       : g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \)
+        return 1
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         call buf_str.clear()
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         return 1    " stepped.
@@ -513,7 +515,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
         let okuri_matched_rom = okuri_buf_str.get_matched_rom()
         call okuri_buf_str.clear()
 
-        let candidate = eskk#get_henkan_result().get_candidate()
+        let candidate = eskk#get_prev_henkan_result().get_candidate()
 
         let buf_str = self.get_current_buf_str()
         let rom_str = henkan_matched_rom . okuri_matched_rom
@@ -522,7 +524,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
             call buf_str.push_matched(rom_str, candidate)
         else
             " No candidates.
-            let input = eskk#get_dictionary().register_word(eskk#get_henkan_result())
+            let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
             call buf_str.push_matched(rom_str, input)
         endif
     else
@@ -599,13 +601,21 @@ function! s:buftable.clear_all() dict "{{{
 endfunction "}}}
 
 
+function! s:buftable.get_begin_pos() dict "{{{
+    return self._begin_pos
+endfunction "}}}
+function! s:buftable.set_begin_pos(expr) dict "{{{
+    let self._begin_pos = getpos(a:expr)
+endfunction "}}}
+
+
 function! s:buftable.dump() dict "{{{
     let lines = []
     call add(lines, printf('current phase:%d', self._henkan_phase))
+    call add(lines, printf('begin pos: %s', string(self.get_begin_pos())))
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call add(lines, printf('phase:%d', phase))
-        call add(lines, printf('pos: %s', string(buf_str.get_pos())))
         call add(lines, printf('rom_str: %s', string(buf_str.get_rom_str())))
         call add(lines, printf('matched pairs: %s', string(buf_str.get_matched())))
     endfor

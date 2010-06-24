@@ -118,7 +118,7 @@ endfunction "}}}
 
 " Mappings
 function! s:eskk.map_all_keys(...) dict "{{{
-    if s:has_mapped
+    if has_key(s:has_mapped, bufnr('%'))
         return
     endif
 
@@ -132,7 +132,7 @@ function! s:eskk.map_all_keys(...) dict "{{{
 
     " Map escape key.
     execute
-    \   'lnoremap'
+    \   'lmap'
     \   '<buffer><expr>' . (a:0 ? s:mapopt_chars2raw(a:1) : '')
     \   s:map.escape.lhs
     \   'eskk#escape_key()'
@@ -150,23 +150,25 @@ function! s:eskk.map_all_keys(...) dict "{{{
         endif
     endfor
 
-    let s:has_mapped = 1
+    call eskk#util#assert(!has_key(s:has_mapped, bufnr('%')))
+    let s:has_mapped[bufnr('%')] = 1
 endfunction "}}}
 function! s:eskk.unmap_all_keys() dict "{{{
-    if !s:has_mapped
+    if !has_key(s:has_mapped, bufnr('%'))
         return
     endif
 
     for key in g:eskk_mapped_key
         call eskk#unmap_key(key)
     endfor
-    let s:has_mapped = 0
+
+    unlet s:has_mapped[bufnr('%')]
 endfunction "}}}
 
 " Manipulate display string.
 function! s:eskk.remove_display_str() dict "{{{
     let current_str = self.buftable.get_display_str()
-    return repeat("\<C-h>", eskk#util#mb_strlen(current_str))
+    return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! s:eskk.kakutei_str() dict "{{{
     return self.remove_display_str() . self.buftable.get_display_str(0)
@@ -181,7 +183,7 @@ endfunction "}}}
 function! s:eskk.escape_key() dict "{{{
     let kakutei_str = self.kakutei_str()
     call self.buftable.reset()
-    return kakutei_str . "\<Esc>"
+    return kakutei_str . "\<Plug>(eskk:internal:escape-key)"
 endfunction "}}}
 
 " Mode
@@ -308,7 +310,7 @@ function! s:eskk.throw_event(event_name) dict "{{{
 endfunction "}}}
 
 " Henkan result
-function! s:eskk.get_henkan_result() dict "{{{
+function! s:eskk.get_prev_henkan_result() dict "{{{
     return self.prev_henkan_result
 endfunction "}}}
 function! s:eskk.set_henkan_result(henkan_result) dict "{{{
@@ -419,6 +421,12 @@ function! s:eskk.get_special_key(type) dict "{{{
         throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
     endif
 endfunction "}}}
+function! s:eskk.handle_special_lhs(char, type, stash) dict "{{{
+    return
+    \   self.is_special_lhs(a:char, a:type)
+    \   && has_key(s:map_fn, a:type)
+    \   && call(s:map_fn[a:type], [a:stash])
+endfunction "}}}
 
 lockvar s:eskk
 " }}}
@@ -468,6 +476,7 @@ let s:map = {
 \   'mode:ascii:to-hira': {},
 \   'mode:zenei:to-hira': {},
 \}
+" TODO s:map should contain this info.
 " Keys used by only its mode.
 let s:mode_local_keys = {
 \   'hira': [
@@ -522,12 +531,91 @@ let s:mode_local_keys = {
 \       'mode:zenei:to-hira',
 \   ],
 \}
+" TODO s:map should contain this info.
+function! eskk#handle_toggle_hankata(stash) "{{{
+    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! eskk#handle_toggle_kata(stash) "{{{
+    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! eskk#handle_ctrl_q_key(stash) "{{{
+    let buftable = eskk#get_buftable()
+    let phase    = buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call buftable.do_ctrl_q_key()
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! eskk#handle_q_key(stash) "{{{
+    let buftable = eskk#get_buftable()
+    let phase    = buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call buftable.do_q_key()
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! eskk#handle_to_ascii(stash) "{{{
+    let buftable = eskk#get_buftable()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
+        call eskk#set_mode('ascii')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! eskk#handle_to_zenei(stash) "{{{
+    let buftable = eskk#get_buftable()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
+        call eskk#set_mode('zenei')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+let s:map_fn = {
+\   'mode:hira:toggle-hankata': 'eskk#handle_toggle_hankata',
+\   'mode:hira:ctrl-q-key': 'eskk#handle_ctrl_q_key',
+\   'mode:hira:toggle-kata': 'eskk#handle_toggle_kata',
+\   'mode:hira:q-key': 'eskk#handle_q_key',
+\   'mode:hira:to-ascii': 'eskk#handle_to_ascii',
+\   'mode:hira:to-zenei': 'eskk#handle_to_zenei',
+\
+\   'mode:kata:toggle-hankata': 'eskk#handle_toggle_hankata',
+\   'mode:kata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
+\   'mode:kata:toggle-kata': 'eskk#handle_toggle_kata',
+\   'mode:kata:q-key': 'eskk#handle_q_key',
+\   'mode:kata:to-ascii': 'eskk#handle_to_ascii',
+\   'mode:kata:to-zenei': 'eskk#handle_to_zenei',
+\
+\   'mode:hankata:toggle-hankata': 'eskk#handle_toggle_hankata',
+\   'mode:hankata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
+\   'mode:hankata:toggle-kata': 'eskk#handle_toggle_kata',
+\   'mode:hankata:q-key': 'eskk#handle_q_key',
+\   'mode:hankata:to-ascii': 'eskk#handle_to_ascii',
+\   'mode:hankata:to-zenei': 'eskk#handle_to_zenei',
+\
+\
+\}
 " Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
 let s:stash_prototype = {}
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
 " `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
-let s:has_mapped = 0
+let s:has_mapped = {}
 " SKK dicionary.
 let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary, s:eskk_instances[s:instance_id].added_words)
 " }}}
@@ -925,35 +1013,13 @@ function! eskk#asym_filter(stash, table_name) "{{{
     let to_ascii = printf('mode:%s:to-ascii', cur_mode)
     let to_zenei = printf('mode:%s:to-zenei', cur_mode)
 
-    if eskk#is_special_lhs(char, toggle_hankata)
-    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
-        return
-    elseif eskk#is_special_lhs(char, ctrl_q_key)
-    \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
-        call buftable.do_ctrl_q_key()
-        return
-    elseif eskk#is_special_lhs(char, toggle_kata)
-    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
-        return
-    elseif eskk#is_special_lhs(char, q_key)
-    \   && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \       || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI)
-        call buftable.do_q_key()
-        return
-    elseif eskk#is_special_lhs(char, to_ascii)
-    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call eskk#set_mode('ascii')
-        return
-    elseif eskk#is_special_lhs(char, to_zenei)
-    \   && phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call eskk#set_mode('zenei')
-        return
-    else
-        " Fall through.
-    endif
+    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei]
+        if eskk#handle_special_lhs(char, key, a:stash)
+            " Handled.
+            call eskk#util#logf("Handled '%s' key.", key)
+            return
+        endif
+    endfor
 
 
     " In order not to change current buftable old string.
@@ -1293,6 +1359,20 @@ function! eskk#get_special_key(...) "{{{
     let self = eskk#get_current_instance()
     return call(self.get_special_key, a:000, self)
 endfunction "}}}
+function! eskk#handle_special_lhs(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.handle_special_lhs, a:000, self)
+endfunction "}}}
+
+" Mappings
+function! eskk#map_all_keys(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.map_all_keys, a:000, self)
+endfunction "}}}
+function! eskk#unmap_all_keys(...) "{{{
+    let self = eskk#get_current_instance()
+    return call(self.unmap_all_keys, a:000, self)
+endfunction "}}}
 
 " Manipulate display string.
 function! eskk#remove_display_str(...) "{{{
@@ -1377,9 +1457,9 @@ function! eskk#throw_event(...) "{{{
 endfunction "}}}
 
 " Henkan result
-function! eskk#get_henkan_result(...) "{{{
+function! eskk#get_prev_henkan_result(...) "{{{
     let self = eskk#get_current_instance()
-    return call(self.get_henkan_result, a:000, self)
+    return call(self.get_prev_henkan_result, a:000, self)
 endfunction "}}}
 function! eskk#set_henkan_result(...) "{{{
     let self = eskk#get_current_instance()
@@ -1626,6 +1706,14 @@ call eskk#validate_mode_structure('hankata')
 
 unlet dict
 
+" }}}
+" Map keys when BufEnter {{{
+function! s:map_all_keys_if_enabled() "{{{
+    if eskk#is_enabled()
+        call eskk#map_all_keys()
+    endif
+endfunction "}}}
+autocmd InsertEnter * call s:map_all_keys_if_enabled()
 " }}}
 
 augroup END
