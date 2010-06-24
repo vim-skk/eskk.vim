@@ -84,29 +84,18 @@ endfunction "}}}
 
 function! s:load_table(table_name) "{{{
     if has_key(s:table_defs, a:table_name)
-        return 1
+        return s:table_defs[a:table_name]
     endif
 
     " Lazy loading.
-    try
-        let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
-        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
-        return 1
-    catch
-        call eskk#util#logf("can't load table '%s'.", a:table_name)
-        call eskk#util#log(v:exception)
-        return 0
-    endtry
+    let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
+    call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+    return s:table_defs[a:table_name]
 endfunction "}}}
 
 function! s:get_table(table_name, ...) "{{{
-    if s:load_table(a:table_name)
-        call eskk#util#assert(has_key(s:table_defs, a:table_name))
-        return s:table_defs[a:table_name]
-    else
-        let msg = printf("can't load table '%s'.", a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
+    call s:load_table(a:table_name)
+    return s:table_defs[a:table_name]
 endfunction "}}}
 
 function! s:get_current_table(...) "{{{
@@ -158,10 +147,7 @@ function! eskk#table#has_candidates(...) "{{{
 endfunction "}}}
 
 function! eskk#table#get_candidates(table_name, str_buf) "{{{
-    if !s:load_table(a:table_name)
-        let msg = printf("can't load table '%s'.", a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
+    call s:load_table(a:table_name)
     if empty(a:str_buf)
         throw eskk#internal_error(['eskk', 'table'], "a:str_buf is empty.")
     endif
