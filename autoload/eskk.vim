@@ -65,12 +65,6 @@ function! s:eskk.enable(...) dict "{{{
 
     call eskk#throw_event('enable-im')
 
-    " If skk.vim exists and enabled, disable it.
-    let disable_skk_vim = ''
-    if exists('g:skk_version') && exists('b:skk_on') && b:skk_on
-        let disable_skk_vim = SkkDisable()
-    endif
-
     " Lazy initialize
     if empty(s:skk_dict)
         let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
@@ -87,6 +81,12 @@ function! s:eskk.enable(...) dict "{{{
 
     " TODO Save previous mode/state.
     call self.set_mode(g:eskk_initial_mode)
+
+    " If skk.vim exists and enabled, disable it.
+    let disable_skk_vim = ''
+    if exists('g:skk_version') && exists('b:skk_on') && b:skk_on
+        let disable_skk_vim = SkkDisable()
+    endif
 
     let self.enabled = 1
     return disable_skk_vim . "\<C-^>"
