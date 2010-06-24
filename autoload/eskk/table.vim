@@ -18,11 +18,6 @@ runtime! plugin/eskk.vim
 " NOTE: Argument for table's name must be a:table_name.
 " Because of readability to call s:load_table().
 
-" TODO
-" - Build table in Vim <SID> mapping table.
-" - Make util functions to parse command macro arguments.
-" - OO-ize table
-
 
 
 " Variables {{{
@@ -163,21 +158,6 @@ function! eskk#table#has_candidates(...) "{{{
 endfunction "}}}
 
 function! eskk#table#get_candidates(table_name, str_buf) "{{{
-    " TODO
-    " Current implementation is smart but heavy.
-    " Make table like this?
-    " 's': {
-    "   'a': {'map_to': 'さ'},
-    "
-    "   .
-    "   .
-    "   .
-    "
-    "   'y': {'a': {'map_to': 'しゃ'}}
-    " }
-    " But this uses a lot of memory.
-    "
-
     if !s:load_table(a:table_name)
         let msg = printf("can't load table '%s'.", a:table_name)
         throw eskk#internal_error(['eskk', 'table'], msg)
