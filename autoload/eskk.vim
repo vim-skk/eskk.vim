@@ -25,19 +25,28 @@ augroup eskk
 autocmd!
 
 " s:eskk {{{
-" mode: Current mode.
-" buftable: Buffer strings for inserted, filtered and so on.
-" is_locked_old_str: Lock current diff old string?
-" temp_event_hook_fn: Temporary event handler functions/arguments.
-" enabled: True if s:eskk.enable() is called.
+" mode:
+"   Current mode.
+" _buftable:
+"   Buffer strings for inserted, filtered and so on.
+" is_locked_old_str:
+"   Lock current diff old string?
+" temp_event_hook_fn:
+"   Temporary event handler functions/arguments.
+" enabled:
+"   True if s:eskk.enable() is called.
+" stash:
+"   Stash for instance-local variables. See `s:mutable_stash`.
+" prev_henkan_result:
+"   Previous henkan result.
+"   See `s:henkan_result` in `autoload/eskk/dictionary.vim`.
 let s:eskk = {
 \   'mode': '',
-\   'buftable': eskk#buftable#new(),
+\   '_buftable': {},
 \   'is_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'stash': {},
-\   'added_words': [],
 \   'prev_henkan_result': {},
 \}
 
@@ -60,17 +69,14 @@ function! s:eskk.enable(...) dict "{{{
         let disable_skk_vim = SkkDisable()
     endif
 
-
     " Clear current variable states.
     let self.mode = ''
-    call self.buftable.reset()
-
+    call self.get_buftable().reset()
 
     " Set up Mappings.
     if do_map
         call self.map_all_keys()
     endif
-
 
     " TODO Save previous mode/state.
     call self.set_mode(g:eskk_initial_mode)
@@ -106,7 +112,7 @@ function! s:eskk.disable(...) dict "{{{
     let self.enabled = 0
 
     let kakutei_str = eskk#kakutei_str()
-    call self.buftable.reset()
+    call self.get_buftable().reset()
     return kakutei_str . "\<C-^>"
 endfunction "}}}
 function! s:eskk.toggle() dict "{{{
@@ -167,11 +173,11 @@ endfunction "}}}
 
 " Manipulate display string.
 function! s:eskk.remove_display_str() dict "{{{
-    let current_str = self.buftable.get_display_str()
+    let current_str = self.get_buftable().get_display_str()
     return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! s:eskk.kakutei_str() dict "{{{
-    return self.remove_display_str() . self.buftable.get_display_str(0)
+    return self.remove_display_str() . self.get_buftable().get_display_str(0)
 endfunction "}}}
 
 " Big letter keys
@@ -182,7 +188,7 @@ endfunction "}}}
 " Escape key
 function! s:eskk.escape_key() dict "{{{
     let kakutei_str = self.kakutei_str()
-    call self.buftable.reset()
+    call self.get_buftable().reset()
     return kakutei_str . "\<Plug>(eskk:internal:escape-key)"
 endfunction "}}}
 
@@ -202,7 +208,7 @@ function! s:eskk.set_mode(next_mode) dict "{{{
     let self.mode = a:next_mode
 
     " Reset buftable.
-    call self.buftable.reset()
+    call self.get_buftable().reset()
 
     " cb_mode_enter
     call self.call_mode_func('cb_mode_enter', [self.mode], 0)
@@ -261,14 +267,19 @@ endfunction "}}}
 
 " Buftable
 function! s:eskk.get_buftable() dict "{{{
-    return self.buftable
+    if empty(self._buftable)
+        let self._buftable = eskk#buftable#new()
+    endif
+    return self._buftable
 endfunction "}}}
 function! s:eskk.set_buftable(buftable) dict "{{{
-    call a:buftable.set_old_str(self.buftable.get_old_str())
-    let self.buftable = a:buftable
+    call a:buftable.set_old_str(
+    \   empty(self._buftable) ? '' : self._buftable.get_old_str()
+    \)
+    let self._buftable = a:buftable
 endfunction "}}}
 function! s:eskk.rewrite() dict "{{{
-    return self.buftable.rewrite()
+    return self.get_buftable().rewrite()
 endfunction "}}}
 
 " Event
@@ -351,7 +362,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     \}]
 
     if !self.is_locked_old_str
-        call self.buftable.set_old_str(self.buftable.get_display_str())
+        call self.get_buftable().set_old_str(self.get_buftable().get_display_str())
     endif
 
     try
@@ -374,15 +385,17 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 
     catch
         let lines = []
-        call add(lines, '!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        call add(lines, '--- char ---')
+        call add(lines, printf('char: %s', a:char))
+        call add(lines, '--- char ---')
         call add(lines, '--- exception ---')
         call add(lines, printf('v:exception: %s', v:exception))
         call add(lines, printf('v:throwpoint: %s', v:throwpoint))
+        call add(lines, '--- exception ---')
         call add(lines, '--- buftable ---')
-        let lines += self.buftable.dump()
-        call add(lines, '--- char ---')
-        call add(lines, printf('char: %s', a:char))
-        call add(lines, '!!!!!!!!!!!!!! error !!!!!!!!!!!!!!')
+        let lines += self.get_buftable().dump()
+        call add(lines, '--- buftable ---')
+        call add(lines, '')
         call add(lines, '')
         call add(lines, "Please report this error to author.")
         call add(lines, "`:help eskk` to see author's e-mail address.")
@@ -617,7 +630,7 @@ let s:event_hook_fn = {}
 " `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
 let s:has_mapped = {}
 " SKK dicionary.
-let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary, s:eskk_instances[s:instance_id].added_words)
+let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
 " }}}
 
 " Functions {{{
@@ -901,9 +914,6 @@ function! eskk#create_new_instance() "{{{
     " Initialize instance.
     call inst.enable(0)
 
-    " Update s:skk_dict. Assign current instance's `added_words`.
-    let s:skk_dict._added_words = inst.added_words
-
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
@@ -914,9 +924,6 @@ function! eskk#destroy_current_instance() "{{{
     " Destroy current instance.
     call remove(s:eskk_instances, s:instance_id)
     let s:instance_id -= 1
-
-    " Update s:skk_dict. Assign current instance's `added_words`.
-    let s:skk_dict._added_words = s:eskk_instances[s:instance_id].added_words
 endfunction "}}}
 function! eskk#get_mutable_stash(namespace) "{{{
     let obj = deepcopy(s:mutable_stash, 1)
@@ -1492,12 +1499,12 @@ endfunction "}}}
 
 " Exceptions {{{
 function! s:build_error(from, msg) "{{{
-    return join(a:from, ': ') . ' - ' . join(a:msg, ': ')
+    return 'eskk: ' . join(a:msg, ': ') . ' at ' . join(a:from, '#')
 endfunction "}}}
 function! eskk#get_exception_message(error_str) "{{{
     " Get only `a:msg` of s:build_error().
     let s = a:error_str
-    let s = substitute(s, '^.\{-} - ', '', '')
+    let s = substitute(s, '^eskk: ', '', '')
     return s
 endfunction "}}}
 
@@ -1556,7 +1563,15 @@ endif
 " InsertLeave {{{
 function! s:autocmd_insert_leave() "{{{
     let self = eskk#get_current_instance()
-    call self.buftable.reset()
+
+    " NOTE: Check if self._buftable is initialized.
+    " `self._buftable` should not be written,
+    " `self.get_buftable()` is recommended.
+    " But Vim calls this function at InsertLeave,
+    " I carefully treat `self._buftable` not to be initialized.
+    if !empty(self._buftable)
+        call self._buftable.reset()
+    endif
 
     if !g:eskk_keep_state && self.is_enabled()
         let disable = self.disable()
