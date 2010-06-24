@@ -15,9 +15,6 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
-" NOTE: Argument for table's name must be a:table_name.
-" Because of readability to call s:load_table().
-
 
 
 " Variables {{{
@@ -82,7 +79,7 @@ function! s:parse_arg(arg) "{{{
 endfunction "}}}
 
 
-function! s:load_table(table_name) "{{{
+function! s:get_table(table_name, ...) "{{{
     if has_key(s:table_defs, a:table_name)
         return s:table_defs[a:table_name]
     endif
@@ -90,11 +87,6 @@ function! s:load_table(table_name) "{{{
     " Lazy loading.
     let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
     call eskk#util#logf("table '%s' has been loaded.", a:table_name)
-    return s:table_defs[a:table_name]
-endfunction "}}}
-
-function! s:get_table(table_name, ...) "{{{
-    call s:load_table(a:table_name)
     return s:table_defs[a:table_name]
 endfunction "}}}
 
@@ -147,7 +139,6 @@ function! eskk#table#has_candidates(...) "{{{
 endfunction "}}}
 
 function! eskk#table#get_candidates(table_name, str_buf) "{{{
-    call s:load_table(a:table_name)
     if empty(a:str_buf)
         throw eskk#internal_error(['eskk', 'table'], "a:str_buf is empty.")
     endif
@@ -215,8 +206,6 @@ endfunction "}}}
 let s:table_obj = {}
 
 function! eskk#table#new(table_name) "{{{
-    call s:load_table(a:table_name)
-
     let obj = deepcopy(s:table_obj)
     let obj.table_name = a:table_name
 
