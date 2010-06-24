@@ -536,7 +536,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
         " Destroy current eskk instance.
         try
             call eskk#destroy_current_instance()
-        catch /^eskk -/
+        catch /^eskk:/
             call eskk#log('warning: ' . eskk#get_exception_message(v:exception))
         endtry
 
