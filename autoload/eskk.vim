@@ -1538,6 +1538,8 @@ function! eskk#user_error(from, msg) "{{{
 endfunction "}}}
 " }}}
 
+" NOTE: Put off these execution until `enable-im` event
+" because eskk#load() will execute these codes.
 " Write timestamp to debug file {{{
 function! eskk#register_debug_begin() "{{{
     if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
