@@ -71,6 +71,11 @@ function! s:eskk.enable(...) dict "{{{
         let disable_skk_vim = SkkDisable()
     endif
 
+    " Lazy initialize
+    if empty(s:skk_dict)
+        let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
+    endif
+
     " Clear current variable states.
     let self.mode = ''
     call self.get_buftable().reset()
@@ -632,7 +637,7 @@ let s:event_hook_fn = {}
 " `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
 let s:has_mapped = {}
 " SKK dicionary.
-let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
+let s:skk_dict = {}
 " }}}
 
 " Functions {{{
