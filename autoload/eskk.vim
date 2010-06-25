@@ -647,10 +647,10 @@ function! eskk#asym_filter(stash, table_name) "{{{
     try
         " Handle special characters.
         " These characters are handled regardless of current phase.
-        if char ==# "\<BS>" || char ==# "\<C-h>"
+        if eskk#is_internal_key(char, 'backspace-key')
             call buftable.do_backspace(a:stash)
             return
-        elseif char ==# "\<CR>"
+        elseif eskk#is_internal_key(char, 'enter-key')
             call buftable.do_enter(a:stash)
             return
         elseif eskk#is_special_lhs(char, 'sticky')
@@ -1034,6 +1034,11 @@ function! eskk#handle_special_lhs(char, type, stash) "{{{
     \   eskk#is_special_lhs(a:char, a:type)
     \   && has_key(s:map_fn, a:type)
     \   && call(s:map_fn[a:type], [a:stash])
+endfunction "}}}
+
+function! eskk#is_internal_key(char, internal_lhs) "{{{
+    let real_lhs = maparg(printf('<Plug>(eskk:internal:%s)', a:internal_lhs), 'ic')
+    return eskk#util#eval_key(real_lhs) ==# a:char
 endfunction "}}}
 
 " Mappings
@@ -1516,7 +1521,8 @@ function! eskk#set_up_default_mappings() "{{{
 
     silent! EskkMap -type=mode:zenei:to-hira -unique <C-j>
 
-    silent EskkMap -type=mode:zenei:to-hira -unique <C-j>
+    " Remap <BS> to <C-h>
+    silent! EskkMap <BS> <C-h>
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#set_up_default_mappings', [])
 " }}}

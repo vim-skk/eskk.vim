@@ -291,9 +291,9 @@ function! s:buftable.do_enter(stash) dict "{{{
         if normal_buf_str.get_rom_str() != ''
             call self.push_kakutei_str(normal_buf_str.get_rom_str())
             call normal_buf_str.clear()
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<CR>"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:enter-key)"])
         else
-            let a:stash.return = "\<CR>"
+            let a:stash.return = "\<Plug>(eskk:internal:enter-key)"
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
