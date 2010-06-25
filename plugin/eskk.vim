@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 74))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 75))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -208,6 +208,7 @@ nnoremap        <Plug>(eskk:save-dictionary) :<C-u>call eskk#update_dictionary()
 noremap!        <Plug>(eskk:internal:backspace-key)    <C-h>
 noremap!        <Plug>(eskk:internal:escape-key)       <Esc>
 noremap!        <Plug>(eskk:internal:enter-key)        <CR>
+noremap!        <Plug>(eskk:internal:undo-key)        <C-g>u
 
 if !g:eskk_no_default_mappings
     function! s:do_map(rhs, mode)

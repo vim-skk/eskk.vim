@@ -297,7 +297,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<C-g>u"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
@@ -306,7 +306,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<C-g>u"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
@@ -315,7 +315,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<C-g>u"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
@@ -455,7 +455,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
             call self.push_kakutei_str(self.get_display_str(0))
         endif
         if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', ["\<C-g>u"])
+            call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
         endif
         call self.set_begin_pos('.')
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
