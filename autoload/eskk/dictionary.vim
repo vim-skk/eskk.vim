@@ -422,9 +422,16 @@ function! s:physical_dict.get_lines() dict "{{{
     let path = self.path
     if filereadable(path)
         call eskk#util#logf('reading %s...', path)
-        let self._content_lines   = readfile(path)
+        let self._content_lines  = readfile(path)
         let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
+        if self.okuri_ari_lnum ==# -1
+            throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+        endif
         let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
+        if self.okuri_nasi_lnum ==# -1
+            throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+        endif
+
         call eskk#util#logf('reading %s... - done.', path)
     else
         call eskk#util#logf("Can't read '%s'!", path)
@@ -474,9 +481,11 @@ endfunction "}}}
 
 
 function! s:dict.refer(buftable) dict "{{{
-    let key       = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_matched_filter()
-    let okuri     = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_filter()
-    let okuri_rom = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_rom()
+    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let key       = henkan_buf_str.get_matched_filter()
+    let okuri     = okuri_buf_str.get_matched_filter()
+    let okuri_rom = okuri_buf_str.get_matched_rom()
 
     let added = []
     for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
@@ -484,16 +493,6 @@ function! s:dict.refer(buftable) dict "{{{
             call add(added, added_input)
         endif
     endfor
-    if !empty(added)
-        return s:henkan_result_new(
-        \   self,
-        \   key,
-        \   okuri_rom,
-        \   okuri,
-        \   deepcopy(a:buftable, 1),
-        \   added
-        \)
-    endif
 
     return s:henkan_result_new(
     \   self,
@@ -501,7 +500,7 @@ function! s:dict.refer(buftable) dict "{{{
     \   okuri_rom,
     \   okuri,
     \   deepcopy(a:buftable, 1),
-    \   [],
+    \   added,
     \)
 endfunction "}}}
 
@@ -536,7 +535,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
         " Destroy current eskk instance.
         try
             call eskk#destroy_current_instance()
-        catch /^eskk -/
+        catch /^eskk:/
             call eskk#log('warning: ' . eskk#get_exception_message(v:exception))
         endtry
 
