@@ -955,7 +955,7 @@ endfunction "}}}
 function! eskk#is_enabled() "{{{
     return eskk#get_current_instance().enabled
 endfunction "}}}
-function! eskk#enable() "{{{
+function! eskk#enable(...) "{{{
     let self = eskk#get_current_instance()
     let do_map = a:0 != 0 ? a:1 : 1
 
