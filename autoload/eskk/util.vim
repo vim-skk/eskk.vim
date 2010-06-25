@@ -198,6 +198,11 @@ function! eskk#util#option_value(value, list, default_index) "{{{
     endif
 endfunction "}}}
 
+
+function! eskk#util#identity(value) "{{{
+    return a:value
+endfunction "}}}
+
 " }}}
 
 

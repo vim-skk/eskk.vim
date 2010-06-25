@@ -658,7 +658,7 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         elseif eskk#is_big_letter(char)
             call buftable.do_sticky(a:stash)
-            call eskk#register_temp_event('filter-redispatch', 'eskk#filter', [tolower(char)])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [tolower(char)])
             return
         else
             " Fall through.
@@ -694,7 +694,7 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         else
             call buftable.push_kakutei_str(buftable.get_display_str(0))
-            call eskk#register_temp_event('filter-redispatch', 'eskk#filter', [a:stash.char])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
 
             call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         endif
@@ -810,7 +810,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             "     eskk#get_named_map(eskk#util#uneval_key(char))
             for rest_char in split(rest, '\zs')
                 call eskk#register_temp_event(
-                \   'filter-redispatch',
+                \   'filter-redispatch-post',
                 \   'eskk#util#eval_key',
                 \   [eskk#get_named_map(rest_char)]
                 \)
@@ -888,7 +888,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
                 "     eskk#get_named_map(eskk#util#uneval_key(char))
                 for rest_char in split(rest, '\zs')
                     call eskk#register_temp_event(
-                    \   'filter-redispatch',
+                    \   'filter-redispatch-post',
                     \   'eskk#util#eval_key',
                     \   [eskk#get_named_map(rest_char)]
                     \)
@@ -1316,15 +1316,17 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         if type(ret_str) == type("")
             return ret_str
         else
-            if eskk#has_event('filter-redispatch')
-                " NOTE: Because of Vim's bug, `:lmap` can't remap to `:lmap`.
-                map! <buffer><expr> <Plug>(eskk:_filter_redispatch) join(eskk#throw_event("filter-redispatch"))
-                return
-                \   eskk#rewrite()
-                \   . "\<Plug>(eskk:_filter_redispatch)"
-            else
-                return eskk#rewrite()
+            let redispatch_pre = ''
+            if eskk#has_event('filter-redispatch-pre')
+                map! <buffer><expr> <Plug>(eskk:_filter_redispatch_pre) join(eskk#throw_event("filter-redispatch-pre"))
+                let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
             endif
+            let redispatch_post = ''
+            if eskk#has_event('filter-redispatch-post')
+                map! <buffer><expr> <Plug>(eskk:_filter_redispatch_post) join(eskk#throw_event("filter-redispatch-post"))
+                let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
+            endif
+            return redispatch_pre . eskk#rewrite() . redispatch_post
         endif
 
     catch
