@@ -288,8 +288,13 @@ function! s:buftable.do_enter(stash) dict "{{{
     let phase = self.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call normal_buf_str.clear()
-        let a:stash.return = "\<CR>"
+        if normal_buf_str.get_rom_str() != ''
+            call self.push_kakutei_str(normal_buf_str.get_rom_str())
+            call normal_buf_str.clear()
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<CR>"])
+        else
+            let a:stash.return = "\<CR>"
+        endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<C-g>u"])
