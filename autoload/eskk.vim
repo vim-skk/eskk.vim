@@ -240,7 +240,7 @@ let s:map_fn = {
 let s:stash_prototype = {}
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
-" `s:eskk.map_all_keys()` and `s:eskk.unmap_all_keys()` toggle this value.
+" `eskk#map_all_keys()` and `eskk#unmap_all_keys()` toggle this value.
 let s:has_mapped = {}
 " SKK dicionary.
 let s:skk_dict = {}
