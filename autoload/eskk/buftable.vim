@@ -437,6 +437,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
         if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
             call self.push_kakutei_str(self.get_display_str(0))
         endif
+        call self.set_begin_pos('.')
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
@@ -602,7 +603,13 @@ function! s:buftable.get_begin_pos() dict "{{{
     return self._begin_pos
 endfunction "}}}
 function! s:buftable.set_begin_pos(expr) dict "{{{
-    let self._begin_pos = getpos(a:expr)
+    if mode() ==# 'i'
+        let self._begin_pos = ['i', getpos(a:expr)]
+    elseif mode() ==# 'c'
+        let self._begin_pos = ['c', getcmdpos()]
+    else
+        call eskk#util#warnf("warning: called eskk from mode '%s'.", mode())
+    endif
 endfunction "}}}
 
 
