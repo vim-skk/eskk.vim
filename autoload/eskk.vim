@@ -1571,7 +1571,7 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=mode:zenei:to-hira -unique <C-j>
 
     " Remap <BS> to <C-h>
-    silent! EskkMap <BS> <C-h>
+    silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#set_up_default_mappings', [])
 " }}}
