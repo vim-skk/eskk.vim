@@ -1335,49 +1335,51 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         endif
 
     catch
-        let lines = []
-        call add(lines, '--- char ---')
-        call add(lines, printf('char: %s', string(a:char)))
-        call add(lines, '--- char ---')
-        call add(lines, '--- exception ---')
-        if v:exception =~# '^eskk:'
-            call add(lines, 'exception type: eskk exception')
-            call add(lines, printf('v:exception: %s', eskk#get_exception_message(v:exception)))
-        else
-            call add(lines, 'exception type: Vim internal error')
-            call add(lines, printf('v:exception: %s', v:exception))
-        endif
-        call add(lines, printf('v:throwpoint: %s', v:throwpoint))
-        call add(lines, '--- exception ---')
-        call add(lines, '--- buftable ---')
-        let lines += eskk#get_buftable().dump()
-        call add(lines, '--- buftable ---')
-        call add(lines, '')
-        call add(lines, '')
-        call add(lines, "Please report this error to author.")
-        call add(lines, "`:help eskk` to see author's e-mail address.")
-
-        let log_file = expand(g:eskk_error_log_file)
-        let write_success = 0
-        try
-            call writefile(lines, log_file)
-            let write_success = 1
-        catch
-            for l in lines
-                call eskk#util#warn(l)
-            endfor
-        endtry
-
-        call eskk#util#warnf(
-        \   "Error has occurred!! Please see %s to check and please report to plugin author.",
-        \   (write_success ? string(log_file) : ':messages')
-        \)
-
+        call s:write_error_log_file(v:exception, v:throwpoint, a:char)
         return eskk#escape_key() . a:char
 
     finally
         call eskk#throw_event('filter-finalize')
     endtry
+endfunction "}}}
+function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
+    let lines = []
+    call add(lines, '--- char ---')
+    call add(lines, printf('char: %s', string(a:char)))
+    call add(lines, '--- char ---')
+    call add(lines, '--- exception ---')
+    if a:v_exception =~# '^eskk:'
+        call add(lines, 'exception type: eskk exception')
+        call add(lines, printf('v:exception: %s', eskk#get_exception_message(a:v_exception)))
+    else
+        call add(lines, 'exception type: Vim internal error')
+        call add(lines, printf('v:exception: %s', a:v_exception))
+    endif
+    call add(lines, printf('v:throwpoint: %s', a:v_throwpoint))
+    call add(lines, '--- exception ---')
+    call add(lines, '--- buftable ---')
+    let lines += eskk#get_buftable().dump()
+    call add(lines, '--- buftable ---')
+    call add(lines, '')
+    call add(lines, '')
+    call add(lines, "Please report this error to author.")
+    call add(lines, "`:help eskk` to see author's e-mail address.")
+
+    let log_file = expand(g:eskk_error_log_file)
+    let write_success = 0
+    try
+        call writefile(lines, log_file)
+        let write_success = 1
+    catch
+        for l in lines
+            call eskk#util#warn(l)
+        endfor
+    endtry
+
+    call eskk#util#warnf(
+    \   "Error has occurred!! Please see %s to check and please report to plugin author.",
+    \   (write_success ? string(log_file) : ':messages')
+    \)
 endfunction "}}}
 function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
     call eskk#call_mode_func('filter', [a:stash], 1)
