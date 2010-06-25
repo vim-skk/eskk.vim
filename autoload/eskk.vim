@@ -1604,15 +1604,15 @@ function! eskk#register_builtin_modes() "{{{
     let dict = eskk#get_mode_structure('ascii')
 
     function! dict.filter(stash)
-        let self = eskk#get_current_instance()
+        let this = eskk#get_current_instance()
         if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
             call eskk#set_mode('hira')
         else
             if has_key(g:eskk_mode_use_tables, 'ascii')
-                if !has_key(self.sandbox, 'table')
-                    let self.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
+                if !has_key(this.sandbox, 'table')
+                    let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
                 endif
-                let a:stash.return = self.sandbox.table.get_map_to(a:stash.char, a:stash.char)
+                let a:stash.return = this.sandbox.table.get_map_to(a:stash.char, a:stash.char)
             else
                 let a:stash.return = a:stash.char
             endif
@@ -1627,14 +1627,14 @@ function! eskk#register_builtin_modes() "{{{
     let dict = eskk#get_mode_structure('zenei')
 
     function! dict.filter(stash)
-        let self = eskk#get_current_instance()
+        let this = eskk#get_current_instance()
         if eskk#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
             call eskk#set_mode('hira')
         else
-            if !has_key(self.sandbox, 'table')
-                let self.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
+            if !has_key(this.sandbox, 'table')
+                let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
             endif
-            let a:stash.return = self.sandbox.table.get_map_to(a:stash.char, a:stash.char)
+            let a:stash.return = this.sandbox.table.get_map_to(a:stash.char, a:stash.char)
         endif
     endfunction
 
