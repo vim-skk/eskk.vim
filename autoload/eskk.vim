@@ -525,7 +525,7 @@ function! eskk#create_new_instance() "{{{
     let s:instance_id += 1
 
     " Initialize instance.
-    call inst.enable(0)
+    call eskk#enable(0)
 
     return inst
 endfunction "}}}
