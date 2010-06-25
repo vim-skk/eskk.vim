@@ -420,22 +420,28 @@ function! s:physical_dict.get_lines() dict "{{{
     endif
 
     let path = self.path
-    if filereadable(path)
-        call eskk#util#logf('reading %s...', path)
-        let self._content_lines  = readfile(path)
-        let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
-        if self.okuri_ari_lnum ==# -1
-            throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
-        endif
-        let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
-        if self.okuri_nasi_lnum ==# -1
-            throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
-        endif
+    try
+        if filereadable(path)
+            call eskk#util#logf('reading %s...', path)
+            let self._content_lines  = readfile(path)
+            let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
+            if self.okuri_ari_lnum ==# -1
+                throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+            endif
+            let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
+            if self.okuri_nasi_lnum ==# -1
+                throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+            endif
 
-        call eskk#util#logf('reading %s... - done.', path)
-    else
-        call eskk#util#logf("Can't read '%s'!", path)
-    endif
+            call eskk#util#logf('reading %s... - done.', path)
+        else
+            call eskk#util#logf("Can't read '%s'!", path)
+        endif
+    catch /^eskk: parse error/
+        call eskk#util#log('warning: ' . v:exception)
+        let self.okuri_ari_lnum = -1
+        let self.okuri_nasi_lnum = -1
+    endtry
     let self._loaded = 1
 
     return self._content_lines
