@@ -198,14 +198,9 @@ function! eskk#util#option_value(value, list, default_index) "{{{
     endif
 endfunction "}}}
 
-function! eskk#util#get_table_lazy(table_name) "{{{
-    let varname = 's:lazy_table_' . a:table_name
-    if exists(varname)
-        return {varname}
-    else
-        let {varname} = eskk#table#new(a:table_name)
-        return {varname}
-    endif
+
+function! eskk#util#identity(value) "{{{
+    return a:value
 endfunction "}}}
 
 " }}}

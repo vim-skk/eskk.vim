@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 56))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 74))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -183,6 +183,13 @@ if !exists("g:eskk_error_log_file")
     let g:eskk_error_log_file = '~/eskk-error.log'
 endif
 
+if !exists("g:eskk_set_undo_point")
+    let g:eskk_set_undo_point = {
+    \   'sticky': 1,
+    \   'kakutei': 1,
+    \}
+endif
+
 " }}}
 
 " Mappings {{{
@@ -200,6 +207,7 @@ nnoremap        <Plug>(eskk:save-dictionary) :<C-u>call eskk#update_dictionary()
 
 noremap!        <Plug>(eskk:internal:backspace-key)    <C-h>
 noremap!        <Plug>(eskk:internal:escape-key)       <Esc>
+noremap!        <Plug>(eskk:internal:enter-key)        <CR>
 
 if !g:eskk_no_default_mappings
     function! s:do_map(rhs, mode)

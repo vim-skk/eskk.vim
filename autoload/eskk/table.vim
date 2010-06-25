@@ -15,14 +15,6 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
-" NOTE: Argument for table's name must be a:table_name.
-" Because of readability to call s:load_table().
-
-" TODO
-" - Build table in Vim <SID> mapping table.
-" - Make util functions to parse command macro arguments.
-" - OO-ize table
-
 
 
 " Variables {{{
@@ -87,31 +79,15 @@ function! s:parse_arg(arg) "{{{
 endfunction "}}}
 
 
-function! s:load_table(table_name) "{{{
+function! s:get_table(table_name, ...) "{{{
     if has_key(s:table_defs, a:table_name)
-        return 1
+        return s:table_defs[a:table_name]
     endif
 
     " Lazy loading.
-    try
-        let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
-        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
-        return 1
-    catch
-        call eskk#util#logf("can't load table '%s'.", a:table_name)
-        call eskk#util#log(v:exception)
-        return 0
-    endtry
-endfunction "}}}
-
-function! s:get_table(table_name, ...) "{{{
-    if s:load_table(a:table_name)
-        call eskk#util#assert(has_key(s:table_defs, a:table_name))
-        return s:table_defs[a:table_name]
-    else
-        let msg = printf("can't load table '%s'.", a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
+    let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
+    call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+    return s:table_defs[a:table_name]
 endfunction "}}}
 
 function! s:get_current_table(...) "{{{
@@ -163,25 +139,6 @@ function! eskk#table#has_candidates(...) "{{{
 endfunction "}}}
 
 function! eskk#table#get_candidates(table_name, str_buf) "{{{
-    " TODO
-    " Current implementation is smart but heavy.
-    " Make table like this?
-    " 's': {
-    "   'a': {'map_to': 'さ'},
-    "
-    "   .
-    "   .
-    "   .
-    "
-    "   'y': {'a': {'map_to': 'しゃ'}}
-    " }
-    " But this uses a lot of memory.
-    "
-
-    if !s:load_table(a:table_name)
-        let msg = printf("can't load table '%s'.", a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
     if empty(a:str_buf)
         throw eskk#internal_error(['eskk', 'table'], "a:str_buf is empty.")
     endif
@@ -242,6 +199,16 @@ function! eskk#table#get_definition(table_name) "{{{
     return s:get_table(a:table_name)
 endfunction "}}}
 
+function! eskk#table#get_table(table_name) "{{{
+    let varname = 's:lazy_table_' . a:table_name
+    if exists(varname)
+        return {varname}
+    else
+        let {varname} = eskk#table#new(a:table_name)
+        return {varname}
+    endif
+endfunction "}}}
+
 " }}}
 
 
@@ -249,8 +216,6 @@ endfunction "}}}
 let s:table_obj = {}
 
 function! eskk#table#new(table_name) "{{{
-    call s:load_table(a:table_name)
-
     let obj = deepcopy(s:table_obj)
     let obj.table_name = a:table_name
 

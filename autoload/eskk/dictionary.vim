@@ -540,7 +540,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
         endtry
 
         " Enable eskk mapping if it has been disabled.
-        call eskk#get_current_instance().map_all_keys()
+        call eskk#map_all_keys()
 
         " Restore `&imsearch`.
         let &l:imsearch = save_imsearch

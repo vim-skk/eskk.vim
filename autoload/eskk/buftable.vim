@@ -288,19 +288,36 @@ function! s:buftable.do_enter(stash) dict "{{{
     let phase = self.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call normal_buf_str.clear()
-        let a:stash.return = "\<CR>"
+        if normal_buf_str.get_rom_str() != ''
+            call self.push_kakutei_str(normal_buf_str.get_rom_str())
+            call normal_buf_str.clear()
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:enter-key)"])
+        else
+            let a:stash.return = "\<Plug>(eskk:internal:enter-key)"
+        endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<C-g>u"])
+        endif
+
         call self.push_kakutei_str(self.get_display_str(0))
         call self.clear_all()
 
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<C-g>u"])
+        endif
+
         call self.push_kakutei_str(self.get_display_str(0))
         call self.clear_all()
 
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<C-g>u"])
+        endif
+
         call self.push_kakutei_str(self.get_display_str(0))
         call self.clear_all()
 
@@ -437,6 +454,10 @@ function! s:buftable.do_sticky(stash) dict "{{{
         if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
             call self.push_kakutei_str(self.get_display_str(0))
         endif
+        if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
+            call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', ["\<C-g>u"])
+        endif
+        call self.set_begin_pos('.')
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
@@ -450,7 +471,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
         let step = 0
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         call self.do_enter(a:stash)
-        call eskk#sticky_key(a:stash)
+        call self.do_sticky(a:stash)
 
         let step = 1
     else
@@ -492,7 +513,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = eskk#util#get_table_lazy('rom_to_hira')
+            let table = eskk#table#get_table('rom_to_hira')
             call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
             call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
         endif
@@ -550,10 +571,10 @@ function! s:filter_rom_again(buf_str, table) "{{{
     endfor
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:convert_again_with_table(self, table) "{{{
     let self = a:self
@@ -602,7 +623,13 @@ function! s:buftable.get_begin_pos() dict "{{{
     return self._begin_pos
 endfunction "}}}
 function! s:buftable.set_begin_pos(expr) dict "{{{
-    let self._begin_pos = getpos(a:expr)
+    if mode() ==# 'i'
+        let self._begin_pos = ['i', getpos(a:expr)]
+    elseif mode() ==# 'c'
+        let self._begin_pos = ['c', getcmdpos()]
+    else
+        call eskk#util#warnf("warning: called eskk from mode '%s'.", mode())
+    endif
 endfunction "}}}
 
 
