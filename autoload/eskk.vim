@@ -755,7 +755,7 @@ function! s:filter_rom(stash, table_name) "{{{
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
-    let table = eskk#util#get_table_lazy(a:table_name)
+    let table = eskk#table#get_table(a:table_name)
     let match_exactly  = table.has_map(rom_str)
     let candidates     = table.get_candidates(rom_str)
 

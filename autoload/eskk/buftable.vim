@@ -492,7 +492,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = eskk#util#get_table_lazy('rom_to_hira')
+            let table = eskk#table#get_table('rom_to_hira')
             call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
             call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
         endif
@@ -550,10 +550,10 @@ function! s:filter_rom_again(buf_str, table) "{{{
     endfor
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#util#get_table_lazy(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:convert_again_with_table(self, table) "{{{
     let self = a:self

@@ -199,6 +199,16 @@ function! eskk#table#get_definition(table_name) "{{{
     return s:get_table(a:table_name)
 endfunction "}}}
 
+function! eskk#table#get_table(table_name) "{{{
+    let varname = 's:lazy_table_' . a:table_name
+    if exists(varname)
+        return {varname}
+    else
+        let {varname} = eskk#table#new(a:table_name)
+        return {varname}
+    endif
+endfunction "}}}
+
 " }}}
 
 
