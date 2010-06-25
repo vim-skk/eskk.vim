@@ -1335,18 +1335,21 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         endif
 
     catch
-        call s:write_error_log_file(v:exception, v:throwpoint, a:char)
+        call s:write_error_log_file(v:exception, v:throwpoint, a:char, a:Fn)
         return eskk#escape_key() . a:char
 
     finally
         call eskk#throw_event('filter-finalize')
     endtry
 endfunction "}}}
-function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
+function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
     let lines = []
     call add(lines, '--- char ---')
-    call add(lines, printf('char: %s', string(a:char)))
+    call add(lines, printf('char: %s(%d)', string(a:char), char2nr(a:char)))
+    call add(lines, printf('Fn: %s', type(a:Fn) == type(function('tr')) ? string(a:char) : a:Fn))
+    call add(lines, printf('mode(): %s', mode()))
     call add(lines, '--- char ---')
+    call add(lines, '')
     call add(lines, '--- exception ---')
     if a:v_exception =~# '^eskk:'
         call add(lines, 'exception type: eskk exception')
@@ -1357,9 +1360,46 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     endif
     call add(lines, printf('v:throwpoint: %s', a:v_throwpoint))
     call add(lines, '--- exception ---')
+    call add(lines, '')
     call add(lines, '--- buftable ---')
     let lines += eskk#get_buftable().dump()
     call add(lines, '--- buftable ---')
+    call add(lines, '')
+    call add(lines, "--- Vim's :version ---")
+    redir => output
+    silent version
+    redir END
+    let lines += split(output, '\n')
+    call add(lines, "--- Vim's :version ---")
+    call add(lines, '')
+    call add(lines, '--- g:eskk_version ---')
+    call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
+    call add(lines, '--- g:eskk_version ---')
+    call add(lines, '')
+    if executable('uname')
+        call add(lines, "--- Operating System ---")
+        call add(lines, printf('"uname -a" = %s', system('uname -a')))
+        call add(lines, "--- Operating System ---")
+        call add(lines, '')
+    endif
+    call add(lines, '--- feature-list ---')
+    call add(lines, 'gui_running = '.has('gui_running'))
+    call add(lines, 'unix = '.has('unix'))
+    call add(lines, 'mac = '.has('mac'))
+    call add(lines, 'macunix = '.has('macunix'))
+    call add(lines, 'win16 = '.has('win16'))
+    call add(lines, 'win32 = '.has('win32'))
+    call add(lines, 'win64 = '.has('win64'))
+    call add(lines, 'win32unix = '.has('win32unix'))
+    call add(lines, 'win95 = '.has('win95'))
+    call add(lines, 'amiga = '.has('amiga'))
+    call add(lines, 'beos = '.has('beos'))
+    call add(lines, 'dos16 = '.has('dos16'))
+    call add(lines, 'dos32 = '.has('dos32'))
+    call add(lines, 'os2 = '.has('macunix'))
+    call add(lines, 'qnx = '.has('qnx'))
+    call add(lines, 'vms = '.has('vms'))
+    call add(lines, '--- feature-list ---')
     call add(lines, '')
     call add(lines, '')
     call add(lines, "Please report this error to author.")
@@ -1376,10 +1416,17 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
         endfor
     endtry
 
-    call eskk#util#warnf(
-    \   "Error has occurred!! Please see %s to check and please report to plugin author.",
-    \   (write_success ? string(log_file) : ':messages')
-    \)
+    let save_cmdheight = &cmdheight
+    setlocal cmdheight=3
+    try
+        call eskk#util#warnf(
+        \   "Error has occurred!! Please see %s to check and please report to plugin author.",
+        \   (write_success ? string(log_file) : ':messages')
+        \)
+        sleep 500m
+    finally
+        let &cmdheight = save_cmdheight
+    endtry
 endfunction "}}}
 function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
     call eskk#call_mode_func('filter', [a:stash], 1)
