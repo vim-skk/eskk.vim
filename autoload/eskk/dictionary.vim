@@ -89,7 +89,7 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     else
         let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines)]
     endif
-    call eskk#util#assert(pos > 0, "pos is not invalid (negative) number.")
+    call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
     while pos < end
         let line = whole_lines[pos]
