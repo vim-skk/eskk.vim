@@ -42,6 +42,10 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     call eskk#util#log('s:search_binary()')
 
     let whole_lines = a:ph_dict.get_lines()
+    if !a:ph_dict.is_valid()
+        return ['', -1]
+    endif
+
     if a:has_okuri
         let min = a:ph_dict.okuri_ari_lnum + 1
         let max = a:ph_dict.okuri_nasi_lnum - 1
@@ -73,14 +77,19 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     call eskk#util#log('s:search_linear()')
 
     let whole_lines = a:ph_dict.get_lines()
+    if !a:ph_dict.is_valid()
+        return ['', -1]
+    endif
 
     if a:0 >= 2
         let [pos, end] = a:000
+        call eskk#util#assert(pos < end)
     elseif a:has_okuri
         let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines)]
     else
         let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines)]
     endif
+    call eskk#util#assert(pos > 0, "pos is not invalid (negative) number.")
 
     while pos < end
         let line = whole_lines[pos]
@@ -247,12 +256,13 @@ function! s:henkan_result_get_result(this) "{{{
             throw cant_get_result
         endif
     elseif a:this._status ==# s:LOOK_UP_DICTIONARY
+        let [user_dict, system_dict] = [a:this._dict._user_dict, a:this._dict._system_dict]
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_next_candidate(
-        \   a:this._dict._user_dict, a:this._key, a:this._okuri_rom
+        \   user_dict, a:this._key, a:this._okuri_rom
         \)
         let system_dict_result = eskk#dictionary#search_next_candidate(
-        \   a:this._dict._system_dict, a:this._key, a:this._okuri_rom
+        \   system_dict, a:this._key, a:this._okuri_rom
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
             throw cant_get_result
@@ -389,8 +399,8 @@ lockvar s:henkan_result
 let s:physical_dict = {
 \   '_content_lines': [],
 \   '_loaded': 0,
-\   'okuri_ari_lnum': 0,
-\   'okuri_nasi_lnum': 0,
+\   'okuri_ari_lnum': -1,
+\   'okuri_nasi_lnum': -1,
 \   'path': '',
 \   'sorted': 0,
 \   'encoding': '',
@@ -445,6 +455,11 @@ function! s:physical_dict.get_lines() dict "{{{
     let self._loaded = 1
 
     return self._content_lines
+endfunction "}}}
+
+function! s:physical_dict.is_valid() dict "{{{
+    " Succeeded to parse SKK dictionary.
+    return self.okuri_ari_lnum >= 0 && self.okuri_nasi_lnum >= 0
 endfunction "}}}
 
 lockvar s:physical_dict
@@ -572,6 +587,12 @@ endfunction "}}}
 
 function! s:dict.update_dictionary() dict "{{{
     if !self.is_modified()
+        return
+    endif
+    if !self._user_dict.is_valid()
+        " TODO:
+        " Echo "user dictionary format is invalid. overwrite with new words?".
+        " And do not read, just overwrite it with new words.
         return
     endif
 
