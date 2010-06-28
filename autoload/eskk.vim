@@ -345,20 +345,21 @@ function! eskk#get_named_map(key) "{{{
         return lhs
     endif
 
-    " XXX: :lmap can't remap. It's possibly Vim's bug.
-    " So I also prepare :noremap! mappings.
-    " execute
-    " \   'lmap'
-    " \   '<expr>'
-    " \   lhs
-    " \   printf('eskk#filter(%s)', string(a:key))
     execute
-    \   'map!'
+    \   s:get_map_command()
     \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
 
     return lhs
+endfunction "}}}
+function! s:get_map_command(...) "{{{
+    " XXX: :lmap can't remap to :lmap. It's Vim's bug.
+    "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
+    " So I use :map! mappings for 'fallback' of :lmap.
+
+    let remap = a:0 ? a:1 : 1
+    return remap ? 'map!' : 'noremap!'
 endfunction "}}}
 
 " eskk#map()
@@ -1388,12 +1389,20 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         else
             let redispatch_pre = ''
             if eskk#has_event('filter-redispatch-pre')
-                map! <buffer><expr> <Plug>(eskk:_filter_redispatch_pre) join(eskk#throw_event("filter-redispatch-pre"))
+                execute
+                \   s:get_map_command()
+                \   '<buffer><expr>'
+                \   '<Plug>(eskk:_filter_redispatch_pre)'
+                \   'join(eskk#throw_event("filter-redispatch-pre"))'
                 let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
             endif
             let redispatch_post = ''
             if eskk#has_event('filter-redispatch-post')
-                map! <buffer><expr> <Plug>(eskk:_filter_redispatch_post) join(eskk#throw_event("filter-redispatch-post"))
+                execute
+                \   s:get_map_command()
+                \   '<buffer><expr>'
+                \   '<Plug>(eskk:_filter_redispatch_post)'
+                \   'join(eskk#throw_event("filter-redispatch-post"))'
                 let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
             endif
             return redispatch_pre . eskk#rewrite() . redispatch_post
