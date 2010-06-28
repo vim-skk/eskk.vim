@@ -1761,8 +1761,8 @@ function! eskk#register_map_all_keys_if_enabled() "{{{
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
 " }}}
-" g:eskk_context, g:eskk_context_control {{{
-function! s:call_eskk_context_control_handlers() "{{{
+" g:eskk_context_control {{{
+function! eskk#handle_context_handlers() "{{{
     if !exists('b:eskk_context')
         return
     endif
@@ -1804,12 +1804,6 @@ function! s:call_eskk_context_control_handlers() "{{{
         unlet Fn
     endfor
 endfunction "}}}
-function! eskk#register_context() "{{{
-    if g:eskk_context
-        autocmd eskk InsertEnter * call s:call_eskk_context_control_handlers()
-    endif
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_context', [])
 " }}}
 
 augroup END
