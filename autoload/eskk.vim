@@ -1602,7 +1602,7 @@ function! s:autocmd_insert_leave() "{{{
     endif
 endfunction "}}}
 function! eskk#register_autocmd_insert_leave() "{{{
-    autocmd InsertLeave * call s:autocmd_insert_leave()
+    autocmd eskk InsertLeave * call s:autocmd_insert_leave()
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave', [])
 " }}}
@@ -1671,7 +1671,7 @@ call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-asci
 " Save dictionary if modified {{{
 function! eskk#register_auto_save_dictionary_at_exit() "{{{
     if g:eskk_auto_save_dictionary_at_exit
-        autocmd VimLeavePre * call eskk#update_dictionary()
+        autocmd eskk VimLeavePre * call eskk#update_dictionary()
     endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_auto_save_dictionary_at_exit', [])
@@ -1757,7 +1757,7 @@ call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
 " }}}
 " Map keys when BufEnter {{{
 function! eskk#register_map_all_keys_if_enabled() "{{{
-    autocmd InsertEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
+    autocmd eskk InsertEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
 " }}}
@@ -1806,7 +1806,7 @@ function! s:call_eskk_context_control_handlers() "{{{
 endfunction "}}}
 function! eskk#register_context() "{{{
     if g:eskk_context
-        autocmd InsertEnter * call s:call_eskk_context_control_handlers()
+        autocmd eskk InsertEnter * call s:call_eskk_context_control_handlers()
     endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_context', [])
