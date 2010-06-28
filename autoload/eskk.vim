@@ -988,7 +988,7 @@ function! eskk#enable(...) "{{{
     " If skk.vim exists and enabled, disable it.
     let disable_skk_vim = ''
     if exists('g:skk_version') && exists('b:skk_on') && b:skk_on
-        let disable_skk_vim = SkkDisable()
+        let disable_skk_vim = substitute(SkkDisable(), "\<C-^>", '', '')
     endif
 
     let self.enabled = 1
