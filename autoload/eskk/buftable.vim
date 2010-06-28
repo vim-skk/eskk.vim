@@ -97,6 +97,11 @@ function! s:buffer_string.clear_matched() dict "{{{
 endfunction "}}}
 
 
+function! s:buffer_string.get_input_rom() dict "{{{
+    return self.get_matched_rom() . self.get_rom_str()
+endfunction "}}}
+
+
 function! s:buffer_string.clear() dict "{{{
     call self.clear_rom_str()
     call self.clear_matched()
