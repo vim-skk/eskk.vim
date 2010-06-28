@@ -992,7 +992,12 @@ function! eskk#enable(...) "{{{
     endif
 
     let self.enabled = 1
-    return disable_skk_vim . "\<C-^>"
+
+    if mode() =~# '^[ic]$'
+        return disable_skk_vim . "\<C-^>"
+    else
+        return eskk#emulate_toggle_im(1)
+    endif
 endfunction "}}}
 function! eskk#disable() "{{{
     let self = eskk#get_current_instance()
@@ -1013,10 +1018,47 @@ function! eskk#disable() "{{{
 
     let kakutei_str = eskk#kakutei_str()
     call eskk#get_buftable().reset()
-    return kakutei_str . "\<C-^>"
+
+    if mode() =~# '^[ic]$'
+        return kakutei_str . "\<C-^>"
+    else
+        return eskk#emulate_toggle_im(1)
+    endif
 endfunction "}}}
 function! eskk#toggle() "{{{
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
+endfunction "}}}
+function! eskk#emulate_toggle_im(insert) "{{{
+    let save_lang = v:lang
+    lang messages C
+    try
+        redir => output
+        silent lmap
+        redir END
+    finally
+        execute 'lang messages' save_lang
+    endtry
+    let defined_langmap = (output !~# '^\n*No mapping found\n*$')
+
+    if a:insert
+        " :help i_CTRL-^
+        if defined_langmap
+            if &l:iminsert ==# 1
+                let &l:iminsert = 0
+            else
+                let &l:iminsert = 1
+            endif
+        else
+            if &l:iminsert ==# 2
+                let &l:iminsert = 0
+            else
+                let &l:iminsert = 2
+            endif
+        endif
+    else
+        " TODO :help c_CTRL-^
+        throw eskk#internal_error(['eskk'], 'not implemented.')
+    endif
 endfunction "}}}
 
 function! eskk#is_special_lhs(char, type) "{{{
