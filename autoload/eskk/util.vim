@@ -81,6 +81,15 @@ function! eskk#util#has_idx(list, idx) "{{{
     return 0 <= idx && idx < len(a:list)
 endfunction "}}}
 
+function! eskk#util#has_elem(list, elem) "{{{
+    for Value in a:list
+        if Value ==# a:elem
+            return 1
+        endif
+    endfor
+    return 0
+endfunction "}}}
+
 " a:func is string.
 
 function! eskk#util#skip_spaces(str) "{{{

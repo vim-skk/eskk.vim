@@ -1770,7 +1770,11 @@ function! s:call_eskk_context_control_handlers() "{{{
 
     if !(exists('b:eskk_context')
     \   && has_key(b:eskk_context, 'synname')
-    \   && synIDattr(synID(line("."), col("."), 1), "name") ==# b:eskk_context.synname)
+    \   && eskk#util#has_elem(
+    \       (type(b:eskk_context.synname) == type([]) ?
+    \           b:eskk_context.synname
+    \           : [b:eskk_context.synname]),
+    \       synIDattr(synID(line("."), col("."), 1), "name")))
         return
     endif
     " ... and current syntax name has matched,
