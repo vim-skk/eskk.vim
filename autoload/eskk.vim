@@ -1405,7 +1405,12 @@ function! s:filter(self, char, Fn, tail_args) "{{{
                 \   'join(eskk#throw_event("filter-redispatch-post"))'
                 let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
             endif
-            return redispatch_pre . eskk#rewrite() . redispatch_post
+            execute
+            \   s:get_map_command(0)
+            \   '<buffer><expr>'
+            \   '<Plug>(eskk:_filter_rewrite)'
+            \   'eskk#rewrite()'
+            return redispatch_pre . "\<Plug>(eskk:_filter_rewrite)" . redispatch_post
         endif
 
     catch
