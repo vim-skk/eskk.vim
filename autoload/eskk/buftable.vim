@@ -97,6 +97,11 @@ function! s:buffer_string.clear_matched() dict "{{{
 endfunction "}}}
 
 
+function! s:buffer_string.get_input_rom() dict "{{{
+    return self.get_matched_rom() . self.get_rom_str()
+endfunction "}}}
+
+
 function! s:buffer_string.clear() dict "{{{
     call self.clear_rom_str()
     call self.clear_matched()
@@ -170,7 +175,8 @@ function! s:buftable.rewrite() dict "{{{
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(old)) . kakutei . new
+    let bs = eskk#util#eval_key(maparg('<Plug>(eskk:internal:backspace-key)', 'ic'))
+    return repeat(bs, eskk#util#mb_strlen(old)) . kakutei . new
 endfunction "}}}
 
 function! s:buftable.get_display_str(...) dict "{{{
@@ -286,18 +292,20 @@ function! s:buftable.do_enter(stash) dict "{{{
     let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     let phase = self.get_henkan_phase()
+    let enter_char = eskk#util#eval_key(maparg('<Plug>(eskk:internal:enter-key)', 'ic'))
+    let undo_char  = eskk#util#eval_key(maparg('<Plug>(eskk:internal:undo-key)', 'ic'))
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if normal_buf_str.get_rom_str() != ''
             call self.push_kakutei_str(normal_buf_str.get_rom_str())
             call normal_buf_str.clear()
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:enter-key)"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', [enter_char])
         else
-            let a:stash.return = "\<Plug>(eskk:internal:enter-key)"
+            let a:stash.return = enter_char
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', [undo_char])
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
@@ -306,7 +314,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', [undo_char])
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
@@ -315,7 +323,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', [undo_char])
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
@@ -328,7 +336,7 @@ function! s:buftable.do_enter(stash) dict "{{{
 endfunction "}}}
 function! s:buftable.do_backspace(stash) dict "{{{
     if self.get_old_str() == ''
-        let a:stash.return = "\<Plug>(eskk:internal:backspace-key)"
+        let a:stash.return = eskk#util#eval_key(maparg('<Plug>(eskk:internal:backspace-key)', 'ic'))
         return
     endif
 
@@ -455,7 +463,8 @@ function! s:buftable.do_sticky(stash) dict "{{{
             call self.push_kakutei_str(self.get_display_str(0))
         endif
         if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', ["\<Plug>(eskk:internal:undo-key)"])
+            let undo_char = eskk#util#eval_key(maparg('<Plug>(eskk:internal:undo-key)', 'ic'))
+            call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', [undo_char])
         endif
         call self.set_begin_pos('.')
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
