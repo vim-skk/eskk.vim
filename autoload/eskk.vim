@@ -1762,7 +1762,7 @@ endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
 " }}}
 " g:eskk_context_control {{{
-function! eskk#handle_context_handlers() "{{{
+function! eskk#handle_context() "{{{
     if !exists('b:eskk_context')
         return
     endif
