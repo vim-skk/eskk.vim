@@ -656,6 +656,8 @@ let s:event_hook_fn = {}
 let s:has_mapped = {}
 " SKK dicionary.
 let s:skk_dict = {}
+" For eskk#register_map(), eskk#unregister_map().
+let s:key_handler = {}
 " }}}
 
 " Functions {{{
@@ -755,20 +757,21 @@ function! eskk#get_named_map(key) "{{{
         return lhs
     endif
 
-    " XXX: :lmap can't remap. It's possibly Vim's bug.
-    " So I also prepare :noremap! mappings.
-    " execute
-    " \   'lmap'
-    " \   '<expr>'
-    " \   lhs
-    " \   printf('eskk#filter(%s)', string(a:key))
     execute
-    \   'map!'
+    \   s:get_map_command()
     \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
 
     return lhs
+endfunction "}}}
+function! s:get_map_command(...) "{{{
+    " XXX: :lmap can't remap to :lmap. It's Vim's bug.
+    "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
+    " So I use :map! mappings for 'fallback' of :lmap.
+
+    let remap = a:0 ? a:1 : 1
+    return remap ? 'map!' : 'noremap!'
 endfunction "}}}
 
 " eskk#map()
@@ -1398,11 +1401,16 @@ function! eskk#enable(...) "{{{
     " If skk.vim exists and enabled, disable it.
     let disable_skk_vim = ''
     if exists('g:skk_version') && exists('b:skk_on') && b:skk_on
-        let disable_skk_vim = SkkDisable()
+        let disable_skk_vim = substitute(SkkDisable(), "\<C-^>", '', '')
     endif
 
     let self.enabled = 1
-    return disable_skk_vim . "\<C-^>"
+
+    if mode() =~# '^[ic]$'
+        return disable_skk_vim . "\<C-^>"
+    else
+        return eskk#emulate_toggle_im(1)
+    endif
 endfunction "}}}
 function! eskk#disable() "{{{
     let self = eskk#get_current_instance()
@@ -1423,10 +1431,47 @@ function! eskk#disable() "{{{
 
     let kakutei_str = eskk#kakutei_str()
     call eskk#get_buftable().reset()
-    return kakutei_str . "\<C-^>"
+
+    if mode() =~# '^[ic]$'
+        return kakutei_str . "\<C-^>"
+    else
+        return eskk#emulate_toggle_im(1)
+    endif
 endfunction "}}}
 function! eskk#toggle() "{{{
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
+endfunction "}}}
+function! eskk#emulate_toggle_im(insert) "{{{
+    let save_lang = v:lang
+    lang messages C
+    try
+        redir => output
+        silent lmap
+        redir END
+    finally
+        execute 'lang messages' save_lang
+    endtry
+    let defined_langmap = (output !~# '^\n*No mapping found\n*$')
+
+    if a:insert
+        " :help i_CTRL-^
+        if defined_langmap
+            if &l:iminsert ==# 1
+                let &l:iminsert = 0
+            else
+                let &l:iminsert = 1
+            endif
+        else
+            if &l:iminsert ==# 2
+                let &l:iminsert = 0
+            else
+                let &l:iminsert = 2
+            endif
+        endif
+    else
+        " TODO :help c_CTRL-^
+        throw eskk#internal_error(['eskk'], 'not implemented.')
+    endif
 endfunction "}}}
 
 function! eskk#is_special_lhs(char, type) "{{{
@@ -1675,6 +1720,20 @@ function! eskk#has_event(event_name) "{{{
     \   || has_key(self.temp_event_hook_fn, a:event_name)
 endfunction "}}}
 
+function! eskk#register_map(map, Fn, args, force) "{{{
+    let map = eskk#util#eval_key(a:map)
+    if has_key(s:key_handler, map) && !a:force
+        return
+    endif
+    let s:key_handler[map] = [a:Fn, a:args]
+endfunction "}}}
+function! eskk#unregister_map(map, Fn, args) "{{{
+    let map = eskk#util#eval_key(a:map)
+    if has_key(s:key_handler, map)
+        unlet s:key_handler[map]
+    endif
+endfunction "}}}
+
 " Henkan result
 function! eskk#get_prev_henkan_result() "{{{
     let self = eskk#get_current_instance()
@@ -1727,7 +1786,14 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     endif
 
     try
-        call call(a:Fn, filter_args + a:tail_args)
+        let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
+        if has_key(s:key_handler, rom)
+            " Call eskk#register_map()'s handlers.
+            let [Fn, args] = s:key_handler[rom]
+            call call(Fn, filter_args + args)
+        else
+            call call(a:Fn, filter_args + a:tail_args)
+        endif
 
         let ret_str = filter_args[0].return
         if type(ret_str) == type("")
@@ -1735,15 +1801,28 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         else
             let redispatch_pre = ''
             if eskk#has_event('filter-redispatch-pre')
-                map! <buffer><expr> <Plug>(eskk:_filter_redispatch_pre) join(eskk#throw_event("filter-redispatch-pre"))
+                execute
+                \   s:get_map_command()
+                \   '<buffer><expr>'
+                \   '<Plug>(eskk:_filter_redispatch_pre)'
+                \   'join(eskk#throw_event("filter-redispatch-pre"))'
                 let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
             endif
             let redispatch_post = ''
             if eskk#has_event('filter-redispatch-post')
-                map! <buffer><expr> <Plug>(eskk:_filter_redispatch_post) join(eskk#throw_event("filter-redispatch-post"))
+                execute
+                \   s:get_map_command()
+                \   '<buffer><expr>'
+                \   '<Plug>(eskk:_filter_redispatch_post)'
+                \   'join(eskk#throw_event("filter-redispatch-post"))'
                 let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
             endif
-            return redispatch_pre . eskk#rewrite() . redispatch_post
+            execute
+            \   s:get_map_command(0)
+            \   '<buffer><expr>'
+            \   '<Plug>(eskk:_filter_rewrite)'
+            \   'eskk#rewrite()'
+            return redispatch_pre . "\<Plug>(eskk:_filter_rewrite)" . redispatch_post
         endif
 
     catch
@@ -1935,7 +2014,7 @@ function! s:autocmd_insert_leave() "{{{
     endif
 endfunction "}}}
 function! eskk#register_autocmd_insert_leave() "{{{
-    autocmd InsertLeave * call s:autocmd_insert_leave()
+    autocmd eskk InsertLeave * call s:autocmd_insert_leave()
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave', [])
 " }}}
@@ -2004,7 +2083,7 @@ call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-asci
 " Save dictionary if modified {{{
 function! eskk#register_auto_save_dictionary_at_exit() "{{{
     if g:eskk_auto_save_dictionary_at_exit
-        autocmd VimLeavePre * call eskk#update_dictionary()
+        autocmd eskk VimLeavePre * call eskk#update_dictionary()
     endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_auto_save_dictionary_at_exit', [])
@@ -2090,9 +2169,53 @@ call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
 " }}}
 " Map keys when BufEnter {{{
 function! eskk#register_map_all_keys_if_enabled() "{{{
-    autocmd InsertEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
+    autocmd eskk InsertEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
+" }}}
+" g:eskk_context_control {{{
+function! eskk#handle_context() "{{{
+    if !exists('b:eskk_context')
+        return
+    endif
+    " b:eskk_context exists,
+
+    if !(exists('b:eskk_context')
+    \   && has_key(b:eskk_context, 'synname')
+    \   && eskk#util#has_elem(
+    \       (type(b:eskk_context.synname) == type([]) ?
+    \           b:eskk_context.synname
+    \           : [b:eskk_context.synname]),
+    \       synIDattr(synID(line("."), col("."), 1), "name")))
+        return
+    endif
+    " ... and current syntax name has matched,
+
+    let if_rule_name = (eskk#is_enabled() ? 'if_enabled' : 'if_disabled')
+    let filetype_has = eskk#util#has_key_f(g:eskk_context_control, [&l:filetype, if_rule_name])
+    let global_has   = eskk#util#has_key_f(g:eskk_context_control, ['*', if_rule_name])
+    if !(filetype_has || global_has)
+        return
+    endif
+    " ... and settings have had a rule that has matched,
+
+
+    " ... Now ready to call g:eskk_context_control's hooks.
+
+    let Fn_filetype = eskk#util#get_f(g:eskk_context_control, [&l:filetype, if_rule_name], [])
+    let Fn_global   = eskk#util#get_f(g:eskk_context_control, ['*', if_rule_name], [])
+    let FnList =
+    \   (type(Fn_filetype) == type([]) ? Fn_filetype : [Fn_filetype])
+    \   + (type(Fn_global) == type([]) ? Fn_global : [Fn_global])
+    for Fn in FnList
+        if type(Fn) == type([])
+            call call('call', Fn)
+        else
+            call call(Fn, [])
+        endif
+        unlet Fn
+    endfor
+endfunction "}}}
 " }}}
 
 augroup END
