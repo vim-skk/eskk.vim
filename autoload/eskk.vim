@@ -35,6 +35,8 @@ autocmd!
 "   Temporary event handler functions/arguments.
 " enabled:
 "   True if s:eskk.enable() is called.
+" enabled_mode:
+"   Vim's mode() return value when calling eskk#enable().
 " stash:
 "   Stash for instance-local variables. See `s:mutable_stash`.
 " prev_henkan_result:
@@ -1405,11 +1407,12 @@ function! eskk#enable(...) "{{{
     endif
 
     let self.enabled = 1
+    let self.enabled_mode = mode()
 
-    if mode() =~# '^[ic]$'
+    if self.enabled_mode =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
-        return eskk#emulate_toggle_im(1)
+        return eskk#emulate_toggle_im(self.enabled_mode ==# 'i')
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
@@ -1435,13 +1438,13 @@ function! eskk#disable() "{{{
     if mode() =~# '^[ic]$'
         return kakutei_str . "\<C-^>"
     else
-        return eskk#emulate_toggle_im(1)
+        return eskk#emulate_toggle_im(self.enabled_mode ==# 'i')
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
-function! eskk#emulate_toggle_im(insert) "{{{
+function! eskk#emulate_toggle_im(at_insert_mode) "{{{
     let save_lang = v:lang
     lang messages C
     try
@@ -1453,7 +1456,7 @@ function! eskk#emulate_toggle_im(insert) "{{{
     endtry
     let defined_langmap = (output !~# '^\n*No mapping found\n*$')
 
-    if a:insert
+    if a:at_insert_mode
         " :help i_CTRL-^
         if defined_langmap
             if &l:iminsert ==# 1
@@ -1469,8 +1472,21 @@ function! eskk#emulate_toggle_im(insert) "{{{
             endif
         endif
     else
-        " TODO :help c_CTRL-^
-        throw eskk#internal_error(['eskk'], 'not implemented.')
+        " :help c_CTRL-^
+        let val = &imsearch !=# -1 ? &imsearch : &iminsert
+        if defined_langmap
+            if val ==# 1
+                let &l:imsearch = 0
+            else
+                let &l:imsearch = 1
+            endif
+        else
+            if val ==# 2
+                let &l:imsearch = 0
+            else
+                let &l:imsearch = 2
+            endif
+        endif
     endif
 endfunction "}}}
 
@@ -2095,7 +2111,7 @@ function! eskk#register_builtin_modes() "{{{
     let dict = eskk#get_mode_structure('ascii')
 
     function! dict.filter(stash)
-        let this = eskk#get_current_instance()
+        let this = eskk#get_mode_structure('ascii')
         if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
             call eskk#set_mode('hira')
         else
@@ -2169,7 +2185,7 @@ call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
 " }}}
 " Map keys when BufEnter {{{
 function! eskk#register_map_all_keys_if_enabled() "{{{
-    autocmd eskk InsertEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
+    autocmd eskk BufEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
 " }}}
