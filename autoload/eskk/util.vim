@@ -33,11 +33,9 @@ function! eskk#util#log(msg) "{{{
 
     if exists('g:eskk_debug_file')
         let file = expand(g:eskk_debug_file)
-        if filereadable(file)
-            call writefile(readfile(file) + [a:msg], file)
-        else
-            call writefile([a:msg], file)
-        endif
+        execute 'redir >>' file
+        silent echo a:msg
+        redir END
     else
         call eskk#util#warn(a:msg)
     endif
