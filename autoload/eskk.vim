@@ -1683,7 +1683,7 @@ function! eskk#register_builtin_modes() "{{{
     let dict = eskk#get_mode_structure('ascii')
 
     function! dict.filter(stash)
-        let this = eskk#get_current_instance()
+        let this = eskk#get_mode_structure('ascii')
         if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
             call eskk#set_mode('hira')
         else
@@ -1757,7 +1757,7 @@ call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
 " }}}
 " Map keys when BufEnter {{{
 function! eskk#register_map_all_keys_if_enabled() "{{{
-    autocmd eskk InsertEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
+    autocmd eskk BufEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
 " }}}
