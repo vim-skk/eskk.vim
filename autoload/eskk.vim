@@ -348,14 +348,14 @@ function! eskk#get_named_map(key) "{{{
     endif
 
     execute
-    \   s:get_map_command()
+    \   eskk#get_map_command()
     \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
 
     return lhs
 endfunction "}}}
-function! s:get_map_command(...) "{{{
+function! eskk#get_map_command(...) "{{{
     " XXX: :lmap can't remap to :lmap. It's Vim's bug.
     "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
     " So I use :map! mappings for 'fallback' of :lmap.
@@ -1408,7 +1408,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             let redispatch_pre = ''
             if eskk#has_event('filter-redispatch-pre')
                 execute
-                \   s:get_map_command()
+                \   eskk#get_map_command()
                 \   '<buffer><expr>'
                 \   '<Plug>(eskk:_filter_redispatch_pre)'
                 \   'join(eskk#throw_event("filter-redispatch-pre"))'
@@ -1417,18 +1417,13 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             let redispatch_post = ''
             if eskk#has_event('filter-redispatch-post')
                 execute
-                \   s:get_map_command()
+                \   eskk#get_map_command()
                 \   '<buffer><expr>'
                 \   '<Plug>(eskk:_filter_redispatch_post)'
                 \   'join(eskk#throw_event("filter-redispatch-post"))'
                 let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
             endif
-            execute
-            \   s:get_map_command(0)
-            \   '<buffer><expr>'
-            \   '<Plug>(eskk:_filter_rewrite)'
-            \   'eskk#rewrite()'
-            return redispatch_pre . "\<Plug>(eskk:_filter_rewrite)" . redispatch_post
+            return redispatch_pre . eskk#rewrite() . redispatch_post
         endif
 
     catch
