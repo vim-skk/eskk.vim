@@ -1359,6 +1359,7 @@ endfunction "}}}
 
 " Filter
 function! eskk#filter(char) "{{{
+    call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
 endfunction "}}}
