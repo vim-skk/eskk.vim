@@ -175,11 +175,14 @@ function! s:buftable.rewrite() dict "{{{
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    execute
-    \   eskk#get_map_command(0)
-    \   '<buffer>'
-    \   '<Plug>(eskk:internal:_inserted)'
-    \   substitute(kakutei . new, '<', '<lt>', 'g')
+    let inserted_str = kakutei . new
+    if inserted_str != ''
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer>'
+        \   '<Plug>(eskk:internal:_inserted)'
+        \   substitute(inserted_str, '<', '<lt>', 'g')
+    endif
 
     return repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(old))
     \   . "\<Plug>(eskk:internal:_inserted)"
