@@ -1610,8 +1610,7 @@ function! s:autocmd_insert_leave() "{{{
     endif
 
     if !g:eskk_keep_state && eskk#is_enabled()
-        let disable = eskk#disable()
-        noautocmd execute 'normal! i' . disable
+        call eskk#disable()
     endif
 endfunction "}}}
 function! eskk#register_autocmd_insert_leave() "{{{
