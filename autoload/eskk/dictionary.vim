@@ -211,15 +211,15 @@ let s:henkan_result = {
 \   '_result': [],
 \}
 
-function! s:henkan_result_new(dict, key, okuri, okuri_filter, buftable, registered_input) "{{{
+function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_input) "{{{
     return extend(
     \   deepcopy(s:henkan_result),
     \   {
     \       'buftable': a:buftable,
     \       '_dict': a:dict,
     \       '_key': a:key,
-    \       '_okuri_rom': a:okuri,
-    \       '_okuri': a:okuri_filter,
+    \       '_okuri_rom': a:okuri_rom,
+    \       '_okuri': a:okuri,
     \       '_registered_input': a:registered_input,
     \       '_status': (empty(a:registered_input) ? s:LOOK_UP_DICTIONARY : s:REGISTERED_WORD),
     \       '_result': (empty(a:registered_input) ? [] : [map(copy(a:registered_input), '{"result": v:val, "annotation": ""}'), 0]),
