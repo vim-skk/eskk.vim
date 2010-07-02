@@ -1202,8 +1202,9 @@ function! eskk#set_mode(next_mode) "{{{
     let prev_mode = self.mode
     let self.mode = a:next_mode
 
-    " Reset buftable.
-    call eskk#get_buftable().reset()
+    let buftable = eskk#get_buftable()
+    call buftable.reset()
+    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
     call eskk#throw_event('enter-mode-' . self.mode)
 
