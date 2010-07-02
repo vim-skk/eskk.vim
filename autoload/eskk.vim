@@ -1587,8 +1587,6 @@ function! eskk#register_non_egg_like_newline_event() "{{{
         return
     endif
 
-    let self = eskk#get_current_instance()
-
     " Default behavior is `egg like newline`.
     " Turns it to `Non egg like newline` during henkan phase.
     call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri', 'enter-phase-henkan-select'], 'eskk#do_lmap_non_egg_like_newline', [1])
