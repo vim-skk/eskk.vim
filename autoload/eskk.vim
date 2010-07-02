@@ -21,9 +21,6 @@ endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
-augroup eskk
-autocmd!
-
 " s:eskk {{{
 " mode:
 "   Current mode.
@@ -1562,6 +1559,11 @@ endfunction "}}}
 
 " NOTE: Put off these execution until `enable-im` event
 " because eskk#load() will execute these codes.
+" Create eskk augroup. {{{
+augroup eskk
+    autocmd!
+augroup END
+" }}}
 " Write timestamp to debug file {{{
 function! eskk#register_debug_begin() "{{{
     if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
@@ -1816,8 +1818,6 @@ function! eskk#handle_context() "{{{
     endfor
 endfunction "}}}
 " }}}
-
-augroup END
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
