@@ -1077,6 +1077,7 @@ function! eskk#emulate_toggle_im(at_insert_mode) "{{{
             endif
         endif
     endif
+    return ''
 endfunction "}}}
 
 function! eskk#is_special_lhs(char, type) "{{{
