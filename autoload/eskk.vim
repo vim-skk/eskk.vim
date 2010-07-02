@@ -699,6 +699,7 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         else
             call buftable.push_kakutei_str(buftable.get_display_str(0))
+            call buftable.clear_all()
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
 
             call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
