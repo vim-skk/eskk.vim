@@ -76,7 +76,7 @@ function! s:get_table(table_name, ...) "{{{
 endfunction "}}}
 
 function! s:has_table(table_name) "{{{
-    call s:get_table(a:table_name)    " to load this table.
+    call s:load_table(a:table_name)    " to load this table.
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
 
@@ -110,7 +110,7 @@ function! s:set_base_table(table_name, Fn) "{{{
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
-    call s:get_table(a:table_name)
+    call s:load_table(a:table_name)
     return !has_key(s:table_defs[a:table_name], 'derived')
 endfunction "}}}
 
