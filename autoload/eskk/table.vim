@@ -76,15 +76,17 @@ function! s:set_table(table_name, base_dict, ...) "{{{
     endif
 endfunction "}}}
 
-function! s:is_derived_table(table_name) "{{{
+function! s:is_base_table(table_name) "{{{
     call s:get_table(a:table_name)
-    return has_key(s:table_defs[a:table_name], 'derived')
+    return !has_key(s:table_defs[a:table_name], 'derived')
 endfunction "}}}
 
 function! s:get_map(table_name, lhs, index, ...) "{{{
     let def = s:get_table(a:table_name)
 
-    if s:is_derived_table(a:table_name)
+    if s:is_base_table(a:table_name)
+        return eskk#util#get_f(def, [a:lhs, a:index])
+    else
         let derived = s:table_defs[a:table_name].derived
         " Look up from back.
         " Because derived structure can `overwrite` base structure.
@@ -100,8 +102,6 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
                 endif
             endif
         endfor
-    else
-        return eskk#util#get_f(def, [a:lhs, s:MAP_TO_INDEX])
     endif
 
     " No lhs in `s:table_defs`.
