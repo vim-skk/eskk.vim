@@ -64,8 +64,8 @@ endfunction "}}}
 
 " Autoload functions for writing table. {{{
 
-function! eskk#table#register_table(table_name, table_dict) "{{{
-    call s:set_table(a:table_name, a:table_dict)
+function! eskk#table#register_table(...) "{{{
+    call call('s:set_table', a:000)
 endfunction "}}}
 
 " }}}
