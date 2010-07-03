@@ -29,55 +29,6 @@ lockvar s:REST_INDEX
 
 " Functions {{{
 
-function! s:parse_arg(arg) "{{{
-    let arg = a:arg
-    let opt_regex = '-\(\w\+\)=\(\S\+\)'
-
-    " Parse options.
-    let opt = {}
-    while arg != ''
-        let arg = eskk#util#skip_spaces(arg)
-        let [a, arg] = eskk#util#get_arg(arg)
-
-        let m = matchlist(a, opt_regex)
-        if !empty(m)
-            " a is option.
-            let [opt_name, opt_value] = m[1:2]
-            if opt_name ==# 'rest'
-                let opt.rest = opt_value
-            else
-                throw eskk#user_error(['eskk', 'table'], printf("unknown option '%s'.", opt_name))
-            endif
-        else
-            let arg = eskk#util#unget_arg(arg, a)
-            break
-        endif
-    endwhile
-
-    " Parse arguments.
-    let lhs = ''
-    let rhs = ''
-    while arg != ''
-        let arg = eskk#util#skip_spaces(arg)
-        let [a, arg] = eskk#util#get_arg(arg)
-        if lhs == ''
-            let lhs = a
-        else
-            let rhs = a
-        endif
-    endwhile
-    if lhs == '' && rhs == ''
-        call eskk#util#logf('lhs = %s, rhs = %s', lhs, rhs)
-        throw eskk#user_error(['eskk', 'table'], 'Map [-rest=...] lhs rhs')
-    endif
-
-    return {
-    \   'lhs': lhs,
-    \   'rhs': rhs,
-    \   'rest': get(opt, 'rest', ''),
-    \}
-endfunction "}}}
-
 
 function! s:get_table(table_name, ...) "{{{
     if has_key(s:table_defs, a:table_name)
