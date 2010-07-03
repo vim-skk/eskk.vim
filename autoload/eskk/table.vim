@@ -68,38 +68,6 @@ function! eskk#table#register_table(table_name, table_dict) "{{{
     call s:set_table(a:table_name, a:table_dict)
 endfunction "}}}
 
-" Force overwrite if a:bang is true.
-function! eskk#table#map(table_name, force, lhs, rhs, ...) "{{{
-    let [rest] = eskk#util#get_args(a:000, '')
-
-    " a:lhs is already defined and not banged.
-    let evaled_lhs = eskk#util#eval_key(a:lhs)
-    if !eskk#table#has_map(a:table_name, evaled_lhs) || a:force
-        call s:create_map(a:table_name, evaled_lhs, a:rhs, rest)
-    endif
-endfunction "}}}
-
-function! s:create_map(table_name, lhs, rhs, rest) "{{{
-    let def = s:get_table(a:table_name)
-    let def[a:lhs] = [a:rhs, a:rest]
-endfunction "}}}
-
-function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
-    let [rest] = eskk#util#get_args(a:000, '')
-
-    let evaled_lhs = eskk#util#eval_key(a:lhs)
-    if eskk#table#has_map(evaled_lhs)
-        call s:destroy_map(a:table_name, evaled_lhs)
-    elseif !a:silent
-        throw eskk#user_error(['eskk', 'table'], 'No table mapping.')
-    endif
-endfunction "}}}
-
-function! s:destroy_map(table_name, lhs) "{{{
-    let def = s:get_table(a:table_name)
-    unlet def[a:lhs]
-endfunction "}}}
-
 " }}}
 
 
