@@ -62,7 +62,8 @@ function! s:load_table(table_name) "{{{
         return s:load_table(s:table_defs[a:table_name].name)
     endif
 
-    throw eskk#internal_error(['eskk', 'table'])
+    let msg = printf("Can't load '%s'.", a:table_name)
+    throw eskk#internal_error(['eskk', 'table'], msg)
 endfunction "}}}
 
 function! s:get_base_table(table_name, ...) "{{{
