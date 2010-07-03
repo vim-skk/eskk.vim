@@ -65,6 +65,8 @@ function! s:load_table(table_name) "{{{
 endfunction "}}}
 
 function! s:get_table(table_name, ...) "{{{
+    " For compatibility, this function returns base table object.
+
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
         return s:table_defs[a:table_name].base
     endif
