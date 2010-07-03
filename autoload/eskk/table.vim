@@ -54,7 +54,7 @@ function! s:load_table(table_name) "{{{
         unlet s:table_defs[a:table_name].lazyinit
         let s:table_defs[a:table_name].base = def
         call eskk#util#logf("table '%s' has been loaded.", a:table_name)
-        return def
+        return s:table_defs[a:table_name].base
     endif
 
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'name'])
@@ -93,7 +93,7 @@ function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
     let def = s:table_defs[a:table_name]
 
     " NOTE: I don't set `def.base` here.
-    " It will be set in `s:get_base_table()`.
+    " It will be set in `s:load_table()`.
     let def.name = a:base_table_name
     let def.derived = a:derived_dict
 endfunction "}}}
