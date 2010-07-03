@@ -1769,6 +1769,15 @@ function! eskk#register_builtin_modes() "{{{
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
 " }}}
+" Register builtin-tables. {{{
+function! eskk#register_builtin_tables() "{{{
+    " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
+    for name in ['rom_to_hira', 'rom_to_kata', 'rom_to_hankata', 'rom_to_zenei', 'hira_to_kata', 'kata_to_hira']
+        call eskk#table#register_table(name, 'eskk#table#' . name . '#load')
+    endfor
+endfunction "}}}
+call eskk#register_temp_event('enable-im', 'eskk#register_builtin_tables', [])
+" }}}
 " Map keys when BufEnter {{{
 function! eskk#register_map_all_keys_if_enabled() "{{{
     autocmd eskk BufEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
