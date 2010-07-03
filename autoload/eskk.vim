@@ -21,9 +21,6 @@ endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
-augroup eskk
-autocmd!
-
 " s:eskk {{{
 " mode:
 "   Current mode.
@@ -348,14 +345,14 @@ function! eskk#get_named_map(key) "{{{
     endif
 
     execute
-    \   s:get_map_command()
+    \   eskk#get_map_command()
     \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
 
     return lhs
 endfunction "}}}
-function! s:get_map_command(...) "{{{
+function! eskk#get_map_command(...) "{{{
     " XXX: :lmap can't remap to :lmap. It's Vim's bug.
     "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
     " So I use :map! mappings for 'fallback' of :lmap.
@@ -699,6 +696,7 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         else
             call buftable.push_kakutei_str(buftable.get_display_str(0))
+            call buftable.clear_all()
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
 
             call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
@@ -1081,6 +1079,7 @@ function! eskk#emulate_toggle_im(at_insert_mode) "{{{
             endif
         endif
     endif
+    return ''
 endfunction "}}}
 
 function! eskk#is_special_lhs(char, type) "{{{
@@ -1208,8 +1207,9 @@ function! eskk#set_mode(next_mode) "{{{
     let prev_mode = self.mode
     let self.mode = a:next_mode
 
-    " Reset buftable.
-    call eskk#get_buftable().reset()
+    let buftable = eskk#get_buftable()
+    call buftable.reset()
+    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
 
     call eskk#throw_event('enter-mode-' . self.mode)
 
@@ -1365,6 +1365,7 @@ endfunction "}}}
 
 " Filter
 function! eskk#filter(char) "{{{
+    call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
 endfunction "}}}
@@ -1411,7 +1412,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             let redispatch_pre = ''
             if eskk#has_event('filter-redispatch-pre')
                 execute
-                \   s:get_map_command()
+                \   eskk#get_map_command()
                 \   '<buffer><expr>'
                 \   '<Plug>(eskk:_filter_redispatch_pre)'
                 \   'join(eskk#throw_event("filter-redispatch-pre"))'
@@ -1420,18 +1421,13 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             let redispatch_post = ''
             if eskk#has_event('filter-redispatch-post')
                 execute
-                \   s:get_map_command()
+                \   eskk#get_map_command()
                 \   '<buffer><expr>'
                 \   '<Plug>(eskk:_filter_redispatch_post)'
                 \   'join(eskk#throw_event("filter-redispatch-post"))'
                 let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
             endif
-            execute
-            \   s:get_map_command(0)
-            \   '<buffer><expr>'
-            \   '<Plug>(eskk:_filter_rewrite)'
-            \   'eskk#rewrite()'
-            return redispatch_pre . "\<Plug>(eskk:_filter_rewrite)" . redispatch_post
+            return redispatch_pre . eskk#rewrite() . redispatch_post
         endif
 
     catch
@@ -1570,6 +1566,11 @@ endfunction "}}}
 
 " NOTE: Put off these execution until `enable-im` event
 " because eskk#load() will execute these codes.
+" Create eskk augroup. {{{
+augroup eskk
+    autocmd!
+augroup END
+" }}}
 " Write timestamp to debug file {{{
 function! eskk#register_debug_begin() "{{{
     if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
@@ -1595,8 +1596,6 @@ function! eskk#register_non_egg_like_newline_event() "{{{
         return
     endif
 
-    let self = eskk#get_current_instance()
-
     " Default behavior is `egg like newline`.
     " Turns it to `Non egg like newline` during henkan phase.
     call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri', 'enter-phase-henkan-select'], 'eskk#do_lmap_non_egg_like_newline', [1])
@@ -1618,8 +1617,7 @@ function! s:autocmd_insert_leave() "{{{
     endif
 
     if !g:eskk_keep_state && eskk#is_enabled()
-        let disable = eskk#disable()
-        noautocmd execute 'normal! i' . disable
+        call eskk#disable()
     endif
 endfunction "}}}
 function! eskk#register_autocmd_insert_leave() "{{{
@@ -1826,8 +1824,6 @@ function! eskk#handle_context() "{{{
     endfor
 endfunction "}}}
 " }}}
-
-augroup END
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo

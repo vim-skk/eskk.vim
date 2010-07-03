@@ -173,10 +173,21 @@ function! s:buftable.rewrite() dict "{{{
     call eskk#util#logf('kakutei string = %s', string(kakutei))
     call eskk#util#logf('new display string = %s', string(new))
 
+    let bs = repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(old))
+
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
-    let bs = eskk#util#eval_key(maparg('<Plug>(eskk:internal:backspace-key)', 'ic'))
-    return repeat(bs, eskk#util#mb_strlen(old)) . kakutei . new
+    let inserted_str = kakutei . new
+    if inserted_str == ''
+        return bs
+    else
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer>'
+        \   '<Plug>(eskk:internal:_inserted)'
+        \   substitute(inserted_str, '<', '<lt>', 'g')
+        return bs . "\<Plug>(eskk:internal:_inserted)"
+    endif
 endfunction "}}}
 
 function! s:buftable.get_display_str(...) dict "{{{
@@ -292,8 +303,8 @@ function! s:buftable.do_enter(stash) dict "{{{
     let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     let phase = self.get_henkan_phase()
-    let enter_char = eskk#util#eval_key(maparg('<Plug>(eskk:internal:enter-key)', 'ic'))
-    let undo_char  = eskk#util#eval_key(maparg('<Plug>(eskk:internal:undo-key)', 'ic'))
+    let enter_char = eskk#util#eval_key('<Plug>(eskk:internal:enter-key)')
+    let undo_char  = eskk#util#eval_key('<Plug>(eskk:internal:undo-key)')
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if normal_buf_str.get_rom_str() != ''
@@ -336,7 +347,7 @@ function! s:buftable.do_enter(stash) dict "{{{
 endfunction "}}}
 function! s:buftable.do_backspace(stash) dict "{{{
     if self.get_old_str() == ''
-        let a:stash.return = eskk#util#eval_key(maparg('<Plug>(eskk:internal:backspace-key)', 'ic'))
+        let a:stash.return = eskk#util#eval_key('<Plug>(eskk:internal:backspace-key)')
         return
     endif
 
@@ -463,7 +474,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
             call self.push_kakutei_str(self.get_display_str(0))
         endif
         if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            let undo_char = eskk#util#eval_key(maparg('<Plug>(eskk:internal:undo-key)', 'ic'))
+            let undo_char = eskk#util#eval_key('<Plug>(eskk:internal:undo-key)')
             call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', [undo_char])
         endif
         call self.set_begin_pos('.')
