@@ -64,7 +64,7 @@ function! s:load_table(table_name) "{{{
     throw eskk#internal_error(['eskk', 'table'])
 endfunction "}}}
 
-function! s:get_table(table_name, ...) "{{{
+function! s:get_base_table(table_name, ...) "{{{
     " For compatibility, this function returns base table object.
 
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
@@ -117,7 +117,7 @@ endfunction "}}}
 
 function! s:get_map(table_name, lhs, index, ...) "{{{
     if s:is_base_table(a:table_name)
-        let def = s:get_table(a:table_name)
+        let def = s:get_base_table(a:table_name)
         if eskk#util#has_key_f(def, [a:lhs, a:index])
             return def[a:lhs][a:index]
         endif
@@ -182,7 +182,7 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
         return {}
     else
         return filter(
-        \   keys(s:get_table(a:table_name)),
+        \   keys(s:get_base_table(a:table_name)),
         \   'stridx(v:val, a:str_buf) == 0'
         \)
     endif
@@ -213,7 +213,7 @@ endfunction "}}}
 
 
 function! eskk#table#get_definition(table_name) "{{{
-    return s:get_table(a:table_name)
+    return s:get_base_table(a:table_name)
 endfunction "}}}
 
 function! eskk#table#get_table(table_name) "{{{
