@@ -29,6 +29,7 @@ lockvar s:REST_INDEX
 
 " Functions {{{
 
+" Primitive table functions {{{
 
 function! s:get_table(table_name, ...) "{{{
     if has_key(s:table_defs, a:table_name)
@@ -45,8 +46,27 @@ function! s:get_current_table(...) "{{{
     return call('s:get_table', [s:current_table_name] + a:000)
 endfunction "}}}
 
+function! s:has_table(table_name) "{{{
+    return has_key(s:table_defs, a:table_name)
+endfunction "}}}
+
+function! s:set_table(table_name, table_dict) "{{{
+    if s:has_table(a:table_name)
+        " Do not allow override table.
+        let msg = printf("'%s' has been already registered.", a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+    endif
+    let s:table_defs[a:table_name] = a:table_dict
+endfunction "}}}
+
+" }}}
+
 
 " Autoload functions for writing table. {{{
+
+function! eskk#table#register_table(table_name, table_dict) "{{{
+    call s:set_table(a:table_name, a:table_dict)
+endfunction "}}}
 
 " Force overwrite if a:bang is true.
 function! eskk#table#map(table_name, force, lhs, rhs, ...) "{{{
