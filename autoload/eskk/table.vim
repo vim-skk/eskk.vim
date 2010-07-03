@@ -111,6 +111,11 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     endif
 endfunction "}}}
 
+function! s:has_map(table_name, lhs, index) "{{{
+    let no_map = {}
+    return s:get_map(a:table_name, a:lhs, a:index, no_map) isnot no_map
+endfunction "}}}
+
 " }}}
 
 
@@ -150,7 +155,7 @@ function! eskk#table#has_table(table_name) "{{{
 endfunction "}}}
 
 function! eskk#table#has_map(table_name, lhs) "{{{
-    return has_key(s:get_table(a:table_name), a:lhs)
+    return call('s:has_map', [a:table_name, a:lhs, s:MAP_TO_INDEX])
 endfunction "}}}
 
 
@@ -160,19 +165,11 @@ endfunction "}}}
 
 
 function! eskk#table#has_rest(table_name, lhs) "{{{
-    return eskk#util#has_key_f(s:get_table(a:table_name), [a:lhs, 'rest'])
+    return call('s:has_map', [a:table_name, a:lhs, s:REST_INDEX])
 endfunction "}}}
 
 function! eskk#table#get_rest(table_name, lhs, ...) "{{{
-    let def = s:get_table(a:table_name)
-    if empty(def) || !eskk#table#has_rest(a:table_name, a:lhs)
-        if a:0 == 0
-            throw eskk#internal_error(['eskk', 'table'])
-        else
-            return a:1
-        endif
-    endif
-    return def[a:lhs][s:REST_INDEX]
+    return call('s:get_map', [a:table_name, a:lhs, s:REST_INDEX] + a:000)
 endfunction "}}}
 
 
