@@ -37,7 +37,7 @@ function! s:get_table(table_name, ...) "{{{
     endif
 
     " Lazy loading.
-    let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
+    call s:set_table(a:table_name, eskk#table#{a:table_name}#load())
     call eskk#util#logf("table '%s' has been loaded.", a:table_name)
     return s:table_defs[a:table_name]
 endfunction "}}}
