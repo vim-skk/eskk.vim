@@ -49,10 +49,6 @@ function! s:get_table(table_name, ...) "{{{
     return s:table_defs[a:table_name].base
 endfunction "}}}
 
-function! s:get_current_table(...) "{{{
-    return call('s:get_table', [s:current_table_name] + a:000)
-endfunction "}}}
-
 function! s:has_table(table_name) "{{{
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
