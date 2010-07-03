@@ -75,6 +75,42 @@ function! s:set_table(table_name, base_dict, ...) "{{{
     endif
 endfunction "}}}
 
+function! s:is_derived_table(table_name) "{{{
+    call s:get_table(a:table_name)
+    return has_key(s:table_defs[a:table_name], 'derived')
+endfunction "}}}
+
+function! s:get_map(table_name, lhs, index, ...) "{{{
+    let def = s:get_table(a:table_name)
+
+    if s:is_derived_table(a:table_name)
+        let derived = s:table_defs[a:table_name].derived
+        " Look up from back.
+        " Because derived structure can `overwrite` base structure.
+        for i in reverse(range(len(derived)))
+            if has_key(derived[i].data, a:lhs)
+                if derived[i].method ==# 'add'
+                    return derived[i].data[a:lhs][a:index]
+                elseif derived[i].method ==# 'remove'
+                    continue
+                else
+                    let msg = "`method` key's value is one of 'add', 'remove'."
+                    throw eskk#internal_error(['eskk', 'table'], msg)
+                endif
+            endif
+        endfor
+    else
+        return eskk#util#get_f(def, [a:lhs, s:MAP_TO_INDEX])
+    endif
+
+    " No lhs in `s:table_defs`.
+    if a:0
+        return a:1
+    else
+        throw eskk#internal_error(['eskk', 'table'])
+    endif
+endfunction "}}}
+
 " }}}
 
 
@@ -119,15 +155,7 @@ endfunction "}}}
 
 
 function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
-    let def = s:get_table(a:table_name)
-    if empty(def) || !eskk#table#has_map(a:table_name, a:lhs)
-        if a:0 == 0
-            throw eskk#internal_error(['eskk', 'table'])
-        else
-            return a:1
-        endif
-    endif
-    return def[a:lhs][s:MAP_TO_INDEX]
+    return call('s:get_map', [a:table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
 endfunction "}}}
 
 
