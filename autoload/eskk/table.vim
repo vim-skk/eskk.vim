@@ -19,6 +19,7 @@ runtime! plugin/eskk.vim
 
 " Variables {{{
 let s:table_defs = {}
+let s:registered_tables = {}
 
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
@@ -126,6 +127,15 @@ function! eskk#table#register_derived_table_dict(...) "{{{
 endfunction "}}}
 function! eskk#table#register_table_dict(...) "{{{
     call call('s:set_table', a:000)
+endfunction "}}}
+
+function! eskk#table#register_table(table_name, Fn) "{{{
+    if has_key(s:registered_tables, a:table_name)
+        let msg = printf("'%s' has been already registered.", a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+    endif
+
+    let s:registered_tables[a:table_name] = a:Fn
 endfunction "}}}
 
 " }}}
