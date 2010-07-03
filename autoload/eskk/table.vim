@@ -49,8 +49,7 @@ function! s:load_table(table_name) "{{{
     endif
 
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'lazyinit'])
-        let Fn = s:table_defs[a:table_name].lazyinit
-        let def = call(Fn, [])
+        let def = call(s:table_defs[a:table_name].lazyinit, [])
         unlet s:table_defs[a:table_name].lazyinit
         let s:table_defs[a:table_name].base = def
         call eskk#util#logf("table '%s' has been loaded.", a:table_name)
