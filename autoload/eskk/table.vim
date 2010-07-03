@@ -129,7 +129,7 @@ function! eskk#table#register_table_dict(...) "{{{
     call call('s:set_table', a:000)
 endfunction "}}}
 
-function! eskk#table#register_table(table_name, Fn) "{{{
+function! eskk#table#register(table_name, Fn) "{{{
     if has_key(s:registered_tables, a:table_name)
         let msg = printf("'%s' has been already registered.", a:table_name)
         throw eskk#internal_error(['eskk', 'table'], msg)

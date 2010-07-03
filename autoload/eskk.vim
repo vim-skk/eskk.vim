@@ -1773,7 +1773,7 @@ call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
 function! eskk#register_builtin_tables() "{{{
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
     for name in ['rom_to_hira', 'rom_to_kata', 'rom_to_hankata', 'rom_to_zenei', 'hira_to_kata', 'kata_to_hira']
-        call eskk#table#register_table(name, 'eskk#table#' . name . '#load')
+        call eskk#table#register(name, 'eskk#table#' . name . '#load')
     endfor
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_builtin_tables', [])
