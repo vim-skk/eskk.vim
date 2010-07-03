@@ -31,15 +31,22 @@ lockvar s:REST_INDEX
 
 " Primitive table functions {{{
 
+" NOTE: `s:table_defs` Structure is:
+" let s:table_defs['table_name'] = {
+"   'base': {...},
+"   'derived': [{'method': 'add', 'data': {...}}, ...],
+" }
+
+
 function! s:get_table(table_name, ...) "{{{
     if has_key(s:table_defs, a:table_name)
-        return s:table_defs[a:table_name]
+        return s:table_defs[a:table_name].base
     endif
 
     " Lazy loading.
     call s:set_table(a:table_name, eskk#table#{a:table_name}#load())
     call eskk#util#logf("table '%s' has been loaded.", a:table_name)
-    return s:table_defs[a:table_name]
+    return s:table_defs[a:table_name].base
 endfunction "}}}
 
 function! s:get_current_table(...) "{{{
@@ -50,13 +57,21 @@ function! s:has_table(table_name) "{{{
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
 
-function! s:set_table(table_name, table_dict) "{{{
+function! s:set_table(table_name, base_dict, ...) "{{{
     if s:has_table(a:table_name)
         " Do not allow override table.
         let msg = printf("'%s' has been already registered.", a:table_name)
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
-    let s:table_defs[a:table_name] = a:table_dict
+
+    let s:table_defs[a:table_name] = {}
+    let def = s:table_defs[a:table_name]
+
+    let def.base = a:base_dict
+    if a:0
+        " No "derived" key if `def` is base table object.
+        let def.derived = a:1
+    endif
 endfunction "}}}
 
 " }}}
