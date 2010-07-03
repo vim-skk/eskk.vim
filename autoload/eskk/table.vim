@@ -50,11 +50,12 @@ function! s:get_table(table_name, ...) "{{{
 endfunction "}}}
 
 function! s:has_table(table_name) "{{{
+    call s:get_table(a:table_name)    " to load this table.
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
 
 function! s:set_table(table_name, base_dict, ...) "{{{
-    if s:has_table(a:table_name)
+    if has_key(s:table_defs, a:table_name)
         " Do not allow override table.
         let msg = printf("'%s' has been already registered.", a:table_name)
         throw eskk#internal_error(['eskk', 'table'], msg)
@@ -93,21 +94,19 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
         throw eskk#internal_error(['eskk', 'table'], "a:str_buf is empty.")
     endif
 
-    let no_table = {}
-    let def = s:get_table(a:table_name, no_table)
-    if def is no_table
-        return no_table
+    if !s:has_table(a:table_name)
+        return {}
     else
         return filter(
-        \   keys(def),
+        \   keys(s:get_table(a:table_name)),
         \   'stridx(v:val, a:str_buf) == 0'
         \)
     endif
 endfunction "}}}
 
 
-function! eskk#table#has_table(name) "{{{
-    return s:get_table(a:name, -1) !=# -1
+function! eskk#table#has_table(table_name) "{{{
+    return s:has_table(a:table_name)
 endfunction "}}}
 
 function! eskk#table#has_map(table_name, lhs) "{{{
