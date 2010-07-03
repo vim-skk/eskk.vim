@@ -45,20 +45,18 @@ lockvar s:REST_INDEX
 
 function! s:load_table(table_name) "{{{
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
-        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
         return s:table_defs[a:table_name].base
     endif
 
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'lazyinit'])
-        let def = call(s:table_defs[a:table_name].lazyinit, [])
-        unlet s:table_defs[a:table_name].lazyinit
-        let s:table_defs[a:table_name].base = def
+        let s:table_defs[a:table_name].base = call(s:table_defs[a:table_name].lazyinit, [])
         call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+        unlet s:table_defs[a:table_name].lazyinit
         return s:table_defs[a:table_name].base
     endif
 
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'name'])
-        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+        " Load base table. derived table information is already in `derived`.
         return s:load_table(s:table_defs[a:table_name].name)
     endif
 
