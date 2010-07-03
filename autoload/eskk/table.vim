@@ -42,15 +42,36 @@ lockvar s:REST_INDEX
 "   ],
 " }
 
+function! s:load_table(table_name) "{{{
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
+        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+        return s:table_defs[a:table_name].base
+    endif
+
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'lazyinit'])
+        let Fn = s:table_defs[a:table_name].lazyinit
+        let def = call(Fn, [])
+        unlet s:table_defs[a:table_name].lazyinit
+        let s:table_defs[a:table_name].base = def
+        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+        return def
+    endif
+
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'name'])
+        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+        return s:load_table(s:table_defs[a:table_name].name)
+    endif
+
+    throw eskk#internal_error(['eskk', 'table'])
+endfunction "}}}
 
 function! s:get_table(table_name, ...) "{{{
-    if has_key(s:table_defs, a:table_name)
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
         return s:table_defs[a:table_name].base
     endif
 
     " Lazy loading.
-    call s:set_table(a:table_name, eskk#table#{a:table_name}#load())
-    call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+    call s:load_table(a:table_name)
     return s:table_defs[a:table_name].base
 endfunction "}}}
 
@@ -59,7 +80,7 @@ function! s:has_table(table_name) "{{{
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
 
-function! s:set_table(table_name, base_dict, ...) "{{{
+function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
     if has_key(s:table_defs, a:table_name)
         " Do not allow override table.
         let msg = printf("'%s' has been already registered.", a:table_name)
@@ -69,11 +90,23 @@ function! s:set_table(table_name, base_dict, ...) "{{{
     let s:table_defs[a:table_name] = {}
     let def = s:table_defs[a:table_name]
 
-    let def.base = a:base_dict
-    if a:0
-        " No "derived" key if `def` is base table object.
-        let def.derived = a:1
+    " NOTE: I don't set `def.base` here.
+    " It will be set in `s:get_base_table()`.
+    let def.name = a:base_table_name
+    let def.derived = a:derived_dict
+endfunction "}}}
+function! s:set_base_table(table_name, Fn) "{{{
+    if has_key(s:table_defs, a:table_name)
+        " Do not allow override table.
+        let msg = printf("'%s' has been already registered.", a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
     endif
+
+    let s:table_defs[a:table_name] = {}
+    let def = s:table_defs[a:table_name]
+
+    let def.name = a:table_name
+    let def.lazyinit = a:Fn
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
@@ -82,10 +115,11 @@ function! s:is_base_table(table_name) "{{{
 endfunction "}}}
 
 function! s:get_map(table_name, lhs, index, ...) "{{{
-    let def = s:get_table(a:table_name)
-
     if s:is_base_table(a:table_name)
-        return eskk#util#get_f(def, [a:lhs, a:index])
+        let def = s:get_table(a:table_name)
+        if eskk#util#has_key_f(def, [a:lhs, a:index])
+            return def[a:lhs][a:index]
+        endif
     else
         let derived = s:table_defs[a:table_name].derived
         " Look up from back.
@@ -123,19 +157,10 @@ endfunction "}}}
 " Autoload functions for writing table. {{{
 
 function! eskk#table#register_derived_table_dict(...) "{{{
-    call call('s:set_table', a:000)
+    call call('s:set_derived_table', a:000)
 endfunction "}}}
 function! eskk#table#register_table_dict(...) "{{{
-    call call('s:set_table', a:000)
-endfunction "}}}
-
-function! eskk#table#register(table_name, Fn) "{{{
-    if has_key(s:registered_tables, a:table_name)
-        let msg = printf("'%s' has been already registered.", a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
-
-    let s:registered_tables[a:table_name] = a:Fn
+    call call('s:set_base_table', a:000)
 endfunction "}}}
 
 " }}}
