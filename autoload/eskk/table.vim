@@ -34,6 +34,7 @@ lockvar s:REST_INDEX
 
 " NOTE: `s:table_defs` Structure is:
 " let s:table_defs['table_name'] = {
+"   'name': 'base_table_name',
 "   'base': {...},
 "   'derived': [
 "       {'method': 'add', 'data': {...}},
@@ -115,28 +116,34 @@ function! s:is_base_table(table_name) "{{{
     return !has_key(s:table_defs[a:table_name], 'derived')
 endfunction "}}}
 
-function! s:get_map(table_name, lhs, index, ...) "{{{
+function! s:get_map(table_name, search_lhs, index, ...) "{{{
     if s:is_base_table(a:table_name)
-        let def = s:get_base_table(a:table_name)
-        if eskk#util#has_key_f(def, [a:lhs, a:index])
-            return def[a:lhs][a:index]
-        endif
+        return call('eskk#util#get_f', [s:get_base_table(a:table_name), [a:search_lhs, a:index]] + a:000)
     else
         let derived = s:table_defs[a:table_name].derived
-        " Look up from back.
-        " Because derived structure can `overwrite` base structure.
-        for i in reverse(range(len(derived)))
-            if has_key(derived[i].data, a:lhs)
+        let derived_result = {}    " key is lhs.
+        " Process each derived List elements *in order*.
+        " NOTE: Do not return inside `:for`.
+        for i in range(len(derived))
+            if has_key(derived[i].data, a:search_lhs)
                 if derived[i].method ==# 'add'
-                    return derived[i].data[a:lhs][a:index]
+                    let derived_result[a:search_lhs] = derived[i].data[a:search_lhs][a:index]
                 elseif derived[i].method ==# 'remove'
-                    continue
+                    if has_key(derived_result, a:search_lhs)
+                        unlet derived_result[a:search_lhs]
+                    endif
                 else
                     let msg = "`method` key's value is one of 'add', 'remove'."
                     throw eskk#internal_error(['eskk', 'table'], msg)
                 endif
             endif
         endfor
+        if has_key(derived_result, a:search_lhs)
+            return derived_result[a:search_lhs]
+        endif
+
+        " No map in `derived`. Look up in base dict.
+        return call('s:get_map', [s:table_defs[a:table_name].name, a:search_lhs, a:index] + a:000)
     endif
 
     " No lhs in `s:table_defs`.
