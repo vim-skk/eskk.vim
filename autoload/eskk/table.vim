@@ -34,7 +34,11 @@ lockvar s:REST_INDEX
 " NOTE: `s:table_defs` Structure is:
 " let s:table_defs['table_name'] = {
 "   'base': {...},
-"   'derived': [{'method': 'add', 'data': {...}}, ...],
+"   'derived': [
+"       {'method': 'add', 'data': {...}},
+"       {'method': 'remove', 'data': {...}},
+"       ...
+"   ],
 " }
 
 
