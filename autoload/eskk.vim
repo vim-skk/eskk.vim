@@ -1720,7 +1720,7 @@ function! eskk#register_builtin_modes() "{{{
     let dict = eskk#get_mode_structure('zenei')
 
     function! dict.filter(stash)
-        let this = eskk#get_current_instance()
+        let this = eskk#get_mode_structure('zenei')
         if eskk#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
             call eskk#set_mode('hira')
         else
