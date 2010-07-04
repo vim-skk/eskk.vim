@@ -26,19 +26,20 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         endif
 
         " :help getpos()
-        return pos[2]
+        return pos[2] + strlen(g:eskk_marker_henkan)
     endif
 
-    return s:complete_kanji(a:base)
+    return s:complete_kanji()
 endfunction "}}}
-function! s:complete_kanji(cur_keyword_str) "{{{
+function! s:complete_kanji() "{{{
     " Get candidates.
     let list = []
-    for candidate in eskk#dictionary#get_kanji(a:cur_keyword_str, 5)
-        let yomigana = candidate[0]
+    let dict = eskk#get_dictionary()
+    let buftable = eskk#get_buftable()
+    for [yomigana, kanji_list] in dict.get_kanji(buftable)
         call add(list, {'word' : g:eskk_marker_henkan . yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
 
-        for kanji in candidate[1]
+        for kanji in kanji_list
             call add(list, {
             \   'word': kanji.result,
             \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
