@@ -121,7 +121,7 @@ function! eskk#dictionary#parse_skk_dict_line(line) "{{{
         if semicolon != -1
             call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
         else
-            call add(candidates, {'result': _, 'annotation': ''})
+            call add(candidates, {'result': _})
         endif
     endfor
 
@@ -310,7 +310,7 @@ function! s:henkan_result_select_candidates(this) "{{{
         for [c, word] in pages[page_index]
             if g:eskk_show_annotation
                 echon printf('%s:%s%s  ', c, word.result,
-                \       (word.annotation != '' ? ';' . word.annotation : ''))
+                \       (has_key(word, 'annotation') ? ? ';' . word.annotation : ''))
             else
                 echon printf('%s:%s  ', c, word.result)
             endif
