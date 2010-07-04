@@ -80,7 +80,6 @@ function! eskk#complete#handle_special_key(stash) "{{{
     return ''
 endfunction "}}}
 function! s:do_enter(stash) "{{{
-    " Set inserted string by pum to buftable.
     call s:set_selected_item()
 
     call eskk#register_temp_event(
@@ -88,6 +87,7 @@ function! s:do_enter(stash) "{{{
     \   'eskk#util#identity',
     \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
     \)
+    " XXX
     for key in g:eskk_compl_enter_send_keys
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
