@@ -60,7 +60,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     " :help popupmenu-keys
     for [key, fn] in [
     \   ["<CR>", 's:do_enter'],
-    \   ["<C-y>", 's:not_implemented'],
+    \   ["<C-y>", 's:close_pum'],
     \   ["<C-l>", 's:not_implemented'],
     \   ["<C-e>", 's:not_implemented'],
     \   ["<PageUp>", 's:not_implemented'],
@@ -78,6 +78,15 @@ function! eskk#complete#handle_special_key(stash) "{{{
     endfor
 
     return ''
+endfunction "}}}
+function! s:close_pum(stash) "{{{
+    call s:set_selected_item()
+
+    call eskk#register_temp_event(
+    \   'filter-redispatch-pre',
+    \   'eskk#util#identity',
+    \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
+    \)
 endfunction "}}}
 function! s:do_enter(stash) "{{{
     call s:set_selected_item()
