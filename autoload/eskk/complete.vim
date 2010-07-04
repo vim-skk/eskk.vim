@@ -18,13 +18,22 @@ runtime! plugin/eskk.vim
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base)"{{{
     if a:findstart
-        return match(s:get_cur_text(), g:eskk_marker_henkan . '.\+$')
+        let buftable = eskk#get_buftable()
+        let [mode, pos] = buftable.get_begin_pos()
+        let phase = buftable.get_henkan_phase()
+        let do_complete = (mode ==# 'i'
+        \               && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \                   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI))
+
+        if !do_complete
+            " XXX: What should I do?
+        endif
+
+        " :help getpos()
+        return pos[2]
     endif
 
     return s:complete_kanji(a:base)
-endfunction "}}}
-function! s:get_cur_text()"{{{
-    return col('.') < 2 ? '' : matchstr(getline('.'), '.*')[: col('.') - 2]
 endfunction "}}}
 function! s:complete_kanji(cur_keyword_str)"{{{
     " Get candidates.
