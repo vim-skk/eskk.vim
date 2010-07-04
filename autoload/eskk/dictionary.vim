@@ -50,6 +50,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         return ['', -1]
     endif
 
+    " NOTE: min, max, mid are lnum. not index number.
+
     if a:has_okuri
         let min = a:ph_dict.okuri_ari_lnum + 1
         let max = a:ph_dict.okuri_nasi_lnum - 1
@@ -58,8 +60,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         let max = len(whole_lines)
     endif
     while max - min > a:limit
-        let mid = (min + max) / 2
-        let line = whole_lines[mid]
+        let mid = (min + max + 2) / 2
+        let line = whole_lines[mid - 1]
         if a:needle >=# line
             if a:has_okuri
                 let max = mid
@@ -75,7 +77,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         endif
     endwhile
     call eskk#util#logf('min = %d, max = %d', min, max)
-    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
+    " NOTE: min, max: Give index number, not lnum.
+    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min - 1, max - 1)
 endfunction "}}}
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
@@ -88,13 +91,15 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let [pos, end] = a:000
         call eskk#util#assert(pos < end)
     elseif a:has_okuri
-        let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines)]
+        let [pos, end] = [a:ph_dict.okuri_ari_lnum - 1, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
     else
-        let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines)]
+        let [pos, end] = [a:ph_dict.okuri_nasi_lnum - 1, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
-    while pos < end
+    while pos <=# end
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
             call eskk#util#logf('eskk#dictionary#search_next_candidate() - found!: %s', string(line))
