@@ -55,7 +55,8 @@ function! s:complete_kanji() "{{{
 
     return list
 endfunction "}}}
-function! eskk#complete#handle_special_key(char) "{{{
+function! eskk#complete#handle_special_key(stash) "{{{
+    let char = a:stash.char
     " :help popupmenu-keys
     for [key, fn] in [
     \   ["<CR>", 's:do_enter'],
@@ -71,7 +72,7 @@ function! eskk#complete#handle_special_key(char) "{{{
     \   ["<C-h>", 's:do_backspace'],
     \   ["<BS>", 's:do_backspace'],
     \]
-        if a:char ==# eskk#util#eval_key(key)
+        if char ==# eskk#util#eval_key(key)
             return {fn}()
         endif
     endfor
@@ -96,7 +97,11 @@ function! s:do_enter() "{{{
     let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     call okuri_buf_str.clear()
 
-    return "\<Plug>(eskk:internal:_close_pum)"
+    call eskk#register_temp_event(
+    \   'filter-redispatch-pre',
+    \   'eskk#util#identity',
+    \   ["\<Plug>(eskk:internal:_close_pum)"]
+    \)
 endfunction "}}}
 function! s:do_backspace() "{{{
     call eskk#get_buftable().do_backspace()

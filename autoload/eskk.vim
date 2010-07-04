@@ -1788,15 +1788,10 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     endif
 
     try
-        if pumvisible()
-            let ret = eskk#complete#handle_special_key(a:char)
-            if ret != ''
-                return ret . eskk#rewrite()
-            endif
-        endif
-
         let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
-        if has_key(s:key_handler, rom)
+        if pumvisible()
+            call call('eskk#complete#handle_special_key', filter_args)
+        elseif has_key(s:key_handler, rom)
             " Call eskk#register_map()'s handlers.
             let [Fn, args] = s:key_handler[rom]
             call call(Fn, filter_args + args)
