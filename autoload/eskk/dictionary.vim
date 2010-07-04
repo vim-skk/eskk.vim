@@ -24,6 +24,7 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
 
     call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
     \               string(needle), string(a:key_filter), string(a:okuri_rom))
+    call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
 
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
@@ -73,6 +74,7 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
             endif
         endif
     endwhile
+    call eskk#util#logf('min = %d, max = %d', min, max)
     return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
 endfunction "}}}
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
