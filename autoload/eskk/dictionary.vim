@@ -142,7 +142,7 @@ function! eskk#dictionary#merge_results(user_dict_result, system_dict_result) "{
         let str = r.result
 
         if has_key(unique, str)
-            if r.annotation ==# unique[str].annotation
+            if get(r, 'annotation', '') ==# get(unique[str], 'annotation', '')
                 " If `result` and `annotation` is same as old one, Remove new one.
                 call remove(results, i)
                 " Next element is results[i], Don't increment.
@@ -310,7 +310,7 @@ function! s:henkan_result_select_candidates(this) "{{{
         for [c, word] in pages[page_index]
             if g:eskk_show_annotation
                 echon printf('%s:%s%s  ', c, word.result,
-                \       (has_key(word, 'annotation') ? ? ';' . word.annotation : ''))
+                \       (has_key(word, 'annotation') ? ';' . word.annotation : ''))
             else
                 echon printf('%s:%s  ', c, word.result)
             endif
