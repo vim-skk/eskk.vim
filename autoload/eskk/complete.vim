@@ -22,7 +22,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         let [mode, pos] = buftable.get_begin_pos()
 
         if mode !=# 'i'
-            " XXX: What should I do?
+            return -1
         endif
 
         " :help getpos()
