@@ -1789,23 +1789,9 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 
     try
         if pumvisible()
-            let ret_key = eskk#complete#handle_special_key(a:char)
-            if ret_key != ''
-                execute
-                \   eskk#get_map_command(0)
-                \   '<buffer>'
-                \   '<Plug>(eskk:internal:_pum_ret_noremap)'
-                \   ret_key
-                " After handling that of special keys.
-                " Send it to eskk again.
-                "
-                " XXX:
-                "     eskk#get_named_map(char)
-                " should
-                "     eskk#get_named_map(eskk#util#uneval_key(char))
-                return
-                \   "\<Plug>(eskk:internal:_pum_ret_noremap)"
-                " \   . eskk#util#eval_key(eskk#get_named_map(a:char))
+            let ret = eskk#complete#handle_special_key(a:char)
+            if ret != ''
+                return ret . eskk#rewrite()
             endif
         endif
 

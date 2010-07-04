@@ -57,29 +57,53 @@ function! s:complete_kanji() "{{{
 endfunction "}}}
 function! eskk#complete#handle_special_key(char) "{{{
     " :help popupmenu-keys
-    for c in [
-    \   "<CR>",
-    \   "<C-y>",
-    \   "<C-l>",
-    \   "<C-e>",
-    \   "<PageUp>",
-    \   "<PageDown>",
-    \   "<Up>",
-    \   "<Down>",
-    \   "<Space>",
-    \   "<Tab>",
+    for [key, fn] in [
+    \   ["<CR>", 's:do_enter'],
+    \   ["<C-y>", 's:not_implemented'],
+    \   ["<C-l>", 's:not_implemented'],
+    \   ["<C-e>", 's:not_implemented'],
+    \   ["<PageUp>", 's:not_implemented'],
+    \   ["<PageDown>", 's:not_implemented'],
+    \   ["<Up>", 's:not_implemented'],
+    \   ["<Down>", 's:not_implemented'],
+    \   ["<Space>", 's:not_implemented'],
+    \   ["<Tab>", 's:not_implemented'],
+    \   ["<C-h>", 's:do_backspace'],
+    \   ["<BS>", 's:do_backspace'],
     \]
-        if a:char ==# eskk#util#eval_key(c)
-            return c
+        if a:char ==# eskk#util#eval_key(key)
+            return {fn}()
         endif
     endfor
 
-    if a:char ==# "\<C-h>" || a:char ==# "\<BS>"
-        call eskk#get_buftable().do_backspace()
-        return "<C-h>"
+    return ''
+endfunction "}}}
+function! s:do_enter() "{{{
+    " Do not remap to `:lmap`.
+    noremap! <buffer> <Plug>(eskk:internal:_close_pum) <C-y>
+    if maparg('<Plug>(eskk:internal:_pum_ret)', 'l') != ''
+        silent! lunmap          <Plug>(eskk:internal:_pum_ret)
+        silent! lunmap <buffer> <Plug>(eskk:internal:_pum_ret)
     endif
 
-    return ''
+    " Set inserted string by pum to buftable.
+    let buftable = eskk#get_buftable()
+    let [mode, pos] = buftable.get_begin_pos()
+    call eskk#util#assert(mode ==# 'i')
+    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 1]
+    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    call henkan_buf_str.set_matched('', filter_str)
+    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    call okuri_buf_str.clear()
+
+    return "\<Plug>(eskk:internal:_close_pum)"
+endfunction "}}}
+function! s:do_backspace() "{{{
+    call eskk#get_buftable().do_backspace()
+    return "\<C-h>"
+endfunction "}}}
+function! s:not_implemented() "{{{
+    throw eskk#internal_error(['eskk', 'complete'], 'not implemented')
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
