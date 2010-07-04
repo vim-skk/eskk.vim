@@ -194,12 +194,12 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
-let s:REGISTERED_WORD = 0
-lockvar s:REGISTERED_WORD
-let s:LOOK_UP_DICTIONARY = 1
-lockvar s:LOOK_UP_DICTIONARY
-let s:GOT_RESULT = 2
-lockvar s:GOT_RESULT
+let s:HR_REGISTERED_WORD = 0
+lockvar s:HR_REGISTERED_WORD
+let s:HR_LOOK_UP_DICTIONARY = 1
+lockvar s:HR_LOOK_UP_DICTIONARY
+let s:HR_GOT_RESULT = 2
+lockvar s:HR_GOT_RESULT
 
 let s:henkan_result = {
 \   'buftable': {},
@@ -208,7 +208,7 @@ let s:henkan_result = {
 \   '_okuri_rom': '',
 \   '_okuri': '',
 \   '_registered_input': '',
-\   '_status': s:REGISTERED_WORD,
+\   '_status': s:HR_REGISTERED_WORD,
 \   '_result': [],
 \}
 
@@ -222,7 +222,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
     \       '_registered_input': a:registered_input,
-    \       '_status': (empty(a:registered_input) ? s:LOOK_UP_DICTIONARY : s:REGISTERED_WORD),
+    \       '_status': (empty(a:registered_input) ? s:HR_LOOK_UP_DICTIONARY : s:HR_REGISTERED_WORD),
     \       '_result': (empty(a:registered_input) ? [] : [map(copy(a:registered_input), '{"result": v:val, "annotation": ""}'), 0]),
     \   },
     \   'force'
@@ -250,13 +250,13 @@ function! s:henkan_result_get_result(this) "{{{
     \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
     let cant_get_result = eskk#dictionary_look_up_error(['eskk', 'dictionary'], msg)
 
-    if a:this._status ==# s:REGISTERED_WORD || a:this._status ==# s:GOT_RESULT
+    if a:this._status ==# s:HR_REGISTERED_WORD || a:this._status ==# s:HR_GOT_RESULT
         if !empty(a:this._result)
             return a:this._result
         else
             throw cant_get_result
         endif
-    elseif a:this._status ==# s:LOOK_UP_DICTIONARY
+    elseif a:this._status ==# s:HR_LOOK_UP_DICTIONARY
         let [user_dict, system_dict] = [a:this._dict._user_dict, a:this._dict._system_dict]
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_next_candidate(
@@ -273,7 +273,7 @@ function! s:henkan_result_get_result(this) "{{{
         \   eskk#dictionary#merge_results(user_dict_result, system_dict_result),
         \   0
         \]
-        let a:this._status = s:GOT_RESULT
+        let a:this._status = s:HR_GOT_RESULT
         return a:this._result
     endif
 endfunction "}}}
