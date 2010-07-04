@@ -19,8 +19,11 @@ runtime! plugin/eskk.vim
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if a:findstart
         let buftable = eskk#get_buftable()
-        let [mode, pos] = buftable.get_begin_pos()
-
+        let l = buftable.get_begin_pos()
+        if empty(l)
+            return -1
+        endif
+        let [mode, pos] = l
         if mode !=# 'i'
             return -1
         endif
