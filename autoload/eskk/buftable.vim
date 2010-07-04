@@ -538,6 +538,16 @@ function! s:buftable.do_henkan(stash) dict "{{{
             call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
         endif
 
+        " Convert rom_str if possible.
+        let table = eskk#table#get_table(eskk#get_current_mode_table())
+        for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
+            let buf_str = self.get_buf_str(phase)
+            let rom_str = buf_str.get_rom_str()
+            if table.has_map(rom_str)
+                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+            endif
+        endfor
+
         call eskk#set_henkan_result(eskk#get_dictionary().refer(self))
 
         " Enter henkan select phase.
