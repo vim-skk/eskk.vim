@@ -81,14 +81,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
 endfunction "}}}
 function! s:do_enter(stash) "{{{
     " Set inserted string by pum to buftable.
-    let buftable = eskk#get_buftable()
-    let [mode, pos] = buftable.get_begin_pos()
-    call eskk#util#assert(mode ==# 'i')
-    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 1]
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    call henkan_buf_str.set_matched('', filter_str)
-    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    call okuri_buf_str.clear()
+    call s:set_selected_item()
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
@@ -103,12 +96,23 @@ function! s:do_enter(stash) "{{{
         \)
     endfor
 endfunction "}}}
-function! s:do_backspace() "{{{
-    call eskk#get_buftable().do_backspace()
-    return "\<C-h>"
+function! s:do_backspace(stash) "{{{
+    let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-h>'))
 endfunction "}}}
 function! s:not_implemented() "{{{
     throw eskk#internal_error(['eskk', 'complete'], 'not implemented')
+endfunction "}}}
+function! s:set_selected_item() "{{{
+    " Set selected item by pum to buftable.
+
+    let buftable = eskk#get_buftable()
+    let [mode, pos] = buftable.get_begin_pos()
+    call eskk#util#assert(mode ==# 'i')
+    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 1]
+    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    call henkan_buf_str.set_matched('', filter_str)
+    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    call okuri_buf_str.clear()
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
