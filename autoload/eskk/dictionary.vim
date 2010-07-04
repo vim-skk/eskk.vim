@@ -407,6 +407,7 @@ lockvar s:henkan_result
 
 let s:physical_dict = {
 \   '_content_lines': [],
+\   '_ftime_at_read': 0,
 \   '_loaded': 0,
 \   'okuri_ari_lnum': -1,
 \   'okuri_nasi_lnum': -1,
@@ -433,8 +434,10 @@ endfunction "}}}
 
 
 
-function! s:physical_dict.get_lines() dict "{{{
-    if self._loaded
+function! s:physical_dict.get_lines(...) dict "{{{
+    let force = a:0 ? a:1 : 0
+
+    if self._loaded && !force
         return self._content_lines
     endif
 
@@ -461,6 +464,7 @@ function! s:physical_dict.get_lines() dict "{{{
         let self.okuri_ari_lnum = -1
         let self.okuri_nasi_lnum = -1
     endtry
+    let self._ftime_at_read = getftime(path)
     let self._loaded = 1
 
     return self._content_lines
@@ -605,6 +609,11 @@ function! s:dict.update_dictionary() dict "{{{
         return
     endif
 
+    if self._user_dict._ftime_at_read !=# getftime(self._user_dict.path)
+        " Update dictionary's lines.
+        call self._user_dict.get_lines(1)
+    endif
+
     let user_dict_lines = self._user_dict.get_lines()
 
     " Check if a:self.user_dict really does not have added words.
@@ -618,6 +627,7 @@ function! s:dict.update_dictionary() dict "{{{
         " Delete old entry.
         if index !=# -1
             call remove(user_dict_lines, index)
+            call eskk#util#assert(line != '')
         endif
         " Merge old one and create new entry.
         call insert(
