@@ -55,6 +55,32 @@ function! s:complete_kanji() "{{{
 
     return list
 endfunction "}}}
+function! eskk#complete#handle_special_key(char) "{{{
+    " :help popupmenu-keys
+    for c in [
+    \   "<CR>",
+    \   "<C-y>",
+    \   "<C-l>",
+    \   "<C-e>",
+    \   "<PageUp>",
+    \   "<PageDown>",
+    \   "<Up>",
+    \   "<Down>",
+    \   "<Space>",
+    \   "<Tab>",
+    \]
+        if a:char ==# eskk#util#eval_key(c)
+            return c
+        endif
+    endfor
+
+    if a:char ==# "\<C-h>" || a:char ==# "\<BS>"
+        call eskk#get_buftable().do_backspace()
+        return "<C-h>"
+    endif
+
+    return ''
+endfunction "}}}
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo

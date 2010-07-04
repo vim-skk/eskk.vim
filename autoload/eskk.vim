@@ -1788,6 +1788,27 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     endif
 
     try
+        if pumvisible()
+            let ret_key = eskk#complete#handle_special_key(a:char)
+            if ret_key != ''
+                execute
+                \   eskk#get_map_command(0)
+                \   '<buffer>'
+                \   '<Plug>(eskk:internal:_pum_ret_noremap)'
+                \   ret_key
+                " After handling that of special keys.
+                " Send it to eskk again.
+                "
+                " XXX:
+                "     eskk#get_named_map(char)
+                " should
+                "     eskk#get_named_map(eskk#util#uneval_key(char))
+                return
+                \   "\<Plug>(eskk:internal:_pum_ret_noremap)"
+                " \   . eskk#util#eval_key(eskk#get_named_map(a:char))
+            endif
+        endif
+
         let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
         if has_key(s:key_handler, rom)
             " Call eskk#register_map()'s handlers.
