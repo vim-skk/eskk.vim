@@ -33,7 +33,7 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
         let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
-    if type(result[1]) !=# -1
+    if result[1] !=# -1
         return [
         \   s:iconv(result[0], a:physical_dict.encoding, &l:encoding),
         \   result[1]
