@@ -560,7 +560,11 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
     try
         " Get input from command-line.
-        let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+        if okuri == ''
+            let prompt = printf('%s ', key)
+        else
+            let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+        endif
         redraw
         let input  = input(prompt)
     catch /^Vim:Interrupt$/
