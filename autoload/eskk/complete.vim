@@ -22,15 +22,27 @@ function! eskk#complete#eskkcomplete(findstart, base)"{{{
     endif
 
     " Test.
-    return [
-          \ { 'word' : g:eskk_marker_henkan.'ほげら', 'menu' : 'あ' },
-          \ { 'word' : '上', 'menu' : '亜' },
-          \ { 'word' : '下', 'menu' : '亜' },
-          \ { 'word' : g:eskk_marker_henkan.'ぴよぴよ', 'menu' : 'あ' },
-          \]
+    return []
+
+    return s:complete_kanji(a:base)
 endfunction "}}}
 function! s:get_cur_text()"{{{
     return col('.') < 2 ? '' : matchstr(getline('.'), '.*')[: col('.') - 2]
+endfunction "}}}
+function! s:complete_kanji(cur_keyword_str)"{{{
+    " Get candidates.
+    let list = []
+    for candidate in eskk#dictionary#get_kanji(a:cur_keyword_str, 5)
+        let yomigana = candidate[0]
+        call add(list, { 'word' : g:eskk_marker_henkan.yomigana, 'abbr' : yomigana, 'menu' : 'yomigana' })
+        
+        for kanji in candidate[1:]
+            call add(list, { 'word' : kanji.result,
+                        \ 'abbr' : (kanji.annotation != '')? kanji.result : kanji.result . '; ' . kanji.annotation, 'menu' : 'kanji' })
+        endfor
+    endfor
+
+    return list
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
