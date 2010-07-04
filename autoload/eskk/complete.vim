@@ -31,11 +31,14 @@ function! s:complete_kanji(cur_keyword_str)"{{{
     let list = []
     for candidate in eskk#dictionary#get_kanji(a:cur_keyword_str, 5)
         let yomigana = candidate[0]
-        call add(list, { 'word' : g:eskk_marker_henkan.yomigana, 'abbr' : yomigana, 'menu' : 'yomigana' })
-        
-        for kanji in candidate[1:]
-            call add(list, { 'word' : kanji.result,
-                        \ 'abbr' : (kanji.annotation != '')? kanji.result : kanji.result . '; ' . kanji.annotation, 'menu' : 'kanji' })
+        call add(list, {'word' : g:eskk_marker_henkan . yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
+
+        for kanji in candidate[1]
+            call add(list, {
+            \   'word': kanji.result,
+            \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
+            \   'menu': 'kanji'
+            \})
         endfor
     endfor
 
