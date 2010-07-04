@@ -307,6 +307,7 @@ function! s:henkan_result_select_candidates(this) "{{{
                 echon printf('%s:%s  ', c, word.result)
             endif
         endfor
+        echon printf('(%d/%d)', page_index, len(pages) - 1)
 
         " Get char for selected candidate.
         try
