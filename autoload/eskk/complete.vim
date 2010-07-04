@@ -26,7 +26,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         endif
 
         " :help getpos()
-        return pos[2] + strlen(g:eskk_marker_henkan)
+        return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
     return s:complete_kanji()
