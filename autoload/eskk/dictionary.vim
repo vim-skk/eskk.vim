@@ -99,6 +99,7 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
+    " TODO: Use match() for speed-optimization.
     while pos <=# end
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
