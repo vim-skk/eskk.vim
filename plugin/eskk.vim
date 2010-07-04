@@ -123,6 +123,13 @@ function! EskkDefaultMappedKeys() "{{{
     \   "<CR>",
     \   "<Space>",
     \   "<C-q>",
+    \   "<C-y>",
+    \   "<C-l>",
+    \   "<C-e>",
+    \   "<PageUp>",
+    \   "<PageDown>",
+    \   "<Up>",
+    \   "<Down>",
     \]
 endfunction "}}}
 if !exists('g:eskk_mapped_key')
