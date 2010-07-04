@@ -37,7 +37,9 @@ function! s:complete_kanji() "{{{
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
     for [yomigana, kanji_list] in dict.get_kanji(buftable)
-        call add(list, {'word' : g:eskk_marker_henkan . yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
+        if yomigana != ''
+            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
+        endif
 
         for kanji in kanji_list
             call add(list, {
