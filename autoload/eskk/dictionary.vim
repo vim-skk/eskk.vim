@@ -22,10 +22,15 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
+    call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
+    \               string(needle), string(a:key_filter), string(a:okuri_rom))
+
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
+        call eskk#util#log('dictionary is sorted. Try binary search...')
         let result = s:search_binary(a:physical_dict, converted, has_okuri, 5)
     else
+        call eskk#util#log('dictionary is *not* sorted. Try linear search....')
         let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
     if type(result[1]) !=# -1
@@ -39,8 +44,6 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
 endfunction "}}}
 function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    call eskk#util#log('s:search_binary()')
-
     let whole_lines = a:ph_dict.get_lines()
     if !a:ph_dict.is_valid()
         return ['', -1]
@@ -74,8 +77,6 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 endfunction "}}}
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    call eskk#util#log('s:search_linear()')
-
     let whole_lines = a:ph_dict.get_lines()
     if !a:ph_dict.is_valid()
         return ['', -1]
@@ -94,12 +95,12 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     while pos < end
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
-            call eskk#util#logf('s:search_linear() - found matched line - %s', string(line))
+            call eskk#util#logf('eskk#dictionary#search_next_candidate() - found!: %s', string(line))
             return [line[strlen(a:needle) :], pos]
         endif
         let pos += 1
     endwhile
-    call eskk#util#log('s:search_linear() - not found.')
+    call eskk#util#log('eskk#dictionary#search_next_candidate() - not found.')
     return ['', -1]
 endfunction "}}}
 
