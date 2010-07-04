@@ -85,12 +85,6 @@ function! s:eskk.enable(...) dict "{{{
 
     call self.call_mode_func('cb_im_enter', [], 0)
 
-    " Save previous omnifunc.
-    let self.omnifunc_save = &l:omnifunc
-    
-    " Set omnifunc.
-    let &l:omnifunc = 'eskk#complete#eskkcomplete'
-
     let self.enabled = 1
     return disable_skk_vim . "\<C-^>"
 endfunction "}}}
@@ -107,9 +101,6 @@ function! s:eskk.disable(...) dict "{{{
     endif
 
     call self.call_mode_func('cb_im_leave', [], 0)
-    
-    " Restore previous omnifunc.
-    let &l:omnifunc = self.omnifunc_save
 
     let self.enabled = 0
 
@@ -2233,6 +2224,23 @@ function! eskk#handle_context() "{{{
         unlet Fn
     endfor
 endfunction "}}}
+" }}}
+" Completion {{{
+function! eskk#set_omnifunc() "{{{
+    let self = eskk#get_current_instance()
+    if !has_key(self, 'save_omnifunc')
+        let self.save_omnifunc = &l:omnifunc
+        let &l:omnifunc = 'eskk#complete#eskkcomplete'
+    endif
+endfunction "}}}
+function! eskk#restore_omnifunc() "{{{
+    let self = eskk#get_current_instance()
+    if has_key(self, 'save_omnifunc')
+        let &l:omnifunc = self.save_omnifunc
+    endif
+endfunction "}}}
+call eskk#register_temp_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#set_omnifunc', [])
+call eskk#register_temp_event('enter-phase-normal', 'eskk#restore_omnifunc', [])
 " }}}
 
 " Restore 'cpoptions' {{{

@@ -20,12 +20,8 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if a:findstart
         let buftable = eskk#get_buftable()
         let [mode, pos] = buftable.get_begin_pos()
-        let phase = buftable.get_henkan_phase()
-        let do_complete = (mode ==# 'i'
-        \               && (phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        \                   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI))
 
-        if !do_complete
+        if mode !=# 'i'
             " XXX: What should I do?
         endif
 
