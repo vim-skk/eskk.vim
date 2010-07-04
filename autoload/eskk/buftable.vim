@@ -185,7 +185,7 @@ function! s:buftable.rewrite() dict "{{{
         \   eskk#get_map_command(0)
         \   '<buffer>'
         \   '<Plug>(eskk:internal:_inserted)'
-        \   substitute(inserted_str, '<', '<lt>', 'g')
+        \   eskk#util#str2map(inserted_str)
         return bs . "\<Plug>(eskk:internal:_inserted)"
     endif
 endfunction "}}}

@@ -125,6 +125,13 @@ function! s:split_to_keys(lhs)  "{{{
     return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
 endfunction "}}}
 
+function! eskk#util#str2map(str) "{{{
+    let s = a:str
+    let s = substitute(s, '<', '<lt>', 'g')
+    let s = substitute(s, ' ', '<Space>', 'g')
+    return s
+endfunction "}}}
+
 function! eskk#util#get_f(...) "{{{
     return call('s:follow', [0] + a:000)
 endfunction "}}}
