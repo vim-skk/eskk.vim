@@ -73,13 +73,13 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<BS>", 's:do_backspace'],
     \]
         if char ==# eskk#util#eval_key(key)
-            return {fn}()
+            return {fn}(a:stash)
         endif
     endfor
 
     return ''
 endfunction "}}}
-function! s:do_enter() "{{{
+function! s:do_enter(stash) "{{{
     " Set inserted string by pum to buftable.
     let buftable = eskk#get_buftable()
     let [mode, pos] = buftable.get_begin_pos()
