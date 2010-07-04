@@ -16,7 +16,7 @@ set cpo&vim
 runtime! plugin/eskk.vim
 
 " Complete function.
-function! eskk#complete#eskkcomplete(findstart, base)"{{{
+function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if a:findstart
         let buftable = eskk#get_buftable()
         let [mode, pos] = buftable.get_begin_pos()
@@ -35,7 +35,7 @@ function! eskk#complete#eskkcomplete(findstart, base)"{{{
 
     return s:complete_kanji(a:base)
 endfunction "}}}
-function! s:complete_kanji(cur_keyword_str)"{{{
+function! s:complete_kanji(cur_keyword_str) "{{{
     " Get candidates.
     let list = []
     for candidate in eskk#dictionary#get_kanji(a:cur_keyword_str, 5)
