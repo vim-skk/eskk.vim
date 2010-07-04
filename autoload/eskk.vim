@@ -1725,7 +1725,7 @@ function! eskk#register_builtin_modes() "{{{
     let dict = eskk#get_mode_structure('zenei')
 
     function! dict.filter(stash)
-        let this = eskk#get_current_instance()
+        let this = eskk#get_mode_structure('zenei')
         if eskk#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
             call eskk#set_mode('hira')
         else
@@ -1773,6 +1773,15 @@ function! eskk#register_builtin_modes() "{{{
     " }}}
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
+" }}}
+" Register builtin-tables. {{{
+function! eskk#register_builtin_tables() "{{{
+    " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
+    for name in ['rom_to_hira', 'rom_to_kata', 'rom_to_hankata', 'rom_to_zenei', 'hira_to_kata', 'kata_to_hira']
+        call eskk#table#register_table_dict(name, 'eskk#table#' . name . '#load')
+    endfor
+endfunction "}}}
+call eskk#register_temp_event('enable-im', 'eskk#register_builtin_tables', [])
 " }}}
 " Map keys when BufEnter {{{
 function! eskk#register_map_all_keys_if_enabled() "{{{

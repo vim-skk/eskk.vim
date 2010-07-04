@@ -19,6 +19,7 @@ runtime! plugin/eskk.vim
 
 " Variables {{{
 let s:table_defs = {}
+let s:registered_tables = {}
 
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
@@ -29,104 +30,144 @@ lockvar s:REST_INDEX
 
 " Functions {{{
 
-function! s:parse_arg(arg) "{{{
-    let arg = a:arg
-    let opt_regex = '-\(\w\+\)=\(\S\+\)'
+" Primitive table functions {{{
 
-    " Parse options.
-    let opt = {}
-    while arg != ''
-        let arg = eskk#util#skip_spaces(arg)
-        let [a, arg] = eskk#util#get_arg(arg)
+" NOTE: `s:table_defs` Structure is:
+" let s:table_defs['table_name'] = {
+"   'name': 'base_table_name',
+"   'base': {...},
+"   'derived': [
+"       {'method': 'add', 'data': {...}},
+"       {'method': 'remove', 'data': {...}},
+"       ...
+"   ],
+" }
 
-        let m = matchlist(a, opt_regex)
-        if !empty(m)
-            " a is option.
-            let [opt_name, opt_value] = m[1:2]
-            if opt_name ==# 'rest'
-                let opt.rest = opt_value
-            else
-                throw eskk#user_error(['eskk', 'table'], printf("unknown option '%s'.", opt_name))
-            endif
-        else
-            let arg = eskk#util#unget_arg(arg, a)
-            break
-        endif
-    endwhile
-
-    " Parse arguments.
-    let lhs = ''
-    let rhs = ''
-    while arg != ''
-        let arg = eskk#util#skip_spaces(arg)
-        let [a, arg] = eskk#util#get_arg(arg)
-        if lhs == ''
-            let lhs = a
-        else
-            let rhs = a
-        endif
-    endwhile
-    if lhs == '' && rhs == ''
-        call eskk#util#logf('lhs = %s, rhs = %s', lhs, rhs)
-        throw eskk#user_error(['eskk', 'table'], 'Map [-rest=...] lhs rhs')
+function! s:load_table(table_name) "{{{
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
+        return s:table_defs[a:table_name].base
     endif
 
-    return {
-    \   'lhs': lhs,
-    \   'rhs': rhs,
-    \   'rest': get(opt, 'rest', ''),
-    \}
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'lazyinit'])
+        let s:table_defs[a:table_name].base = call(s:table_defs[a:table_name].lazyinit, [])
+        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
+        unlet s:table_defs[a:table_name].lazyinit
+        return s:table_defs[a:table_name].base
+    endif
+
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'name'])
+        " Load base table. derived table information is already in `derived`.
+        return s:load_table(s:table_defs[a:table_name].name)
+    endif
+
+    let msg = printf("Can't load '%s'.", a:table_name)
+    throw eskk#internal_error(['eskk', 'table'], msg)
 endfunction "}}}
 
+function! s:get_base_table(table_name, ...) "{{{
+    " For compatibility, this function returns base table object.
 
-function! s:get_table(table_name, ...) "{{{
-    if has_key(s:table_defs, a:table_name)
-        return s:table_defs[a:table_name]
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
+        return s:table_defs[a:table_name].base
     endif
 
     " Lazy loading.
-    let s:table_defs[a:table_name] = eskk#table#{a:table_name}#load()
-    call eskk#util#logf("table '%s' has been loaded.", a:table_name)
-    return s:table_defs[a:table_name]
+    call s:load_table(a:table_name)
+    return s:table_defs[a:table_name].base
 endfunction "}}}
 
-function! s:get_current_table(...) "{{{
-    return call('s:get_table', [s:current_table_name] + a:000)
+function! s:has_table(table_name) "{{{
+    call s:load_table(a:table_name)    " to load this table.
+    return has_key(s:table_defs, a:table_name)
 endfunction "}}}
+
+function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
+    if has_key(s:table_defs, a:table_name)
+        " Do not allow override table.
+        let msg = printf("'%s' has been already registered.", a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+    endif
+
+    let s:table_defs[a:table_name] = {}
+    let def = s:table_defs[a:table_name]
+
+    " NOTE: I don't set `def.base` here.
+    " It will be set in `s:load_table()`.
+    let def.name = a:base_table_name
+    let def.derived = a:derived_dict
+endfunction "}}}
+function! s:set_base_table(table_name, Fn) "{{{
+    if has_key(s:table_defs, a:table_name)
+        " Do not allow override table.
+        let msg = printf("'%s' has been already registered.", a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+    endif
+
+    let s:table_defs[a:table_name] = {}
+    let def = s:table_defs[a:table_name]
+
+    let def.name = a:table_name
+    let def.lazyinit = a:Fn
+endfunction "}}}
+
+function! s:is_base_table(table_name) "{{{
+    call s:load_table(a:table_name)
+    return s:table_defs[a:table_name].name ==# a:table_name
+endfunction "}}}
+
+function! s:get_map(table_name, search_lhs, index, ...) "{{{
+    if s:is_base_table(a:table_name)
+        return call('eskk#util#get_f', [s:get_base_table(a:table_name), [a:search_lhs, a:index]] + a:000)
+    else
+        let derived = s:table_defs[a:table_name].derived
+        let derived_result = {}    " key is lhs.
+        " Process each derived List elements *in order*.
+        " NOTE: Do not return inside `:for`.
+        for i in range(len(derived))
+            if has_key(derived[i].data, a:search_lhs)
+                if derived[i].method ==# 'add'
+                    let derived_result[a:search_lhs] = derived[i].data[a:search_lhs][a:index]
+                elseif derived[i].method ==# 'remove'
+                    if has_key(derived_result, a:search_lhs)
+                        unlet derived_result[a:search_lhs]
+                    endif
+                else
+                    let msg = "`method` key's value is one of 'add', 'remove'."
+                    throw eskk#internal_error(['eskk', 'table'], msg)
+                endif
+            endif
+        endfor
+        if has_key(derived_result, a:search_lhs)
+            return derived_result[a:search_lhs]
+        endif
+
+        " No map in `derived`. Look up in base dict.
+        return call('s:get_map', [s:table_defs[a:table_name].name, a:search_lhs, a:index] + a:000)
+    endif
+
+    " No lhs in `s:table_defs`.
+    if a:0
+        return a:1
+    else
+        throw eskk#internal_error(['eskk', 'table'])
+    endif
+endfunction "}}}
+
+function! s:has_map(table_name, lhs, index) "{{{
+    let no_map = {}
+    return s:get_map(a:table_name, a:lhs, a:index, no_map) isnot no_map
+endfunction "}}}
+
+" }}}
 
 
 " Autoload functions for writing table. {{{
 
-" Force overwrite if a:bang is true.
-function! eskk#table#map(table_name, force, lhs, rhs, ...) "{{{
-    let [rest] = eskk#util#get_args(a:000, '')
-
-    " a:lhs is already defined and not banged.
-    let evaled_lhs = eskk#util#eval_key(a:lhs)
-    if !eskk#table#has_map(a:table_name, evaled_lhs) || a:force
-        call s:create_map(a:table_name, evaled_lhs, a:rhs, rest)
-    endif
+function! eskk#table#register_derived_table_dict(...) "{{{
+    call call('s:set_derived_table', a:000)
 endfunction "}}}
-
-function! s:create_map(table_name, lhs, rhs, rest) "{{{
-    let def = s:get_table(a:table_name)
-    let def[a:lhs] = [a:rhs, a:rest]
-endfunction "}}}
-
-function! eskk#table#unmap(table_name, silent, lhs, ...) "{{{
-    let [rest] = eskk#util#get_args(a:000, '')
-
-    let evaled_lhs = eskk#util#eval_key(a:lhs)
-    if eskk#table#has_map(evaled_lhs)
-        call s:destroy_map(a:table_name, evaled_lhs)
-    elseif !a:silent
-        throw eskk#user_error(['eskk', 'table'], 'No table mapping.')
-    endif
-endfunction "}}}
-
-function! s:destroy_map(table_name, lhs) "{{{
-    let def = s:get_table(a:table_name)
-    unlet def[a:lhs]
+function! eskk#table#register_table_dict(...) "{{{
+    call call('s:set_base_table', a:000)
 endfunction "}}}
 
 " }}}
@@ -143,60 +184,42 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
         throw eskk#internal_error(['eskk', 'table'], "a:str_buf is empty.")
     endif
 
-    let no_table = {}
-    let def = s:get_table(a:table_name, no_table)
-    if def is no_table
-        return no_table
+    if !s:has_table(a:table_name)
+        return {}
     else
         return filter(
-        \   keys(def),
+        \   keys(s:get_base_table(a:table_name)),
         \   'stridx(v:val, a:str_buf) == 0'
         \)
     endif
 endfunction "}}}
 
 
-function! eskk#table#has_table(name) "{{{
-    return s:get_table(a:name, -1) !=# -1
+function! eskk#table#has_table(table_name) "{{{
+    return s:has_table(a:table_name)
 endfunction "}}}
 
 function! eskk#table#has_map(table_name, lhs) "{{{
-    return has_key(s:get_table(a:table_name), a:lhs)
+    return call('s:has_map', [a:table_name, a:lhs, s:MAP_TO_INDEX])
 endfunction "}}}
 
 
 function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
-    let def = s:get_table(a:table_name)
-    if empty(def) || !eskk#table#has_map(a:table_name, a:lhs)
-        if a:0 == 0
-            throw eskk#internal_error(['eskk', 'table'])
-        else
-            return a:1
-        endif
-    endif
-    return def[a:lhs][s:MAP_TO_INDEX]
+    return call('s:get_map', [a:table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
 endfunction "}}}
 
 
 function! eskk#table#has_rest(table_name, lhs) "{{{
-    return eskk#util#has_key_f(s:get_table(a:table_name), [a:lhs, 'rest'])
+    return call('s:has_map', [a:table_name, a:lhs, s:REST_INDEX])
 endfunction "}}}
 
 function! eskk#table#get_rest(table_name, lhs, ...) "{{{
-    let def = s:get_table(a:table_name)
-    if empty(def) || !eskk#table#has_rest(a:table_name, a:lhs)
-        if a:0 == 0
-            throw eskk#internal_error(['eskk', 'table'])
-        else
-            return a:1
-        endif
-    endif
-    return def[a:lhs][s:REST_INDEX]
+    return call('s:get_map', [a:table_name, a:lhs, s:REST_INDEX] + a:000)
 endfunction "}}}
 
 
 function! eskk#table#get_definition(table_name) "{{{
-    return s:get_table(a:table_name)
+    return s:get_base_table(a:table_name)
 endfunction "}}}
 
 function! eskk#table#get_table(table_name) "{{{

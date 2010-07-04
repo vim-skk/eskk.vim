@@ -22,13 +22,19 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
+    call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
+    \               string(needle), string(a:key_filter), string(a:okuri_rom))
+    call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
+        call eskk#util#log('dictionary is sorted. Try binary search...')
         let result = s:search_binary(a:physical_dict, converted, has_okuri, 5)
     else
+        call eskk#util#log('dictionary is *not* sorted. Try linear search....')
         let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
-    if type(result[1]) !=# -1
+    if result[1] !=# -1
         return [
         \   s:iconv(result[0], a:physical_dict.encoding, &l:encoding),
         \   result[1]
@@ -39,12 +45,12 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
 endfunction "}}}
 function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    call eskk#util#log('s:search_binary()')
-
     let whole_lines = a:ph_dict.get_lines()
     if !a:ph_dict.is_valid()
         return ['', -1]
     endif
+
+    " NOTE: min, max, mid are lnum. not index number.
 
     if a:has_okuri
         let min = a:ph_dict.okuri_ari_lnum + 1
@@ -54,8 +60,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         let max = len(whole_lines)
     endif
     while max - min > a:limit
-        let mid = (min + max) / 2
-        let line = whole_lines[mid]
+        let mid = (min + max + 2) / 2
+        let line = whole_lines[mid - 1]
         if a:needle >=# line
             if a:has_okuri
                 let max = mid
@@ -70,12 +76,12 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
             endif
         endif
     endwhile
-    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
+    call eskk#util#logf('min = %d, max = %d', min, max)
+    " NOTE: min, max: Give index number, not lnum.
+    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min - 1, max - 1)
 endfunction "}}}
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    call eskk#util#log('s:search_linear()')
-
     let whole_lines = a:ph_dict.get_lines()
     if !a:ph_dict.is_valid()
         return ['', -1]
@@ -85,21 +91,23 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let [pos, end] = a:000
         call eskk#util#assert(pos < end)
     elseif a:has_okuri
-        let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines)]
+        let [pos, end] = [a:ph_dict.okuri_ari_lnum - 1, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
     else
-        let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines)]
+        let [pos, end] = [a:ph_dict.okuri_nasi_lnum - 1, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
-    while pos < end
+    while pos <=# end
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
-            call eskk#util#logf('s:search_linear() - found matched line - %s', string(line))
+            call eskk#util#logf('eskk#dictionary#search_next_candidate() - found!: %s', string(line))
             return [line[strlen(a:needle) :], pos]
         endif
         let pos += 1
     endwhile
-    call eskk#util#log('s:search_linear() - not found.')
+    call eskk#util#log('eskk#dictionary#search_next_candidate() - not found.')
     return ['', -1]
 endfunction "}}}
 
@@ -193,12 +201,12 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
-let s:REGISTERED_WORD = 0
-lockvar s:REGISTERED_WORD
-let s:LOOK_UP_DICTIONARY = 1
-lockvar s:LOOK_UP_DICTIONARY
-let s:GOT_RESULT = 2
-lockvar s:GOT_RESULT
+let s:HR_REGISTERED_WORD = 0
+lockvar s:HR_REGISTERED_WORD
+let s:HR_LOOK_UP_DICTIONARY = 1
+lockvar s:HR_LOOK_UP_DICTIONARY
+let s:HR_GOT_RESULT = 2
+lockvar s:HR_GOT_RESULT
 
 let s:henkan_result = {
 \   'buftable': {},
@@ -207,7 +215,7 @@ let s:henkan_result = {
 \   '_okuri_rom': '',
 \   '_okuri': '',
 \   '_registered_input': '',
-\   '_status': s:REGISTERED_WORD,
+\   '_status': s:HR_REGISTERED_WORD,
 \   '_result': [],
 \}
 
@@ -221,7 +229,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
     \       '_registered_input': a:registered_input,
-    \       '_status': (empty(a:registered_input) ? s:LOOK_UP_DICTIONARY : s:REGISTERED_WORD),
+    \       '_status': (empty(a:registered_input) ? s:HR_LOOK_UP_DICTIONARY : s:HR_REGISTERED_WORD),
     \       '_result': (empty(a:registered_input) ? [] : [map(copy(a:registered_input), '{"result": v:val, "annotation": ""}'), 0]),
     \   },
     \   'force'
@@ -249,13 +257,13 @@ function! s:henkan_result_get_result(this) "{{{
     \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
     let cant_get_result = eskk#dictionary_look_up_error(['eskk', 'dictionary'], msg)
 
-    if a:this._status ==# s:REGISTERED_WORD || a:this._status ==# s:GOT_RESULT
+    if a:this._status ==# s:HR_REGISTERED_WORD || a:this._status ==# s:HR_GOT_RESULT
         if !empty(a:this._result)
             return a:this._result
         else
             throw cant_get_result
         endif
-    elseif a:this._status ==# s:LOOK_UP_DICTIONARY
+    elseif a:this._status ==# s:HR_LOOK_UP_DICTIONARY
         let [user_dict, system_dict] = [a:this._dict._user_dict, a:this._dict._system_dict]
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_next_candidate(
@@ -272,7 +280,7 @@ function! s:henkan_result_get_result(this) "{{{
         \   eskk#dictionary#merge_results(user_dict_result, system_dict_result),
         \   0
         \]
-        let a:this._status = s:GOT_RESULT
+        let a:this._status = s:HR_GOT_RESULT
         return a:this._result
     endif
 endfunction "}}}
@@ -307,6 +315,7 @@ function! s:henkan_result_select_candidates(this) "{{{
                 echon printf('%s:%s  ', c, word.result)
             endif
         endfor
+        echon printf('(%d/%d)', page_index, len(pages) - 1)
 
         " Get char for selected candidate.
         try
