@@ -80,13 +80,6 @@ function! eskk#complete#handle_special_key(stash) "{{{
     return ''
 endfunction "}}}
 function! s:do_enter() "{{{
-    " Do not remap to `:lmap`.
-    noremap! <buffer> <Plug>(eskk:internal:_close_pum) <C-y>
-    if maparg('<Plug>(eskk:internal:_pum_ret)', 'l') != ''
-        silent! lunmap          <Plug>(eskk:internal:_pum_ret)
-        silent! lunmap <buffer> <Plug>(eskk:internal:_pum_ret)
-    endif
-
     " Set inserted string by pum to buftable.
     let buftable = eskk#get_buftable()
     let [mode, pos] = buftable.get_begin_pos()
@@ -100,8 +93,15 @@ function! s:do_enter() "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#identity',
-    \   ["\<Plug>(eskk:internal:_close_pum)"]
+    \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
     \)
+    for key in g:eskk_compl_enter_send_keys
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#eval_key(eskk#get_named_map(key))]
+        \)
+    endfor
 endfunction "}}}
 function! s:do_backspace() "{{{
     call eskk#get_buftable().do_backspace()

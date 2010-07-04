@@ -198,6 +198,11 @@ if !exists("g:eskk_context_control")
     \}
 endif
 
+" Completion
+if !exists('g:eskk_compl_enter_send_keys')
+    let g:eskk_compl_enter_send_keys = ['<CR>', '<CR>']
+endif
+
 " }}}
 
 " Mappings {{{
