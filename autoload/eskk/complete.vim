@@ -43,6 +43,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
+    " Do not complete while inputting rom string.
     if a:base[-1] =~ '\a$'
         return []
     endif
