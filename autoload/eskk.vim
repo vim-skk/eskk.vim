@@ -361,11 +361,6 @@ function! eskk#get_nore_map(key, ...) "{{{
     " not
     "   `<Plug>(eskk:filter:^A)` (^A is control character)
 
-    if a:0
-        let _ = s:mapopt_chars2raw(a:1)
-        Dump _
-    endif
-
     let [rhs, key] = [a:key, a:key]
     let key = eskk#util#str2map(key)
 
