@@ -137,7 +137,7 @@ function! s:set_selected_item() "{{{
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
-        call henkan_buf_str.push_matched('', filter_str)
+        call henkan_buf_str.push_matched('', char)
     endfor
 
     let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
