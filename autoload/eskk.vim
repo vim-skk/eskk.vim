@@ -718,6 +718,8 @@ function! s:temp_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
 function! eskk#get_named_map(key) "{{{
+    " FIXME: Rename this to eskk#get_filter_map()
+    "
     " NOTE:
     " a:key is escaped. So when a:key is '<C-a>', return value is
     "   `<Plug>(eskk:filter:<C-a>)`
