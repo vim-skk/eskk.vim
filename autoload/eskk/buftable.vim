@@ -345,7 +345,9 @@ function! s:buftable.do_enter(stash) dict "{{{
         throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
-function! s:buftable.do_backspace(stash) dict "{{{
+function! s:buftable.do_backspace(stash, ...) dict "{{{
+    let done_for_group = a:0 ? a:1 : 1
+
     if self.get_old_str() == ''
         let a:stash.return = eskk#util#eval_key('<Plug>(eskk:internal:backspace-key)')
         return
@@ -376,7 +378,19 @@ function! s:buftable.do_backspace(stash) dict "{{{
             call buf_str.pop_rom_str()
             break
         elseif !empty(buf_str.get_matched())
-            call buf_str.pop_matched()
+            if done_for_group
+                call buf_str.pop_matched()
+            else
+                let m = buf_str.get_matched()
+                call eskk#util#assert(len(m) == 1)
+                let [rom, filter] = m[0]
+                call buf_str.set_matched(rom, eskk#util#mb_chop(filter))
+
+                " `rom` is empty string,
+                " Because currently this is called only by
+                " `s:do_backspace()` in `autoload/eskk/complete.vim`.
+                call eskk#util#assert(rom == '')
+            endif
             break
         elseif self.get_marker(phase) != ''
             if !self.step_back_henkan_phase()
