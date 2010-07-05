@@ -484,15 +484,7 @@ function! s:physical_dict.get_lines(...) dict "{{{
         if filereadable(path)
             call eskk#util#logf('reading %s...', path)
             let self._content_lines  = readfile(path)
-            let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
-            if self.okuri_ari_lnum ==# -1
-                throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
-            endif
-            let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
-            if self.okuri_nasi_lnum ==# -1
-                throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
-            endif
-
+            call s:physical_dict_parse_lines(self, self._content_lines)
             call eskk#util#logf('reading %s... - done.', path)
         else
             call eskk#util#logf("Can't read '%s'!", path)
@@ -506,6 +498,33 @@ function! s:physical_dict.get_lines(...) dict "{{{
     let self._loaded = 1
 
     return self._content_lines
+endfunction "}}}
+
+function! s:physical_dict.set_lines(lines) dict "{{{
+    try
+        let self._content_lines  = a:lines
+        call s:physical_dict_parse_lines(self, a:lines)
+    catch /^eskk: parse error/
+        call eskk#util#log('warning: ' . v:exception)
+        let self.okuri_ari_lnum = -1
+        let self.okuri_nasi_lnum = -1
+    endtry
+    let self._loaded = 1
+
+    return self._content_lines
+endfunction "}}}
+
+function! s:physical_dict_parse_lines(self, lines) "{{{
+    let self = a:self
+
+    let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
+    if self.okuri_ari_lnum ==# -1
+        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+    endif
+    let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
+    if self.okuri_nasi_lnum ==# -1
+        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+    endif
 endfunction "}}}
 
 function! s:physical_dict.is_valid() dict "{{{
@@ -645,7 +664,8 @@ function! s:dict.update_dictionary() dict "{{{
     if !self.is_modified()
         return
     endif
-    if !self._user_dict.is_valid() && filereadable(self._user_dict.path)
+    let user_dict_exists = filereadable(self._user_dict.path)
+    if !self._user_dict.is_valid() && user_dict_exists
         " TODO:
         " Echo "user dictionary format is invalid. overwrite with new words?".
         " And do not read, just overwrite it with new words.
@@ -657,7 +677,14 @@ function! s:dict.update_dictionary() dict "{{{
         call self._user_dict.get_lines(1)
     endif
 
-    let user_dict_lines = self._user_dict.get_lines()
+    if user_dict_exists
+        let user_dict_lines = self._user_dict.get_lines()
+    else
+        " Create new lines.
+        let lines = [';; okuri-ari entries.', ';; okuri-nasi entries.']
+        call self._user_dict.set_lines(lines)
+        let user_dict_lines = lines
+    endif
 
     " Check if a:self.user_dict really does not have added words.
     for [input, key, okuri, okuri_rom] in self._added_words
