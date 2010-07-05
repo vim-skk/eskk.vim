@@ -1023,9 +1023,6 @@ function! eskk#enable(...) "{{{
     let self.enabled = 1
     let self.enabled_mode = mode()
 
-    let self.save_omnifunc = &l:omnifunc
-    let &l:omnifunc = 'eskk#complete#eskkcomplete'
-
     if self.enabled_mode =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
@@ -1046,8 +1043,6 @@ function! eskk#disable() "{{{
     if do_unmap
         call eskk#unmap_all_keys()
     endif
-
-    let &l:omnifunc = self.save_omnifunc
 
     let self.enabled = 0
 
