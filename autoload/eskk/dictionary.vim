@@ -15,7 +15,6 @@ runtime! plugin/eskk.vim
 
 " TODO
 " - Compile dictionary (s:dict._dict_info) to refer to result.
-" - eskk#dictionary#search_next_candidate() => eskk#dictionary#search_candidate()
 
 " Utility autoload functions {{{
 
@@ -60,7 +59,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         return []
     endif
 endfunction "}}}
-function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
+function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
@@ -142,12 +141,12 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     while pos <=# end
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
-            call eskk#util#logf('eskk#dictionary#search_next_candidate() - found!: %s', string(line))
+            call eskk#util#logf('eskk#dictionary#search_candidate() - found!: %s', string(line))
             return [line, pos]
         endif
         let pos += 1
     endwhile
-    call eskk#util#log('eskk#dictionary#search_next_candidate() - not found.')
+    call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
     return ['', -1]
 endfunction "}}}
 
@@ -305,10 +304,10 @@ function! s:henkan_result_get_result(this) "{{{
     elseif a:this._status ==# s:HR_LOOK_UP_DICTIONARY
         let [user_dict, system_dict] = [a:this._dict._user_dict, a:this._dict._system_dict]
         " Look up this henkan result in dictionaries.
-        let user_dict_result = eskk#dictionary#search_next_candidate(
+        let user_dict_result = eskk#dictionary#search_candidate(
         \   user_dict, a:this._key, a:this._okuri_rom
         \)
-        let system_dict_result = eskk#dictionary#search_next_candidate(
+        let system_dict_result = eskk#dictionary#search_candidate(
         \   system_dict, a:this._key, a:this._okuri_rom
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
@@ -689,7 +688,7 @@ function! s:dict.update_dictionary() dict "{{{
 
     " Check if a:self.user_dict really does not have added words.
     for [input, key, okuri, okuri_rom] in self._added_words
-        let [line, index] = eskk#dictionary#search_next_candidate(self._user_dict, key, okuri_rom)
+        let [line, index] = eskk#dictionary#search_candidate(self._user_dict, key, okuri_rom)
         if okuri_rom != ''
             let lnum = self._user_dict.okuri_ari_idx + 1
         else
