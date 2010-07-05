@@ -25,11 +25,12 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         endif
         let [mode, pos] = l
         if mode !=# 'i'
+            " Command line mode completion is not implemented.
             return -1
         endif
 
         " :help getpos()
-        return pos[2] - 1 + strlen(g:eskk_marker_henkan)
+        return pos[2] - 1
     endif
 
     return s:complete_kanji()
@@ -40,10 +41,12 @@ function! s:complete_kanji() "{{{
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
     for [yomigana, kanji_list] in dict.get_kanji(buftable)
+        " Add yomigana.
         if yomigana != ''
-            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
+            call add(list, {'word' : g:eskk_marker_henkan.yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
         endif
 
+        " Add kanji.
         for kanji in kanji_list
             call add(list, {
             \   'word': kanji.result,

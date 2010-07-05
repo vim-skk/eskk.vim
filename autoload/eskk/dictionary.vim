@@ -1,4 +1,4 @@
-" vim:foldmethod=marker:fen:
+" vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
 " Load once {{{
@@ -90,13 +90,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 
     " NOTE: min, max, mid are lnum. not index number.
 
-    if a:has_okuri
-        let min = a:ph_dict.okuri_ari_lnum + 1
-        let max = a:ph_dict.okuri_nasi_lnum - 1
-    else
-        let min = a:ph_dict.okuri_nasi_lnum + 1
-        let max = len(whole_lines)
-    endif
+    let min = a:ph_dict.okuri_ari_lnum + 1
+    let max = a:has_okuri ? a:ph_dict.okuri_nasi_lnum - 1 : len(whole_lines)
     while max - min > a:limit
         let mid = (min + max + 2) / 2
         let line = whole_lines[mid - 1]
@@ -106,12 +101,10 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
             else
                 let min = mid
             endif
+        elseif a:has_okuri
+          let min = mid
         else
-            if a:has_okuri
-                let min = mid
-            else
-                let max = mid
-            endif
+          let max = mid
         endif
     endwhile
     call eskk#util#logf('min = %d, max = %d', min, max)
@@ -152,17 +145,15 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     " call eskk#util#assert(a:line =~# '^/.\+/$')
     " let line = a:line[1:-2]
-    let yomi = matchstr(a:line, '^\zs[^ ]\+\ze /.*/$]')
-    let line = matchstr(a:line, '^[^ ]\+ /\zs.*\ze/$')
+    let yomi = matchstr(a:line, '^[^/ ]\+')
+    let line = matchstr(a:line, '/\zs[^/]*')
 
     let candidates = []
     for _ in split(line, '/')
         let semicolon = stridx(_, ';')
-        if semicolon != -1
-            call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
-        else
-            call add(candidates, {'result': _})
-        endif
+        call add(candidates, (semicolon != -1) ?
+              \ {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]} :
+              \ {'result': _})
     endfor
 
     return [yomi, candidates]
@@ -708,10 +699,13 @@ function! s:dict.get_kanji(buftable) dict "{{{
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
+    
+    if key == ''
+        return []
+    endif
 
-    let lines = []
-    let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom)
-    let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom)
+    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom)
+          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom)
 
     " TODO: Unique duplicated candidates.
 
