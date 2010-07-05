@@ -185,7 +185,7 @@ function! s:buftable.rewrite() dict "{{{
         \   eskk#get_map_command(0)
         \   '<buffer>'
         \   '<Plug>(eskk:internal:_inserted)'
-        \   substitute(inserted_str, '<', '<lt>', 'g')
+        \   eskk#util#str2map(inserted_str)
         return bs . "\<Plug>(eskk:internal:_inserted)"
     endif
 endfunction "}}}
@@ -409,6 +409,10 @@ function! s:get_next_candidate(self, stash, next) "{{{
         call eskk#util#assert(type(candidate) == type(""), "henkan_result.get_candidate()'s return value is String.")
 
         " Set candidate.
+        " FIXME:
+        " Do not set with `rom_str`.
+        " Get henkan_result's buftable
+        " and get matched rom str(s).
         call cur_buf_str.set_matched(rom_str, candidate)
     else
         " No more candidates.

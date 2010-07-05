@@ -91,10 +91,10 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let [pos, end] = a:000
         call eskk#util#assert(pos < end)
     elseif a:has_okuri
-        let [pos, end] = [a:ph_dict.okuri_ari_lnum - 1, len(whole_lines) - 1]
+        let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
     else
-        let [pos, end] = [a:ph_dict.okuri_nasi_lnum - 1, len(whole_lines) - 1]
+        let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
@@ -121,7 +121,7 @@ function! eskk#dictionary#parse_skk_dict_line(line) "{{{
         if semicolon != -1
             call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
         else
-            call add(candidates, {'result': _, 'annotation': ''})
+            call add(candidates, {'result': _})
         endif
     endfor
 
@@ -142,7 +142,7 @@ function! eskk#dictionary#merge_results(user_dict_result, system_dict_result) "{
         let str = r.result
 
         if has_key(unique, str)
-            if r.annotation ==# unique[str].annotation
+            if get(r, 'annotation', '') ==# get(unique[str], 'annotation', '')
                 " If `result` and `annotation` is same as old one, Remove new one.
                 call remove(results, i)
                 " Next element is results[i], Don't increment.
@@ -310,7 +310,7 @@ function! s:henkan_result_select_candidates(this) "{{{
         for [c, word] in pages[page_index]
             if g:eskk_show_annotation
                 echon printf('%s:%s%s  ', c, word.result,
-                \       (word.annotation != '' ? ';' . word.annotation : ''))
+                \       (has_key(word, 'annotation') ? ';' . word.annotation : ''))
             else
                 echon printf('%s:%s  ', c, word.result)
             endif
@@ -407,6 +407,7 @@ lockvar s:henkan_result
 
 let s:physical_dict = {
 \   '_content_lines': [],
+\   '_ftime_at_read': 0,
 \   '_loaded': 0,
 \   'okuri_ari_lnum': -1,
 \   'okuri_nasi_lnum': -1,
@@ -433,8 +434,10 @@ endfunction "}}}
 
 
 
-function! s:physical_dict.get_lines() dict "{{{
-    if self._loaded
+function! s:physical_dict.get_lines(...) dict "{{{
+    let force = a:0 ? a:1 : 0
+
+    if self._loaded && !force
         return self._content_lines
     endif
 
@@ -461,6 +464,7 @@ function! s:physical_dict.get_lines() dict "{{{
         let self.okuri_ari_lnum = -1
         let self.okuri_nasi_lnum = -1
     endtry
+    let self._ftime_at_read = getftime(path)
     let self._loaded = 1
 
     return self._content_lines
@@ -556,7 +560,11 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
     try
         " Get input from command-line.
-        let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+        if okuri == ''
+            let prompt = printf('%s ', key)
+        else
+            let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+        endif
         redraw
         let input  = input(prompt)
     catch /^Vim:Interrupt$/
@@ -605,6 +613,11 @@ function! s:dict.update_dictionary() dict "{{{
         return
     endif
 
+    if self._user_dict._ftime_at_read !=# getftime(self._user_dict.path)
+        " Update dictionary's lines.
+        call self._user_dict.get_lines(1)
+    endif
+
     let user_dict_lines = self._user_dict.get_lines()
 
     " Check if a:self.user_dict really does not have added words.
@@ -618,6 +631,7 @@ function! s:dict.update_dictionary() dict "{{{
         " Delete old entry.
         if index !=# -1
             call remove(user_dict_lines, index)
+            call eskk#util#assert(line != '')
         endif
         " Merge old one and create new entry.
         call insert(
