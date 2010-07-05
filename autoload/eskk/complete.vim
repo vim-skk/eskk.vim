@@ -15,6 +15,16 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
+" Variables {{{
+let s:select_but_not_inserted = 0
+" }}}
+
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if a:findstart
@@ -33,6 +43,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
+    let s:select_but_not_inserted = 0
     return s:complete_kanji()
 endfunction "}}}
 function! s:complete_kanji() "{{{
@@ -62,14 +73,14 @@ function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
     " :help popupmenu-keys
     for [key, fn] in [
-    \   ["<CR>", 's:do_enter'],
+    \   ["<CR>", 's:do_enter_pre'],
     \   ["<C-y>", 's:close_pum'],
     \   ["<C-l>", 's:identity'],
     \   ["<C-e>", 's:identity'],
     \   ["<PageUp>", 's:identity'],
     \   ["<PageDown>", 's:identity'],
-    \   ["<Up>", 's:identity'],
-    \   ["<Down>", 's:identity'],
+    \   ["<Up>", 's:select_item'],
+    \   ["<Down>", 's:select_item'],
     \   ["<Space>", 's:identity'],
     \   ["<Tab>", 's:identity'],
     \   ["<C-h>", 's:identity'],
@@ -92,6 +103,24 @@ function! s:close_pum(stash) "{{{
     \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
     \)
 endfunction "}}}
+function! s:do_enter_pre(stash) "{{{
+    if s:select_but_not_inserted
+        " Insert selected item.
+        call eskk#register_temp_event(
+        \   'filter-redispatch-pre',
+        \   'eskk#util#identity',
+        \   [eskk#util#eval_key(eskk#get_nore_map('<C-n><C-p>'))]
+        \)
+
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   eskk#util#get_local_func('do_enter', s:SID_PREFIX),
+        \   [a:stash]
+        \)
+    else
+        call s:do_enter(a:stash)
+    endif
+endfunction "}}}
 function! s:do_enter(stash) "{{{
     call s:set_selected_item()
 
@@ -110,6 +139,12 @@ function! s:do_enter(stash) "{{{
         \   [eskk#util#eval_key(eskk#get_named_map(key))]
         \)
     endfor
+
+    return ''
+endfunction "}}}
+function! s:select_item(stash) "{{{
+    let s:select_but_not_inserted = 1
+    let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
