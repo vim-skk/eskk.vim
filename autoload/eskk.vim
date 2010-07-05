@@ -997,6 +997,7 @@ function! eskk#enable(...) "{{{
     if eskk#is_enabled()
         return ''
     endif
+    call eskk#util#log('')
     call eskk#util#log('enabling eskk...')
 
     call eskk#throw_event('enable-im')
@@ -1015,7 +1016,6 @@ function! eskk#enable(...) "{{{
         call eskk#map_all_keys()
     endif
 
-    " TODO Save previous mode/state.
     call eskk#set_mode(g:eskk_initial_mode)
 
     " If skk.vim exists and enabled, disable it.
@@ -1040,6 +1040,7 @@ function! eskk#disable() "{{{
     if !eskk#is_enabled()
         return ''
     endif
+    call eskk#util#log('')
     call eskk#util#log('disabling eskk...')
 
     call eskk#throw_event('disable-im')
