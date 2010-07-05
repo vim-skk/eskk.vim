@@ -64,16 +64,16 @@ function! eskk#complete#handle_special_key(stash) "{{{
     for [key, fn] in [
     \   ["<CR>", 's:do_enter'],
     \   ["<C-y>", 's:close_pum'],
-    \   ["<C-l>", 's:not_implemented'],
-    \   ["<C-e>", 's:not_implemented'],
-    \   ["<PageUp>", 's:not_implemented'],
-    \   ["<PageDown>", 's:not_implemented'],
-    \   ["<Up>", 's:not_implemented'],
-    \   ["<Down>", 's:not_implemented'],
-    \   ["<Space>", 's:not_implemented'],
-    \   ["<Tab>", 's:not_implemented'],
-    \   ["<C-h>", 's:do_backspace'],
-    \   ["<BS>", 's:do_backspace'],
+    \   ["<C-l>", 's:identity'],
+    \   ["<C-e>", 's:identity'],
+    \   ["<PageUp>", 's:identity'],
+    \   ["<PageDown>", 's:identity'],
+    \   ["<Up>", 's:identity'],
+    \   ["<Down>", 's:identity'],
+    \   ["<Space>", 's:identity'],
+    \   ["<Tab>", 's:identity'],
+    \   ["<C-h>", 's:identity'],
+    \   ["<BS>", 's:identity'],
     \]
         if char ==# eskk#util#eval_key(key)
             call {fn}(a:stash)
@@ -111,11 +111,8 @@ function! s:do_enter(stash) "{{{
         \)
     endfor
 endfunction "}}}
-function! s:do_backspace(stash) "{{{
-    let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-h>'))
-endfunction "}}}
-function! s:not_implemented() "{{{
-    throw eskk#internal_error(['eskk', 'complete'], 'not implemented')
+function! s:identity(stash) "{{{
+    let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
