@@ -626,14 +626,25 @@ function! s:buftable.do_q_key() dict "{{{
 endfunction "}}}
 function! s:convert_again_with_table(self, table) "{{{
     let self = a:self
-    let buf_str = self.get_current_buf_str()
+
+    " Convert rom_str if possible.
+    let table = eskk#table#get_table(eskk#get_current_mode_table())
+    for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
+        let buf_str = self.get_buf_str(phase)
+        let rom_str = buf_str.get_rom_str()
+        if table.has_map(rom_str)
+            call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+        endif
+    endfor
+
+    let cur_buf_str = self.get_current_buf_str()
 
     let normal_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str  = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
 
-    for buf_str in [henkan_buf_str, okuri_buf_str]
-        for m in buf_str.get_matched()
+    for cur_buf_str in [henkan_buf_str, okuri_buf_str]
+        for m in cur_buf_str.get_matched()
             call normal_buf_str.push_matched(m[0], a:table.get_map_to(m[0]))
         endfor
     endfor
@@ -646,8 +657,8 @@ function! s:convert_again_with_table(self, table) "{{{
     function! s:finalize()
         let self = eskk#get_buftable()
         if self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-            let buf_str = self.get_current_buf_str()
-            call buf_str.clear_matched()
+            let cur_buf_str = self.get_current_buf_str()
+            call cur_buf_str.clear_matched()
         endif
     endfunction
 
