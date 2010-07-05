@@ -96,6 +96,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \]
         if char ==# eskk#util#eval_key(key)
             call {fn}(a:stash)
+            call eskk#util#logf("pumvisible() = 1, Handled key '%s'.", key)
             return 1
         endif
     endfor
