@@ -33,6 +33,10 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
+    if a:base[-1:] =~ '\a$'
+        return []
+    endif
+
     return s:complete_kanji()
 endfunction "}}}
 function! s:complete_kanji() "{{{
