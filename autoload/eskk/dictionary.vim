@@ -502,6 +502,7 @@ endfunction "}}}
 
 function! s:physical_dict.is_valid() dict "{{{
     " Succeeded to parse SKK dictionary.
+    call self.get_lines()
     return self.okuri_ari_lnum >= 0 && self.okuri_nasi_lnum >= 0
 endfunction "}}}
 
