@@ -28,6 +28,10 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     \               string(needle), string(a:key_filter), string(a:okuri_rom))
     call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
 
+    if !a:physical_dict.is_valid()
+        return []
+    endif
+
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
@@ -63,6 +67,10 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
     call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
     \               string(needle), string(a:key_filter), string(a:okuri_rom))
     call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+
+    if !a:physical_dict.is_valid()
+        return ['', -1]
+    endif
 
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
