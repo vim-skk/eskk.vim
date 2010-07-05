@@ -1097,15 +1097,16 @@ function! eskk#emulate_toggle_im(at_insert_mode) "{{{
         endif
     else
         " :help c_CTRL-^
-        let val = &imsearch !=# -1 ? &imsearch : &iminsert
-        if defined_langmap
-            if val ==# 1
+        if &l:imsearch ==# -1
+            let &l:imsearch = &l:iminsert
+        elseif defined_langmap
+            if &l:imsearch ==# 1
                 let &l:imsearch = 0
             else
                 let &l:imsearch = 1
             endif
         else
-            if val ==# 2
+            if &l:imsearch ==# 2
                 let &l:imsearch = 0
             else
                 let &l:imsearch = 2
