@@ -645,7 +645,7 @@ function! s:dict.update_dictionary() dict "{{{
     if !self.is_modified()
         return
     endif
-    if !self._user_dict.is_valid()
+    if !self._user_dict.is_valid() && filereadable(self._user_dict.path)
         " TODO:
         " Echo "user dictionary format is invalid. overwrite with new words?".
         " And do not read, just overwrite it with new words.
