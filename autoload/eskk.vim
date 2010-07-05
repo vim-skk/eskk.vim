@@ -1834,30 +1834,28 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             endif
         endif
 
-        let ret_str = filter_args[0].return
-        if type(ret_str) == type("")
-            return ret_str
-        else
-            let redispatch_pre = ''
-            if eskk#has_event('filter-redispatch-pre')
-                execute
-                \   eskk#get_map_command()
-                \   '<buffer><expr>'
-                \   '<Plug>(eskk:_filter_redispatch_pre)'
-                \   'join(eskk#throw_event("filter-redispatch-pre"))'
-                let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
-            endif
-            let redispatch_post = ''
-            if eskk#has_event('filter-redispatch-post')
-                execute
-                \   eskk#get_map_command()
-                \   '<buffer><expr>'
-                \   '<Plug>(eskk:_filter_redispatch_post)'
-                \   'join(eskk#throw_event("filter-redispatch-post"))'
-                let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
-            endif
-            return redispatch_pre . eskk#rewrite() . redispatch_post
+        let redispatch_pre = ''
+        if eskk#has_event('filter-redispatch-pre')
+            execute
+            \   eskk#get_map_command()
+            \   '<buffer><expr>'
+            \   '<Plug>(eskk:_filter_redispatch_pre)'
+            \   'join(eskk#throw_event("filter-redispatch-pre"))'
+            let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
         endif
+        let redispatch_post = ''
+        if eskk#has_event('filter-redispatch-post')
+            execute
+            \   eskk#get_map_command()
+            \   '<buffer><expr>'
+            \   '<Plug>(eskk:_filter_redispatch_post)'
+            \   'join(eskk#throw_event("filter-redispatch-post"))'
+            let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
+        endif
+        let ret_str = filter_args[0].return
+        return redispatch_pre
+        \   . (type(ret_str) == type("") ? ret_str : eskk#rewrite())
+        \   . redispatch_post
 
     catch
         call s:write_error_log_file(v:exception, v:throwpoint, a:char, a:Fn)
