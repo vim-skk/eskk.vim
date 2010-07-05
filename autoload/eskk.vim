@@ -551,6 +551,8 @@ function! eskk#create_new_instance() "{{{
     call add(s:eskk_instances, inst)
     let s:instance_id += 1
 
+    call eskk#util#log('Create instance...[%d]', s:instance_id)
+
     " Initialize instance.
     call eskk#enable(0)
 
@@ -560,6 +562,8 @@ function! eskk#destroy_current_instance() "{{{
     if s:instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
+
+    call eskk#util#log('Destroy instance...[%d]', s:instance_id)
 
     " Destroy current instance.
     call remove(s:eskk_instances, s:instance_id)
