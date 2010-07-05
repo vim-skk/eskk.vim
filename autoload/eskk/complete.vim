@@ -81,8 +81,6 @@ function! eskk#complete#handle_special_key(stash) "{{{
         endif
     endfor
 
-    " Otherwise, Get current selected item and stop completion.
-    call s:set_selected_item()
     return 0
 endfunction "}}}
 function! s:close_pum(stash) "{{{
