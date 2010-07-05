@@ -129,13 +129,6 @@ function! s:eskk.map_all_keys(...) dict "{{{
         call call('eskk#set_up_key', [key] + a:000)
     endfor
 
-    " Map escape key.
-    execute
-    \   'lnoremap'
-    \   '<buffer><expr>' . (a:0 ? s:mapopt_chars2raw(a:1) : '')
-    \   s:map.escape.lhs
-    \   'eskk#escape_key()'
-
     " Map `:EskkMap -general` keys.
     for [key, opt] in items(s:map.general)
         if opt.rhs == ''
@@ -2100,6 +2093,9 @@ function! eskk#set_up_default_mappings() "{{{
 
     " Remap <BS> to <C-h>
     silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
+
+    silent! EskkMap -expr -noremap <Esc> eskk#escape_key()
+    silent! EskkMap -expr -noremap <C-c> eskk#escape_key()
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#set_up_default_mappings', [])
 " }}}
