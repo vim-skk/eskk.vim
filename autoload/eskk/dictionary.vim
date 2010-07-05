@@ -1,4 +1,4 @@
-" vim:foldmethod=marker:fen:
+" vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
 " Load once {{{
@@ -15,9 +15,52 @@ runtime! plugin/eskk.vim
 
 " TODO
 " - Compile dictionary (s:dict._dict_info) to refer to result.
+" - lnum => idx
+" - eskk#dictionary#search_next_candidate() => eskk#dictionary#search_candidate()
 
 " Utility autoload functions {{{
 
+function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
+    let limit = a:0 ? a:1 : -1    " No limit by default.
+    let has_okuri = a:okuri_rom != ''
+    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
+
+    call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
+    \               string(needle), string(a:key_filter), string(a:okuri_rom))
+    call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+
+    if !a:physical_dict.is_valid()
+        return []
+    endif
+
+    let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
+    if a:physical_dict.sorted
+        call eskk#util#log('dictionary is sorted. Try binary search...')
+        let result = s:search_binary(a:physical_dict, converted, has_okuri, 5)
+    else
+        call eskk#util#log('dictionary is *not* sorted. Try linear search....')
+        let result = s:search_linear(a:physical_dict, converted, has_okuri)
+    endif
+
+    if result[1] !=# -1
+        let whole_lines = a:physical_dict.get_lines()
+        let begin = result[1]
+        let i = begin + 1
+        while eskk#util#has_idx(whole_lines, i)
+        \   && stridx(whole_lines[i], converted) == 0
+            let i += 1
+        endwhile
+        let end = i - 1
+        call eskk#util#assert(begin <= end)
+
+        return map(
+        \   whole_lines[begin : (limit ==# -1 ? end : begin + limit)],
+        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+        \)
+    else
+        return []
+    endif
+endfunction "}}}
 function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
@@ -25,6 +68,10 @@ function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri
     call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
     \               string(needle), string(a:key_filter), string(a:okuri_rom))
     call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+
+    if !a:physical_dict.is_valid()
+        return ['', -1]
+    endif
 
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
@@ -52,13 +99,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 
     " NOTE: min, max, mid are lnum. not index number.
 
-    if a:has_okuri
-        let min = a:ph_dict.okuri_ari_lnum + 1
-        let max = a:ph_dict.okuri_nasi_lnum - 1
-    else
-        let min = a:ph_dict.okuri_nasi_lnum + 1
-        let max = len(whole_lines)
-    endif
+    let min = a:ph_dict.okuri_ari_lnum + 1
+    let max = a:has_okuri ? a:ph_dict.okuri_nasi_lnum - 1 : len(whole_lines)
     while max - min > a:limit
         let mid = (min + max + 2) / 2
         let line = whole_lines[mid - 1]
@@ -68,12 +110,10 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
             else
                 let min = mid
             endif
+        elseif a:has_okuri
+          let min = mid
         else
-            if a:has_okuri
-                let min = mid
-            else
-                let max = mid
-            endif
+          let max = mid
         endif
     endwhile
     call eskk#util#logf('min = %d, max = %d', min, max)
@@ -89,13 +129,13 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
 
     if a:0 >= 2
         let [pos, end] = a:000
-        call eskk#util#assert(pos < end)
+        call eskk#util#assert(pos < end, 'pos < end')
     elseif a:has_okuri
         let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
+        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1, 'okuri_ari_lnum is not -1')
     else
         let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
+        call eskk#util#assert(a:ph_dict.okuri_nasi_lnum !=# -1, 'okuri_nasi_lnum is not -1')
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
@@ -104,7 +144,7 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
             call eskk#util#logf('eskk#dictionary#search_next_candidate() - found!: %s', string(line))
-            return [line[strlen(a:needle) :], pos]
+            return [line, pos]
         endif
         let pos += 1
     endwhile
@@ -113,27 +153,26 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
 endfunction "}}}
 
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
-    call eskk#util#assert(a:line =~# '^/.\+/$')
-    let line = a:line[1:-2]
+    let m = matchlist(a:line, '^\([^ ]\+\) /\(.*\)/$')
+    call eskk#util#assert(!empty(m))
+    let [yomi, line] = m[1:2]
 
     let candidates = []
     for _ in split(line, '/')
         let semicolon = stridx(_, ';')
-        if semicolon != -1
-            call add(candidates, {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]})
-        else
-            call add(candidates, {'result': _})
-        endif
+        call add(candidates, (semicolon != -1) ?
+              \ {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]} :
+              \ {'result': _})
     endfor
 
-    return candidates
+    return [yomi, candidates]
 endfunction "}}}
 
 function! eskk#dictionary#merge_results(user_dict_result, system_dict_result) "{{{
     " Merge.
     let results =
-    \   (a:user_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:user_dict_result[0]) : [])
-    \   + (a:system_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:system_dict_result[0]) : [])
+    \   (a:user_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:user_dict_result[0])[1] : [])
+    \   + (a:system_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:system_dict_result[0])[1] : [])
 
     " Unique.
     let unique = {}
@@ -447,15 +486,7 @@ function! s:physical_dict.get_lines(...) dict "{{{
         if filereadable(path)
             call eskk#util#logf('reading %s...', path)
             let self._content_lines  = readfile(path)
-            let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
-            if self.okuri_ari_lnum ==# -1
-                throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
-            endif
-            let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
-            if self.okuri_nasi_lnum ==# -1
-                throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
-            endif
-
+            call s:physical_dict_parse_lines(self, self._content_lines)
             call eskk#util#logf('reading %s... - done.', path)
         else
             call eskk#util#logf("Can't read '%s'!", path)
@@ -471,8 +502,36 @@ function! s:physical_dict.get_lines(...) dict "{{{
     return self._content_lines
 endfunction "}}}
 
+function! s:physical_dict.set_lines(lines) dict "{{{
+    try
+        let self._content_lines  = a:lines
+        call s:physical_dict_parse_lines(self, a:lines)
+    catch /^eskk: parse error/
+        call eskk#util#log('warning: ' . v:exception)
+        let self.okuri_ari_lnum = -1
+        let self.okuri_nasi_lnum = -1
+    endtry
+    let self._loaded = 1
+
+    return self._content_lines
+endfunction "}}}
+
+function! s:physical_dict_parse_lines(self, lines) "{{{
+    let self = a:self
+
+    let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
+    if self.okuri_ari_lnum ==# -1
+        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+    endif
+    let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
+    if self.okuri_nasi_lnum ==# -1
+        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+    endif
+endfunction "}}}
+
 function! s:physical_dict.is_valid() dict "{{{
     " Succeeded to parse SKK dictionary.
+    call self.get_lines()
     return self.okuri_ari_lnum >= 0 && self.okuri_nasi_lnum >= 0
 endfunction "}}}
 
@@ -607,7 +666,8 @@ function! s:dict.update_dictionary() dict "{{{
     if !self.is_modified()
         return
     endif
-    if !self._user_dict.is_valid()
+    let user_dict_exists = filereadable(self._user_dict.path)
+    if !self._user_dict.is_valid() && user_dict_exists
         " TODO:
         " Echo "user dictionary format is invalid. overwrite with new words?".
         " And do not read, just overwrite it with new words.
@@ -619,7 +679,14 @@ function! s:dict.update_dictionary() dict "{{{
         call self._user_dict.get_lines(1)
     endif
 
-    let user_dict_lines = self._user_dict.get_lines()
+    if user_dict_exists
+        let user_dict_lines = self._user_dict.get_lines()
+    else
+        " Create new lines.
+        let lines = [';; okuri-ari entries.', ';; okuri-nasi entries.']
+        call self._user_dict.set_lines(lines)
+        let user_dict_lines = lines
+    endif
 
     " Check if a:self.user_dict really does not have added words.
     for [input, key, okuri, okuri_rom] in self._added_words
@@ -661,6 +728,32 @@ function! s:dict.update_dictionary() dict "{{{
         \    "'" . self._user_dict.path . "' - " . v:exception
         echohl None
     endtry
+endfunction "}}}
+
+function! s:dict.get_kanji(buftable) dict "{{{
+    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let key       = henkan_buf_str.get_matched_filter()
+    let okuri     = okuri_buf_str.get_matched_filter()
+    let okuri_rom = okuri_buf_str.get_matched_rom()
+
+    if key == ''
+        return []
+    endif
+
+    " Convert `self._added_words` to same value
+    " of return value of `eskk#dictionary#parse_skk_dict_line()`.
+    let added = []
+    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
+        call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
+    endfor
+
+    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom)
+          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom)
+
+    " TODO: Unique duplicated candidates.
+
+    return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
 endfunction "}}}
 
 lockvar s:dict

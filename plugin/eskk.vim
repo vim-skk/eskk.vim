@@ -123,6 +123,13 @@ function! EskkDefaultMappedKeys() "{{{
     \   "<CR>",
     \   "<Space>",
     \   "<C-q>",
+    \   "<C-y>",
+    \   "<C-l>",
+    \   "<C-e>",
+    \   "<PageUp>",
+    \   "<PageDown>",
+    \   "<Up>",
+    \   "<Down>",
     \]
 endfunction "}}}
 if !exists('g:eskk_mapped_key')
@@ -196,6 +203,11 @@ if !exists("g:eskk_context_control")
     \       'if_disabled': 'eskk#enable'
     \   },
     \}
+endif
+
+" Completion
+if !exists('g:eskk_compl_enter_send_keys')
+    let g:eskk_compl_enter_send_keys = ['<CR>', '<CR>']
 endif
 
 " }}}
