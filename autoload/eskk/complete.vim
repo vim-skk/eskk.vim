@@ -123,6 +123,14 @@ function! s:do_space(stash) "{{{
     \   'eskk#util#identity',
     \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
     \)
+
+    " FIXME:
+    " When user selected kanji in completion, this mapping henkan kanji.
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#util#identity',
+    \   [eskk#util#eval_key(eskk#get_named_map('<Space>'))]
+    \)
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-h>'))
