@@ -145,8 +145,8 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     " call eskk#util#assert(a:line =~# '^/.\+/$')
     " let line = a:line[1:-2]
-    let yomi = matchstr(a:line, '^[^/ ]\+')
-    let line = matchstr(a:line, '/\zs[^/]*')
+    let yomi = matchstr(a:line, '^[^;/ ]\+')
+    let line = matchstr(a:line, '/\zs.*\ze/$')
 
     let candidates = []
     for _ in split(line, '/')
