@@ -143,6 +143,8 @@ function! s:set_selected_item() "{{{
     let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     call okuri_buf_str.clear()
     call okuri_buf_str.set_rom_str(rom_str)
+
+    call buftable.set_old_str(buftable.get_display_str())
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
