@@ -698,7 +698,7 @@ function! s:dict.get_kanji(buftable) dict "{{{
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    
+
     if key == ''
         return []
     endif
