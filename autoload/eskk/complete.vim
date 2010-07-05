@@ -74,7 +74,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<PageDown>", 's:not_implemented'],
     \   ["<Up>", 's:not_implemented'],
     \   ["<Down>", 's:not_implemented'],
-    \   ["<Space>", 's:not_implemented'],
+    \   ["<Space>", 's:do_space'],
     \   ["<Tab>", 's:not_implemented'],
     \   ["<C-h>", 's:do_backspace'],
     \   ["<BS>", 's:do_backspace'],
