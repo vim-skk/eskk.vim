@@ -76,11 +76,14 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<BS>", 's:do_backspace'],
     \]
         if char ==# eskk#util#eval_key(key)
-            return {fn}(a:stash)
+            call {fn}(a:stash)
+            return 1
         endif
     endfor
 
-    return ''
+    " Otherwise, Get current selected item and stop completion.
+    call s:set_selected_item()
+    return 0
 endfunction "}}}
 function! s:close_pum(stash) "{{{
     call s:set_selected_item()
