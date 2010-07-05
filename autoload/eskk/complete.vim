@@ -123,11 +123,26 @@ function! s:set_selected_item() "{{{
     let buftable = eskk#get_buftable()
     let [mode, pos] = buftable.get_begin_pos()
     call eskk#util#assert(mode ==# 'i')
+
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 1]
+    if filter_str =~# '[a-z]$'
+        let [filter_str, rom_str] = [
+        \   substitute(filter_str, '.$', '', ''),
+        \   substitute(filter_str, '.*\(.\)$', '\1', '')
+        \]
+    else
+        let rom_str = ''
+    endif
+
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    call henkan_buf_str.set_matched('', filter_str)
+    call henkan_buf_str.clear()
+    for char in split(filter_str, '\zs')
+        call henkan_buf_str.push_matched('', filter_str)
+    endfor
+
     let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     call okuri_buf_str.clear()
+    call okuri_buf_str.set_rom_str(rom_str)
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
