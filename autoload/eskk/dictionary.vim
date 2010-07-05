@@ -15,7 +15,6 @@ runtime! plugin/eskk.vim
 
 " TODO
 " - Compile dictionary (s:dict._dict_info) to refer to result.
-" - lnum => idx
 " - eskk#dictionary#search_next_candidate() => eskk#dictionary#search_candidate()
 
 " Utility autoload functions {{{
@@ -99,8 +98,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 
     " NOTE: min, max, mid are lnum. not index number.
 
-    let min = a:ph_dict.okuri_ari_lnum + 1
-    let max = a:has_okuri ? a:ph_dict.okuri_nasi_lnum - 1 : len(whole_lines)
+    let min = a:ph_dict.okuri_ari_idx + 1
+    let max = a:has_okuri ? a:ph_dict.okuri_nasi_idx - 1 : len(whole_lines)
     while max - min > a:limit
         let mid = (min + max + 2) / 2
         let line = whole_lines[mid - 1]
@@ -131,11 +130,11 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let [pos, end] = a:000
         call eskk#util#assert(pos < end, 'pos < end')
     elseif a:has_okuri
-        let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1, 'okuri_ari_lnum is not -1')
+        let [pos, end] = [a:ph_dict.okuri_ari_idx, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
     else
-        let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_nasi_lnum !=# -1, 'okuri_nasi_lnum is not -1')
+        let [pos, end] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
@@ -449,8 +448,8 @@ let s:physical_dict = {
 \   '_content_lines': [],
 \   '_ftime_at_read': 0,
 \   '_loaded': 0,
-\   'okuri_ari_lnum': -1,
-\   'okuri_nasi_lnum': -1,
+\   'okuri_ari_idx': -1,
+\   'okuri_nasi_idx': -1,
 \   'path': '',
 \   'sorted': 0,
 \   'encoding': '',
@@ -493,8 +492,8 @@ function! s:physical_dict.get_lines(...) dict "{{{
         endif
     catch /^eskk: parse error/
         call eskk#util#log('warning: ' . v:exception)
-        let self.okuri_ari_lnum = -1
-        let self.okuri_nasi_lnum = -1
+        let self.okuri_ari_idx = -1
+        let self.okuri_nasi_idx = -1
     endtry
     let self._ftime_at_read = getftime(path)
     let self._loaded = 1
@@ -508,8 +507,8 @@ function! s:physical_dict.set_lines(lines) dict "{{{
         call s:physical_dict_parse_lines(self, a:lines)
     catch /^eskk: parse error/
         call eskk#util#log('warning: ' . v:exception)
-        let self.okuri_ari_lnum = -1
-        let self.okuri_nasi_lnum = -1
+        let self.okuri_ari_idx = -1
+        let self.okuri_nasi_idx = -1
     endtry
     let self._loaded = 1
 
@@ -519,12 +518,12 @@ endfunction "}}}
 function! s:physical_dict_parse_lines(self, lines) "{{{
     let self = a:self
 
-    let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
-    if self.okuri_ari_lnum ==# -1
+    let self.okuri_ari_idx  = index(self._content_lines, ';; okuri-ari entries.')
+    if self.okuri_ari_idx ==# -1
         throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
     endif
-    let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
-    if self.okuri_nasi_lnum ==# -1
+    let self.okuri_nasi_idx = index(self._content_lines, ';; okuri-nasi entries.')
+    if self.okuri_nasi_idx ==# -1
         throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
     endif
 endfunction "}}}
@@ -532,7 +531,7 @@ endfunction "}}}
 function! s:physical_dict.is_valid() dict "{{{
     " Succeeded to parse SKK dictionary.
     call self.get_lines()
-    return self.okuri_ari_lnum >= 0 && self.okuri_nasi_lnum >= 0
+    return self.okuri_ari_idx >= 0 && self.okuri_nasi_idx >= 0
 endfunction "}}}
 
 lockvar s:physical_dict
@@ -692,9 +691,9 @@ function! s:dict.update_dictionary() dict "{{{
     for [input, key, okuri, okuri_rom] in self._added_words
         let [line, index] = eskk#dictionary#search_next_candidate(self._user_dict, key, okuri_rom)
         if okuri_rom != ''
-            let lnum = self._user_dict.okuri_ari_lnum + 1
+            let lnum = self._user_dict.okuri_ari_idx + 1
         else
-            let lnum = self._user_dict.okuri_nasi_lnum + 1
+            let lnum = self._user_dict.okuri_nasi_idx + 1
         endif
         " Delete old entry.
         if index !=# -1
