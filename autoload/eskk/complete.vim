@@ -113,6 +113,15 @@ function! s:do_enter(stash) "{{{
         \)
     endfor
 endfunction "}}}
+function! s:do_space(stash) "{{{
+    call s:set_selected_item()
+
+    call eskk#register_temp_event(
+    \   'filter-redispatch-pre',
+    \   'eskk#util#identity',
+    \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
+    \)
+endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-h>'))
 endfunction "}}}
