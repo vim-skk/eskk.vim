@@ -128,13 +128,13 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
 
     if a:0 >= 2
         let [pos, end] = a:000
-        call eskk#util#assert(pos < end)
+        call eskk#util#assert(pos < end, 'pos < end')
     elseif a:has_okuri
         let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
+        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1, 'okuri_ari_lnum is not -1')
     else
         let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1)
+        call eskk#util#assert(a:ph_dict.okuri_nasi_lnum !=# -1, 'okuri_nasi_lnum is not -1')
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
