@@ -39,6 +39,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
             return -1
         endif
 
+        call s:initialize_variables()
         " :help getpos()
         return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
@@ -48,7 +49,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return []
     endif
 
-    call s:initialize_variables()
     return s:complete_kanji()
 endfunction "}}}
 function! s:initialize_variables() "{{{
