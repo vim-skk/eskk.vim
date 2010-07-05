@@ -82,7 +82,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     " :help popupmenu-keys
     for [key, fn] in [
     \   ["<CR>", 's:do_enter_pre'],
-    \   ["<C-y>", 's:close_pum'],
+    \   ["<C-y>", 's:close_pum_pre'],
     \   ["<C-l>", 's:identity'],
     \   ["<C-e>", 's:identity'],
     \   ["<PageUp>", 's:identity'],
@@ -102,6 +102,21 @@ function! eskk#complete#handle_special_key(stash) "{{{
 
     return 0
 endfunction "}}}
+function! s:close_pum_pre(stash) "{{{
+    if s:select_but_not_inserted
+        " Insert selected item.
+        let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-n><C-p>'))
+        " Call `s:close_pum()` at next time.
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#eval_key(eskk#get_named_map('<C-y>'))]
+        \)
+        let s:select_but_not_inserted = 0
+    else
+        call s:close_pum(a:stash)
+    endif
+endfunction "}}}
 function! s:close_pum(stash) "{{{
     call s:set_selected_item()
 
@@ -114,17 +129,14 @@ endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
     if s:select_but_not_inserted
         " Insert selected item.
-        call eskk#register_temp_event(
-        \   'filter-redispatch-pre',
-        \   'eskk#util#identity',
-        \   [eskk#util#eval_key(eskk#get_nore_map('<C-n><C-p>'))]
-        \)
-
+        let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-n><C-p>'))
+        " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   eskk#util#get_local_func('do_enter', s:SID_PREFIX),
-        \   [a:stash]
+        \   'eskk#util#identity',
+        \   [eskk#util#eval_key(eskk#get_named_map('<CR>'))]
         \)
+        let s:select_but_not_inserted = 0
     else
         call s:do_enter(a:stash)
     endif
