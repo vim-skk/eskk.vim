@@ -43,8 +43,11 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
-    let s:select_but_not_inserted = 0
+    call s:initialize_variables()
     return s:complete_kanji()
+endfunction "}}}
+function! s:initialize_variables() "{{{
+    let s:select_but_not_inserted = 0
 endfunction "}}}
 function! s:complete_kanji() "{{{
     " Get candidates.
@@ -157,6 +160,7 @@ function! s:set_selected_item() "{{{
     call eskk#util#assert(mode ==# 'i')
 
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 1]
+    call eskk#util#logf('Got selected item by pum: %s', string(filter_str))
     if filter_str =~# '[a-z]$'
         let [filter_str, rom_str] = [
         \   substitute(filter_str, '.$', '', ''),
@@ -177,6 +181,8 @@ function! s:set_selected_item() "{{{
     call okuri_buf_str.set_rom_str(rom_str)
 
     call buftable.set_old_str(buftable.get_display_str())
+
+    call s:initialize_variables()
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
