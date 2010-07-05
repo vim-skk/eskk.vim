@@ -1000,6 +1000,10 @@ function! eskk#enable(...) "{{{
     call eskk#util#log('')
     call eskk#util#log('enabling eskk...')
 
+    if mode() ==# 'c'
+        let &l:iminsert = 1
+    endif
+
     call eskk#throw_event('enable-im')
 
     " Lazy initialize
@@ -1042,6 +1046,10 @@ function! eskk#disable() "{{{
     endif
     call eskk#util#log('')
     call eskk#util#log('disabling eskk...')
+
+    if mode() ==# 'c'
+        return "\<C-^>"
+    endif
 
     call eskk#throw_event('disable-im')
 
