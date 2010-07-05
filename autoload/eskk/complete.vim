@@ -30,7 +30,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         endif
 
         " :help getpos()
-        return pos[2] - 1
+        return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
     return s:complete_kanji()
@@ -43,7 +43,7 @@ function! s:complete_kanji() "{{{
     for [yomigana, kanji_list] in dict.get_kanji(buftable)
         " Add yomigana.
         if yomigana != ''
-            call add(list, {'word' : g:eskk_marker_henkan.yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
+            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
         endif
 
         " Add kanji.
