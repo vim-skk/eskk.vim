@@ -43,6 +43,10 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
+    if a:base[-1] =~ '\a$'
+        return []
+    endif
+
     call s:initialize_variables()
     return s:complete_kanji()
 endfunction "}}}
@@ -84,7 +88,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<PageDown>", 's:identity'],
     \   ["<Up>", 's:select_item'],
     \   ["<Down>", 's:select_item'],
-    \   ["<Space>", 's:identity'],
+    \   ["<Space>", 's:do_space'],
     \   ["<Tab>", 's:identity'],
     \   ["<C-h>", 's:identity'],
     \   ["<BS>", 's:identity'],
@@ -148,6 +152,26 @@ endfunction "}}}
 function! s:select_item(stash) "{{{
     let s:select_but_not_inserted = 1
     let a:stash.return = a:stash.char
+endfunction "}}}
+function! s:do_space(stash) "{{{
+    call s:set_selected_item()
+
+    call eskk#register_temp_event(
+    \   'filter-redispatch-pre',
+    \   'eskk#util#identity',
+    \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
+    \)
+
+    " FIXME:
+    " When user selected kanji in completion, this mapping henkan kanji.
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#util#identity',
+    \   [eskk#util#eval_key(eskk#get_named_map('<Space>'))]
+    \)
+endfunction "}}}
+function! s:do_backspace(stash) "{{{
+    let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-h>'))
 endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
