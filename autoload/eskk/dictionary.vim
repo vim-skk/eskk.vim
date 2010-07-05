@@ -20,7 +20,8 @@ runtime! plugin/eskk.vim
 
 " Utility autoload functions {{{
 
-function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom) "{{{
+function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
+    let limit = a:0 ? a:1 : -1    " No limit by default.
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
 
@@ -53,7 +54,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         call eskk#util#assert(begin <= end)
 
         return map(
-        \   whole_lines[begin : end],
+        \   whole_lines[begin : (limit ==# -1 ? end : begin + limit)],
         \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
         \)
     else
