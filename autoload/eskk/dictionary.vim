@@ -143,10 +143,9 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
 endfunction "}}}
 
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
-    " call eskk#util#assert(a:line =~# '^/.\+/$')
-    " let line = a:line[1:-2]
-    let yomi = matchstr(a:line, '^[^;/ ]\+')
-    let line = matchstr(a:line, '/\zs.*\ze/$')
+    let m = matchlist(a:line, '^\([^ ]\+\) /\(.*\)/$')
+    call eskk#util#assert(!empty(m))
+    let [yomi, line] = m[1:2]
 
     let candidates = []
     for _ in split(line, '/')
