@@ -1032,6 +1032,9 @@ endfunction "}}}
 function! eskk#update_dictionary() "{{{
     call eskk#get_dictionary().update_dictionary()
 endfunction "}}}
+function! eskk#forget_registered_words() "{{{
+    call eskk#get_dictionary().forget_registered_words()
+endfunction "}}}
 
 
 " Filter

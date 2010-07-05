@@ -730,6 +730,10 @@ function! s:dict.update_dictionary() dict "{{{
     endtry
 endfunction "}}}
 
+function! s:dict.forget_registered_words() dict "{{{
+    let self._added_words = []
+endfunction "}}}
+
 function! s:dict.get_kanji(buftable) dict "{{{
     let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
