@@ -739,22 +739,31 @@ function! eskk#get_named_map(key) "{{{
 
     return lhs
 endfunction "}}}
-function! eskk#get_nore_map(key) "{{{
+function! eskk#get_nore_map(key, ...) "{{{
     " NOTE:
     " a:key is escaped. So when a:key is '<C-a>', return value is
     "   `<Plug>(eskk:filter:<C-a>)`
     " not
     "   `<Plug>(eskk:filter:^A)` (^A is control character)
 
-    let lhs = printf('<Plug>(eskk:noremap:%s)', a:key)
+    if a:0
+        let _ = s:mapopt_chars2raw(a:1)
+        Dump _
+    endif
+
+    let [rhs, key] = [a:key, a:key]
+    let key = eskk#util#str2map(key)
+
+    let lhs = printf('<Plug>(eskk:noremap:%s)', key)
     if maparg(lhs, 'l') != ''
         return lhs
     endif
 
     execute
     \   eskk#get_map_command(0)
+    \   (a:0 ? s:mapopt_chars2raw(a:1) : '')
     \   lhs
-    \   a:key
+    \   rhs
 
     return lhs
 endfunction "}}}
