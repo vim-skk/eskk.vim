@@ -1053,7 +1053,7 @@ function! eskk#disable() "{{{
     endif
 
     let &l:omnifunc = self.save_omnifunc
-    
+
     let self.enabled = 0
 
     let kakutei_str = eskk#kakutei_str()
