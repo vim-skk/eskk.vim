@@ -436,6 +436,15 @@ function! s:henkan_result.get_candidate() dict "{{{
         return -1
     endtry
 endfunction "}}}
+function! s:henkan_result.get_key() dict "{{{
+    return self._key
+endfunction "}}}
+function! s:henkan_result.get_okuri() dict "{{{
+    return self._okuri
+endfunction "}}}
+function! s:henkan_result.get_okuri_rom() dict "{{{
+    return self._okuri_rom
+endfunction "}}}
 
 function! s:henkan_result.advance() dict "{{{
     return s:henkan_result_advance(self, 1)
@@ -654,7 +663,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
 
     if input != ''
-        call add(self._added_words, [input, key, okuri, okuri_rom])
+        call self.remember_word(input, key, okuri, okuri_rom)
         return input . okuri
     else
         return key . okuri
@@ -663,6 +672,10 @@ endfunction "}}}
 
 function! s:dict.forget_registered_words() dict "{{{
     let self._added_words = []
+endfunction "}}}
+
+function! s:dict.remember_word(input, key, okuri, okuri_rom) dict "{{{
+    call add(self._added_words, [a:input, a:key, a:okuri, a:okuri_rom])
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{

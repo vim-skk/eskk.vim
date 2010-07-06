@@ -337,7 +337,19 @@ function! s:buftable.do_enter(stash) dict "{{{
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', [undo_char])
         endif
 
-        call self.push_kakutei_str(self.get_display_str(0))
+        let henkan_result = eskk#get_prev_henkan_result()
+        let converted = self.get_display_str(0)
+        call eskk#util#assert(converted ==# henkan_result.get_candidate(), 'display string and current candidate string must be same.')
+
+        let dict = eskk#get_dictionary()
+        call dict.remember_word(
+        \   converted,
+        \   henkan_result.get_key(),
+        \   henkan_result.get_okuri(),
+        \   henkan_result.get_okuri_rom(),
+        \)
+
+        call self.push_kakutei_str(converted)
         call self.clear_all()
 
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
