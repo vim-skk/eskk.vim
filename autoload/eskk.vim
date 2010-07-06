@@ -572,6 +572,8 @@ function! eskk#create_new_instance() "{{{
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
+    let ns = s:get_inst_namespace()
+
     if ns.eskk_instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
