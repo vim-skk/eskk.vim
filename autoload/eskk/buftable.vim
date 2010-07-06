@@ -338,18 +338,17 @@ function! s:buftable.do_enter(stash) dict "{{{
         endif
 
         let henkan_result = eskk#get_prev_henkan_result()
-        let converted = self.get_display_str(0)
-        call eskk#util#assert(converted ==# henkan_result.get_candidate(), 'display string and current candidate string must be same.')
+        let converted = henkan_result.get_candidate(0)
 
         let dict = eskk#get_dictionary()
         call dict.remember_word(
-        \   converted,
+        \   henkan_result.get_candidate(0),
         \   henkan_result.get_key(),
         \   henkan_result.get_okuri(),
         \   henkan_result.get_okuri_rom(),
         \)
 
-        call self.push_kakutei_str(converted)
+        call self.push_kakutei_str(henkan_result.get_candidate(1))
         call self.clear_all()
 
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)

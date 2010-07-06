@@ -335,10 +335,12 @@ function! s:henkan_result_get_result(this) "{{{
         \]
         let a:this._status = s:HR_GOT_RESULT
         return a:this._result
+    else
+        throw eskk#internal_error(['eskk', 'dictionary'])
     endif
 endfunction "}}}
 
-function! s:henkan_result_select_candidates(this) "{{{
+function! s:henkan_result_select_candidates(this, with_okuri) "{{{
     " Select candidates by getchar()'s character.
     let words = copy(a:this._result[0])
     let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))
@@ -385,7 +387,7 @@ function! s:henkan_result_select_candidates(this) "{{{
                 let page_index += 1
             else
                 " No more pages. Register new word.
-                return a:this._dict.register_word(a:this)
+                return a:this._dict.register_word(a:this, a:with_okuri)
             endif
         elseif eskk#is_special_lhs(char, 'phase:henkan-select:prev-page')
             if eskk#util#has_idx(pages, page_index - 1)
@@ -400,7 +402,7 @@ function! s:henkan_result_select_candidates(this) "{{{
                 if c ==# selected
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
-                    return word.result . a:this._okuri
+                    return word.result . (a:with_okuri ? a:this._okuri : '')
                 endif
             endfor
         endif
@@ -413,7 +415,9 @@ function! s:getchar(...) "{{{
 endfunction "}}}
 
 
-function! s:henkan_result.get_candidate() dict "{{{
+function! s:henkan_result.get_candidate(...) dict "{{{
+    let with_okuri = a:0 ? a:1 : 1
+
     call eskk#util#logf('Get candidate for: buftable.dump() = %s', string(self.buftable.dump()))
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
     try
@@ -422,15 +426,15 @@ function! s:henkan_result.get_candidate() dict "{{{
         call eskk#util#logf('idx = %d, counter = %d', idx, counter)
         if idx >= counter
             try
-                return s:henkan_result_select_candidates(self)
+                return s:henkan_result_select_candidates(self, with_okuri)
             catch /^eskk: leave henkan select$/
                 if result[1] > 0
                     let result[1] -= 1
                 endif
-                return candidates[result[1]].result . self._okuri
+                return candidates[result[1]].result . (with_okuri ? self._okuri : '')
             endtry
         else
-            return candidates[idx].result . self._okuri
+            return candidates[idx].result . (with_okuri ? self._okuri : '')
         endif
     catch /^eskk: dictionary look up error:/
         return -1
@@ -610,7 +614,8 @@ function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
     \)
 endfunction "}}}
 
-function! s:dict.register_word(henkan_result) dict "{{{
+function! s:dict.register_word(henkan_result, ...) dict "{{{
+    let with_okuri = a:0 ? a:1 : 1
     let buftable  = a:henkan_result.buftable
     let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_matched_filter()
     let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_filter()
@@ -664,9 +669,9 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
     if input != ''
         call self.remember_word(input, key, okuri, okuri_rom)
-        return input . okuri
+        return input . (with_okuri ? okuri : '')
     else
-        return key . okuri
+        return key . (with_okuri ? okuri : '')
     endif
 endfunction "}}}
 
