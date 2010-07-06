@@ -153,16 +153,13 @@ function! s:buftable.get_current_buf_str() dict "{{{
 endfunction "}}}
 
 
-" Rewrite old string, Insert new string.
 function! s:buftable.set_old_str(str) dict "{{{
     let self._old_str = a:str
 endfunction "}}}
 function! s:buftable.get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
-" Return inserted string.
-" Inserted string contains "\<Plug>(eskk:internal:backspace-key)"
-" to delete old characters.
+" Rewrite old string, Insert new string.
 function! s:buftable.rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
 
