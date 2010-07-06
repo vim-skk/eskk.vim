@@ -547,10 +547,11 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
 endfunction "}}}
 function! s:buftable.do_henkan(stash) dict "{{{
     let phase = self.get_henkan_phase()
+    let eskk_mode = eskk#get_mode()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
+        if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
             let table = eskk#table#get_table('rom_to_hira')
             call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
             call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
@@ -585,15 +586,15 @@ function! s:buftable.do_henkan(stash) dict "{{{
 
         let candidate = eskk#get_prev_henkan_result().get_candidate()
 
-        let buf_str = self.get_current_buf_str()
+        let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         let rom_str = henkan_matched_rom . okuri_matched_rom
         if type(candidate) == type("")
             " Set candidate.
-            call buf_str.push_matched(rom_str, candidate)
+            call henkan_select_buf_str.set_matched(rom_str, candidate)
         else
             " No candidates.
             let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
-            call buf_str.push_matched(rom_str, input)
+            call henkan_select_buf_str.set_matched(rom_str, input)
         endif
     else
         let msg = printf("s:buftable.do_henkan() does not support phase %d.", phase)
