@@ -34,7 +34,10 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
             return -1
         endif
         let [mode, pos] = l
-        if mode !=# 'i'
+        let phase = buftable.get_henkan_phase()
+        let do_complete = (mode ==# 'i')
+
+        if !do_complete
             " Command line mode completion is not implemented.
             return -1
         endif

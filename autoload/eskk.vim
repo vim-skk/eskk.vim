@@ -1028,6 +1028,9 @@ function! eskk#enable(...) "{{{
         let disable_skk_vim = substitute(SkkDisable(), "\<C-^>", '', '')
     endif
 
+    let self.omnifunc_save = &l:omnifunc
+    let &l:omnifunc = 'eskk#complete#eskkcomplete'
+
     let self.enabled = 1
     let self.enabled_mode = mode()
 
@@ -1056,6 +1059,8 @@ function! eskk#disable() "{{{
     if do_unmap
         call eskk#unmap_all_keys()
     endif
+
+    let &l:omnifunc = self.omnifunc_save
 
     let self.enabled = 0
 
@@ -1915,23 +1920,6 @@ function! eskk#handle_context() "{{{
         unlet Fn
     endfor
 endfunction "}}}
-" }}}
-" Completion {{{
-function! eskk#set_omnifunc() "{{{
-    let self = eskk#get_current_instance()
-    if !has_key(self, 'save_omnifunc') && g:eskk_enable_completion
-        let self.save_omnifunc = &l:omnifunc
-        let &l:omnifunc = 'eskk#complete#eskkcomplete'
-    endif
-endfunction "}}}
-function! eskk#restore_omnifunc() "{{{
-    let self = eskk#get_current_instance()
-    if has_key(self, 'save_omnifunc')
-        let &l:omnifunc = self.save_omnifunc
-    endif
-endfunction "}}}
-call eskk#register_temp_event(['enter-phase-henkan', 'enter-phase-okuri'], 'eskk#set_omnifunc', [])
-call eskk#register_temp_event('enter-phase-normal', 'eskk#restore_omnifunc', [])
 " }}}
 
 " Restore 'cpoptions' {{{
