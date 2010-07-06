@@ -720,14 +720,14 @@ function! eskk#asym_filter(stash, table_name) "{{{
         return s:filter_rom(a:stash, a:table_name)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
-            return buftable.do_henkan(a:stash)
+            call buftable.do_henkan(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
-            return buftable.do_henkan(a:stash)
+            call buftable.do_henkan(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         else
             return s:filter_rom(a:stash, a:table_name)
