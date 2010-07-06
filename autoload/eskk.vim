@@ -1152,6 +1152,21 @@ function! eskk#get_special_key(type) "{{{
         throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
     endif
 endfunction "}}}
+function! eskk#get_special_map(type) "{{{
+    if has_key(s:map, a:type)
+        let map = printf('<Plug>(eskk:internal:_noremap_%s)', a:type)
+        if maparg(map) == ''
+            " Not to remap.
+            execute
+            \   eskk#get_map_command(0)
+            \   map
+            \   s:map[a:type].lhs
+        endif
+        return map
+    else
+        throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
+    endif
+endfunction "}}}
 function! eskk#handle_special_lhs(char, type, stash) "{{{
     return
     \   eskk#is_special_lhs(a:char, a:type)
