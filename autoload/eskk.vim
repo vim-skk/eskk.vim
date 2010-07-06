@@ -536,23 +536,32 @@ endfunction "}}}
 
 
 " Manipulate eskk instances.
+function! s:get_inst_namespace() "{{{
+    return g:eskk_keep_state_beyond_buffer ? s: : b:
+endfunction "}}}
+function! s:exists_instance() "{{{
+    let varname = (g:eskk_keep_state_beyond_buffer ? 's' : 'b') . ':eskk_instances'
+    return exists(varname)
+endfunction "}}}
 function! eskk#get_current_instance() "{{{
-    if !exists('b:eskk_instances')
-        let b:eskk_instances = [s:eskk_new()]
+    let ns = s:get_inst_namespace()
+    if !s:exists_instance()
+        let ns.eskk_instances = [s:eskk_new()]
         " Index number for current instance in s:eskk_instances.
-        let b:eskk_instance_id = 0
+        let ns.eskk_instance_id = 0
     endif
-    return b:eskk_instances[b:eskk_instance_id]
+    return ns.eskk_instances[ns.eskk_instance_id]
 endfunction "}}}
 function! eskk#create_new_instance() "{{{
     " TODO: CoW
 
     " Create instance.
     let inst = s:eskk_new()
-    call add(b:eskk_instances, inst)
-    let b:eskk_instance_id += 1
+    let ns = s:get_inst_namespace()
+    call add(ns.eskk_instances, inst)
+    let ns.eskk_instance_id += 1
 
-    call eskk#util#logf('Create instance: %d => %d', b:eskk_instance_id - 1, b:eskk_instance_id)
+    call eskk#util#logf('Create instance: %d => %d', ns.eskk_instance_id - 1, ns.eskk_instance_id)
 
     " Initialize instance.
     call eskk#enable(0)
@@ -560,15 +569,15 @@ function! eskk#create_new_instance() "{{{
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
-    if b:eskk_instance_id == 0
+    if ns.eskk_instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
 
     " Destroy current instance.
-    call remove(b:eskk_instances, b:eskk_instance_id)
-    let b:eskk_instance_id -= 1
+    call remove(ns.eskk_instances, ns.eskk_instance_id)
+    let ns.eskk_instance_id -= 1
 
-    call eskk#util#logf('Destroy instance: %d => %d', b:eskk_instance_id + 1, b:eskk_instance_id)
+    call eskk#util#logf('Destroy instance: %d => %d', ns.eskk_instance_id + 1, ns.eskk_instance_id)
 endfunction "}}}
 function! eskk#get_mutable_stash(namespace) "{{{
     let obj = deepcopy(s:mutable_stash, 1)
@@ -1890,7 +1899,9 @@ function! eskk#restore_im_options() "{{{
     let [&g:iminsert, &g:imsearch] = s:saved_im_options
 endfunction "}}}
 function! eskk#register_restore_im_options() "{{{
-    autocmd eskk BufLeave * call eskk#restore_im_options()
+    if !g:eskk_keep_state_beyond_buffer
+        autocmd eskk BufLeave * call eskk#restore_im_options()
+    endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_restore_im_options', [])
 " }}}
