@@ -66,7 +66,6 @@ let s:available_modes = {}
 let s:map = {
 \   'general': {},
 \   'sticky': {},
-\   'escape': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -1177,13 +1176,6 @@ function! eskk#map_all_keys(...) "{{{
         call call('eskk#set_up_key', [key] + a:000)
     endfor
 
-    " Map escape key.
-    execute
-    \   'lnoremap'
-    \   '<buffer><expr>' . (a:0 ? s:mapopt_chars2raw(a:1) : '')
-    \   s:map.escape.lhs
-    \   'eskk#escape_key()'
-
     " Map `:EskkMap -general` keys.
     for [key, opt] in items(s:map.general)
         if opt.rhs == ''
@@ -1728,7 +1720,6 @@ call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave',
 function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=henkan -unique <Space>
-    silent! EskkMap -type=escape -unique <Esc>
 
     silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
 
