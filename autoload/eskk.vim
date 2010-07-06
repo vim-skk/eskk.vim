@@ -1717,24 +1717,10 @@ endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_non_egg_like_newline_event', [])
 " }}}
 " InsertLeave {{{
-function! s:autocmd_insert_leave() "{{{
-    let self = eskk#get_current_instance()
-
-    " NOTE: Check if self._buftable is initialized.
-    " `self._buftable` should not be written,
-    " `self.get_buftable()` is recommended.
-    " But Vim calls this function at InsertLeave,
-    " I carefully treat `self._buftable` not to be initialized.
-    if !empty(self._buftable)
-        call self._buftable.reset()
-    endif
-
-    if !g:eskk_keep_state && eskk#is_enabled()
-        call eskk#disable()
-    endif
-endfunction "}}}
 function! eskk#register_autocmd_insert_leave() "{{{
-    autocmd eskk InsertLeave * call s:autocmd_insert_leave()
+    if !g:eskk_keep_state
+        autocmd eskk InsertLeave * call eskk#disable()
+    endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave', [])
 " }}}
