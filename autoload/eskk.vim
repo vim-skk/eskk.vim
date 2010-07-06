@@ -67,6 +67,7 @@ let s:map = {
 \   'general': {},
 \   'sticky': {},
 \   'backspace-key': {},
+\   'escape-key': {},
 \   'enter-key': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
@@ -1208,7 +1209,7 @@ function! eskk#remove_display_str() "{{{
     let current_str = eskk#get_buftable().get_display_str()
 
     " NOTE: This function return value is not remapped.
-    let bs = maparg('<Plug>(eskk:internal:backspace-key)', 'ic')
+    let bs = eskk#get_special_key('backspace-key')
     call eskk#util#assert(bs != '')
 
     return repeat(eskk#util#eval_key(bs), eskk#util#mb_strlen(current_str))
@@ -1230,7 +1231,7 @@ function! eskk#escape_key() "{{{
     call eskk#get_buftable().reset()
 
     " NOTE: This function return value is not remapped.
-    let esc = maparg('<Plug>(eskk:internal:escape-key)', 'ic')
+    let esc = eskk#get_special_key('escape-key')
     call eskk#util#assert(esc != '')
 
     return kakutei_str . eskk#util#eval_key(esc)
@@ -1719,6 +1720,7 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=henkan -unique <Space>
     silent! EskkMap -type=backspace-key -unique <C-h>
     silent! EskkMap -type=enter-key -unique <CR>
+    silent! EskkMap -type=escape-key -unique <Esc>
 
     silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
 

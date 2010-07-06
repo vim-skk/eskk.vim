@@ -173,20 +173,32 @@ function! s:buftable.rewrite() dict "{{{
     call eskk#util#logf('kakutei string = %s', string(kakutei))
     call eskk#util#logf('new display string = %s', string(new))
 
-    let bs = repeat("\<Plug>(eskk:internal:backspace-key)", eskk#util#mb_strlen(old))
+    let bs = eskk#util#eval_key(eskk#get_special_key('backspace-key'))
+    call eskk#util#assert(bs != '')
+    let bs = repeat(bs, eskk#util#mb_strlen(old))
+    " Not to remap.
+    let rewrite_bs = ''
+    if bs != ''
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer>'
+        \   '<Plug>(eskk:internal:_rewrite_bs)'
+        \   eskk#util#str2map(bs)
+        let rewrite_bs = "\<Plug>(eskk:internal:_rewrite_bs)"
+    endif
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
     let inserted_str = kakutei . new
     if inserted_str == ''
-        return bs
+        return rewrite_bs
     else
         execute
         \   eskk#get_map_command(0)
         \   '<buffer>'
         \   '<Plug>(eskk:internal:_inserted)'
         \   eskk#util#str2map(inserted_str)
-        return bs . "\<Plug>(eskk:internal:_inserted)"
+        return rewrite_bs . "\<Plug>(eskk:internal:_inserted)"
     endif
 endfunction "}}}
 
