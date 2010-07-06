@@ -1082,7 +1082,6 @@ function! eskk#disable() "{{{
     let self.enabled = 0
 
     let kakutei_str = eskk#kakutei_str()
-    call eskk#get_buftable().reset()
 
     if mode() =~# '^[ic]$'
         return kakutei_str . "\<C-^>"
@@ -1244,7 +1243,6 @@ endfunction "}}}
 function! eskk#escape_key() "{{{
     let self = eskk#get_current_instance()
     let kakutei_str = eskk#kakutei_str()
-    call eskk#get_buftable().reset()
 
     " NOTE: This function return value is not remapped.
     let esc = eskk#get_special_key('escape-key')
@@ -1270,7 +1268,7 @@ function! eskk#set_mode(next_mode) "{{{
     let self.mode = a:next_mode
 
     let buftable = eskk#get_buftable()
-    call buftable.reset()
+    call buftable.clear_all()
 
     call buftable.set_henkan_phase(
     \   (eskk#has_mode_func('get_init_phase') ?
