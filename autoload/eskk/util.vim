@@ -110,7 +110,7 @@ function! s:split_special_key(key) "{{{
     let head = matchstr(a:key, '^<[^>]\+>')
     return [head, strpart(a:key, strlen(head))]
 endfunction "}}}
-function! eskk#util#eval_key(key) "{{{
+function! eskk#util#key2char(key) "{{{
     " From arpeggio.vim
 
     let keys = s:split_to_keys(a:key)

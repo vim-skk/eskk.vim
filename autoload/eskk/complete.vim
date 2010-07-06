@@ -97,7 +97,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<C-h>", 's:identity'],
     \   ["<BS>", 's:identity'],
     \]
-        if char ==# eskk#util#eval_key(key)
+        if char ==# eskk#util#key2char(key)
             call {fn}(a:stash)
             call eskk#util#logf("pumvisible() = 1, Handled key '%s'.", key)
             return 1
@@ -109,12 +109,12 @@ endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:select_but_not_inserted
         " Insert selected item.
-        let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-n><C-p>'))
+        let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-n><C-p>'))
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
         \   'eskk#util#identity',
-        \   [eskk#util#eval_key(eskk#get_named_map('<C-y>'))]
+        \   [eskk#util#key2char(eskk#get_named_map('<C-y>'))]
         \)
         let s:select_but_not_inserted = 0
     else
@@ -127,18 +127,18 @@ function! s:close_pum(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#identity',
-    \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
+    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
     if s:select_but_not_inserted
         " Insert selected item.
-        let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-n><C-p>'))
+        let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-n><C-p>'))
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
         \   'eskk#util#identity',
-        \   [eskk#util#eval_key(eskk#get_named_map('<CR>'))]
+        \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
         \)
         let s:select_but_not_inserted = 0
     else
@@ -151,7 +151,7 @@ function! s:do_enter(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#identity',
-    \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
+    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
     \)
     " FIXME:
     " When g:eskk_compl_enter_send_keys == ['<CR>', '<CR>']
@@ -160,7 +160,7 @@ function! s:do_enter(stash) "{{{
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
         \   'eskk#util#identity',
-        \   [eskk#util#eval_key(eskk#get_named_map(key))]
+        \   [eskk#util#key2char(eskk#get_named_map(key))]
         \)
     endfor
 
@@ -176,7 +176,7 @@ function! s:do_space(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#identity',
-    \   [eskk#util#eval_key(eskk#get_nore_map('<C-y>'))]
+    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
     \)
 
     " FIXME:
@@ -184,11 +184,11 @@ function! s:do_space(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
     \   'eskk#util#identity',
-    \   [eskk#util#eval_key(eskk#get_named_map('<Space>'))]
+    \   [eskk#util#key2char(eskk#get_named_map('<Space>'))]
     \)
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
-    let a:stash.return = eskk#util#eval_key(eskk#get_nore_map('<C-h>'))
+    let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-h>'))
 endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char

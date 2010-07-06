@@ -881,7 +881,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             for rest_char in split(rest, '\zs')
                 call eskk#register_temp_event(
                 \   'filter-redispatch-post',
-                \   'eskk#util#eval_key',
+                \   'eskk#util#key2char',
                 \   [eskk#get_named_map(rest_char)]
                 \)
             endfor
@@ -959,7 +959,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
                 for rest_char in split(rest, '\zs')
                     call eskk#register_temp_event(
                     \   'filter-redispatch-post',
-                    \   'eskk#util#eval_key',
+                    \   'eskk#util#key2char',
                     \   [eskk#get_named_map(rest_char)]
                     \)
                 endfor
@@ -1166,7 +1166,7 @@ endfunction "}}}
 function! eskk#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error when `s:map[a:type]` does not exist.
     return has_key(s:map, a:type)
-    \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
+    \   && eskk#util#key2char(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
 function! eskk#get_special_key(type) "{{{
     if has_key(s:map, a:type)
@@ -1250,7 +1250,7 @@ function! eskk#remove_display_str() "{{{
     let bs = eskk#get_special_key('backspace-key')
     call eskk#util#assert(bs != '')
 
-    return repeat(eskk#util#eval_key(bs), eskk#util#mb_strlen(current_str))
+    return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! eskk#kakutei_str() "{{{
     let self = eskk#get_current_instance()
@@ -1271,7 +1271,7 @@ function! eskk#escape_key() "{{{
     let esc = eskk#get_special_key('escape-key')
     call eskk#util#assert(esc != '')
 
-    return kakutei_str . eskk#util#eval_key(esc)
+    return kakutei_str . eskk#util#key2char(esc)
 endfunction "}}}
 
 " Mode
@@ -1436,14 +1436,14 @@ function! eskk#has_event(event_name) "{{{
 endfunction "}}}
 
 function! eskk#register_map(map, Fn, args, force) "{{{
-    let map = eskk#util#eval_key(a:map)
+    let map = eskk#util#key2char(a:map)
     if has_key(s:key_handler, map) && !a:force
         return
     endif
     let s:key_handler[map] = [a:Fn, a:args]
 endfunction "}}}
 function! eskk#unregister_map(map, Fn, args) "{{{
-    let map = eskk#util#eval_key(a:map)
+    let map = eskk#util#key2char(a:map)
     if has_key(s:key_handler, map)
         unlet s:key_handler[map]
     endif
