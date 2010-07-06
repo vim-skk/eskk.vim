@@ -247,11 +247,9 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
-let s:HR_REGISTERED_WORD = 0
-lockvar s:HR_REGISTERED_WORD
-let s:HR_LOOK_UP_DICTIONARY = 1
+let s:HR_LOOK_UP_DICTIONARY = 0
 lockvar s:HR_LOOK_UP_DICTIONARY
-let s:HR_GOT_RESULT = 2
+let s:HR_GOT_RESULT = 1
 lockvar s:HR_GOT_RESULT
 
 let s:henkan_result = {
@@ -260,12 +258,18 @@ let s:henkan_result = {
 \   '_key': '',
 \   '_okuri_rom': '',
 \   '_okuri': '',
-\   '_registered_input': '',
-\   '_status': s:HR_REGISTERED_WORD,
+\   '_status': -1,
 \   '_result': [],
 \}
 
 function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_input) "{{{
+    let added = []
+    for [added_input, added_key, added_okuri, added_okuri_rom] in a:registered_input
+        if added_key ==# a:key && added_okuri_rom[0] ==# a:okuri_rom[0]
+            call add(added, added_input)
+        endif
+    endfor
+
     return extend(
     \   deepcopy(s:henkan_result),
     \   {
@@ -274,9 +278,8 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_key': a:key,
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
-    \       '_registered_input': a:registered_input,
-    \       '_status': (empty(a:registered_input) ? s:HR_LOOK_UP_DICTIONARY : s:HR_REGISTERED_WORD),
-    \       '_result': (empty(a:registered_input) ? [] : [map(copy(a:registered_input), '{"result": v:val, "annotation": ""}'), 0]),
+    \       '_status': (empty(added) ? s:HR_LOOK_UP_DICTIONARY : s:HR_GOT_RESULT),
+    \       '_result': (empty(added) ? [] : [map(added, '{"result": v:val}'), 0]),
     \   },
     \   'force'
     \)
@@ -303,7 +306,7 @@ function! s:henkan_result_get_result(this) "{{{
     \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
     let cant_get_result = eskk#dictionary_look_up_error(['eskk', 'dictionary'], msg)
 
-    if a:this._status ==# s:HR_REGISTERED_WORD || a:this._status ==# s:HR_GOT_RESULT
+    if a:this._status ==# s:HR_GOT_RESULT
         if !empty(a:this._result)
             return a:this._result
         else
@@ -581,20 +584,13 @@ endfunction "}}}
 
 
 function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
-    let added = []
-    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
-        if added_key ==# a:key && added_okuri_rom[0] ==# a:okuri_rom[0]
-            call add(added, added_input)
-        endif
-    endfor
-
     return s:henkan_result_new(
     \   self,
     \   a:key,
     \   a:okuri_rom,
     \   a:okuri,
     \   deepcopy(a:buftable, 1),
-    \   added,
+    \   copy(self._added_words),
     \)
 endfunction "}}}
 
@@ -656,6 +652,10 @@ function! s:dict.register_word(henkan_result) dict "{{{
     else
         return key . okuri
     endif
+endfunction "}}}
+
+function! s:dict.forget_registered_words() dict "{{{
+    let self._added_words = []
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
@@ -728,10 +728,6 @@ function! s:dict.update_dictionary() dict "{{{
         \    "'" . self._user_dict.path . "' - " . v:exception
         echohl None
     endtry
-endfunction "}}}
-
-function! s:dict.forget_registered_words() dict "{{{
-    let self._added_words = []
 endfunction "}}}
 
 function! s:dict.get_kanji(buftable) dict "{{{

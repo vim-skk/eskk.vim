@@ -762,11 +762,8 @@ function! eskk#asym_filter(stash, table_name) "{{{
             call buftable.choose_prev_candidate(a:stash)
             return
         else
-            call buftable.push_kakutei_str(buftable.get_display_str(0))
-            call buftable.clear_all()
+            call buftable.do_enter(a:stash)
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
-
-            call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         endif
     else
         let msg = printf("eskk#asym_filter() does not support phase %d.", phase)
