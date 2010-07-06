@@ -134,25 +134,25 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     endif
 
     if a:0 >= 2
-        let [pos, end] = a:000
-        call eskk#util#assert(pos < end, 'pos < end')
+        let [min, max] = a:000
+        call eskk#util#assert(min < max, 'min < max')
     elseif a:has_okuri
-        let [pos, end] = [a:ph_dict.okuri_ari_idx, len(whole_lines) - 1]
+        let [min, max] = [a:ph_dict.okuri_ari_idx, len(whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
     else
-        let [pos, end] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
+        let [min, max] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
-    call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
+    call eskk#util#assert(min >= 0, "min is not invalid (negative) number.")
 
     " TODO: Use match() for speed-optimization.
-    while pos <=# end
-        let line = whole_lines[pos]
+    while min <=# max
+        let line = whole_lines[min]
         if stridx(line, a:needle) == 0
             call eskk#util#logf('eskk#dictionary#search_candidate() - found!: %s', string(line))
-            return [line, pos]
+            return [line, min]
         endif
-        let pos += 1
+        let min += 1
     endwhile
     call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
     return ['', -1]
