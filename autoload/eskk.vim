@@ -1888,7 +1888,7 @@ endfunction "}}}
 " Completion {{{
 function! eskk#set_omnifunc() "{{{
     let self = eskk#get_current_instance()
-    if !has_key(self, 'save_omnifunc')
+    if !has_key(self, 'save_omnifunc') && g:eskk_enable_completion
         let self.save_omnifunc = &l:omnifunc
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
     endif
