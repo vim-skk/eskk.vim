@@ -1640,12 +1640,16 @@ function! eskk#register_debug_begin() "{{{
     call eskk#util#log(v.rface)
     call eskk#util#log(repeat('-', strlen(v) - 1))
 
-    let n = eskk#util#rand(2)
+    call eskk#util#log('')
+    let n = eskk#util#rand(3)
     if n ==# 0
-        call eskk#util#log("e = extended,enhanced,environment,...")
-    else
+        call eskk#util#log("e = extended,enhanced,environment,...enlightenment?")
+    elseif n ==# 1
         call eskk#util#log('SKK = I')
         call eskk#util#log('e * SKK = Inf.')
+    else
+        call eskk#util#log("( '-')                  ('-' )")
+        call eskk#util#log('(/ *_*)/******************(*_* )*********')
     endif
 
     call eskk#util#log(repeat('-', 80))
