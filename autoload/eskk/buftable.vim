@@ -303,8 +303,8 @@ function! s:buftable.do_enter(stash) dict "{{{
     let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     let phase = self.get_henkan_phase()
-    let enter_char = eskk#util#eval_key(eskk#get_special_key('enter-key'))
-    let undo_char  = eskk#util#eval_key('<Plug>(eskk:internal:undo-key)')
+    let enter_char = eskk#util#eval_key(eskk#get_special_map('enter-key'))
+    let undo_char  = eskk#util#eval_key(eskk#get_special_map('undo-key'))
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if normal_buf_str.get_rom_str() != ''
@@ -492,7 +492,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
             call self.push_kakutei_str(self.get_display_str(0))
         endif
         if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            let undo_char = eskk#util#eval_key('<Plug>(eskk:internal:undo-key)')
+            let undo_char = eskk#util#eval_key(eskk#get_special_map('undo-key'))
             call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', [undo_char])
         endif
         call self.set_begin_pos('.')

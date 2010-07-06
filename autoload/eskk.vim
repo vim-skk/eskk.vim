@@ -69,6 +69,7 @@ let s:map = {
 \   'backspace-key': {},
 \   'escape-key': {},
 \   'enter-key': {},
+\   'undo-key': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -1736,6 +1737,7 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=backspace-key -unique <C-h>
     silent! EskkMap -type=enter-key -unique <CR>
     silent! EskkMap -type=escape-key -unique <Esc>
+    silent! EskkMap -type=undo-key -unique <C-g>u
 
     silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
 
