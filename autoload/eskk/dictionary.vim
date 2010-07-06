@@ -151,12 +151,12 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
 endfunction "}}}
 
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
-    let m = matchlist(a:line, '^\([^ ]\+\) /\(.*\)/$')
-    call eskk#util#assert(!empty(m))
-    let [yomi, line] = m[1:2]
+    let list = split(a:line, '/')
+    call eskk#util#assert(!empty(list))
+    let yomi = substitute(list[0], '\s', '', 'g')
 
     let candidates = []
-    for _ in split(line, '/')
+    for _ in list[1:]
         let semicolon = stridx(_, ';')
         call add(candidates, (semicolon != -1) ?
               \ {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]} :
