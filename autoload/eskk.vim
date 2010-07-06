@@ -1332,6 +1332,12 @@ function! eskk#call_mode_func(func_key, args, required) "{{{
     return call(st[a:func_key], a:args, st)
 endfunction "}}}
 
+function! eskk#has_current_mode_table() "{{{
+    return eskk#has_mode_table(eskk#get_mode())
+endfunction "}}}
+function! eskk#has_mode_table(mode) "{{{
+    return has_key(g:eskk_mode_use_tables, a:mode)
+endfunction "}}}
 function! eskk#get_current_mode_table() "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}

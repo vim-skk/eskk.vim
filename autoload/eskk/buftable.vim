@@ -557,14 +557,16 @@ function! s:buftable.do_henkan(stash) dict "{{{
         endif
 
         " Convert rom_str if possible.
-        let table = eskk#table#get_table(eskk#get_current_mode_table())
-        for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
-            let buf_str = self.get_buf_str(phase)
-            let rom_str = buf_str.get_rom_str()
-            if table.has_map(rom_str)
-                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
-            endif
-        endfor
+        if eskk#has_current_mode_table()
+            let table = eskk#table#get_table(eskk#get_current_mode_table())
+            for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
+                let buf_str = self.get_buf_str(phase)
+                let rom_str = buf_str.get_rom_str()
+                if table.has_map(rom_str)
+                    call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+                endif
+            endfor
+        endif
 
         call eskk#set_henkan_result(eskk#get_dictionary().refer(self))
 
@@ -628,14 +630,16 @@ function! s:convert_again_with_table(self, table) "{{{
     let self = a:self
 
     " Convert rom_str if possible.
-    let table = eskk#table#get_table(eskk#get_current_mode_table())
-    for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
-        let buf_str = self.get_buf_str(phase)
-        let rom_str = buf_str.get_rom_str()
-        if table.has_map(rom_str)
-            call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
-        endif
-    endfor
+    if eskk#has_current_mode_table()
+        let table = eskk#table#get_table(eskk#get_current_mode_table())
+        for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
+            let buf_str = self.get_buf_str(phase)
+            let rom_str = buf_str.get_rom_str()
+            if table.has_map(rom_str)
+                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+            endif
+        endfor
+    endif
 
     let cur_buf_str = self.get_current_buf_str()
 
