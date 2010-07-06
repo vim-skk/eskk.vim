@@ -83,20 +83,24 @@ let s:map = {
 \   'mode:hira:q-key': {},
 \   'mode:hira:to-ascii': {},
 \   'mode:hira:to-zenei': {},
+\   'mode:hira:to-abbrev': {},
 \   'mode:kata:toggle-hankata': {},
 \   'mode:kata:ctrl-q-key': {},
 \   'mode:kata:toggle-kata': {},
 \   'mode:kata:q-key': {},
 \   'mode:kata:to-ascii': {},
 \   'mode:kata:to-zenei': {},
+\   'mode:kata:to-abbrev': {},
 \   'mode:hankata:toggle-hankata': {},
 \   'mode:hankata:ctrl-q-key': {},
 \   'mode:hankata:toggle-kata': {},
 \   'mode:hankata:q-key': {},
 \   'mode:hankata:to-ascii': {},
 \   'mode:hankata:to-zenei': {},
+\   'mode:hankata:to-abbrev': {},
 \   'mode:ascii:to-hira': {},
 \   'mode:zenei:to-hira': {},
+\   'mode:abbrev:henkan-key': {},
 \}
 " TODO s:map should contain this info.
 " Keys used by only its mode.
@@ -115,6 +119,7 @@ let s:mode_local_keys = {
 \       'mode:hira:q-key',
 \       'mode:hira:to-ascii',
 \       'mode:hira:to-zenei',
+\       'mode:hira:to-abbrev',
 \   ],
 \   'kata': [
 \       'phase:henkan:henkan-key',
@@ -130,6 +135,7 @@ let s:mode_local_keys = {
 \       'mode:kata:q-key',
 \       'mode:kata:to-ascii',
 \       'mode:kata:to-zenei',
+\       'mode:kata:to-abbrev',
 \   ],
 \   'hankata': [
 \       'phase:henkan:henkan-key',
@@ -145,6 +151,7 @@ let s:mode_local_keys = {
 \       'mode:hankata:q-key',
 \       'mode:hankata:to-ascii',
 \       'mode:hankata:to-zenei',
+\       'mode:hankata:to-abbrev',
 \   ],
 \   'ascii': [
 \       'mode:ascii:to-hira',
@@ -208,6 +215,15 @@ function! eskk#handle_to_zenei(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! eskk#handle_to_abbrev(stash) "{{{
+    let buftable = eskk#get_buftable()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
+        call eskk#set_mode('abbrev')
+        return 1
+    endif
+    return 0
+endfunction "}}}
 let s:map_fn = {
 \   'mode:hira:toggle-hankata': 'eskk#handle_toggle_hankata',
 \   'mode:hira:ctrl-q-key': 'eskk#handle_ctrl_q_key',
@@ -215,6 +231,7 @@ let s:map_fn = {
 \   'mode:hira:q-key': 'eskk#handle_q_key',
 \   'mode:hira:to-ascii': 'eskk#handle_to_ascii',
 \   'mode:hira:to-zenei': 'eskk#handle_to_zenei',
+\   'mode:hira:to-abbrev': 'eskk#handle_to_abbrev',
 \
 \   'mode:kata:toggle-hankata': 'eskk#handle_toggle_hankata',
 \   'mode:kata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
@@ -222,6 +239,7 @@ let s:map_fn = {
 \   'mode:kata:q-key': 'eskk#handle_q_key',
 \   'mode:kata:to-ascii': 'eskk#handle_to_ascii',
 \   'mode:kata:to-zenei': 'eskk#handle_to_zenei',
+\   'mode:kata:to-abbrev': 'eskk#handle_to_abbrev',
 \
 \   'mode:hankata:toggle-hankata': 'eskk#handle_toggle_hankata',
 \   'mode:hankata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
@@ -229,6 +247,7 @@ let s:map_fn = {
 \   'mode:hankata:q-key': 'eskk#handle_q_key',
 \   'mode:hankata:to-ascii': 'eskk#handle_to_ascii',
 \   'mode:hankata:to-zenei': 'eskk#handle_to_zenei',
+\   'mode:hankata:to-abbrev': 'eskk#handle_to_abbrev',
 \
 \
 \}
@@ -681,8 +700,9 @@ function! eskk#asym_filter(stash, table_name) "{{{
     let q_key = printf('mode:%s:q-key', cur_mode)
     let to_ascii = printf('mode:%s:to-ascii', cur_mode)
     let to_zenei = printf('mode:%s:to-zenei', cur_mode)
+    let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
 
-    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei]
+    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei, to_abbrev]
         if eskk#handle_special_lhs(char, key, a:stash)
             " Handled.
             call eskk#util#logf("Handled '%s' key.", key)
@@ -1760,6 +1780,7 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=mode:hira:q-key -unique q
     silent! EskkMap -type=mode:hira:to-ascii -unique l
     silent! EskkMap -type=mode:hira:to-zenei -unique L
+    silent! EskkMap -type=mode:hira:to-abbrev -unique /
 
     silent! EskkMap -type=mode:kata:toggle-hankata -unique <C-q>
     silent! EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
@@ -1767,6 +1788,7 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=mode:kata:q-key -unique q
     silent! EskkMap -type=mode:kata:to-ascii -unique l
     silent! EskkMap -type=mode:kata:to-zenei -unique L
+    silent! EskkMap -type=mode:kata:to-abbrev -unique /
 
     silent! EskkMap -type=mode:hankata:toggle-hankata -unique <C-q>
     silent! EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
@@ -1774,10 +1796,13 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=mode:hankata:q-key -unique q
     silent! EskkMap -type=mode:hankata:to-ascii -unique l
     silent! EskkMap -type=mode:hankata:to-zenei -unique L
+    silent! EskkMap -type=mode:hankata:to-abbrev -unique /
 
     silent! EskkMap -type=mode:ascii:to-hira -unique <C-j>
 
     silent! EskkMap -type=mode:zenei:to-hira -unique <C-j>
+
+    silent! EskkMap -type=mode:abbrev:henkan-key -unique <Space>
 
     " Remap <BS> to <C-h>
     silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
@@ -1884,6 +1909,86 @@ function! eskk#register_builtin_modes() "{{{
     endfunction
 
     call eskk#validate_mode_structure('hankata')
+    " }}}
+
+    " 'abbrev' mode {{{
+    call eskk#register_mode('abbrev')
+    let dict = eskk#get_mode_structure('abbrev')
+
+    function! dict.filter(stash)
+        let char = a:stash.char
+        let buftable = eskk#get_buftable()
+        let this = eskk#get_mode_structure('abbrev')
+        let buf_str = buftable.get_current_buf_str()
+        let phase = buftable.get_henkan_phase()
+
+        " Handle special characters.
+        " These characters are handled regardless of current phase.
+        if eskk#is_special_lhs(char, 'backspace-key')
+            if buf_str.get_rom_str() == ''
+                " If backspace-key was pressed at empty string,
+                " leave abbrev mode.
+                " TODO: Back to previous mode?
+                call eskk#set_mode('hira')
+            else
+                call buftable.do_backspace(a:stash)
+            endif
+            return
+        elseif eskk#is_special_lhs(char, 'enter-key')
+            call buftable.do_enter(a:stash)
+            if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+                return
+            elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+                call eskk#set_mode('hira')
+                return
+            endif
+        else
+            " Fall through.
+        endif
+
+        " Handle other characters.
+        if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+            call eskk#util#log('henkan!!!!!!!!!!!!1')
+            if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
+                call buftable.do_henkan(a:stash)
+                call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
+            else
+                call buf_str.push_rom_str(char)
+            endif
+        elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+            call eskk#util#log('henkan select!!!!!!!!!!!!1')
+            if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
+                call buftable.choose_next_candidate(a:stash)
+                return
+            elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
+                call buftable.choose_prev_candidate(a:stash)
+                return
+            else
+                call buftable.push_kakutei_str(buftable.get_display_str(0))
+                call buftable.clear_all()
+                call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
+
+                call eskk#util#log('((((((((((((((^^))))))))))))))')
+                " Leave abbrev mode.
+                " TODO: Back to previous mode?
+                call eskk#set_mode('hira')
+                call eskk#util#log('((((((((((((((^^))))))))))))))')
+            endif
+        else
+            throw eskk#internal_error(['eskk'], "'abbrev' mode does not support phase %d.", phase)
+        endif
+    endfunction
+    function! dict.get_init_phase() "{{{
+        return g:eskk#buftable#HENKAN_PHASE_HENKAN
+    endfunction "}}}
+    function! dict.get_supported_phases() "{{{
+        return [
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
+        \]
+    endfunction "}}}
+
+    call eskk#validate_mode_structure('abbrev')
     " }}}
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])

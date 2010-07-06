@@ -548,57 +548,75 @@ endfunction "}}}
 function! s:buftable.do_henkan(stash) dict "{{{
     let phase = self.get_henkan_phase()
     let eskk_mode = eskk#get_mode()
+    let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
-            let table = eskk#table#get_table('rom_to_hira')
-            call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
-            call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
-        endif
+        if eskk_mode ==# 'abbrev'
+            let key = henkan_buf_str.get_rom_str()
+            call eskk#set_henkan_result(eskk#get_dictionary().refer(self, key, '', ''))
 
-        let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+            " XXX: This must clear strings.
+            call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
-        " Convert rom_str if possible.
-        if eskk#has_current_mode_table()
-            let table = eskk#table#get_table(eskk#get_current_mode_table())
-            for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
-                let buf_str = self.get_buf_str(phase)
-                let rom_str = buf_str.get_rom_str()
-                if table.has_map(rom_str)
-                    call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
-                endif
-            endfor
-        endif
-
-        let key = henkan_buf_str.get_matched_filter()
-        let okuri = okuri_buf_str.get_matched_filter()
-        let okuri_rom = okuri_buf_str.get_matched_rom()
-        call eskk#set_henkan_result(eskk#get_dictionary().refer(self, key, okuri, okuri_rom))
-
-        " Enter henkan select phase.
-        call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-
-        " Clear phase henkan/okuri buffer string.
-        " Assumption: `eskk#get_dictionary().refer()` saves necessary strings.
-        let henkan_matched_rom = henkan_buf_str.get_matched_rom()
-        call henkan_buf_str.clear()
-
-        let okuri_matched_rom = okuri_buf_str.get_matched_rom()
-        call okuri_buf_str.clear()
-
-        let candidate = eskk#get_prev_henkan_result().get_candidate()
-
-        let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-        let rom_str = henkan_matched_rom . okuri_matched_rom
-        if type(candidate) == type("")
-            " Set candidate.
-            call henkan_select_buf_str.set_matched(rom_str, candidate)
+            let candidate = eskk#get_prev_henkan_result().get_candidate()
+            if type(candidate) == type("")
+                " Set candidate.
+                call henkan_select_buf_str.set_matched(key, candidate)
+            else
+                " No candidates.
+                let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
+                call henkan_select_buf_str.set_matched(key, input)
+            endif
         else
-            " No candidates.
-            let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
-            call henkan_select_buf_str.set_matched(rom_str, input)
+            if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
+                let table = eskk#table#get_table('rom_to_hira')
+                call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
+                call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
+            endif
+
+            " Convert rom_str if possible.
+            if eskk#has_current_mode_table()
+                let table = eskk#table#get_table(eskk#get_current_mode_table())
+                for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
+                    let buf_str = self.get_buf_str(phase)
+                    let rom_str = buf_str.get_rom_str()
+                    if table.has_map(rom_str)
+                        call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+                    endif
+                endfor
+            endif
+
+            let key = henkan_buf_str.get_matched_filter()
+            let okuri = okuri_buf_str.get_matched_filter()
+            let okuri_rom = okuri_buf_str.get_matched_rom()
+            call eskk#set_henkan_result(eskk#get_dictionary().refer(self, key, okuri, okuri_rom))
+
+            " XXX: This must clear strings.
+            call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+
+            " Clear phase henkan/okuri buffer string.
+            " NOTE: I assume that `eskk#get_dictionary().refer()`
+            " saves necessary strings even if I clear these.
+            let henkan_matched_rom = henkan_buf_str.get_matched_rom()
+            call henkan_buf_str.clear()
+
+            let okuri_matched_rom = okuri_buf_str.get_matched_rom()
+            call okuri_buf_str.clear()
+
+            let candidate = eskk#get_prev_henkan_result().get_candidate()
+
+            let rom_str = henkan_matched_rom . okuri_matched_rom
+            if type(candidate) == type("")
+                " Set candidate.
+                call henkan_select_buf_str.set_matched(rom_str, candidate)
+            else
+                " No candidates.
+                let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
+                call henkan_select_buf_str.set_matched(rom_str, input)
+            endif
         endif
     else
         let msg = printf("s:buftable.do_henkan() does not support phase %d.", phase)
