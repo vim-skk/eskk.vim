@@ -31,9 +31,11 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         let buftable = eskk#get_buftable()
         let l = buftable.get_begin_pos()
         if empty(l)
+
             return -1
         endif
         let [mode, pos] = l
+
         if mode !=# 'i'
             " Command line mode completion is not implemented.
             return -1
@@ -131,7 +133,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
         endif
     endfor
 
-    return 0
+    "return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:select_but_not_inserted

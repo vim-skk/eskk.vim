@@ -34,10 +34,10 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, converted, has_okuri, 5)
+        let result = s:search_binary(a:physical_dict, converted, has_okuri, limit)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        let result = s:search_linear(a:physical_dict, converted, has_okuri)
+        let result = s:search_linear(a:physical_dict, converted, has_okuri, limit)
     endif
 
     if result[1] !=# -1
