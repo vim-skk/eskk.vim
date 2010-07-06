@@ -2039,45 +2039,10 @@ call eskk#register_temp_event('enable-im', 'eskk#register_restore_im_options', [
 " }}}
 " g:eskk_context_control {{{
 function! eskk#handle_context() "{{{
-    if !exists('b:eskk_context')
-        return
-    endif
-    " b:eskk_context exists,
-
-    if !(exists('b:eskk_context')
-    \   && has_key(b:eskk_context, 'synname')
-    \   && eskk#util#has_elem(
-    \       (type(b:eskk_context.synname) == type([]) ?
-    \           b:eskk_context.synname
-    \           : [b:eskk_context.synname]),
-    \       synIDattr(synID(line("."), col("."), 1), "name")))
-        return
-    endif
-    " ... and current syntax name has matched,
-
-    let if_rule_name = (eskk#is_enabled() ? 'if_enabled' : 'if_disabled')
-    let filetype_has = eskk#util#has_key_f(g:eskk_context_control, [&l:filetype, if_rule_name])
-    let global_has   = eskk#util#has_key_f(g:eskk_context_control, ['*', if_rule_name])
-    if !(filetype_has || global_has)
-        return
-    endif
-    " ... and settings have had a rule that has matched,
-
-
-    " ... Now ready to call g:eskk_context_control's hooks.
-
-    let Fn_filetype = eskk#util#get_f(g:eskk_context_control, [&l:filetype, if_rule_name], [])
-    let Fn_global   = eskk#util#get_f(g:eskk_context_control, ['*', if_rule_name], [])
-    let FnList =
-    \   (type(Fn_filetype) == type([]) ? Fn_filetype : [Fn_filetype])
-    \   + (type(Fn_global) == type([]) ? Fn_global : [Fn_global])
-    for Fn in FnList
-        if type(Fn) == type([])
-            call call('call', Fn)
-        else
-            call call(Fn, [])
+    for control in g:eskk_context_control
+        if eval(control.rule)
+            call call(control.fn, [])
         endif
-        unlet Fn
     endfor
 endfunction "}}}
 " }}}

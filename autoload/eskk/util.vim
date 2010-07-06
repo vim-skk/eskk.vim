@@ -223,6 +223,16 @@ function! eskk#util#rand(max) "{{{
     return (next / 65536) % (a:max + 1)
 endfunction "}}}
 
+
+function! eskk#util#get_syn_names(...) "{{{
+    let [line, col] = eskk#util#get_args(a:000, line('.'), col('.'))
+    " synstack() returns strange value when col is over $ pos. Bug?
+    if col >= col('$')
+        return []
+    endif
+    return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
+endfunction "}}}
+
 " }}}
 
 

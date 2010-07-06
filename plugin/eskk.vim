@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 196))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 197))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -198,11 +198,7 @@ if !exists("g:eskk_set_undo_point")
 endif
 
 if !exists("g:eskk_context_control")
-    let g:eskk_context_control = {
-    \   '*': {
-    \       'if_disabled': 'eskk#enable'
-    \   },
-    \}
+    let g:eskk_context_control = []
 endif
 
 if !exists('g:eskk_keep_state_beyond_buffer')
