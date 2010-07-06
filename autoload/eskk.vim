@@ -58,12 +58,6 @@ lockvar s:eskk
 
 " Variables {{{
 
-" These instances are created, destroyed
-" at word-register mode.
-let s:eskk_instances = [s:eskk_new()]
-" Index number of s:eskk_instances for current instance.
-let s:instance_id = 0
-
 " NOTE: Following variables are non-local between instances.
 
 " Supported modes and their structures.
@@ -245,6 +239,8 @@ let s:has_mapped = {}
 let s:skk_dict = {}
 " For eskk#register_map(), eskk#unregister_map().
 let s:key_handler = {}
+" Global values of &iminsert, &imsearch.
+let s:saved_im_options = []
 " }}}
 
 " Functions {{{
@@ -541,17 +537,22 @@ endfunction "}}}
 
 " Manipulate eskk instances.
 function! eskk#get_current_instance() "{{{
-    return s:eskk_instances[s:instance_id]
+    if !exists('b:eskk_instances')
+        let b:eskk_instances = [s:eskk_new()]
+        " Index number for current instance in s:eskk_instances.
+        let b:eskk_instance_id = 0
+    endif
+    return b:eskk_instances[b:eskk_instance_id]
 endfunction "}}}
 function! eskk#create_new_instance() "{{{
     " TODO: CoW
 
     " Create instance.
     let inst = s:eskk_new()
-    call add(s:eskk_instances, inst)
-    let s:instance_id += 1
+    call add(b:eskk_instances, inst)
+    let b:eskk_instance_id += 1
 
-    call eskk#util#logf('Create instance: %d => %d', s:instance_id - 1, s:instance_id)
+    call eskk#util#logf('Create instance: %d => %d', b:eskk_instance_id - 1, b:eskk_instance_id)
 
     " Initialize instance.
     call eskk#enable(0)
@@ -559,15 +560,15 @@ function! eskk#create_new_instance() "{{{
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
-    if s:instance_id == 0
+    if b:eskk_instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
 
     " Destroy current instance.
-    call remove(s:eskk_instances, s:instance_id)
-    let s:instance_id -= 1
+    call remove(b:eskk_instances, b:eskk_instance_id)
+    let b:eskk_instance_id -= 1
 
-    call eskk#util#logf('Destroy instance: %d => %d', s:instance_id + 1, s:instance_id)
+    call eskk#util#logf('Destroy instance: %d => %d', b:eskk_instance_id + 1, b:eskk_instance_id)
 endfunction "}}}
 function! eskk#get_mutable_stash(namespace) "{{{
     let obj = deepcopy(s:mutable_stash, 1)
@@ -1033,6 +1034,10 @@ function! eskk#enable(...) "{{{
 
     let self.enabled = 1
     let self.enabled_mode = mode()
+
+    if empty(s:saved_im_options)
+        let s:saved_im_options = [&g:iminsert, &g:imsearch]
+    endif
 
     if self.enabled_mode =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
@@ -1876,6 +1881,18 @@ function! eskk#register_map_all_keys_if_enabled() "{{{
     autocmd eskk BufEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
+" }}}
+" BufEnter: Restore global option value of &iminsert, &imsearch {{{
+function! eskk#restore_im_options() "{{{
+    if empty(s:saved_im_options)
+        return
+    endif
+    let [&g:iminsert, &g:imsearch] = s:saved_im_options
+endfunction "}}}
+function! eskk#register_restore_im_options() "{{{
+    autocmd eskk BufLeave * call eskk#restore_im_options()
+endfunction "}}}
+call eskk#register_temp_event('enable-im', 'eskk#register_restore_im_options', [])
 " }}}
 " g:eskk_context_control {{{
 function! eskk#handle_context() "{{{
