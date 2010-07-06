@@ -44,15 +44,45 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1 + strlen(g:eskk_marker_henkan)
     endif
 
-    " Do not complete while inputting rom string.
-    if a:base[-1] =~ '\a$'
-        return []
-    endif
+    if eskk#get_mode() ==# 'ascii'
+        " ASCII mode.
+        return s:complete_ascii()
+    else
+        " Kanji mode.
+        
+        " Do not complete while inputting rom string.
+        if a:base[-1] =~ '\a$'
+            return []
+        endif
 
-    return s:complete_kanji()
+        return s:complete_kanji()
+    endif
 endfunction "}}}
 function! s:initialize_variables() "{{{
     let s:select_but_not_inserted = 0
+endfunction "}}}
+function! s:complete_ascii() "{{{
+    " Get candidates.
+    let list = []
+    let dict = eskk#get_dictionary()
+    let buftable = eskk#get_buftable()
+    for [yomigana, kanji_list] in dict.get_ascii(buftable)
+        " Add yomigana.
+        if yomigana != ''
+            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
+        endif
+
+        " Add kanji.
+        for kanji in kanji_list[: 1]
+            call add(list, {
+            \   'word': kanji.result,
+            \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
+            \   'menu': 'kanji'
+            \})
+        endfor
+    endfor
+
+    return list
 endfunction "}}}
 function! s:complete_kanji() "{{{
     " Get candidates.
@@ -66,7 +96,7 @@ function! s:complete_kanji() "{{{
         endif
 
         " Add kanji.
-        for kanji in kanji_list
+        for kanji in kanji_list[: 1]
             call add(list, {
             \   'word': kanji.result,
             \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
