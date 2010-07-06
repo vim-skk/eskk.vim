@@ -15,8 +15,6 @@ runtime! plugin/eskk.vim
 
 " TODO
 " - Compile dictionary (s:dict._dict_info) to refer to result.
-" - lnum => idx
-" - eskk#dictionary#search_next_candidate() => eskk#dictionary#search_candidate()
 
 " Utility autoload functions {{{
 
@@ -61,7 +59,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         return []
     endif
 endfunction "}}}
-function! eskk#dictionary#search_next_candidate(physical_dict, key_filter, okuri_rom) "{{{
+function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
@@ -99,8 +97,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 
     " NOTE: min, max, mid are lnum. not index number.
 
-    let min = a:ph_dict.okuri_ari_lnum + 1
-    let max = a:has_okuri ? a:ph_dict.okuri_nasi_lnum - 1 : len(whole_lines)
+    let min = a:ph_dict.okuri_ari_idx + 1
+    let max = a:has_okuri ? a:ph_dict.okuri_nasi_idx - 1 : len(whole_lines)
     while max - min > a:limit
         let mid = (min + max + 2) / 2
         let line = whole_lines[mid - 1]
@@ -131,33 +129,34 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let [pos, end] = a:000
         call eskk#util#assert(pos < end, 'pos < end')
     elseif a:has_okuri
-        let [pos, end] = [a:ph_dict.okuri_ari_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_lnum !=# -1, 'okuri_ari_lnum is not -1')
+        let [pos, end] = [a:ph_dict.okuri_ari_idx, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
     else
-        let [pos, end] = [a:ph_dict.okuri_nasi_lnum, len(whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_nasi_lnum !=# -1, 'okuri_nasi_lnum is not -1')
+        let [pos, end] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
+        call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
     call eskk#util#assert(pos >= 0, "pos is not invalid (negative) number.")
 
+    " TODO: Use match() for speed-optimization.
     while pos <=# end
         let line = whole_lines[pos]
         if stridx(line, a:needle) == 0
-            call eskk#util#logf('eskk#dictionary#search_next_candidate() - found!: %s', string(line))
+            call eskk#util#logf('eskk#dictionary#search_candidate() - found!: %s', string(line))
             return [line, pos]
         endif
         let pos += 1
     endwhile
-    call eskk#util#log('eskk#dictionary#search_next_candidate() - not found.')
+    call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
     return ['', -1]
 endfunction "}}}
 
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
-    let m = matchlist(a:line, '^\([^ ]\+\) /\(.*\)/$')
-    call eskk#util#assert(!empty(m))
-    let [yomi, line] = m[1:2]
+    let list = split(a:line, '/')
+    call eskk#util#assert(!empty(list))
+    let yomi = substitute(list[0], '\s', '', 'g')
 
     let candidates = []
-    for _ in split(line, '/')
+    for _ in list[1:]
         let semicolon = stridx(_, ';')
         call add(candidates, (semicolon != -1) ?
               \ {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]} :
@@ -305,10 +304,10 @@ function! s:henkan_result_get_result(this) "{{{
     elseif a:this._status ==# s:HR_LOOK_UP_DICTIONARY
         let [user_dict, system_dict] = [a:this._dict._user_dict, a:this._dict._system_dict]
         " Look up this henkan result in dictionaries.
-        let user_dict_result = eskk#dictionary#search_next_candidate(
+        let user_dict_result = eskk#dictionary#search_candidate(
         \   user_dict, a:this._key, a:this._okuri_rom
         \)
-        let system_dict_result = eskk#dictionary#search_next_candidate(
+        let system_dict_result = eskk#dictionary#search_candidate(
         \   system_dict, a:this._key, a:this._okuri_rom
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
@@ -448,8 +447,8 @@ let s:physical_dict = {
 \   '_content_lines': [],
 \   '_ftime_at_read': 0,
 \   '_loaded': 0,
-\   'okuri_ari_lnum': -1,
-\   'okuri_nasi_lnum': -1,
+\   'okuri_ari_idx': -1,
+\   'okuri_nasi_idx': -1,
 \   'path': '',
 \   'sorted': 0,
 \   'encoding': '',
@@ -492,8 +491,8 @@ function! s:physical_dict.get_lines(...) dict "{{{
         endif
     catch /^eskk: parse error/
         call eskk#util#log('warning: ' . v:exception)
-        let self.okuri_ari_lnum = -1
-        let self.okuri_nasi_lnum = -1
+        let self.okuri_ari_idx = -1
+        let self.okuri_nasi_idx = -1
     endtry
     let self._ftime_at_read = getftime(path)
     let self._loaded = 1
@@ -507,8 +506,8 @@ function! s:physical_dict.set_lines(lines) dict "{{{
         call s:physical_dict_parse_lines(self, a:lines)
     catch /^eskk: parse error/
         call eskk#util#log('warning: ' . v:exception)
-        let self.okuri_ari_lnum = -1
-        let self.okuri_nasi_lnum = -1
+        let self.okuri_ari_idx = -1
+        let self.okuri_nasi_idx = -1
     endtry
     let self._loaded = 1
 
@@ -518,12 +517,12 @@ endfunction "}}}
 function! s:physical_dict_parse_lines(self, lines) "{{{
     let self = a:self
 
-    let self.okuri_ari_lnum  = index(self._content_lines, ';; okuri-ari entries.')
-    if self.okuri_ari_lnum ==# -1
+    let self.okuri_ari_idx  = index(self._content_lines, ';; okuri-ari entries.')
+    if self.okuri_ari_idx ==# -1
         throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
     endif
-    let self.okuri_nasi_lnum = index(self._content_lines, ';; okuri-nasi entries.')
-    if self.okuri_nasi_lnum ==# -1
+    let self.okuri_nasi_idx = index(self._content_lines, ';; okuri-nasi entries.')
+    if self.okuri_nasi_idx ==# -1
         throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
     endif
 endfunction "}}}
@@ -531,7 +530,7 @@ endfunction "}}}
 function! s:physical_dict.is_valid() dict "{{{
     " Succeeded to parse SKK dictionary.
     call self.get_lines()
-    return self.okuri_ari_lnum >= 0 && self.okuri_nasi_lnum >= 0
+    return self.okuri_ari_idx >= 0 && self.okuri_nasi_idx >= 0
 endfunction "}}}
 
 lockvar s:physical_dict
@@ -689,11 +688,11 @@ function! s:dict.update_dictionary() dict "{{{
 
     " Check if a:self.user_dict really does not have added words.
     for [input, key, okuri, okuri_rom] in self._added_words
-        let [line, index] = eskk#dictionary#search_next_candidate(self._user_dict, key, okuri_rom)
+        let [line, index] = eskk#dictionary#search_candidate(self._user_dict, key, okuri_rom)
         if okuri_rom != ''
-            let lnum = self._user_dict.okuri_ari_lnum + 1
+            let lnum = self._user_dict.okuri_ari_idx + 1
         else
-            let lnum = self._user_dict.okuri_nasi_lnum + 1
+            let lnum = self._user_dict.okuri_nasi_idx + 1
         endif
         " Delete old entry.
         if index !=# -1
@@ -727,6 +726,10 @@ function! s:dict.update_dictionary() dict "{{{
         \    "'" . self._user_dict.path . "' - " . v:exception
         echohl None
     endtry
+endfunction "}}}
+
+function! s:dict.forget_registered_words() dict "{{{
+    let self._added_words = []
 endfunction "}}}
 
 function! s:dict.get_kanji(buftable) dict "{{{

@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 145))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 163))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -206,6 +206,10 @@ if !exists("g:eskk_context_control")
 endif
 
 " Completion
+if !exists('g:eskk_enable_completion')
+    let g:eskk_enable_completion = 1
+endif
+
 if !exists('g:eskk_compl_enter_send_keys')
     let g:eskk_compl_enter_send_keys = ['<CR>', '<CR>']
 endif
