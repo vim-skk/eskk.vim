@@ -98,33 +98,36 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     " NOTE: min, max, mid are lnum. not index number.
 
     if a:has_okuri
-        let [min, max] = [a:ph_dict.okuri_ari_idx, len(whole_lines) - 1]
+        let [min, max] = [a:ph_dict.okuri_ari_idx, a:ph_dict.okuri_nasi_idx - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
     else
         let [min, max] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
-    " let min = a:ph_dict.okuri_ari_idx + 1
-    " let max = a:has_okuri ? a:ph_dict.okuri_nasi_idx - 1 : len(whole_lines)
+    call eskk#util#logf('s:search_binary(): Initial: min = %d, max = %d', min, max)
 
+    call eskk#util#log('--- s:search_binary() ---')
     while max - min > a:limit
         let mid = (min + max + 2) / 2
         let line = whole_lines[mid - 1]
+        call eskk#util#logf('min = %d, max = %d, mid = %d', min, max, mid)
         if a:needle >=# line
             if a:has_okuri
                 let max = mid
             else
                 let min = mid
             endif
-        elseif a:has_okuri
-          let min = mid
         else
-          let max = mid
+            if a:has_okuri
+                let min = mid
+            else
+                let max = mid
+            endif
         endif
     endwhile
-    call eskk#util#logf('min = %d, max = %d', min, max)
+    call eskk#util#log('--- s:search_binary() ---')
     " NOTE: min, max: Give index number, not lnum.
-    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min - 1, max - 1)
+    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
 endfunction "}}}
 function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
@@ -144,6 +147,7 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number.")
+    call eskk#util#logf('s:search_linear(): Initial: min = %d, max = %d', min, max)
 
     " TODO: Use match() for speed-optimization.
     while min <=# max
@@ -535,6 +539,9 @@ function! s:physical_dict_parse_lines(self, lines) "{{{
     let self.okuri_nasi_idx = index(self._content_lines, ';; okuri-nasi entries.')
     if self.okuri_nasi_idx ==# -1
         throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+    endif
+    if self.okuri_ari_idx >= self.okuri_nasi_idx
+        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error: okuri-ari entries must be before okuri-nasi entries.")
     endif
 endfunction "}}}
 
