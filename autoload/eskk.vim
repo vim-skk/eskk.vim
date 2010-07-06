@@ -1624,19 +1624,29 @@ augroup END
 function! eskk#register_debug_begin() "{{{
     call eskk#util#log('')
 
+    call eskk#util#log(repeat('-', 80))
+
     call eskk#util#log(strftime('%c'))
 
-    let lface = "( ._.) <"
-    let v = printf(" g:eskk_version = %s /", string(g:eskk_version))
-    call eskk#util#log(repeat(' ', strlen(lface)).' '.repeat('-', strlen(v) - 1))
-    call eskk#util#log(lface.v)
-    call eskk#util#log(repeat(' ', strlen(lface)).repeat('-', strlen(v) - 1))
+    let n = eskk#util#rand(2)
+    if n ==# 0
+        let lface = "( ._.) <"
+        let v = printf(" g:eskk_version = %s /", string(g:eskk_version))
+        call eskk#util#log(repeat(' ', strlen(lface)).' '.repeat('-', strlen(v) - 1))
+        call eskk#util#log(lface.v)
+        call eskk#util#log(repeat(' ', strlen(lface)).repeat('-', strlen(v) - 1))
 
-    let rface = "> ('-' )"
-    let v = printf("/ v:version = %s ", string(v:version))
-    call eskk#util#log(' '.repeat('-', strlen(v) - 1))
-    call eskk#util#log(v.rface)
-    call eskk#util#log(repeat('-', strlen(v) - 1))
+        let rface = "> ('-' )"
+        let v = printf("/ v:version = %s ", string(v:version))
+        call eskk#util#log(' '.repeat('-', strlen(v) - 1))
+        call eskk#util#log(v.rface)
+        call eskk#util#log(repeat('-', strlen(v) - 1))
+    else
+        call eskk#util#log('SKK = I')
+        call eskk#util#log('e * SKK = Inf.')
+    endif
+
+    call eskk#util#log(repeat('-', 80))
 
     call eskk#util#log('')
     call eskk#util#log('')

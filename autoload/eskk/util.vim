@@ -217,6 +217,12 @@ function! eskk#util#identity(value) "{{{
     return a:value
 endfunction "}}}
 
+
+function! eskk#util#rand(max) "{{{
+    let next = localtime() * 1103515245 + 12345
+    return (next / 65536) % (a:max + 1)
+endfunction "}}}
+
 " }}}
 
 
