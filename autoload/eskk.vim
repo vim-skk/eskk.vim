@@ -1622,9 +1622,24 @@ augroup END
 " }}}
 " Write timestamp to debug file {{{
 function! eskk#register_debug_begin() "{{{
-    if g:eskk_debug && exists('g:eskk_debug_file') && filereadable(expand(g:eskk_debug_file))
-        call writefile(['', printf('--- %s ---', strftime('%c')), ''], expand(g:eskk_debug_file))
-    endif
+    call eskk#util#log('')
+
+    call eskk#util#log(strftime('%c'))
+
+    let lface = "( ._.) <"
+    let v = printf(" g:eskk_version = %s /", string(g:eskk_version))
+    call eskk#util#log(repeat(' ', strlen(lface)).' '.repeat('-', strlen(v) - 1))
+    call eskk#util#log(lface.v)
+    call eskk#util#log(repeat(' ', strlen(lface)).repeat('-', strlen(v) - 1))
+
+    let rface = "> ('-' )"
+    let v = printf("/ v:version = %s ", string(v:version))
+    call eskk#util#log(' '.repeat('-', strlen(v) - 1))
+    call eskk#util#log(v.rface)
+    call eskk#util#log(repeat('-', strlen(v) - 1))
+
+    call eskk#util#log('')
+    call eskk#util#log('')
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_debug_begin', [])
 " }}}
