@@ -1271,7 +1271,12 @@ function! eskk#set_mode(next_mode) "{{{
 
     let buftable = eskk#get_buftable()
     call buftable.reset()
-    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+
+    call buftable.set_henkan_phase(
+    \   (eskk#has_mode_func('get_init_phase') ?
+    \       eskk#call_mode_func('get_init_phase', [], 0)
+    \       : g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    \)
 
     call eskk#throw_event('enter-mode-' . self.mode)
 
@@ -1310,6 +1315,11 @@ function! eskk#get_mode_structure(mode) "{{{
         throw eskk#user_error(['eskk'], printf("mode '%s' is not available.", a:mode))
     endif
     return s:available_modes[a:mode]
+endfunction "}}}
+function! eskk#has_mode_func(func_key) "{{{
+    let self = eskk#get_current_instance()
+    let st = eskk#get_mode_structure(self.mode)
+    return has_key(st, a:func_key)
 endfunction "}}}
 function! eskk#call_mode_func(func_key, args, required) "{{{
     let self = eskk#get_current_instance()
