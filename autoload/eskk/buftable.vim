@@ -314,7 +314,7 @@ function! s:buftable.do_enter(stash) dict "{{{
     let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     let phase = self.get_henkan_phase()
-    let enter_char = eskk#util#eval_key('<Plug>(eskk:internal:enter-key)')
+    let enter_char = eskk#util#eval_key(eskk#get_special_key('enter-key'))
     let undo_char  = eskk#util#eval_key('<Plug>(eskk:internal:undo-key)')
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
