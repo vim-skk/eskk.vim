@@ -572,25 +572,19 @@ endfunction "}}}
 
 
 
-function! s:dict.refer(buftable) dict "{{{
-    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
-
+function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
     let added = []
     for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
-        if added_key ==# key && added_okuri_rom[0] ==# okuri_rom[0]
+        if added_key ==# a:key && added_okuri_rom[0] ==# a:okuri_rom[0]
             call add(added, added_input)
         endif
     endfor
 
     return s:henkan_result_new(
     \   self,
-    \   key,
-    \   okuri_rom,
-    \   okuri,
+    \   a:key,
+    \   a:okuri_rom,
+    \   a:okuri,
     \   deepcopy(a:buftable, 1),
     \   added,
     \)
