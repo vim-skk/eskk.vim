@@ -66,6 +66,8 @@ let s:available_modes = {}
 let s:map = {
 \   'general': {},
 \   'sticky': {},
+\   'backspace-key': {},
+\   'enter-key': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -690,10 +692,10 @@ function! eskk#asym_filter(stash, table_name) "{{{
     try
         " Handle special characters.
         " These characters are handled regardless of current phase.
-        if eskk#is_internal_key(char, 'backspace-key')
+        if eskk#is_special_lhs(char, 'backspace-key')
             call buftable.do_backspace(a:stash)
             return
-        elseif eskk#is_internal_key(char, 'enter-key')
+        elseif eskk#is_special_lhs(char, 'enter-key')
             call buftable.do_enter(a:stash)
             return
         elseif eskk#is_special_lhs(char, 'sticky')
@@ -1154,11 +1156,6 @@ function! eskk#handle_special_lhs(char, type, stash) "{{{
     \   eskk#is_special_lhs(a:char, a:type)
     \   && has_key(s:map_fn, a:type)
     \   && call(s:map_fn[a:type], [a:stash])
-endfunction "}}}
-
-function! eskk#is_internal_key(char, internal_lhs) "{{{
-    let real_lhs = maparg(printf('<Plug>(eskk:internal:%s)', a:internal_lhs), 'ic')
-    return eskk#util#eval_key(real_lhs) ==# a:char
 endfunction "}}}
 
 " Mappings
@@ -1720,6 +1717,8 @@ call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave',
 function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=henkan -unique <Space>
+    silent! EskkMap -type=backspace-key -unique <C-h>
+    silent! EskkMap -type=enter-key -unique <CR>
 
     silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
 
