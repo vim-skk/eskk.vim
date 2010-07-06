@@ -190,7 +190,9 @@ function! s:buftable.rewrite() dict "{{{
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
     let inserted_str = kakutei . new
-    if inserted_str == ''
+    if old ==# inserted_str
+        return ''
+    elseif inserted_str == ''
         return rewrite_bs
     else
         execute
