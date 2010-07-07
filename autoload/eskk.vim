@@ -263,6 +263,8 @@ let s:skk_dict = {}
 let s:key_handler = {}
 " Global values of &iminsert, &imsearch.
 let s:saved_im_options = []
+" Flag for `s:initialize()`.
+let s:is_initialized = 0
 " }}}
 
 " Functions {{{
@@ -1039,6 +1041,11 @@ function! eskk#enable(...) "{{{
         let &l:iminsert = 1
     endif
 
+    if !s:is_initialized
+        call s:initialize()
+        let s:is_initialized = 1
+    endif
+
     call eskk#throw_event('enable-im')
 
     " Lazy initialize
@@ -1565,6 +1572,9 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 endfunction "}}}
 function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
     let lines = []
+    call add(lines, '--- g:eskk_version ---')
+    call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
+    call add(lines, '--- g:eskk_version ---')
     call add(lines, '--- char ---')
     call add(lines, printf('char: %s(%d)', string(a:char), char2nr(a:char)))
     call add(lines, printf('Fn: %s', type(a:Fn) == type(function('tr')) ? string(a:char) : a:Fn))
@@ -1593,9 +1603,6 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
     let lines += split(output, '\n')
     call add(lines, "--- Vim's :version ---")
     call add(lines, '')
-    call add(lines, '--- g:eskk_version ---')
-    call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
-    call add(lines, '--- g:eskk_version ---')
     call add(lines, '')
     if executable('uname')
         call add(lines, "--- Operating System ---")
@@ -1653,6 +1660,16 @@ function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
     call eskk#call_mode_func('filter', [a:stash], 1)
 endfunction "}}}
 
+
+" g:eskk_context_control
+function! eskk#handle_context() "{{{
+    for control in g:eskk_context_control
+        if eval(control.rule)
+            call call(control.fn, [])
+        endif
+    endfor
+endfunction "}}}
+
 " }}}
 
 " Exceptions {{{
@@ -1689,15 +1706,14 @@ function! eskk#user_error(from, msg) "{{{
 endfunction "}}}
 " }}}
 
-" NOTE: Put off these execution until `enable-im` event
-" because eskk#load() will execute these codes.
-" Create eskk augroup. {{{
-augroup eskk
-    autocmd!
-augroup END
-" }}}
-" Write timestamp to debug file {{{
-function! eskk#register_debug_begin() "{{{
+function! s:initialize() "{{{
+    " Create eskk augroup. {{{
+    augroup eskk
+        autocmd!
+    augroup END
+    " }}}
+
+    " Write timestamp to debug file {{{
     call eskk#util#log('')
 
     call eskk#util#log(repeat('-', 80))
@@ -1732,43 +1748,35 @@ function! eskk#register_debug_begin() "{{{
 
     call eskk#util#log('')
     call eskk#util#log('')
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_debug_begin', [])
-" }}}
-" Egg-like-newline {{{
-function! eskk#do_lmap_non_egg_like_newline(do_map) "{{{
-    if a:do_map
-        if !eskk#has_temp_key('<CR>')
-            call eskk#util#log("Map *non* egg like newline...: <CR> => <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)")
-            call eskk#set_up_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
-        endif
-    else
-        call eskk#util#log("Restore *non* egg like newline...: <CR>")
-        call eskk#register_temp_event('filter-begin', 'eskk#set_up_temp_key_restore', ['<CR>'])
-    endif
-endfunction "}}}
-function! eskk#register_non_egg_like_newline_event() "{{{
-    if g:eskk_egg_like_newline
-        return
-    endif
+    " }}}
 
-    " Default behavior is `egg like newline`.
-    " Turns it to `Non egg like newline` during henkan phase.
-    call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri', 'enter-phase-henkan-select'], 'eskk#do_lmap_non_egg_like_newline', [1])
-    call eskk#register_event('enter-phase-normal', 'eskk#do_lmap_non_egg_like_newline', [0])
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_non_egg_like_newline_event', [])
-" }}}
-" InsertLeave {{{
-function! eskk#register_autocmd_insert_leave() "{{{
+    " Egg-like-newline {{{
+    function! s:do_lmap_non_egg_like_newline(do_map) "{{{
+        if a:do_map
+            if !eskk#has_temp_key('<CR>')
+                call eskk#util#log("Map *non* egg like newline...: <CR> => <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)")
+                call eskk#set_up_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
+            endif
+        else
+            call eskk#util#log("Restore *non* egg like newline...: <CR>")
+            call eskk#register_temp_event('filter-begin', 'eskk#set_up_temp_key_restore', ['<CR>'])
+        endif
+    endfunction "}}}
+    if !g:eskk_egg_like_newline
+        " Default behavior is `egg like newline`.
+        " Turns it to `Non egg like newline` during henkan phase.
+        call eskk#register_event(['enter-phase-henkan', 'enter-phase-okuri', 'enter-phase-henkan-select'], eskk#util#get_local_func('do_lmap_non_egg_like_newline', s:SID_PREFIX), [1])
+        call eskk#register_event('enter-phase-normal', eskk#util#get_local_func('do_lmap_non_egg_like_newline', s:SID_PREFIX), [0])
+    endif
+    " }}}
+
+    " g:eskk_keep_state: eskk#disable() at InsertLeave {{{
     if !g:eskk_keep_state
         autocmd eskk InsertLeave * call eskk#disable()
     endif
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave', [])
-" }}}
-" Default mappings - :EskkMap {{{
-function! eskk#set_up_default_mappings() "{{{
+    " }}}
+
+    " Default mappings - :EskkMap {{{
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=henkan -unique <Space>
     silent! EskkMap -type=backspace-key -unique <C-h>
@@ -1823,33 +1831,32 @@ function! eskk#set_up_default_mappings() "{{{
 
     silent! EskkMap -expr -noremap <Esc> eskk#escape_key()
     silent! EskkMap -expr -noremap <C-c> eskk#escape_key()
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#set_up_default_mappings', [])
-" }}}
-" Map temporary key to keys to use in that mode {{{
-function! eskk#map_mode_local_keys() "{{{
-    let mode = eskk#get_mode()
+    " }}}
 
-    if has_key(s:mode_local_keys, mode)
-        for key in s:mode_local_keys[mode]
-            let real_key = eskk#get_special_key(key)
-            call eskk#set_up_temp_key(real_key)
-            call eskk#register_temp_event('leave-mode-' . mode, 'eskk#set_up_temp_key_restore', [real_key])
-        endfor
-    endif
-endfunction "}}}
-call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-ascii', 'enter-mode-zenei'], 'eskk#map_mode_local_keys', [])
-" }}}
-" Save dictionary if modified {{{
-function! eskk#register_auto_save_dictionary_at_exit() "{{{
+    " Map temporary key to keys to use in that mode {{{
+    function! s:map_mode_local_keys() "{{{
+        let mode = eskk#get_mode()
+
+        if has_key(s:mode_local_keys, mode)
+            for key in s:mode_local_keys[mode]
+                let real_key = eskk#get_special_key(key)
+                call eskk#set_up_temp_key(real_key)
+                call eskk#register_temp_event('leave-mode-' . mode, 'eskk#set_up_temp_key_restore', [real_key])
+            endfor
+        endif
+    endfunction "}}}
+    call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-ascii', 'enter-mode-zenei'], eskk#util#get_local_func('map_mode_local_keys', s:SID_PREFIX), [])
+    " }}}
+
+    " Save dictionary if modified {{{
     if g:eskk_auto_save_dictionary_at_exit
         autocmd eskk VimLeavePre * call eskk#update_dictionary()
     endif
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_auto_save_dictionary_at_exit', [])
-" }}}
-" Register builtin-modes. {{{
-function! eskk#register_builtin_modes() "{{{
+    " }}}
+
+    " Register builtin-modes. {{{
+    call eskk#util#log('Registering builtin modes...')
+
     " 'ascii' mode {{{
     call eskk#register_mode('ascii')
     let dict = eskk#get_mode_structure('ascii')
@@ -2004,47 +2011,33 @@ function! eskk#register_builtin_modes() "{{{
 
     call eskk#validate_mode_structure('abbrev')
     " }}}
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
-" }}}
-" Register builtin-tables. {{{
-function! eskk#register_builtin_tables() "{{{
+    " }}}
+
+    " Register builtin-tables. {{{
+    call eskk#util#log('Registering builtin tables...')
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
     for name in ['rom_to_hira', 'rom_to_kata', 'rom_to_hankata', 'rom_to_zenei', 'hira_to_kata', 'kata_to_hira']
         call eskk#table#register_table_dict(name, 'eskk#table#' . name . '#load')
     endfor
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_builtin_tables', [])
-" }}}
-" Map keys when BufEnter {{{
-function! eskk#register_map_all_keys_if_enabled() "{{{
+    " }}}
+
+    " BufEnter: Map keys if enabled. {{{
     autocmd eskk BufEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_map_all_keys_if_enabled', [])
-" }}}
-" BufEnter: Restore global option value of &iminsert, &imsearch {{{
-function! eskk#restore_im_options() "{{{
-    if empty(s:saved_im_options)
-        return
-    endif
-    let [&g:iminsert, &g:imsearch] = s:saved_im_options
-endfunction "}}}
-function! eskk#register_restore_im_options() "{{{
-    if !g:eskk_keep_state_beyond_buffer
-        autocmd eskk BufLeave * call eskk#restore_im_options()
-    endif
-endfunction "}}}
-call eskk#register_temp_event('enable-im', 'eskk#register_restore_im_options', [])
-" }}}
-" g:eskk_context_control {{{
-function! eskk#handle_context() "{{{
-    for control in g:eskk_context_control
-        if eval(control.rule)
-            call call(control.fn, [])
+    " }}}
+
+    " BufEnter: Restore global option value of &iminsert, &imsearch {{{
+    function! s:restore_im_options() "{{{
+        if empty(s:saved_im_options)
+            return
         endif
-    endfor
+        let [&g:iminsert, &g:imsearch] = s:saved_im_options
+    endfunction "}}}
+
+    if !g:eskk_keep_state_beyond_buffer
+        autocmd eskk BufLeave * call s:restore_im_options()
+    endif
+    " }}}
 endfunction "}}}
-" }}}
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
