@@ -205,6 +205,10 @@ if !exists('g:eskk_keep_state_beyond_buffer')
     let g:eskk_keep_state_beyond_buffer = 0
 endif
 
+if !exists("g:eskk_fix_extra_okuri")
+    let g:eskk_fix_extra_okuri = 1
+endif
+
 " Completion
 if !exists('g:eskk_enable_completion')
     let g:eskk_enable_completion = 1

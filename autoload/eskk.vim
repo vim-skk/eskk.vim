@@ -745,14 +745,12 @@ function! eskk#asym_filter(stash, table_name) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
             call buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
             call buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
@@ -971,7 +969,6 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call eskk#util#assert(!empty(matched))
         if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
             call buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         endif
     endif
 endfunction "}}}
@@ -1941,7 +1938,7 @@ function! s:initialize() "{{{
     call eskk#register_mode('abbrev')
     let dict = eskk#get_mode_structure('abbrev')
 
-    function! dict.filter(stash)
+    function! dict.filter(stash) "{{{
         let char = a:stash.char
         let buftable = eskk#get_buftable()
         let this = eskk#get_mode_structure('abbrev')
@@ -1964,7 +1961,7 @@ function! s:initialize() "{{{
             call buftable.do_enter(a:stash)
             if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
                 return
-            elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+            else
                 call eskk#set_mode('hira')
                 return
             endif
@@ -1976,7 +1973,6 @@ function! s:initialize() "{{{
         if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
             if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
                 call buftable.do_henkan(a:stash)
-                call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
             else
                 call buf_str.push_rom_str(char)
             endif
@@ -1999,7 +1995,7 @@ function! s:initialize() "{{{
         else
             throw eskk#internal_error(['eskk'], "'abbrev' mode does not support phase %d.", phase)
         endif
-    endfunction
+    endfunction "}}}
     function! dict.get_init_phase() "{{{
         return g:eskk#buftable#HENKAN_PHASE_HENKAN
     endfunction "}}}

@@ -580,6 +580,15 @@ function! s:buftable.do_henkan(stash) dict "{{{
                 call henkan_select_buf_str.set_matched(key, input)
             endtry
         else
+            if g:eskk_fix_extra_okuri
+            \   && henkan_buf_str.get_rom_str() != ''
+            \   && phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+                call okuri_buf_str.set_rom_str(henkan_buf_str.get_rom_str())
+                call henkan_buf_str.clear_rom_str()
+                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                return
+            endif
+
             if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
                 let table = eskk#table#get_table('rom_to_hira')
                 call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
