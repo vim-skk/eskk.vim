@@ -801,7 +801,7 @@ function! s:dict.get_kanji(key, okuri, okuri_rom) dict "{{{
     return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
 endfunction "}}}
 
-function! s:dict.get_ascii(buftable) dict "{{{
+function! s:dict.get_ascii(key, okuri, okuri_rom) dict "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom
@@ -825,7 +825,7 @@ function! s:dict.get_ascii(buftable) dict "{{{
     return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
 endfunction "}}}
 
-function! s:dict.get_abbrev(buftable) dict "{{{
+function! s:dict.get_abbrev(key, okuri, okuri_rom) dict "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom
