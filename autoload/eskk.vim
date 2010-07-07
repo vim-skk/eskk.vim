@@ -2043,6 +2043,10 @@ function! s:initialize() "{{{
         autocmd eskk BufLeave * call s:restore_im_options()
     endif
     " }}}
+
+    " InsertLeave: Clear buftable. {{{
+    autocmd eskk InsertLeave * call eskk#get_buftable().reset()
+    " }}}
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
