@@ -2010,6 +2010,15 @@ function! s:initialize() "{{{
         \]
     endfunction "}}}
 
+    function! s:mode_abbrev_set_begin_pos() "{{{
+        call eskk#get_buftable().set_begin_pos('.')
+    endfunction "}}}
+    call eskk#register_event(
+    \   'enter-mode-abbrev',
+    \   eskk#util#get_local_func('mode_abbrev_set_begin_pos', s:SID_PREFIX),
+    \   []
+    \)
+
     call eskk#validate_mode_structure('abbrev')
     " }}}
     " }}}
