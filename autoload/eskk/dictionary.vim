@@ -297,15 +297,21 @@ function! s:henkan_result_advance(this, advance) "{{{
         unlet a:this._candidate
     endif
 
-    let result = s:henkan_result_get_result(a:this)
-    if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
-        " Next time to call s:henkan_result_get_result(),
-        " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
-        let result[1] += (a:advance ? 1 : -1)
-        return 1
-    else
+    try
+        let result = s:henkan_result_get_result(a:this)
+        if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
+            " Next time to call s:henkan_result_get_result(),
+            " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
+            let result[1] += (a:advance ? 1 : -1)
+            return 1
+        else
+            return 0
+        endif
         return 0
-    endif
+    catch /^eskk: dictionary look up error:/
+        " Shut up error. This function does not throw exception.
+        return 0
+    endtry
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
