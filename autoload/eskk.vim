@@ -66,6 +66,10 @@ let s:available_modes = {}
 let s:map = {
 \   'general': {},
 \   'sticky': {},
+\   'backspace-key': {},
+\   'escape-key': {},
+\   'enter-key': {},
+\   'undo-key': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -79,20 +83,24 @@ let s:map = {
 \   'mode:hira:q-key': {},
 \   'mode:hira:to-ascii': {},
 \   'mode:hira:to-zenei': {},
+\   'mode:hira:to-abbrev': {},
 \   'mode:kata:toggle-hankata': {},
 \   'mode:kata:ctrl-q-key': {},
 \   'mode:kata:toggle-kata': {},
 \   'mode:kata:q-key': {},
 \   'mode:kata:to-ascii': {},
 \   'mode:kata:to-zenei': {},
+\   'mode:kata:to-abbrev': {},
 \   'mode:hankata:toggle-hankata': {},
 \   'mode:hankata:ctrl-q-key': {},
 \   'mode:hankata:toggle-kata': {},
 \   'mode:hankata:q-key': {},
 \   'mode:hankata:to-ascii': {},
 \   'mode:hankata:to-zenei': {},
+\   'mode:hankata:to-abbrev': {},
 \   'mode:ascii:to-hira': {},
 \   'mode:zenei:to-hira': {},
+\   'mode:abbrev:henkan-key': {},
 \}
 " TODO s:map should contain this info.
 " Keys used by only its mode.
@@ -111,6 +119,7 @@ let s:mode_local_keys = {
 \       'mode:hira:q-key',
 \       'mode:hira:to-ascii',
 \       'mode:hira:to-zenei',
+\       'mode:hira:to-abbrev',
 \   ],
 \   'kata': [
 \       'phase:henkan:henkan-key',
@@ -126,6 +135,7 @@ let s:mode_local_keys = {
 \       'mode:kata:q-key',
 \       'mode:kata:to-ascii',
 \       'mode:kata:to-zenei',
+\       'mode:kata:to-abbrev',
 \   ],
 \   'hankata': [
 \       'phase:henkan:henkan-key',
@@ -141,6 +151,7 @@ let s:mode_local_keys = {
 \       'mode:hankata:q-key',
 \       'mode:hankata:to-ascii',
 \       'mode:hankata:to-zenei',
+\       'mode:hankata:to-abbrev',
 \   ],
 \   'ascii': [
 \       'mode:ascii:to-hira',
@@ -204,6 +215,15 @@ function! eskk#handle_to_zenei(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! eskk#handle_to_abbrev(stash) "{{{
+    let buftable = eskk#get_buftable()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
+        call eskk#set_mode('abbrev')
+        return 1
+    endif
+    return 0
+endfunction "}}}
 let s:map_fn = {
 \   'mode:hira:toggle-hankata': 'eskk#handle_toggle_hankata',
 \   'mode:hira:ctrl-q-key': 'eskk#handle_ctrl_q_key',
@@ -211,6 +231,7 @@ let s:map_fn = {
 \   'mode:hira:q-key': 'eskk#handle_q_key',
 \   'mode:hira:to-ascii': 'eskk#handle_to_ascii',
 \   'mode:hira:to-zenei': 'eskk#handle_to_zenei',
+\   'mode:hira:to-abbrev': 'eskk#handle_to_abbrev',
 \
 \   'mode:kata:toggle-hankata': 'eskk#handle_toggle_hankata',
 \   'mode:kata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
@@ -218,6 +239,7 @@ let s:map_fn = {
 \   'mode:kata:q-key': 'eskk#handle_q_key',
 \   'mode:kata:to-ascii': 'eskk#handle_to_ascii',
 \   'mode:kata:to-zenei': 'eskk#handle_to_zenei',
+\   'mode:kata:to-abbrev': 'eskk#handle_to_abbrev',
 \
 \   'mode:hankata:toggle-hankata': 'eskk#handle_toggle_hankata',
 \   'mode:hankata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
@@ -225,6 +247,7 @@ let s:map_fn = {
 \   'mode:hankata:q-key': 'eskk#handle_q_key',
 \   'mode:hankata:to-ascii': 'eskk#handle_to_ascii',
 \   'mode:hankata:to-zenei': 'eskk#handle_to_zenei',
+\   'mode:hankata:to-abbrev': 'eskk#handle_to_abbrev',
 \
 \
 \}
@@ -568,6 +591,8 @@ function! eskk#create_new_instance() "{{{
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
+    let ns = s:get_inst_namespace()
+
     if ns.eskk_instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
@@ -675,8 +700,9 @@ function! eskk#asym_filter(stash, table_name) "{{{
     let q_key = printf('mode:%s:q-key', cur_mode)
     let to_ascii = printf('mode:%s:to-ascii', cur_mode)
     let to_zenei = printf('mode:%s:to-zenei', cur_mode)
+    let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
 
-    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei]
+    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei, to_abbrev]
         if eskk#handle_special_lhs(char, key, a:stash)
             " Handled.
             call eskk#util#logf("Handled '%s' key.", key)
@@ -690,10 +716,10 @@ function! eskk#asym_filter(stash, table_name) "{{{
     try
         " Handle special characters.
         " These characters are handled regardless of current phase.
-        if eskk#is_internal_key(char, 'backspace-key')
+        if eskk#is_special_lhs(char, 'backspace-key')
             call buftable.do_backspace(a:stash)
             return
-        elseif eskk#is_internal_key(char, 'enter-key')
+        elseif eskk#is_special_lhs(char, 'enter-key')
             call buftable.do_enter(a:stash)
             return
         elseif eskk#is_special_lhs(char, 'sticky')
@@ -716,15 +742,15 @@ function! eskk#asym_filter(stash, table_name) "{{{
         return s:filter_rom(a:stash, a:table_name)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
-            return buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+            call buftable.do_henkan(a:stash)
+            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
-            return buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+            call buftable.do_henkan(a:stash)
+            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
@@ -736,11 +762,8 @@ function! eskk#asym_filter(stash, table_name) "{{{
             call buftable.choose_prev_candidate(a:stash)
             return
         else
-            call buftable.push_kakutei_str(buftable.get_display_str(0))
-            call buftable.clear_all()
+            call buftable.do_enter(a:stash)
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
-
-            call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
         endif
     else
         let msg = printf("eskk#asym_filter() does not support phase %d.", phase)
@@ -855,7 +878,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             for rest_char in split(rest, '\zs')
                 call eskk#register_temp_event(
                 \   'filter-redispatch-post',
-                \   'eskk#util#eval_key',
+                \   'eskk#util#key2char',
                 \   [eskk#get_named_map(rest_char)]
                 \)
             endfor
@@ -933,7 +956,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
                 for rest_char in split(rest, '\zs')
                     call eskk#register_temp_event(
                     \   'filter-redispatch-post',
-                    \   'eskk#util#eval_key',
+                    \   'eskk#util#key2char',
                     \   [eskk#get_named_map(rest_char)]
                     \)
                 endfor
@@ -942,8 +965,11 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         call okuri_buf_str.clear_rom_str()
 
-        if g:eskk_auto_henkan_at_okuri_match
+        let matched = okuri_buf_str.get_matched()
+        call eskk#util#assert(!empty(matched))
+        if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
             call buftable.do_henkan(a:stash)
+            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         endif
     endif
 endfunction "}}}
@@ -1078,7 +1104,6 @@ function! eskk#disable() "{{{
     let self.enabled = 0
 
     let kakutei_str = eskk#kakutei_str()
-    call eskk#get_buftable().reset()
 
     if mode() =~# '^[ic]$'
         return kakutei_str . "\<C-^>"
@@ -1140,11 +1165,26 @@ endfunction "}}}
 function! eskk#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error when `s:map[a:type]` does not exist.
     return has_key(s:map, a:type)
-    \   && eskk#util#eval_key(s:map[a:type].lhs) ==# a:char
+    \   && eskk#util#key2char(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
 function! eskk#get_special_key(type) "{{{
     if has_key(s:map, a:type)
         return s:map[a:type].lhs
+    else
+        throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
+    endif
+endfunction "}}}
+function! eskk#get_special_map(type) "{{{
+    if has_key(s:map, a:type)
+        let map = printf('<Plug>(eskk:internal:_noremap_%s)', a:type)
+        if maparg(map) == ''
+            " Not to remap.
+            execute
+            \   eskk#get_map_command(0)
+            \   map
+            \   s:map[a:type].lhs
+        endif
+        return map
     else
         throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
     endif
@@ -1154,11 +1194,6 @@ function! eskk#handle_special_lhs(char, type, stash) "{{{
     \   eskk#is_special_lhs(a:char, a:type)
     \   && has_key(s:map_fn, a:type)
     \   && call(s:map_fn[a:type], [a:stash])
-endfunction "}}}
-
-function! eskk#is_internal_key(char, internal_lhs) "{{{
-    let real_lhs = maparg(printf('<Plug>(eskk:internal:%s)', a:internal_lhs), 'ic')
-    return eskk#util#eval_key(real_lhs) ==# a:char
 endfunction "}}}
 
 " Mappings
@@ -1211,10 +1246,10 @@ function! eskk#remove_display_str() "{{{
     let current_str = eskk#get_buftable().get_display_str()
 
     " NOTE: This function return value is not remapped.
-    let bs = maparg('<Plug>(eskk:internal:backspace-key)', 'ic')
+    let bs = eskk#get_special_key('backspace-key')
     call eskk#util#assert(bs != '')
 
-    return repeat(eskk#util#eval_key(bs), eskk#util#mb_strlen(current_str))
+    return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! eskk#kakutei_str() "{{{
     let self = eskk#get_current_instance()
@@ -1230,13 +1265,12 @@ endfunction "}}}
 function! eskk#escape_key() "{{{
     let self = eskk#get_current_instance()
     let kakutei_str = eskk#kakutei_str()
-    call eskk#get_buftable().reset()
 
     " NOTE: This function return value is not remapped.
-    let esc = maparg('<Plug>(eskk:internal:escape-key)', 'ic')
+    let esc = eskk#get_special_key('escape-key')
     call eskk#util#assert(esc != '')
 
-    return kakutei_str . eskk#util#eval_key(esc)
+    return kakutei_str . eskk#util#key2char(esc)
 endfunction "}}}
 
 " Mode
@@ -1256,8 +1290,13 @@ function! eskk#set_mode(next_mode) "{{{
     let self.mode = a:next_mode
 
     let buftable = eskk#get_buftable()
-    call buftable.reset()
-    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    call buftable.clear_all()
+
+    call buftable.set_henkan_phase(
+    \   (eskk#has_mode_func('get_init_phase') ?
+    \       eskk#call_mode_func('get_init_phase', [], 0)
+    \       : g:eskk#buftable#HENKAN_PHASE_NORMAL)
+    \)
 
     call eskk#throw_event('enter-mode-' . self.mode)
 
@@ -1297,6 +1336,11 @@ function! eskk#get_mode_structure(mode) "{{{
     endif
     return s:available_modes[a:mode]
 endfunction "}}}
+function! eskk#has_mode_func(func_key) "{{{
+    let self = eskk#get_current_instance()
+    let st = eskk#get_mode_structure(self.mode)
+    return has_key(st, a:func_key)
+endfunction "}}}
 function! eskk#call_mode_func(func_key, args, required) "{{{
     let self = eskk#get_current_instance()
     let st = eskk#get_mode_structure(self.mode)
@@ -1310,6 +1354,12 @@ function! eskk#call_mode_func(func_key, args, required) "{{{
     return call(st[a:func_key], a:args, st)
 endfunction "}}}
 
+function! eskk#has_current_mode_table() "{{{
+    return eskk#has_mode_table(eskk#get_mode())
+endfunction "}}}
+function! eskk#has_mode_table(mode) "{{{
+    return has_key(g:eskk_mode_use_tables, a:mode)
+endfunction "}}}
 function! eskk#get_current_mode_table() "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}
@@ -1385,14 +1435,14 @@ function! eskk#has_event(event_name) "{{{
 endfunction "}}}
 
 function! eskk#register_map(map, Fn, args, force) "{{{
-    let map = eskk#util#eval_key(a:map)
+    let map = eskk#util#key2char(a:map)
     if has_key(s:key_handler, map) && !a:force
         return
     endif
     let s:key_handler[map] = [a:Fn, a:args]
 endfunction "}}}
 function! eskk#unregister_map(map, Fn, args) "{{{
-    let map = eskk#util#eval_key(a:map)
+    let map = eskk#util#key2char(a:map)
     if has_key(s:key_handler, map)
         unlet s:key_handler[map]
     endif
@@ -1476,6 +1526,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             \   'join(eskk#throw_event("filter-redispatch-pre"))'
             let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
         endif
+
         let redispatch_post = ''
         if eskk#has_event('filter-redispatch-post')
             execute
@@ -1485,10 +1536,24 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             \   'join(eskk#throw_event("filter-redispatch-post"))'
             let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
         endif
+
+        " eskk#rewrite() assumes that &backspace contains "eol".
+        let restore_backspace = ''
+        if !eskk#util#has_elem(split(&l:backspace, ','), 'eol')
+            execute
+            \   eskk#get_map_command(0)
+            \   '<buffer><expr>'
+            \   '<Plug>(eskk:internal:_restore_backspace)'
+            \   '[setbufvar("%", "&backspace", '.string(&l:backspace).'), ""][1]'
+            let restore_backspace = "\<Plug>(eskk:internal:_restore_backspace)"
+            setlocal backspace+=eol
+        endif
+
         let ret_str = filter_args[0].return
         return redispatch_pre
         \   . (type(ret_str) == type("") ? ret_str : eskk#rewrite())
         \   . redispatch_post
+        \   . restore_backspace
 
     catch
         call s:write_error_log_file(v:exception, v:throwpoint, a:char, a:Fn)
@@ -1695,24 +1760,10 @@ endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_non_egg_like_newline_event', [])
 " }}}
 " InsertLeave {{{
-function! s:autocmd_insert_leave() "{{{
-    let self = eskk#get_current_instance()
-
-    " NOTE: Check if self._buftable is initialized.
-    " `self._buftable` should not be written,
-    " `self.get_buftable()` is recommended.
-    " But Vim calls this function at InsertLeave,
-    " I carefully treat `self._buftable` not to be initialized.
-    if !empty(self._buftable)
-        call self._buftable.reset()
-    endif
-
-    if !g:eskk_keep_state && eskk#is_enabled()
-        call eskk#disable()
-    endif
-endfunction "}}}
 function! eskk#register_autocmd_insert_leave() "{{{
-    autocmd eskk InsertLeave * call s:autocmd_insert_leave()
+    if !g:eskk_keep_state
+        autocmd eskk InsertLeave * call eskk#disable()
+    endif
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave', [])
 " }}}
@@ -1720,6 +1771,10 @@ call eskk#register_temp_event('enable-im', 'eskk#register_autocmd_insert_leave',
 function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=henkan -unique <Space>
+    silent! EskkMap -type=backspace-key -unique <C-h>
+    silent! EskkMap -type=enter-key -unique <CR>
+    silent! EskkMap -type=escape-key -unique <Esc>
+    silent! EskkMap -type=undo-key -unique <C-g>u
 
     silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
 
@@ -1739,6 +1794,7 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=mode:hira:q-key -unique q
     silent! EskkMap -type=mode:hira:to-ascii -unique l
     silent! EskkMap -type=mode:hira:to-zenei -unique L
+    silent! EskkMap -type=mode:hira:to-abbrev -unique /
 
     silent! EskkMap -type=mode:kata:toggle-hankata -unique <C-q>
     silent! EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
@@ -1746,6 +1802,7 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=mode:kata:q-key -unique q
     silent! EskkMap -type=mode:kata:to-ascii -unique l
     silent! EskkMap -type=mode:kata:to-zenei -unique L
+    silent! EskkMap -type=mode:kata:to-abbrev -unique /
 
     silent! EskkMap -type=mode:hankata:toggle-hankata -unique <C-q>
     silent! EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
@@ -1753,10 +1810,13 @@ function! eskk#set_up_default_mappings() "{{{
     silent! EskkMap -type=mode:hankata:q-key -unique q
     silent! EskkMap -type=mode:hankata:to-ascii -unique l
     silent! EskkMap -type=mode:hankata:to-zenei -unique L
+    silent! EskkMap -type=mode:hankata:to-abbrev -unique /
 
     silent! EskkMap -type=mode:ascii:to-hira -unique <C-j>
 
     silent! EskkMap -type=mode:zenei:to-hira -unique <C-j>
+
+    silent! EskkMap -type=mode:abbrev:henkan-key -unique <Space>
 
     " Remap <BS> to <C-h>
     silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
@@ -1864,6 +1924,86 @@ function! eskk#register_builtin_modes() "{{{
 
     call eskk#validate_mode_structure('hankata')
     " }}}
+
+    " 'abbrev' mode {{{
+    call eskk#register_mode('abbrev')
+    let dict = eskk#get_mode_structure('abbrev')
+
+    function! dict.filter(stash)
+        let char = a:stash.char
+        let buftable = eskk#get_buftable()
+        let this = eskk#get_mode_structure('abbrev')
+        let buf_str = buftable.get_current_buf_str()
+        let phase = buftable.get_henkan_phase()
+
+        " Handle special characters.
+        " These characters are handled regardless of current phase.
+        if eskk#is_special_lhs(char, 'backspace-key')
+            if buf_str.get_rom_str() == ''
+                " If backspace-key was pressed at empty string,
+                " leave abbrev mode.
+                " TODO: Back to previous mode?
+                call eskk#set_mode('hira')
+            else
+                call buftable.do_backspace(a:stash)
+            endif
+            return
+        elseif eskk#is_special_lhs(char, 'enter-key')
+            call buftable.do_enter(a:stash)
+            if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+                return
+            elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+                call eskk#set_mode('hira')
+                return
+            endif
+        else
+            " Fall through.
+        endif
+
+        " Handle other characters.
+        if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+            call eskk#util#log('henkan!!!!!!!!!!!!1')
+            if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
+                call buftable.do_henkan(a:stash)
+                call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
+            else
+                call buf_str.push_rom_str(char)
+            endif
+        elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+            call eskk#util#log('henkan select!!!!!!!!!!!!1')
+            if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
+                call buftable.choose_next_candidate(a:stash)
+                return
+            elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
+                call buftable.choose_prev_candidate(a:stash)
+                return
+            else
+                call buftable.push_kakutei_str(buftable.get_display_str(0))
+                call buftable.clear_all()
+                call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
+
+                call eskk#util#log('((((((((((((((^^))))))))))))))')
+                " Leave abbrev mode.
+                " TODO: Back to previous mode?
+                call eskk#set_mode('hira')
+                call eskk#util#log('((((((((((((((^^))))))))))))))')
+            endif
+        else
+            throw eskk#internal_error(['eskk'], "'abbrev' mode does not support phase %d.", phase)
+        endif
+    endfunction
+    function! dict.get_init_phase() "{{{
+        return g:eskk#buftable#HENKAN_PHASE_HENKAN
+    endfunction "}}}
+    function! dict.get_supported_phases() "{{{
+        return [
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
+        \]
+    endfunction "}}}
+
+    call eskk#validate_mode_structure('abbrev')
+    " }}}
 endfunction "}}}
 call eskk#register_temp_event('enable-im', 'eskk#register_builtin_modes', [])
 " }}}
@@ -1898,45 +2038,10 @@ call eskk#register_temp_event('enable-im', 'eskk#register_restore_im_options', [
 " }}}
 " g:eskk_context_control {{{
 function! eskk#handle_context() "{{{
-    if !exists('b:eskk_context')
-        return
-    endif
-    " b:eskk_context exists,
-
-    if !(exists('b:eskk_context')
-    \   && has_key(b:eskk_context, 'synname')
-    \   && eskk#util#has_elem(
-    \       (type(b:eskk_context.synname) == type([]) ?
-    \           b:eskk_context.synname
-    \           : [b:eskk_context.synname]),
-    \       synIDattr(synID(line("."), col("."), 1), "name")))
-        return
-    endif
-    " ... and current syntax name has matched,
-
-    let if_rule_name = (eskk#is_enabled() ? 'if_enabled' : 'if_disabled')
-    let filetype_has = eskk#util#has_key_f(g:eskk_context_control, [&l:filetype, if_rule_name])
-    let global_has   = eskk#util#has_key_f(g:eskk_context_control, ['*', if_rule_name])
-    if !(filetype_has || global_has)
-        return
-    endif
-    " ... and settings have had a rule that has matched,
-
-
-    " ... Now ready to call g:eskk_context_control's hooks.
-
-    let Fn_filetype = eskk#util#get_f(g:eskk_context_control, [&l:filetype, if_rule_name], [])
-    let Fn_global   = eskk#util#get_f(g:eskk_context_control, ['*', if_rule_name], [])
-    let FnList =
-    \   (type(Fn_filetype) == type([]) ? Fn_filetype : [Fn_filetype])
-    \   + (type(Fn_global) == type([]) ? Fn_global : [Fn_global])
-    for Fn in FnList
-        if type(Fn) == type([])
-            call call('call', Fn)
-        else
-            call call(Fn, [])
+    for control in g:eskk_context_control
+        if eval(control.rule)
+            call call(control.fn, [])
         endif
-        unlet Fn
     endfor
 endfunction "}}}
 " }}}

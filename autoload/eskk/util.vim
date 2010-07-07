@@ -110,7 +110,7 @@ function! s:split_special_key(key) "{{{
     let head = matchstr(a:key, '^<[^>]\+>')
     return [head, strpart(a:key, strlen(head))]
 endfunction "}}}
-function! eskk#util#eval_key(key) "{{{
+function! eskk#util#key2char(key) "{{{
     " From arpeggio.vim
 
     let keys = s:split_to_keys(a:key)
@@ -221,6 +221,16 @@ endfunction "}}}
 function! eskk#util#rand(max) "{{{
     let next = localtime() * 1103515245 + 12345
     return (next / 65536) % (a:max + 1)
+endfunction "}}}
+
+
+function! eskk#util#get_syn_names(...) "{{{
+    let [line, col] = eskk#util#get_args(a:000, line('.'), col('.'))
+    " synstack() returns strange value when col is over $ pos. Bug?
+    if col >= col('$')
+        return []
+    endif
+    return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
 endfunction "}}}
 
 " }}}

@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 173))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 207))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -141,7 +141,7 @@ if !exists('g:eskk_initial_mode')
     let g:eskk_initial_mode = 'hira'
 endif
 if !exists('g:eskk_statusline_mode_strings')
-    let g:eskk_statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ'}
+    let g:eskk_statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
 endif
 if !exists('g:eskk_mode_use_tables')
     let g:eskk_mode_use_tables =  {'hira': 'rom_to_hira', 'kata': 'rom_to_kata', 'zenei': 'rom_to_zenei', 'hankata': 'rom_to_hankata'}
@@ -198,11 +198,7 @@ if !exists("g:eskk_set_undo_point")
 endif
 
 if !exists("g:eskk_context_control")
-    let g:eskk_context_control = {
-    \   '*': {
-    \       'if_disabled': 'eskk#enable'
-    \   },
-    \}
+    let g:eskk_context_control = []
 endif
 
 if !exists('g:eskk_keep_state_beyond_buffer')
@@ -233,11 +229,6 @@ lnoremap <expr> <Plug>(eskk:toggle)     eskk#toggle()
 
 nnoremap        <Plug>(eskk:save-dictionary) :<C-u>call eskk#update_dictionary()<CR>
 
-noremap!        <Plug>(eskk:internal:backspace-key)    <C-h>
-noremap!        <Plug>(eskk:internal:escape-key)       <Esc>
-noremap!        <Plug>(eskk:internal:enter-key)        <CR>
-noremap!        <Plug>(eskk:internal:undo-key)        <C-g>u
-
 if !g:eskk_no_default_mappings
     function! s:do_map(rhs, mode)
         let map_default_even_if_already_mapped = !g:eskk_dont_map_default_if_already_mapped
@@ -263,12 +254,15 @@ endif
 
 " Commands {{{
 
-" :EskkMap {{{
 command!
 \   -nargs=+
 \   EskkMap
 \   call eskk#_cmd_eskk_map(<q-args>)
-" }}}
+
+command!
+\   -bar
+\   EskkForgetRegisteredWords
+\   call eskk#forget_registered_words()
 
 " }}}
 
