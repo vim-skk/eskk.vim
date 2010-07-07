@@ -1070,8 +1070,10 @@ function! eskk#enable(...) "{{{
         let disable_skk_vim = substitute(SkkDisable(), "\<C-^>", '', '')
     endif
 
-    let self.omnifunc_save = &l:omnifunc
-    let &l:omnifunc = 'eskk#complete#eskkcomplete'
+    if g:eskk_enable_completion
+        let self.omnifunc_save = &l:omnifunc
+        let &l:omnifunc = 'eskk#complete#eskkcomplete'
+    endif
 
     let self.enabled = 1
     let self.enabled_mode = mode()
@@ -1106,7 +1108,9 @@ function! eskk#disable() "{{{
         call eskk#unmap_all_keys()
     endif
 
-    let &l:omnifunc = self.omnifunc_save
+    if g:eskk_enable_completion
+        let &l:omnifunc = self.omnifunc_save
+    endif
 
     let self.enabled = 0
 
