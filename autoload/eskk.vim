@@ -745,14 +745,12 @@ function! eskk#asym_filter(stash, table_name) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
             call buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
             call buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         else
             return s:filter_rom(a:stash, a:table_name)
         endif
@@ -971,7 +969,6 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call eskk#util#assert(!empty(matched))
         if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
             call buftable.do_henkan(a:stash)
-            call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         endif
     endif
 endfunction "}}}
@@ -1976,7 +1973,6 @@ function! s:initialize() "{{{
         if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
             if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
                 call buftable.do_henkan(a:stash)
-                call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
             else
                 call buf_str.push_rom_str(char)
             endif
