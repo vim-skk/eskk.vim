@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 226))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 233))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -90,6 +90,10 @@ endif
 
 if !exists("eskk_kata_convert_to_hira_at_henkan")
   let eskk_kata_convert_to_hira_at_henkan = 1
+endif
+
+if !exists("eskk_kata_convert_to_hira_at_completion")
+  let eskk_kata_convert_to_hira_at_completion = 1
 endif
 
 if !exists("eskk_show_annotation")

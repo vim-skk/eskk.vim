@@ -581,14 +581,23 @@ function! s:buftable.do_henkan(stash) dict "{{{
             endtry
         else
             if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
-                let table = eskk#table#get_table('rom_to_hira')
-                call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
-                call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI), table)
+                call self.filter_rom_inplace(
+                \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
+                \   'rom_to_hira'
+                \)
+                call self.filter_rom_inplace(
+                \   g:eskk#buftable#HENKAN_PHASE_OKURI,
+                \   'rom_to_hira'
+                \)
             endif
 
             " Convert rom_str if possible.
             if eskk#has_current_mode_table()
-                let table = eskk#table#get_table(eskk#get_current_mode_table())
+                if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
+                    let table = eskk#table#get_table('rom_to_hira')
+                else
+                    let table = eskk#table#get_table(eskk#get_current_mode_table())
+                endif
                 for henkan_phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
                     let buf_str = self.get_buf_str(henkan_phase)
                     let rom_str = buf_str.get_rom_str()
@@ -640,25 +649,35 @@ function! s:buftable.do_henkan(stash) dict "{{{
         throw eskk#internal_error(['eskk', 'mode', 'builtin'], msg)
     endif
 endfunction "}}}
-function! s:filter_rom_again(buf_str, table) "{{{
-    let buf_str = a:buf_str
-    let table   = a:table
+function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
+    let phase = a:phase
+    let table = eskk#table#get_table(a:table_name)
+    let buf_str = self.get_buf_str(phase)
 
     let matched = buf_str.get_matched()
     call buf_str.clear_matched()
     for [rom_str, filter_str] in matched
-        if table.has_map(rom_str)
-            call buf_str.push_matched(
-            \   rom_str,
-            \   table.get_map_to(rom_str)
-            \)
-        else
-            call buf_str.push_matched(
-            \   rom_str,
-            \   rom_str,
-            \)
-        endif
+        call buf_str.push_matched(
+        \   rom_str,
+        \   table.get_map_to(rom_str, rom_str)
+        \)
     endfor
+    return buf_str
+endfunction "}}}
+function! s:buftable.filter_rom(phase, table_name) dict "{{{
+    let phase = a:phase
+    let table = eskk#table#get_table(a:table_name)
+    let buf_str = deepcopy(self.get_buf_str(phase), 1)
+
+    let matched = buf_str.get_matched()
+    call buf_str.clear_matched()
+    for [rom_str, filter_str] in matched
+        call buf_str.push_matched(
+        \   rom_str,
+        \   table.get_map_to(rom_str, rom_str)
+        \)
+    endfor
+    return buf_str
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
     return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
@@ -671,7 +690,11 @@ function! s:convert_again_with_table(self, table) "{{{
 
     " Convert rom_str if possible.
     if eskk#has_current_mode_table()
-        let table = eskk#table#get_table(eskk#get_current_mode_table())
+        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
+            let table = eskk#table#get_table('rom_to_hira')
+        else
+            let table = eskk#table#get_table(eskk#get_current_mode_table())
+        endif
         for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
             let buf_str = self.get_buf_str(phase)
             let rom_str = buf_str.get_rom_str()

@@ -297,15 +297,21 @@ function! s:henkan_result_advance(this, advance) "{{{
         unlet a:this._candidate
     endif
 
-    let result = s:henkan_result_get_result(a:this)
-    if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
-        " Next time to call s:henkan_result_get_result(),
-        " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
-        let result[1] += (a:advance ? 1 : -1)
-        return 1
-    else
+    try
+        let result = s:henkan_result_get_result(a:this)
+        if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
+            " Next time to call s:henkan_result_get_result(),
+            " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
+            let result[1] += (a:advance ? 1 : -1)
+            return 1
+        else
+            return 0
+        endif
         return 0
-    endif
+    catch /^eskk: dictionary look up error:/
+        " Shut up error. This function does not throw exception.
+        return 0
+    endtry
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
@@ -768,12 +774,10 @@ function! s:dict.update_dictionary() dict "{{{
     endtry
 endfunction "}}}
 
-function! s:dict.get_kanji(buftable) dict "{{{
-    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
+function! s:dict.get_kanji(key, okuri, okuri_rom) dict "{{{
+    let key = a:key
+    let okuri = a:okuri
+    let okuri_rom = a:okuri_rom
 
     if key == ''
         return []
@@ -795,11 +799,9 @@ function! s:dict.get_kanji(buftable) dict "{{{
 endfunction "}}}
 
 function! s:dict.get_ascii(buftable) dict "{{{
-    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
+    let key = a:key
+    let okuri = a:okuri
+    let okuri_rom = a:okuri_rom
 
     if key == ''
         return []
@@ -821,11 +823,9 @@ function! s:dict.get_ascii(buftable) dict "{{{
 endfunction "}}}
 
 function! s:dict.get_abbrev(buftable) dict "{{{
-    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_rom_str()
-    let okuri     = ''
-    let okuri_rom = ''
+    let key = a:key
+    let okuri = a:okuri
+    let okuri_rom = a:okuri_rom
 
     if key == ''
         return []

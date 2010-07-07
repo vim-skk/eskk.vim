@@ -60,7 +60,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return s:complete_abbrev()
     elseif eskk#get_mode() ==# 'hira'
         " Kanji mode.
-        
+
         " Do not complete while inputting rom string.
         if a:base[-1] =~ '\a$'
             return []
@@ -79,7 +79,12 @@ function! s:complete_ascii() "{{{
     let list = []
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    for [yomigana, kanji_list] in dict.get_ascii(buftable)
+    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let key       = henkan_buf_str.get_matched_filter()
+    let okuri     = okuri_buf_str.get_matched_filter()
+    let okuri_rom = okuri_buf_str.get_matched_rom()
+    for [yomigana, kanji_list] in dict.get_ascii(key, okuri, okuri_rom)
         " Add yomigana.
         if yomigana != ''
             call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
@@ -102,7 +107,12 @@ function! s:complete_abbrev() "{{{
     let list = []
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    for [yomigana, kanji_list] in dict.get_abbrev(buftable)
+    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let key       = henkan_buf_str.get_matched_filter()
+    let okuri     = okuri_buf_str.get_matched_filter()
+    let okuri_rom = okuri_buf_str.get_matched_rom()
+    for [yomigana, kanji_list] in dict.get_abbrev(key, okuri, okuri_rom)
         " Add yomigana.
         if yomigana != ''
             call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
@@ -125,7 +135,23 @@ function! s:complete_kanji() "{{{
     let list = []
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    for [yomigana, kanji_list] in dict.get_kanji(buftable)
+    if g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
+        let henkan_buf_str = buftable.filter_rom(
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
+        \   'rom_to_hira'
+        \)
+        let okuri_buf_str = buftable.filter_rom(
+        \   g:eskk#buftable#HENKAN_PHASE_OKURI,
+        \   'rom_to_hira'
+        \)
+    else
+        let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    endif
+    let key       = henkan_buf_str.get_matched_filter()
+    let okuri     = okuri_buf_str.get_matched_filter()
+    let okuri_rom = okuri_buf_str.get_matched_rom()
+    for [yomigana, kanji_list] in dict.get_kanji(key, okuri, okuri_rom)
         " Add yomigana.
         if yomigana != ''
             call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
