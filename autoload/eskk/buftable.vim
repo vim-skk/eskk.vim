@@ -581,8 +581,12 @@ function! s:buftable.do_henkan(stash) dict "{{{
             endtry
         else
             if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
-                call self.filter_rom_again(
-                \   [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI],
+                call self.filter_rom_inplace(
+                \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
+                \   'rom_to_hira'
+                \)
+                call self.filter_rom_inplace(
+                \   g:eskk#buftable#HENKAN_PHASE_OKURI,
                 \   'rom_to_hira'
                 \)
             endif
@@ -645,23 +649,18 @@ function! s:buftable.do_henkan(stash) dict "{{{
         throw eskk#internal_error(['eskk', 'mode', 'builtin'], msg)
     endif
 endfunction "}}}
-function! s:buftable.filter_rom_again(phase_list, table_name) dict "{{{
-    if type(a:phase_list) != type([])
-        return self.filter_rom_again([a:phase_list], a:table_name)
-    endif
-
+function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
+    let phase = a:phase
     let table = eskk#table#get_table(a:table_name)
-    for phase in a:phase_list
-        let buf_str = self.get_buf_str(phase)
+    let buf_str = self.get_buf_str(phase)
 
-        let matched = buf_str.get_matched()
-        call buf_str.clear_matched()
-        for [rom_str, filter_str] in matched
-            call buf_str.push_matched(
-            \   rom_str,
-            \   table.get_map_to(rom_str, rom_str)
-            \)
-        endfor
+    let matched = buf_str.get_matched()
+    call buf_str.clear_matched()
+    for [rom_str, filter_str] in matched
+        call buf_str.push_matched(
+        \   rom_str,
+        \   table.get_map_to(rom_str, rom_str)
+        \)
     endfor
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
