@@ -338,8 +338,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         endif
 
         let henkan_result = eskk#get_prev_henkan_result()
-        try
-            let converted = henkan_result.get_candidate(0)
+        if henkan_result.get_status() ==# g:eskk#dictionary#HR_GOT_RESULT
             let dict = eskk#get_dictionary()
             call dict.remember_word(
             \   henkan_result.get_candidate(0),
@@ -347,12 +346,11 @@ function! s:buftable.do_enter(stash) dict "{{{
             \   henkan_result.get_okuri(),
             \   henkan_result.get_okuri_rom(),
             \)
+        endif
 
-            call self.push_kakutei_str(henkan_result.get_candidate(1))
-        catch /^eskk: dictionary look up error:/
-        endtry
-
+        call self.push_kakutei_str(self.get_display_str(0))
         call self.clear_all()
+
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     else
         throw eskk#internal_error(['eskk'])
