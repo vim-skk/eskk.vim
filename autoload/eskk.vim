@@ -687,339 +687,6 @@ function! eskk#forget_registered_words() "{{{
 endfunction "}}}
 
 
-" Filter
-function! eskk#asym_filter(stash, table_name) "{{{
-    let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let phase = buftable.get_henkan_phase()
-
-
-    " Handle special mode-local mapping.
-    let cur_mode = eskk#get_mode()
-    let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
-    let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
-    let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
-    let q_key = printf('mode:%s:q-key', cur_mode)
-    let to_ascii = printf('mode:%s:to-ascii', cur_mode)
-    let to_zenei = printf('mode:%s:to-zenei', cur_mode)
-    let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
-
-    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei, to_abbrev]
-        if eskk#handle_special_lhs(char, key, a:stash)
-            " Handled.
-            call eskk#util#logf("Handled '%s' key.", key)
-            return
-        endif
-    endfor
-
-
-    " In order not to change current buftable old string.
-    call eskk#lock_old_str()
-    try
-        " Handle special characters.
-        " These characters are handled regardless of current phase.
-        if eskk#is_special_lhs(char, 'backspace-key')
-            call buftable.do_backspace(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, 'enter-key')
-            call buftable.do_enter(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, 'sticky')
-            call buftable.do_sticky(a:stash)
-            return
-        elseif eskk#is_big_letter(char)
-            call buftable.do_sticky(a:stash)
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [tolower(char)])
-            return
-        else
-            " Fall through.
-        endif
-    finally
-        call eskk#unlock_old_str()
-    endtry
-
-
-    " Handle other characters.
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return s:filter_rom(a:stash, a:table_name)
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
-            call buftable.do_henkan(a:stash)
-        else
-            return s:filter_rom(a:stash, a:table_name)
-        endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
-            call buftable.do_henkan(a:stash)
-        else
-            return s:filter_rom(a:stash, a:table_name)
-        endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
-            call buftable.choose_next_candidate(a:stash)
-            return
-        elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
-            call buftable.choose_prev_candidate(a:stash)
-            return
-        else
-            call buftable.do_enter(a:stash)
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
-        endif
-    else
-        let msg = printf("eskk#asym_filter() does not support phase %d.", phase)
-        throw eskk#internal_error(['eskk'], msg)
-    endif
-endfunction "}}}
-function! s:generate_map_list(str, tail, ...) "{{{
-    let str = a:str
-    let result = a:0 != 0 ? a:1 : []
-    " NOTE: `str` must come to empty string.
-    if str == ''
-        return result
-    else
-        call add(result, str)
-        " a:tail is true, Delete tail one character.
-        " a:tail is false, Delete first one character.
-        return s:generate_map_list(
-        \   (a:tail ? strpart(str, 0, strlen(str) - 1) : strpart(str, 1)),
-        \   a:tail,
-        \   result
-        \)
-    endif
-endfunction "}}}
-function! s:get_matched_and_rest(table, rom_str, tail) "{{{
-    " For e.g., if table has map "n" to "ん" and "j" to none.
-    " rom_str(a:tail is true): "nj" => [["ん"], "j"]
-    " rom_str(a:tail is false): "nj" => [[], "nj"]
-
-    let matched = []
-    let rest = a:rom_str
-    while 1
-        let counter = 0
-        let has_map_str = -1
-        for str in s:generate_map_list(rest, a:tail)
-            let counter += 1
-            if a:table.has_map(str)
-                let has_map_str = str
-                break
-            endif
-        endfor
-        if has_map_str ==# -1
-            return [matched, rest]
-        endif
-        call add(matched, has_map_str)
-        if a:tail
-            " Delete first `has_map_str` bytes.
-            let rest = strpart(rest, strlen(has_map_str))
-        else
-            " Delete last `has_map_str` bytes.
-            let rest = strpart(rest, 0, strlen(rest) - strlen(has_map_str))
-        endif
-    endwhile
-endfunction "}}}
-function! s:filter_rom(stash, table_name) "{{{
-    let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
-    let rom_str = buf_str.get_rom_str() . char
-    let table = eskk#table#get_table(a:table_name)
-    let match_exactly  = table.has_map(rom_str)
-    let candidates     = table.get_candidates(rom_str)
-
-    call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
-    call eskk#util#logf('candidates = %s', string(candidates))
-
-    if match_exactly
-        call eskk#util#assert(!empty(candidates))
-    endif
-
-    if match_exactly && len(candidates) == 1
-        " Match!
-        call eskk#util#logf('%s - match!', rom_str)
-        return s:filter_rom_exact_match(a:stash, table)
-
-    elseif !empty(candidates)
-        " Has candidates but not match.
-        call eskk#util#logf('%s - wait for a next key.', rom_str)
-        return s:filter_rom_has_candidates(a:stash)
-
-    else
-        " No candidates.
-        call eskk#util#logf('%s - no candidates.', rom_str)
-        return s:filter_rom_no_match(a:stash, table)
-    endif
-endfunction "}}}
-function! s:filter_rom_exact_match(stash, table) "{{{
-    let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
-    let rom_str = buf_str.get_rom_str() . char
-    let phase = buftable.get_henkan_phase()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        " Set filtered string.
-        call buf_str.push_matched(rom_str, a:table.get_map_to(rom_str))
-        call buf_str.clear_rom_str()
-
-
-        " Set rest string.
-        "
-        " NOTE:
-        " rest must not have multibyte string.
-        " rest is for rom string.
-        let rest = a:table.get_rest(rom_str, -1)
-        " Assumption: 'a:table.has_map(rest)' returns false here.
-        if rest !=# -1
-            " XXX:
-            "     eskk#get_named_map(char)
-            " should
-            "     eskk#get_named_map(eskk#util#uneval_key(char))
-            for rest_char in split(rest, '\zs')
-                call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#util#key2char',
-                \   [eskk#get_named_map(rest_char)]
-                \)
-            endfor
-        endif
-
-
-        " Clear filtered string when eskk#filter()'s finalizing.
-        function! s:finalize()
-            let buftable = eskk#get_buftable()
-            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = buftable.get_current_buf_str()
-                call buf_str.clear_matched()
-            endif
-        endfunction
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
-        \   []
-        \)
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        " Enter phase henkan select with henkan.
-
-        " Input: "SesSi"
-        " Convert from:
-        "   henkan buf str:
-        "     filter str: "せ"
-        "     rom str   : "s"
-        "   okuri buf str:
-        "     filter str: "し"
-        "     rom str   : "si"
-        " to:
-        "   henkan buf str:
-        "     filter str: "せっ"
-        "     rom str   : ""
-        "   okuri buf str:
-        "     filter str: "し"
-        "     rom str   : "si"
-        " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
-        let henkan_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        let okuri_buf_str         = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-        let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-        let henkan_rom = henkan_buf_str.get_rom_str()
-        let okuri_rom  = okuri_buf_str.get_rom_str()
-        if henkan_rom != '' && a:table.has_map(henkan_rom . okuri_rom[0])
-            " Push "っ".
-            let match_rom = henkan_rom . okuri_rom[0]
-            call henkan_buf_str.push_matched(
-            \   match_rom,
-            \   a:table.get_map_to(match_rom)
-            \)
-            " Push "s" to rom str.
-            let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
-            if rest !=# -1
-                call okuri_buf_str.set_rom_str(
-                \   rest . okuri_rom[1:]
-                \)
-            endif
-        endif
-
-        call eskk#util#assert(char != '')
-        call okuri_buf_str.push_rom_str(char)
-
-        if a:table.has_map(okuri_buf_str.get_rom_str())
-            call okuri_buf_str.push_matched(
-            \   okuri_buf_str.get_rom_str(),
-            \   a:table.get_map_to(okuri_buf_str.get_rom_str())
-            \)
-            let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
-            if rest !=# -1
-                " XXX:
-                "     eskk#get_named_map(char)
-                " should
-                "     eskk#get_named_map(eskk#util#uneval_key(char))
-                for rest_char in split(rest, '\zs')
-                    call eskk#register_temp_event(
-                    \   'filter-redispatch-post',
-                    \   'eskk#util#key2char',
-                    \   [eskk#get_named_map(rest_char)]
-                    \)
-                endfor
-            endif
-        endif
-
-        call okuri_buf_str.clear_rom_str()
-
-        let matched = okuri_buf_str.get_matched()
-        call eskk#util#assert(!empty(matched))
-        if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
-            call buftable.do_henkan(a:stash)
-        endif
-    endif
-endfunction "}}}
-function! s:filter_rom_has_candidates(stash) "{{{
-    let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
-
-    " NOTE: This will be run in all phases.
-    call buf_str.push_rom_str(char)
-endfunction "}}}
-function! s:filter_rom_no_match(stash, table) "{{{
-    let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
-    let rom_str_without_char = buf_str.get_rom_str()
-    let rom_str = rom_str_without_char . char
-    let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
-
-    let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
-    if empty(matched_map_list)
-        if input_style ==# 'skk'
-            if rest ==# char
-                let a:stash.return = char
-            else
-                let rest = strpart(rest, 0, strlen(rest) - 2) . char
-                call buf_str.set_rom_str(rest)
-            endif
-        else
-            let [matched_map_list, head_no_match] = s:get_matched_and_rest(a:table, rom_str, 0)
-            if empty(matched_map_list)
-                call buf_str.set_rom_str(head_no_match)
-            else
-                for char in split(head_no_match, '\zs')
-                    call buf_str.push_matched(char, char)
-                endfor
-                for matched in matched_map_list
-                    call buf_str.push_matched(matched, a:table.get_map_to(matched))
-                endfor
-                call buf_str.clear_rom_str()
-            endif
-        endif
-    else
-        for matched in matched_map_list
-            call buf_str.push_matched(matched, a:table.get_map_to(matched))
-        endfor
-        call buf_str.set_rom_str(rest)
-    endif
-endfunction "}}}
-
-
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
     return eskk#get_current_instance().enabled
@@ -1660,6 +1327,337 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
 endfunction "}}}
 function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
     call eskk#call_mode_func('filter', [a:stash], 1)
+endfunction "}}}
+
+function! eskk#asym_filter(stash, table_name) "{{{
+    let char = a:stash.char
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+
+
+    " Handle special mode-local mapping.
+    let cur_mode = eskk#get_mode()
+    let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
+    let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
+    let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
+    let q_key = printf('mode:%s:q-key', cur_mode)
+    let to_ascii = printf('mode:%s:to-ascii', cur_mode)
+    let to_zenei = printf('mode:%s:to-zenei', cur_mode)
+    let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
+
+    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei, to_abbrev]
+        if eskk#handle_special_lhs(char, key, a:stash)
+            " Handled.
+            call eskk#util#logf("Handled '%s' key.", key)
+            return
+        endif
+    endfor
+
+
+    " In order not to change current buftable old string.
+    call eskk#lock_old_str()
+    try
+        " Handle special characters.
+        " These characters are handled regardless of current phase.
+        if eskk#is_special_lhs(char, 'backspace-key')
+            call buftable.do_backspace(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'enter-key')
+            call buftable.do_enter(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'sticky')
+            call buftable.do_sticky(a:stash)
+            return
+        elseif eskk#is_big_letter(char)
+            call buftable.do_sticky(a:stash)
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [tolower(char)])
+            return
+        else
+            " Fall through.
+        endif
+    finally
+        call eskk#unlock_old_str()
+    endtry
+
+
+    " Handle other characters.
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        return s:filter_rom(a:stash, a:table_name)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
+            call buftable.do_henkan(a:stash)
+        else
+            return s:filter_rom(a:stash, a:table_name)
+        endif
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
+            call buftable.do_henkan(a:stash)
+        else
+            return s:filter_rom(a:stash, a:table_name)
+        endif
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
+            call buftable.choose_next_candidate(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
+            call buftable.choose_prev_candidate(a:stash)
+            return
+        else
+            call buftable.do_enter(a:stash)
+            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
+        endif
+    else
+        let msg = printf("eskk#asym_filter() does not support phase %d.", phase)
+        throw eskk#internal_error(['eskk'], msg)
+    endif
+endfunction "}}}
+function! s:generate_map_list(str, tail, ...) "{{{
+    let str = a:str
+    let result = a:0 != 0 ? a:1 : []
+    " NOTE: `str` must come to empty string.
+    if str == ''
+        return result
+    else
+        call add(result, str)
+        " a:tail is true, Delete tail one character.
+        " a:tail is false, Delete first one character.
+        return s:generate_map_list(
+        \   (a:tail ? strpart(str, 0, strlen(str) - 1) : strpart(str, 1)),
+        \   a:tail,
+        \   result
+        \)
+    endif
+endfunction "}}}
+function! s:get_matched_and_rest(table, rom_str, tail) "{{{
+    " For e.g., if table has map "n" to "ん" and "j" to none.
+    " rom_str(a:tail is true): "nj" => [["ん"], "j"]
+    " rom_str(a:tail is false): "nj" => [[], "nj"]
+
+    let matched = []
+    let rest = a:rom_str
+    while 1
+        let counter = 0
+        let has_map_str = -1
+        for str in s:generate_map_list(rest, a:tail)
+            let counter += 1
+            if a:table.has_map(str)
+                let has_map_str = str
+                break
+            endif
+        endfor
+        if has_map_str ==# -1
+            return [matched, rest]
+        endif
+        call add(matched, has_map_str)
+        if a:tail
+            " Delete first `has_map_str` bytes.
+            let rest = strpart(rest, strlen(has_map_str))
+        else
+            " Delete last `has_map_str` bytes.
+            let rest = strpart(rest, 0, strlen(rest) - strlen(has_map_str))
+        endif
+    endwhile
+endfunction "}}}
+function! s:filter_rom(stash, table_name) "{{{
+    let char = a:stash.char
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
+    let rom_str = buf_str.get_rom_str() . char
+    let table = eskk#table#get_table(a:table_name)
+    let match_exactly  = table.has_map(rom_str)
+    let candidates     = table.get_candidates(rom_str)
+
+    call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
+    call eskk#util#logf('candidates = %s', string(candidates))
+
+    if match_exactly
+        call eskk#util#assert(!empty(candidates))
+    endif
+
+    if match_exactly && len(candidates) == 1
+        " Match!
+        call eskk#util#logf('%s - match!', rom_str)
+        return s:filter_rom_exact_match(a:stash, table)
+
+    elseif !empty(candidates)
+        " Has candidates but not match.
+        call eskk#util#logf('%s - wait for a next key.', rom_str)
+        return s:filter_rom_has_candidates(a:stash)
+
+    else
+        " No candidates.
+        call eskk#util#logf('%s - no candidates.', rom_str)
+        return s:filter_rom_no_match(a:stash, table)
+    endif
+endfunction "}}}
+function! s:filter_rom_exact_match(stash, table) "{{{
+    let char = a:stash.char
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
+    let rom_str = buf_str.get_rom_str() . char
+    let phase = buftable.get_henkan_phase()
+
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        " Set filtered string.
+        call buf_str.push_matched(rom_str, a:table.get_map_to(rom_str))
+        call buf_str.clear_rom_str()
+
+
+        " Set rest string.
+        "
+        " NOTE:
+        " rest must not have multibyte string.
+        " rest is for rom string.
+        let rest = a:table.get_rest(rom_str, -1)
+        " Assumption: 'a:table.has_map(rest)' returns false here.
+        if rest !=# -1
+            " XXX:
+            "     eskk#get_named_map(char)
+            " should
+            "     eskk#get_named_map(eskk#util#uneval_key(char))
+            for rest_char in split(rest, '\zs')
+                call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#key2char',
+                \   [eskk#get_named_map(rest_char)]
+                \)
+            endfor
+        endif
+
+
+        " Clear filtered string when eskk#filter()'s finalizing.
+        function! s:finalize()
+            let buftable = eskk#get_buftable()
+            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+                let buf_str = buftable.get_current_buf_str()
+                call buf_str.clear_matched()
+            endif
+        endfunction
+
+        call eskk#register_temp_event(
+        \   'filter-begin',
+        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
+        \   []
+        \)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        " Enter phase henkan select with henkan.
+
+        " Input: "SesSi"
+        " Convert from:
+        "   henkan buf str:
+        "     filter str: "せ"
+        "     rom str   : "s"
+        "   okuri buf str:
+        "     filter str: "し"
+        "     rom str   : "si"
+        " to:
+        "   henkan buf str:
+        "     filter str: "せっ"
+        "     rom str   : ""
+        "   okuri buf str:
+        "     filter str: "し"
+        "     rom str   : "si"
+        " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
+        let henkan_buf_str        = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        let okuri_buf_str         = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+        let henkan_rom = henkan_buf_str.get_rom_str()
+        let okuri_rom  = okuri_buf_str.get_rom_str()
+        if henkan_rom != '' && a:table.has_map(henkan_rom . okuri_rom[0])
+            " Push "っ".
+            let match_rom = henkan_rom . okuri_rom[0]
+            call henkan_buf_str.push_matched(
+            \   match_rom,
+            \   a:table.get_map_to(match_rom)
+            \)
+            " Push "s" to rom str.
+            let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
+            if rest !=# -1
+                call okuri_buf_str.set_rom_str(
+                \   rest . okuri_rom[1:]
+                \)
+            endif
+        endif
+
+        call eskk#util#assert(char != '')
+        call okuri_buf_str.push_rom_str(char)
+
+        if a:table.has_map(okuri_buf_str.get_rom_str())
+            call okuri_buf_str.push_matched(
+            \   okuri_buf_str.get_rom_str(),
+            \   a:table.get_map_to(okuri_buf_str.get_rom_str())
+            \)
+            let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
+            if rest !=# -1
+                " XXX:
+                "     eskk#get_named_map(char)
+                " should
+                "     eskk#get_named_map(eskk#util#uneval_key(char))
+                for rest_char in split(rest, '\zs')
+                    call eskk#register_temp_event(
+                    \   'filter-redispatch-post',
+                    \   'eskk#util#key2char',
+                    \   [eskk#get_named_map(rest_char)]
+                    \)
+                endfor
+            endif
+        endif
+
+        call okuri_buf_str.clear_rom_str()
+
+        let matched = okuri_buf_str.get_matched()
+        call eskk#util#assert(!empty(matched))
+        if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
+            call buftable.do_henkan(a:stash)
+        endif
+    endif
+endfunction "}}}
+function! s:filter_rom_has_candidates(stash) "{{{
+    let char = a:stash.char
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
+
+    " NOTE: This will be run in all phases.
+    call buf_str.push_rom_str(char)
+endfunction "}}}
+function! s:filter_rom_no_match(stash, table) "{{{
+    let char = a:stash.char
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
+    let rom_str_without_char = buf_str.get_rom_str()
+    let rom_str = rom_str_without_char . char
+    let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
+
+    let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
+    if empty(matched_map_list)
+        if input_style ==# 'skk'
+            if rest ==# char
+                let a:stash.return = char
+            else
+                let rest = strpart(rest, 0, strlen(rest) - 2) . char
+                call buf_str.set_rom_str(rest)
+            endif
+        else
+            let [matched_map_list, head_no_match] = s:get_matched_and_rest(a:table, rom_str, 0)
+            if empty(matched_map_list)
+                call buf_str.set_rom_str(head_no_match)
+            else
+                for char in split(head_no_match, '\zs')
+                    call buf_str.push_matched(char, char)
+                endfor
+                for matched in matched_map_list
+                    call buf_str.push_matched(matched, a:table.get_map_to(matched))
+                endfor
+                call buf_str.clear_rom_str()
+            endif
+        endif
+    else
+        for matched in matched_map_list
+            call buf_str.push_matched(matched, a:table.get_map_to(matched))
+        endfor
+        call buf_str.set_rom_str(rest)
+    endif
 endfunction "}}}
 
 
