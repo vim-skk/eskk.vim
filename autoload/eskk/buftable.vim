@@ -589,7 +589,11 @@ function! s:buftable.do_henkan(stash) dict "{{{
 
             " Convert rom_str if possible.
             if eskk#has_current_mode_table()
-                let table = eskk#table#get_table(eskk#get_current_mode_table())
+                if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
+                    let table = eskk#table#get_table('rom_to_hira')
+                else
+                    let table = eskk#table#get_table(eskk#get_current_mode_table())
+                endif
                 for henkan_phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
                     let buf_str = self.get_buf_str(henkan_phase)
                     let rom_str = buf_str.get_rom_str()
@@ -671,7 +675,11 @@ function! s:convert_again_with_table(self, table) "{{{
 
     " Convert rom_str if possible.
     if eskk#has_current_mode_table()
-        let table = eskk#table#get_table(eskk#get_current_mode_table())
+        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
+            let table = eskk#table#get_table('rom_to_hira')
+        else
+            let table = eskk#table#get_table(eskk#get_current_mode_table())
+        endif
         for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
             let buf_str = self.get_buf_str(phase)
             let rom_str = buf_str.get_rom_str()
