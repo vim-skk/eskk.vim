@@ -34,10 +34,10 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, converted, has_okuri, 5)
+        let result = s:search_binary(a:physical_dict, converted, has_okuri, limit)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        let result = s:search_linear(a:physical_dict, converted, has_okuri)
+        let result = s:search_linear(a:physical_dict, converted, has_okuri, limit)
     endif
 
     if result[1] !=# -1
@@ -750,8 +750,34 @@ function! s:dict.get_kanji(buftable) dict "{{{
         call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
     endfor
 
-    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom)
-          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom)
+    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
+          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10)
+
+    " TODO: Unique duplicated candidates.
+
+    return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
+endfunction "}}}
+
+function! s:dict.get_ascii(buftable) dict "{{{
+    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let key       = henkan_buf_str.get_matched_filter()
+    let okuri     = okuri_buf_str.get_matched_filter()
+    let okuri_rom = okuri_buf_str.get_matched_rom()
+
+    if key == ''
+        return []
+    endif
+
+    " Convert `self._added_words` to same value
+    " of return value of `eskk#dictionary#parse_skk_dict_line()`.
+    let added = []
+    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
+        call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
+    endfor
+
+    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
+          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10)
 
     " TODO: Unique duplicated candidates.
 
