@@ -51,6 +51,8 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
         return s:complete_ascii()
+    elseif eskk#get_mode() ==# 'abbrev'
+        return s:complete_abbrev()
     else
         " Kanji mode.
         
@@ -71,6 +73,29 @@ function! s:complete_ascii() "{{{
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
     for [yomigana, kanji_list] in dict.get_ascii(buftable)
+        " Add yomigana.
+        if yomigana != ''
+            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
+        endif
+
+        " Add kanji.
+        for kanji in kanji_list[: 1]
+            call add(list, {
+            \   'word': kanji.result,
+            \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
+            \   'menu': 'kanji'
+            \})
+        endfor
+    endfor
+
+    return list
+endfunction "}}}
+function! s:complete_abbrev() "{{{
+    " Get candidates.
+    let list = []
+    let dict = eskk#get_dictionary()
+    let buftable = eskk#get_buftable()
+    for [yomigana, kanji_list] in dict.get_abbrev(buftable)
         " Add yomigana.
         if yomigana != ''
             call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})

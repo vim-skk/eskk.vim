@@ -821,6 +821,32 @@ function! s:dict.get_ascii(buftable) dict "{{{
     return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
 endfunction "}}}
 
+function! s:dict.get_abbrev(buftable) dict "{{{
+    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let key       = henkan_buf_str.get_rom_str()
+    let okuri     = ''
+    let okuri_rom = ''
+
+    if key == ''
+        return []
+    endif
+
+    " Convert `self._added_words` to same value
+    " of return value of `eskk#dictionary#parse_skk_dict_line()`.
+    let added = []
+    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
+        call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
+    endfor
+
+    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
+          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10)
+
+    " TODO: Unique duplicated candidates.
+
+    return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
+endfunction "}}}
+
 lockvar s:dict
 " }}}
 
