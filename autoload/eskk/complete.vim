@@ -31,7 +31,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         let buftable = eskk#get_buftable()
         let l = buftable.get_begin_pos()
         if empty(l)
-
             return -1
         endif
         let [mode, pos] = l
@@ -55,7 +54,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return s:complete_abbrev()
     else
         " Kanji mode.
-        
+
         " Do not complete while inputting rom string.
         if a:base[-1] =~ '\a$'
             return []
