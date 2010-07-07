@@ -580,15 +580,6 @@ function! s:buftable.do_henkan(stash) dict "{{{
                 call henkan_select_buf_str.set_matched(key, input)
             endtry
         else
-            if g:eskk_fix_extra_okuri
-            \   && henkan_buf_str.get_rom_str() != ''
-            \   && phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-                call okuri_buf_str.set_rom_str(henkan_buf_str.get_rom_str())
-                call henkan_buf_str.clear_rom_str()
-                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
-                return
-            endif
-
             if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
                 let table = eskk#table#get_table('rom_to_hira')
                 call s:filter_rom_again(self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN), table)
@@ -598,13 +589,23 @@ function! s:buftable.do_henkan(stash) dict "{{{
             " Convert rom_str if possible.
             if eskk#has_current_mode_table()
                 let table = eskk#table#get_table(eskk#get_current_mode_table())
-                for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
-                    let buf_str = self.get_buf_str(phase)
+                for henkan_phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
+                    let buf_str = self.get_buf_str(henkan_phase)
                     let rom_str = buf_str.get_rom_str()
                     if table.has_map(rom_str)
                         call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+                        call buf_str.clear_rom_str()
                     endif
                 endfor
+            endif
+
+            if g:eskk_fix_extra_okuri
+            \   && henkan_buf_str.get_rom_str() != ''
+            \   && phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+                call okuri_buf_str.set_rom_str(henkan_buf_str.get_rom_str())
+                call henkan_buf_str.clear_rom_str()
+                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                return
             endif
 
             let key = henkan_buf_str.get_matched_filter()
