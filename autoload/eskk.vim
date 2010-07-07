@@ -1534,7 +1534,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             \   eskk#get_map_command()
             \   '<buffer><expr>'
             \   '<Plug>(eskk:_filter_redispatch_pre)'
-            \   'join(eskk#throw_event("filter-redispatch-pre"))'
+            \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
             let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
         endif
 
@@ -1544,7 +1544,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             \   eskk#get_map_command()
             \   '<buffer><expr>'
             \   '<Plug>(eskk:_filter_redispatch_post)'
-            \   'join(eskk#throw_event("filter-redispatch-post"))'
+            \   'join(eskk#throw_event("filter-redispatch-post"), "")'
             let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
         endif
 
