@@ -54,11 +54,11 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
-        return []
+        return s:complete_ascii()
     elseif eskk#get_mode() ==# 'abbrev'
         " abbrev mode.
         return s:complete_abbrev()
-    elseif eskk#get_mode() ==# 'hira'
+    else
         " Kanji mode.
 
         " Do not complete while inputting rom string.
@@ -68,8 +68,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 
         return s:complete_kanji()
     endif
-
-    return []
 endfunction "}}}
 function! s:initialize_variables() "{{{
     let s:select_but_not_inserted = 0
