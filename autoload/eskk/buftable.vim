@@ -662,6 +662,22 @@ function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
         \   table.get_map_to(rom_str, rom_str)
         \)
     endfor
+    return buf_str
+endfunction "}}}
+function! s:buftable.filter_rom(phase, table_name) dict "{{{
+    let phase = a:phase
+    let table = eskk#table#get_table(a:table_name)
+    let buf_str = deepcopy(self.get_buf_str(phase), 1)
+
+    let matched = buf_str.get_matched()
+    call buf_str.clear_matched()
+    for [rom_str, filter_str] in matched
+        call buf_str.push_matched(
+        \   rom_str,
+        \   table.get_map_to(rom_str, rom_str)
+        \)
+    endfor
+    return buf_str
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
     return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))

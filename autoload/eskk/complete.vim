@@ -127,8 +127,19 @@ function! s:complete_kanji() "{{{
     let list = []
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    if g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
+        let henkan_buf_str = buftable.filter_rom(
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
+        \   'rom_to_hira'
+        \)
+        let okuri_buf_str = buftable.filter_rom(
+        \   g:eskk#buftable#HENKAN_PHASE_OKURI,
+        \   'rom_to_hira'
+        \)
+    else
+        let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    endif
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
