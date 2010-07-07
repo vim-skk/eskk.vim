@@ -31,7 +31,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         let buftable = eskk#get_buftable()
         let l = buftable.get_begin_pos()
         if empty(l)
-
             return -1
         endif
         let [mode, pos] = l
@@ -45,15 +44,21 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 
         call s:initialize_variables()
         " :help getpos()
-        return pos[2] - 1 + strlen(g:eskk_marker_henkan)
+
+        if eskk#get_mode() ==# 'ascii'
+            return pos[2] - 1
+        else
+            return pos[2] - 1 + strlen(g:eskk_marker_henkan)
+        endif
     endif
 
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
-        return s:complete_ascii()
+        return []
     elseif eskk#get_mode() ==# 'abbrev'
+        " abbrev mode.
         return s:complete_abbrev()
-    else
+    elseif eskk#get_mode() ==# 'hira'
         " Kanji mode.
         
         " Do not complete while inputting rom string.
@@ -63,6 +68,8 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 
         return s:complete_kanji()
     endif
+
+    return []
 endfunction "}}}
 function! s:initialize_variables() "{{{
     let s:select_but_not_inserted = 0
