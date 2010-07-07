@@ -275,7 +275,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     endfor
 
     return extend(
-    \   deepcopy(s:henkan_result),
+    \   deepcopy(s:henkan_result, 1),
     \   {
     \       'buftable': a:buftable,
     \       '_dict': a:dict,
@@ -498,7 +498,7 @@ let s:physical_dict = {
 
 function! s:physical_dict_new(path, sorted, encoding) "{{{
     return extend(
-    \   deepcopy(s:physical_dict),
+    \   deepcopy(s:physical_dict, 1),
     \   {'path': expand(a:path), 'sorted': a:sorted, 'encoding': a:encoding},
     \   'force'
     \)
@@ -598,7 +598,7 @@ let s:dict = {
 
 function! eskk#dictionary#new(user_dict, system_dict) "{{{
     return extend(
-    \   deepcopy(s:dict),
+    \   deepcopy(s:dict, 1),
     \   {
     \       '_user_dict': s:physical_dict_new(
     \           a:user_dict.path,
