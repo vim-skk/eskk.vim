@@ -1859,6 +1859,11 @@ function! s:initialize() "{{{
     " Register builtin-modes. {{{
     call eskk#util#log('Registering builtin modes...')
 
+    function! s:set_current_to_begin_pos() "{{{
+        call eskk#get_buftable().set_begin_pos('.')
+    endfunction "}}}
+
+
     " 'ascii' mode {{{
     call eskk#register_mode('ascii')
     let dict = eskk#get_mode_structure('ascii')
@@ -1868,6 +1873,21 @@ function! s:initialize() "{{{
         if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
             call eskk#set_mode('hira')
         else
+            if a:stash.char !=# "\<BS>"
+            \   && a:stash.char !=# "\<C-h>"
+                if a:stash.char =~# '\w'
+                    if !has_key(this.sandbox, 'already_set_for_this_word')
+                        " Set start col of word.
+                        call s:set_current_to_begin_pos()
+                        let this.sandbox.already_set_for_this_word = 1
+                    endif
+                else
+                    if has_key(this.sandbox, 'already_set_for_this_word')
+                        unlet this.sandbox.already_set_for_this_word
+                    endif
+                endif
+            endif
+
             if has_key(g:eskk_mode_use_tables, 'ascii')
                 if !has_key(this.sandbox, 'table')
                     let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
@@ -1897,6 +1917,12 @@ function! s:initialize() "{{{
             let a:stash.return = this.sandbox.table.get_map_to(a:stash.char, a:stash.char)
         endif
     endfunction
+
+    call eskk#register_event(
+    \   'enter-mode-abbrev',
+    \   eskk#util#get_local_func('set_current_to_begin_pos', s:SID_PREFIX),
+    \   []
+    \)
 
     call eskk#validate_mode_structure('zenei')
     " }}}
@@ -2006,12 +2032,9 @@ function! s:initialize() "{{{
         \]
     endfunction "}}}
 
-    function! s:mode_abbrev_set_begin_pos() "{{{
-        call eskk#get_buftable().set_begin_pos('.')
-    endfunction "}}}
     call eskk#register_event(
     \   'enter-mode-abbrev',
-    \   eskk#util#get_local_func('mode_abbrev_set_begin_pos', s:SID_PREFIX),
+    \   eskk#util#get_local_func('set_current_to_begin_pos', s:SID_PREFIX),
     \   []
     \)
 
