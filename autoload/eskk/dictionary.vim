@@ -632,10 +632,9 @@ endfunction "}}}
 
 function! s:dict.register_word(henkan_result, ...) dict "{{{
     let return_input = a:0 ? a:1 : 0
-    let buftable  = a:henkan_result.buftable
-    let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_matched_filter()
-    let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_filter()
-    let okuri_rom = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_rom()
+    let key       = a:henkan_result.get_key()
+    let okuri     = a:henkan_result.get_okuri()
+    let okuri_rom = a:henkan_result.get_okuri_rom()
 
 
     " inputsave()
