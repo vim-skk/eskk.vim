@@ -1941,7 +1941,7 @@ function! s:initialize() "{{{
     call eskk#register_mode('abbrev')
     let dict = eskk#get_mode_structure('abbrev')
 
-    function! dict.filter(stash)
+    function! dict.filter(stash) "{{{
         let char = a:stash.char
         let buftable = eskk#get_buftable()
         let this = eskk#get_mode_structure('abbrev')
@@ -1999,7 +1999,7 @@ function! s:initialize() "{{{
         else
             throw eskk#internal_error(['eskk'], "'abbrev' mode does not support phase %d.", phase)
         endif
-    endfunction
+    endfunction "}}}
     function! dict.get_init_phase() "{{{
         return g:eskk#buftable#HENKAN_PHASE_HENKAN
     endfunction "}}}
