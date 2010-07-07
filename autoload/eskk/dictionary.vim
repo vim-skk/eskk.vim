@@ -774,12 +774,10 @@ function! s:dict.update_dictionary() dict "{{{
     endtry
 endfunction "}}}
 
-function! s:dict.get_kanji(buftable) dict "{{{
-    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
+function! s:dict.get_kanji(key, okuri, okuri_rom) dict "{{{
+    let key = a:key
+    let okuri = a:okuri
+    let okuri_rom = a:okuri_rom
 
     if key == ''
         return []
@@ -801,11 +799,9 @@ function! s:dict.get_kanji(buftable) dict "{{{
 endfunction "}}}
 
 function! s:dict.get_ascii(buftable) dict "{{{
-    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
+    let key = a:key
+    let okuri = a:okuri
+    let okuri_rom = a:okuri_rom
 
     if key == ''
         return []
@@ -827,11 +823,9 @@ function! s:dict.get_ascii(buftable) dict "{{{
 endfunction "}}}
 
 function! s:dict.get_abbrev(buftable) dict "{{{
-    let henkan_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = a:buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_rom_str()
-    let okuri     = ''
-    let okuri_rom = ''
+    let key = a:key
+    let okuri = a:okuri
+    let okuri_rom = a:okuri_rom
 
     if key == ''
         return []
