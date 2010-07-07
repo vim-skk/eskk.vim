@@ -1070,8 +1070,10 @@ function! eskk#enable(...) "{{{
         let disable_skk_vim = substitute(SkkDisable(), "\<C-^>", '', '')
     endif
 
-    let self.omnifunc_save = &l:omnifunc
-    let &l:omnifunc = 'eskk#complete#eskkcomplete'
+    if g:eskk_enable_completion
+        let self.omnifunc_save = &l:omnifunc
+        let &l:omnifunc = 'eskk#complete#eskkcomplete'
+    endif
 
     let self.enabled = 1
     let self.enabled_mode = mode()
@@ -1106,7 +1108,9 @@ function! eskk#disable() "{{{
         call eskk#unmap_all_keys()
     endif
 
-    let &l:omnifunc = self.omnifunc_save
+    if g:eskk_enable_completion
+        let &l:omnifunc = self.omnifunc_save
+    endif
 
     let self.enabled = 0
 
@@ -1530,7 +1534,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             \   eskk#get_map_command()
             \   '<buffer><expr>'
             \   '<Plug>(eskk:_filter_redispatch_pre)'
-            \   'join(eskk#throw_event("filter-redispatch-pre"))'
+            \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
             let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
         endif
 
@@ -1540,7 +1544,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             \   eskk#get_map_command()
             \   '<buffer><expr>'
             \   '<Plug>(eskk:_filter_redispatch_post)'
-            \   'join(eskk#throw_event("filter-redispatch-post"))'
+            \   'join(eskk#throw_event("filter-redispatch-post"), "")'
             let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
         endif
 
@@ -1557,7 +1561,8 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         endif
 
         let ret_str = filter_args[0].return
-        return redispatch_pre
+        return
+        \   redispatch_pre
         \   . (type(ret_str) == type("") ? ret_str : eskk#rewrite())
         \   . redispatch_post
         \   . restore_backspace
@@ -1969,7 +1974,6 @@ function! s:initialize() "{{{
 
         " Handle other characters.
         if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-            call eskk#util#log('henkan!!!!!!!!!!!!1')
             if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
                 call buftable.do_henkan(a:stash)
                 call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
@@ -1977,7 +1981,6 @@ function! s:initialize() "{{{
                 call buf_str.push_rom_str(char)
             endif
         elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-            call eskk#util#log('henkan select!!!!!!!!!!!!1')
             if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
                 call buftable.choose_next_candidate(a:stash)
                 return
@@ -1989,11 +1992,9 @@ function! s:initialize() "{{{
                 call buftable.clear_all()
                 call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
 
-                call eskk#util#log('((((((((((((((^^))))))))))))))')
                 " Leave abbrev mode.
                 " TODO: Back to previous mode?
                 call eskk#set_mode('hira')
-                call eskk#util#log('((((((((((((((^^))))))))))))))')
             endif
         else
             throw eskk#internal_error(['eskk'], "'abbrev' mode does not support phase %d.", phase)
