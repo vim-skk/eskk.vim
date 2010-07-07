@@ -338,19 +338,21 @@ function! s:buftable.do_enter(stash) dict "{{{
         endif
 
         let henkan_result = eskk#get_prev_henkan_result()
-        let converted = henkan_result.get_candidate(0)
+        try
+            let converted = henkan_result.get_candidate(0)
+            let dict = eskk#get_dictionary()
+            call dict.remember_word(
+            \   henkan_result.get_candidate(0),
+            \   henkan_result.get_key(),
+            \   henkan_result.get_okuri(),
+            \   henkan_result.get_okuri_rom(),
+            \)
 
-        let dict = eskk#get_dictionary()
-        call dict.remember_word(
-        \   henkan_result.get_candidate(0),
-        \   henkan_result.get_key(),
-        \   henkan_result.get_okuri(),
-        \   henkan_result.get_okuri_rom(),
-        \)
+            call self.push_kakutei_str(henkan_result.get_candidate(1))
+        catch /^eskk: dictionary look up error:/
+        endtry
 
-        call self.push_kakutei_str(henkan_result.get_candidate(1))
         call self.clear_all()
-
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     else
         throw eskk#internal_error(['eskk'])
@@ -431,7 +433,6 @@ function! s:get_next_candidate(self, stash, next) "{{{
 
     if henkan_result[a:next ? 'advance' : 'back']()
         let candidate = henkan_result.get_candidate()
-        call eskk#util#assert(type(candidate) == type(""), "henkan_result.get_candidate()'s return value is String.")
 
         " Set candidate.
         " FIXME:
@@ -572,15 +573,14 @@ function! s:buftable.do_henkan(stash) dict "{{{
             " XXX: This must clear strings.
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
-            let candidate = eskk#get_prev_henkan_result().get_candidate()
-            if type(candidate) == type("")
-                " Set candidate.
+            try
+                let candidate = eskk#get_prev_henkan_result().get_candidate()
                 call henkan_select_buf_str.set_matched(key, candidate)
-            else
+            catch /^eskk: dictionary look up error:/
                 " No candidates.
                 let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
                 call henkan_select_buf_str.set_matched(key, input)
-            endif
+            endtry
         else
             if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
                 let table = eskk#table#get_table('rom_to_hira')
@@ -617,17 +617,15 @@ function! s:buftable.do_henkan(stash) dict "{{{
             let okuri_matched_rom = okuri_buf_str.get_matched_rom()
             call okuri_buf_str.clear()
 
-            let candidate = eskk#get_prev_henkan_result().get_candidate()
-
             let rom_str = henkan_matched_rom . okuri_matched_rom
-            if type(candidate) == type("")
-                " Set candidate.
+            try
+                let candidate = eskk#get_prev_henkan_result().get_candidate()
                 call henkan_select_buf_str.set_matched(rom_str, candidate)
-            else
+            catch /^eskk: dictionary look up error:/
                 " No candidates.
                 let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
                 call henkan_select_buf_str.set_matched(rom_str, input)
-            endif
+            endtry
         endif
     else
         let msg = printf("s:buftable.do_henkan() does not support phase %d.", phase)

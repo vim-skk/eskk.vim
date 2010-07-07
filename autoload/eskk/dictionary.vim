@@ -420,25 +420,22 @@ function! s:henkan_result.get_candidate(...) dict "{{{
 
     call eskk#util#logf('Get candidate for: buftable.dump() = %s', string(self.buftable.dump()))
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
-    try
-        let result = s:henkan_result_get_result(self)
-        let [candidates, idx] = result
-        call eskk#util#logf('idx = %d, counter = %d', idx, counter)
-        if idx >= counter
-            try
-                return s:henkan_result_select_candidates(self, with_okuri)
-            catch /^eskk: leave henkan select$/
-                if result[1] > 0
-                    let result[1] -= 1
-                endif
-                return candidates[result[1]].result . (with_okuri ? self._okuri : '')
-            endtry
-        else
-            return candidates[idx].result . (with_okuri ? self._okuri : '')
-        endif
-    catch /^eskk: dictionary look up error:/
-        return -1
-    endtry
+
+    let result = s:henkan_result_get_result(self)
+    let [candidates, idx] = result
+    call eskk#util#logf('idx = %d, counter = %d', idx, counter)
+    if idx >= counter
+        try
+            return s:henkan_result_select_candidates(self, with_okuri)
+        catch /^eskk: leave henkan select$/
+            if result[1] > 0
+                let result[1] -= 1
+            endif
+            return candidates[result[1]].result . (with_okuri ? self._okuri : '')
+        endtry
+    else
+        return candidates[idx].result . (with_okuri ? self._okuri : '')
+    endif
 endfunction "}}}
 function! s:henkan_result.get_key() dict "{{{
     return self._key
