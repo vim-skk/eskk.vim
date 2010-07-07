@@ -43,6 +43,16 @@ lockvar s:REST_INDEX
 "   ],
 " }
 
+" s:table {{{
+let s:table = {}
+
+function! s:table_new() "{{{
+    return deepcopy(s:table, 1)
+endfunction "}}}
+
+lockvar s:table
+" }}}
+
 function! s:load_table(table_name) "{{{
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
         return s:table_defs[a:table_name].base
@@ -88,7 +98,7 @@ function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
 
-    let s:table_defs[a:table_name] = {}
+    let s:table_defs[a:table_name] = s:table_new()
     let def = s:table_defs[a:table_name]
 
     " NOTE: I don't set `def.base` here.
@@ -103,7 +113,7 @@ function! s:set_base_table(table_name, Fn) "{{{
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
 
-    let s:table_defs[a:table_name] = {}
+    let s:table_defs[a:table_name] = s:table_new()
     let def = s:table_defs[a:table_name]
 
     let def.name = a:table_name
