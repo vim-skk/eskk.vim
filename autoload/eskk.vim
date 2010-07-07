@@ -263,6 +263,8 @@ let s:skk_dict = {}
 let s:key_handler = {}
 " Global values of &iminsert, &imsearch.
 let s:saved_im_options = []
+" Flag for `s:initialize()`.
+let s:is_initialized = 0
 " }}}
 
 " Functions {{{
@@ -1037,6 +1039,11 @@ function! eskk#enable(...) "{{{
 
     if mode() ==# 'c'
         let &l:iminsert = 1
+    endif
+
+    if !s:is_initialized
+        call s:initialize()
+        let s:is_initialized = 1
     endif
 
     call eskk#throw_event('enable-im')
@@ -2031,7 +2038,6 @@ function! s:initialize() "{{{
     endif
     " }}}
 endfunction "}}}
-call eskk#register_temp_event('enable-im', eskk#util#get_local_func('initialize', s:SID_PREFIX), [])
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
