@@ -289,7 +289,12 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \)
 endfunction "}}}
 
-function! s:henkan_result_advance(self, advance) "{{{
+function! s:henkan_result_advance(this, advance) "{{{
+    if has_key(a:this, '_candidate')
+        " Delete current candidate cache.
+        unlet a:this._candidate
+    endif
+
     try
         let result = s:henkan_result_get_result(a:self)
         if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
@@ -387,7 +392,13 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
                 let page_index += 1
             else
                 " No more pages. Register new word.
-                return a:this._dict.register_word(a:this, a:with_okuri)
+                let input = a:this._dict.register_word(a:this, 1)
+                let henkan_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                return [
+                \   (input != '' ? input : buf_str.get_matched_filter()),
+                \   okuri_buf_str.get_matched_filter()
+                \]
             endif
         elseif eskk#is_special_lhs(char, 'phase:henkan-select:prev-page')
             if eskk#util#has_idx(pages, page_index - 1)
@@ -402,7 +413,7 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
                 if c ==# selected
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
-                    return word.result . (a:with_okuri ? a:this._okuri : '')
+                    return [word.result, (a:with_okuri ? a:this._okuri : '')]
                 endif
             endfor
         endif
@@ -418,6 +429,10 @@ endfunction "}}}
 function! s:henkan_result.get_candidate(...) dict "{{{
     let with_okuri = a:0 ? a:1 : 1
 
+    if has_key(self, '_candidate')
+        return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
+    endif
+
     call eskk#util#logf('Get candidate for: buftable.dump() = %s', string(self.buftable.dump()))
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
 
@@ -426,16 +441,18 @@ function! s:henkan_result.get_candidate(...) dict "{{{
     call eskk#util#logf('idx = %d, counter = %d', idx, counter)
     if idx >= counter
         try
-            return s:henkan_result_select_candidates(self, with_okuri)
+            let self._candidate = s:henkan_result_select_candidates(self, with_okuri)
         catch /^eskk: leave henkan select$/
             if result[1] > 0
                 let result[1] -= 1
             endif
-            return candidates[result[1]].result . (with_okuri ? self._okuri : '')
+            let self._candidate = [candidates[result[1]].result, (with_okuri ? self._okuri : '')]
         endtry
     else
-        return candidates[idx].result . (with_okuri ? self._okuri : '')
+        let self._candidate = [candidates[idx].result, (with_okuri ? self._okuri : '')]
     endif
+
+    return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
 endfunction "}}}
 function! s:henkan_result.get_key() dict "{{{
     return self._key
@@ -612,7 +629,7 @@ function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
 endfunction "}}}
 
 function! s:dict.register_word(henkan_result, ...) dict "{{{
-    let with_okuri = a:0 ? a:1 : 1
+    let return_input = a:0 ? a:1 : 0
     let buftable  = a:henkan_result.buftable
     let key       = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN).get_matched_filter()
     let okuri     = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI).get_matched_filter()
@@ -666,10 +683,8 @@ function! s:dict.register_word(henkan_result, ...) dict "{{{
 
     if input != ''
         call self.remember_word(input, key, okuri, okuri_rom)
-        return input . (with_okuri ? okuri : '')
-    else
-        return key . (with_okuri ? okuri : '')
     endif
+    return return_input ? input : (input != '' ? input : key) . okuri
 endfunction "}}}
 
 function! s:dict.forget_registered_words() dict "{{{
