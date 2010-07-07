@@ -52,7 +52,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         call eskk#util#assert(begin <= end)
 
         return map(
-        \   whole_lines[begin : (limit ==# -1 ? end : begin + limit)],
+        \   whole_lines[begin : (limit < 0 ? end : begin + limit)],
         \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
         \)
     else
@@ -95,8 +95,6 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         return ['', -1]
     endif
 
-    " NOTE: min, max, mid are lnum. not index number.
-
     if a:has_okuri
         let [min, max] = [a:ph_dict.okuri_ari_idx, a:ph_dict.okuri_nasi_idx - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
@@ -107,8 +105,13 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     call eskk#util#logf('s:search_binary(): Initial: min = %d, max = %d', min, max)
 
     call eskk#util#log('--- s:search_binary() ---')
-    while max - min > a:limit
+    let prev_mid = -1
+    while a:limit < 0 || max - min > a:limit
         let mid = (min + max + 2) / 2
+        if prev_mid !=# -1 && mid ==# prev_mid
+            break
+        endif
+        let prev_mid = mid
         let line = whole_lines[mid - 1]
         call eskk#util#logf('min = %d, max = %d, mid = %d', min, max, mid)
         if a:needle >=# line
