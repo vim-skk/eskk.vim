@@ -1565,6 +1565,9 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 endfunction "}}}
 function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
     let lines = []
+    call add(lines, '--- g:eskk_version ---')
+    call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
+    call add(lines, '--- g:eskk_version ---')
     call add(lines, '--- char ---')
     call add(lines, printf('char: %s(%d)', string(a:char), char2nr(a:char)))
     call add(lines, printf('Fn: %s', type(a:Fn) == type(function('tr')) ? string(a:char) : a:Fn))
@@ -1593,9 +1596,6 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
     let lines += split(output, '\n')
     call add(lines, "--- Vim's :version ---")
     call add(lines, '')
-    call add(lines, '--- g:eskk_version ---')
-    call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
-    call add(lines, '--- g:eskk_version ---')
     call add(lines, '')
     if executable('uname')
         call add(lines, "--- Operating System ---")
