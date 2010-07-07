@@ -1964,7 +1964,7 @@ function! s:initialize() "{{{
             call buftable.do_enter(a:stash)
             if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
                 return
-            elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+            else
                 call eskk#set_mode('hira')
                 return
             endif
