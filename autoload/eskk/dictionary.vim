@@ -251,10 +251,12 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
-let s:HR_LOOK_UP_DICTIONARY = 0
-lockvar s:HR_LOOK_UP_DICTIONARY
-let s:HR_GOT_RESULT = 1
-lockvar s:HR_GOT_RESULT
+let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 0
+lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+let g:eskk#dictionary#HR_GOT_RESULT = 1
+lockvar g:eskk#dictionary#HR_GOT_RESULT
+let g:eskk#dictionary#HR_NO_RESULT = 2
+lockvar g:eskk#dictionary#HR_NO_RESULT
 
 let s:henkan_result = {
 \   'buftable': {},
@@ -282,7 +284,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_key': a:key,
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
-    \       '_status': (empty(added) ? s:HR_LOOK_UP_DICTIONARY : s:HR_GOT_RESULT),
+    \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_GOT_RESULT),
     \       '_result': (empty(added) ? [] : [map(added, '{"result": v:val}'), 0]),
     \   },
     \   'force'
@@ -295,33 +297,25 @@ function! s:henkan_result_advance(this, advance) "{{{
         unlet a:this._candidate
     endif
 
-    try
-        let result = s:henkan_result_get_result(a:self)
-        if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
-            " Next time to call s:henkan_result_get_result(),
-            " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
-            let result[1] += (a:advance ? 1 : -1)
-            return 1
-        else
-            return 0
-        endif
-    catch /^eskk: dictionary look up error:/
+    let result = s:henkan_result_get_result(a:self)
+    if eskk#util#has_idx(result[0], result[1] + (a:advance ? 1 : -1))
+        " Next time to call s:henkan_result_get_result(),
+        " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
+        let result[1] += (a:advance ? 1 : -1)
+        return 1
+    else
         return 0
-    endtry
+    endif
 endfunction "}}}
 
 function! s:henkan_result_get_result(this) "{{{
-    let msg = printf("Can't look up '%s%s%s%s' in dictionaries.",
+    let errormsg = printf("Can't look up '%s%s%s%s' in dictionaries.",
     \                   g:eskk_marker_henkan, a:this._key, g:eskk_marker_okuri, a:this._okuri_rom)
-    let cant_get_result = eskk#dictionary_look_up_error(['eskk', 'dictionary'], msg)
 
-    if a:this._status ==# s:HR_GOT_RESULT
-        if !empty(a:this._result)
-            return a:this._result
-        else
-            throw cant_get_result
-        endif
-    elseif a:this._status ==# s:HR_LOOK_UP_DICTIONARY
+    if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
+        call eskk#util#assert(!empty(a:this._result), "a:this._result must be not empty.")
+        return a:this._result
+    elseif a:this._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
         let [user_dict, system_dict] = [a:this._dict._user_dict, a:this._dict._system_dict]
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_candidate(
@@ -331,15 +325,18 @@ function! s:henkan_result_get_result(this) "{{{
         \   system_dict, a:this._key, a:this._okuri_rom
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
-            throw cant_get_result
+            let a:this._status = g:eskk#dictionary#HR_NO_RESULT
+            throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
         endif
         " Merge and unique user dict result and system dict result.
         let a:this._result = [
         \   eskk#dictionary#merge_results(user_dict_result, system_dict_result),
         \   0
         \]
-        let a:this._status = s:HR_GOT_RESULT
+        let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
         return a:this._result
+    elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
+        throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
     else
         throw eskk#internal_error(['eskk', 'dictionary'])
     endif
@@ -436,8 +433,10 @@ function! s:henkan_result.get_candidate(...) dict "{{{
     call eskk#util#logf('Get candidate for: buftable.dump() = %s', string(self.buftable.dump()))
     let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
 
+    " Save `result` reference to modify.
     let result = s:henkan_result_get_result(self)
     let [candidates, idx] = result
+
     call eskk#util#logf('idx = %d, counter = %d', idx, counter)
     if idx >= counter
         try
@@ -462,6 +461,9 @@ function! s:henkan_result.get_okuri() dict "{{{
 endfunction "}}}
 function! s:henkan_result.get_okuri_rom() dict "{{{
     return self._okuri_rom
+endfunction "}}}
+function! s:henkan_result.get_status() dict "{{{
+    return self._status
 endfunction "}}}
 
 function! s:henkan_result.advance() dict "{{{
