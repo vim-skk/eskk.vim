@@ -965,7 +965,9 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         call okuri_buf_str.clear_rom_str()
 
-        if g:eskk_auto_henkan_at_okuri_match
+        let matched = okuri_buf_str.get_matched()
+        call eskk#util#assert(!empty(matched))
+        if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
             call buftable.do_henkan(a:stash)
             call eskk#util#assert(buftable.get_henkan_phase() == g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, 'After callign s:buftable.do_henkan(), current phase must be henkan select.')
         endif
