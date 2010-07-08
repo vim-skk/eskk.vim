@@ -88,8 +88,16 @@ function! s:buffer_string.push_matched(rom_str, filter_str) dict "{{{
     call add(self._matched_pairs, [a:rom_str, a:filter_str])
 endfunction "}}}
 function! s:buffer_string.pop_matched() dict "{{{
-    if !empty(self._matched_pairs)
+    if empty(self._matched_pairs)
+        return
+    endif
+
+    let p = self._matched_pairs[-1]
+    if eskk#util#mb_strlen(p[1]) ==# 1
         call remove(self._matched_pairs, -1)
+    else
+        call remove(self._matched_pairs, -1)
+        call self.push_matched(p[0], eskk#util#mb_chop(p[1]))
     endif
 endfunction "}}}
 function! s:buffer_string.clear_matched() dict "{{{
