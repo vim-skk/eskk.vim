@@ -95,7 +95,7 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         return ['', -1]
     endif
 
-    " NOTE: min, max, mid are lnum. not index number.
+    " NOTE: min, max, mid are index number. not lnum.
 
     if a:has_okuri
         let [min, max] = [a:ph_dict.okuri_ari_idx, a:ph_dict.okuri_nasi_idx - 1]
@@ -108,8 +108,8 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
 
     call eskk#util#log('--- s:search_binary() ---')
     while max - min > a:limit
-        let mid = (min + max + 2) / 2
-        let line = whole_lines[mid - 1]
+        let mid = (min + max) / 2
+        let line = whole_lines[mid]
         call eskk#util#logf('min = %d, max = %d, mid = %d', min, max, mid)
         if a:needle >=# line
             if a:has_okuri
