@@ -539,8 +539,7 @@ function! s:parse_options(args) "{{{
         endif
     endwhile
 
-    let opt.remap = !opt.noremap
-    call remove(opt, 'noremap')
+    let opt.remap = !remove(opt, 'noremap')
     return [opt, type, args]
 endfunction "}}}
 function! eskk#_cmd_eskk_map(args) "{{{
