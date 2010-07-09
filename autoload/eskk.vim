@@ -1799,7 +1799,6 @@ function! s:initialize() "{{{
 
     " Default mappings - :EskkMap {{{
     silent! EskkMap -type=sticky -unique ;
-    silent! EskkMap -type=henkan -unique <Space>
     silent! EskkMap -type=backspace-key -unique <C-h>
     silent! EskkMap -type=enter-key -unique <CR>
     silent! EskkMap -type=escape-key -unique <Esc>
