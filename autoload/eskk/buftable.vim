@@ -508,6 +508,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
             call self.push_kakutei_str(self.get_display_str(0))
+            call buf_str.clear()
         endif
         if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
             let undo_char = eskk#util#key2char(eskk#get_special_map('undo-key'))
