@@ -680,7 +680,10 @@ endfunction "}}}
 
 " Dictionary
 function! eskk#update_dictionary() "{{{
-    call eskk#get_dictionary().update_dictionary()
+    let dict = eskk#get_dictionary()
+    if !empty(dict)
+        call dict.update_dictionary()
+    endif
 endfunction "}}}
 function! eskk#forget_registered_words() "{{{
     call eskk#get_dictionary().forget_registered_words()
