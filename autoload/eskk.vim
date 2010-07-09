@@ -287,12 +287,11 @@ function! s:map_key(key, options) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
     " Map a:key.
-    let named_key = eskk#get_named_map(a:key)
     execute
     \   'lmap'
     \   '<buffer>' . s:mapopt_dict2raw(a:options)
     \   a:key
-    \   named_key
+    \   eskk#get_named_map(a:key)
 endfunction "}}}
 function! eskk#set_up_temp_key(lhs, ...) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
@@ -463,7 +462,7 @@ endfunction "}}}
 function! s:mapopt_dict2raw(options) "{{{
     let ret = ''
     for [key, val] in items(a:options)
-        if key ==# 'remap'
+        if key ==# 'remap' || key ==# 'map-if'
             continue
         endif
         if val
@@ -482,6 +481,7 @@ function! s:create_default_mapopt() "{{{
     \   'silent': 0,
     \   'unique': 0,
     \   'remap': 0,
+    \   'map-if': '1',
     \}
 endfunction "}}}
 
@@ -495,47 +495,61 @@ function! s:parse_one_arg_from_q_args(args) "{{{
     let rest = strpart(arg, strlen(head))
     return [head, rest]
 endfunction "}}}
+function! s:parse_string_from_q_args(args) "{{{
+    let arg = s:skip_white(a:args)
+    if arg =~# '^[''"]'    " If arg is string-ish, just eval(it).
+        let pat = (arg =~# "^'" ? '^\(''\).\{-}[^''\\]\1' : '^\("\).\{-}[^\\]\1')
+        let m = matchstr(arg, pat.'\C')
+        let rest = strpart(arg, strlen(m))
+        return [eval(m), rest]
+    else
+        return s:parse_one_arg_from_q_args(a:args)
+    endif
+endfunction "}}}
+function! s:parse_options_get_optargs(args) "{{{
+    let OPT_CHARS = '[A-Za-z0-9\-]'
+    let a = s:skip_white(a:args)
+
+    if a[0] !=# '-'
+        return ['--', '', a]
+    endif
+    if a ==# '--'
+        let rest = s:parse_one_arg_from_q_args(a)[1]
+        return ['--', '', rest]
+    endif
+    let a = a[1:]
+    if a !~# '^'.OPT_CHARS.'\+'
+        throw eskk#parse_error(['eskk'], ":EskkMap argument's key must be word.")
+    endif
+
+    if a =~# '^'.OPT_CHARS.'\+='    " key has a value.
+        let [m, optname; _] = matchlist(a, '^\('.OPT_CHARS.'\+\)='.'\C')
+        let rest = strpart(a, strlen(m))
+        let [value, rest] = s:parse_string_from_q_args(rest)
+        return [optname, value, rest]
+    else
+        let m = matchstr(a, '^'.OPT_CHARS.'\+'.'\C')
+        let rest = strpart(a, strlen(m))
+        return [m, 1, rest]
+    endif
+endfunction "}}}
 function! s:parse_options(args) "{{{
     let args = a:args
     let type = 'general'
     let opt = s:create_default_mapopt()
     let opt.noremap = 0
 
-    while !empty(args)
-        let [a, rest] = s:parse_one_arg_from_q_args(args)
-        if a[0] !=# '-'
+    while args != ''
+        let [optname, value, args] = s:parse_options_get_optargs(args)
+        if optname ==# '--'
             break
         endif
-        let args = rest
-
-        if a ==# '--'
-            break
-        elseif a[0] ==# '-'
-            if a[1:] ==# 'expr'
-                let opt.expr = 1
-            elseif a[1:] ==# 'noremap'
-                let opt.noremap = 1
-            elseif a[1:] ==# 'buffer'
-                let opt.buffer = 1
-            elseif a[1:] ==# 'silent'
-                let opt.silent = 1
-            elseif a[1:] ==# 'special'
-                let opt.special = 1
-            elseif a[1:] ==# 'script'
-                let opt.script = 1
-            elseif a[1:] ==# 'unique'
-                let opt.unique = 1
-            elseif a[1:4] ==# 'type'
-                if a =~# '^-type='
-                    " TODO Allow -type="..." style?
-                    " But I don't suppose that -type's argument cotains whitespaces.
-                    let type = substitute(a, '^-type=', '', '')
-                else
-                    throw eskk#parse_error(['eskk'], "-type must be '-type=...' style.")
-                endif
-            else
-                throw eskk#parse_error(['eskk'], printf("unknown option '%s'.", a))
-            endif
+        if optname ==# 'type'
+            let type = value
+        elseif has_key(opt, optname)
+            let opt[optname] = value
+        else
+            throw eskk#parse_error(['eskk'], printf("unknown option '%s'.", optname))
         endif
     endwhile
 
@@ -1223,6 +1237,9 @@ function! eskk#map_all_keys(...) "{{{
 
     " Map `:EskkMap -general` keys.
     for [key, opt] in items(s:map.general)
+        if !eval(opt.options['map-if'])
+            continue
+        endif
         if opt.rhs == ''
             call s:map_key(key, opt.options)
         else
@@ -1830,11 +1847,10 @@ function! s:initialize() "{{{
 
     silent! EskkMap -type=mode:abbrev:henkan-key -unique <Space>
 
-    " Remap <BS> to <C-h>
     silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
 
-    silent! EskkMap -expr -noremap <Esc> eskk#escape_key()
-    silent! EskkMap -expr -noremap <C-c> eskk#escape_key()
+    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" <Esc> eskk#escape_key()
+    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" <C-c> eskk#escape_key()
     " }}}
 
     " Map temporary key to keys to use in that mode {{{
