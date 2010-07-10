@@ -1088,6 +1088,8 @@ function! eskk#enable(...) "{{{
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
     endif
 
+    call eskk#set_cursor_color()
+
     let self.enabled = 1
     let self.enabled_mode = mode()
 
@@ -1689,6 +1691,21 @@ function! eskk#handle_context() "{{{
             call call(control.fn, [])
         endif
     endfor
+endfunction "}}}
+
+
+" g:eskk_use_color_cursor
+function! eskk#set_cursor_color() "{{{
+    " From s:SkkSetCursorColor() of skk.vim
+
+    let color = get(g:eskk_cursor_color, eskk#get_mode(), '')
+    if has('gui_running') && g:eskk_use_color_cursor
+        if type(color) == type([]) && len(color) >= 2
+            execute 'highlight lCursor guibg=' . color[&background ==# 'light' ? 0 : 1]
+        elseif type(color) == type("") && color != ''
+            execute 'highlight lCursor guibg=' . color
+        endif
+    endif
 endfunction "}}}
 
 " }}}
