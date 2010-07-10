@@ -1503,11 +1503,12 @@ function! eskk#filter(char) "{{{
     let self = eskk#get_current_instance()
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
 endfunction "}}}
-function! eskk#emulate_filter_keys(chars) "{{{
+function! eskk#emulate_filter_keys(chars, ...) "{{{
     " This function is written almost for the tests.
     " But maybe this is useful
     " when someone (not me) tries to emulate keys? :)
 
+    let clear_buftable = a:0 ? a:1 : 0
     let ret = ''
     let bs = '\(\^H\|<80>kb\)'
     let plug = strtrans("\<Plug>")
@@ -1562,6 +1563,11 @@ function! eskk#emulate_filter_keys(chars) "{{{
             let ret .= _
         endif
     endfor
+
+    if clear_buftable
+        let buftable = eskk#get_buftable()
+        call buftable.clear_all()
+    endif
 
     return ret
 endfunction "}}}
