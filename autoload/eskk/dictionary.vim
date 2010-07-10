@@ -251,12 +251,14 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
-let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 0
-lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-let g:eskk#dictionary#HR_GOT_RESULT = 1
-lockvar g:eskk#dictionary#HR_GOT_RESULT
-let g:eskk#dictionary#HR_NO_RESULT = 2
+let g:eskk#dictionary#HR_NO_RESULT = 0
 lockvar g:eskk#dictionary#HR_NO_RESULT
+let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 1
+lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+let g:eskk#dictionary#HR_SEE_ADDED_WORDS = 2
+lockvar g:eskk#dictionary#HR_SEE_ADDED_WORDS
+let g:eskk#dictionary#HR_GOT_RESULT = 3
+lockvar g:eskk#dictionary#HR_GOT_RESULT
 
 let s:henkan_result = {
 \   'buftable': {},
@@ -284,7 +286,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_key': a:key,
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
-    \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_GOT_RESULT),
+    \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
     \       '_result': (empty(added) ? [] : [map(added, '{"result": v:val}'), 0]),
     \   },
     \   'force'
@@ -304,6 +306,9 @@ function! s:henkan_result_advance(this, advance) "{{{
             " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
             let result[1] += (a:advance ? 1 : -1)
             return 1
+        elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
+            let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+            return s:henkan_result_advance(a:this, a:advance)
         else
             return 0
         endif
@@ -341,6 +346,14 @@ function! s:henkan_result_get_result(this) "{{{
         \]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
         return a:this._result
+    elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
+        let [candidates, idx] = a:this._result
+        if eskk#util#has_idx(candidates, idx)
+            return a:this._result
+        else
+            let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+            return a:henkan_result_get_result(a:this)
+        endif
     elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
         throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
     else
