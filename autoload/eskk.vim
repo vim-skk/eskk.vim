@@ -1538,7 +1538,12 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
                     break
                 endif
                 if pos ==# 0
-                    let ret = eskk#util#mb_chop(ret)
+                    if ret == ''
+                        let r = bs . r
+                        break
+                    else
+                        let ret = eskk#util#mb_chop(ret)
+                    endif
                 else
                     let before = strpart(r, 0, pos)
                     let after = strpart(r, pos)
