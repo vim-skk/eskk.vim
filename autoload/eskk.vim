@@ -2019,12 +2019,8 @@ function! s:initialize() "{{{
             return
         elseif eskk#is_special_lhs(char, 'enter-key')
             call buftable.do_enter(a:stash)
-            if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-                return
-            else
-                call eskk#set_mode('hira')
-                return
-            endif
+            call eskk#set_mode('hira')
+            return
         else
             " Fall through.
         endif
