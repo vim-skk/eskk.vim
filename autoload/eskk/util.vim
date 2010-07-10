@@ -233,6 +233,18 @@ function! eskk#util#get_syn_names(...) "{{{
     return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
 endfunction "}}}
 
+
+function! eskk#util#escape_regex(regex) "{{{
+    " XXX
+    let s = a:regex
+    let s = substitute(s, "\\", "\\\\", 'g')
+    let s = substitute(s, '\*', "\\*", 'g')
+    let s = substitute(s, '\.', "\\.", 'g')
+    let s = substitute(s, '\^', "\\^", 'g')
+    let s = substitute(s, '\$', "\\$", 'g')
+    return s
+endfunction "}}}
+
 " }}}
 
 
