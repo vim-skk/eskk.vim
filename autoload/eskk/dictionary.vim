@@ -165,7 +165,7 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
-    let yomi = substitute(list[0], '\s', '', 'g')
+    let yomi = substitute(list[0], '\s$', '', 'g')
 
     let candidates = []
     for _ in list[1:]
