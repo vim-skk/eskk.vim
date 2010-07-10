@@ -44,6 +44,10 @@ function! s:run()
     " call buftable.clear_all()
     Is eskk#emulate_filter_keys("hoge\<C-h>fuga"), 'ほふが'
     call buftable.clear_all()
+    Is eskk#emulate_filter_keys("a\<C-h>"), ""
+    call buftable.clear_all()
+    Is eskk#emulate_filter_keys("a\<C-h>\<C-h>"), "\<C-h>"
+    call buftable.clear_all()
 endfunction
 
 call s:run()
