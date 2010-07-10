@@ -305,6 +305,24 @@ function! s:buftable.push_kakutei_str(str) dict "{{{
     let self._kakutei_str .= a:str
 endfunction "}}}
 
+function! s:buftable.convert_rom_str() dict "{{{
+    if eskk#has_current_mode_table()
+        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
+            let table = eskk#table#get_table('rom_to_hira')
+        else
+            let table = eskk#table#get_table(eskk#get_current_mode_table())
+        endif
+        for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
+            let buf_str = self.get_buf_str(phase)
+            let rom_str = buf_str.get_rom_str()
+            if table.has_map(rom_str)
+                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+                call buf_str.clear_rom_str()
+            endif
+        endfor
+    endif
+endfunction "}}}
+
 function! s:buftable.do_enter(stash) dict "{{{
     let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     let henkan_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
@@ -313,6 +331,8 @@ function! s:buftable.do_enter(stash) dict "{{{
     let phase = self.get_henkan_phase()
     let enter_char = eskk#util#key2char(eskk#get_special_map('enter-key'))
     let undo_char  = eskk#util#key2char(eskk#get_special_map('undo-key'))
+
+    call self.convert_rom_str()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if normal_buf_str.get_rom_str() != ''
@@ -601,21 +621,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
             endif
 
             " Convert rom_str if possible.
-            if eskk#has_current_mode_table()
-                if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
-                    let table = eskk#table#get_table('rom_to_hira')
-                else
-                    let table = eskk#table#get_table(eskk#get_current_mode_table())
-                endif
-                for henkan_phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
-                    let buf_str = self.get_buf_str(henkan_phase)
-                    let rom_str = buf_str.get_rom_str()
-                    if table.has_map(rom_str)
-                        call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
-                        call buf_str.clear_rom_str()
-                    endif
-                endfor
-            endif
+            call self.convert_rom_str()
 
             if g:eskk_fix_extra_okuri
             \   && henkan_buf_str.get_rom_str() != ''
@@ -698,20 +704,7 @@ function! s:convert_again_with_table(self, table) "{{{
     let self = a:self
 
     " Convert rom_str if possible.
-    if eskk#has_current_mode_table()
-        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = eskk#table#get_table('rom_to_hira')
-        else
-            let table = eskk#table#get_table(eskk#get_current_mode_table())
-        endif
-        for phase in [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI]
-            let buf_str = self.get_buf_str(phase)
-            let rom_str = buf_str.get_rom_str()
-            if table.has_map(rom_str)
-                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
-            endif
-        endfor
-    endif
+    call self.convert_rom_str()
 
     let cur_buf_str = self.get_current_buf_str()
 
