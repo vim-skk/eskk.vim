@@ -1503,6 +1503,33 @@ function! eskk#filter(char) "{{{
     let self = eskk#get_current_instance()
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
 endfunction "}}}
+function! eskk#emulate_filter_keys(chars) "{{{
+    " This function is written almost for the tests.
+    " But maybe this is useful
+    " when someone (not me) tries to emulate keys? :)
+
+    let ret = ''
+    let bs = strtrans(eskk#util#key2char(eskk#get_special_map('backspace-key')))
+    let inserted = strtrans("\<Plug>(eskk:internal:_inserted)")
+    let mapmode = 'ic'
+    for c in split(a:chars, '\zs')
+        let r = strtrans(eskk#filter(c))
+        let r = substitute(r, inserted, maparg('<Plug>(eskk:internal:_inserted)', 'ic'), 'g')
+        while stridx(r, bs) != -1
+            if r =~# '^'.bs
+                let ret = eskk#util#mb_chop(ret)
+                let r = substitute(r, '^'.bs, '', '')
+            elseif r =~# '.'.bs
+                let r = substitute(r, '.'.bs, '', '')
+            else
+                throw eskk#internal_error(['eskk'], printf('wtf?:r = %s, ret = %s', string(r), string(ret)))
+            endif
+        endwhile
+        let ret .= r
+    endfor
+
+    return ret
+endfunction "}}}
 function! eskk#call_via_filter(Fn, tail_args) "{{{
     let self = eskk#get_current_instance()
     let char = a:0 != 0 ? a:1 : ''
