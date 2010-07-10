@@ -8,7 +8,7 @@ set cpo&vim
 
 
 function! s:run()
-    if !(exists('$ESKK_TEST_DICTIONARY') && $ESKK_TEST_DICTIONARY)
+    if !(exists('$ESKK_TEST_DICTIONARY') && $ESKK_TEST_DICTIONARY != '')
         Skip 'Set $ESKK_TEST_DICTIONARY to test.'
     endif
 
