@@ -416,9 +416,9 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
                 " No more pages. Register new word.
                 let input = a:this._dict.register_word(a:this, 1)
                 let henkan_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-                let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 return [
-                \   (input != '' ? input : buf_str.get_matched_filter()),
+                \   (input != '' ? input : henkan_buf_str.get_matched_filter()),
                 \   okuri_buf_str.get_matched_filter()
                 \]
             endif
