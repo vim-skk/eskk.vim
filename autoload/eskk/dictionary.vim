@@ -178,11 +178,11 @@ function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     return [yomi, candidates]
 endfunction "}}}
 
-function! eskk#dictionary#merge_results(user_dict_result, system_dict_result) "{{{
-    " Merge.
-    let results =
-    \   (a:user_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:user_dict_result[0])[1] : [])
-    \   + (a:system_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:system_dict_result[0])[1] : [])
+function! eskk#dictionary#merge_results(results) "{{{
+    let results = []
+    for _ in a:results
+        let results += _
+    endfor
 
     " Unique.
     let unique = {}
@@ -340,9 +340,15 @@ function! s:henkan_result_get_result(this) "{{{
             throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
         endif
         " Merge and unique user dict result and system dict result.
+        let parsed_user_dict_result   = user_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(user_dict_result[0])[1]
+        let parsed_system_dict_result = system_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(system_dict_result[0])[1]
+        let results = []
+        for r in [parsed_user_dict_result, parsed_system_dict_result, get(a:this._result, 0, [])]
+            call add(results, r)
+        endfor
         let a:this._result = [
-        \   eskk#dictionary#merge_results(user_dict_result, system_dict_result),
-        \   0
+        \   eskk#dictionary#merge_results(results),
+        \   0,
         \]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
         return a:this._result
