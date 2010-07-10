@@ -1511,9 +1511,20 @@ function! eskk#emulate_filter_keys(chars) "{{{
     let ret = ''
     let bs = '\(\^H\|<80>kb\)'
     let plug = strtrans("\<Plug>")
+    let mapmode = 'icl'
     for c in split(a:chars, '\zs')
         let r = strtrans(eskk#filter(c))
-        let r = substitute(r, plug.'\((eskk:[^()]\+)\)', '\=strtrans(eskk#util#key2char(maparg("<Plug>".submatch(1), "icl")))', 'g')
+        let pre = ''
+        if r =~# '(eskk:_filter_redispatch_pre)'
+            let pre = eskk#util#do_remap('<Plug>(eskk:_filter_redispatch_pre)', mapmode)
+            let r = substitute(r, plug.'\((eskk:_filter_redispatch_pre)\)', '', '')
+        endif
+        let post = ''
+        if r =~# '(eskk:_filter_redispatch_post)'
+            let post = eskk#util#do_remap('<Plug>(eskk:_filter_redispatch_post)', mapmode)
+            let r = substitute(r, plug.'\((eskk:_filter_redispatch_post)\)', '', '')
+        endif
+        let r = substitute(r, plug.'\((eskk:[^()]\+)\)', '\=strtrans(eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(1), mapmode)))', 'g')
         while r =~# bs
             if r =~# '^'.bs
                 let ret = eskk#util#mb_chop(ret)
@@ -1524,7 +1535,19 @@ function! eskk#emulate_filter_keys(chars) "{{{
                 throw eskk#internal_error(['eskk'], printf('wtf?:r = %s, ret = %s', string(r), string(ret)))
             endif
         endwhile
+
+        if pre != ''
+            let _ = strtrans(eval(post))
+            let _ = substitute(_, plug.'\((eskk:[^()]\+)\)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(1), mapmode))', 'g')
+            let ret .= _
+            let ret .= eskk#util#do_remap(eval(pre), mapmode)
+        endif
         let ret .= r
+        if post != ''
+            let _ = strtrans(eval(post))
+            let _ = substitute(_, plug.'\((eskk:[^()]\+)\)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(1), mapmode))', 'g')
+            let ret .= _
+        endif
     endfor
 
     return ret

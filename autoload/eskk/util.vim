@@ -245,6 +245,11 @@ function! eskk#util#escape_regex(regex) "{{{
     return s
 endfunction "}}}
 
+function! eskk#util#do_remap(map, modes) "{{{
+    let m = maparg(a:map, a:modes)
+    return m != '' ? m : a:map
+endfunction "}}}
+
 " }}}
 
 
