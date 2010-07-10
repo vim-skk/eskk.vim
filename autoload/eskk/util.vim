@@ -250,6 +250,26 @@ function! eskk#util#do_remap(map, modes) "{{{
     return m != '' ? m : a:map
 endfunction "}}}
 
+function! eskk#util#remove_ctrl_char(s, ctrl_char) "{{{
+    let s = a:s
+    let pos = stridx(s, a:ctrl_char)
+    if pos != -1
+        let before = strpart(s, 0, pos)
+        let after  = strpart(s, pos + strlen(a:ctrl_char))
+        let s = before . after
+    endif
+    return [s, pos]
+endfunction "}}}
+function! eskk#util#remove_all_ctrl_chars(s, ctrl_char) "{{{
+    let s = a:s
+    while 1
+        let [s, pos] = eskk#util#remove_ctrl_char(s, a:ctrl_char)
+        if pos == -1
+            break
+        endif
+    endwhile
+    return s
+endfunction "}}}
 " }}}
 
 
