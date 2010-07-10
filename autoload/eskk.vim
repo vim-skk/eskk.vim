@@ -1509,13 +1509,12 @@ function! eskk#emulate_filter_keys(chars) "{{{
     " when someone (not me) tries to emulate keys? :)
 
     let ret = ''
-    let bs = strtrans(eskk#util#key2char(eskk#get_special_map('backspace-key')))
-    let inserted = strtrans("\<Plug>(eskk:internal:_inserted)")
-    let mapmode = 'ic'
+    let bs = '\(\^H\|<80>kb\)'
+    let plug = strtrans("\<Plug>")
     for c in split(a:chars, '\zs')
         let r = strtrans(eskk#filter(c))
-        let r = substitute(r, inserted, maparg('<Plug>(eskk:internal:_inserted)', 'ic'), 'g')
-        while stridx(r, bs) != -1
+        let r = substitute(r, plug.'\((eskk:[^()]\+)\)', '\=strtrans(eskk#util#key2char(maparg("<Plug>".submatch(1), "icl")))', 'g')
+        while r =~# bs
             if r =~# '^'.bs
                 let ret = eskk#util#mb_chop(ret)
                 let r = substitute(r, '^'.bs, '', '')
