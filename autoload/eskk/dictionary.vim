@@ -125,8 +125,10 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
             endif
         endif
     endwhile
-
+    
     call eskk#util#log('--- s:search_binary() ---')
+    " NOTE: min, max: Give index number, not lnum.
+    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)    call eskk#util#log('--- s:search_binary() ---')
     " NOTE: min, max: Give index number, not lnum.
     return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
 endfunction "}}}
