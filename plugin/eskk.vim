@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 237))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 256))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -220,6 +220,26 @@ endif
 
 if !exists('g:eskk_compl_enter_send_keys')
     let g:eskk_compl_enter_send_keys = ['<CR>', '<CR>']
+endif
+
+" Cursor color
+if !exists('g:eskk_use_color_cursor')
+    let g:eskk_use_color_cursor = 1
+endif
+
+if !exists('g:eskk_cursor_color')
+    " ascii: ivory4:#8b8b83, gray:#bebebe
+    " hira: coral4:#8b3e2f, pink:#ffc0cb
+    " kata: forestgreen:#228b22, green:#00ff00
+    " abbrev: royalblue:#4169e1
+    " zenei: gold:#ffd700
+    let g:eskk_cursor_color = {
+    \   'ascii': ['#8b8b83', '#bebebe'],
+    \   'hira': ['#8b3e2f', '#ffc0cb'],
+    \   'kata': ['#228b22', '#00ff00'],
+    \   'abbrev': '#4169e1',
+    \   'zenei': '#ffd700',
+    \}
 endif
 
 " }}}

@@ -8,7 +8,7 @@ set cpo&vim
 
 
 function! s:run()
-    if !(exists('$ESKK_TEST_DICTIONARY') && $ESKK_TEST_DICTIONARY)
+    if !(exists('$ESKK_TEST_DICTIONARY') && $ESKK_TEST_DICTIONARY != '')
         Skip 'Set $ESKK_TEST_DICTIONARY to test.'
     endif
 
@@ -20,7 +20,7 @@ function! s:run()
     call curbufstr.set_filter_str('あさ')
 
     " Set up dictionary.
-    let dict = eskk#dictionary#new('~/.skk-jisyo')
+    let dict = eskk#dictionary#new($ESKK_TEST_DICTIONARY)
     VarDump dict.refer(buftable)
 endfunction
 

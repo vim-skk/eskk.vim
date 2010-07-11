@@ -168,7 +168,7 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
-    let yomi = substitute(list[0], '\s', '', 'g')
+    let yomi = substitute(list[0], '\s$', '', 'g')
 
     let candidates = []
     for _ in list[1:]
@@ -181,11 +181,11 @@ function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     return [yomi, candidates]
 endfunction "}}}
 
-function! eskk#dictionary#merge_results(user_dict_result, system_dict_result) "{{{
-    " Merge.
-    let results =
-    \   (a:user_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:user_dict_result[0])[1] : [])
-    \   + (a:system_dict_result[1] !=# -1 ? eskk#dictionary#parse_skk_dict_line(a:system_dict_result[0])[1] : [])
+function! eskk#dictionary#merge_results(results) "{{{
+    let results = []
+    for _ in a:results
+        let results += _
+    endfor
 
     " Unique.
     let unique = {}
@@ -254,12 +254,14 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
-let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 0
-lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-let g:eskk#dictionary#HR_GOT_RESULT = 1
-lockvar g:eskk#dictionary#HR_GOT_RESULT
-let g:eskk#dictionary#HR_NO_RESULT = 2
+let g:eskk#dictionary#HR_NO_RESULT = 0
 lockvar g:eskk#dictionary#HR_NO_RESULT
+let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 1
+lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+let g:eskk#dictionary#HR_SEE_ADDED_WORDS = 2
+lockvar g:eskk#dictionary#HR_SEE_ADDED_WORDS
+let g:eskk#dictionary#HR_GOT_RESULT = 3
+lockvar g:eskk#dictionary#HR_GOT_RESULT
 
 let s:henkan_result = {
 \   'buftable': {},
@@ -287,7 +289,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_key': a:key,
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
-    \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_GOT_RESULT),
+    \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
     \       '_result': (empty(added) ? [] : [map(added, '{"result": v:val}'), 0]),
     \   },
     \   'force'
@@ -307,6 +309,9 @@ function! s:henkan_result_advance(this, advance) "{{{
             " eskk will getchar() if `result[1] >= g:eskk_show_candidates_count`
             let result[1] += (a:advance ? 1 : -1)
             return 1
+        elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
+            let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+            return s:henkan_result_advance(a:this, a:advance)
         else
             return 0
         endif
@@ -338,12 +343,26 @@ function! s:henkan_result_get_result(this) "{{{
             throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
         endif
         " Merge and unique user dict result and system dict result.
+        let parsed_user_dict_result   = user_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(user_dict_result[0])[1]
+        let parsed_system_dict_result = system_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(system_dict_result[0])[1]
+        let results = []
+        for r in [parsed_user_dict_result, parsed_system_dict_result, get(a:this._result, 0, [])]
+            call add(results, r)
+        endfor
         let a:this._result = [
-        \   eskk#dictionary#merge_results(user_dict_result, system_dict_result),
-        \   0
+        \   eskk#dictionary#merge_results(results),
+        \   0,
         \]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
         return a:this._result
+    elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
+        let [candidates, idx] = a:this._result
+        if eskk#util#has_idx(candidates, idx)
+            return a:this._result
+        else
+            let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+            return a:henkan_result_get_result(a:this)
+        endif
     elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
         throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
     else
@@ -400,9 +419,9 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
                 " No more pages. Register new word.
                 let input = a:this._dict.register_word(a:this, 1)
                 let henkan_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-                let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+                let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 return [
-                \   (input != '' ? input : buf_str.get_matched_filter()),
+                \   (input != '' ? input : henkan_buf_str.get_matched_filter()),
                 \   okuri_buf_str.get_matched_filter()
                 \]
             endif

@@ -233,6 +233,43 @@ function! eskk#util#get_syn_names(...) "{{{
     return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
 endfunction "}}}
 
+
+function! eskk#util#escape_regex(regex) "{{{
+    " XXX
+    let s = a:regex
+    let s = substitute(s, "\\", "\\\\", 'g')
+    let s = substitute(s, '\*', "\\*", 'g')
+    let s = substitute(s, '\.', "\\.", 'g')
+    let s = substitute(s, '\^', "\\^", 'g')
+    let s = substitute(s, '\$', "\\$", 'g')
+    return s
+endfunction "}}}
+
+function! eskk#util#do_remap(map, modes) "{{{
+    let m = maparg(a:map, a:modes)
+    return m != '' ? m : a:map
+endfunction "}}}
+
+function! eskk#util#remove_ctrl_char(s, ctrl_char) "{{{
+    let s = a:s
+    let pos = stridx(s, a:ctrl_char)
+    if pos != -1
+        let before = strpart(s, 0, pos)
+        let after  = strpart(s, pos + strlen(a:ctrl_char))
+        let s = before . after
+    endif
+    return [s, pos]
+endfunction "}}}
+function! eskk#util#remove_all_ctrl_chars(s, ctrl_char) "{{{
+    let s = a:s
+    while 1
+        let [s, pos] = eskk#util#remove_ctrl_char(s, a:ctrl_char)
+        if pos == -1
+            break
+        endif
+    endwhile
+    return s
+endfunction "}}}
 " }}}
 
 
