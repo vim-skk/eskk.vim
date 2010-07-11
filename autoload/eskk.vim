@@ -1100,7 +1100,7 @@ function! eskk#enable(...) "{{{
     if self.enabled_mode =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
-        return eskk#emulate_toggle_im(self.enabled_mode ==# 'i')
+        return eskk#emulate_toggle_im()
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
@@ -1134,13 +1134,13 @@ function! eskk#disable() "{{{
     if mode() =~# '^[ic]$'
         return kakutei_str . "\<C-^>"
     else
-        return eskk#emulate_toggle_im(self.enabled_mode ==# 'i')
+        return eskk#emulate_toggle_im()
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
-function! eskk#emulate_toggle_im(at_insert_mode) "{{{
+function! eskk#emulate_toggle_im() "{{{
     let save_lang = v:lang
     lang messages C
     try
@@ -1152,37 +1152,35 @@ function! eskk#emulate_toggle_im(at_insert_mode) "{{{
     endtry
     let defined_langmap = (output !~# '^\n*No mapping found\n*$')
 
-    if a:at_insert_mode
-        " :help i_CTRL-^
-        if defined_langmap
-            if &l:iminsert ==# 1
-                let &l:iminsert = 0
-            else
-                let &l:iminsert = 1
-            endif
+    " :help i_CTRL-^
+    if defined_langmap
+        if &l:iminsert ==# 1
+            let &l:iminsert = 0
         else
-            if &l:iminsert ==# 2
-                let &l:iminsert = 0
-            else
-                let &l:iminsert = 2
-            endif
+            let &l:iminsert = 1
         endif
     else
-        " :help c_CTRL-^
-        if &l:imsearch ==# -1
-            let &l:imsearch = &l:iminsert
-        elseif defined_langmap
-            if &l:imsearch ==# 1
-                let &l:imsearch = 0
-            else
-                let &l:imsearch = 1
-            endif
+        if &l:iminsert ==# 2
+            let &l:iminsert = 0
         else
-            if &l:imsearch ==# 2
-                let &l:imsearch = 0
-            else
-                let &l:imsearch = 2
-            endif
+            let &l:iminsert = 2
+        endif
+    endif
+    
+    " :help c_CTRL-^
+    if &l:imsearch ==# -1
+        let &l:imsearch = &l:iminsert
+    elseif defined_langmap
+        if &l:imsearch ==# 1
+            let &l:imsearch = 0
+        else
+            let &l:imsearch = 1
+        endif
+    else
+        if &l:imsearch ==# 2
+            let &l:imsearch = 0
+        else
+            let &l:imsearch = 2
         endif
     endif
     return ''
