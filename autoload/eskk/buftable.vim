@@ -384,6 +384,22 @@ function! s:buftable.do_backspace(stash, ...) dict "{{{
         endif
     endif
 
+    let mode_st = eskk#get_current_mode_structure()
+    if g:eskk_convert_at_exact_match
+    \   && has_key(mode_st.sandbox, 'real_matched_pairs')
+        let p = mode_st.sandbox.real_matched_pairs
+        unlet mode_st.sandbox.real_matched_pairs
+
+        let filter_str = join(map(copy(p), 'v:val[1]'), '')
+        let buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+        if filter_str ==# buf_str.get_matched_filter()
+            " Fall through.
+        else
+            call buf_str.set_multiple_matched(p)
+            return
+        endif
+    endif
+
     " Build backspaces to delete previous characters.
     for phase in self.get_lower_phases()
         let buf_str = self.get_buf_str(phase)
