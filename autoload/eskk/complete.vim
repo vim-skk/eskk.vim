@@ -62,7 +62,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         " Kanji mode.
 
         " Do not complete while inputting rom string.
-        if a:base[-1] =~ '\a$'
+        if a:base =~ '\a$'
             return []
         endif
 
