@@ -2189,6 +2189,16 @@ function! s:initialize() "{{{
     " InsertLeave: Clear buftable. {{{
     autocmd eskk InsertLeave * call eskk#get_buftable().reset()
     " }}}
+
+    " g:eskk_convert_at_exact_match {{{
+    function! s:clear_real_matched_pairs() "{{{
+        let st = eskk#get_current_mode_structure()
+        if has_key(st.sandbox, 'real_matched_pairs')
+            unlet st.sandbox.real_matched_pairs
+        endif
+    endfunction "}}}
+    autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
+    " }}}
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
