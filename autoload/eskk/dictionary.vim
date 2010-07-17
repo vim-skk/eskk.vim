@@ -40,24 +40,27 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
 
-    if result[1] !=# -1
-        let whole_lines = a:physical_dict.get_lines()
-        let begin = result[1]
-        let i = begin + 1
-        while eskk#util#has_idx(whole_lines, i)
-        \   && stridx(whole_lines[i], converted) == 0
-            let i += 1
-        endwhile
-        let end = i - 1
-        call eskk#util#assert(begin <= end)
-
-        return map(
-        \   whole_lines[begin : (limit < 0 ? end : begin + limit)],
-        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
-        \)
-    else
+    if result[1] ==# -1
         return []
     endif
+    
+    " Get lines until limit.
+    let whole_lines = a:physical_dict.get_lines()
+    let begin = result[1]
+    let i = begin + 1
+    while eskk#util#has_idx(whole_lines, i)
+                \   && stridx(whole_lines[i], converted) == 0
+        let i += 1
+    endwhile
+    let end = i - 1
+    call eskk#util#assert(begin <= end)
+    if limit >= 0 && begin + limit < end
+        let end = begin + limit
+    endif
+
+    return map(whole_lines[begin : end],
+                \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+                \)
 endfunction "}}}
 function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
