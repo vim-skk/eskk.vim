@@ -197,6 +197,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
         endif
     endfor
 
+    call s:set_selected_item()
     "return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
