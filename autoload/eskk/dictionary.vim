@@ -37,7 +37,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         let result = s:search_binary(a:physical_dict, converted, has_okuri, limit)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        let result = s:search_linear(a:physical_dict, converted, has_okuri, limit)
+        let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
 
     if result[1] !=# -1
@@ -809,7 +809,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     endfor
 
     " Unique duplicated candidates.
-    let lines = eskk#util#unique(eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
+    let lines = eskk#util#unique(eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom)
           \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10))
 
     return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
