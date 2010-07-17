@@ -80,10 +80,9 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
         let result = s:search_linear(a:physical_dict, converted, has_okuri)
     endif
     if result[1] !=# -1
-        return [
-        \   s:iconv(result[0], a:physical_dict.encoding, &l:encoding),
-        \   result[1]
-        \]
+        let conv_line = s:iconv(result[0], a:physical_dict.encoding, &l:encoding)
+        call eskk#util#logf('eskk#dictionary#search_candidate() - found!: %s', string(conv_line))
+        return [conv_line, result[1]]
     else
         return ['', -1]
     endif
@@ -154,7 +153,6 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     while min <=# max
         let line = whole_lines[min]
         if stridx(line, a:needle) == 0
-            call eskk#util#logf('eskk#dictionary#search_candidate() - found!: %s', string(line))
             return [line, min]
         endif
         let min += 1
