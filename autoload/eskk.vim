@@ -983,6 +983,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         let matched = okuri_buf_str.get_matched()
         call eskk#util#assert(!empty(matched))
+        " `len(matched) == 1`: Do henkan at only the first time.
         if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
             call buftable.do_henkan(a:stash)
         endif
