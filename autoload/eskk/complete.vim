@@ -173,7 +173,6 @@ function! s:complete_kanji() "{{{
 endfunction "}}}
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
-    echomsg char
     call eskk#util#logf('eskk#complete#handle_special_key(): char = %s', char)
 
     " :help popupmenu-keys
@@ -188,6 +187,8 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<Down>", 's:select_item'],
     \   ["<Space>", 's:do_space'],
     \   ["<Tab>", 's:select_item'],
+    \   ["<C-n>", 's:select_item'],
+    \   ["<C-p>", 's:select_item'],
     \   ["<C-h>", 's:do_backspace'],
     \   ["<BS>", 's:do_backspace'],
     \]
@@ -198,10 +199,13 @@ function! eskk#complete#handle_special_key(stash) "{{{
         endif
     endfor
 
-    if s:select_but_not_inserted
-        " Select item.
-        call s:set_selected_item()
+    " Select item.
+    call s:set_selected_item()
 
+    let buftable = eskk#get_buftable()
+    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let key       = henkan_buf_str.get_matched_filter()
+    if key !~ '^[あ-ん]\+$'
         call eskk#register_temp_event(
                     \   'filter-redispatch-pre',
                     \   'eskk#util#identity',
@@ -290,13 +294,22 @@ function! s:do_space(stash) "{{{
     \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
     \)
 
-    " FIXME:
-    " When user selected kanji in completion, this mapping henkan kanji.
-    call eskk#register_temp_event(
-    \   'filter-redispatch-post',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_named_map('<Space>'))]
-    \)
+    let buftable = eskk#get_buftable()
+    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let key       = henkan_buf_str.get_matched_filter()
+    if key =~ '^[あ-ん]\+$'
+        call eskk#register_temp_event(
+                    \   'filter-redispatch-post',
+                    \   'eskk#util#identity',
+                    \   [eskk#util#key2char(eskk#get_named_map('<Space>'))]
+                    \)
+    else
+        call eskk#register_temp_event(
+                    \   'filter-redispatch-post',
+                    \   'eskk#util#identity',
+                    \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
+                    \)
+    endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-h>'))
