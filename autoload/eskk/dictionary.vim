@@ -35,32 +35,46 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
         let result = s:search_binary(a:physical_dict, converted, has_okuri, limit)
+
+        if result[1] == -1
+            return []
+        endif
+
+        " Get lines until limit.
+        let whole_lines = a:physical_dict.get_lines()
+        let begin = result[1]
+        let i = begin + 1
+        while eskk#util#has_idx(whole_lines, i)
+                    \   && stridx(whole_lines[i], converted) == 0
+            let i += 1
+        endwhile
+        let end = i - 1
+        call eskk#util#assert(begin <= end)
+        if limit >= 0 && begin + limit < end
+            let end = begin + limit
+        endif
+
+        return map(whole_lines[begin : end],
+                    \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+                    \)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        let result = s:search_linear(a:physical_dict, converted, has_okuri)
-    endif
+        
+        let lines = []
+        let start = 1
+        while 1
+            let result = s:search_linear(a:physical_dict, converted, has_okuri, start)
 
-    if result[1] ==# -1
-        return []
+            if result[1] == -1
+                break
+            endif
+            
+            call add(lines, result[0])
+            let start = result[1] + 1
+        endwhile
+        
+        return map(lines, 's:iconv(v:val, a:physical_dict.encoding, &l:encoding)')
     endif
-    
-    " Get lines until limit.
-    let whole_lines = a:physical_dict.get_lines()
-    let begin = result[1]
-    let i = begin + 1
-    while eskk#util#has_idx(whole_lines, i)
-                \   && stridx(whole_lines[i], converted) == 0
-        let i += 1
-    endwhile
-    let end = i - 1
-    call eskk#util#assert(begin <= end)
-    if limit >= 0 && begin + limit < end
-        let end = begin + limit
-    endif
-
-    return map(whole_lines[begin : end],
-                \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
-                \)
 endfunction "}}}
 function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
@@ -139,7 +153,10 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         return ['', -1]
     endif
 
-    if a:0 >= 2
+    if a:0 == 1
+        let [min, max] = [a:1, len(whole_lines) - 1]
+        call eskk#util#assert(min < max, 'min < max')
+    elseif a:0 >= 2
         let [min, max] = a:000
         call eskk#util#assert(min < max, 'min < max')
     elseif a:has_okuri
@@ -152,11 +169,9 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number.")
     call eskk#util#logf('s:search_linear(): Initial: min = %d, max = %d', min, max)
 
-    " TODO: Use match() for speed-optimization.
     while min <=# max
-        let line = whole_lines[min]
-        if stridx(line, a:needle) == 0
-            return [line, min]
+        if stridx(whole_lines[min], a:needle) == 0
+            return [whole_lines[min], min]
         endif
         let min += 1
     endwhile
@@ -811,11 +826,14 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
         call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
     endfor
 
-    " Unique duplicated candidates.
-    let lines = eskk#util#unique(eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom)
-          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10))
+    let candidates_max = 10
+    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, candidates_max)
+    if len(lines) < candidates_max
+        let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, candidates_max - len(lines))
+    endif
 
-    return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
+    " Unique duplicated candidates.
+    return added + map(eskk#util#unique(lines), 'eskk#dictionary#parse_skk_dict_line(v:val)')
 endfunction "}}}
 
 lockvar s:dict
