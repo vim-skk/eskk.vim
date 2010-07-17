@@ -173,6 +173,7 @@ function! s:complete_kanji() "{{{
 endfunction "}}}
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
+    echomsg char
     call eskk#util#logf('eskk#complete#handle_special_key(): char = %s', char)
 
     " :help popupmenu-keys
@@ -186,7 +187,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<Up>", 's:select_item'],
     \   ["<Down>", 's:select_item'],
     \   ["<Space>", 's:do_space'],
-    \   ["<Tab>", 's:identity'],
+    \   ["<Tab>", 's:select_item'],
     \   ["<C-h>", 's:do_backspace'],
     \   ["<BS>", 's:do_backspace'],
     \]
@@ -197,8 +198,24 @@ function! eskk#complete#handle_special_key(stash) "{{{
         endif
     endfor
 
-    call s:set_selected_item()
-    "return 0
+    if s:select_but_not_inserted
+        " Select item.
+        call s:set_selected_item()
+
+        call eskk#register_temp_event(
+                    \   'filter-redispatch-pre',
+                    \   'eskk#util#identity',
+                    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+                    \)
+        call eskk#register_temp_event(
+                    \   'filter-redispatch-post',
+                    \   'eskk#util#identity',
+                    \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
+                    \)
+    endif
+    
+    " Not handled.
+    return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:select_but_not_inserted
