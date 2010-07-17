@@ -217,6 +217,9 @@ endif
 if !exists('g:eskk_enable_completion')
     let g:eskk_enable_completion = 1
 endif
+if !exists('g:eskk_candidates_max')
+    let g:eskk_candidates_max = 10
+endif
 
 if !exists('g:eskk_compl_enter_send_keys')
     let g:eskk_compl_enter_send_keys = ['<CR>', '<CR>']

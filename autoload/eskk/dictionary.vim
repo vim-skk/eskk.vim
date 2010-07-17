@@ -826,10 +826,9 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
         call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
     endfor
 
-    let candidates_max = 10
-    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, candidates_max)
-    if len(lines) < candidates_max
-        let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, candidates_max - len(lines))
+    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, g:eskk_candidates_max)
+    if len(lines) < g:eskk_candidates_max
+        let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, g:eskk_candidates_max - len(lines))
     endif
 
     " Unique duplicated candidates.
