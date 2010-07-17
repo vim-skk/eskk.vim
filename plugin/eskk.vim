@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 262))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 263))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -137,6 +137,8 @@ function! EskkDefaultMappedKeys() "{{{
     \   "<PageDown>",
     \   "<Up>",
     \   "<Down>",
+    \   "<C-n>",
+    \   "<C-p>",
     \]
 endfunction "}}}
 if !exists('g:eskk_mapped_key')
