@@ -54,15 +54,19 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
+        call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
         return s:complete_ascii()
     elseif eskk#get_mode() ==# 'abbrev'
         " abbrev mode.
+        call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
         return s:complete_abbrev()
     else
         " Kanji mode.
+        call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
         " Do not complete while inputting rom string.
         if a:base =~ '\a$'
+            call eskk#util#log('eskk#complete#eskkcomplete(): kanji - skip.')
             return []
         endif
 
@@ -169,6 +173,8 @@ function! s:complete_kanji() "{{{
 endfunction "}}}
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
+    call eskk#util#logf('eskk#complete#handle_special_key(): char = %s', char)
+
     " :help popupmenu-keys
     for [key, fn] in [
     \   ["<CR>", 's:do_enter_pre'],
