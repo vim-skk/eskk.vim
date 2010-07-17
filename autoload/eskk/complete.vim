@@ -181,8 +181,8 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<Down>", 's:select_item'],
     \   ["<Space>", 's:do_space'],
     \   ["<Tab>", 's:identity'],
-    \   ["<C-h>", 's:identity'],
-    \   ["<BS>", 's:identity'],
+    \   ["<C-h>", 's:do_backspace'],
+    \   ["<BS>", 's:do_backspace'],
     \]
         if char ==# eskk#util#key2char(key)
             call {fn}(a:stash)
@@ -287,7 +287,7 @@ function! s:set_selected_item() "{{{
     let [mode, pos] = buftable.get_begin_pos()
     call eskk#util#assert(mode ==# 'i')
 
-    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 1]
+    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
     call eskk#util#logf('Got selected item by pum: %s', string(filter_str))
     if filter_str =~# '[a-z]$'
         let [filter_str, rom_str] = [
