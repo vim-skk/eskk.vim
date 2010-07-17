@@ -1232,7 +1232,7 @@ function! eskk#map_all_keys(...) "{{{
     lmapclear <buffer>
 
     " Map mapped keys.
-    for key in g:eskk_mapped_key
+    for key in g:eskk_mapped_keys
         call call('eskk#set_up_key', [key] + a:000)
     endfor
 
@@ -1261,7 +1261,7 @@ function! eskk#unmap_all_keys() "{{{
         return
     endif
 
-    for key in g:eskk_mapped_key
+    for key in g:eskk_mapped_keys
         call eskk#unmap_key(key)
     endfor
 
