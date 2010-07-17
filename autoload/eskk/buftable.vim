@@ -533,7 +533,10 @@ function! s:buftable.do_sticky(stash) dict "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
+        if g:eskk_ignore_continuous_sticky
+        \   && empty(buf_str.get_matched())
+            let step = 0
+        elseif buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
             let step = 1
         else
