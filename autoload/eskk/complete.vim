@@ -86,7 +86,7 @@ function! s:complete_ascii() "{{{
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    for [yomigana, kanji_list] in dict.search(key, okuri, okuri_rom)
+    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
         " Add yomigana.
         if yomigana != ''
             call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
@@ -114,7 +114,7 @@ function! s:complete_abbrev() "{{{
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    for [yomigana, kanji_list] in dict.search(key, okuri, okuri_rom)
+    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
         " Add yomigana.
         if yomigana != ''
             call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
@@ -153,7 +153,7 @@ function! s:complete_kanji() "{{{
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    for [yomigana, kanji_list] in dict.search(key, okuri, okuri_rom)
+    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
         " Add yomigana.
         if yomigana != ''
             call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})

@@ -182,7 +182,7 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
-    let yomi = substitute(list[0], '\s$', '', 'g')
+    let [yomi, okuri] = [matchstr(list[0], '^[^a-z ]\+'), matchstr(list[0], '[a-z]\+')]
 
     let candidates = []
     for _ in list[1:]
@@ -192,7 +192,7 @@ function! eskk#dictionary#parse_skk_dict_line(line) "{{{
               \ {'result': _})
     endfor
 
-    return [yomi, candidates]
+    return [yomi, okuri, candidates]
 endfunction "}}}
 
 function! eskk#dictionary#merge_results(results) "{{{
@@ -357,14 +357,14 @@ function! s:henkan_result_get_result(this) "{{{
             throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
         endif
         " Merge and unique user dict result and system dict result.
-        let parsed_user_dict_result   = user_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(user_dict_result[0])[1]
-        let parsed_system_dict_result = system_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(system_dict_result[0])[1]
-        let results = []
-        for r in [parsed_user_dict_result, parsed_system_dict_result, get(a:this._result, 0, [])]
-            call add(results, r)
-        endfor
+        let parsed_user_dict_result   = user_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(user_dict_result[0])[2]
+        let parsed_system_dict_result = system_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(system_dict_result[0])[2]
         let a:this._result = [
-        \   eskk#dictionary#merge_results(results),
+        \   eskk#dictionary#merge_results([
+        \       parsed_user_dict_result,
+        \       parsed_system_dict_result,
+        \       get(a:this._result, 0, [])
+        \   ]),
         \   0,
         \]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
@@ -823,7 +823,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     " of return value of `eskk#dictionary#parse_skk_dict_line()`.
     let added = []
     for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
-        call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
+        call add(added, [added_key, added_okuri_rom, [{'result': added_input . added_okuri}]])
     endfor
 
     let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, g:eskk_candidates_max)
