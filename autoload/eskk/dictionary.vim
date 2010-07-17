@@ -827,11 +827,14 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     endfor
 
     let lines = []
-    if len(added) < g:eskk_candidates_max
-        let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, g:eskk_candidates_max)
-    endif
-    if len(added) + len(lines) < g:eskk_candidates_max
-        let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, g:eskk_candidates_max - len(lines))
+    let len = len(added)
+    if len < g:eskk_candidates_max
+        let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, g:eskk_candidates_max - len)
+        let len += len(lines)
+        
+        if len < g:eskk_candidates_max
+            let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, g:eskk_candidates_max - len)
+        endif
     endif
 
     " Unique duplicated candidates.
