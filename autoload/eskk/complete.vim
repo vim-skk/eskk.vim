@@ -181,8 +181,8 @@ function! eskk#complete#handle_special_key(stash) "{{{
     \   ["<Down>", 's:select_item'],
     \   ["<Space>", 's:do_space'],
     \   ["<Tab>", 's:identity'],
-    \   ["<C-h>", 's:identity'],
-    \   ["<BS>", 's:identity'],
+    \   ["<C-h>", 's:do_backspace'],
+    \   ["<BS>", 's:do_backspace'],
     \]
         if char ==# eskk#util#key2char(key)
             call {fn}(a:stash)
