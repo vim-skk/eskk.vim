@@ -305,23 +305,6 @@ function! s:buftable.push_kakutei_str(str) dict "{{{
     let self._kakutei_str .= a:str
 endfunction "}}}
 
-function! s:buftable.convert_rom_str(phases) dict "{{{
-    if eskk#has_current_mode_table()
-        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = eskk#table#get_table('rom_to_hira')
-        else
-            let table = eskk#table#get_table(eskk#get_current_mode_table())
-        endif
-        for buf_str in map(a:phases, 'self.get_buf_str(v:val)')
-            let rom_str = buf_str.get_rom_str()
-            if table.has_map(rom_str)
-                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
-                call buf_str.clear_rom_str()
-            endif
-        endfor
-    endif
-endfunction "}}}
-
 function! s:buftable.do_enter(stash) dict "{{{
     let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     let henkan_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
@@ -533,7 +516,10 @@ function! s:buftable.do_sticky(stash) dict "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
+        if g:eskk_ignore_continuous_sticky
+        \   && empty(buf_str.get_matched())
+            let step = 0
+        elseif buf_str.get_rom_str() != '' || buf_str.get_matched_filter() != ''
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
             let step = 1
         else
@@ -659,6 +645,30 @@ function! s:buftable.do_henkan(stash) dict "{{{
         throw eskk#internal_error(['eskk', 'mode', 'builtin'], msg)
     endif
 endfunction "}}}
+function! s:buftable.do_ctrl_q_key() dict "{{{
+    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+endfunction "}}}
+function! s:buftable.do_q_key() dict "{{{
+    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+endfunction "}}}
+
+" TODO: These functions are very similar. Refactoring them.
+function! s:buftable.convert_rom_str(phases) dict "{{{
+    if eskk#has_current_mode_table()
+        if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
+            let table = eskk#table#get_table('rom_to_hira')
+        else
+            let table = eskk#table#get_table(eskk#get_current_mode_table())
+        endif
+        for buf_str in map(a:phases, 'self.get_buf_str(v:val)')
+            let rom_str = buf_str.get_rom_str()
+            if table.has_map(rom_str)
+                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+                call buf_str.clear_rom_str()
+            endif
+        endfor
+    endif
+endfunction "}}}
 function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
     let phase = a:phase
     let table = eskk#table#get_table(a:table_name)
@@ -688,12 +698,6 @@ function! s:buftable.filter_rom(phase, table_name) dict "{{{
         \)
     endfor
     return buf_str
-endfunction "}}}
-function! s:buftable.do_ctrl_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
-endfunction "}}}
-function! s:buftable.do_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:convert_again_with_table(self, table) "{{{
     let self = a:self
@@ -732,7 +736,6 @@ function! s:convert_again_with_table(self, table) "{{{
     \   []
     \)
 endfunction "}}}
-
 
 function! s:buftable.clear_all() dict "{{{
     for phase in self.get_all_phases()

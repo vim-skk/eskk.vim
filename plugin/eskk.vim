@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 258))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 264))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -30,6 +30,7 @@ set cpo&vim
 if !exists('g:eskk_debug')
     let g:eskk_debug = 0
 endif
+
 if !exists('g:eskk_debug_wait_ms')
     let g:eskk_debug_wait_ms = 0
 endif
@@ -75,6 +76,7 @@ endif
 if !exists("g:eskk_backup_dictionary")
     let g:eskk_backup_dictionary = g:eskk_dictionary.path . ".BAK"
 endif
+
 if !exists("g:eskk_auto_save_dictionary_at_exit")
     let g:eskk_auto_save_dictionary_at_exit = 1
 endif
@@ -104,6 +106,7 @@ endif
 if !exists('g:eskk_no_default_mappings')
     let g:eskk_no_default_mappings = 0
 endif
+
 if !exists('g:eskk_dont_map_default_if_already_mapped')
     let g:eskk_dont_map_default_if_already_mapped = 1
 endif
@@ -134,19 +137,23 @@ function! EskkDefaultMappedKeys() "{{{
     \   "<PageDown>",
     \   "<Up>",
     \   "<Down>",
+    \   "<C-n>",
+    \   "<C-p>",
     \]
 endfunction "}}}
-if !exists('g:eskk_mapped_key')
-    let g:eskk_mapped_key = EskkDefaultMappedKeys()
+if !exists('g:eskk_mapped_keys')
+    let g:eskk_mapped_keys = EskkDefaultMappedKeys()
 endif
 
 " Mode
 if !exists('g:eskk_initial_mode')
     let g:eskk_initial_mode = 'hira'
 endif
+
 if !exists('g:eskk_statusline_mode_strings')
     let g:eskk_statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
 endif
+
 if !exists('g:eskk_mode_use_tables')
     let g:eskk_mode_use_tables =  {'hira': 'rom_to_hira', 'kata': 'rom_to_kata', 'zenei': 'rom_to_zenei', 'hankata': 'rom_to_hankata'}
 endif
@@ -155,12 +162,15 @@ endif
 if !exists("g:eskk_marker_henkan")
     let g:eskk_marker_henkan = '▽'
 endif
+
 if !exists("g:eskk_marker_okuri")
     let g:eskk_marker_okuri = '*'
 endif
+
 if !exists("g:eskk_marker_henkan_select")
     let g:eskk_marker_henkan_select = '▼'
 endif
+
 if !exists("g:eskk_marker_jisyo_touroku")
     let g:eskk_marker_jisyo_touroku = '?'
 endif
@@ -213,16 +223,21 @@ if !exists("g:eskk_fix_extra_okuri")
     let g:eskk_fix_extra_okuri = 1
 endif
 
+if !exists('g:eskk_ignore_continuous_sticky')
+    let g:eskk_ignore_continuous_sticky = 1
+endif
+
 " Completion
 if !exists('g:eskk_enable_completion')
     let g:eskk_enable_completion = 1
 endif
+
 if !exists('g:eskk_candidates_max')
     let g:eskk_candidates_max = 10
 endif
 
 if !exists('g:eskk_compl_enter_send_keys')
-    let g:eskk_compl_enter_send_keys = ['<CR>', '<CR>']
+    let g:eskk_compl_enter_send_keys = ['<CR>']
 endif
 
 " Cursor color

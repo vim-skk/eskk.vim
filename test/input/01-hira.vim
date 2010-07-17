@@ -9,13 +9,9 @@ set cpo&vim
 
 
 function! s:run()
-    call eskk#enable()
-    OK eskk#is_enabled()
-
-    let buftable = eskk#get_buftable()
-
     Is eskk#emulate_filter_keys(''), ''
     Is eskk#emulate_filter_keys('a'), 'あ'
+    Is eskk#emulate_filter_keys("s"), "s"
     Is eskk#emulate_filter_keys('sa'), 'さ'
     Is eskk#emulate_filter_keys('cha'), 'ちゃ'
     Is eskk#emulate_filter_keys('kanji'), 'かんじ'
@@ -31,6 +27,8 @@ function! s:run()
     Is eskk#emulate_filter_keys("hoge\<C-h>fuga"), 'ほふが'
     Is eskk#emulate_filter_keys("a\<C-h>"), ""
     Is eskk#emulate_filter_keys("a\<C-h>\<C-h>"), "\<C-h>"
+    Is eskk#emulate_filter_keys(" \<C-h>"), ""
+    Is eskk#emulate_filter_keys(" \<C-h>\<C-h>"), "\<C-h>"
 endfunction
 
 call s:run()

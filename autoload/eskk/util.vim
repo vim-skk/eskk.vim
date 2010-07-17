@@ -94,11 +94,11 @@ function! eskk#util#unique(list) "{{{
     for item in a:list
         if !has_key(dup_check, item)
             let dup_check[item] = 1
-            
+
             call add(list, item)
         endif
     endfor
-    
+
     return list
 endfunction "}}}
 

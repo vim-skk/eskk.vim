@@ -983,6 +983,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         let matched = okuri_buf_str.get_matched()
         call eskk#util#assert(!empty(matched))
+        " `len(matched) == 1`: Do henkan at only the first time.
         if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
             call buftable.do_henkan(a:stash)
         endif
@@ -1166,7 +1167,7 @@ function! eskk#emulate_toggle_im() "{{{
             let &l:iminsert = 2
         endif
     endif
-    
+
     " :help c_CTRL-^
     if &l:imsearch ==# -1
         let &l:imsearch = &l:iminsert
@@ -1231,7 +1232,7 @@ function! eskk#map_all_keys(...) "{{{
     lmapclear <buffer>
 
     " Map mapped keys.
-    for key in g:eskk_mapped_key
+    for key in g:eskk_mapped_keys
         call call('eskk#set_up_key', [key] + a:000)
     endfor
 
@@ -1260,7 +1261,7 @@ function! eskk#unmap_all_keys() "{{{
         return
     endif
 
-    for key in g:eskk_mapped_key
+    for key in g:eskk_mapped_keys
         call eskk#unmap_key(key)
     endfor
 
