@@ -794,7 +794,7 @@ function! s:dict.update_dictionary() dict "{{{
     endtry
 endfunction "}}}
 
-function! s:dict.get_kanji(key, okuri, okuri_rom) dict "{{{
+function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom
@@ -810,58 +810,17 @@ function! s:dict.get_kanji(key, okuri, okuri_rom) dict "{{{
         call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
     endfor
 
-    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
+    " Unique duplicated candidates.
+    let lines = []
+    let dup_check = {}
+    for line in eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
           \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10)
-
-    " TODO: Unique duplicated candidates.
-
-    return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
-endfunction "}}}
-
-function! s:dict.get_ascii(key, okuri, okuri_rom) dict "{{{
-    let key = a:key
-    let okuri = a:okuri
-    let okuri_rom = a:okuri_rom
-
-    if key == ''
-        return []
-    endif
-
-    " Convert `self._added_words` to same value
-    " of return value of `eskk#dictionary#parse_skk_dict_line()`.
-    let added = []
-    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
-        call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
+        if !has_key(dup_check, line)
+            let dup_check[line] = 1
+            
+            call add(lines, line)
+        endif
     endfor
-
-    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
-          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10)
-
-    " TODO: Unique duplicated candidates.
-
-    return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
-endfunction "}}}
-
-function! s:dict.get_abbrev(key, okuri, okuri_rom) dict "{{{
-    let key = a:key
-    let okuri = a:okuri
-    let okuri_rom = a:okuri_rom
-
-    if key == ''
-        return []
-    endif
-
-    " Convert `self._added_words` to same value
-    " of return value of `eskk#dictionary#parse_skk_dict_line()`.
-    let added = []
-    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
-        call add(added, [added_key, [{'result': added_input . added_okuri_rom}]])
-    endfor
-
-    let lines = eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
-          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10)
-
-    " TODO: Unique duplicated candidates.
 
     return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
 endfunction "}}}
