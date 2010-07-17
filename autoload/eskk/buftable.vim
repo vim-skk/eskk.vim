@@ -387,16 +387,28 @@ function! s:buftable.do_backspace(stash, ...) dict "{{{
     let mode_st = eskk#get_current_mode_structure()
     if g:eskk_convert_at_exact_match
     \   && has_key(mode_st.sandbox, 'real_matched_pairs')
+
         let p = mode_st.sandbox.real_matched_pairs
         unlet mode_st.sandbox.real_matched_pairs
 
-        let filter_str = join(map(copy(p), 'v:val[1]'), '')
-        let buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        if filter_str ==# buf_str.get_matched_filter()
-            " Fall through.
-        else
-            call buf_str.set_multiple_matched(p)
+        if g:eskk_delete_implies_kakutei
+            " Enter normal phase and delete one character.
+            let filter_str = eskk#util#mb_chop(self.get_display_str(0))
+            call self.push_kakutei_str(filter_str)
+            let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+            call henkan_select_buf_str.clear()
+
+            call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
             return
+        else
+            let filter_str = join(map(copy(p), 'v:val[1]'), '')
+            let buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+            if filter_str ==# buf_str.get_matched_filter()
+                " Fall through.
+            else
+                call buf_str.set_multiple_matched(p)
+                return
+            endif
         endif
     endif
 
