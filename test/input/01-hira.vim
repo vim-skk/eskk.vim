@@ -9,11 +9,6 @@ set cpo&vim
 
 
 function! s:run()
-    call eskk#enable()
-    OK eskk#is_enabled()
-
-    let buftable = eskk#get_buftable()
-
     Is eskk#emulate_filter_keys(''), ''
     Is eskk#emulate_filter_keys('a'), 'あ'
     Is eskk#emulate_filter_keys("s"), "s"
