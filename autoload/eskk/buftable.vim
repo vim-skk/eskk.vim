@@ -398,7 +398,7 @@ function! s:buftable.do_backspace(stash, ...) dict "{{{
                 endif
                 " ["tyo", "ちょ"] => ["tyo", "ち"]
                 if eskk#util#mb_strlen(p[1]) !=# 1
-                    call self.push_matched(p[0], eskk#util#mb_chop(p[1]))
+                    call buf_str.push_matched(p[0], eskk#util#mb_chop(p[1]))
                 endif
             else
                 let m = buf_str.get_matched()
@@ -568,7 +568,8 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
         throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
-function! s:buftable.do_henkan(stash) dict "{{{
+function! s:buftable.do_henkan(stash, ...) dict "{{{
+    let convert_at_exact_match = a:0 ? a:1 : 0
     let phase = self.get_henkan_phase()
     let eskk_mode = eskk#get_mode()
     let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
@@ -581,7 +582,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
             let key = henkan_buf_str.get_rom_str()
             call eskk#set_henkan_result(eskk#get_dictionary().refer(self, key, '', ''))
 
-            if !g:eskk_convert_at_exact_match
+            if !convert_at_exact_match
                 " XXX: This must clear strings. Following clearing must be wasteful.
                 call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
             endif
@@ -623,7 +624,7 @@ function! s:buftable.do_henkan(stash) dict "{{{
             let okuri_rom = okuri_buf_str.get_matched_rom()
             call eskk#set_henkan_result(eskk#get_dictionary().refer(self, key, okuri, okuri_rom))
 
-            if !g:eskk_convert_at_exact_match
+            if !convert_at_exact_match
                 " XXX: This must clear strings. Following clearing must be wasteful.
                 call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
             endif
@@ -640,12 +641,12 @@ function! s:buftable.do_henkan(stash) dict "{{{
             let rom_str = henkan_matched_rom . okuri_matched_rom
             try
                 let candidate = eskk#get_prev_henkan_result().get_candidate()
-                let buf_str = (g:eskk_convert_at_exact_match ? henkan_buf_str : henkan_select_buf_str)
+                let buf_str = (convert_at_exact_match ? henkan_buf_str : henkan_select_buf_str)
                 call buf_str.set_matched(rom_str, candidate)
             catch /^eskk: dictionary look up error:/
                 " No candidates.
                 let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
-                let buf_str = (g:eskk_convert_at_exact_match ? henkan_buf_str : henkan_select_buf_str)
+                let buf_str = (convert_at_exact_match ? henkan_buf_str : henkan_select_buf_str)
                 call buf_str.set_matched(rom_str, input)
             endtry
         endif

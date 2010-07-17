@@ -927,7 +927,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endif
             let st.sandbox.real_matched_pairs = henkan_buf_str.get_matched()
 
-            call buftable.do_henkan(a:stash)
+            call buftable.do_henkan(a:stash, 1)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         " Enter phase henkan select with henkan.
