@@ -1166,7 +1166,7 @@ function! eskk#emulate_toggle_im() "{{{
             let &l:iminsert = 2
         endif
     endif
-    
+
     " :help c_CTRL-^
     if &l:imsearch ==# -1
         let &l:imsearch = &l:iminsert

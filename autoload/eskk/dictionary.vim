@@ -59,7 +59,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
                     \)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        
+
         let lines = []
         let start = 1
         while 1
@@ -68,11 +68,11 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             if result[1] == -1
                 break
             endif
-            
+
             call add(lines, result[0])
             let start = result[1] + 1
         endwhile
-        
+
         return map(lines, 's:iconv(v:val, a:physical_dict.encoding, &l:encoding)')
     endif
 endfunction "}}}
@@ -141,7 +141,7 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
             endif
         endif
     endwhile
-    
+
     call eskk#util#log('--- s:search_binary() ---')
     " NOTE: min, max: Give index number, not lnum.
     return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
@@ -196,6 +196,7 @@ function! eskk#dictionary#parse_skk_dict_line(line) "{{{
 endfunction "}}}
 
 function! eskk#dictionary#merge_results(results) "{{{
+    " Flatten list.
     let results = []
     for _ in a:results
         let results += _
