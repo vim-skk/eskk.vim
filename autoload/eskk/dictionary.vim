@@ -809,16 +809,8 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     endfor
 
     " Unique duplicated candidates.
-    let lines = []
-    let dup_check = {}
-    for line in eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
-          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10)
-        if !has_key(dup_check, line)
-            let dup_check[line] = 1
-            
-            call add(lines, line)
-        endif
-    endfor
+    let lines = eskk#util#unique(eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, 10)
+          \ + eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, 10))
 
     return added + map(lines, 'eskk#dictionary#parse_skk_dict_line(v:val)')
 endfunction "}}}

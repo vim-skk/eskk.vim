@@ -88,6 +88,20 @@ function! eskk#util#has_elem(list, elem) "{{{
     return 0
 endfunction "}}}
 
+function! eskk#util#unique(list) "{{{
+    let list = []
+    let dup_check = {}
+    for item in a:list
+        if !has_key(dup_check, item)
+            let dup_check[item] = 1
+            
+            call add(list, item)
+        endif
+    endfor
+    
+    return list
+endfunction "}}}
+
 " a:func is string.
 
 function! eskk#util#skip_spaces(str) "{{{
