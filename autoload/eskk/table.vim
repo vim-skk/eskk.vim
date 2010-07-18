@@ -127,7 +127,16 @@ endfunction "}}}
 
 function! s:get_map(table_name, search_lhs, index, ...) "{{{
     if s:is_base_table(a:table_name)
-        return call('eskk#util#get_f', [s:get_base_table(a:table_name), [a:search_lhs, a:index]] + a:000)
+        let t = s:get_base_table(a:table_name)
+        if !eskk#util#has_key_f(t, [a:search_lhs, a:index])
+        \   || t[a:search_lhs][a:index] == ''
+            if a:0
+                return a:1
+            else
+                throw eskk#internal_error(['eskk', 'table'])
+            endif
+        endif
+        return t[a:search_lhs][a:index]
     else
         let derived = s:table_defs[a:table_name].derived
         let derived_result = {}    " key is lhs.
