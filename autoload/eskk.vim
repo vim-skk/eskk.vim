@@ -1602,12 +1602,16 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     endif
 
     try
-        let handled = 0
         if pumvisible()
             let handled = call('eskk#complete#handle_special_key', filter_args)
-        endif
-
-        if !handled
+            if !handled
+                call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#identity',
+                \   [eskk#util#key2char(eskk#get_named_map(a:char))]
+                \)
+            endif
+        else
             let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
             if has_key(s:key_handler, rom)
                 " Call eskk#register_map()'s handlers.
