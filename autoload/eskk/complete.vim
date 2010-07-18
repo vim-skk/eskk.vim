@@ -195,7 +195,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
         if char ==# eskk#util#key2char(key)
             call {fn}(a:stash)
             call eskk#util#logf("pumvisible() = 1, Handled key '%s'.", key)
-            return 1
+            return
         endif
     endfor
 
@@ -219,7 +219,6 @@ function! eskk#complete#handle_special_key(stash) "{{{
     endif
 
     " Not handled.
-    return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:select_but_not_inserted
@@ -278,8 +277,6 @@ function! s:do_enter(stash) "{{{
         \   [eskk#util#key2char(eskk#get_named_map(key))]
         \)
     endfor
-
-    return ''
 endfunction "}}}
 function! s:select_item(stash) "{{{
     let s:select_but_not_inserted = 1
@@ -299,16 +296,16 @@ function! s:do_space(stash) "{{{
     let key       = henkan_buf_str.get_matched_filter()
     if s:check_yomigana(key)
         call eskk#register_temp_event(
-                    \   'filter-redispatch-post',
-                    \   'eskk#util#identity',
-                    \   [eskk#util#key2char(eskk#get_named_map('<Space>'))]
-                    \)
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_named_map('<Space>'))]
+        \)
     else
         call eskk#register_temp_event(
-                    \   'filter-redispatch-post',
-                    \   'eskk#util#identity',
-                    \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
-                    \)
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
+        \)
     endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
