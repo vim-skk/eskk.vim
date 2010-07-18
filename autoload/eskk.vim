@@ -1653,44 +1653,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             endif
         endif
 
-        let redispatch_pre = ''
-        if eskk#has_event('filter-redispatch-pre')
-            execute
-            \   eskk#get_map_command()
-            \   '<buffer><expr>'
-            \   '<Plug>(eskk:_filter_redispatch_pre)'
-            \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
-            let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
-        endif
-
-        let redispatch_post = ''
-        if eskk#has_event('filter-redispatch-post')
-            execute
-            \   eskk#get_map_command()
-            \   '<buffer><expr>'
-            \   '<Plug>(eskk:_filter_redispatch_post)'
-            \   'join(eskk#throw_event("filter-redispatch-post"), "")'
-            let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
-        endif
-
-        " eskk#rewrite() assumes that &backspace contains "eol".
-        let restore_backspace = ''
-        if !eskk#util#has_elem(split(&l:backspace, ','), 'eol')
-            execute
-            \   eskk#get_map_command(0)
-            \   '<buffer><expr>'
-            \   '<Plug>(eskk:internal:_restore_backspace)'
-            \   '[setbufvar("%", "&backspace", '.string(&l:backspace).'), ""][1]'
-            let restore_backspace = "\<Plug>(eskk:internal:_restore_backspace)"
-            setlocal backspace+=eol
-        endif
-
-        let ret_str = filter_args[0].return
-        return
-        \   redispatch_pre
-        \   . (type(ret_str) == type("") ? ret_str : eskk#rewrite())
-        \   . redispatch_post
-        \   . restore_backspace
+        return s:rewrite_string(filter_args[0].return)
 
     catch
         call s:write_error_log_file(v:exception, v:throwpoint, a:char, a:Fn)
@@ -1699,6 +1662,45 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     finally
         call eskk#throw_event('filter-finalize')
     endtry
+endfunction "}}}
+function! s:rewrite_string(return_string) "{{{
+    let redispatch_pre = ''
+    if eskk#has_event('filter-redispatch-pre')
+        execute
+        \   eskk#get_map_command()
+        \   '<buffer><expr>'
+        \   '<Plug>(eskk:_filter_redispatch_pre)'
+        \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
+        let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
+    endif
+
+    let redispatch_post = ''
+    if eskk#has_event('filter-redispatch-post')
+        execute
+        \   eskk#get_map_command()
+        \   '<buffer><expr>'
+        \   '<Plug>(eskk:_filter_redispatch_post)'
+        \   'join(eskk#throw_event("filter-redispatch-post"), "")'
+        let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
+    endif
+
+    " eskk#rewrite() assumes that &backspace contains "eol".
+    let restore_backspace = ''
+    if !eskk#util#has_elem(split(&l:backspace, ','), 'eol')
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer><expr>'
+        \   '<Plug>(eskk:internal:_restore_backspace)'
+        \   '[setbufvar("%", "&backspace", '.string(&l:backspace).'), ""][1]'
+        let restore_backspace = "\<Plug>(eskk:internal:_restore_backspace)"
+        setlocal backspace+=eol
+    endif
+
+    return
+    \   redispatch_pre
+    \   . (type(a:return_string) == type("") ? a:return_string : eskk#rewrite())
+    \   . redispatch_post
+    \   . restore_backspace
 endfunction "}}}
 function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
     let lines = []
