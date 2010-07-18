@@ -1614,10 +1614,10 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 
     call eskk#throw_event('filter-begin')
 
-    let filter_args = [{
+    let stash = {
     \   'char': a:char,
     \   'return': 0,
-    \}]
+    \}
 
     if !self.is_locked_old_str
         call eskk#get_buftable().set_old_str(eskk#get_buftable().get_display_str())
@@ -1625,7 +1625,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 
     try
         if pumvisible()
-            let handled = call('eskk#complete#handle_special_key', filter_args)
+            let handled = call('eskk#complete#handle_special_key', [stash])
             if !handled
                 "call eskk#register_temp_event(
                 "\   'filter-redispatch-post',
@@ -1633,13 +1633,13 @@ function! s:filter(self, char, Fn, tail_args) "{{{
                 "\   [eskk#util#key2char(eskk#get_named_map(a:char))]
                 "\)
                 
-                call s:do_filter(filter_args[0], a:Fn, a:tail_args)
+                call s:do_filter(stash, a:Fn, a:tail_args)
             endif
         else
-            call s:do_filter(filter_args[0], a:Fn, a:tail_args)
+            call s:do_filter(stash, a:Fn, a:tail_args)
         endif
 
-        return s:rewrite_string(filter_args[0].return)
+        return s:rewrite_string(stash.return)
 
     catch
         call s:write_error_log_file(v:exception, v:throwpoint, a:char, a:Fn)
