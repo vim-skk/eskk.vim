@@ -1468,9 +1468,11 @@ function! eskk#throw_event(event_name) "{{{
     let ret        = []
     let event      = get(s:event_hook_fn, a:event_name, [])
     let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
-    for call_args in event + temp_event
+    let all_events = event + temp_event
+    while !empty(all_events)
+        let call_args = remove(all_events, 0)
         call add(ret, call('call', call_args))
-    endfor
+    endwhile
 
     " Clear temporary hooks.
     let self.temp_event_hook_fn[a:event_name] = []
