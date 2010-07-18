@@ -1482,8 +1482,8 @@ endfunction "}}}
 function! eskk#has_event(event_name) "{{{
     let self = eskk#get_current_instance()
     return
-    \   has_key(s:event_hook_fn, a:event_name)
-    \   || has_key(self.temp_event_hook_fn, a:event_name)
+    \   !empty(get(s:event_hook_fn, a:event_name, []))
+    \   || !empty(get(self.temp_event_hook_fn, a:event_name, []))
 endfunction "}}}
 
 function! eskk#register_map(map, Fn, args, force) "{{{
