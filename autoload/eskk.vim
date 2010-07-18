@@ -2205,12 +2205,16 @@ function! s:initialize() "{{{
 
     " g:eskk_convert_at_exact_match {{{
     function! s:clear_real_matched_pairs() "{{{
+        if !eskk#is_enabled() || eskk#get_mode() == ''
+            return
+        endif
+
         let st = eskk#get_current_mode_structure()
         if has_key(st.sandbox, 'real_matched_pairs')
             unlet st.sandbox.real_matched_pairs
         endif
     endfunction "}}}
-    "autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
+    autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
     " }}}
 endfunction "}}}
 
