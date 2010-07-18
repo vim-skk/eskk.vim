@@ -2156,7 +2156,8 @@ function! s:initialize() "{{{
                 call eskk#set_mode('hira')
             endif
         else
-            throw eskk#internal_error(['eskk'], "'abbrev' mode does not support phase %d.", phase)
+            let msg = printf("'abbrev' mode does not support phase %d.", phase)
+            throw eskk#internal_error(['eskk'], msg)
         endif
     endfunction "}}}
     function! dict.get_init_phase() "{{{
