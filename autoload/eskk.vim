@@ -1625,20 +1625,23 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 
     try
         if pumvisible()
-            let handled = call('eskk#complete#handle_special_key', [stash])
-            if !handled
-                "call eskk#register_temp_event(
-                "\   'filter-redispatch-post',
-                "\   'eskk#util#identity',
-                "\   [eskk#util#key2char(eskk#get_named_map(a:char))]
-                "\)
-                
-                call s:do_filter(stash, a:Fn, a:tail_args)
+            call eskk#complete#handle_special_key(stash)
+            let handled =
+            \   eskk#has_event('filter-redispatch-post')
+            \   || type(stash.return) == type("")
+            \   || eskk#get_buftable().has_changed()
+            if handled
+                " Postpone a:char process.
+                call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#identity',
+                \   [eskk#util#key2char(eskk#get_named_map(a:char))]
+                \)
+                return s:rewrite_string(stash.return)
             endif
-        else
-            call s:do_filter(stash, a:Fn, a:tail_args)
         endif
 
+        call s:do_filter(stash, a:Fn, a:tail_args)
         return s:rewrite_string(stash.return)
 
     catch

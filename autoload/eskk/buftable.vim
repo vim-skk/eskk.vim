@@ -194,6 +194,21 @@ function! s:buftable.rewrite() dict "{{{
     endif
 endfunction "}}}
 
+function! s:buftable.has_changed() dict "{{{
+    let kakutei = self._kakutei_str
+    if kakutei != ''
+        return 1
+    endif
+
+    let [old, new] = [self._old_str, self.get_display_str()]
+    let inserted_str = kakutei . new
+    if old !=# inserted_str
+        return 1
+    endif
+
+    return 0
+endfunction "}}}
+
 function! s:buftable.get_display_str(...) dict "{{{
     let with_marker = a:0 != 0 ? a:1 : 1
     let phase = self._henkan_phase
