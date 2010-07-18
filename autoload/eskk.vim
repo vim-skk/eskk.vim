@@ -1633,24 +1633,10 @@ function! s:filter(self, char, Fn, tail_args) "{{{
                 "\   [eskk#util#key2char(eskk#get_named_map(a:char))]
                 "\)
                 
-                let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
-                if has_key(s:key_handler, rom)
-                    " Call eskk#register_map()'s handlers.
-                    let [Fn, args] = s:key_handler[rom]
-                    call call(Fn, filter_args + args)
-                else
-                    call call(a:Fn, filter_args + a:tail_args)
-                endif
+                call s:do_filter(filter_args[0], a:Fn, a:tail_args)
             endif
         else
-            let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
-            if has_key(s:key_handler, rom)
-                " Call eskk#register_map()'s handlers.
-                let [Fn, args] = s:key_handler[rom]
-                call call(Fn, filter_args + args)
-            else
-                call call(a:Fn, filter_args + a:tail_args)
-            endif
+            call s:do_filter(filter_args[0], a:Fn, a:tail_args)
         endif
 
         return s:rewrite_string(filter_args[0].return)
@@ -1662,6 +1648,17 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     finally
         call eskk#throw_event('filter-finalize')
     endtry
+endfunction "}}}
+function! s:do_filter(stash, Fn, tail_args) "{{{
+    let filter_args = [a:stash]
+    let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:stash.char
+    if has_key(s:key_handler, rom)
+        " Call eskk#register_map()'s handlers.
+        let [Fn, args] = s:key_handler[rom]
+        call call(Fn, filter_args + args)
+    else
+        call call(a:Fn, filter_args + a:tail_args)
+    endif
 endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
