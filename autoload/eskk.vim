@@ -1629,7 +1629,8 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         if pumvisible()
             call eskk#complete#handle_special_key(stash)
             let handled =
-            \   eskk#has_event('filter-redispatch-post')
+            \   eskk#has_event('filter-redispatch-pre')
+            \   || eskk#has_event('filter-redispatch-post')
             \   || type(stash.return) == type("")
             \   || eskk#get_buftable().has_changed()
             if handled
