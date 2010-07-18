@@ -974,6 +974,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call eskk#util#assert(char != '')
         call okuri_buf_str.push_rom_str(char)
 
+        let has_rest = 0
         if a:table.has_map(okuri_buf_str.get_rom_str())
             call okuri_buf_str.push_matched(
             \   okuri_buf_str.get_rom_str(),
@@ -992,6 +993,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
                     \   [eskk#get_named_map(rest_char)]
                     \)
                 endfor
+                let has_rest = 1
             endif
         endif
 
@@ -999,8 +1001,9 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         let matched = okuri_buf_str.get_matched()
         call eskk#util#assert(!empty(matched))
-        " `len(matched) == 1`: Do henkan at only the first time.
-        if len(matched) == 1 && g:eskk_auto_henkan_at_okuri_match
+        " TODO `len(matched) == 1`: Do henkan at only the first time.
+
+        if !has_rest && g:eskk_auto_henkan_at_okuri_match
             call buftable.do_henkan(a:stash)
         endif
     endif
