@@ -1627,6 +1627,15 @@ function! s:filter(self, char, Fn, tail_args) "{{{
                 \   'eskk#util#identity',
                 \   [eskk#util#key2char(eskk#get_named_map(a:char))]
                 \)
+                
+                let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
+                if has_key(s:key_handler, rom)
+                    " Call eskk#register_map()'s handlers.
+                    let [Fn, args] = s:key_handler[rom]
+                    call call(Fn, filter_args + args)
+                else
+                    call call(a:Fn, filter_args + a:tail_args)
+                endif
             endif
         else
             let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:char
@@ -2201,7 +2210,7 @@ function! s:initialize() "{{{
             unlet st.sandbox.real_matched_pairs
         endif
     endfunction "}}}
-    autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
+    "autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
     " }}}
 endfunction "}}}
 

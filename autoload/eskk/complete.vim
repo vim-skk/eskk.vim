@@ -205,7 +205,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     let buftable = eskk#get_buftable()
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let key       = henkan_buf_str.get_matched_filter()
-    if key !~ '^[あ-ん]\+$'
+    if !s:check_yomigana(key)
         call eskk#register_temp_event(
                     \   'filter-redispatch-pre',
                     \   'eskk#util#identity',
@@ -297,7 +297,7 @@ function! s:do_space(stash) "{{{
     let buftable = eskk#get_buftable()
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let key       = henkan_buf_str.get_matched_filter()
-    if key =~ '^[あ-ん]\+$'
+    if s:check_yomigana(key)
         call eskk#register_temp_event(
                     \   'filter-redispatch-post',
                     \   'eskk#util#identity',
@@ -348,6 +348,19 @@ function! s:set_selected_item() "{{{
     call buftable.set_old_str(buftable.get_display_str())
 
     call s:initialize_variables()
+endfunction "}}}
+function! s:check_yomigana(key) "{{{
+    if eskk#get_mode() ==# 'ascii'
+        " ASCII mode.
+        return a:key =~ '^[[:alnum:]-]\+$'
+    elseif eskk#get_mode() ==# 'abbrev'
+        " abbrev mode.
+        call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
+        return a:key =~ '^[[:alnum:]-]\+$'
+    else
+        " Kanji mode.
+        return a:key =~ '^[あ-んー。！？]\+$'
+    endif
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
