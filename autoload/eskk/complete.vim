@@ -207,17 +207,17 @@ function! eskk#complete#handle_special_key(stash) "{{{
     let key       = henkan_buf_str.get_matched_filter()
     if !s:check_yomigana(key)
         call eskk#register_temp_event(
-                    \   'filter-redispatch-pre',
-                    \   'eskk#util#identity',
-                    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
-                    \)
+        \   'filter-redispatch-pre',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+        \)
         call eskk#register_temp_event(
-                    \   'filter-redispatch-post',
-                    \   'eskk#util#identity',
-                    \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
-                    \)
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
+        \)
     endif
-    
+
     " Not handled.
     return 0
 endfunction "}}}
