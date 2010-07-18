@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 264))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 270))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -225,6 +225,10 @@ endif
 
 if !exists('g:eskk_ignore_continuous_sticky')
     let g:eskk_ignore_continuous_sticky = 1
+endif
+
+if !exists('g:eskk_convert_at_exact_match')
+    let g:eskk_convert_at_exact_match = 0
 endif
 
 " Completion

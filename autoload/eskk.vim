@@ -915,6 +915,20 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
         \   []
         \)
+
+        if g:eskk_convert_at_exact_match
+        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+            let st = eskk#get_current_mode_structure()
+            let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+            if has_key(st.sandbox, 'real_matched_pairs')
+                " Restore previous hiragana & push current to the tail.
+                let p = henkan_buf_str.pop_matched()
+                call henkan_buf_str.set_multiple_matched(st.sandbox.real_matched_pairs + [p])
+            endif
+            let st.sandbox.real_matched_pairs = henkan_buf_str.get_matched()
+
+            call buftable.do_henkan(a:stash, 1)
+        endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         " Enter phase henkan select with henkan.
 
@@ -1356,6 +1370,9 @@ function! eskk#validate_mode_structure(mode) "{{{
             throw eskk#user_error(['eskk'], printf("eskk#register_mode(%s): %s is not present in structure", string(a:mode), string(key)))
         endif
     endfor
+endfunction "}}}
+function! eskk#get_current_mode_structure() "{{{
+    return eskk#get_mode_structure(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_structure(mode) "{{{
     let self = eskk#get_current_instance()
@@ -2175,6 +2192,16 @@ function! s:initialize() "{{{
 
     " InsertLeave: Clear buftable. {{{
     autocmd eskk InsertLeave * call eskk#get_buftable().reset()
+    " }}}
+
+    " g:eskk_convert_at_exact_match {{{
+    function! s:clear_real_matched_pairs() "{{{
+        let st = eskk#get_current_mode_structure()
+        if has_key(st.sandbox, 'real_matched_pairs')
+            unlet st.sandbox.real_matched_pairs
+        endif
+    endfunction "}}}
+    autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
     " }}}
 endfunction "}}}
 
