@@ -1657,6 +1657,7 @@ function! eskk#call_via_filter(Fn, tail_args) "{{{
 endfunction "}}}
 function! s:filter(self, char, Fn, tail_args) "{{{
     let self = a:self
+    let buftable = eskk#get_buftable()
 
     call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
     if !eskk#is_supported_mode(self.mode)
@@ -1673,7 +1674,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     \}
 
     if !self.is_locked_old_str
-        call eskk#get_buftable().set_old_str(eskk#get_buftable().get_display_str())
+        call buftable.set_old_str(buftable.get_display_str())
     endif
 
     try
@@ -1683,7 +1684,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             \   eskk#has_event('filter-redispatch-pre')
             \   || eskk#has_event('filter-redispatch-post')
             \   || type(stash.return) == type("")
-            \   || eskk#get_buftable().has_changed()
+            \   || buftable.has_changed()
             if handled
                 " Postpone a:char process.
                 call eskk#register_temp_event(
