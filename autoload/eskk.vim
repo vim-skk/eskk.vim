@@ -1554,27 +1554,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
 
         let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
 
-        for bs in ["\<BS>", "\<C-h>"]
-            while 1
-                let [r, pos] = eskk#util#remove_ctrl_char(r, bs)
-                if pos ==# -1
-                    break
-                endif
-                if pos ==# 0
-                    if ret == ''
-                        let r = bs . r
-                        break
-                    else
-                        let ret = eskk#util#mb_chop(ret)
-                    endif
-                else
-                    let before = strpart(r, 0, pos)
-                    let after = strpart(r, pos)
-                    let before = eskk#util#mb_chop(before)
-                    let r = before . after
-                endif
-            endwhile
-        endfor
+        let [r, ret] = s:emulate_backspace(r, ret)
 
         if pre != ''
             let _ = eval(pre)
@@ -1599,6 +1579,33 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
 
     return ret
 endfunction "}}}
+function! s:emulate_backspace(str, cur_ret) "{{{
+    let r = a:str
+    let ret = a:cur_ret
+    for bs in ["\<BS>", "\<C-h>"]
+        while 1
+            let [r, pos] = eskk#util#remove_ctrl_char(r, bs)
+            if pos ==# -1
+                break
+            endif
+            if pos ==# 0
+                if ret == ''
+                    let r = bs . r
+                    break
+                else
+                    let ret = eskk#util#mb_chop(ret)
+                endif
+            else
+                let before = strpart(r, 0, pos)
+                let after = strpart(r, pos)
+                let before = eskk#util#mb_chop(before)
+                let r = before . after
+            endif
+        endwhile
+    endfor
+    return [r, ret]
+endfunction "}}}
+
 function! eskk#call_via_filter(Fn, tail_args) "{{{
     let self = eskk#get_current_instance()
     let char = a:0 != 0 ? a:1 : ''
