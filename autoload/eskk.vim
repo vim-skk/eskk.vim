@@ -1540,22 +1540,26 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
         let r = eskk#filter(c)
         let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
 
+        " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
         let pre = ''
         if r =~# '(eskk:_filter_redispatch_pre)'
             let pre = maparg('<Plug>(eskk:_filter_redispatch_pre)', mapmode)
             let r = substitute(r, '(eskk:_filter_redispatch_pre)', '', '')
         endif
 
+        " Remove `<Plug>(eskk:_filter_redispatch_post)` beforehand.
         let post = ''
         if r =~# '(eskk:_filter_redispatch_post)'
             let post = maparg('<Plug>(eskk:_filter_redispatch_post)', mapmode)
             let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
         endif
 
+        " Expand <Plug> mappings.
         let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
 
         let [r, ret] = s:emulate_backspace(r, ret)
 
+        " Handle `<Plug>(eskk:_filter_redispatch_pre)`.
         if pre != ''
             let _ = eval(pre)
             let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
@@ -1564,7 +1568,11 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
             let ret .= _
             let ret .= eskk#util#do_remap(eval(pre), mapmode)
         endif
+
+        " Handle rewritten text.
         let ret .= r
+
+        " Handle `<Plug>(eskk:_filter_redispatch_post)`.
         if post != ''
             let _ = eval(post)
             let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
@@ -1574,6 +1582,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
         endif
     endfor
 
+    " For convenience.
     if clear_buftable
         let buftable = eskk#get_buftable()
         call buftable.clear_all()
