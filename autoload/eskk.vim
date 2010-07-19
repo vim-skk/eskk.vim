@@ -1054,6 +1054,13 @@ function! s:filter_rom_no_match(stash, table) "{{{
                     call buf_str.push_matched(char, char)
                 endfor
                 for matched in matched_map_list
+                    if a:table.has_rest(matched)
+                        call eskk#register_temp_event(
+                        \   'filter-redispatch-post',
+                        \   'eskk#util#identity',
+                        \   [eskk#util#key2char(eskk#get_named_map(a:table.get_rest(matched)))]
+                        \)
+                    endif
                     call buf_str.push_matched(matched, a:table.get_map_to(matched))
                 endfor
                 call buf_str.clear_rom_str()
