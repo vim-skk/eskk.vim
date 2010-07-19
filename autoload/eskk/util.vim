@@ -47,6 +47,9 @@ endfunction "}}}
 function! eskk#util#logf(fmt, ...) "{{{
     call eskk#util#log(call('printf', [a:fmt] + a:000))
 endfunction "}}}
+function! eskk#util#logstrf(fmt, ...) "{{{
+    return call('eskk#util#logf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
+endfunction "}}}
 
 function! eskk#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))

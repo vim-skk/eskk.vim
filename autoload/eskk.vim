@@ -820,9 +820,12 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     while 1
         let counter = 0
         let has_map_str = -1
-        for str in s:generate_map_list(rest, a:tail)
+        let list = s:generate_map_list(rest, a:tail)
+        for str in list
             let counter += 1
             if a:table.has_map(str)
+                call eskk#util#logstrf('s:generate_map_list(%s, %d) = %s', rest, a:tail, list)
+                call eskk#util#logstrf('found! - %s has map', str)
                 let has_map_str = str
                 break
             endif
@@ -1032,6 +1035,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
 
     let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
+    call eskk#util#logstrf('matched_map_list = %s, rest = %s', matched_map_list, rest)
     if empty(matched_map_list)
         if input_style ==# 'skk'
             if rest ==# char
@@ -1042,6 +1046,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
             endif
         else
             let [matched_map_list, head_no_match] = s:get_matched_and_rest(a:table, rom_str, 0)
+            call eskk#util#logstrf('matched_map_list = %s, head_no_match = %s', matched_map_list, head_no_match)
             if empty(matched_map_list)
                 call buf_str.set_rom_str(head_no_match)
             else
