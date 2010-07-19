@@ -404,6 +404,13 @@ function! eskk#get_map_command(...) "{{{
     let remap = a:0 ? a:1 : 1
     return remap ? 'map!' : 'noremap!'
 endfunction "}}}
+function! eskk#get_map_modes() "{{{
+    " XXX: :lmap can't remap to :lmap. It's Vim's bug.
+    "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
+    " So I use :map! mappings for 'fallback' of :lmap.
+
+    return 'ic'
+endfunction "}}}
 
 " eskk#map()
 function! eskk#map(type, options, lhs, rhs) "{{{
@@ -1535,7 +1542,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
     let ret = ''
     let bs = '\(\^H\|<80>kb\)'
     let plug = strtrans("\<Plug>")
-    let mapmode = 'icl'
+    let mapmode = eskk#get_map_modes()[0:0]
     for c in split(a:chars, '\zs')
         let r = eskk#filter(c)
         let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
