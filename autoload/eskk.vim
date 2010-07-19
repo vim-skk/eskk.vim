@@ -1552,7 +1552,6 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
 
     let clear_buftable = a:0 ? a:1 : 1
     let ret = ''
-    let bs = '\(\^H\|<80>kb\)'
     let plug = strtrans("\<Plug>")
     let mapmode = eskk#get_map_modes()[0:0]
     for c in split(a:chars, '\zs')
@@ -1582,7 +1581,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
         if pre != ''
             let _ = eval(pre)
             let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
-            let _ = s:emulate_filter_char(_)
+            let [_, ret] = s:emulate_filter_char(_, ret)
             let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
             let ret .= _
             let ret .= eskk#util#do_remap(eval(pre), mapmode)
@@ -1595,7 +1594,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
         if post != ''
             let _ = eval(post)
             let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
-            let _ = s:emulate_filter_char(_)
+            let [_, ret] = s:emulate_filter_char(_, ret)
             let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
             let ret .= _
         endif
@@ -1635,17 +1634,20 @@ function! s:emulate_backspace(str, cur_ret) "{{{
     endfor
     return [r, ret]
 endfunction "}}}
-function! s:emulate_filter_char(r) "{{{
-    let r = a:r
+function! s:emulate_filter_char(str, cur_ret) "{{{
+    let r = a:str
+    let ret = a:cur_ret
     while 1
         if r !~# '(eskk:filter:[^()]\+)'
             break
         endif
         let char = matchstr(r, '(eskk:filter:\zs[^()]\+\ze)')
         let r = substitute(r, '(eskk:filter:[^()]\+)', '', '')
-        let r .= eskk#emulate_filter_keys(char, 0)
+        let _ = eskk#emulate_filter_keys(char, 0)
+        let [_, ret] = s:emulate_backspace(_, ret)
+        let r .= _
     endwhile
-    return r
+    return [r, ret]
 endfunction "}}}
 
 function! eskk#call_via_filter(Fn, tail_args) "{{{
