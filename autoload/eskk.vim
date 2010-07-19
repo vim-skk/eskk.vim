@@ -1559,6 +1559,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
         if pre != ''
             let _ = eval(pre)
             let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
+            let _ = s:emulate_filter_char(_)
             let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
             let ret .= _
             let ret .= eskk#util#do_remap(eval(pre), mapmode)
@@ -1567,6 +1568,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
         if post != ''
             let _ = eval(post)
             let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
+            let _ = s:emulate_filter_char(_)
             let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
             let ret .= _
         endif
@@ -1604,6 +1606,18 @@ function! s:emulate_backspace(str, cur_ret) "{{{
         endwhile
     endfor
     return [r, ret]
+endfunction "}}}
+function! s:emulate_filter_char(r) "{{{
+    let r = a:r
+    while 1
+        if r !~# '(eskk:filter:[^()]\+)'
+            break
+        endif
+        let char = matchstr(r, '(eskk:filter:\zs[^()]\+\ze)')
+        let r = substitute(r, '(eskk:filter:[^()]\+)', '', '')
+        let r .= eskk#emulate_filter_keys(char, 0)
+    endwhile
+    return r
 endfunction "}}}
 
 function! eskk#call_via_filter(Fn, tail_args) "{{{
