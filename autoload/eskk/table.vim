@@ -59,6 +59,7 @@ lockvar s:REST_INDEX
 
 " Primitive table functions {{{
 
+" TODO Do not call this function if already loaded.
 function! s:load_table(table_name) "{{{
     if !has_key(s:table_defs, a:table_name)
         let msg = printf('%s is not registered.', a:table_name)
