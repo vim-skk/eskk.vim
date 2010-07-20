@@ -225,8 +225,18 @@ function! eskk#util#get_f(dict, keys, ...) "{{{
         endif
     endif
 endfunction "}}}
-function! eskk#util#has_key_f(...) "{{{
-    return call('s:follow', [s:FOLLOW_HAS, 0] + a:000)
+function! eskk#util#has_key_f(dict, keys) "{{{
+    if empty(a:keys)
+        throw eskk#internal_error(['eskk', 'util'])
+    elseif len(a:keys) == 1
+        return eskk#util#can_access(a:dict, a:keys[0])
+    else
+        if eskk#util#can_access(a:dict, a:keys[0])
+            return eskk#util#has_key_f(a:dict[a:keys[0]], a:keys[1:])
+        else
+            return 0
+        endif
+    endif
 endfunction "}}}
 
 function! eskk#util#assert(cond, ...) "{{{
