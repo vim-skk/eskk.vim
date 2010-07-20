@@ -2234,7 +2234,11 @@ function! s:initialize() "{{{
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
     for name in eskk#util#glob('autoload/eskk/table/**/*.vim')
         let name = fnamemodify(name, ':t:r')
-        call eskk#table#register_table_dict(name, 'eskk#table#' . name . '#load')
+        let table = eskk#table#create(name)
+        function! table.init() dict
+            call self.add_from_dict(eskk#table#{self.name}#load())
+        endfunction
+        call table.register()
     endfor
     " }}}
 

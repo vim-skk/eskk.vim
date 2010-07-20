@@ -58,24 +58,16 @@ lockvar s:table
 " }}}
 
 function! s:load_table(table_name) "{{{
-    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'data'])
-        return s:table_defs[a:table_name].data
+    if !has_key(s:table_defs, a:table_name)
+        let msg = printf('warning: %s is not registered.', a:table_name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
     endif
+    let def = s:table_defs[a:table_name]
 
-    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'lazyinit'])
-        let s:table_defs[a:table_name].data = call(s:table_defs[a:table_name].lazyinit, [])
-        call eskk#util#logf("table '%s' has been loaded.", a:table_name)
-        unlet s:table_defs[a:table_name].lazyinit
-        return s:table_defs[a:table_name].data
+    if !def._loaded
+        call def.init()
+        let def._loaded = 1
     endif
-
-    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'name'])
-        " Load base table. derived table information is already in `derived`.
-        return s:load_table(s:table_defs[a:table_name].name)
-    endif
-
-    let msg = printf("Can't load '%s'.", a:table_name)
-    throw eskk#internal_error(['eskk', 'table'], msg)
 endfunction "}}}
 
 function! s:get_base_table(table_name, ...) "{{{
@@ -111,18 +103,16 @@ function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
     let def.derived = a:derived_dict
 endfunction "}}}
 
-function! s:set_base_table(table_name, Fn) "{{{
-    if has_key(s:table_defs, a:table_name)
+function! s:set_base_table(skel) "{{{
+    let skel = a:skel
+
+    if has_key(s:table_defs, skel.name)
         " Do not allow override table.
-        let msg = printf("'%s' has been already registered.", a:table_name)
+        let msg = printf("'%s' has been already registered.", skel.name)
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
 
-    let s:table_defs[a:table_name] = s:table_new()
-    let def = s:table_defs[a:table_name]
-
-    let def.name = a:table_name
-    let def.lazyinit = a:Fn
+    let s:table_defs[skel.name] = skel
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
@@ -195,6 +185,31 @@ function! eskk#table#register_table_dict(...) "{{{
     call call('s:set_base_table', a:000)
 endfunction "}}}
 
+" }}}
+
+
+" eskk#table#create() {{{
+let s:register_skeleton = {'data': {}, '_loaded': 0}
+
+function! eskk#table#create(name) "{{{
+    let obj = deepcopy(s:register_skeleton, 1)
+    let obj.name = a:name
+    return obj
+endfunction "}}}
+
+" TODO
+function! s:register_skeleton.add() dict "{{{
+endfunction "}}}
+
+function! s:register_skeleton.add_from_dict(dict) dict "{{{
+    let self.data = a:dict
+endfunction "}}}
+
+function! s:register_skeleton.register() dict "{{{
+    call eskk#table#register_table_dict(self)
+endfunction "}}}
+
+lockvar s:register_skeleton
 " }}}
 
 
