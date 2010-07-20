@@ -322,6 +322,10 @@ function! eskk#table#get_all_registered_tables() "{{{
     return keys(s:table_defs)
 endfunction "}}}
 
+function! eskk#table#has_table(table_name) "{{{
+    return has_key(s:table_defs, a:table_name)
+endfunction "}}}
+
 " }}}
 
 " OO interface for autoload functions {{{
