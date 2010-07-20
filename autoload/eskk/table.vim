@@ -304,6 +304,18 @@ function! eskk#table#get_rest(table_name, lhs, ...) "{{{
     return call('s:get_map', [a:table_name, a:lhs, s:REST_INDEX] + a:000)
 endfunction "}}}
 
+
+
+" Not included in OO interface.
+
+function! eskk#table#get_all_tables() "{{{
+    return map(eskk#util#glob('autoload/eskk/table/**/*.vim'), 'fnamemodify(v:val, ":t:r")')
+endfunction "}}}
+
+function! eskk#table#get_all_registered_tables() "{{{
+    return keys(s:table_defs)
+endfunction "}}}
+
 " }}}
 
 " OO interface for autoload functions {{{
