@@ -283,6 +283,15 @@ endfunction "}}}
 lockvar s:table_obj
 " }}}
 
+
+" Debug {{{
+
+function! eskk#table#_dump() "{{{
+    let def = s:table_defs
+    PP def
+endfunction "}}}
+" }}}
+
 " }}}
 
 " Restore 'cpoptions' {{{
