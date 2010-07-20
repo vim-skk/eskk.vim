@@ -47,16 +47,6 @@ lockvar s:REST_INDEX
 "   ],
 " }
 
-" s:table {{{
-let s:table = {}
-
-function! s:table_new() "{{{
-    return deepcopy(s:table, 1)
-endfunction "}}}
-
-lockvar s:table
-" }}}
-
 function! s:load_table(table_name) "{{{
     if !has_key(s:table_defs, a:table_name)
         let msg = printf('warning: %s is not registered.', a:table_name)
@@ -85,22 +75,6 @@ endfunction "}}}
 function! s:has_table(table_name) "{{{
     call s:load_table(a:table_name)    " to load this table.
     return has_key(s:table_defs, a:table_name)
-endfunction "}}}
-
-function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
-    if has_key(s:table_defs, a:table_name)
-        " Do not allow override table.
-        let msg = printf("'%s' has been already registered.", a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
-
-    let s:table_defs[a:table_name] = s:table_new()
-    let def = s:table_defs[a:table_name]
-
-    " NOTE: I don't set `def.data` here.
-    " It will be set in `s:load_table()`.
-    let def.name = a:base_table_name
-    let def.derived = a:derived_dict
 endfunction "}}}
 
 function! s:set_base_table(skel) "{{{
@@ -176,10 +150,6 @@ endfunction "}}}
 
 
 " Autoload functions for writing table. {{{
-
-function! eskk#table#register_derived_table_dict(...) "{{{
-    call call('s:set_derived_table', a:000)
-endfunction "}}}
 
 function! eskk#table#register_table_dict(...) "{{{
     call call('s:set_base_table', a:000)
