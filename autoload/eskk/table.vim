@@ -102,15 +102,18 @@ function! s:has_table(table_name) "{{{
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
-    return !has_key(s:get_table_data(a:table_name), 'bases')
+    call s:load_table(a:table_name)
+    return !has_key(s:table_defs[a:table_name], 'bases')
 endfunction "}}}
 
-function! s:get_map(table_name, search_lhs, index, ...) "{{{
+function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
 
     if s:is_base_table(a:table_name)
-        if !eskk#util#has_key_f(data, [a:search_lhs, a:index])
-        \   || data[a:search_lhs][a:index] == ''
+        call eskk#util#logf('table %s is base table.', a:table_name)
+
+        if !eskk#util#has_key_f(data, [a:lhs, a:index])
+        \   || data[a:lhs][a:index] == ''
             " No lhs in `s:table_defs`.
             if a:0
                 return a:1
@@ -118,12 +121,18 @@ function! s:get_map(table_name, search_lhs, index, ...) "{{{
                 throw eskk#internal_error(['eskk', 'table'])
             endif
         endif
-        return data[a:search_lhs][a:index]
+
+        call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
+        return data[a:lhs][a:index]
     else
-        if has_key(data, a:search_lhs)
-            if data[a:search_lhs].method ==# 'add'
-                return data[a:search_lhs].data[a:index]
-            elseif data[a:search_lhs].method ==# 'remove'
+        call eskk#util#logf('table %s is derived table.', a:table_name)
+
+        if has_key(data, a:lhs)
+            call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
+
+            if data[a:lhs].method ==# 'add'
+                return data[a:lhs].data[a:index]
+            elseif data[a:lhs].method ==# 'remove'
                 " No lhs in `s:table_defs`.
                 if a:0
                     return a:1
@@ -134,8 +143,8 @@ function! s:get_map(table_name, search_lhs, index, ...) "{{{
                 throw eskk#internal_error(
                 \   ['eskk', 'table'],
                 \   printf("%s: invalid method of lhs '%s'.",
-                \       data[a:search_lhs].method,
-                \       a:search_lhs
+                \       data[a:lhs].method,
+                \       a:lhs
                 \   )
                 \)
             endif
@@ -143,7 +152,7 @@ function! s:get_map(table_name, search_lhs, index, ...) "{{{
 
         let not_found = {}
         for parent in s:table_defs[a:table_name].bases
-            let r = call('s:get_map', [a:table_name, a:search_lhs, a:index, not_found])
+            let r = call('s:get_map', [parent.name, a:lhs, a:index, not_found])
             if r isnot not_found
                 return r
             endif
