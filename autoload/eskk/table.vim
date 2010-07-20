@@ -61,15 +61,28 @@ lockvar s:REST_INDEX
 
 function! s:load_table(table_name) "{{{
     if !has_key(s:table_defs, a:table_name)
-        let msg = printf('warning: %s is not registered.', a:table_name)
+        let msg = printf('%s is not registered.', a:table_name)
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
     let def = s:table_defs[a:table_name]
 
-    if !def._loaded
-        call def.init()
-        let def._loaded = 1
+    if def._loaded
+        return
     endif
+
+    if has_key(def, 'init')
+        call def.init()
+    endif
+
+    if has_key(def, 'bases')
+        call eskk#util#logf("table %s is derived table. Let's load base tables...", a:table_name)
+        for base in def.bases
+            call s:load_table(base.name)
+        endfor
+    endif
+
+    let def._loaded = 1
+    call eskk#util#logf('table %s has been loaded.', a:table_name)
 endfunction "}}}
 
 function! s:get_table_data(table_name, ...) "{{{
@@ -85,18 +98,6 @@ endfunction "}}}
 function! s:has_table(table_name) "{{{
     call s:load_table(a:table_name)    " to load this table.
     return has_key(s:table_defs, a:table_name)
-endfunction "}}}
-
-function! s:register_table(skel) "{{{
-    let skel = a:skel
-
-    if has_key(s:table_defs, skel.name)
-        " Do not allow override table.
-        let msg = printf("'%s' has been already registered.", skel.name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
-
-    let s:table_defs[skel.name] = skel
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
@@ -171,14 +172,18 @@ function! eskk#table#create(name, ...) "{{{
     let obj = deepcopy(s:register_skeleton, 1)
     let obj.name = a:name
     if a:0
-        let names = type(a:1) == type([]) : a:1 : [a:1]
+        let names = type(a:1) == type([]) ? a:1 : [a:1]
         let obj.bases = map(names, 'eskk#table#create(v:val)')
     endif
     return obj
 endfunction "}}}
 
-" TODO
-function! s:register_skeleton.add() dict "{{{
+function! s:register_skeleton.add(lhs, map, ...) dict "{{{
+    let self.data[a:lhs] = {'method': 'add', 'data': [a:map, (a:0 ? a:1 : '')]}
+endfunction "}}}
+
+function! s:register_skeleton.remove(lhs, map, ...) dict "{{{
+    let self.data[a:lhs] = {'method': 'remove', 'data': [a:map, (a:0 ? a:1 : '')]}
 endfunction "}}}
 
 function! s:register_skeleton.add_from_dict(dict) dict "{{{
@@ -186,7 +191,13 @@ function! s:register_skeleton.add_from_dict(dict) dict "{{{
 endfunction "}}}
 
 function! s:register_skeleton.register() dict "{{{
-    call s:register_table(self)
+    if has_key(s:table_defs, self.name)
+        " Do not allow override table.
+        let msg = printf("'%s' has been already registered.", self.name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+    endif
+
+    let s:table_defs[self.name] = self
 endfunction "}}}
 
 lockvar s:register_skeleton
