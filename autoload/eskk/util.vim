@@ -149,15 +149,21 @@ function! eskk#util#str2map(str) "{{{
     return s
 endfunction "}}}
 
+let s:FOLLOW_GET = 0
+let s:FOLLOW_HAS = 1
+let s:FOLLOW_LET = 2
 " Built-in 'get()' like function.
 " But 3 arg is omitted, this throws an exception.
 "
 " This allows both Dictionary and List as a:dict.
-" And if a:ret_bool is true:
+"
+" If a:action is s:FOLLOW_HAS:
 "   Return boolean value(existence of key).
-" And if a:ret_bool is false:
+" If a:action is s:FOLLOW_GET:
 "   Raise an exception or return value if it exists.
-function! s:follow(ret_bool, dict, follow, ...) "{{{
+" If a:action is s:FOLLOW_LET:
+"   Raise an exception or return value if it exists.
+function! s:follow(action, dict, follow, ...) "{{{
     if empty(a:follow)
         throw eskk#internal_error(['eskk', 'util'])
     endif
@@ -165,7 +171,7 @@ function! s:follow(ret_bool, dict, follow, ...) "{{{
     if a:0 == 0
         if type(a:dict) == type([])
             if !eskk#util#has_idx(a:dict, a:follow[0])
-                if a:ret_bool
+                if a:action ==# s:FOLLOW_HAS
                     return 0
                 else
                     throw eskk#internal_error(['eskk', 'util'])
@@ -173,7 +179,7 @@ function! s:follow(ret_bool, dict, follow, ...) "{{{
             endif
         elseif type(a:dict) == type({})
             if !has_key(a:dict, a:follow[0])
-                if a:ret_bool
+                if a:action ==# s:FOLLOW_HAS
                     return 0
                 else
                     throw eskk#internal_error(['eskk', 'util'])
@@ -188,16 +194,16 @@ function! s:follow(ret_bool, dict, follow, ...) "{{{
     endif
 
     if len(a:follow) == 1
-        return a:ret_bool ? 1 : got
+        return a:action ==# s:FOLLOW_HAS ? 1 : got
     else
-        return call('s:follow', [a:ret_bool, got, remove(a:follow, 1, -1)] + a:000)
+        return call('s:follow', [a:action, got, remove(a:follow, 1, -1)] + a:000)
     endif
 endfunction "}}}
 function! eskk#util#get_f(...) "{{{
-    return call('s:follow', [0] + a:000)
+    return call('s:follow', [s:FOLLOW_GET] + a:000)
 endfunction "}}}
 function! eskk#util#has_key_f(...) "{{{
-    return call('s:follow', [1] + a:000)
+    return call('s:follow', [s:FOLLOW_HAS] + a:000)
 endfunction "}}}
 
 function! eskk#util#assert(cond, ...) "{{{
