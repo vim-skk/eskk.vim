@@ -117,18 +117,11 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     if s:is_base_table(a:table_name)
         call eskk#util#logf('table %s is base table.', a:table_name)
 
-        if !eskk#util#has_key_f(data, [a:lhs, a:index])
-        \   || data[a:lhs][a:index] == ''
-            " No lhs in `s:table_defs`.
-            if a:0
-                return a:1
-            else
-                throw eskk#internal_error(['eskk', 'table'])
-            endif
+        if eskk#util#has_key_f(data, [a:lhs, a:index])
+        \   && data[a:lhs][a:index] != ''
+            call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
+            return data[a:lhs][a:index]
         endif
-
-        call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
-        return data[a:lhs][a:index]
     else
         call eskk#util#logf('table %s is derived table.', a:table_name)
 
@@ -162,13 +155,13 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
                 return r
             endif
         endfor
+    endif
 
-        " No lhs in `s:table_defs`.
-        if a:0
-            return a:1
-        else
-            throw eskk#internal_error(['eskk', 'table'])
-        endif
+    " No lhs in `s:table_defs`.
+    if a:0
+        return a:1
+    else
+        throw eskk#internal_error(['eskk', 'table'])
     endif
 endfunction "}}}
 
@@ -184,21 +177,15 @@ function! s:get_candidates(table_name, lhs_head, ...) "{{{
     if s:is_base_table(a:table_name)
         call eskk#util#logf('table %s is base table.', a:table_name)
 
-        if empty(candidates)
-            " No lhs_head in `s:table_defs`.
-            if a:0
-                return a:1
-            else
-                throw eskk#internal_error(['eskk', 'table'])
-            endif
+        if !empty(candidates)
+            call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
+            return candidates
         endif
-
-        call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
-        return candidates
     else
         call eskk#util#logf('table %s is derived table.', a:table_name)
 
         if !empty(candidates)
+            call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
             return candidates
         endif
 
@@ -209,13 +196,13 @@ function! s:get_candidates(table_name, lhs_head, ...) "{{{
                 return r
             endif
         endfor
+    endif
 
-        " No lhs_head in `s:table_defs`.
-        if a:0
-            return a:1
-        else
-            throw eskk#internal_error(['eskk', 'table'])
-        endif
+    " No lhs_head in `s:table_defs`.
+    if a:0
+        return a:1
+    else
+        throw eskk#internal_error(['eskk', 'table'])
     endif
 endfunction "}}}
 
