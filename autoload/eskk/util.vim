@@ -15,7 +15,7 @@ set cpo&vim
 " }}}
 
 
-" Functions {{{
+" Logging/Output
 function! eskk#util#warn(msg) "{{{
     echohl WarningMsg
     echomsg a:msg
@@ -51,6 +51,8 @@ function! eskk#util#logstrf(fmt, ...) "{{{
     return call('eskk#util#logf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
 
+
+" Multibyte
 function! eskk#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
 endfunction "}}}
@@ -58,6 +60,8 @@ function! eskk#util#mb_chop(str) "{{{
     return substitute(a:str, '.$', '', '')
 endfunction "}}}
 
+
+" Argument
 function! eskk#util#get_args(args, ...) "{{{
     let ret_args = []
     let i = 0
@@ -75,22 +79,8 @@ function! eskk#util#get_args(args, ...) "{{{
     return ret_args
 endfunction "}}}
 
-function! eskk#util#has_idx(list, idx) "{{{
-    " Return true when negative idx.
-    " let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
-    let idx = a:idx
-    return 0 <= idx && idx < len(a:list)
-endfunction "}}}
 
-function! eskk#util#has_elem(list, elem) "{{{
-    for Value in a:list
-        if Value ==# a:elem
-            return 1
-        endif
-    endfor
-    return 0
-endfunction "}}}
-
+" List function
 function! eskk#util#unique(list) "{{{
     let list = []
     let dup_check = {}
@@ -105,57 +95,8 @@ function! eskk#util#unique(list) "{{{
     return list
 endfunction "}}}
 
-function! eskk#util#skip_spaces(str) "{{{
-    return substitute(a:str, '^\s*', '', '')
-endfunction "}}}
-" TODO Escape + Whitespace
-function! eskk#util#get_arg(arg) "{{{
-    let matched = matchstr(a:arg, '^\S\+')
-    return [matched, strpart(a:arg, strlen(matched))]
-endfunction "}}}
-function! eskk#util#unget_arg(arg, str) "{{{
-    return a:str . a:arg
-endfunction "}}}
 
-function! s:split_key(key) "{{{
-    let head = matchstr(a:key, '^[^<]\+')
-    return [head, strpart(a:key, strlen(head))]
-endfunction "}}}
-function! s:split_special_key(key) "{{{
-    let head = matchstr(a:key, '^<[^>]\+>')
-    return [head, strpart(a:key, strlen(head))]
-endfunction "}}}
-function! eskk#util#key2char(key) "{{{
-    " From arpeggio.vim
-
-    let keys = s:split_to_keys(a:key)
-    call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
-    return join(keys, '')
-endfunction "}}}
-function! s:split_to_keys(lhs)  "{{{
-    " From arpeggio.vim
-    "
-    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
-    "             a:lhs doesn't directly contain any escape sequences.
-    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
-endfunction "}}}
-
-function! eskk#util#str2map(str) "{{{
-    let s = a:str
-    let s = substitute(s, '<', '<lt>', 'g')
-    let s = substitute(s, ' ', '<Space>', 'g')
-    return s
-endfunction "}}}
-
-function! eskk#util#can_access(cont, key) "{{{
-    try
-        let Value = a:cont[a:key]
-        return 1
-    catch
-        return 0
-    endtry
-endfunction "}}}
-
+" Various structure function
 function! eskk#util#get_f(dict, keys, ...) "{{{
     if empty(a:keys)
         throw eskk#internal_error(['eskk', 'util'])
@@ -213,56 +154,72 @@ function! eskk#util#let_f(dict, keys, value) "{{{
     endif
 endfunction "}}}
 
-function! eskk#util#assert(cond, ...) "{{{
-    if !a:cond
-        throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
-    endif
+function! eskk#util#has_idx(list, idx) "{{{
+    " Return true when negative idx.
+    " let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
+    let idx = a:idx
+    return 0 <= idx && idx < len(a:list)
 endfunction "}}}
-
-" NOTE: Return value may be Funcref.
-function! eskk#util#get_local_func(funcname, sid) "{{{
-    " :help <SID>
-    return printf('<SNR>%d_%s', a:sid, a:funcname)
-endfunction "}}}
-
-
-function! eskk#util#option_value(value, list, default_index) "{{{
-    let match = 0
-    for _ in a:list
-        if _ ==# a:value
-            let match = 1
-            break
+function! eskk#util#has_elem(list, elem) "{{{
+    for Value in a:list
+        if Value ==# a:elem
+            return 1
         endif
     endfor
-    if match
-        return a:value
-    else
-        return a:list[a:default_index]
-    endif
+    return 0
+endfunction "}}}
+function! eskk#util#can_access(cont, key) "{{{
+    try
+        let Value = a:cont[a:key]
+        return 1
+    catch
+        return 0
+    endtry
 endfunction "}}}
 
 
-function! eskk#util#identity(value) "{{{
-    return a:value
+" Parsing
+function! eskk#util#skip_spaces(str) "{{{
+    return substitute(a:str, '^\s*', '', '')
+endfunction "}}}
+" TODO Escape + Whitespace
+function! eskk#util#get_arg(arg) "{{{
+    let matched = matchstr(a:arg, '^\S\+')
+    return [matched, strpart(a:arg, strlen(matched))]
+endfunction "}}}
+function! eskk#util#unget_arg(arg, str) "{{{
+    return a:str . a:arg
 endfunction "}}}
 
 
-function! eskk#util#rand(max) "{{{
-    let next = localtime() * 1103515245 + 12345
-    return (next / 65536) % (a:max + 1)
+" Key/Char/Map
+function! s:split_to_keys(lhs)  "{{{
+    " From arpeggio.vim
+    "
+    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
+    "             a:lhs doesn't directly contain any escape sequences.
+    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
+endfunction "}}}
+function! eskk#util#key2char(key) "{{{
+    " From arpeggio.vim
+
+    let keys = s:split_to_keys(a:key)
+    call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
+    return join(keys, '')
+endfunction "}}}
+function! eskk#util#str2map(str) "{{{
+    let s = a:str
+    let s = substitute(s, '<', '<lt>', 'g')
+    let s = substitute(s, ' ', '<Space>', 'g')
+    return s
+endfunction "}}}
+function! eskk#util#do_remap(map, modes) "{{{
+    let m = maparg(a:map, a:modes)
+    return m != '' ? m : a:map
 endfunction "}}}
 
 
-function! eskk#util#get_syn_names(...) "{{{
-    let [line, col] = eskk#util#get_args(a:000, line('.'), col('.'))
-    " synstack() returns strange value when col is over $ pos. Bug?
-    if col >= col('$')
-        return []
-    endif
-    return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
-endfunction "}}}
-
-
+" String/Regex
 function! eskk#util#escape_regex(regex) "{{{
     " XXX
     let s = a:regex
@@ -273,12 +230,6 @@ function! eskk#util#escape_regex(regex) "{{{
     let s = substitute(s, '\$', "\\$", 'g')
     return s
 endfunction "}}}
-
-function! eskk#util#do_remap(map, modes) "{{{
-    let m = maparg(a:map, a:modes)
-    return m != '' ? m : a:map
-endfunction "}}}
-
 function! eskk#util#remove_ctrl_char(s, ctrl_char) "{{{
     let s = a:s
     let pos = stridx(s, a:ctrl_char)
@@ -300,10 +251,49 @@ function! eskk#util#remove_all_ctrl_chars(s, ctrl_char) "{{{
     return s
 endfunction "}}}
 
+
+" Misc.
+function! eskk#util#assert(cond, ...) "{{{
+    if !a:cond
+        throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
+    endif
+endfunction "}}}
+function! eskk#util#get_local_func(funcname, sid) "{{{
+    " :help <SID>
+    return printf('<SNR>%d_%s', a:sid, a:funcname)
+endfunction "}}}
+function! eskk#util#option_value(value, list, default_index) "{{{
+    let match = 0
+    for _ in a:list
+        if _ ==# a:value
+            let match = 1
+            break
+        endif
+    endfor
+    if match
+        return a:value
+    else
+        return a:list[a:default_index]
+    endif
+endfunction "}}}
+function! eskk#util#identity(value) "{{{
+    return a:value
+endfunction "}}}
+function! eskk#util#rand(max) "{{{
+    let next = localtime() * 1103515245 + 12345
+    return (next / 65536) % (a:max + 1)
+endfunction "}}}
+function! eskk#util#get_syn_names(...) "{{{
+    let [line, col] = eskk#util#get_args(a:000, line('.'), col('.'))
+    " synstack() returns strange value when col is over $ pos. Bug?
+    if col >= col('$')
+        return []
+    endif
+    return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
+endfunction "}}}
 function! eskk#util#glob(...) "{{{
     return split(call('glob', a:000), '\n')
 endfunction "}}}
-" }}}
 
 
 " Restore 'cpoptions' {{{
