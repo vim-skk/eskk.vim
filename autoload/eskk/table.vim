@@ -216,10 +216,6 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
 endfunction "}}}
 
 
-function! eskk#table#has_table(table_name) "{{{
-    return s:has_table(a:table_name)
-endfunction "}}}
-
 function! eskk#table#has_map(table_name, lhs) "{{{
     return call('s:has_map', [a:table_name, a:lhs, s:MAP_TO_INDEX])
 endfunction "}}}
@@ -236,11 +232,6 @@ endfunction "}}}
 
 function! eskk#table#get_rest(table_name, lhs, ...) "{{{
     return call('s:get_map', [a:table_name, a:lhs, s:REST_INDEX] + a:000)
-endfunction "}}}
-
-
-function! eskk#table#get_definition(table_name) "{{{
-    return s:get_base_table(a:table_name)
 endfunction "}}}
 
 " }}}
