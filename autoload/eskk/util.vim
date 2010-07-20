@@ -287,6 +287,10 @@ function! eskk#util#remove_all_ctrl_chars(s, ctrl_char) "{{{
     endwhile
     return s
 endfunction "}}}
+
+function! eskk#util#glob(...) "{{{
+    return split(call('glob', a:000), '\n')
+endfunction "}}}
 " }}}
 
 

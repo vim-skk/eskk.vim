@@ -2232,7 +2232,8 @@ function! s:initialize() "{{{
     " Register builtin-tables. {{{
     call eskk#util#log('Registering builtin tables...')
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-    for name in ['rom_to_hira', 'rom_to_kata', 'rom_to_hankata', 'rom_to_zenei', 'hira_to_kata', 'kata_to_hira']
+    for name in eskk#util#glob('autoload/eskk/table/**/*.vim')
+        let name = fnamemodify(name, ':t:r')
         call eskk#table#register_table_dict(name, 'eskk#table#' . name . '#load')
     endfor
     " }}}
