@@ -149,13 +149,6 @@ function! eskk#util#str2map(str) "{{{
     return s
 endfunction "}}}
 
-function! eskk#util#get_f(...) "{{{
-    return call('s:follow', [0] + a:000)
-endfunction "}}}
-function! eskk#util#has_key_f(...) "{{{
-    return call('s:follow', [1] + a:000)
-endfunction "}}}
-
 " Built-in 'get()' like function.
 " But 3 arg is omitted, this throws an exception.
 "
@@ -199,6 +192,12 @@ function! s:follow(ret_bool, dict, follow, ...) "{{{
     else
         return call('s:follow', [a:ret_bool, got, remove(a:follow, 1, -1)] + a:000)
     endif
+endfunction "}}}
+function! eskk#util#get_f(...) "{{{
+    return call('s:follow', [0] + a:000)
+endfunction "}}}
+function! eskk#util#has_key_f(...) "{{{
+    return call('s:follow', [1] + a:000)
 endfunction "}}}
 
 function! eskk#util#assert(cond, ...) "{{{
