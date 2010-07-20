@@ -105,8 +105,6 @@ function! eskk#util#unique(list) "{{{
     return list
 endfunction "}}}
 
-" a:func is string.
-
 function! eskk#util#skip_spaces(str) "{{{
     return substitute(a:str, '^\s*', '', '')
 endfunction "}}}
