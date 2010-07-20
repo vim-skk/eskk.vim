@@ -167,9 +167,13 @@ endfunction "}}}
 " Table information per one table {{{
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
-function! eskk#table#create(name) "{{{
+function! eskk#table#create(name, ...) "{{{
     let obj = deepcopy(s:register_skeleton, 1)
     let obj.name = a:name
+    if a:0
+        " a:1 is table name.
+        let obj.parents = map(a:1, 'eskk#table#create(v:val)')
+    endif
     return obj
 endfunction "}}}
 
