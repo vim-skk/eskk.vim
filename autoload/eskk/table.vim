@@ -35,9 +35,11 @@ lockvar s:REST_INDEX
 " Primitive table functions {{{
 
 " NOTE: `s:table_defs` Structure is:
-" let s:table_defs['table_name'] = {
+"
+" let s:table_defs['table_name'] = s:table_new()
+" s:table_new() = {
 "   'name': 'base_table_name',
-"   'base': {...},
+"   'data': {...},
 "   'derived': [
 "       {'method': 'add', 'data': {...}},
 "       {'method': 'remove', 'data': {...}},
@@ -56,15 +58,15 @@ lockvar s:table
 " }}}
 
 function! s:load_table(table_name) "{{{
-    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
-        return s:table_defs[a:table_name].base
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'data'])
+        return s:table_defs[a:table_name].data
     endif
 
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'lazyinit'])
-        let s:table_defs[a:table_name].base = call(s:table_defs[a:table_name].lazyinit, [])
+        let s:table_defs[a:table_name].data = call(s:table_defs[a:table_name].lazyinit, [])
         call eskk#util#logf("table '%s' has been loaded.", a:table_name)
         unlet s:table_defs[a:table_name].lazyinit
-        return s:table_defs[a:table_name].base
+        return s:table_defs[a:table_name].data
     endif
 
     if eskk#util#has_key_f(s:table_defs, [a:table_name, 'name'])
@@ -79,13 +81,13 @@ endfunction "}}}
 function! s:get_base_table(table_name, ...) "{{{
     " For compatibility, this function returns base table object.
 
-    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'base'])
-        return s:table_defs[a:table_name].base
+    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'data'])
+        return s:table_defs[a:table_name].data
     endif
 
     " Lazy loading.
     call s:load_table(a:table_name)
-    return s:table_defs[a:table_name].base
+    return s:table_defs[a:table_name].data
 endfunction "}}}
 
 function! s:has_table(table_name) "{{{
@@ -103,7 +105,7 @@ function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
     let s:table_defs[a:table_name] = s:table_new()
     let def = s:table_defs[a:table_name]
 
-    " NOTE: I don't set `def.base` here.
+    " NOTE: I don't set `def.data` here.
     " It will be set in `s:load_table()`.
     let def.name = a:base_table_name
     let def.derived = a:derived_dict
