@@ -47,6 +47,7 @@ runtime! plugin/eskk.vim
 " Variables {{{
 let s:table_defs = {}
 let s:cached_tables = {}
+" let s:cached_maps = {}    " TODO
 
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
