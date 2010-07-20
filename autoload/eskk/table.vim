@@ -178,12 +178,26 @@ function! eskk#table#create(name, ...) "{{{
     return obj
 endfunction "}}}
 
+function! s:register_skeleton.is_base() dict "{{{
+    return !has_key(self, 'bases')
+endfunction "}}}
+
 function! s:register_skeleton.add(lhs, map, ...) dict "{{{
-    let self.data[a:lhs] = {'method': 'add', 'data': [a:map, (a:0 ? a:1 : '')]}
+    let pair = [a:map, (a:0 ? a:1 : '')]
+    if self.is_base()
+        let self.data[a:lhs] = pair
+    else
+        let self.data[a:lhs] = {'method': 'add', 'data': pair}
+    endif
 endfunction "}}}
 
 function! s:register_skeleton.remove(lhs, map, ...) dict "{{{
-    let self.data[a:lhs] = {'method': 'remove', 'data': [a:map, (a:0 ? a:1 : '')]}
+    let pair = [a:map, (a:0 ? a:1 : '')]
+    if self.is_base()
+        let self.data[a:lhs] = pair
+    else
+        let self.data[a:lhs] = {'method': 'remove', 'data': pair}
+    endif
 endfunction "}}}
 
 function! s:register_skeleton.add_from_dict(dict) dict "{{{
