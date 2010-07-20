@@ -6,57 +6,102 @@ set cpo&vim
 " }}}
 
 
-" TODO
-" Test eskk#util#has_key_f().
-
 function! s:run()
     " Dictionary
-    call simpletap#is(
+    Is
     \   eskk#util#get_f(
     \       {'foo': 1},
     \       ['foo']
     \   ),
     \   1
-    \)
-    call simpletap#is(
+    Ok
+    \   eskk#util#has_key_f(
+    \       {'foo': 1},
+    \       ['foo']
+    \   ),
+
+    let dict = {'foo': 1}
+    Is
+    \   eskk#util#let_f(
+    \       dict,
+    \       ['foo'],
+    \       2
+    \   ),
+    \   1
+    Ok has_key(dict, 'foo') && dict.foo ==# 1
+    let dict = {}
+    Is
+    \   eskk#util#let_f(
+    \       dict,
+    \       ['foo'],
+    \       2
+    \   ),
+    \   2
+    Ok has_key(dict, 'foo') && dict.foo ==# 2
+
+    Is
     \   eskk#util#get_f(
     \       {'foo': {'bar': 1}},
     \       ['foo', 'bar']
     \   ),
     \   1
-    \)
-    call simpletap#is(
+    Ok
+    \   eskk#util#has_key_f(
+    \       {'foo': {'bar': 1}},
+    \       ['foo', 'bar']
+    \   ),
+
+    Is
     \   eskk#util#get_f(
     \       {},
     \       ['foo'],
     \       1
     \   ),
     \   1
-    \)
+    Ok
+    \   ! eskk#util#has_key_f(
+    \       {},
+    \       ['foo'],
+    \   ),
 
     " List
-    call simpletap#is(
+    Is
     \   eskk#util#get_f(
     \       [1,2,3],
     \       [0]
     \   ),
     \   1
-    \)
-    call simpletap#is(
+    Ok
+    \   eskk#util#has_key_f(
+    \       [1,2,3],
+    \       [0]
+    \   ),
+
+    Is
     \   eskk#util#get_f(
     \       [[1], 2 ,3],
     \       [0, 0]
     \   ),
     \   1
-    \)
-    call simpletap#is(
+    Ok
+    \   eskk#util#has_key_f(
+    \       [[1], 2 ,3],
+    \       [0, 0]
+    \   ),
+
+    Is
     \   eskk#util#get_f(
     \       [1],
     \       [1],
     \       1
     \   ),
     \   1
-    \)
+    Ok
+    \   eskk#util#has_key_f(
+    \       [1],
+    \       [1],
+    \   ),
+
 
     " TODO Use simpletap#throws_ok() or simpletap#ok().
 
