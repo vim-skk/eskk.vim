@@ -1100,11 +1100,6 @@ function! eskk#enable(...) "{{{
 
     call eskk#throw_event('enable-im')
 
-    " Lazy initialize
-    if empty(s:skk_dict)
-        let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
-    endif
-
     " Clear current variable states.
     let self.mode = ''
     call eskk#get_buftable().reset()
@@ -1131,10 +1126,6 @@ function! eskk#enable(...) "{{{
 
     let self.enabled = 1
     let self.enabled_mode = mode()
-
-    if empty(s:saved_im_options)
-        let s:saved_im_options = [&g:iminsert, &g:imsearch]
-    endif
 
     if self.enabled_mode =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
@@ -2278,6 +2269,16 @@ function! s:initialize() "{{{
         endif
     endfunction "}}}
     autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
+    " }}}
+
+    " s:skk_dict: Lazy initialization {{{
+    call eskk#util#assert(empty(s:skk_dict))
+    let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
+    " }}}
+
+    " s:saved_im_options {{{
+    call eskk#util#assert(empty(s:saved_im_options))
+    let s:saved_im_options = [&g:iminsert, &g:imsearch]
     " }}}
 endfunction "}}}
 
