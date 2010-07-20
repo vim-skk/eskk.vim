@@ -59,7 +59,6 @@ lockvar s:REST_INDEX
 
 " Primitive table functions {{{
 
-" TODO Do not call this function if already loaded.
 function! s:load_table(table_name) "{{{
     if !has_key(s:table_defs, a:table_name)
         let msg = printf('%s is not registered.', a:table_name)
@@ -92,17 +91,23 @@ function! s:get_table_data(table_name, ...) "{{{
     endif
 
     " Lazy loading.
-    call s:load_table(a:table_name)
+    if !s:table_defs[a:table_name]._loaded
+        call s:load_table(a:table_name)
+    endif
     return s:table_defs[a:table_name].data
 endfunction "}}}
 
 function! s:has_table(table_name) "{{{
-    call s:load_table(a:table_name)    " to load this table.
+    if !s:table_defs[a:table_name]._loaded
+        call s:load_table(a:table_name)
+    endif
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
-    call s:load_table(a:table_name)
+    if !s:table_defs[a:table_name]._loaded
+        call s:load_table(a:table_name)
+    endif
     return !has_key(s:table_defs[a:table_name], 'bases')
 endfunction "}}}
 
