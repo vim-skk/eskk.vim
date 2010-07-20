@@ -93,11 +93,11 @@ function! s:run()
     \   eskk#util#get_f(
     \       [1],
     \       [1],
-    \       1
+    \       2
     \   ),
-    \   1
+    \   2
     Ok
-    \   eskk#util#has_key_f(
+    \   ! eskk#util#has_key_f(
     \       [1],
     \       [1],
     \   ),
