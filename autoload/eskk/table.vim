@@ -70,15 +70,15 @@ function! s:load_table(table_name) "{{{
         return
     endif
 
-    if has_key(def, 'init')
-        call def.init()
-    endif
-
     if has_key(def, 'bases')
         call eskk#util#logf("table %s is derived table. Let's load base tables...", a:table_name)
         for base in def.bases
             call s:load_table(base.name)
         endfor
+    endif
+
+    if has_key(def, 'init')
+        call def.init()
     endif
 
     let def._loaded = 1
