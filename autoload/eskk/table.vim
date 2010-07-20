@@ -172,6 +172,53 @@ function! s:has_map(table_name, lhs, index) "{{{
     return s:get_map(a:table_name, a:lhs, a:index, not_found) isnot not_found
 endfunction "}}}
 
+function! s:get_candidates(table_name, lhs_head, ...) "{{{
+    let data = s:get_table_data(a:table_name)
+    let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
+
+    if s:is_base_table(a:table_name)
+        call eskk#util#logf('table %s is base table.', a:table_name)
+
+        if empty(candidates)
+            " No lhs_head in `s:table_defs`.
+            if a:0
+                return a:1
+            else
+                throw eskk#internal_error(['eskk', 'table'])
+            endif
+        endif
+
+        call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
+        return candidates
+    else
+        call eskk#util#logf('table %s is derived table.', a:table_name)
+
+        if !empty(candidates)
+            return candidates
+        endif
+
+        let not_found = {}
+        for parent in s:table_defs[a:table_name].bases
+            let r = call('s:get_candidates', [parent.name, a:lhs_head, not_found])
+            if r isnot not_found
+                return r
+            endif
+        endfor
+
+        " No lhs_head in `s:table_defs`.
+        if a:0
+            return a:1
+        else
+            throw eskk#internal_error(['eskk', 'table'])
+        endif
+    endif
+endfunction "}}}
+
+function! s:has_candidates(table_name, lhs_head) "{{{
+    let not_found = {}
+    return s:get_candidates(a:table_name, a:lhs_head, a:index, not_found) isnot not_found
+endfunction "}}}
+
 " }}}
 
 
@@ -230,23 +277,12 @@ lockvar s:register_skeleton
 
 " Autoload functions {{{
 
-function! eskk#table#has_candidates(...) "{{{
-    return !empty(call('eskk#table#get_candidates', a:000))
+function! eskk#table#has_candidates(table_name, lhs_head) "{{{
+    return call('s:has_candidates', [a:table_name, a:lhs_head])
 endfunction "}}}
 
-function! eskk#table#get_candidates(table_name, str_buf) "{{{
-    if empty(a:str_buf)
-        throw eskk#internal_error(['eskk', 'table'], "a:str_buf is empty.")
-    endif
-
-    if !s:has_table(a:table_name)
-        return {}
-    else
-        return filter(
-        \   keys(s:get_table_data(a:table_name)),
-        \   'stridx(v:val, a:str_buf) == 0'
-        \)
-    endif
+function! eskk#table#get_candidates(table_name, lhs_head, ...) "{{{
+    return call('s:get_candidates', [a:table_name, a:lhs_head] + a:000)
 endfunction "}}}
 
 function! eskk#table#has_map(table_name, lhs) "{{{
