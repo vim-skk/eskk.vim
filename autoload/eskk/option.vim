@@ -18,7 +18,7 @@ let s:options = {
 \   'debug': {'value': 0},
 \   'debug_wait_ms': {'value': 0},
 \
-\   'dictionary': {'value': {}, ''},
+\   'dictionary': {'value': {}},
 \}
 
 function! eskk#option#load() "{{{
