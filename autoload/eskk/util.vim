@@ -149,6 +149,15 @@ function! eskk#util#str2map(str) "{{{
     return s
 endfunction "}}}
 
+function! eskk#util#can_access(cont, key) "{{{
+    try
+        let Value = a:cont[a:key]
+        return 1
+    catch
+        return 0
+    endtry
+endfunction "}}}
+
 let s:FOLLOW_GET = 0
 let s:FOLLOW_HAS = 1
 let s:FOLLOW_LET = 2
@@ -203,7 +212,7 @@ function! eskk#util#get_f(...) "{{{
     return call('s:follow', [s:FOLLOW_GET] + a:000)
 endfunction "}}}
 function! eskk#util#has_key_f(...) "{{{
-    return call('s:follow', [s:FOLLOW_HAS] + a:000)
+    return call('s:follow', [s:FOLLOW_HAS, 0] + a:000)
 endfunction "}}}
 
 function! eskk#util#assert(cond, ...) "{{{
