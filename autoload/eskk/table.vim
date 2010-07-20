@@ -221,7 +221,7 @@ function! eskk#table#has_map(table_name, lhs) "{{{
 endfunction "}}}
 
 
-function! eskk#table#get_map_to(table_name, lhs, ...) "{{{
+function! eskk#table#get_map(table_name, lhs, ...) "{{{
     return call('s:get_map', [a:table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
 endfunction "}}}
 
@@ -272,8 +272,8 @@ function! s:table_obj.has_map(...) dict "{{{
     return call('eskk#table#has_map', [self.table_name] + a:000)
 endfunction "}}}
 
-function! s:table_obj.get_map_to(...) dict "{{{
-    return call('eskk#table#get_map_to', [self.table_name] + a:000)
+function! s:table_obj.get_map(...) dict "{{{
+    return call('eskk#table#get_map', [self.table_name] + a:000)
 endfunction "}}}
 
 function! s:table_obj.has_rest(...) dict "{{{

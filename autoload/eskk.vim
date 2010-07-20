@@ -885,7 +885,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         " Set filtered string.
-        call buf_str.push_matched(rom_str, a:table.get_map_to(rom_str))
+        call buf_str.push_matched(rom_str, a:table.get_map(rom_str))
         call buf_str.clear_rom_str()
 
 
@@ -970,7 +970,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             let match_rom = henkan_rom . okuri_rom[0]
             call henkan_buf_str.push_matched(
             \   match_rom,
-            \   a:table.get_map_to(match_rom)
+            \   a:table.get_map(match_rom)
             \)
             " Push "s" to rom str.
             let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
@@ -988,7 +988,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         if a:table.has_map(okuri_buf_str.get_rom_str())
             call okuri_buf_str.push_matched(
             \   okuri_buf_str.get_rom_str(),
-            \   a:table.get_map_to(okuri_buf_str.get_rom_str())
+            \   a:table.get_map(okuri_buf_str.get_rom_str())
             \)
             let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
             if rest !=# -1
@@ -1061,14 +1061,14 @@ function! s:filter_rom_no_match(stash, table) "{{{
                         \   [eskk#util#key2char(eskk#get_named_map(a:table.get_rest(matched)))]
                         \)
                     endif
-                    call buf_str.push_matched(matched, a:table.get_map_to(matched))
+                    call buf_str.push_matched(matched, a:table.get_map(matched))
                 endfor
                 call buf_str.clear_rom_str()
             endif
         endif
     else
         for matched in matched_map_list
-            call buf_str.push_matched(matched, a:table.get_map_to(matched))
+            call buf_str.push_matched(matched, a:table.get_map(matched))
         endfor
         call buf_str.set_rom_str(rest)
     endif
@@ -2082,7 +2082,7 @@ function! s:initialize() "{{{
                 if !has_key(this.sandbox, 'table')
                     let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
                 endif
-                let a:stash.return = this.sandbox.table.get_map_to(a:stash.char, a:stash.char)
+                let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
             else
                 let a:stash.return = a:stash.char
             endif
@@ -2104,7 +2104,7 @@ function! s:initialize() "{{{
             if !has_key(this.sandbox, 'table')
                 let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
             endif
-            let a:stash.return = this.sandbox.table.get_map_to(a:stash.char, a:stash.char)
+            let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
         endif
     endfunction
 

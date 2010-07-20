@@ -716,7 +716,7 @@ function! s:buftable.convert_rom_str(phases) dict "{{{
         for buf_str in map(a:phases, 'self.get_buf_str(v:val)')
             let rom_str = buf_str.get_rom_str()
             if table.has_map(rom_str)
-                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+                call buf_str.push_matched(rom_str, table.get_map(rom_str))
                 call buf_str.clear_rom_str()
             endif
         endfor
@@ -732,7 +732,7 @@ function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
     for [rom_str, filter_str] in matched
         call buf_str.push_matched(
         \   rom_str,
-        \   table.get_map_to(rom_str, rom_str)
+        \   table.get_map(rom_str, rom_str)
         \)
     endfor
     return buf_str
@@ -747,7 +747,7 @@ function! s:buftable.filter_rom(phase, table_name) dict "{{{
     for [rom_str, filter_str] in matched
         call buf_str.push_matched(
         \   rom_str,
-        \   table.get_map_to(rom_str, rom_str)
+        \   table.get_map(rom_str, rom_str)
         \)
     endfor
     return buf_str
@@ -766,7 +766,7 @@ function! s:convert_again_with_table(self, table) "{{{
 
     for cur_buf_str in [henkan_buf_str, okuri_buf_str]
         for m in cur_buf_str.get_matched()
-            call normal_buf_str.push_matched(m[0], a:table.get_map_to(m[0]))
+            call normal_buf_str.push_matched(m[0], a:table.get_map(m[0]))
         endfor
     endfor
 
