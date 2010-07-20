@@ -229,6 +229,12 @@ endfunction "}}}
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
 function! eskk#table#create(name, ...) "{{{
+    if has_key(s:table_defs, a:name)
+        " Do not allow override table.
+        let msg = printf("'%s' has been already registered.", a:name)
+        throw eskk#internal_error(['eskk', 'table'], msg)
+    endif
+
     let obj = deepcopy(s:register_skeleton, 1)
     let obj.name = a:name
     if a:0
