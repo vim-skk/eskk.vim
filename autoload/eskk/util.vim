@@ -208,8 +208,22 @@ function! s:follow(action, dict, follow, ...) "{{{
         return call('s:follow', [a:action, got, remove(a:follow, 1, -1)] + a:000)
     endif
 endfunction "}}}
-function! eskk#util#get_f(...) "{{{
-    return call('s:follow', [s:FOLLOW_GET] + a:000)
+function! eskk#util#get_f(dict, keys, ...) "{{{
+    if empty(a:keys)
+        throw eskk#internal_error(['eskk', 'util'])
+    elseif len(a:keys) == 1
+        return call('get', [a:dict, a:keys[0]] + a:000)
+    else
+        if eskk#util#can_access(a:dict, a:keys[0])
+            return call('eskk#util#get_f', [a:dict[a:keys[0]], a:keys[1:]] + a:000)
+        else
+            if a:0
+                return a:1
+            else
+                throw eskk#internal_error(['eskk', 'util'])
+            endif
+        endif
+    endif
 endfunction "}}}
 function! eskk#util#has_key_f(...) "{{{
     return call('s:follow', [s:FOLLOW_HAS, 0] + a:000)
