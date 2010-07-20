@@ -158,56 +158,6 @@ function! eskk#util#can_access(cont, key) "{{{
     endtry
 endfunction "}}}
 
-let s:FOLLOW_GET = 0
-let s:FOLLOW_HAS = 1
-let s:FOLLOW_LET = 2
-" Built-in 'get()' like function.
-" But 3 arg is omitted, this throws an exception.
-"
-" This allows both Dictionary and List as a:dict.
-"
-" If a:action is s:FOLLOW_HAS:
-"   Return boolean value(existence of key).
-" If a:action is s:FOLLOW_GET:
-"   Raise an exception or return value if it exists.
-" If a:action is s:FOLLOW_LET:
-"   Raise an exception or return value if it exists.
-function! s:follow(action, dict, follow, ...) "{{{
-    if empty(a:follow)
-        throw eskk#internal_error(['eskk', 'util'])
-    endif
-
-    if a:0 == 0
-        if type(a:dict) == type([])
-            if !eskk#util#has_idx(a:dict, a:follow[0])
-                if a:action ==# s:FOLLOW_HAS
-                    return 0
-                else
-                    throw eskk#internal_error(['eskk', 'util'])
-                endif
-            endif
-        elseif type(a:dict) == type({})
-            if !has_key(a:dict, a:follow[0])
-                if a:action ==# s:FOLLOW_HAS
-                    return 0
-                else
-                    throw eskk#internal_error(['eskk', 'util'])
-                endif
-            endif
-        else
-            throw eskk#internal_error(['eskk', 'util'])
-        endif
-        let got = get(a:dict, a:follow[0])
-    else
-        let got = get(a:dict, a:follow[0], a:1)
-    endif
-
-    if len(a:follow) == 1
-        return a:action ==# s:FOLLOW_HAS ? 1 : got
-    else
-        return call('s:follow', [a:action, got, remove(a:follow, 1, -1)] + a:000)
-    endif
-endfunction "}}}
 function! eskk#util#get_f(dict, keys, ...) "{{{
     if empty(a:keys)
         throw eskk#internal_error(['eskk', 'util'])
