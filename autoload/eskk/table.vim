@@ -82,7 +82,7 @@ function! s:has_table(table_name) "{{{
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
 
-function! s:set_base_table(skel) "{{{
+function! s:register_table(skel) "{{{
     let skel = a:skel
 
     if has_key(s:table_defs, skel.name)
@@ -153,15 +153,6 @@ endfunction "}}}
 " }}}
 
 
-" Autoload functions for writing table. {{{
-
-function! eskk#table#register_table_dict(...) "{{{
-    call call('s:set_base_table', a:000)
-endfunction "}}}
-
-" }}}
-
-
 " eskk#table#create() {{{
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
@@ -180,7 +171,7 @@ function! s:register_skeleton.add_from_dict(dict) dict "{{{
 endfunction "}}}
 
 function! s:register_skeleton.register() dict "{{{
-    call eskk#table#register_table_dict(self)
+    call s:register_table(self)
 endfunction "}}}
 
 lockvar s:register_skeleton
