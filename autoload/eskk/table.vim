@@ -108,6 +108,7 @@ function! s:set_derived_table(table_name, derived_dict, base_table_name) "{{{
     let def.name = a:base_table_name
     let def.derived = a:derived_dict
 endfunction "}}}
+
 function! s:set_base_table(table_name, Fn) "{{{
     if has_key(s:table_defs, a:table_name)
         " Do not allow override table.
@@ -187,6 +188,7 @@ endfunction "}}}
 function! eskk#table#register_derived_table_dict(...) "{{{
     call call('s:set_derived_table', a:000)
 endfunction "}}}
+
 function! eskk#table#register_table_dict(...) "{{{
     call call('s:set_base_table', a:000)
 endfunction "}}}
@@ -215,16 +217,13 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
     endif
 endfunction "}}}
 
-
 function! eskk#table#has_map(table_name, lhs) "{{{
     return call('s:has_map', [a:table_name, a:lhs, s:MAP_TO_INDEX])
 endfunction "}}}
 
-
 function! eskk#table#get_map(table_name, lhs, ...) "{{{
     return call('s:get_map', [a:table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
 endfunction "}}}
-
 
 function! eskk#table#has_rest(table_name, lhs) "{{{
     return call('s:has_map', [a:table_name, a:lhs, s:REST_INDEX])
