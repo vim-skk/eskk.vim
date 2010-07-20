@@ -117,7 +117,7 @@ endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
     call s:load_table(a:table_name)
-    return s:table_defs[a:table_name].name ==# a:table_name
+    return !has_key(s:table_defs[a:table_name], 'parents')
 endfunction "}}}
 
 function! s:get_map(table_name, search_lhs, index, ...) "{{{
