@@ -195,6 +195,25 @@ function! eskk#util#has_key_f(dict, keys) "{{{
         endif
     endif
 endfunction "}}}
+function! eskk#util#let_f(dict, keys, value) "{{{
+    if empty(a:keys)
+        throw eskk#internal_error(['eskk', 'util'])
+    elseif len(a:keys) == 1
+        if eskk#util#can_access(a:dict, a:keys[0])
+            return a:dict[a:keys[0]]
+        else
+            let a:dict[a:keys[0]] = a:value
+            return a:value
+        endif
+    else
+        if !eskk#util#can_access(a:dict, a:keys[0])
+            let unused = -1
+            let values = [unused, unused, unused, [], {}, unused]
+            let a:dict[a:keys[0]] = values[type(a:dict)]
+        endif
+        return eskk#util#let_f(a:dict[a:keys[0]], a:keys[1:])
+    endif
+endfunction "}}}
 
 function! eskk#util#assert(cond, ...) "{{{
     if !a:cond
