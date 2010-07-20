@@ -34,13 +34,25 @@ lockvar s:REST_INDEX
 
 " NOTE: `s:table_defs` Structure is:
 "
-" let s:table_defs['table_name'] = s:table_new()
-" s:table_new() = {
-"   'name': 'base_table_name',
+" let s:table_defs['table_name'] = eskk#table#create()
+"
+" BASE TABLE:
+" eskk#table#create() = {
+"   'name': 'table_name',
 "   'data': {...},
-"   'derived': [
+" }
+"
+" DERIVED TABLE:
+" eskk#table#create() = {
+"   'name': 'table_name',
+"   'data': {
 "       {'method': 'add', 'data': {...}},
 "       {'method': 'remove', 'data': {...}},
+"       ...
+"   },
+"   'parents': [
+"       eskk#table#create(),
+"       eskk#table#create(),
 "       ...
 "   ],
 " }
