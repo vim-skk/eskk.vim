@@ -37,7 +37,7 @@ runtime! plugin/eskk.vim
 "       'lhs2': {'method': 'remove', 'data': ['map2', 'rest2']},
 "       ...
 "   },
-"   'parents': [
+"   'bases': [
 "       eskk#table#create(),
 "       eskk#table#create(),
 "       ...
@@ -100,7 +100,7 @@ function! s:register_table(skel) "{{{
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
-    return !has_key(s:get_table_data(a:table_name), 'parents')
+    return !has_key(s:get_table_data(a:table_name), 'bases')
 endfunction "}}}
 
 function! s:get_map(table_name, search_lhs, index, ...) "{{{
@@ -140,7 +140,7 @@ function! s:get_map(table_name, search_lhs, index, ...) "{{{
         endif
 
         let not_found = {}
-        for parent in s:table_defs[a:table_name].parents
+        for parent in s:table_defs[a:table_name].bases
             let r = call('s:get_map', [a:table_name, a:search_lhs, a:index, not_found])
             if r isnot not_found
                 return r
@@ -171,8 +171,8 @@ function! eskk#table#create(name, ...) "{{{
     let obj = deepcopy(s:register_skeleton, 1)
     let obj.name = a:name
     if a:0
-        " a:1 is table name.
-        let obj.parents = map(a:1, 'eskk#table#create(v:val)')
+        let names = type(a:1) == type([]) : a:1 : [a:1]
+        let obj.bases = map(names, 'eskk#table#create(v:val)')
     endif
     return obj
 endfunction "}}}
