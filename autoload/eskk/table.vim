@@ -29,8 +29,8 @@ runtime! plugin/eskk.vim
 " eskk#table#create() = {
 "   'name': 'table_name',
 "   'data': {
-"       {'method': 'add', 'data': {...}},
-"       {'method': 'remove', 'data': {...}},
+"       'lhs': {'method': 'add', 'data': ['', '']},
+"       'lhs2': {'method': 'remove', 'data': ['', '']},
 "       ...
 "   },
 "   'parents': [
@@ -99,55 +99,61 @@ function! s:is_base_table(table_name) "{{{
 endfunction "}}}
 
 function! s:get_map(table_name, search_lhs, index, ...) "{{{
+    let data = s:get_table_data(a:table_name)
+
     if s:is_base_table(a:table_name)
-        let t = s:get_table_data(a:table_name)
-        if !eskk#util#has_key_f(t, [a:search_lhs, a:index])
-        \   || t[a:search_lhs][a:index] == ''
+        if !eskk#util#has_key_f(data, [a:search_lhs, a:index])
+        \   || data[a:search_lhs][a:index] == ''
+            " No lhs in `s:table_defs`.
             if a:0
                 return a:1
             else
                 throw eskk#internal_error(['eskk', 'table'])
             endif
         endif
-        return t[a:search_lhs][a:index]
+        return data[a:search_lhs][a:index]
     else
-        let derived = s:table_defs[a:table_name].derived
-        let derived_result = {}    " key is lhs.
-        " Process each derived List elements *in order*.
-        " NOTE: Do not return inside `:for`.
-        for i in range(len(derived))
-            if has_key(derived[i].data, a:search_lhs)
-                if derived[i].method ==# 'add'
-                    let derived_result[a:search_lhs] = derived[i].data[a:search_lhs][a:index]
-                elseif derived[i].method ==# 'remove'
-                    if has_key(derived_result, a:search_lhs)
-                        unlet derived_result[a:search_lhs]
-                    endif
+        if has_key(data, a:search_lhs)
+            if data[a:search_lhs].method ==# 'add'
+                return data[a:search_lhs].data[a:index]
+            elseif data[a:search_lhs].method ==# 'remove'
+                " No lhs in `s:table_defs`.
+                if a:0
+                    return a:1
                 else
-                    let msg = "`method` key's value is one of 'add', 'remove'."
-                    throw eskk#internal_error(['eskk', 'table'], msg)
+                    throw eskk#internal_error(['eskk', 'table'])
                 endif
+            else
+                throw eskk#internal_error(
+                \   ['eskk', 'table'],
+                \   printf("%s: invalid method of lhs '%s'.",
+                \       data[a:search_lhs].method,
+                \       a:search_lhs
+                \   )
+                \)
             endif
-        endfor
-        if has_key(derived_result, a:search_lhs)
-            return derived_result[a:search_lhs]
         endif
 
-        " No map in `derived`. Look up in base dict.
-        return call('s:get_map', [s:table_defs[a:table_name].name, a:search_lhs, a:index] + a:000)
-    endif
+        let not_found = {}
+        for parent in s:table_defs[a:table_name].parents
+            let r = call('s:get_map', [a:table_name, a:search_lhs, a:index, not_found])
+            if r isnot not_found
+                return r
+            endif
+        endfor
 
-    " No lhs in `s:table_defs`.
-    if a:0
-        return a:1
-    else
-        throw eskk#internal_error(['eskk', 'table'])
+        " No lhs in `s:table_defs`.
+        if a:0
+            return a:1
+        else
+            throw eskk#internal_error(['eskk', 'table'])
+        endif
     endif
 endfunction "}}}
 
 function! s:has_map(table_name, lhs, index) "{{{
-    let no_map = {}
-    return s:get_map(a:table_name, a:lhs, a:index, no_map) isnot no_map
+    let not_found = {}
+    return s:get_map(a:table_name, a:lhs, a:index, not_found) isnot not_found
 endfunction "}}}
 
 " }}}
