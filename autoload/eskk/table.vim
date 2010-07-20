@@ -60,10 +60,8 @@ function! s:load_table(table_name) "{{{
     endif
 endfunction "}}}
 
-function! s:get_base_table(table_name, ...) "{{{
-    " For compatibility, this function returns base table object.
-
-    if eskk#util#has_key_f(s:table_defs, [a:table_name, 'data'])
+function! s:get_table_data(table_name, ...) "{{{
+    if s:table_defs[a:table_name]._loaded
         return s:table_defs[a:table_name].data
     endif
 
@@ -90,13 +88,12 @@ function! s:set_base_table(skel) "{{{
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
-    call s:load_table(a:table_name)
-    return !has_key(s:table_defs[a:table_name], 'parents')
+    return !has_key(s:get_table_data(a:table_name), 'parents')
 endfunction "}}}
 
 function! s:get_map(table_name, search_lhs, index, ...) "{{{
     if s:is_base_table(a:table_name)
-        let t = s:get_base_table(a:table_name)
+        let t = s:get_table_data(a:table_name)
         if !eskk#util#has_key_f(t, [a:search_lhs, a:index])
         \   || t[a:search_lhs][a:index] == ''
             if a:0
@@ -198,7 +195,7 @@ function! eskk#table#get_candidates(table_name, str_buf) "{{{
         return {}
     else
         return filter(
-        \   keys(s:get_base_table(a:table_name)),
+        \   keys(s:get_table_data(a:table_name)),
         \   'stridx(v:val, a:str_buf) == 0'
         \)
     endif
