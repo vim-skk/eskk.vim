@@ -22,15 +22,19 @@ runtime! plugin/eskk.vim
 " BASE TABLE:
 " eskk#table#create() = {
 "   'name': 'table_name',
-"   'data': {...},
+"   'data': {
+"       'lhs': ['map', 'rest'],
+"       'lhs2': ['map2', 'rest2'],
+"       ...
+"   },
 " }
 "
 " DERIVED TABLE:
 " eskk#table#create() = {
 "   'name': 'table_name',
 "   'data': {
-"       'lhs': {'method': 'add', 'data': ['', '']},
-"       'lhs2': {'method': 'remove', 'data': ['', '']},
+"       'lhs': {'method': 'add', 'data': ['map', 'rest']},
+"       'lhs2': {'method': 'remove', 'data': ['map2', 'rest2']},
 "       ...
 "   },
 "   'parents': [
