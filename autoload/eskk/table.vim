@@ -15,23 +15,6 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
-
-
-" Variables {{{
-let s:table_defs = {}
-let s:cached_tables = {}
-
-let s:MAP_TO_INDEX = 0
-let s:REST_INDEX = 1
-lockvar s:MAP_TO_INDEX
-lockvar s:REST_INDEX
-" }}}
-
-
-" Functions {{{
-
-" Primitive table functions {{{
-
 " NOTE: `s:table_defs` Structure is:
 "
 " let s:table_defs['table_name'] = eskk#table#create()
@@ -56,6 +39,20 @@ lockvar s:REST_INDEX
 "       ...
 "   ],
 " }
+
+" Variables {{{
+let s:table_defs = {}
+let s:cached_tables = {}
+
+let s:MAP_TO_INDEX = 0
+let s:REST_INDEX = 1
+lockvar s:MAP_TO_INDEX
+lockvar s:REST_INDEX
+" }}}
+
+" Functions {{{
+
+" Primitive table functions {{{
 
 function! s:load_table(table_name) "{{{
     if !has_key(s:table_defs, a:table_name)
@@ -282,7 +279,6 @@ lockvar s:table_obj
 " }}}
 
 " }}}
-
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
