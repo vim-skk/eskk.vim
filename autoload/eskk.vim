@@ -850,7 +850,7 @@ function! s:filter_rom(stash, table_name) "{{{
     let rom_str = buf_str.get_rom_str() . char
     let table = eskk#table#new(a:table_name)
     let match_exactly  = table.has_map(rom_str)
-    let candidates     = table.get_candidates(rom_str)
+    let candidates     = table.get_candidates(rom_str, [])
 
     call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
     call eskk#util#logf('candidates = %s', string(candidates))
