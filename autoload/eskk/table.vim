@@ -19,8 +19,6 @@ runtime! plugin/eskk.vim
 
 " Variables {{{
 let s:table_defs = {}
-let s:registered_tables = {}
-
 let s:cached_tables = {}
 
 let s:MAP_TO_INDEX = 0
