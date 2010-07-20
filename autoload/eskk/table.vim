@@ -47,7 +47,7 @@ runtime! plugin/eskk.vim
 " Variables {{{
 let s:table_defs = {}
 let s:cached_tables = {}
-" let s:cached_maps = {}    " TODO
+let s:cached_maps = {}
 
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
@@ -114,12 +114,20 @@ endfunction "}}}
 function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
 
+    " g:eskk_cache_table_map
+    if eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
+        return s:cached_maps[a:table_name][a:lhs][a:index]
+    endif
+
     if s:is_base_table(a:table_name)
         call eskk#util#logf('table %s is base table.', a:table_name)
 
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
+            if g:eskk_cache_table_map
+                call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs])
+            endif
             return data[a:lhs][a:index]
         endif
     else
@@ -128,7 +136,10 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         if has_key(data, a:lhs)
             call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
 
-            if data[a:lhs].method ==# 'add'
+            if data[a:lhs].method ==# 'add' && data[a:lhs].data[a:index] != ''
+                if g:eskk_cache_table_map
+                    call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs].data)
+                endif
                 return data[a:lhs].data[a:index]
             elseif data[a:lhs].method ==# 'remove'
                 " No lhs in `s:table_defs`.

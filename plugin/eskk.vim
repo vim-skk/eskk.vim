@@ -158,6 +158,11 @@ if !exists('g:eskk_mode_use_tables')
     let g:eskk_mode_use_tables =  {'hira': 'rom_to_hira', 'kata': 'rom_to_kata', 'zenei': 'rom_to_zenei', 'hankata': 'rom_to_hankata'}
 endif
 
+" Table
+if !exists('g:eskk_cache_table_map')
+    let g:eskk_cache_table_map = 0
+endif
+
 " Markers
 if !exists("g:eskk_marker_henkan")
     let g:eskk_marker_henkan = '▽'
