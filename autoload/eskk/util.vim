@@ -162,7 +162,14 @@ function! eskk#util#get_f(dict, keys, ...) "{{{
     if empty(a:keys)
         throw eskk#internal_error(['eskk', 'util'])
     elseif len(a:keys) == 1
-        return call('get', [a:dict, a:keys[0]] + a:000)
+        if !eskk#util#can_access(a:dict, a:keys[0])
+            if a:0
+                return a:1
+            else
+                throw eskk#internal_error(['eskk', 'util'])
+            endif
+        endif
+        return a:dict[a:keys[0]]
     else
         if eskk#util#can_access(a:dict, a:keys[0])
             return call('eskk#util#get_f', [a:dict[a:keys[0]], a:keys[1:]] + a:000)
