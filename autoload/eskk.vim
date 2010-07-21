@@ -2250,7 +2250,9 @@ function! s:initialize() "{{{
     " Register builtin-tables. {{{
     call eskk#util#log('Registering builtin tables...')
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-    for name in eskk#table#get_all_tables()
+    let tables = eskk#table#get_all_tables()
+    call eskk#util#logstrf('tables = %s', tables)
+    for name in tables
         let table = eskk#table#create(name)
         function! table.init() dict
             call self.add_from_dict(eskk#table#{self.name}#load())

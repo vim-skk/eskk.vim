@@ -69,6 +69,7 @@ function! s:load_table(table_name) "{{{
     if def._loaded
         return
     endif
+    call eskk#util#logf("Loading table %s...", a:table_name)
 
     if has_key(def, 'bases')
         call eskk#util#logf("table %s is derived table. Let's load base tables...", a:table_name)
@@ -227,10 +228,12 @@ function! eskk#table#create(name, ...) "{{{
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
 
+    call eskk#util#logf('created table %s', a:name)
     let obj = deepcopy(s:register_skeleton, 1)
     let obj.name = a:name
     if a:0
         let names = type(a:1) == type([]) ? a:1 : [a:1]
+        call eskk#util#logstrf('created table %s: base tables are %s', a:name, names)
         let obj.bases = map(names, 'eskk#table#create(v:val)')
     endif
     return obj
@@ -269,6 +272,7 @@ function! s:register_skeleton.register() dict "{{{
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
 
+    call eskk#util#logf('Register table %s.', self.name)
     let s:table_defs[self.name] = self
 endfunction "}}}
 
