@@ -150,7 +150,7 @@ function! eskk#util#let_f(dict, keys, value) "{{{
             let values = [unused, unused, unused, [], {}, unused]
             let a:dict[a:keys[0]] = values[type(a:dict)]
         endif
-        return eskk#util#let_f(a:dict[a:keys[0]], a:keys[1:])
+        return eskk#util#let_f(a:dict[a:keys[0]], a:keys[1:], a:value)
     endif
 endfunction "}}}
 
