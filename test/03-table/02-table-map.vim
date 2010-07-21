@@ -90,6 +90,16 @@ function! s:do_test_add_overwrite() "{{{
     Is table.get_rest('lhs'), 'bar'
 endfunction "}}}
 
+function! s:do_test_remove_base_map() "{{{
+    let name = s:tempstr()
+    let table = eskk#table#create(name, 'rom_to_hira')
+    call table.remove('a')
+    call table.register()
+
+    let table = eskk#table#new(name)
+    OK !table.has_map('a')
+endfunction "}}}
+
 function! s:do_test_empty_string() "{{{
     let name = s:tempstr()
     let table = eskk#table#create(name)
@@ -139,6 +149,7 @@ endfunction "}}}
 function! s:run() "{{{
     call s:do_test_many_tables()
     call s:do_test_add_overwrite()
+    call s:do_test_remove_base_map()
     call s:do_test_empty_string()
 endfunction "}}}
 
