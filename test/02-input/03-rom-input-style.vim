@@ -62,7 +62,7 @@ function! s:run()
         call s:do_test_msime()
         call s:do_test_quickmatch()
     finally
-        let g:eskk_rom_input_style = original
+        let g:eskk_rom_input_style = rom_input_style
         let g:eskk_cache_table_map = cache_table_map
     endtry
 endfunction
