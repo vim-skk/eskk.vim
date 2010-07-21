@@ -273,8 +273,11 @@ endfunction "}}}
 function! s:register_skeleton.register() dict "{{{
     if has_key(s:table_defs, self.name)
         " Do not allow override table.
+        "
         let msg = printf("'%s' has been already registered.", self.name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
+        " throw eskk#internal_error(['eskk', 'table'], msg)
+        call eskk#util#log('warning: ' . msg)
+        return
     endif
 
     call eskk#util#logf('Register table %s.', self.name)
