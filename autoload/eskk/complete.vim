@@ -205,7 +205,9 @@ function! eskk#complete#handle_special_key(stash) "{{{
     let buftable = eskk#get_buftable()
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let key       = henkan_buf_str.get_matched_filter()
-    if !s:check_yomigana(key)
+    if s:check_yomigana(key)
+        return 1
+    else
         call eskk#register_temp_event(
         \   'filter-redispatch-pre',
         \   'eskk#util#identity',
@@ -216,14 +218,13 @@ function! eskk#complete#handle_special_key(stash) "{{{
         \   'eskk#util#identity',
         \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
         \)
+        " Postpone a:char process.
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_named_map(char))]
+        \)
     endif
-
-    " Postpone a:char process.
-    call eskk#register_temp_event(
-    \   'filter-redispatch-post',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_named_map(char))]
-    \)
 
     " Not handled.
     return 0
