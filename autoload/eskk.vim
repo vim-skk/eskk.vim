@@ -1576,25 +1576,14 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     endif
 
     try
+        let do_filter = 1
         if pumvisible() && g:eskk_enable_completion
-            call eskk#complete#handle_special_key(stash)
-            let handled =
-            \   eskk#has_event('filter-redispatch-pre')
-            \   || eskk#has_event('filter-redispatch-post')
-            \   || type(stash.return) == type("")
-            \   || buftable.has_changed()
-            if handled
-                " Postpone a:char process.
-                call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#util#identity',
-                \   [eskk#util#key2char(eskk#get_named_map(a:char))]
-                \)
-                return s:rewrite_string(stash.return)
-            endif
+            let do_filter = eskk#complete#handle_special_key(stash)
         endif
 
-        call s:do_filter(stash, a:Fn, a:tail_args)
+        if do_filter
+            call s:call_filter_fn(stash, a:Fn, a:tail_args)
+        endif
         return s:rewrite_string(stash.return)
 
     catch
@@ -1605,7 +1594,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         call eskk#throw_event('filter-finalize')
     endtry
 endfunction "}}}
-function! s:do_filter(stash, Fn, tail_args) "{{{
+function! s:call_filter_fn(stash, Fn, tail_args) "{{{
     let filter_args = [a:stash]
     let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:stash.char
     if has_key(s:key_handler, rom)

@@ -195,7 +195,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
         if char ==# eskk#util#key2char(key)
             call {fn}(a:stash)
             call eskk#util#logf("pumvisible() = 1, Handled key '%s'.", key)
-            return
+            return 1
         endif
     endfor
 
@@ -218,7 +218,15 @@ function! eskk#complete#handle_special_key(stash) "{{{
         \)
     endif
 
+    " Postpone a:char process.
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#util#identity',
+    \   [eskk#util#key2char(eskk#get_named_map(char))]
+    \)
+
     " Not handled.
+    return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:select_but_not_inserted
