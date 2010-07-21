@@ -36,7 +36,7 @@ runtime! plugin/eskk.vim
 "   'name': 'table_name',
 "   'data': {
 "       'lhs': {'method': 'add', 'data': ['map', 'rest']},
-"       'lhs2': {'method': 'remove', 'data': ['map2', 'rest2']},
+"       'lhs2': {'method': 'remove'},
 "       ...
 "   },
 "   'bases': [
@@ -233,12 +233,6 @@ endfunction "}}}
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
 function! eskk#table#create(name, ...) "{{{
-    if has_key(s:table_defs, a:name)
-        " Do not allow override table.
-        let msg = printf("'%s' has been already registered.", a:name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
-
     call eskk#util#logf('created table %s', a:name)
     let obj = deepcopy(s:register_skeleton, 1)
     let obj.name = a:name
@@ -263,12 +257,11 @@ function! s:register_skeleton.add(lhs, map, ...) dict "{{{
     endif
 endfunction "}}}
 
-function! s:register_skeleton.remove(lhs, map, ...) dict "{{{
-    let pair = [a:map, (a:0 ? a:1 : '')]
+function! s:register_skeleton.remove(lhs) dict "{{{
     if self.is_base()
-        let self.data[a:lhs] = pair
+        throw eskk#user_error(['eskk', 'table'], "Must not remove base class map.")
     else
-        let self.data[a:lhs] = {'method': 'remove', 'data': pair}
+        let self.data[a:lhs] = {'method': 'remove'}
     endif
 endfunction "}}}
 
