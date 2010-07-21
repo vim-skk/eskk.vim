@@ -752,7 +752,11 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         elseif eskk#is_big_letter(char)
             call buftable.do_sticky(a:stash)
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [tolower(char)])
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#util#identity',
+            \   [eskk#util#key2char(eskk#get_named_map(tolower(char)))]
+            \)
             return
         else
             " Fall through.
@@ -786,7 +790,11 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         else
             call buftable.do_enter(a:stash)
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#util#identity',
+            \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
+            \)
         endif
     else
         let msg = printf("eskk#asym_filter() does not support phase %d.", phase)
@@ -848,9 +856,9 @@ function! s:filter_rom(stash, table_name) "{{{
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.get_rom_str() . char
-    let table = eskk#table#get_table(a:table_name)
+    let table = eskk#table#new(a:table_name)
     let match_exactly  = table.has_map(rom_str)
-    let candidates     = table.get_candidates(rom_str)
+    let candidates     = table.get_candidates(rom_str, [])
 
     call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
     call eskk#util#logf('candidates = %s', string(candidates))
@@ -885,7 +893,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         " Set filtered string.
-        call buf_str.push_matched(rom_str, a:table.get_map_to(rom_str))
+        call buf_str.push_matched(rom_str, a:table.get_map(rom_str))
         call buf_str.clear_rom_str()
 
 
@@ -970,7 +978,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             let match_rom = henkan_rom . okuri_rom[0]
             call henkan_buf_str.push_matched(
             \   match_rom,
-            \   a:table.get_map_to(match_rom)
+            \   a:table.get_map(match_rom)
             \)
             " Push "s" to rom str.
             let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
@@ -988,7 +996,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         if a:table.has_map(okuri_buf_str.get_rom_str())
             call okuri_buf_str.push_matched(
             \   okuri_buf_str.get_rom_str(),
-            \   a:table.get_map_to(okuri_buf_str.get_rom_str())
+            \   a:table.get_map(okuri_buf_str.get_rom_str())
             \)
             let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
             if rest !=# -1
@@ -1061,14 +1069,14 @@ function! s:filter_rom_no_match(stash, table) "{{{
                         \   [eskk#util#key2char(eskk#get_named_map(a:table.get_rest(matched)))]
                         \)
                     endif
-                    call buf_str.push_matched(matched, a:table.get_map_to(matched))
+                    call buf_str.push_matched(matched, a:table.get_map(matched))
                 endfor
                 call buf_str.clear_rom_str()
             endif
         endif
     else
         for matched in matched_map_list
-            call buf_str.push_matched(matched, a:table.get_map_to(matched))
+            call buf_str.push_matched(matched, a:table.get_map(matched))
         endfor
         call buf_str.set_rom_str(rest)
     endif
@@ -1532,115 +1540,14 @@ endfunction "}}}
 
 " Filter
 function! eskk#filter(char) "{{{
+    if len(a:char) != 1
+        call eskk#util#logstrf('warning: a:char is not one character length: a:char = %s', a:char)
+        return ''
+    endif
     call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
 endfunction "}}}
-function! eskk#emulate_filter_keys(chars, ...) "{{{
-    " This function is written almost for the tests.
-    " But maybe this is useful
-    " when someone (not me) tries to emulate keys? :)
-
-    let clear_buftable = a:0 ? a:1 : 1
-    let ret = ''
-    let plug = strtrans("\<Plug>")
-    let mapmode = eskk#get_map_modes()[0:0]
-    for c in split(a:chars, '\zs')
-        let r = eskk#filter(c)
-        let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
-
-        " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
-        let pre = ''
-        if r =~# '(eskk:_filter_redispatch_pre)'
-            let pre = maparg('<Plug>(eskk:_filter_redispatch_pre)', mapmode)
-            let r = substitute(r, '(eskk:_filter_redispatch_pre)', '', '')
-        endif
-
-        " Remove `<Plug>(eskk:_filter_redispatch_post)` beforehand.
-        let post = ''
-        if r =~# '(eskk:_filter_redispatch_post)'
-            let post = maparg('<Plug>(eskk:_filter_redispatch_post)', mapmode)
-            let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
-        endif
-
-        " Expand <Plug> mappings.
-        let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
-
-        let [r, ret] = s:emulate_backspace(r, ret)
-
-        " Handle `<Plug>(eskk:_filter_redispatch_pre)`.
-        if pre != ''
-            let _ = eval(pre)
-            let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
-            let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
-            let ret .= _
-            let ret .= eskk#util#do_remap(eval(pre), mapmode)
-        endif
-
-        " Handle rewritten text.
-        let ret .= r
-
-        " Handle `<Plug>(eskk:_filter_redispatch_post)`.
-        if post != ''
-            let _ = eval(post)
-            let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
-            let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
-            let ret .= _
-        endif
-    endfor
-
-    " For convenience.
-    if clear_buftable
-        let buftable = eskk#get_buftable()
-        call buftable.clear_all()
-    endif
-
-    return ret
-endfunction "}}}
-function! s:emulate_backspace(str, cur_ret) "{{{
-    let r = a:str
-    let ret = a:cur_ret
-    for bs in ["\<BS>", "\<C-h>"]
-        while 1
-            let [r, pos] = eskk#util#remove_ctrl_char(r, bs)
-            if pos ==# -1
-                break
-            endif
-            if pos ==# 0
-                if ret == ''
-                    let r = bs . r
-                    break
-                else
-                    let ret = eskk#util#mb_chop(ret)
-                endif
-            else
-                let before = strpart(r, 0, pos)
-                let after = strpart(r, pos)
-                let before = eskk#util#mb_chop(before)
-                let r = before . after
-            endif
-        endwhile
-    endfor
-    return [r, ret]
-endfunction "}}}
-function! s:emulate_filter_char(str, cur_ret) "{{{
-    let r = a:str
-    let ret = a:cur_ret
-    while 1
-        if r !~# '(eskk:filter:[^()]\+)'
-            break
-        endif
-        let char = matchstr(r, '(eskk:filter:\zs[^()]\+\ze)')
-        let r = substitute(r, '(eskk:filter:[^()]\+)', '', '')
-        let _ = eskk#emulate_filter_keys(char, 0)
-        let [_, ret] = s:emulate_backspace(_, ret)
-        let r .= _
-    endwhile
-    return [r, ret]
-endfunction "}}}
-
 function! eskk#call_via_filter(Fn, tail_args) "{{{
     let self = eskk#get_current_instance()
     let char = a:0 != 0 ? a:1 : ''
@@ -1732,7 +1639,7 @@ function! s:rewrite_string(return_string) "{{{
 
     " eskk#rewrite() assumes that &backspace contains "eol".
     let restore_backspace = ''
-    if !eskk#util#has_elem(split(&l:backspace, ','), 'eol')
+    if &l:backspace !~# '\<eol\>'
         execute
         \   eskk#get_map_command(0)
         \   '<buffer><expr>'
@@ -1836,6 +1743,114 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
 endfunction "}}}
 function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
     call eskk#call_mode_func('filter', [a:stash], 1)
+endfunction "}}}
+
+" For test
+function! eskk#emulate_filter_keys(chars, ...) "{{{
+    " This function is written almost for the tests.
+    " But maybe this is useful
+    " when someone (not me) tries to emulate keys? :)
+
+    let clear_buftable = a:0 ? a:1 : 1
+    let ret = ''
+    let plug = strtrans("\<Plug>")
+    let mapmode = eskk#get_map_modes()[0:0]
+    for c in split(a:chars, '\zs')
+        let r = eskk#filter(c)
+        let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
+
+        " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
+        let pre = ''
+        if r =~# '(eskk:_filter_redispatch_pre)'
+            let pre = maparg('<Plug>(eskk:_filter_redispatch_pre)', mapmode)
+            let r = substitute(r, '(eskk:_filter_redispatch_pre)', '', '')
+        endif
+
+        " Remove `<Plug>(eskk:_filter_redispatch_post)` beforehand.
+        let post = ''
+        if r =~# '(eskk:_filter_redispatch_post)'
+            let post = maparg('<Plug>(eskk:_filter_redispatch_post)', mapmode)
+            let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
+        endif
+
+        " Expand <Plug> mappings.
+        let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+
+        let [r, ret] = s:emulate_backspace(r, ret)
+
+        " Handle `<Plug>(eskk:_filter_redispatch_pre)`.
+        if pre != ''
+            let _ = eval(pre)
+            let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
+            let [_, ret] = s:emulate_filter_char(_, ret)
+            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+            let ret .= _
+            let ret .= eskk#util#do_remap(eval(pre), mapmode)
+        endif
+
+        " Handle rewritten text.
+        let ret .= r
+
+        " Handle `<Plug>(eskk:_filter_redispatch_post)`.
+        if post != ''
+            let _ = eval(post)
+            let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
+            let [_, ret] = s:emulate_filter_char(_, ret)
+            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+            let ret .= _
+        endif
+    endfor
+
+    " For convenience.
+    if clear_buftable
+        let buftable = eskk#get_buftable()
+        call buftable.clear_all()
+    endif
+
+    return ret
+endfunction "}}}
+function! s:emulate_backspace(str, cur_ret) "{{{
+    let r = a:str
+    let ret = a:cur_ret
+    for bs in ["\<BS>", "\<C-h>"]
+        while 1
+            let [r, pos] = eskk#util#remove_ctrl_char(r, bs)
+            if pos ==# -1
+                break
+            endif
+            if pos ==# 0
+                if ret == ''
+                    let r = bs . r
+                    break
+                else
+                    let ret = eskk#util#mb_chop(ret)
+                endif
+            else
+                let before = strpart(r, 0, pos)
+                let after = strpart(r, pos)
+                let before = eskk#util#mb_chop(before)
+                let r = before . after
+            endif
+        endwhile
+    endfor
+    return [r, ret]
+endfunction "}}}
+function! s:emulate_filter_char(str, cur_ret) "{{{
+    let r = a:str
+    let ret = a:cur_ret
+    while 1
+        let pat = '(eskk:filter:\([^()]*\))'.'\C'
+        let m = matchlist(r, pat)
+        if empty(m)
+            break
+        endif
+        let char = m[1]
+        let r = substitute(r, pat, '', '')
+        let _ = eskk#emulate_filter_keys(char, 0)
+        let [_, ret] = s:emulate_backspace(_, ret)
+        let r .= _
+    endwhile
+    return [r, ret]
 endfunction "}}}
 
 
@@ -2081,7 +2096,7 @@ function! s:initialize() "{{{
                 if !has_key(this.sandbox, 'table')
                     let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
                 endif
-                let a:stash.return = this.sandbox.table.get_map_to(a:stash.char, a:stash.char)
+                let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
             else
                 let a:stash.return = a:stash.char
             endif
@@ -2103,7 +2118,7 @@ function! s:initialize() "{{{
             if !has_key(this.sandbox, 'table')
                 let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
             endif
-            let a:stash.return = this.sandbox.table.get_map_to(a:stash.char, a:stash.char)
+            let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
         endif
     endfunction
 
@@ -2197,7 +2212,11 @@ function! s:initialize() "{{{
             else
                 call buftable.push_kakutei_str(buftable.get_display_str(0))
                 call buftable.clear_all()
-                call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
+                call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#identity',
+                \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
+                \)
 
                 " Leave abbrev mode.
                 " TODO: Back to previous mode?
@@ -2231,8 +2250,14 @@ function! s:initialize() "{{{
     " Register builtin-tables. {{{
     call eskk#util#log('Registering builtin tables...')
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-    for name in ['rom_to_hira', 'rom_to_kata', 'rom_to_hankata', 'rom_to_zenei', 'hira_to_kata', 'kata_to_hira']
-        call eskk#table#register_table_dict(name, 'eskk#table#' . name . '#load')
+    let tables = eskk#table#get_all_tables()
+    call eskk#util#logstrf('tables = %s', tables)
+    for name in tables
+        let table = eskk#table#create(name)
+        function! table.init() dict
+            call self.add_from_dict(eskk#table#{self.name}#load())
+        endfunction
+        call table.register()
     endfor
     " }}}
 

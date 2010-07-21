@@ -129,10 +129,6 @@ let s:buftable = {
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
 
-" FIXME
-" - Current implementation depends on &backspace
-" when inserted string has newline.
-
 
 function! eskk#buftable#new() "{{{
     return deepcopy(s:buftable)
@@ -177,6 +173,10 @@ function! s:buftable.rewrite() dict "{{{
     let bs = eskk#util#key2char(eskk#get_special_map('backspace-key'))
     let bs = repeat(bs, eskk#util#mb_strlen(old))
 
+    " FIXME
+    " - Current implementation depends on &backspace
+    " when inserted string has newline.
+
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
     let inserted_str = kakutei . new
@@ -184,6 +184,15 @@ function! s:buftable.rewrite() dict "{{{
         return ''
     elseif inserted_str == ''
         return bs
+    elseif stridx(inserted_str, old) == 0
+        " When inserted_str == "foobar", old == "foo"
+        " Insert "bar".
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer>'
+        \   '<Plug>(eskk:internal:_inserted)'
+        \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
+        return "\<Plug>(eskk:internal:_inserted)"
     else
         execute
         \   eskk#get_map_command(0)
@@ -699,24 +708,24 @@ function! s:buftable.do_henkan(stash, ...) dict "{{{
     endif
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_q_key() dict "{{{
-    return s:convert_again_with_table(self, eskk#table#get_table(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
 
 " TODO: These functions are very similar. Refactoring them.
 function! s:buftable.convert_rom_str(phases) dict "{{{
     if eskk#has_current_mode_table()
         if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = eskk#table#get_table('rom_to_hira')
+            let table = eskk#table#new('rom_to_hira')
         else
-            let table = eskk#table#get_table(eskk#get_current_mode_table())
+            let table = eskk#table#new(eskk#get_current_mode_table())
         endif
         for buf_str in map(a:phases, 'self.get_buf_str(v:val)')
             let rom_str = buf_str.get_rom_str()
             if table.has_map(rom_str)
-                call buf_str.push_matched(rom_str, table.get_map_to(rom_str))
+                call buf_str.push_matched(rom_str, table.get_map(rom_str))
                 call buf_str.clear_rom_str()
             endif
         endfor
@@ -724,7 +733,7 @@ function! s:buftable.convert_rom_str(phases) dict "{{{
 endfunction "}}}
 function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
     let phase = a:phase
-    let table = eskk#table#get_table(a:table_name)
+    let table = eskk#table#new(a:table_name)
     let buf_str = self.get_buf_str(phase)
 
     let matched = buf_str.get_matched()
@@ -732,14 +741,14 @@ function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
     for [rom_str, filter_str] in matched
         call buf_str.push_matched(
         \   rom_str,
-        \   table.get_map_to(rom_str, rom_str)
+        \   table.get_map(rom_str, rom_str)
         \)
     endfor
     return buf_str
 endfunction "}}}
 function! s:buftable.filter_rom(phase, table_name) dict "{{{
     let phase = a:phase
-    let table = eskk#table#get_table(a:table_name)
+    let table = eskk#table#new(a:table_name)
     let buf_str = deepcopy(self.get_buf_str(phase), 1)
 
     let matched = buf_str.get_matched()
@@ -747,7 +756,7 @@ function! s:buftable.filter_rom(phase, table_name) dict "{{{
     for [rom_str, filter_str] in matched
         call buf_str.push_matched(
         \   rom_str,
-        \   table.get_map_to(rom_str, rom_str)
+        \   table.get_map(rom_str, rom_str)
         \)
     endfor
     return buf_str
@@ -766,7 +775,7 @@ function! s:convert_again_with_table(self, table) "{{{
 
     for cur_buf_str in [henkan_buf_str, okuri_buf_str]
         for m in cur_buf_str.get_matched()
-            call normal_buf_str.push_matched(m[0], a:table.get_map_to(m[0]))
+            call normal_buf_str.push_matched(m[0], a:table.get_map(m[0]))
         endfor
     endfor
 

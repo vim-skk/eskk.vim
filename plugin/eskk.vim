@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 293))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 353))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -156,6 +156,11 @@ endif
 
 if !exists('g:eskk_mode_use_tables')
     let g:eskk_mode_use_tables =  {'hira': 'rom_to_hira', 'kata': 'rom_to_kata', 'zenei': 'rom_to_zenei', 'hankata': 'rom_to_hankata'}
+endif
+
+" Table
+if !exists('g:eskk_cache_table_map')
+    let g:eskk_cache_table_map = 1
 endif
 
 " Markers

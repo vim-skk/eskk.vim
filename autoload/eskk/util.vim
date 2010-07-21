@@ -15,7 +15,7 @@ set cpo&vim
 " }}}
 
 
-" Functions {{{
+" Logging/Output
 function! eskk#util#warn(msg) "{{{
     echohl WarningMsg
     echomsg a:msg
@@ -51,6 +51,8 @@ function! eskk#util#logstrf(fmt, ...) "{{{
     return call('eskk#util#logf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
 
+
+" Multibyte
 function! eskk#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
 endfunction "}}}
@@ -58,6 +60,8 @@ function! eskk#util#mb_chop(str) "{{{
     return substitute(a:str, '.$', '', '')
 endfunction "}}}
 
+
+" Argument
 function! eskk#util#get_args(args, ...) "{{{
     let ret_args = []
     let i = 0
@@ -75,22 +79,8 @@ function! eskk#util#get_args(args, ...) "{{{
     return ret_args
 endfunction "}}}
 
-function! eskk#util#has_idx(list, idx) "{{{
-    " Return true when negative idx.
-    " let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
-    let idx = a:idx
-    return 0 <= idx && idx < len(a:list)
-endfunction "}}}
 
-function! eskk#util#has_elem(list, elem) "{{{
-    for Value in a:list
-        if Value ==# a:elem
-            return 1
-        endif
-    endfor
-    return 0
-endfunction "}}}
-
+" List function
 function! eskk#util#unique(list) "{{{
     let list = []
     let dup_check = {}
@@ -105,8 +95,90 @@ function! eskk#util#unique(list) "{{{
     return list
 endfunction "}}}
 
-" a:func is string.
 
+" Various structure function
+function! eskk#util#get_f(dict, keys, ...) "{{{
+    if empty(a:keys)
+        throw eskk#internal_error(['eskk', 'util'])
+    elseif len(a:keys) == 1
+        if !eskk#util#can_access(a:dict, a:keys[0])
+            if a:0
+                return a:1
+            else
+                throw eskk#internal_error(['eskk', 'util'])
+            endif
+        endif
+        return a:dict[a:keys[0]]
+    else
+        if eskk#util#can_access(a:dict, a:keys[0])
+            return call('eskk#util#get_f', [a:dict[a:keys[0]], a:keys[1:]] + a:000)
+        else
+            if a:0
+                return a:1
+            else
+                throw eskk#internal_error(['eskk', 'util'])
+            endif
+        endif
+    endif
+endfunction "}}}
+function! eskk#util#has_key_f(dict, keys) "{{{
+    if empty(a:keys)
+        throw eskk#internal_error(['eskk', 'util'])
+    elseif len(a:keys) == 1
+        return eskk#util#can_access(a:dict, a:keys[0])
+    else
+        if eskk#util#can_access(a:dict, a:keys[0])
+            return eskk#util#has_key_f(a:dict[a:keys[0]], a:keys[1:])
+        else
+            return 0
+        endif
+    endif
+endfunction "}}}
+function! eskk#util#let_f(dict, keys, value) "{{{
+    if empty(a:keys)
+        throw eskk#internal_error(['eskk', 'util'])
+    elseif len(a:keys) == 1
+        if eskk#util#can_access(a:dict, a:keys[0])
+            return a:dict[a:keys[0]]
+        else
+            let a:dict[a:keys[0]] = a:value
+            return a:value
+        endif
+    else
+        if !eskk#util#can_access(a:dict, a:keys[0])
+            let unused = -1
+            let values = [unused, unused, unused, [], {}, unused]
+            let a:dict[a:keys[0]] = values[type(a:dict)]
+        endif
+        return eskk#util#let_f(a:dict[a:keys[0]], a:keys[1:], a:value)
+    endif
+endfunction "}}}
+
+function! eskk#util#has_idx(list, idx) "{{{
+    " Return true when negative idx.
+    " let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
+    let idx = a:idx
+    return 0 <= idx && idx < len(a:list)
+endfunction "}}}
+function! eskk#util#has_elem(list, elem) "{{{
+    for Value in a:list
+        if Value ==# a:elem
+            return 1
+        endif
+    endfor
+    return 0
+endfunction "}}}
+function! eskk#util#can_access(cont, key) "{{{
+    try
+        let Value = a:cont[a:key]
+        return 1
+    catch
+        return 0
+    endtry
+endfunction "}}}
+
+
+" Parsing
 function! eskk#util#skip_spaces(str) "{{{
     return substitute(a:str, '^\s*', '', '')
 endfunction "}}}
@@ -119,13 +191,14 @@ function! eskk#util#unget_arg(arg, str) "{{{
     return a:str . a:arg
 endfunction "}}}
 
-function! s:split_key(key) "{{{
-    let head = matchstr(a:key, '^[^<]\+')
-    return [head, strpart(a:key, strlen(head))]
-endfunction "}}}
-function! s:split_special_key(key) "{{{
-    let head = matchstr(a:key, '^<[^>]\+>')
-    return [head, strpart(a:key, strlen(head))]
+
+" Key/Char/Map
+function! s:split_to_keys(lhs)  "{{{
+    " From arpeggio.vim
+    "
+    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
+    "             a:lhs doesn't directly contain any escape sequences.
+    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
 endfunction "}}}
 function! eskk#util#key2char(key) "{{{
     " From arpeggio.vim
@@ -134,123 +207,19 @@ function! eskk#util#key2char(key) "{{{
     call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
     return join(keys, '')
 endfunction "}}}
-function! s:split_to_keys(lhs)  "{{{
-    " From arpeggio.vim
-    "
-    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
-    "             a:lhs doesn't directly contain any escape sequences.
-    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
-endfunction "}}}
-
 function! eskk#util#str2map(str) "{{{
     let s = a:str
     let s = substitute(s, '<', '<lt>', 'g')
     let s = substitute(s, ' ', '<Space>', 'g')
-    return s
+    return s != '' ? s : '<Nop>'
 endfunction "}}}
-
-function! eskk#util#get_f(...) "{{{
-    return call('s:follow', [0] + a:000)
-endfunction "}}}
-function! eskk#util#has_key_f(...) "{{{
-    return call('s:follow', [1] + a:000)
-endfunction "}}}
-
-" Built-in 'get()' like function.
-" But 3 arg is omitted, this throws an exception.
-"
-" This allows both Dictionary and List as a:dict.
-" And if a:ret_bool is true:
-"   Return boolean value(existence of key).
-" And if a:ret_bool is false:
-"   Raise an exception or return value if it exists.
-function! s:follow(ret_bool, dict, follow, ...) "{{{
-    if empty(a:follow)
-        throw eskk#internal_error(['eskk', 'util'])
-    endif
-
-    if a:0 == 0
-        if type(a:dict) == type([])
-            if !eskk#util#has_idx(a:dict, a:follow[0])
-                if a:ret_bool
-                    return 0
-                else
-                    throw eskk#internal_error(['eskk', 'util'])
-                endif
-            endif
-        elseif type(a:dict) == type({})
-            if !has_key(a:dict, a:follow[0])
-                if a:ret_bool
-                    return 0
-                else
-                    throw eskk#internal_error(['eskk', 'util'])
-                endif
-            endif
-        else
-            throw eskk#internal_error(['eskk', 'util'])
-        endif
-        let got = get(a:dict, a:follow[0])
-    else
-        let got = get(a:dict, a:follow[0], a:1)
-    endif
-
-    if len(a:follow) == 1
-        return a:ret_bool ? 1 : got
-    else
-        return call('s:follow', [a:ret_bool, got, remove(a:follow, 1, -1)] + a:000)
-    endif
-endfunction "}}}
-
-function! eskk#util#assert(cond, ...) "{{{
-    if !a:cond
-        throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
-    endif
-endfunction "}}}
-
-" NOTE: Return value may be Funcref.
-function! eskk#util#get_local_func(funcname, sid) "{{{
-    " :help <SID>
-    return printf('<SNR>%d_%s', a:sid, a:funcname)
+function! eskk#util#do_remap(map, modes) "{{{
+    let m = maparg(a:map, a:modes)
+    return m != '' ? m : a:map
 endfunction "}}}
 
 
-function! eskk#util#option_value(value, list, default_index) "{{{
-    let match = 0
-    for _ in a:list
-        if _ ==# a:value
-            let match = 1
-            break
-        endif
-    endfor
-    if match
-        return a:value
-    else
-        return a:list[a:default_index]
-    endif
-endfunction "}}}
-
-
-function! eskk#util#identity(value) "{{{
-    return a:value
-endfunction "}}}
-
-
-function! eskk#util#rand(max) "{{{
-    let next = localtime() * 1103515245 + 12345
-    return (next / 65536) % (a:max + 1)
-endfunction "}}}
-
-
-function! eskk#util#get_syn_names(...) "{{{
-    let [line, col] = eskk#util#get_args(a:000, line('.'), col('.'))
-    " synstack() returns strange value when col is over $ pos. Bug?
-    if col >= col('$')
-        return []
-    endif
-    return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
-endfunction "}}}
-
-
+" String/Regex
 function! eskk#util#escape_regex(regex) "{{{
     " XXX
     let s = a:regex
@@ -261,12 +230,6 @@ function! eskk#util#escape_regex(regex) "{{{
     let s = substitute(s, '\$', "\\$", 'g')
     return s
 endfunction "}}}
-
-function! eskk#util#do_remap(map, modes) "{{{
-    let m = maparg(a:map, a:modes)
-    return m != '' ? m : a:map
-endfunction "}}}
-
 function! eskk#util#remove_ctrl_char(s, ctrl_char) "{{{
     let s = a:s
     let pos = stridx(s, a:ctrl_char)
@@ -287,7 +250,50 @@ function! eskk#util#remove_all_ctrl_chars(s, ctrl_char) "{{{
     endwhile
     return s
 endfunction "}}}
-" }}}
+
+
+" Misc.
+function! eskk#util#assert(cond, ...) "{{{
+    if !a:cond
+        throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
+    endif
+endfunction "}}}
+function! eskk#util#get_local_func(funcname, sid) "{{{
+    " :help <SID>
+    return printf('<SNR>%d_%s', a:sid, a:funcname)
+endfunction "}}}
+function! eskk#util#option_value(value, list, default_index) "{{{
+    let match = 0
+    for _ in a:list
+        if _ ==# a:value
+            let match = 1
+            break
+        endif
+    endfor
+    if match
+        return a:value
+    else
+        return a:list[a:default_index]
+    endif
+endfunction "}}}
+function! eskk#util#identity(value) "{{{
+    return a:value
+endfunction "}}}
+function! eskk#util#rand(max) "{{{
+    let next = localtime() * 1103515245 + 12345
+    return (next / 65536) % (a:max + 1)
+endfunction "}}}
+function! eskk#util#get_syn_names(...) "{{{
+    let [line, col] = eskk#util#get_args(a:000, line('.'), col('.'))
+    " synstack() returns strange value when col is over $ pos. Bug?
+    if col >= col('$')
+        return []
+    endif
+    return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
+endfunction "}}}
+function! eskk#util#globpath(pat) "{{{
+    return split(globpath(&runtimepath, a:pat), '\n')
+endfunction "}}}
 
 
 " Restore 'cpoptions' {{{
