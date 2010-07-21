@@ -148,14 +148,6 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
                 else
                     throw eskk#internal_error(['eskk', 'table'])
                 endif
-            else
-                throw eskk#internal_error(
-                \   ['eskk', 'table'],
-                \   printf("%s: invalid method of lhs '%s'.",
-                \       data[a:lhs].method,
-                \       a:lhs
-                \   )
-                \)
             endif
         endif
 
