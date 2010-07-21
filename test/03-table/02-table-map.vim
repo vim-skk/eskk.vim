@@ -57,18 +57,14 @@ function! s:do_test_many_tables() "{{{
     for name in table_names
         let t = eskk#table#new(name)
         for [lhs, map; rest] in maps[name]
-            Ok t.has_map(lhs)
-            Ok t.get_map(lhs) ==# map
-
+            Ok t.has_map(lhs), 't.has_map(lhs)'
             let map_does_not_conflict = map . "hogera"
-            Ok t.get_map(lhs, map_does_not_conflict) ==# map
+            Is t.get_map(lhs, map_does_not_conflict), map, 't.get_map(lhs, hoge) ==# map'
 
             if !empty(rest)
-                Ok t.has_rest(lhs)
-                Ok t.get_rest(lhs) ==# rest[0]
-
+                Ok t.has_rest(lhs), 't.has_rest(lhs)'
                 let rest_does_not_conflict = rest[0] . "hogera"
-                Ok t.get_rest(lhs, rest_does_not_conflict) ==# rest[0]
+                Is t.get_rest(lhs, rest_does_not_conflict), rest[0], 't.get_rest(lhs, hoge) ==# rhs'
             endif
             unlet rest
         endfor
