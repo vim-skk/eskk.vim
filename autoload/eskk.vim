@@ -1576,7 +1576,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
     endif
 
     try
-        if pumvisible()
+        if pumvisible() && g:eskk_enable_completion
             call eskk#complete#handle_special_key(stash)
             let handled =
             \   eskk#has_event('filter-redispatch-pre')
