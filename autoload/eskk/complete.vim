@@ -327,7 +327,12 @@ function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
     let buftable = eskk#get_buftable()
-    let [mode, pos] = buftable.get_begin_pos()
+    let l = buftable.get_begin_pos()
+    if empty(l)
+        call eskk#util#log("warning: Can't get begin pos.")
+        return
+    endif
+    let [mode, pos] = l
     call eskk#util#assert(mode ==# 'i')
 
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
