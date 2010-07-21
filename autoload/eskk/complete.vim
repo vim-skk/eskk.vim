@@ -199,12 +199,12 @@ function! eskk#complete#handle_special_key(stash) "{{{
         endif
     endfor
 
-    " Select item.
-    call s:set_selected_item()
-    
     if s:check_yomigana()
         return 1
     else
+        " Select item.
+        call s:set_selected_item()
+ 
         call eskk#register_temp_event(
         \   'filter-redispatch-pre',
         \   'eskk#util#identity',
@@ -355,21 +355,25 @@ function! s:set_selected_item() "{{{
     call s:initialize_variables()
 endfunction "}}}
 function! s:check_yomigana() "{{{
-    let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let key       = henkan_buf_str.get_matched_filter()
+    let l = buftable.get_begin_pos()
+    if empty(l)
+        call eskk#util#log("warning: Can't get begin pos.")
+        return 1
+    endif
+    let [mode, pos] = l
+    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
         
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
-        return key =~ '^[[:alnum:]-]\+$'
+        return filter_str =~ '^[[:alnum:]-]\+$'
     elseif eskk#get_mode() ==# 'abbrev'
         " abbrev mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
-        return key =~ '^[[:alnum:]-]\+$'
+        return filter_str =~ '^[[:alnum:]-]\+$'
     else
         " Kanji mode.
-        return key =~ '^[あ-んー。！？]\+$'
+        return filter_str =~ '^[あ-んー。！？]\+$'
     endif
 endfunction "}}}
 
