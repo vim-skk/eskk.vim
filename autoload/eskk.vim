@@ -1635,7 +1635,7 @@ function! s:rewrite_string(return_string) "{{{
 
     " eskk#rewrite() assumes that &backspace contains "eol".
     let restore_backspace = ''
-    if !eskk#util#has_elem(split(&l:backspace, ','), 'eol')
+    if &l:backspace !~# '\<eol\>'
         execute
         \   eskk#get_map_command(0)
         \   '<buffer><expr>'
