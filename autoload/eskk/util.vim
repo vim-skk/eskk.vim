@@ -291,8 +291,8 @@ function! eskk#util#get_syn_names(...) "{{{
     endif
     return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
 endfunction "}}}
-function! eskk#util#glob(...) "{{{
-    return split(call('glob', a:000), '\n')
+function! eskk#util#globpath(pat) "{{{
+    return split(globpath(&runtimepath, a:pat), '\n')
 endfunction "}}}
 
 
