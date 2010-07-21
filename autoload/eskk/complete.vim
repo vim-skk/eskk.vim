@@ -199,15 +199,15 @@ function! eskk#complete#handle_special_key(stash) "{{{
         endif
     endfor
 
-    " Select item.
-    call s:set_selected_item()
-
     let buftable = eskk#get_buftable()
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let key       = henkan_buf_str.get_matched_filter()
     if s:check_yomigana(key)
         return 1
     else
+        " Select item.
+        call s:set_selected_item()
+
         call eskk#register_temp_event(
         \   'filter-redispatch-pre',
         \   'eskk#util#identity',
