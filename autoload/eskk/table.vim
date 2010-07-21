@@ -176,7 +176,8 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     if a:0
         return a:1
     else
-        throw eskk#internal_error(['eskk', 'table'])
+        let msg = eskk#util#printstrf('table name = %s, lhs = %s, index = %d', a:table_name, a:lhs, a:index)
+        throw eskk#internal_error(['eskk', 'table'], msg)
     endif
 endfunction "}}}
 
