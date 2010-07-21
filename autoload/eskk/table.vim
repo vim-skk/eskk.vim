@@ -15,9 +15,11 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
-" NOTE: `s:table_defs` Structure is:
-"
-" let s:table_defs['table_name'] = eskk#table#create()
+" s:table_defs = {
+"   'table_name': eskk#table#create(),
+"   'table_name2': eskk#table#create(),
+"   ...
+" }
 "
 " BASE TABLE:
 " eskk#table#create() = {
