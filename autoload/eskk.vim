@@ -752,7 +752,11 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         elseif eskk#is_big_letter(char)
             call buftable.do_sticky(a:stash)
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [tolower(char)])
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#util#identity',
+            \   [eskk#util#key2char(eskk#get_named_map(tolower(char)))]
+            \)
             return
         else
             " Fall through.
@@ -786,7 +790,11 @@ function! eskk#asym_filter(stash, table_name) "{{{
             return
         else
             call buftable.do_enter(a:stash)
-            call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#util#identity',
+            \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
+            \)
         endif
     else
         let msg = printf("eskk#asym_filter() does not support phase %d.", phase)
@@ -2198,7 +2206,11 @@ function! s:initialize() "{{{
             else
                 call buftable.push_kakutei_str(buftable.get_display_str(0))
                 call buftable.clear_all()
-                call eskk#register_temp_event('filter-redispatch-post', 'eskk#filter', [a:stash.char])
+                call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#identity',
+                \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
+                \)
 
                 " Leave abbrev mode.
                 " TODO: Back to previous mode?
