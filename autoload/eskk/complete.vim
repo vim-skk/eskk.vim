@@ -195,17 +195,19 @@ function! eskk#complete#handle_special_key(stash) "{{{
         if char ==# eskk#util#key2char(key)
             call {fn}(a:stash)
             call eskk#util#logf("pumvisible() = 1, Handled key '%s'.", key)
-            return
+            return 1
         endif
     endfor
-
-    " Select item.
-    call s:set_selected_item()
 
     let buftable = eskk#get_buftable()
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let key       = henkan_buf_str.get_matched_filter()
-    if !s:check_yomigana(key)
+    if s:check_yomigana(key)
+        return 1
+    else
+        " Select item.
+        call s:set_selected_item()
+
         call eskk#register_temp_event(
         \   'filter-redispatch-pre',
         \   'eskk#util#identity',
@@ -216,9 +218,16 @@ function! eskk#complete#handle_special_key(stash) "{{{
         \   'eskk#util#identity',
         \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
         \)
+        " Postpone a:char process.
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_named_map(char))]
+        \)
     endif
 
     " Not handled.
+    return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:select_but_not_inserted
@@ -318,11 +327,15 @@ function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
     let buftable = eskk#get_buftable()
-    let [mode, pos] = buftable.get_begin_pos()
+    let l = buftable.get_begin_pos()
+    if empty(l)
+        call eskk#util#log("warning: Can't get begin pos.")
+        return
+    endif
+    let [mode, pos] = l
     call eskk#util#assert(mode ==# 'i')
 
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
-    call eskk#util#logf('Got selected item by pum: %s', string(filter_str))
     if filter_str =~# '[a-z]$'
         let [filter_str, rom_str] = [
         \   substitute(filter_str, '.$', '', ''),
@@ -331,6 +344,7 @@ function! s:set_selected_item() "{{{
     else
         let rom_str = ''
     endif
+    call eskk#util#logstrf('Got selected item by pum: filter_str = %s, rom_str = %s', filter_str, rom_str)
 
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     call henkan_buf_str.clear()

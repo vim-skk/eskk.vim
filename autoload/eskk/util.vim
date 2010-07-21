@@ -51,6 +51,10 @@ function! eskk#util#logstrf(fmt, ...) "{{{
     return call('eskk#util#logf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
 
+function! eskk#util#printstrf(fmt, ...) "{{{
+    return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
+endfunction "}}}
+
 
 " Multibyte
 function! eskk#util#mb_strlen(str) "{{{

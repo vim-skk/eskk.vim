@@ -775,7 +775,7 @@ function! s:convert_again_with_table(self, table) "{{{
 
     for cur_buf_str in [henkan_buf_str, okuri_buf_str]
         for m in cur_buf_str.get_matched()
-            call normal_buf_str.push_matched(m[0], a:table.get_map(m[0]))
+            call normal_buf_str.push_matched(m[0], a:table.get_map(m[0], m[1]))
         endfor
     endfor
 
