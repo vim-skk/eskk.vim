@@ -1835,11 +1835,13 @@ function! s:emulate_filter_char(str, cur_ret) "{{{
     let r = a:str
     let ret = a:cur_ret
     while 1
-        if r !~# '(eskk:filter:[^()]\+)'
+        let pat = '(eskk:filter:\([^()]*\))'.'\C'
+        let m = matchlist(r, pat)
+        if empty(m)
             break
         endif
-        let char = matchstr(r, '(eskk:filter:\zs[^()]\+\ze)')
-        let r = substitute(r, '(eskk:filter:[^()]\+)', '', '')
+        let char = m[1]
+        let r = substitute(r, pat, '', '')
         let _ = eskk#emulate_filter_keys(char, 0)
         let [_, ret] = s:emulate_backspace(_, ret)
         let r .= _
