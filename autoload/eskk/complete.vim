@@ -336,7 +336,6 @@ function! s:set_selected_item() "{{{
     call eskk#util#assert(mode ==# 'i')
 
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
-    call eskk#util#logf('Got selected item by pum: %s', string(filter_str))
     if filter_str =~# '[a-z]$'
         let [filter_str, rom_str] = [
         \   substitute(filter_str, '.$', '', ''),
@@ -345,6 +344,7 @@ function! s:set_selected_item() "{{{
     else
         let rom_str = ''
     endif
+    call eskk#util#logstrf('Got selected item by pum: filter_str = %s, rom_str = %s', filter_str, rom_str)
 
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     call henkan_buf_str.clear()
