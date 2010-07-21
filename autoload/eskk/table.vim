@@ -117,7 +117,16 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
 
     " g:eskk_cache_table_map
     if eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
-        return s:cached_maps[a:table_name][a:lhs][a:index]
+        if s:cached_maps[a:table_name][a:lhs][a:index] != ''
+            return s:cached_maps[a:table_name][a:lhs][a:index]
+        else
+            " No lhs in `s:table_defs`.
+            if a:0
+                return a:1
+            else
+                throw eskk#internal_error(['eskk', 'table'])
+            endif
+        endif
     endif
 
     if s:is_base_table(a:table_name)
