@@ -184,6 +184,15 @@ function! s:buftable.rewrite() dict "{{{
         return ''
     elseif inserted_str == ''
         return bs
+    elseif stridx(inserted_str, old) == 0
+        " When inserted_str == "foobar", old == "foo"
+        " Insert "bar".
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer>'
+        \   '<Plug>(eskk:internal:_inserted)'
+        \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
+        return "\<Plug>(eskk:internal:_inserted)"
     else
         execute
         \   eskk#get_map_command(0)
