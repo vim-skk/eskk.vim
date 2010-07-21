@@ -129,10 +129,6 @@ let s:buftable = {
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
 \}
 
-" FIXME
-" - Current implementation depends on &backspace
-" when inserted string has newline.
-
 
 function! eskk#buftable#new() "{{{
     return deepcopy(s:buftable)
@@ -176,6 +172,10 @@ function! s:buftable.rewrite() dict "{{{
 
     let bs = eskk#util#key2char(eskk#get_special_map('backspace-key'))
     let bs = repeat(bs, eskk#util#mb_strlen(old))
+
+    " FIXME
+    " - Current implementation depends on &backspace
+    " when inserted string has newline.
 
     " TODO Rewrite mininum string as possible
     " when old or new string become too long.
