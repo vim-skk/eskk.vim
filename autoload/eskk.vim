@@ -1126,7 +1126,6 @@ function! eskk#enable(...) "{{{
     endif
 
     if g:eskk_enable_completion
-        let self.omnifunc_save = &l:omnifunc
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
     endif
 
@@ -1161,7 +1160,7 @@ function! eskk#disable() "{{{
         call eskk#unmap_all_keys()
     endif
 
-    if g:eskk_enable_completion
+    if g:eskk_enable_completion && has_key(self, 'omnifunc_save')
         let &l:omnifunc = self.omnifunc_save
     endif
 
