@@ -211,7 +211,7 @@ function! eskk#util#str2map(str) "{{{
     let s = a:str
     let s = substitute(s, '<', '<lt>', 'g')
     let s = substitute(s, ' ', '<Space>', 'g')
-    return s
+    return s != '' ? s : '<Nop>'
 endfunction "}}}
 function! eskk#util#do_remap(map, modes) "{{{
     let m = maparg(a:map, a:modes)
