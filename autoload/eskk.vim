@@ -1540,6 +1540,10 @@ endfunction "}}}
 
 " Filter
 function! eskk#filter(char) "{{{
+    if len(a:char) != 1
+        call eskk#util#logstrf('warning: a:char is not one character length: a:char = %s', a:char)
+        return ''
+    endif
     call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
     return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
