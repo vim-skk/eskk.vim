@@ -319,7 +319,7 @@ endfunction "}}}
 " Not included in OO interface.
 
 function! eskk#table#get_all_tables() "{{{
-    return map(eskk#util#globpath('autoload/eskk/table/**/*.vim'), 'fnamemodify(v:val, ":t:r")')
+    return map(eskk#util#globpath('autoload/eskk/table/*.vim'), 'fnamemodify(v:val, ":t:r")')
 endfunction "}}}
 
 function! eskk#table#get_all_registered_tables() "{{{
