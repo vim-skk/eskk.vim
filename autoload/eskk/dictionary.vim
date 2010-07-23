@@ -155,7 +155,6 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
 
     if a:0 == 1
         let [min, max] = [a:1, len(whole_lines) - 1]
-        call eskk#util#assert(min < max, 'min < max')
     elseif a:0 >= 2
         let [min, max] = a:000
         call eskk#util#assert(min < max, 'min < max')

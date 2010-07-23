@@ -1580,7 +1580,7 @@ function! s:filter(self, char, Fn, tail_args) "{{{
             let do_filter = eskk#complete#handle_special_key(stash)
         endif
 
-        if do_filter
+        if do_filter > 0
             call s:call_filter_fn(stash, a:Fn, a:tail_args)
         endif
         return s:rewrite_string(stash.return)
