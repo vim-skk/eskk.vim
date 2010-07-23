@@ -823,7 +823,9 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     " of return value of `eskk#dictionary#parse_skk_dict_line()`.
     let added = []
     for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
-        call add(added, [added_key, added_okuri_rom, [{'result': added_input . added_okuri}]])
+        if stridx(added_key, key) == 0
+            call add(added, [added_key, added_okuri_rom, [{'result': added_input . added_okuri}]])
+        endif
     endfor
 
     let lines = []
