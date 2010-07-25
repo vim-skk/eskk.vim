@@ -34,7 +34,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
             return -1
         endif
         let [mode, pos] = l
-        let phase = buftable.get_henkan_phase()
         let do_complete = (mode ==# 'i')
 
         if !do_complete
@@ -364,7 +363,7 @@ function! s:check_yomigana() "{{{
     endif
     let [mode, pos] = l
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
-        
+
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
         return filter_str =~ '^[[:alnum:]-]\+$'
