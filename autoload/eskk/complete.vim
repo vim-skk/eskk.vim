@@ -101,6 +101,10 @@ function! s:complete_ascii() "{{{
         endfor
     endfor
 
+    if !empty(list)
+        let inst = eskk#get_current_instance()
+        let inst.has_started_completion = 1
+    endif
     return list
 endfunction "}}}
 function! s:complete_abbrev() "{{{
@@ -129,6 +133,10 @@ function! s:complete_abbrev() "{{{
         endfor
     endfor
 
+    if !empty(list)
+        let inst = eskk#get_current_instance()
+        let inst.has_started_completion = 1
+    endif
     return list
 endfunction "}}}
 function! s:complete_kanji() "{{{
@@ -168,6 +176,10 @@ function! s:complete_kanji() "{{{
         endfor
     endfor
 
+    if !empty(list)
+        let inst = eskk#get_current_instance()
+        let inst.has_started_completion = 1
+    endif
     return list
 endfunction "}}}
 function! eskk#complete#handle_special_key(stash) "{{{
