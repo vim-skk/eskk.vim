@@ -1580,7 +1580,7 @@ function! s:filter(self, char) "{{{
             let self.has_started_completion = 0
         endif
 
-        if do_filter > 0
+        if do_filter
             call s:call_filter_fn(stash)
         endif
         return s:rewrite_string(stash.return)
