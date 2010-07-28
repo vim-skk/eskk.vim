@@ -39,6 +39,8 @@ delfunc s:SID
 " prev_henkan_result:
 "   Previous henkan result.
 "   See `s:henkan_result` in `autoload/eskk/dictionary.vim`.
+" has_started_completion:
+"   completion has been started from eskk.
 let s:eskk = {
 \   'mode': '',
 \   '_buftable': {},
@@ -47,6 +49,7 @@ let s:eskk = {
 \   'enabled': 0,
 \   'stash': {},
 \   'prev_henkan_result': {},
+\   'has_started_completion': 0,
 \}
 
 function! s:eskk_new() "{{{
@@ -1576,8 +1579,10 @@ function! s:filter(self, char, Fn, tail_args) "{{{
 
     try
         let do_filter = 1
-        if pumvisible() && g:eskk_enable_completion
+        if g:eskk_enable_completion && pumvisible() && self.has_started_completion
             let do_filter = eskk#complete#handle_special_key(stash)
+        else
+            let self.has_started_completion = 0
         endif
 
         if do_filter > 0
