@@ -256,6 +256,7 @@ function! s:register_skeleton.add(lhs, map, ...) dict "{{{
     else
         let self.data[a:lhs] = {'method': 'add', 'data': pair}
     endif
+    return self
 endfunction "}}}
 
 function! s:register_skeleton.remove(lhs) dict "{{{
@@ -264,10 +265,12 @@ function! s:register_skeleton.remove(lhs) dict "{{{
     else
         let self.data[a:lhs] = {'method': 'remove'}
     endif
+    return self
 endfunction "}}}
 
 function! s:register_skeleton.add_from_dict(dict) dict "{{{
     let self.data = a:dict
+    return self
 endfunction "}}}
 
 function! s:register_skeleton.register() dict "{{{
@@ -282,6 +285,7 @@ function! s:register_skeleton.register() dict "{{{
 
     call eskk#util#logf('Register table %s.', self.name)
     let s:table_defs[self.name] = self
+    return self
 endfunction "}}}
 
 lockvar s:register_skeleton
