@@ -1548,14 +1548,9 @@ function! eskk#filter(char) "{{{
     endif
     call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
-    return s:filter(self, a:char, 's:filter_body_call_mode_or_default_filter', [self])
+    return s:filter(self, a:char)
 endfunction "}}}
-function! eskk#call_via_filter(Fn, tail_args) "{{{
-    let self = eskk#get_current_instance()
-    let char = a:0 != 0 ? a:1 : ''
-    return s:filter(self, char, a:Fn, a:tail_args)
-endfunction "}}}
-function! s:filter(self, char, Fn, tail_args) "{{{
+function! s:filter(self, char) "{{{
     let self = a:self
     let buftable = eskk#get_buftable()
 
@@ -1586,19 +1581,19 @@ function! s:filter(self, char, Fn, tail_args) "{{{
         endif
 
         if do_filter > 0
-            call s:call_filter_fn(stash, a:Fn, a:tail_args)
+            call s:call_filter_fn(stash)
         endif
         return s:rewrite_string(stash.return)
 
     catch
-        call s:write_error_log_file(v:exception, v:throwpoint, a:char, a:Fn)
+        call s:write_error_log_file(v:exception, v:throwpoint, a:char)
         return eskk#escape_key() . a:char
 
     finally
         call eskk#throw_event('filter-finalize')
     endtry
 endfunction "}}}
-function! s:call_filter_fn(stash, Fn, tail_args) "{{{
+function! s:call_filter_fn(stash) "{{{
     let filter_args = [a:stash]
     let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:stash.char
     if has_key(s:key_handler, rom)
@@ -1606,7 +1601,7 @@ function! s:call_filter_fn(stash, Fn, tail_args) "{{{
         let [Fn, args] = s:key_handler[rom]
         call call(Fn, filter_args + args)
     else
-        call call(a:Fn, filter_args + a:tail_args)
+        call eskk#call_mode_func('filter', filter_args, 1)
     endif
 endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
@@ -1648,14 +1643,13 @@ function! s:rewrite_string(return_string) "{{{
     \   . redispatch_post
     \   . restore_backspace
 endfunction "}}}
-function! s:write_error_log_file(v_exception, v_throwpoint, char, Fn) "{{{
+function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     let lines = []
     call add(lines, '--- g:eskk_version ---')
     call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
     call add(lines, '--- g:eskk_version ---')
     call add(lines, '--- char ---')
     call add(lines, printf('char: %s(%d)', string(a:char), char2nr(a:char)))
-    call add(lines, printf('Fn: %s', type(a:Fn) == type(function('tr')) ? string(a:char) : a:Fn))
     call add(lines, printf('mode(): %s', mode()))
     call add(lines, '--- char ---')
     call add(lines, '')
