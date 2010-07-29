@@ -699,8 +699,10 @@ function! s:buftable.do_henkan(stash, ...) dict "{{{
             catch /^eskk: dictionary look up error:/
                 " No candidates.
                 let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
-                call self.push_kakutei_str(input)
-                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+                if input != ''
+                    call self.push_kakutei_str(input)
+                    call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+                endif
             endtry
         endif
     else
