@@ -624,6 +624,7 @@ function! s:buftable.do_henkan(stash, ...) dict "{{{
     let convert_at_exact_match = a:0 ? a:1 : 0
     let phase = self.get_henkan_phase()
     let eskk_mode = eskk#get_mode()
+    let normal_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
@@ -698,8 +699,8 @@ function! s:buftable.do_henkan(stash, ...) dict "{{{
             catch /^eskk: dictionary look up error:/
                 " No candidates.
                 let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
-                let buf_str = (convert_at_exact_match ? henkan_buf_str : henkan_select_buf_str)
-                call buf_str.set_matched(rom_str, input)
+                call self.push_kakutei_str(input)
+                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
             endtry
         endif
     else
