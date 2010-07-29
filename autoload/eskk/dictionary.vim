@@ -375,7 +375,7 @@ function! s:henkan_result_get_result(this) "{{{
             return a:this._result
         else
             let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-            return a:henkan_result_get_result(a:this)
+            return s:henkan_result_get_result(a:this)
         endif
     elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
         throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
