@@ -298,6 +298,10 @@ endfunction "}}}
 function! eskk#util#globpath(pat) "{{{
     return split(globpath(&runtimepath, a:pat), '\n')
 endfunction "}}}
+function! eskk#util#getchar(...) "{{{
+    let c = call('getchar', a:000)
+    return type(c) == type("") ? c : nr2char(c)
+endfunction "}}}
 
 
 " Restore 'cpoptions' {{{

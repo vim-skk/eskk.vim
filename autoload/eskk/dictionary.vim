@@ -418,7 +418,7 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
 
         " Get char for selected candidate.
         try
-            let char = s:getchar()
+            let char = eskk#util#getchar()
         catch /^Vim:Interrupt$/
             throw 'eskk: leave henkan select'
         endtry
@@ -457,11 +457,6 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
             endfor
         endif
     endwhile
-endfunction "}}}
-
-function! s:getchar(...) "{{{
-    let c = call('getchar', a:000)
-    return type(c) == type("") ? c : nr2char(c)
 endfunction "}}}
 
 
