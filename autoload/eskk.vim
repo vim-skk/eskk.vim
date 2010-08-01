@@ -1132,8 +1132,6 @@ function! eskk#enable(...) "{{{
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
     endif
 
-    call eskk#set_cursor_color()
-
     let self.enabled = 1
     let self.enabled_mode = mode()
 
@@ -2293,6 +2291,14 @@ function! s:initialize() "{{{
     " s:saved_im_options {{{
     call eskk#util#assert(empty(s:saved_im_options))
     let s:saved_im_options = [&g:iminsert, &g:imsearch]
+    " }}}
+
+    " Call eskk#set_cursor_color() at enter-mode {{{
+    call eskk#register_event(
+    \   'enter-mode',
+    \   'eskk#set_cursor_color',
+    \   []
+    \)
     " }}}
 endfunction "}}}
 
