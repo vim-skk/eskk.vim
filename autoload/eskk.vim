@@ -2038,7 +2038,7 @@ function! s:initialize() "{{{
             endfor
         endif
     endfunction "}}}
-    call eskk#register_event(['enter-mode-hira', 'enter-mode-kata', 'enter-mode-ascii', 'enter-mode-zenei'], eskk#util#get_local_func('map_mode_local_keys', s:SID_PREFIX), [])
+    call eskk#register_event('enter-mode', eskk#util#get_local_func('map_mode_local_keys', s:SID_PREFIX), [])
     " }}}
 
     " Save dictionary if modified {{{
