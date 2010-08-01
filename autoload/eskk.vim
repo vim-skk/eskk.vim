@@ -1351,6 +1351,7 @@ function! eskk#set_mode(next_mode) "{{{
     endif
 
     call eskk#throw_event('leave-mode-' . self.mode)
+    call eskk#throw_event('leave-mode')
 
     " Change mode.
     let prev_mode = self.mode
@@ -1366,6 +1367,7 @@ function! eskk#set_mode(next_mode) "{{{
     \)
 
     call eskk#throw_event('enter-mode-' . self.mode)
+    call eskk#throw_event('enter-mode')
 
     " For &statusline.
     redrawstatus
