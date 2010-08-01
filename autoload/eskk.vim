@@ -1355,15 +1355,6 @@ function! eskk#set_mode(next_mode) "{{{
     let prev_mode = self.mode
     let self.mode = a:next_mode
 
-    let buftable = eskk#get_buftable()
-    call buftable.clear_all()
-
-    call buftable.set_henkan_phase(
-    \   (eskk#has_mode_func('get_init_phase') ?
-    \       eskk#call_mode_func('get_init_phase', [], 0)
-    \       : g:eskk#buftable#HENKAN_PHASE_NORMAL)
-    \)
-
     call eskk#throw_event('enter-mode-' . self.mode)
     call eskk#throw_event('enter-mode')
 
@@ -2293,10 +2284,34 @@ function! s:initialize() "{{{
     let s:saved_im_options = [&g:iminsert, &g:imsearch]
     " }}}
 
-    " Call eskk#set_cursor_color() at enter-mode {{{
+    " Event: enter-mode {{{
     call eskk#register_event(
     \   'enter-mode',
     \   'eskk#set_cursor_color',
+    \   []
+    \)
+
+    function! s:initialize_clear_buftable()
+        let buftable = eskk#get_buftable()
+        call buftable.clear_all()
+    endfunction
+    call eskk#register_event(
+    \   'enter-mode',
+    \   eskk#util#get_local_func('initialize_clear_buftable', s:SID_PREFIX),
+    \   []
+    \)
+
+    function! s:initialize_set_henkan_phase()
+        let buftable = eskk#get_buftable()
+        call buftable.set_henkan_phase(
+        \   (eskk#has_mode_func('get_init_phase') ?
+        \       eskk#call_mode_func('get_init_phase', [], 0)
+        \       : g:eskk#buftable#HENKAN_PHASE_NORMAL)
+        \)
+    endfunction
+    call eskk#register_event(
+    \   'enter-mode',
+    \   eskk#util#get_local_func('initialize_set_henkan_phase', s:SID_PREFIX),
     \   []
     \)
     " }}}
