@@ -922,18 +922,9 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         endif
 
 
-        " Clear filtered string when eskk#filter()'s finalizing.
-        function! s:finalize()
-            let buftable = eskk#get_buftable()
-            if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-                let buf_str = buftable.get_current_buf_str()
-                call buf_str.clear_matched()
-            endif
-        endfunction
-
         call eskk#register_temp_event(
         \   'filter-begin',
-        \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
+        \   eskk#util#get_local_func('clear_filtered_string', s:SID_PREFIX),
         \   []
         \)
 
@@ -1084,6 +1075,15 @@ function! s:filter_rom_no_match(stash, table) "{{{
         call buf_str.set_rom_str(rest)
     endif
 endfunction "}}}
+" Clear filtered string when eskk#filter()'s finalizing.
+function! s:clear_filtered_string()
+    let buftable = eskk#get_buftable()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+        let buf_str = buftable.get_current_buf_str()
+        call buf_str.clear_matched()
+    endif
+endfunction
+
 
 
 " Enable/Disable IM
@@ -2230,11 +2230,13 @@ function! s:initialize() "{{{
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
     let tables = eskk#table#get_all_tables()
     call eskk#util#logstrf('tables = %s', tables)
+    let tabletmpl = {}    " dummy object
+    function! tabletmpl.init() dict
+        call self.add_from_dict(eskk#table#{self.name}#load())
+    endfunction
     for name in tables
         let table = eskk#table#create(name)
-        function! table.init() dict
-            call self.add_from_dict(eskk#table#{self.name}#load())
-        endfunction
+        let table.init = tabletmpl.init
         call table.register()
     endfor
     " }}}
