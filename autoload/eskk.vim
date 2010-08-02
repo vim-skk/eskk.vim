@@ -2230,11 +2230,13 @@ function! s:initialize() "{{{
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
     let tables = eskk#table#get_all_tables()
     call eskk#util#logstrf('tables = %s', tables)
+    let tabletmpl = {}
+    function! tabletmpl.init() dict
+        call self.add_from_dict(eskk#table#{self.name}#load())
+    endfunction
     for name in tables
         let table = eskk#table#create(name)
-        function! table.init() dict
-            call self.add_from_dict(eskk#table#{self.name}#load())
-        endfunction
+        call extend(table, tabletmpl)
         call table.register()
     endfor
     " }}}
