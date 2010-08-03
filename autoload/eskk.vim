@@ -1480,6 +1480,10 @@ function! eskk#throw_event(event_name) "{{{
     let event      = get(s:event_hook_fn, a:event_name, [])
     let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
     let all_events = event + temp_event
+    if empty(all_events)
+        return []
+    endif
+
     while !empty(all_events)
         let call_args = remove(all_events, 0)
         call add(ret, call('call', call_args))
