@@ -166,12 +166,13 @@ function! s:buftable.rewrite() dict "{{{
     let kakutei = self._kakutei_str
     let self._kakutei_str = ''
 
-    call eskk#util#logf('old string = %s', string(old))
-    call eskk#util#logf('kakutei string = %s', string(kakutei))
-    call eskk#util#logf('new display string = %s', string(new))
+    if g:eskk_debug
+        call eskk#util#logf('old string = %s', string(old))
+        call eskk#util#logf('kakutei string = %s', string(kakutei))
+        call eskk#util#logf('new display string = %s', string(new))
+    endif
 
-    let bs = eskk#util#key2char(eskk#get_special_map('backspace-key'))
-    let bs = repeat(bs, eskk#util#mb_strlen(old))
+    let bs_expr = 'repeat(eskk#util#key2char(eskk#get_special_map("backspace-key")), eskk#util#mb_strlen(old))'
 
     " FIXME
     " - Current implementation depends on &backspace
@@ -183,7 +184,7 @@ function! s:buftable.rewrite() dict "{{{
     if old ==# inserted_str
         return ''
     elseif inserted_str == ''
-        return bs
+        return eval(bs_expr)
     elseif stridx(inserted_str, old) == 0
         " When inserted_str == "foobar", old == "foo"
         " Insert "bar".
@@ -199,7 +200,7 @@ function! s:buftable.rewrite() dict "{{{
         \   '<buffer>'
         \   '<Plug>(eskk:internal:_inserted)'
         \   eskk#util#str2map(inserted_str)
-        return bs . "\<Plug>(eskk:internal:_inserted)"
+        return eval(bs_expr) . "\<Plug>(eskk:internal:_inserted)"
     endif
 endfunction "}}}
 

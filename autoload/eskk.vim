@@ -266,6 +266,8 @@ let s:skk_dict = {}
 let s:key_handler = {}
 " Global values of &iminsert, &imsearch.
 let s:saved_im_options = []
+" Global values of &backspace.
+let s:saved_backspace = -1
 " Flag for `s:initialize()`.
 let s:is_initialized = 0
 " }}}
@@ -1449,10 +1451,6 @@ function! eskk#set_buftable(buftable) "{{{
     \)
     let self._buftable = a:buftable
 endfunction "}}}
-function! eskk#rewrite() "{{{
-    let self = eskk#get_current_instance()
-    return eskk#get_buftable().rewrite()
-endfunction "}}}
 
 " Event
 function! eskk#register_event(event_names, Fn, head_args, ...) "{{{
@@ -1480,6 +1478,10 @@ function! eskk#throw_event(event_name) "{{{
     let event      = get(s:event_hook_fn, a:event_name, [])
     let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
     let all_events = event + temp_event
+    if empty(all_events)
+        return []
+    endif
+
     while !empty(all_events)
         let call_args = remove(all_events, 0)
         call add(ret, call('call', call_args))
@@ -1545,10 +1547,13 @@ function! s:filter(self, char) "{{{
     let self = a:self
     let buftable = eskk#get_buftable()
 
-    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
-    if !eskk#is_supported_mode(self.mode)
-        call eskk#util#warn('current mode is empty!')
-        sleep 1
+    if g:eskk_debug
+        call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
+        " Check irregular circumstance.
+        if !eskk#is_supported_mode(self.mode)
+            call eskk#util#warn('current mode is not supported: ' . self.mode)
+            sleep 1
+        endif
     endif
 
 
@@ -1616,23 +1621,10 @@ function! s:rewrite_string(return_string) "{{{
         let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
     endif
 
-    " eskk#rewrite() assumes that &backspace contains "eol".
-    let restore_backspace = ''
-    if &l:backspace !~# '\<eol\>'
-        execute
-        \   eskk#get_map_command(0)
-        \   '<buffer><expr>'
-        \   '<Plug>(eskk:internal:_restore_backspace)'
-        \   '[setbufvar("%", "&backspace", '.string(&l:backspace).'), ""][1]'
-        let restore_backspace = "\<Plug>(eskk:internal:_restore_backspace)"
-        setlocal backspace+=eol
-    endif
-
     return
     \   redispatch_pre
-    \   . (type(a:return_string) == type("") ? a:return_string : eskk#rewrite())
+    \   . (type(a:return_string) == type("") ? a:return_string : eskk#get_buftable().rewrite())
     \   . redispatch_post
-    \   . restore_backspace
 endfunction "}}}
 function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     let lines = []
@@ -1718,9 +1710,6 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     finally
         let &cmdheight = save_cmdheight
     endtry
-endfunction "}}}
-function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
-    call eskk#call_mode_func('filter', [a:stash], 1)
 endfunction "}}}
 
 " For test
@@ -2316,6 +2305,17 @@ function! s:initialize() "{{{
     \   eskk#util#get_local_func('initialize_set_henkan_phase', s:SID_PREFIX),
     \   []
     \)
+    " }}}
+
+    " InsertLeave: Restore &backspace value {{{
+    " NOTE: Due to current implementation,
+    " s:buftable.rewrite() assumes that &backspace contains "eol".
+    if &l:backspace !~# '\<eol\>'
+        let s:saved_backspace = &l:backspace
+        setlocal backspace+=eol
+        autocmd eskk InsertEnter * setlocal backspace+=eol
+        autocmd eskk InsertLeave * let &l:backspace = s:saved_backspace
+    endif
     " }}}
 endfunction "}}}
 
