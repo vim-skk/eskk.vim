@@ -266,6 +266,8 @@ let s:skk_dict = {}
 let s:key_handler = {}
 " Global values of &iminsert, &imsearch.
 let s:saved_im_options = []
+" Global values of &backspace.
+let s:saved_backspace = -1
 " Flag for `s:initialize()`.
 let s:is_initialized = 0
 " }}}
@@ -1620,23 +1622,10 @@ function! s:rewrite_string(return_string) "{{{
         let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
     endif
 
-    " eskk#rewrite() assumes that &backspace contains "eol".
-    let restore_backspace = ''
-    if &l:backspace !~# '\<eol\>'
-        execute
-        \   eskk#get_map_command(0)
-        \   '<buffer><expr>'
-        \   '<Plug>(eskk:internal:_restore_backspace)'
-        \   '[setbufvar("%", "&backspace", '.string(&l:backspace).'), ""][1]'
-        let restore_backspace = "\<Plug>(eskk:internal:_restore_backspace)"
-        setlocal backspace+=eol
-    endif
-
     return
     \   redispatch_pre
     \   . (type(a:return_string) == type("") ? a:return_string : eskk#rewrite())
     \   . redispatch_post
-    \   . restore_backspace
 endfunction "}}}
 function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     let lines = []
@@ -2320,6 +2309,17 @@ function! s:initialize() "{{{
     \   eskk#util#get_local_func('initialize_set_henkan_phase', s:SID_PREFIX),
     \   []
     \)
+    " }}}
+
+    " InsertLeave: Restore &backspace value {{{
+    " NOTE: Due to current implementation,
+    " eskk#rewrite() assumes that &backspace contains "eol".
+    if &l:backspace !~# '\<eol\>'
+        let s:saved_backspace = &l:backspace
+        setlocal backspace+=eol
+        autocmd eskk InsertEnter * setlocal backspace+=eol
+        autocmd eskk InsertLeave * let &l:backspace = s:saved_backspace
+    endif
     " }}}
 endfunction "}}}
 
