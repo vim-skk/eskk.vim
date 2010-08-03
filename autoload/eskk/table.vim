@@ -294,34 +294,6 @@ lockvar s:register_skeleton
 
 " Autoload functions {{{
 
-function! eskk#table#has_candidates(table_name, lhs_head) "{{{
-    return call('s:has_candidates', [a:table_name, a:lhs_head])
-endfunction "}}}
-
-function! eskk#table#get_candidates(table_name, lhs_head, ...) "{{{
-    return call('s:get_candidates', [a:table_name, a:lhs_head] + a:000)
-endfunction "}}}
-
-function! eskk#table#has_map(table_name, lhs) "{{{
-    return call('s:has_map', [a:table_name, a:lhs, s:MAP_TO_INDEX])
-endfunction "}}}
-
-function! eskk#table#get_map(table_name, lhs, ...) "{{{
-    return call('s:get_map', [a:table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
-endfunction "}}}
-
-function! eskk#table#has_rest(table_name, lhs) "{{{
-    return call('s:has_map', [a:table_name, a:lhs, s:REST_INDEX])
-endfunction "}}}
-
-function! eskk#table#get_rest(table_name, lhs, ...) "{{{
-    return call('s:get_map', [a:table_name, a:lhs, s:REST_INDEX] + a:000)
-endfunction "}}}
-
-
-
-" Not included in OO interface.
-
 function! eskk#table#get_all_tables() "{{{
     return map(eskk#util#globpath('autoload/eskk/table/*.vim'), 'fnamemodify(v:val, ":t:r")')
 endfunction "}}}
@@ -359,28 +331,28 @@ endfunction "}}}
 
 " I need meta programming in Vim script!!
 
-function! s:table_obj.has_candidates(...) dict "{{{
-    return call('eskk#table#has_candidates', [self.table_name] + a:000)
+function! s:table_obj.has_candidates(lhs_head) dict "{{{
+    return call('s:has_candidates', [self.table_name, a:lhs_head])
 endfunction "}}}
 
-function! s:table_obj.get_candidates(...) dict "{{{
-    return call('eskk#table#get_candidates', [self.table_name] + a:000)
+function! s:table_obj.get_candidates(lhs_head, ...) dict "{{{
+    return call('s:get_candidates', [self.table_name, a:lhs_head] + a:000)
 endfunction "}}}
 
-function! s:table_obj.has_map(...) dict "{{{
-    return call('eskk#table#has_map', [self.table_name] + a:000)
+function! s:table_obj.has_map(lhs) dict "{{{
+    return call('s:has_map', [self.table_name, a:lhs, s:MAP_TO_INDEX])
 endfunction "}}}
 
-function! s:table_obj.get_map(...) dict "{{{
-    return call('eskk#table#get_map', [self.table_name] + a:000)
+function! s:table_obj.get_map(lhs, ...) dict "{{{
+    return call('s:get_map', [self.table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
 endfunction "}}}
 
-function! s:table_obj.has_rest(...) dict "{{{
-    return call('eskk#table#has_rest', [self.table_name] + a:000)
+function! s:table_obj.has_rest(lhs) dict "{{{
+    return call('s:has_map', [self.table_name, a:lhs, s:REST_INDEX])
 endfunction "}}}
 
-function! s:table_obj.get_rest(...) dict "{{{
-    return call('eskk#table#get_rest', [self.table_name] + a:000)
+function! s:table_obj.get_rest(lhs, ...) dict "{{{
+    return call('s:get_map', [self.table_name, a:lhs, s:REST_INDEX] + a:000)
 endfunction "}}}
 
 
