@@ -261,16 +261,11 @@ function! s:do_space(stash) "{{{
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let pos = s:get_buftable_pos()[1]
-    if pos[2] + strlen(g:eskk_marker_henkan) < col('.')
-        let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-h>'))
-    else
+    if pos[2] + strlen(g:eskk_marker_henkan) >= col('.')
         call s:close_pum(a:stash)
-        call eskk#register_temp_event(
-        \   'filter-redispatch-pre',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map('<C-h>'))]
-        \)
     endif
+    let buftable = eskk#get_buftable()
+    call buftable.do_backspace(a:stash)
 endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
