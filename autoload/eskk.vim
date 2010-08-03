@@ -1131,6 +1131,7 @@ function! eskk#enable(...) "{{{
     endif
 
     if g:eskk_enable_completion
+        let self.omnifunc_save = &l:omnifunc
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
     endif
 
