@@ -18,10 +18,9 @@ runtime! plugin/eskk.vim
 
 " Utility autoload functions {{{
 
-function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
+function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_okuri, okuri_rom, ...) "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
-    let has_okuri = a:okuri_rom != ''
-    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
+    let needle = a:key_filter . (a:has_okuri ? a:okuri_rom[0] : '')
 
     call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
     \               string(needle), string(a:key_filter), string(a:okuri_rom))
@@ -34,7 +33,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, converted, has_okuri, limit)
+        let result = s:search_binary(a:physical_dict, converted, a:has_okuri, limit)
 
         if result[1] == -1
             return []
@@ -63,7 +62,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         let lines = []
         let start = 1
         while 1
-            let result = s:search_linear(a:physical_dict, converted, has_okuri, start)
+            let result = s:search_linear(a:physical_dict, converted, a:has_okuri, start)
 
             if result[1] == -1
                 break
@@ -655,7 +654,6 @@ function! eskk#dictionary#new(user_dict, system_dict) "{{{
 endfunction "}}}
 
 
-
 function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
     return s:henkan_result_new(
     \   self,
@@ -805,7 +803,7 @@ function! s:dict.update_dictionary() dict "{{{
     endtry
 endfunction "}}}
 
-function! s:dict.search(key, okuri, okuri_rom) dict "{{{
+function! s:dict.search(key, has_okuri, okuri, okuri_rom) dict "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom
@@ -826,11 +824,11 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let lines = []
     let len = len(added)
     if len < g:eskk_candidates_max
-        let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, g:eskk_candidates_max - len)
+        let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, a:has_okuri, okuri_rom, g:eskk_candidates_max - len)
         let len += len(lines)
         
         if len < g:eskk_candidates_max
-            let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, g:eskk_candidates_max - len)
+            let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, a:has_okuri, okuri_rom, g:eskk_candidates_max - len)
         endif
     endif
 

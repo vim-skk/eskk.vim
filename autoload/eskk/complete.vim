@@ -54,11 +54,11 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
-        return s:complete_ascii()
+        return s:complete(eskk#get_mode())
     elseif eskk#get_mode() ==# 'abbrev'
         " abbrev mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
-        return s:complete_abbrev()
+        return s:complete(eskk#get_mode())
     else
         " Kanji mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
@@ -69,77 +69,13 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
             return []
         endif
 
-        return s:complete_kanji()
+        return s:complete(eskk#get_mode())
     endif
 endfunction "}}}
 function! s:initialize_variables() "{{{
     let s:select_but_not_inserted = 0
 endfunction "}}}
-function! s:complete_ascii() "{{{
-    " Get candidates.
-    let list = []
-    let dict = eskk#get_dictionary()
-    let buftable = eskk#get_buftable()
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
-    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
-        " Add yomigana.
-        if yomigana != ''
-            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
-        endif
-
-        " Add kanji.
-        for kanji in kanji_list[: 1]
-            call add(list, {
-            \   'word': kanji.result,
-            \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
-            \   'menu': 'kanji'
-            \})
-        endfor
-    endfor
-
-    if !empty(list)
-        let inst = eskk#get_current_instance()
-        let inst.has_started_completion = 1
-    endif
-    return list
-endfunction "}}}
-function! s:complete_abbrev() "{{{
-    " Get candidates.
-    let list = []
-    let dict = eskk#get_dictionary()
-    let buftable = eskk#get_buftable()
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
-    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
-        " Add yomigana.
-        if yomigana != ''
-            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'ascii'})
-        endif
-
-        " Add kanji.
-        for kanji in kanji_list[: 1]
-            call add(list, {
-            \   'word': kanji.result,
-            \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
-            \   'menu': 'kanji'
-            \})
-        endfor
-    endfor
-
-    if !empty(list)
-        let inst = eskk#get_current_instance()
-        let inst.has_started_completion = 1
-    endif
-    return list
-endfunction "}}}
-function! s:complete_kanji() "{{{
+function! s:complete(mode) "{{{
     " Get candidates.
     let list = []
     let dict = eskk#get_dictionary()
@@ -160,10 +96,15 @@ function! s:complete_kanji() "{{{
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
+
+    let [mode, pos] = buftable.get_begin_pos()
+    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
+    let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
+    
+    for [yomigana, okuri_rom, kanji_list] in dict.search(key, has_okuri, okuri, okuri_rom)
         " Add yomigana.
         if yomigana != ''
-            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : 'yomigana'})
+            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : a:mode})
         endif
 
         " Add kanji.
@@ -213,27 +154,27 @@ function! eskk#complete#handle_special_key(stash) "{{{
     if s:check_yomigana()
         " Do filter.
         return 1
-    else
-        " Select item.
-        call s:set_selected_item()
- 
-        call eskk#register_temp_event(
-        \   'filter-redispatch-pre',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
-        \)
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
-        \)
-        " Postpone a:char process.
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map(char))]
-        \)
     endif
+    
+    " Select item.
+    call s:set_selected_item()
+
+    call eskk#register_temp_event(
+                \   'filter-redispatch-pre',
+                \   'eskk#util#identity',
+                \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+                \)
+    call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#identity',
+                \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
+                \)
+    " Postpone a:char process.
+    call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#identity',
+                \   [eskk#util#key2char(eskk#get_named_map(char))]
+                \)
 
     " Not handled.
     return 0
@@ -385,7 +326,7 @@ function! s:check_yomigana() "{{{
         return filter_str =~ '^[[:alnum:]-]\+$'
     else
         " Kanji mode.
-        return filter_str =~ '^[あ-んー。！？]\+$'
+        return filter_str =~ '^[あ-んー。！？*]\+$'
     endif
 endfunction "}}}
 
