@@ -1451,10 +1451,6 @@ function! eskk#set_buftable(buftable) "{{{
     \)
     let self._buftable = a:buftable
 endfunction "}}}
-function! eskk#rewrite() "{{{
-    let self = eskk#get_current_instance()
-    return eskk#get_buftable().rewrite()
-endfunction "}}}
 
 " Event
 function! eskk#register_event(event_names, Fn, head_args, ...) "{{{
@@ -1627,7 +1623,7 @@ function! s:rewrite_string(return_string) "{{{
 
     return
     \   redispatch_pre
-    \   . (type(a:return_string) == type("") ? a:return_string : eskk#rewrite())
+    \   . (type(a:return_string) == type("") ? a:return_string : eskk#get_buftable().rewrite())
     \   . redispatch_post
 endfunction "}}}
 function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
@@ -2313,7 +2309,7 @@ function! s:initialize() "{{{
 
     " InsertLeave: Restore &backspace value {{{
     " NOTE: Due to current implementation,
-    " eskk#rewrite() assumes that &backspace contains "eol".
+    " s:buftable.rewrite() assumes that &backspace contains "eol".
     if &l:backspace !~# '\<eol\>'
         let s:saved_backspace = &l:backspace
         setlocal backspace+=eol
