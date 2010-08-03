@@ -303,6 +303,7 @@ function! s:set_selected_item() "{{{
     call okuri_buf_str.clear()
     call okuri_buf_str.set_rom_str(rom_str)
 
+    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     call buftable.set_old_str(buftable.get_display_str())
 
     call s:initialize_variables()
