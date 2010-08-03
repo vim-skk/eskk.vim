@@ -260,7 +260,17 @@ function! s:do_space(stash) "{{{
     endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
-    let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-h>'))
+    let pos = s:get_buftable_pos()[1]
+    if pos[2] + strlen(g:eskk_marker_henkan) < col('.')
+        let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-h>'))
+    else
+        call s:close_pum(a:stash)
+        call eskk#register_temp_event(
+        \   'filter-redispatch-pre',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_named_map('<C-h>'))]
+        \)
+    endif
 endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
