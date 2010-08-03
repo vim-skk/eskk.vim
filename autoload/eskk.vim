@@ -1551,10 +1551,13 @@ function! s:filter(self, char) "{{{
     let self = a:self
     let buftable = eskk#get_buftable()
 
-    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
-    if !eskk#is_supported_mode(self.mode)
-        call eskk#util#warn('current mode is empty!')
-        sleep 1
+    if g:eskk_debug
+        call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
+        " Check irregular circumstance.
+        if !eskk#is_supported_mode(self.mode)
+            call eskk#util#warn('current mode is not supported: ' . self.mode)
+            sleep 1
+        endif
     endif
 
 
