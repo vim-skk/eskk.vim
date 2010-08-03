@@ -1715,9 +1715,6 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
         let &cmdheight = save_cmdheight
     endtry
 endfunction "}}}
-function! s:filter_body_call_mode_or_default_filter(stash, self) "{{{
-    call eskk#call_mode_func('filter', [a:stash], 1)
-endfunction "}}}
 
 " For test
 function! eskk#emulate_filter_keys(chars, ...) "{{{
