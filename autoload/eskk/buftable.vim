@@ -166,9 +166,11 @@ function! s:buftable.rewrite() dict "{{{
     let kakutei = self._kakutei_str
     let self._kakutei_str = ''
 
-    call eskk#util#logf('old string = %s', string(old))
-    call eskk#util#logf('kakutei string = %s', string(kakutei))
-    call eskk#util#logf('new display string = %s', string(new))
+    if g:eskk_debug
+        call eskk#util#logf('old string = %s', string(old))
+        call eskk#util#logf('kakutei string = %s', string(kakutei))
+        call eskk#util#logf('new display string = %s', string(new))
+    endif
 
     let bs_expr = 'repeat(eskk#util#key2char(eskk#get_special_map("backspace-key")), eskk#util#mb_strlen(old))'
 
