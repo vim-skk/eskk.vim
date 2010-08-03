@@ -28,12 +28,7 @@ let s:select_but_not_inserted = 0
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if a:findstart
-        let buftable = eskk#get_buftable()
-        let l = buftable.get_begin_pos()
-        if empty(l)
-            return -1
-        endif
-        let [mode, pos] = l
+        let [mode, pos] = s:get_buftable_pos()
         let do_complete = (mode ==# 'i')
 
         if !do_complete
@@ -97,7 +92,7 @@ function! s:complete(mode) "{{{
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
 
-    let [mode, pos] = buftable.get_begin_pos()
+    let pos = s:get_buftable_pos()[1]
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
     let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
     
@@ -274,13 +269,7 @@ function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
     let buftable = eskk#get_buftable()
-    let l = buftable.get_begin_pos()
-    if empty(l)
-        call eskk#util#log("warning: Can't get begin pos.")
-        return
-    endif
-    let [mode, pos] = l
-    call eskk#util#assert(mode ==# 'i')
+    let pos = s:get_buftable_pos()[1]
 
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
     if filter_str =~# '[a-z]$'
@@ -310,12 +299,7 @@ function! s:set_selected_item() "{{{
 endfunction "}}}
 function! s:check_yomigana() "{{{
     let buftable = eskk#get_buftable()
-    let l = buftable.get_begin_pos()
-    if empty(l)
-        call eskk#util#log("warning: Can't get begin pos.")
-        return 1
-    endif
-    let [mode, pos] = l
+    let [mode, pos] = s:get_buftable_pos()
     let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
 
     if eskk#get_mode() ==# 'ascii'
@@ -329,6 +313,17 @@ function! s:check_yomigana() "{{{
         " Kanji mode.
         return filter_str =~ '^[あ-んー。！？*]\+$'
     endif
+endfunction "}}}
+function! s:get_buftable_pos() "{{{
+    let buftable = eskk#get_buftable()
+    let l = buftable.get_begin_pos()
+    if empty(l)
+        call eskk#util#log("warning: Can't get begin pos.")
+        return
+    endif
+    let [mode, pos] = l
+    call eskk#util#assert(mode ==# 'i')
+    return [mode, pos]
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
