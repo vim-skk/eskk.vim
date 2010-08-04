@@ -699,6 +699,9 @@ lockvar s:mutable_stash
 
 " Getter for scope-local variables.
 function! eskk#get_dictionary() "{{{
+    if empty(s:skk_dict)
+        let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
+    endif
     return s:skk_dict
 endfunction "}}}
 
@@ -2261,11 +2264,6 @@ function! s:initialize() "{{{
         endif
     endfunction "}}}
     autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
-    " }}}
-
-    " s:skk_dict: Lazy initialization {{{
-    call eskk#util#assert(empty(s:skk_dict))
-    let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
     " }}}
 
     " s:saved_im_options {{{
