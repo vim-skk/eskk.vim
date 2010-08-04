@@ -846,7 +846,7 @@ function! s:asym_filter.filter_rom(stash) dict "{{{
     else
         " No candidates.
         call eskk#util#logf('%s - no candidates.', rom_str)
-        return self.filter_rom_no_match(a:stash, table)
+        return self.filter_rom_no_match(a:stash)
     endif
 endfunction "}}}
 function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
