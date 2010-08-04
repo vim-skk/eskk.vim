@@ -22,9 +22,11 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_o
     let limit = a:0 ? a:1 : -1    " No limit by default.
     let needle = a:key_filter . (a:has_okuri ? a:okuri_rom[0] : '')
 
-    call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
-    \               string(needle), string(a:key_filter), string(a:okuri_rom))
-    call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+    if g:eskk_debug
+        call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
+        \               string(needle), string(a:key_filter), string(a:okuri_rom))
+        call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+    endif
 
     if !a:physical_dict.is_valid()
         return []
@@ -79,9 +81,11 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
-    call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
-    \               string(needle), string(a:key_filter), string(a:okuri_rom))
-    call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+    if g:eskk_debug
+        call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
+        \               string(needle), string(a:key_filter), string(a:okuri_rom))
+        call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+    endif
 
     if !a:physical_dict.is_valid()
         return ['', -1]
@@ -119,9 +123,13 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         let [min, max] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
-    call eskk#util#logf('s:search_binary(): Initial: min = %d, max = %d', min, max)
 
-    call eskk#util#log('--- s:search_binary() ---')
+    if g:eskk_debug
+        call eskk#util#logf('s:search_binary(): Initial: min = %d, max = %d', min, max)
+
+        call eskk#util#log('--- s:search_binary() ---')
+    endif
+
     while max - min > a:limit
         let mid = (min + max) / 2
         let line = whole_lines[mid]
