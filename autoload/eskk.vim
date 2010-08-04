@@ -1946,7 +1946,7 @@ function! s:initialize() "{{{
     endif
     " }}}
 
-    " g:eskk_keep_state: eskk#disable() at InsertLeave {{{
+    " InsertLeave: g:eskk_keep_state: eskk#disable() {{{
     if !g:eskk_keep_state
         autocmd eskk InsertLeave * call eskk#disable()
     endif
@@ -2252,7 +2252,7 @@ function! s:initialize() "{{{
     autocmd eskk InsertLeave * call eskk#get_buftable().reset()
     " }}}
 
-    " g:eskk_convert_at_exact_match {{{
+    " InsertLeave: g:eskk_convert_at_exact_match {{{
     function! s:clear_real_matched_pairs() "{{{
         if !eskk#is_enabled() || eskk#get_mode() == ''
             return
