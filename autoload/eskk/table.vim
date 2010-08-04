@@ -165,7 +165,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
 
         let not_found = {}
         for parent in s:table_defs[a:table_name].bases
-            let r = call('s:get_map', [parent.name, a:lhs, a:index, not_found])
+            let r = s:get_map(parent.name, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r
             endif
@@ -203,7 +203,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         " Search parent tables.
         let not_found = {}
         for parent in s:table_defs[a:table_name].bases
-            let r = call('s:get_candidates', [parent.name, a:lhs_head, a:max_candidates, not_found])
+            let r = s:get_candidates(parent.name, a:lhs_head, a:max_candidates, not_found)
             if r isnot not_found
                 return r
             endif
@@ -322,7 +322,7 @@ endfunction "}}}
 
 function! s:table_obj.has_candidates(lhs_head) dict "{{{
     let not_found = {}
-    return s:get_candidates(self.table_name, a:lhs_head, 1, not_found) isnot not_found
+    return self.get_candidates(a:lhs_head, 1, not_found) isnot not_found
 endfunction "}}}
 
 function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) dict "{{{
@@ -331,7 +331,7 @@ endfunction "}}}
 
 function! s:table_obj.has_map(lhs) dict "{{{
     let not_found = {}
-    return s:get_map(self.table_name, a:lhs, s:MAP_TO_INDEX, not_found) isnot not_found
+    return self.get_map(a:lhs, not_found) isnot not_found
 endfunction "}}}
 
 function! s:table_obj.get_map(lhs, ...) dict "{{{
@@ -340,7 +340,7 @@ endfunction "}}}
 
 function! s:table_obj.has_rest(lhs) dict "{{{
     let not_found = {}
-    return s:get_map(self.table_name, a:lhs, s:REST_INDEX, not_found) isnot not_found
+    return self.get_rest(a:lhs, not_found) isnot not_found
 endfunction "}}}
 
 function! s:table_obj.get_rest(lhs, ...) dict "{{{
