@@ -517,8 +517,13 @@ function! s:get_next_candidate(self, stash, next) "{{{
         if a:next
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
-            let input = eskk#get_dictionary().register_word(henkan_result)
-            call cur_buf_str.set_matched(rom_str, input)
+            let [input, hira, okuri] =
+            \   eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
+            if input != ''
+                call self.clear_all()
+                call self.push_kakutei_str(input . okuri)
+                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+            endif
         else
             " Restore previous buftable state
 
@@ -645,21 +650,29 @@ function! s:buftable.do_henkan(stash, ...) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     \ || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if eskk_mode ==# 'abbrev'
-            let key = henkan_buf_str.get_rom_str()
-            call eskk#set_henkan_result(eskk#get_dictionary().refer(self, key, '', ''))
-
-            if !convert_at_exact_match
-                " XXX: This must clear strings. Following clearing must be wasteful.
-                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-            endif
+            let rom_str = henkan_buf_str.get_rom_str()
+            call eskk#set_henkan_result(eskk#get_dictionary().refer(self, rom_str, '', ''))
 
             try
                 let candidate = eskk#get_prev_henkan_result().get_candidate()
-                call henkan_select_buf_str.set_matched(key, candidate)
+                " No exception throwed. continue...
+
+                call self.clear_all()
+                if convert_at_exact_match
+                    call henkan_buf_str.set_matched(rom_str, candidate)
+                else
+                    call henkan_select_buf_str.set_matched(rom_str, candidate)
+                    call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+                endif
             catch /^eskk: dictionary look up error:/
                 " No candidates.
-                let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
-                call henkan_select_buf_str.set_matched(key, input)
+                let [input, hira, okuri] =
+                \   eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
+                if input != ''
+                    call self.clear_all()
+                    call self.push_kakutei_str(input . okuri)
+                    call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
+                endif
             endtry
         else
             if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
@@ -685,35 +698,35 @@ function! s:buftable.do_henkan(stash, ...) dict "{{{
                 return
             endif
 
-            let key = henkan_buf_str.get_matched_filter()
+            let hira = henkan_buf_str.get_matched_filter()
             let okuri = okuri_buf_str.get_matched_filter()
             let okuri_rom = okuri_buf_str.get_matched_rom()
-            call eskk#set_henkan_result(eskk#get_dictionary().refer(self, key, okuri, okuri_rom))
-
-            if !convert_at_exact_match
-                " XXX: This must clear strings. Following clearing must be wasteful.
-                call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-            endif
+            call eskk#set_henkan_result(eskk#get_dictionary().refer(self, hira, okuri, okuri_rom))
 
             " Clear phase henkan/okuri buffer string.
             " NOTE: I assume that `eskk#get_dictionary().refer()`
             " saves necessary strings even if I clear these.
             let henkan_matched_rom = henkan_buf_str.get_matched_rom()
-            call henkan_buf_str.clear()
-
             let okuri_matched_rom = okuri_buf_str.get_matched_rom()
-            call okuri_buf_str.clear()
-
             let rom_str = henkan_matched_rom . okuri_matched_rom
             try
                 let candidate = eskk#get_prev_henkan_result().get_candidate()
-                let buf_str = (convert_at_exact_match ? henkan_buf_str : henkan_select_buf_str)
-                call buf_str.set_matched(rom_str, candidate)
+                " No exception throwed. continue...
+
+                call self.clear_all()
+                if convert_at_exact_match
+                    call henkan_buf_str.set_matched(rom_str, candidate)
+                else
+                    call henkan_select_buf_str.set_matched(rom_str, candidate)
+                    call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
+                endif
             catch /^eskk: dictionary look up error:/
                 " No candidates.
-                let input = eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
+                let [input, hira, okuri] =
+                \   eskk#get_dictionary().register_word(eskk#get_prev_henkan_result())
                 if input != ''
-                    call self.push_kakutei_str(input)
+                    call self.clear_all()
+                    call self.push_kakutei_str(input . okuri)
                     call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
                 endif
             endtry

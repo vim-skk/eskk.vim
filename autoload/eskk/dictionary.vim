@@ -438,7 +438,7 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
                 let page_index += 1
             else
                 " No more pages. Register new word.
-                let input = a:this._dict.register_word(a:this, 1)
+                let input = a:this._dict.register_word(a:this)[0]
                 let henkan_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 return [
@@ -673,8 +673,7 @@ function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
     \)
 endfunction "}}}
 
-function! s:dict.register_word(henkan_result, ...) dict "{{{
-    let return_input = a:0 ? a:1 : 0
+function! s:dict.register_word(henkan_result) dict "{{{
     let key       = a:henkan_result.get_key()
     let okuri     = a:henkan_result.get_okuri()
     let okuri_rom = a:henkan_result.get_okuri_rom()
@@ -728,7 +727,7 @@ function! s:dict.register_word(henkan_result, ...) dict "{{{
     if input != ''
         call self.remember_word(input, key, okuri, okuri_rom)
     endif
-    return return_input ? input : (input != '' ? input : key) . okuri
+    return [input, key, okuri]
 endfunction "}}}
 
 function! s:dict.forget_registered_words() dict "{{{
