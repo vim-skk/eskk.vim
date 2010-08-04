@@ -165,63 +165,54 @@ let s:mode_local_keys = {
 \}
 " TODO s:map should contain this info.
 function! eskk#handle_toggle_hankata(stash) "{{{
-    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
         return 1
     endif
     return 0
 endfunction "}}}
 function! eskk#handle_toggle_kata(stash) "{{{
-    if eskk#get_buftable().get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
         return 1
     endif
     return 0
 endfunction "}}}
 function! eskk#handle_ctrl_q_key(stash) "{{{
-    let buftable = eskk#get_buftable()
-    let phase    = buftable.get_henkan_phase()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call buftable.do_ctrl_q_key()
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call a:stash.buftable.do_ctrl_q_key()
         return 1
     endif
     return 0
 endfunction "}}}
 function! eskk#handle_q_key(stash) "{{{
-    let buftable = eskk#get_buftable()
-    let phase    = buftable.get_henkan_phase()
-
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call buftable.do_q_key()
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call a:stash.buftable.do_q_key()
         return 1
     endif
     return 0
 endfunction "}}}
 function! eskk#handle_to_ascii(stash) "{{{
-    let buftable = eskk#get_buftable()
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && a:stash.buf_str.get_rom_str() == ''
         call eskk#set_mode('ascii')
         return 1
     endif
     return 0
 endfunction "}}}
 function! eskk#handle_to_zenei(stash) "{{{
-    let buftable = eskk#get_buftable()
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && a:stash.buf_str.get_rom_str() == ''
         call eskk#set_mode('zenei')
         return 1
     endif
     return 0
 endfunction "}}}
 function! eskk#handle_to_abbrev(stash) "{{{
-    let buftable = eskk#get_buftable()
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL).get_rom_str() == ''
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && a:stash.buf_str.get_rom_str() == ''
         call eskk#set_mode('abbrev')
         return 1
     endif
@@ -727,8 +718,8 @@ endfunction "}}}
 
 function! s:asym_filter.filter(stash) dict "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let phase = buftable.get_henkan_phase()
+    let buftable = a:stash.buftable
+    let phase = a:stash.phase
 
 
     " Handle special mode-local mapping.
@@ -817,8 +808,8 @@ function! s:asym_filter.filter(stash) dict "{{{
 endfunction "}}}
 function! s:asym_filter.filter_rom(stash) dict "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
+    let buftable = a:stash.buftable
+    let buf_str = a:stash.buf_str
     let rom_str = buf_str.get_rom_str() . char
     let match_exactly  = self.table.has_map(rom_str)
     let candidates     = self.table.get_candidates(rom_str, [])
@@ -848,10 +839,10 @@ function! s:asym_filter.filter_rom(stash) dict "{{{
 endfunction "}}}
 function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
+    let buftable = a:stash.buftable
+    let buf_str = a:stash.buf_str
     let rom_str = buf_str.get_rom_str() . char
-    let phase = buftable.get_henkan_phase()
+    let phase = a:stash.phase
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
@@ -981,17 +972,13 @@ function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
     endif
 endfunction "}}}
 function! s:asym_filter.filter_rom_has_candidates(stash) "{{{
-    let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
-
     " NOTE: This will be run in all phases.
-    call buf_str.push_rom_str(char)
+    call a:stash.buf_str.push_rom_str(a:stash.char)
 endfunction "}}}
 function! s:asym_filter.filter_rom_no_match(stash) "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
-    let buf_str = buftable.get_current_buf_str()
+    let buftable = a:stash.buftable
+    let buf_str = a:stash.buf_str
     let rom_str_without_char = buf_str.get_rom_str()
     let rom_str = rom_str_without_char . char
     let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
@@ -1571,6 +1558,10 @@ function! s:filter(self, char) "{{{
     let stash = {
     \   'char': a:char,
     \   'return': 0,
+    \
+    \   'buftable': buftable,
+    \   'phase': buftable.get_henkan_phase(),
+    \   'buf_str': buftable.get_current_buf_str(),
     \}
 
     if !self.is_locked_old_str
@@ -1600,7 +1591,7 @@ function! s:filter(self, char) "{{{
 endfunction "}}}
 function! s:call_filter_fn(stash) "{{{
     let filter_args = [a:stash]
-    let rom = eskk#get_buftable().get_current_buf_str().get_input_rom() . a:stash.char
+    let rom = a:stash.buftable.get_current_buf_str().get_input_rom() . a:stash.char
     if has_key(s:key_handler, rom)
         " Call eskk#register_map()'s handlers.
         let [Fn, args] = s:key_handler[rom]
