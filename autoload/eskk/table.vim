@@ -221,7 +221,7 @@ endfunction "}}}
 " }}}
 
 
-" Table information per one table {{{
+" s:register_skeleton {{{
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
 function! eskk#table#create(name, ...) "{{{
@@ -299,7 +299,7 @@ endfunction "}}}
 
 " }}}
 
-" OO interface for autoload functions {{{
+" s:table_obj {{{
 let s:table_obj = {}
 
 function! eskk#table#new(table_name) "{{{
@@ -358,6 +358,7 @@ function! eskk#table#_dump() "{{{
     let def = s:table_defs
     PP def
 endfunction "}}}
+
 " }}}
 
 " }}}
