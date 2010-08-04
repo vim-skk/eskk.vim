@@ -181,11 +181,6 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     endif
 endfunction "}}}
 
-function! s:has_map(table_name, lhs, index) "{{{
-    let not_found = {}
-    return s:get_map(a:table_name, a:lhs, a:index, not_found) isnot not_found
-endfunction "}}}
-
 function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     call eskk#util#assert(a:max_candidates !=# 0, "a:max_candidates must be negative or positive.")
 
@@ -335,7 +330,8 @@ function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) dict "{{{
 endfunction "}}}
 
 function! s:table_obj.has_map(lhs) dict "{{{
-    return call('s:has_map', [self.table_name, a:lhs, s:MAP_TO_INDEX])
+    let not_found = {}
+    return s:get_map(self.table_name, a:lhs, s:MAP_TO_INDEX, not_found) isnot not_found
 endfunction "}}}
 
 function! s:table_obj.get_map(lhs, ...) dict "{{{
@@ -343,7 +339,8 @@ function! s:table_obj.get_map(lhs, ...) dict "{{{
 endfunction "}}}
 
 function! s:table_obj.has_rest(lhs) dict "{{{
-    return call('s:has_map', [self.table_name, a:lhs, s:REST_INDEX])
+    let not_found = {}
+    return s:get_map(self.table_name, a:lhs, s:REST_INDEX, not_found) isnot not_found
 endfunction "}}}
 
 function! s:table_obj.get_rest(lhs, ...) dict "{{{
