@@ -118,8 +118,7 @@ endfunction "}}}
 function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
 
-    " g:eskk_cache_table_map
-    if eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
+    if g:eskk_cache_table_map && eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
         if s:cached_maps[a:table_name][a:lhs][a:index] != ''
             return s:cached_maps[a:table_name][a:lhs][a:index]
         else
