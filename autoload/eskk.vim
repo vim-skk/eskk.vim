@@ -812,10 +812,12 @@ function! s:asym_filter.filter_rom(stash) dict "{{{
     let buf_str = a:stash.buf_str
     let rom_str = buf_str.get_rom_str() . char
     let match_exactly  = self.table.has_map(rom_str)
-    let candidates     = self.table.get_candidates(rom_str, [])
+    let candidates     = self.table.get_candidates(rom_str, 2, [])
 
-    call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
-    call eskk#util#logf('candidates = %s', string(candidates))
+    if g:eskk_debug
+        call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
+        call eskk#util#logf('candidates = %s', string(candidates))
+    endif
 
     if match_exactly
         call eskk#util#assert(!empty(candidates))

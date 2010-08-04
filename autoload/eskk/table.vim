@@ -50,6 +50,7 @@ runtime! plugin/eskk.vim
 let s:table_defs = {}
 let s:cached_tables = {}
 let s:cached_maps = {}
+let s:cached_candidates = {}
 
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
@@ -117,8 +118,7 @@ endfunction "}}}
 function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
 
-    " g:eskk_cache_table_map
-    if eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
+    if g:eskk_cache_table_map && eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
         if s:cached_maps[a:table_name][a:lhs][a:index] != ''
             return s:cached_maps[a:table_name][a:lhs][a:index]
         else
@@ -165,7 +165,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
 
         let not_found = {}
         for parent in s:table_defs[a:table_name].bases
-            let r = call('s:get_map', [parent.name, a:lhs, a:index, not_found])
+            let r = s:get_map(parent.name, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r
             endif
@@ -181,33 +181,29 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     endif
 endfunction "}}}
 
-function! s:has_map(table_name, lhs, index) "{{{
-    let not_found = {}
-    return s:get_map(a:table_name, a:lhs, a:index, not_found) isnot not_found
-endfunction "}}}
+function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
+    call eskk#util#assert(a:max_candidates !=# 0, "a:max_candidates must be negative or positive.")
 
-function! s:get_candidates(table_name, lhs_head, ...) "{{{
-    let data = s:get_table_data(a:table_name)
-    let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
-
-    if s:is_base_table(a:table_name)
-        call eskk#util#logf('table %s is base table.', a:table_name)
-
-        if !empty(candidates)
-            call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
-            return candidates
-        endif
+    if g:eskk_cache_table_candidates && eskk#util#has_key_f(s:cached_candidates, [a:table_name, a:lhs_head])
+        let candidates = s:cached_candidates[a:table_name][a:lhs_head]
     else
-        call eskk#util#logf('table %s is derived table.', a:table_name)
-
-        if !empty(candidates)
-            call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
-            return candidates
+        let data = s:get_table_data(a:table_name)
+        let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
+        if g:eskk_cache_table_candidates
+            call eskk#util#let_f(s:cached_candidates, [a:table_name, a:lhs_head], candidates)
         endif
+    endif
 
+    if !empty(candidates)
+        call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
+        return candidates
+    endif
+
+    if !s:is_base_table(a:table_name)
+        " Search parent tables.
         let not_found = {}
         for parent in s:table_defs[a:table_name].bases
-            let r = call('s:get_candidates', [parent.name, a:lhs_head, not_found])
+            let r = s:get_candidates(parent.name, a:lhs_head, a:max_candidates, not_found)
             if r isnot not_found
                 return r
             endif
@@ -222,15 +218,10 @@ function! s:get_candidates(table_name, lhs_head, ...) "{{{
     endif
 endfunction "}}}
 
-function! s:has_candidates(table_name, lhs_head) "{{{
-    let not_found = {}
-    return s:get_candidates(a:table_name, a:lhs_head, a:index, not_found) isnot not_found
-endfunction "}}}
-
 " }}}
 
 
-" Table information per one table {{{
+" s:register_skeleton {{{
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
 function! eskk#table#create(name, ...) "{{{
@@ -308,7 +299,7 @@ endfunction "}}}
 
 " }}}
 
-" OO interface for autoload functions {{{
+" s:table_obj {{{
 let s:table_obj = {}
 
 function! eskk#table#new(table_name) "{{{
@@ -329,18 +320,18 @@ function! s:table_obj_new(table_name) "{{{
 endfunction "}}}
 
 
-" I need meta programming in Vim script!!
-
 function! s:table_obj.has_candidates(lhs_head) dict "{{{
-    return call('s:has_candidates', [self.table_name, a:lhs_head])
+    let not_found = {}
+    return self.get_candidates(a:lhs_head, 1, not_found) isnot not_found
 endfunction "}}}
 
-function! s:table_obj.get_candidates(lhs_head, ...) dict "{{{
-    return call('s:get_candidates', [self.table_name, a:lhs_head] + a:000)
+function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) dict "{{{
+    return call('s:get_candidates', [self.table_name, a:lhs_head, a:max_candidates] + a:000)
 endfunction "}}}
 
 function! s:table_obj.has_map(lhs) dict "{{{
-    return call('s:has_map', [self.table_name, a:lhs, s:MAP_TO_INDEX])
+    let not_found = {}
+    return self.get_map(a:lhs, not_found) isnot not_found
 endfunction "}}}
 
 function! s:table_obj.get_map(lhs, ...) dict "{{{
@@ -348,7 +339,8 @@ function! s:table_obj.get_map(lhs, ...) dict "{{{
 endfunction "}}}
 
 function! s:table_obj.has_rest(lhs) dict "{{{
-    return call('s:has_map', [self.table_name, a:lhs, s:REST_INDEX])
+    let not_found = {}
+    return self.get_rest(a:lhs, not_found) isnot not_found
 endfunction "}}}
 
 function! s:table_obj.get_rest(lhs, ...) dict "{{{
@@ -366,6 +358,7 @@ function! eskk#table#_dump() "{{{
     let def = s:table_defs
     PP def
 endfunction "}}}
+
 " }}}
 
 " }}}

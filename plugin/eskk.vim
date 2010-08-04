@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 387))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 395))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -161,6 +161,9 @@ endif
 " Table
 if !exists('g:eskk_cache_table_map')
     let g:eskk_cache_table_map = 1
+endif
+if !exists('g:eskk_cache_table_candidates')
+    let g:eskk_cache_table_candidates = 1
 endif
 
 " Markers
