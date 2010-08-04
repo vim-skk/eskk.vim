@@ -2248,8 +2248,8 @@ function! s:initialize() "{{{
     endif
     " }}}
 
-    " InsertLeave: Clear buftable. {{{
-    autocmd eskk InsertLeave * call eskk#get_buftable().reset()
+    " InsertEnter: Clear buftable. {{{
+    autocmd eskk InsertEnter * call eskk#get_buftable().reset()
     " }}}
 
     " InsertLeave: g:eskk_convert_at_exact_match {{{
