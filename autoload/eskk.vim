@@ -1310,7 +1310,6 @@ endfunction "}}}
 
 " Manipulate display string.
 function! eskk#remove_display_str() "{{{
-    let self = eskk#get_current_instance()
     let current_str = eskk#get_buftable().get_display_str()
 
     " NOTE: This function return value is not remapped.
@@ -1320,7 +1319,6 @@ function! eskk#remove_display_str() "{{{
     return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! eskk#kakutei_str() "{{{
-    let self = eskk#get_current_instance()
     return eskk#remove_display_str() . eskk#get_buftable().get_display_str(0)
 endfunction "}}}
 
@@ -1331,7 +1329,6 @@ endfunction "}}}
 
 " Escape key
 function! eskk#escape_key() "{{{
-    let self = eskk#get_current_instance()
     let kakutei_str = eskk#kakutei_str()
 
     " NOTE: This function return value is not remapped.
