@@ -159,6 +159,7 @@ endfunction "}}}
 function! s:buftable.get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
+
 " Rewrite old string, Insert new string.
 function! s:buftable.rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
@@ -172,7 +173,7 @@ function! s:buftable.rewrite() dict "{{{
         call eskk#util#logf('new display string = %s', string(new))
     endif
 
-    let bs_expr = 'repeat(eskk#util#key2char(eskk#get_special_map("backspace-key")), eskk#util#mb_strlen(old))'
+    let bs_expr = self.make_remove_bs_expr()
 
     " FIXME
     " - Current implementation depends on &backspace
@@ -202,6 +203,17 @@ function! s:buftable.rewrite() dict "{{{
         \   eskk#util#str2map(inserted_str)
         return eval(bs_expr) . "\<Plug>(eskk:internal:_inserted)"
     endif
+endfunction "}}}
+function! s:buftable.make_remove_bs_expr() dict "{{{
+    let old = self._old_str
+    return join([
+    \   'repeat(',
+    \       'eskk#util#key2char(eskk#get_special_map("backspace-key")),',
+    \       'eskk#util#mb_strlen(',
+    \       string(old),
+    \       ')',
+    \   ')',
+    \])
 endfunction "}}}
 
 function! s:buftable.has_changed() dict "{{{

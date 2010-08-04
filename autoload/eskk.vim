@@ -699,6 +699,9 @@ lockvar s:mutable_stash
 
 " Getter for scope-local variables.
 function! eskk#get_dictionary() "{{{
+    if empty(s:skk_dict)
+        let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
+    endif
     return s:skk_dict
 endfunction "}}}
 
@@ -1310,7 +1313,6 @@ endfunction "}}}
 
 " Manipulate display string.
 function! eskk#remove_display_str() "{{{
-    let self = eskk#get_current_instance()
     let current_str = eskk#get_buftable().get_display_str()
 
     " NOTE: This function return value is not remapped.
@@ -1320,7 +1322,6 @@ function! eskk#remove_display_str() "{{{
     return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
 endfunction "}}}
 function! eskk#kakutei_str() "{{{
-    let self = eskk#get_current_instance()
     return eskk#remove_display_str() . eskk#get_buftable().get_display_str(0)
 endfunction "}}}
 
@@ -1331,7 +1332,6 @@ endfunction "}}}
 
 " Escape key
 function! eskk#escape_key() "{{{
-    let self = eskk#get_current_instance()
     let kakutei_str = eskk#kakutei_str()
 
     " NOTE: This function return value is not remapped.
@@ -1946,7 +1946,7 @@ function! s:initialize() "{{{
     endif
     " }}}
 
-    " g:eskk_keep_state: eskk#disable() at InsertLeave {{{
+    " InsertLeave: g:eskk_keep_state: eskk#disable() {{{
     if !g:eskk_keep_state
         autocmd eskk InsertLeave * call eskk#disable()
     endif
@@ -2248,11 +2248,11 @@ function! s:initialize() "{{{
     endif
     " }}}
 
-    " InsertLeave: Clear buftable. {{{
-    autocmd eskk InsertLeave * call eskk#get_buftable().reset()
+    " InsertEnter: Clear buftable. {{{
+    autocmd eskk InsertEnter * call eskk#get_buftable().reset()
     " }}}
 
-    " g:eskk_convert_at_exact_match {{{
+    " InsertLeave: g:eskk_convert_at_exact_match {{{
     function! s:clear_real_matched_pairs() "{{{
         if !eskk#is_enabled() || eskk#get_mode() == ''
             return
@@ -2264,11 +2264,6 @@ function! s:initialize() "{{{
         endif
     endfunction "}}}
     autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
-    " }}}
-
-    " s:skk_dict: Lazy initialization {{{
-    call eskk#util#assert(empty(s:skk_dict))
-    let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
     " }}}
 
     " s:saved_im_options {{{
