@@ -719,7 +719,7 @@ endfunction "}}}
 
 
 " Filter
-
+" s:asym_filter {{{
 let s:asym_filter = {'table': {}}
 
 function! eskk#create_asym_filter(table_name) "{{{
@@ -817,56 +817,6 @@ function! s:asym_filter.filter(stash) dict "{{{
         let msg = printf("s:asym_filter.filter() does not support phase %d.", phase)
         throw eskk#internal_error(['eskk'], msg)
     endif
-endfunction "}}}
-function! s:generate_map_list(str, tail, ...) "{{{
-    let str = a:str
-    let result = a:0 != 0 ? a:1 : []
-    " NOTE: `str` must come to empty string.
-    if str == ''
-        return result
-    else
-        call add(result, str)
-        " a:tail is true, Delete tail one character.
-        " a:tail is false, Delete first one character.
-        return s:generate_map_list(
-        \   (a:tail ? strpart(str, 0, strlen(str) - 1) : strpart(str, 1)),
-        \   a:tail,
-        \   result
-        \)
-    endif
-endfunction "}}}
-function! s:get_matched_and_rest(table, rom_str, tail) "{{{
-    " For e.g., if table has map "n" to "ん" and "j" to none.
-    " rom_str(a:tail is true): "nj" => [["ん"], "j"]
-    " rom_str(a:tail is false): "nj" => [[], "nj"]
-
-    let matched = []
-    let rest = a:rom_str
-    while 1
-        let counter = 0
-        let has_map_str = -1
-        let list = s:generate_map_list(rest, a:tail)
-        for str in list
-            let counter += 1
-            if a:table.has_map(str)
-                call eskk#util#logstrf('s:generate_map_list(%s, %d) = %s', rest, a:tail, list)
-                call eskk#util#logstrf('found! - %s has map', str)
-                let has_map_str = str
-                break
-            endif
-        endfor
-        if has_map_str ==# -1
-            return [matched, rest]
-        endif
-        call add(matched, has_map_str)
-        if a:tail
-            " Delete first `has_map_str` bytes.
-            let rest = strpart(rest, strlen(has_map_str))
-        else
-            " Delete last `has_map_str` bytes.
-            let rest = strpart(rest, 0, strlen(rest) - strlen(has_map_str))
-        endif
-    endwhile
 endfunction "}}}
 function! s:asym_filter.filter_rom(stash) dict "{{{
     let char = a:stash.char
@@ -1088,14 +1038,67 @@ function! s:asym_filter.filter_rom_no_match(stash) "{{{
         call buf_str.set_rom_str(rest)
     endif
 endfunction "}}}
+
+function! s:generate_map_list(str, tail, ...) "{{{
+    let str = a:str
+    let result = a:0 != 0 ? a:1 : []
+    " NOTE: `str` must come to empty string.
+    if str == ''
+        return result
+    else
+        call add(result, str)
+        " a:tail is true, Delete tail one character.
+        " a:tail is false, Delete first one character.
+        return s:generate_map_list(
+        \   (a:tail ? strpart(str, 0, strlen(str) - 1) : strpart(str, 1)),
+        \   a:tail,
+        \   result
+        \)
+    endif
+endfunction "}}}
+function! s:get_matched_and_rest(table, rom_str, tail) "{{{
+    " For e.g., if table has map "n" to "ん" and "j" to none.
+    " rom_str(a:tail is true): "nj" => [["ん"], "j"]
+    " rom_str(a:tail is false): "nj" => [[], "nj"]
+
+    let matched = []
+    let rest = a:rom_str
+    while 1
+        let counter = 0
+        let has_map_str = -1
+        let list = s:generate_map_list(rest, a:tail)
+        for str in list
+            let counter += 1
+            if a:table.has_map(str)
+                call eskk#util#logstrf('s:generate_map_list(%s, %d) = %s', rest, a:tail, list)
+                call eskk#util#logstrf('found! - %s has map', str)
+                let has_map_str = str
+                break
+            endif
+        endfor
+        if has_map_str ==# -1
+            return [matched, rest]
+        endif
+        call add(matched, has_map_str)
+        if a:tail
+            " Delete first `has_map_str` bytes.
+            let rest = strpart(rest, strlen(has_map_str))
+        else
+            " Delete last `has_map_str` bytes.
+            let rest = strpart(rest, 0, strlen(rest) - strlen(has_map_str))
+        endif
+    endwhile
+endfunction "}}}
 " Clear filtered string when eskk#filter()'s finalizing.
-function! s:clear_filtered_string()
+function! s:clear_filtered_string() "{{{
     let buftable = eskk#get_buftable()
     if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         let buf_str = buftable.get_current_buf_str()
         call buf_str.clear_matched()
     endif
-endfunction
+endfunction "}}}
+
+" }}}
 
 
 
