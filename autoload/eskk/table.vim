@@ -50,6 +50,7 @@ runtime! plugin/eskk.vim
 let s:table_defs = {}
 let s:cached_tables = {}
 let s:cached_maps = {}
+let s:cached_candidates = {}
 
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
@@ -189,8 +190,16 @@ endfunction "}}}
 function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     call eskk#util#assert(a:max_candidates !=# 0, "a:max_candidates must be negative or positive.")
 
-    let data = s:get_table_data(a:table_name)
-    let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
+    if g:eskk_cache_table_candidates && eskk#util#has_key_f(s:cached_candidates, [a:table_name, a:lhs_head])
+        let candidates = s:cached_candidates[a:table_name][a:lhs_head]
+    else
+        let data = s:get_table_data(a:table_name)
+        let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
+        if g:eskk_cache_table_candidates
+            call eskk#util#let_f(s:cached_candidates, [a:table_name, a:lhs_head], candidates)
+        endif
+    endif
+
     if !empty(candidates)
         call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
         return candidates
