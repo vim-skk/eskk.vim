@@ -186,28 +186,21 @@ function! s:has_map(table_name, lhs, index) "{{{
     return s:get_map(a:table_name, a:lhs, a:index, not_found) isnot not_found
 endfunction "}}}
 
-function! s:get_candidates(table_name, lhs_head, ...) "{{{
+function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
+    call eskk#util#assert(a:max_candidates !=# 0, "a:max_candidates must be negative or positive.")
+
     let data = s:get_table_data(a:table_name)
     let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
+    if !empty(candidates)
+        call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
+        return candidates
+    endif
 
-    if s:is_base_table(a:table_name)
-        call eskk#util#logf('table %s is base table.', a:table_name)
-
-        if !empty(candidates)
-            call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
-            return candidates
-        endif
-    else
-        call eskk#util#logf('table %s is derived table.', a:table_name)
-
-        if !empty(candidates)
-            call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
-            return candidates
-        endif
-
+    if !s:is_base_table(a:table_name)
+        " Search parent tables.
         let not_found = {}
         for parent in s:table_defs[a:table_name].bases
-            let r = call('s:get_candidates', [parent.name, a:lhs_head, not_found])
+            let r = call('s:get_candidates', [parent.name, a:lhs_head, a:max_candidates, not_found])
             if r isnot not_found
                 return r
             endif
@@ -220,11 +213,6 @@ function! s:get_candidates(table_name, lhs_head, ...) "{{{
     else
         throw eskk#internal_error(['eskk', 'table'])
     endif
-endfunction "}}}
-
-function! s:has_candidates(table_name, lhs_head) "{{{
-    let not_found = {}
-    return s:get_candidates(a:table_name, a:lhs_head, a:index, not_found) isnot not_found
 endfunction "}}}
 
 " }}}
@@ -330,11 +318,12 @@ endfunction "}}}
 
 
 function! s:table_obj.has_candidates(lhs_head) dict "{{{
-    return call('s:has_candidates', [self.table_name, a:lhs_head])
+    let not_found = {}
+    return s:get_candidates(self.table_name, a:lhs_head, 1, not_found) isnot not_found
 endfunction "}}}
 
-function! s:table_obj.get_candidates(lhs_head, ...) dict "{{{
-    return call('s:get_candidates', [self.table_name, a:lhs_head] + a:000)
+function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) dict "{{{
+    return call('s:get_candidates', [self.table_name, a:lhs_head, a:max_candidates] + a:000)
 endfunction "}}}
 
 function! s:table_obj.has_map(lhs) dict "{{{
