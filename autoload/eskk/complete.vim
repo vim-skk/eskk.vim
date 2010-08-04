@@ -28,10 +28,13 @@ let s:select_but_not_inserted = 0
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
     if a:findstart
-        let [mode, pos] = s:get_buftable_pos()
-        let do_complete = (mode ==# 'i')
-
-        if !do_complete
+        let buftable_pos = s:get_buftable_pos()
+        if empty(buftable_pos)
+            return -1
+        endif
+        
+        let [mode, pos] = buftable_pos
+        if mode !=# 'i'
             " Command line mode completion is not implemented.
             return -1
         endif
@@ -324,7 +327,7 @@ function! s:get_buftable_pos() "{{{
     let l = buftable.get_begin_pos()
     if empty(l)
         call eskk#util#log("warning: Can't get begin pos.")
-        return
+        return []
     endif
     let [mode, pos] = l
     call eskk#util#assert(mode ==# 'i')
