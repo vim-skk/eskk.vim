@@ -329,8 +329,6 @@ function! s:table_obj_new(table_name) "{{{
 endfunction "}}}
 
 
-" I need meta programming in Vim script!!
-
 function! s:table_obj.has_candidates(lhs_head) dict "{{{
     return call('s:has_candidates', [self.table_name, a:lhs_head])
 endfunction "}}}
