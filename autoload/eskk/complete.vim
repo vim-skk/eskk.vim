@@ -23,6 +23,22 @@ delfunc s:SID
 
 " Variables {{{
 let s:select_but_not_inserted = 0
+let s:popup_func_table = {
+    \   eskk#util#key2char("<CR>") : 's:do_enter_pre',
+    \   eskk#util#key2char("<C-y>") : 's:close_pum_pre',
+    \   eskk#util#key2char("<C-l>") : 's:identity',
+    \   eskk#util#key2char("<C-e>") : 's:identity',
+    \   eskk#util#key2char("<PageUp>") : 's:identity',
+    \   eskk#util#key2char("<PageDown>") : 's:identity',
+    \   eskk#util#key2char("<Up>") : 's:select_item',
+    \   eskk#util#key2char("<Down>") : 's:select_item',
+    \   eskk#util#key2char("<Space>") : 's:do_space',
+    \   eskk#util#key2char("<Tab>") : 's:select_item',
+    \   eskk#util#key2char("<C-n>") : 's:select_item',
+    \   eskk#util#key2char("<C-p>") : 's:select_item',
+    \   eskk#util#key2char("<C-h>") : 's:do_backspace',
+    \   eskk#util#key2char("<BS>") : 's:do_backspace',
+    \ }
 " }}}
 
 " Complete function.
@@ -122,29 +138,13 @@ function! s:complete(mode) "{{{
     return list
 endfunction "}}}
 
-let s:popup_fucc_table = {
-    \   eskk#util#key2char("<CR>") : 's:do_enter_pre',
-    \   eskk#util#key2char("<C-y>") : 's:close_pum_pre',
-    \   eskk#util#key2char("<C-l>") : 's:identity',
-    \   eskk#util#key2char("<C-e>") : 's:identity',
-    \   eskk#util#key2char("<PageUp>") : 's:identity',
-    \   eskk#util#key2char("<PageDown>") : 's:identity',
-    \   eskk#util#key2char("<Up>") : 's:select_item',
-    \   eskk#util#key2char("<Down>") : 's:select_item',
-    \   eskk#util#key2char("<Space>") : 's:do_space',
-    \   eskk#util#key2char("<Tab>") : 's:select_item',
-    \   eskk#util#key2char("<C-n>") : 's:select_item',
-    \   eskk#util#key2char("<C-p>") : 's:select_item',
-    \   eskk#util#key2char("<C-h>") : 's:do_backspace',
-    \   eskk#util#key2char("<BS>") : 's:do_backspace',
-    \ }
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
     call eskk#util#logf('eskk#complete#handle_special_key(): char = %s', char)
 
     " Check popupmenu-keys
-    if has_key(s:popup_fucc_table, char)
-        call {s:popup_fucc_table[char]}(a:stash)
+    if has_key(s:popup_func_table, char)
+        call {s:popup_func_table[char]}(a:stash)
         return 0
     endif
 
