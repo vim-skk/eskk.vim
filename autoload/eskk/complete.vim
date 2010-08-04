@@ -121,33 +121,32 @@ function! s:complete(mode) "{{{
     endif
     return list
 endfunction "}}}
+
+let s:popup_fucc_table = {
+    \   eskk#util#key2char("<CR>") : 's:do_enter_pre',
+    \   eskk#util#key2char("<C-y>") : 's:close_pum_pre',
+    \   eskk#util#key2char("<C-l>") : 's:identity',
+    \   eskk#util#key2char("<C-e>") : 's:identity',
+    \   eskk#util#key2char("<PageUp>") : 's:identity',
+    \   eskk#util#key2char("<PageDown>") : 's:identity',
+    \   eskk#util#key2char("<Up>") : 's:select_item',
+    \   eskk#util#key2char("<Down>") : 's:select_item',
+    \   eskk#util#key2char("<Space>") : 's:do_space',
+    \   eskk#util#key2char("<Tab>") : 's:select_item',
+    \   eskk#util#key2char("<C-n>") : 's:select_item',
+    \   eskk#util#key2char("<C-p>") : 's:select_item',
+    \   eskk#util#key2char("<C-h>") : 's:do_backspace',
+    \   eskk#util#key2char("<BS>") : 's:do_backspace',
+    \ }
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
     call eskk#util#logf('eskk#complete#handle_special_key(): char = %s', char)
 
-    " :help popupmenu-keys
-    for [key, fn] in [
-    \   ["<CR>", 's:do_enter_pre'],
-    \   ["<C-y>", 's:close_pum_pre'],
-    \   ["<C-l>", 's:identity'],
-    \   ["<C-e>", 's:identity'],
-    \   ["<PageUp>", 's:identity'],
-    \   ["<PageDown>", 's:identity'],
-    \   ["<Up>", 's:select_item'],
-    \   ["<Down>", 's:select_item'],
-    \   ["<Space>", 's:do_space'],
-    \   ["<Tab>", 's:select_item'],
-    \   ["<C-n>", 's:select_item'],
-    \   ["<C-p>", 's:select_item'],
-    \   ["<C-h>", 's:do_backspace'],
-    \   ["<BS>", 's:do_backspace'],
-    \]
-        if char ==# eskk#util#key2char(key)
-            call {fn}(a:stash)
-            call eskk#util#logf("pumvisible() = 1, Handled key '%s'.", key)
-            return 0
-        endif
-    endfor
+    " Check popupmenu-keys
+    if has_key(s:popup_fucc_table, char)
+        call {s:popup_fucc_table[char]}(a:stash)
+        return 0
+    endif
 
     if s:check_yomigana()
         " Do filter.
