@@ -99,6 +99,15 @@ function! eskk#util#unique(list) "{{{
     return list
 endfunction "}}}
 
+function! eskk#util#list_any(elem, list) "{{{
+    for _ in a:list
+        if _ ==# a:elem
+            return 1
+        endif
+    endfor
+    return 0
+endfunction "}}}
+
 
 " Various structure function
 function! eskk#util#get_f(dict, keys, ...) "{{{
