@@ -1565,6 +1565,7 @@ function! s:filter(self, char) "{{{
     \   'buftable': buftable,
     \   'phase': buftable.get_henkan_phase(),
     \   'buf_str': buftable.get_current_buf_str(),
+    \   'mode': eskk#get_mode(),
     \}
 
     if !self.is_locked_old_str

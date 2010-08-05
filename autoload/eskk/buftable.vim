@@ -641,7 +641,7 @@ endfunction "}}}
 function! s:buftable.do_henkan(stash, ...) dict "{{{
     let convert_at_exact_match = a:0 ? a:1 : 0
     let phase = a:stash.phase
-    let eskk_mode = eskk#get_mode()
+    let eskk_mode = a:stash.mode
 
     if !eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
         " TODO Add an error id like Vim
@@ -689,7 +689,7 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) dict "{{{
 endfunction "}}}
 function! s:buftable.do_henkan_other(stash, convert_at_exact_match) dict "{{{
     let phase = a:stash.phase
-    let eskk_mode = eskk#get_mode()
+    let eskk_mode = a:stash.mode
     let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
