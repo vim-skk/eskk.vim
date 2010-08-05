@@ -773,18 +773,18 @@ function! s:asym_filter.filter(stash) dict "{{{
 
     " Handle other characters.
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        return self.filter_rom(a:stash)
+        return s:filter_rom(a:stash, self.table)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
             call buftable.do_henkan(a:stash)
         else
-            return self.filter_rom(a:stash)
+            return s:filter_rom(a:stash, self.table)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
             call buftable.do_henkan(a:stash)
         else
-            return self.filter_rom(a:stash)
+            return s:filter_rom(a:stash, self.table)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
@@ -806,13 +806,14 @@ function! s:asym_filter.filter(stash) dict "{{{
         throw eskk#internal_error(['eskk'], msg)
     endif
 endfunction "}}}
-function! s:asym_filter.filter_rom(stash) dict "{{{
+
+function! s:filter_rom(stash, table) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
     let rom_str = buf_str.get_rom_str() . char
-    let match_exactly  = self.table.has_map(rom_str)
-    let candidates     = self.table.get_candidates(rom_str, 2, [])
+    let match_exactly  = a:table.has_map(rom_str)
+    let candidates     = a:table.get_candidates(rom_str, 2, [])
 
     if g:eskk_debug
         call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
@@ -826,20 +827,20 @@ function! s:asym_filter.filter_rom(stash) dict "{{{
     if match_exactly && len(candidates) == 1
         " Match!
         call eskk#util#logf('%s - match!', rom_str)
-        return self.filter_rom_exact_match(a:stash)
+        return s:filter_rom_exact_match(a:stash, a:table)
 
     elseif !empty(candidates)
         " Has candidates but not match.
         call eskk#util#logf('%s - wait for a next key.', rom_str)
-        return self.filter_rom_has_candidates(a:stash)
+        return s:filter_rom_has_candidates(a:stash)
 
     else
         " No candidates.
         call eskk#util#logf('%s - no candidates.', rom_str)
-        return self.filter_rom_no_match(a:stash)
+        return s:filter_rom_no_match(a:stash, a:table)
     endif
 endfunction "}}}
-function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
+function! s:filter_rom_exact_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
@@ -849,7 +850,7 @@ function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         " Set filtered string.
-        call buf_str.push_matched(rom_str, self.table.get_map(rom_str))
+        call buf_str.push_matched(rom_str, a:table.get_map(rom_str))
         call buf_str.clear_rom_str()
 
 
@@ -858,8 +859,8 @@ function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
         " NOTE:
         " rest must not have multibyte string.
         " rest is for rom string.
-        let rest = self.table.get_rest(rom_str, -1)
-        " Assumption: 'self.table.has_map(rest)' returns false here.
+        let rest = a:table.get_rest(rom_str, -1)
+        " Assumption: 'a:table.has_map(rest)' returns false here.
         if rest !=# -1
             " XXX:
             "     eskk#get_named_map(char)
@@ -920,15 +921,15 @@ function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
         let henkan_select_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         let henkan_rom = henkan_buf_str.get_rom_str()
         let okuri_rom  = okuri_buf_str.get_rom_str()
-        if henkan_rom != '' && self.table.has_map(henkan_rom . okuri_rom[0])
+        if henkan_rom != '' && a:table.has_map(henkan_rom . okuri_rom[0])
             " Push "っ".
             let match_rom = henkan_rom . okuri_rom[0]
             call henkan_buf_str.push_matched(
             \   match_rom,
-            \   self.table.get_map(match_rom)
+            \   a:table.get_map(match_rom)
             \)
             " Push "s" to rom str.
-            let rest = self.table.get_rest(henkan_rom . okuri_rom[0], -1)
+            let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
             if rest !=# -1
                 call okuri_buf_str.set_rom_str(
                 \   rest . okuri_rom[1:]
@@ -940,12 +941,12 @@ function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
         call okuri_buf_str.push_rom_str(char)
 
         let has_rest = 0
-        if self.table.has_map(okuri_buf_str.get_rom_str())
+        if a:table.has_map(okuri_buf_str.get_rom_str())
             call okuri_buf_str.push_matched(
             \   okuri_buf_str.get_rom_str(),
-            \   self.table.get_map(okuri_buf_str.get_rom_str())
+            \   a:table.get_map(okuri_buf_str.get_rom_str())
             \)
-            let rest = self.table.get_rest(okuri_buf_str.get_rom_str(), -1)
+            let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
             if rest !=# -1
                 " XXX:
                 "     eskk#get_named_map(char)
@@ -973,11 +974,11 @@ function! s:asym_filter.filter_rom_exact_match(stash) dict "{{{
         endif
     endif
 endfunction "}}}
-function! s:asym_filter.filter_rom_has_candidates(stash) "{{{
+function! s:filter_rom_has_candidates(stash) "{{{
     " NOTE: This will be run in all phases.
     call a:stash.buf_str.push_rom_str(a:stash.char)
 endfunction "}}}
-function! s:asym_filter.filter_rom_no_match(stash) "{{{
+function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
@@ -985,7 +986,7 @@ function! s:asym_filter.filter_rom_no_match(stash) "{{{
     let rom_str = rom_str_without_char . char
     let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
 
-    let [matched_map_list, rest] = s:get_matched_and_rest(self.table, rom_str, 1)
+    let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
     call eskk#util#logstrf('matched_map_list = %s, rest = %s', matched_map_list, rest)
     if empty(matched_map_list)
         if input_style ==# 'skk'
@@ -996,7 +997,7 @@ function! s:asym_filter.filter_rom_no_match(stash) "{{{
                 call buf_str.set_rom_str(rest)
             endif
         else
-            let [matched_map_list, head_no_match] = s:get_matched_and_rest(self.table, rom_str, 0)
+            let [matched_map_list, head_no_match] = s:get_matched_and_rest(a:table, rom_str, 0)
             call eskk#util#logstrf('matched_map_list = %s, head_no_match = %s', matched_map_list, head_no_match)
             if empty(matched_map_list)
                 call buf_str.set_rom_str(head_no_match)
@@ -1005,21 +1006,21 @@ function! s:asym_filter.filter_rom_no_match(stash) "{{{
                     call buf_str.push_matched(char, char)
                 endfor
                 for matched in matched_map_list
-                    if self.table.has_rest(matched)
+                    if a:table.has_rest(matched)
                         call eskk#register_temp_event(
                         \   'filter-redispatch-post',
                         \   'eskk#util#identity',
-                        \   [eskk#util#key2char(eskk#get_named_map(self.table.get_rest(matched)))]
+                        \   [eskk#util#key2char(eskk#get_named_map(a:table.get_rest(matched)))]
                         \)
                     endif
-                    call buf_str.push_matched(matched, self.table.get_map(matched))
+                    call buf_str.push_matched(matched, a:table.get_map(matched))
                 endfor
                 call buf_str.clear_rom_str()
             endif
         endif
     else
         for matched in matched_map_list
-            call buf_str.push_matched(matched, self.table.get_map(matched))
+            call buf_str.push_matched(matched, a:table.get_map(matched))
         endfor
         call buf_str.set_rom_str(rest)
     endif
