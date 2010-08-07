@@ -854,6 +854,12 @@ function! s:buftable.get_begin_pos() dict "{{{
     return self._begin_pos
 endfunction "}}}
 function! s:buftable.set_begin_pos(expr) dict "{{{
+    if g:eskk_debug
+        call eskk#util#logf("Set begin pos '%s'.", a:expr)
+        let col = col(a:expr)
+        let line = getline('.')
+        call eskk#util#logf("%s|%s", line[: col - 2], line[col - 1 :])
+    endif
     if mode() ==# 'i'
         let self._begin_pos = ['i', getpos(a:expr)]
     elseif mode() ==# 'c'
