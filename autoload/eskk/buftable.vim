@@ -237,10 +237,10 @@ function! s:buftable.get_display_str(...) dict "{{{
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:get_normal_display_str(self)
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        return s:get_okuri_display_str(self, with_marker)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         return s:get_henkan_display_str(self, with_marker)
+    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        return s:get_okuri_display_str(self, with_marker)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         return s:get_henkan_select_display_str(self, with_marker)
     else
@@ -253,21 +253,21 @@ function! s:get_normal_display_str(this) "{{{
     \   buf_str.get_matched_filter()
     \   . buf_str.get_rom_str()
 endfunction "}}}
+function! s:get_henkan_display_str(this, with_marker) "{{{
+    let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    return
+    \   (a:with_marker ?
+    \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    \       : '')
+    \   . buf_str.get_matched_filter()
+    \   . buf_str.get_rom_str()
+endfunction "}}}
 function! s:get_okuri_display_str(this, with_marker) "{{{
     let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     return
     \   s:get_henkan_display_str(a:this, a:with_marker)
     \   . (a:with_marker ?
     \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    \       : '')
-    \   . buf_str.get_matched_filter()
-    \   . buf_str.get_rom_str()
-endfunction "}}}
-function! s:get_henkan_display_str(this, with_marker) "{{{
-    let buf_str = a:this.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    return
-    \   (a:with_marker ?
-    \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     \       : '')
     \   . buf_str.get_matched_filter()
     \   . buf_str.get_rom_str()
