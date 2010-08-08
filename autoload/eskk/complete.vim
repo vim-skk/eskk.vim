@@ -74,7 +74,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         " abbrev mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
         return s:complete(eskk_mode)
-    else
+    elseif eskk_mode =~# 'hira\|kata'
         " Kanji mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
@@ -85,6 +85,9 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         endif
 
         return s:complete(eskk_mode)
+    else
+        call eskk#util#warn('No completion supported.')
+        return []
     endif
 endfunction "}}}
 function! s:initialize_variables() "{{{
