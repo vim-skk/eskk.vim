@@ -43,6 +43,7 @@ let s:popup_func_table = {
 
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
+    let eskk_mode = eskk#get_mode()
     if a:findstart
         let buftable_pos = s:get_buftable_pos()
         if empty(buftable_pos)
@@ -58,22 +59,22 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         call s:initialize_variables()
         " :help getpos()
 
-        if eskk#get_mode() ==# 'ascii'
+        if eskk_mode ==# 'ascii'
             return pos[2] - 1
         else
             return pos[2] - 1 + strlen(g:eskk_marker_henkan)
         endif
     endif
 
-    if eskk#get_mode() ==# 'ascii'
+    if eskk_mode ==# 'ascii'
         " ASCII mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
-        return s:complete(eskk#get_mode())
-    elseif eskk#get_mode() ==# 'abbrev'
+        return s:complete(eskk_mode)
+    elseif eskk_mode ==# 'abbrev'
         " abbrev mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
-        return s:complete(eskk#get_mode())
-    else
+        return s:complete(eskk_mode)
+    elseif eskk_mode =~# 'hira\|kata'
         " Kanji mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
@@ -83,7 +84,10 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
             return []
         endif
 
-        return s:complete(eskk#get_mode())
+        return s:complete(eskk_mode)
+    else
+        call eskk#util#warn('No completion supported.')
+        return []
     endif
 endfunction "}}}
 function! s:initialize_variables() "{{{
@@ -94,7 +98,7 @@ function! s:complete(mode) "{{{
     let list = []
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    let is_katakana = g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
+    let is_katakana = g:eskk_kata_convert_to_hira_at_completion && a:mode ==# 'kata'
     
     if is_katakana
         let henkan_buf_str = buftable.filter_rom(
