@@ -261,6 +261,9 @@ let s:saved_im_options = []
 let s:saved_backspace = -1
 " Flag for `s:initialize()`.
 let s:is_initialized = 0
+" Last command's string. See eskk#jump_one_char().
+let s:last_jump_cmd = -1
+let s:last_jump_char = -1
 " }}}
 
 " Functions {{{
@@ -1847,14 +1850,21 @@ endfunction "}}}
 
 
 " <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f)
-function! eskk#jump_one_char(cmd) "{{{
+function! eskk#jump_one_char(cmd, ...) "{{{
     if a:cmd !=? 't' && a:cmd !=? 'f'
         return
     endif
     let is_t = a:cmd ==? 't'
     let is_forward = a:cmd ==# tolower(a:cmd)
+    let s:last_jump_cmd = a:cmd
 
-    let char = eskk#util#getchar()
+    if a:0 == 0
+        let char = eskk#util#getchar()
+        let s:last_jump_char = char
+    else
+        let char = a:1
+    endif
+
     if is_forward
         if col('.') == col('$')
             return
@@ -1873,6 +1883,12 @@ function! eskk#jump_one_char(cmd) "{{{
         if idx != -1
             call cursor(line('.'), idx + 1 + is_t)
         endif
+    endif
+endfunction "}}}
+function! eskk#repeat_last_jump() "{{{
+    if type(s:last_jump_cmd) == type("")
+    \   && type(s:last_jump_char) == type("")
+        call eskk#jump_one_char(s:last_jump_cmd, s:last_jump_char)
     endif
 endfunction "}}}
 
