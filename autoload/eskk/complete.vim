@@ -22,7 +22,8 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 " Variables {{{
-let s:select_but_not_inserted = 0
+let s:selected = 0
+let s:inserted = 0
 let s:popup_func_table = {
     \   eskk#util#key2char("<CR>") : 's:do_enter_pre',
     \   eskk#util#key2char("<C-y>") : 's:close_pum_pre',
@@ -33,9 +34,9 @@ let s:popup_func_table = {
     \   eskk#util#key2char("<Up>") : 's:select_item',
     \   eskk#util#key2char("<Down>") : 's:select_item',
     \   eskk#util#key2char("<Space>") : 's:do_space',
-    \   eskk#util#key2char("<Tab>") : 's:select_item',
-    \   eskk#util#key2char("<C-n>") : 's:select_item',
-    \   eskk#util#key2char("<C-p>") : 's:select_item',
+    \   eskk#util#key2char("<Tab>") : 's:select_insert_item',
+    \   eskk#util#key2char("<C-n>") : 's:select_insert_item',
+    \   eskk#util#key2char("<C-p>") : 's:select_insert_item',
     \   eskk#util#key2char("<C-h>") : 's:do_backspace',
     \   eskk#util#key2char("<BS>") : 's:do_backspace',
     \ }
@@ -91,7 +92,8 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     endif
 endfunction "}}}
 function! s:initialize_variables() "{{{
-    let s:select_but_not_inserted = 0
+    let s:selected = 0
+    let s:inserted = 0
 endfunction "}}}
 function! s:complete(mode) "{{{
     " Get candidates.
@@ -186,7 +188,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
-    if s:select_but_not_inserted
+    if s:selected && !s:inserted
         " Insert selected item.
         let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-n><C-p>'))
         " Call `s:close_pum()` at next time.
@@ -195,7 +197,7 @@ function! s:close_pum_pre(stash) "{{{
         \   'eskk#util#identity',
         \   [eskk#util#key2char(eskk#get_named_map('<C-y>'))]
         \)
-        let s:select_but_not_inserted = 0
+        let s:selected = 0
     else
         call s:close_pum(a:stash)
     endif
@@ -210,7 +212,7 @@ function! s:close_pum(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
-    if s:select_but_not_inserted
+    if s:selected && !s:inserted
         " Insert selected item.
         let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-n><C-p>'))
         " Call `s:close_pum()` at next time.
@@ -219,7 +221,7 @@ function! s:do_enter_pre(stash) "{{{
         \   'eskk#util#identity',
         \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
         \)
-        let s:select_but_not_inserted = 0
+        let s:selected = 0
     else
         call s:do_enter(a:stash)
     endif
@@ -244,7 +246,12 @@ function! s:do_enter(stash) "{{{
     endfor
 endfunction "}}}
 function! s:select_item(stash) "{{{
-    let s:select_but_not_inserted = 1
+    let s:selected = 1
+    let a:stash.return = a:stash.char
+endfunction "}}}
+function! s:select_insert_item(stash) "{{{
+    let s:selected = 1
+    let s:inserted = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:do_space(stash) "{{{
