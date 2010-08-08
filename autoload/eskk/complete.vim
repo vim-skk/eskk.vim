@@ -98,7 +98,7 @@ function! s:complete(mode) "{{{
     let list = []
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    if g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
+    if g:eskk_kata_convert_to_hira_at_completion && a:mode ==# 'kata'
         let henkan_buf_str = buftable.filter_rom(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
         \   'rom_to_hira'
