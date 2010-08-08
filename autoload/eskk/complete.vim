@@ -117,8 +117,7 @@ function! s:complete(mode) "{{{
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
 
-    let pos = s:get_buftable_pos()[1]
-    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
+    let filter_str = s:get_inserted_str(0)
     let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
     
     for [yomigana, okuri_rom, kanji_list] in dict.search(key, has_okuri, okuri, okuri_rom)
@@ -286,9 +285,7 @@ function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
     let buftable = eskk#get_buftable()
-    let pos = s:get_buftable_pos()[1]
-
-    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
+    let filter_str = s:get_inserted_str(0)
     if filter_str =~# '[a-z]$'
         let [filter_str, rom_str] = [
         \   substitute(filter_str, '.$', '', ''),
@@ -315,9 +312,7 @@ function! s:set_selected_item() "{{{
     call s:initialize_variables()
 endfunction "}}}
 function! s:check_yomigana() "{{{
-    let buftable = eskk#get_buftable()
-    let [mode, pos] = s:get_buftable_pos()
-    let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
+    let filter_str = s:get_inserted_str(0)
 
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
@@ -341,6 +336,13 @@ function! s:get_buftable_pos() "{{{
     let [mode, pos] = l
     call eskk#util#assert(mode ==# 'i')
     return [mode, pos]
+endfunction "}}}
+function! s:get_inserted_str(with_marker) "{{{
+    let pos = s:get_buftable_pos()[1]
+    return getline('.')[
+    \   pos[2] - 1 + (a:with_marker ? 0 : strlen(g:eskk_marker_henkan))
+    \   : col('.') - 2
+    \]
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
