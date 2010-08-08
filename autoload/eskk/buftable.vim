@@ -127,6 +127,7 @@ let s:buftable = {
 \   '_old_str': '',
 \   '_begin_pos': [],
 \   '_henkan_phase': g:eskk#buftable#HENKAN_PHASE_NORMAL,
+\   '_set_begin_pos_at_rewrite': 0,
 \}
 
 
@@ -161,6 +162,13 @@ function! s:buftable.get_old_str() dict "{{{
 endfunction "}}}
 
 " Rewrite old string, Insert new string.
+"
+" FIXME
+" - Current implementation depends on &backspace
+" when inserted string has newline.
+"
+" TODO Rewrite mininum string as possible
+" when old or new string become too long.
 function! s:buftable.rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
 
@@ -173,33 +181,55 @@ function! s:buftable.rewrite() dict "{{{
         call eskk#util#logf('new display string = %s', string(new))
     endif
 
-    " FIXME
-    " - Current implementation depends on &backspace
-    " when inserted string has newline.
+    let set_begin_pos =
+    \   self._set_begin_pos_at_rewrite
+    \   && self._henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    let self._set_begin_pos_at_rewrite = 0
 
-    " TODO Rewrite mininum string as possible
-    " when old or new string become too long.
-    let inserted_str = kakutei . new
-    if old ==# inserted_str
-        return ''
-    elseif inserted_str == ''
-        return eval(self.make_remove_bs_expr())
-    elseif stridx(inserted_str, old) == 0
-        " When inserted_str == "foobar", old == "foo"
-        " Insert "bar".
+    if set_begin_pos
+        " Simplest algorithm.
+        " Delete current string, and insert new string.
         execute
         \   eskk#get_map_command(0)
         \   '<buffer>'
-        \   '<Plug>(eskk:internal:_inserted)'
-        \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
-        return "\<Plug>(eskk:internal:_inserted)"
+        \   '<Plug>(eskk:internal:_inserted_kakutei)'
+        \   eskk#util#str2map(kakutei)
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer>'
+        \   '<Plug>(eskk:internal:_inserted_new)'
+        \   eskk#util#str2map(new)
+
+        return
+        \   eval(self.make_remove_bs_expr())
+        \   . "\<Plug>(eskk:internal:_inserted_kakutei)"
+        \   . "\<Plug>(eskk:internal:set-begin-pos)"
+        \   . "\<Plug>(eskk:internal:_inserted_new)"
     else
-        execute
-        \   eskk#get_map_command(0)
-        \   '<buffer>'
-        \   '<Plug>(eskk:internal:_inserted)'
-        \   eskk#util#str2map(inserted_str)
-        return eval(self.make_remove_bs_expr()) . "\<Plug>(eskk:internal:_inserted)"
+        let inserted_str = kakutei . new
+        if old ==# inserted_str
+            return ''
+        elseif inserted_str == ''
+            return eval(self.make_remove_bs_expr())
+        elseif stridx(inserted_str, old) == 0
+            " When inserted_str == "foobar", old == "foo"
+            " Insert "bar".
+            execute
+            \   eskk#get_map_command(0)
+            \   '<buffer>'
+            \   '<Plug>(eskk:internal:_inserted)'
+            \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
+            return "\<Plug>(eskk:internal:_inserted)"
+        else
+            " Simplest algorithm.
+            " Delete current string, and insert new string.
+            execute
+            \   eskk#get_map_command(0)
+            \   '<buffer>'
+            \   '<Plug>(eskk:internal:_inserted)'
+            \   eskk#util#str2map(inserted_str)
+            return eval(self.make_remove_bs_expr()) . "\<Plug>(eskk:internal:_inserted)"
+        endif
     endif
 endfunction "}}}
 function! s:buftable.make_remove_bs_expr() dict "{{{
@@ -583,7 +613,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
             let undo_char = eskk#util#key2char(eskk#get_special_map('undo-key'))
             call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', [undo_char])
         endif
-        call self.set_begin_pos('.')
+        let self._set_begin_pos_at_rewrite = 1
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN

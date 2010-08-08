@@ -2310,6 +2310,10 @@ function! s:initialize() "{{{
         autocmd eskk InsertLeave * let &l:backspace = s:saved_backspace
     endif
     " }}}
+
+    " Create <Plug>(eskk:internal:set-begin-pos) {{{
+    noremap! <expr> <Plug>(eskk:internal:set-begin-pos) [eskk#get_buftable().set_begin_pos('.'), ''][1]
+    " }}}
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
