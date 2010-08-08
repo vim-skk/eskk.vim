@@ -60,11 +60,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         call s:initialize_variables()
         " :help getpos()
 
-        if eskk_mode ==# 'ascii'
-            return pos[2] - 1
-        else
-            return pos[2] - 1 + strlen(g:eskk_marker_henkan)
-        endif
+        return pos[2] - 1
     endif
 
     if eskk_mode ==# 'ascii'
@@ -121,6 +117,7 @@ function! s:complete(mode) "{{{
 
     let filter_str = s:get_inserted_str(0)
     let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
+    let marker = g:eskk_marker_popup . g:eskk_marker_henkan
     
     for [yomigana, okuri_rom, kanji_list] in dict.search(key, has_okuri, okuri, okuri_rom)
         if is_katakana
@@ -128,14 +125,14 @@ function! s:complete(mode) "{{{
         else
             " Add yomigana.
             if yomigana != ''
-                call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : a:mode})
+                call add(list, {'word' : marker . yomigana, 'abbr' : yomigana, 'menu' : a:mode})
             endif
         endif
 
         " Add kanji.
         for kanji in kanji_list[: 1]
             call add(list, {
-            \   'word': kanji.result,
+            \   'word': marker . kanji.result,
             \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
             \   'menu': 'kanji'
             \})
@@ -156,6 +153,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     " Check popupmenu-keys
     if has_key(s:popup_func_table, char)
         call {s:popup_func_table[char]}(a:stash)
+        call eskk#util#logf('%s -> %s', char, s:popup_func_table[char])
         return 0
     endif
 
@@ -314,7 +312,8 @@ function! s:set_selected_item() "{{{
     call okuri_buf_str.set_rom_str(rom_str)
 
     call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    call buftable.set_old_str(buftable.get_display_str())
+    " Do not rewrite anything.
+    call buftable.set_old_str(s:get_inserted_str(1))
 
     call s:initialize_variables()
 endfunction "}}}
@@ -345,11 +344,23 @@ function! s:get_buftable_pos() "{{{
     return [mode, pos]
 endfunction "}}}
 function! s:get_inserted_str(with_marker) "{{{
+    " TODO: Show warning if g:eskk_marker_popup
+    " and g:eskk_marker_henkan are the same.
+    " (where is the best place to show the warning?)
+
     let pos = s:get_buftable_pos()[1]
-    return getline('.')[
-    \   pos[2] - 1 + (a:with_marker ? 0 : strlen(g:eskk_marker_henkan))
-    \   : col('.') - 2
-    \]
+    let line = getline('.')
+    let [begin, end] = [pos[2] - 1, col('.') - 2]
+    if !a:with_marker
+        if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
+            let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
+        elseif line[begin : begin + strlen(g:eskk_marker_henkan) - 1] == g:eskk_marker_henkan
+            let begin += strlen(g:eskk_marker_henkan)
+        else
+            call eskk#util#assert(0, '404: marker not found')
+        endif
+    endif
+    return line[begin : end]
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
