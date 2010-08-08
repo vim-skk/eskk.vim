@@ -94,7 +94,9 @@ function! s:complete(mode) "{{{
     let list = []
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
-    if g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
+    let is_katakana = g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
+    
+    if is_katakana
         let henkan_buf_str = buftable.filter_rom(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
         \   'rom_to_hira'
@@ -116,9 +118,13 @@ function! s:complete(mode) "{{{
     let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
     
     for [yomigana, okuri_rom, kanji_list] in dict.search(key, has_okuri, okuri, okuri_rom)
-        " Add yomigana.
-        if yomigana != ''
-            call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : a:mode})
+        if is_katakana
+            call filter(kanji_list, 'stridx(v:val.result, ' . string(filter_str) . ') == 0')
+        else
+            " Add yomigana.
+            if yomigana != ''
+                call add(list, {'word' : yomigana, 'abbr' : yomigana, 'menu' : a:mode})
+            endif
         endif
 
         " Add kanji.
@@ -130,10 +136,6 @@ function! s:complete(mode) "{{{
             \})
         endfor
     endfor
-
-    if g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
-        call filter(list, 'stridx(v:val.word, ' . string(filter_str) . ') == 0')
-    endif
 
     if !empty(list)
         let inst = eskk#get_current_instance()
@@ -322,7 +324,7 @@ function! s:check_yomigana() "{{{
         return filter_str =~ '^[[:alnum:]-]\+$'
     else
         " Kanji mode.
-        return filter_str =~ '^[あ-んー。！？*]\+$'
+        return filter_str =~ '^[ア-ンあ-んー。！？*]\+$'
     endif
 endfunction "}}}
 function! s:get_buftable_pos() "{{{
