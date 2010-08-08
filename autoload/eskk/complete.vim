@@ -131,6 +131,10 @@ function! s:complete(mode) "{{{
         endfor
     endfor
 
+    if g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
+        call filter(list, 'stridx(v:val.word, ' . string(filter_str) . ') == 0')
+    endif
+
     if !empty(list)
         let inst = eskk#get_current_instance()
         let inst.has_started_completion = 1
