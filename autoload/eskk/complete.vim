@@ -273,7 +273,7 @@ function! s:do_space(stash) "{{{
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let pos = s:get_buftable_pos()[1]
-    if pos[2] + strlen(g:eskk_marker_henkan) >= col('.')
+    if pos[2] >= col('.')
         call s:close_pum(a:stash)
     endif
     let buftable = eskk#get_buftable()
