@@ -1984,6 +1984,8 @@ function! s:initialize() "{{{
     " }}}
 
     " Default mappings - :EskkMap {{{
+    silent! EskkMap -unique <C-^> <Plug>(eskk:toggle)
+
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=backspace-key -unique <C-h>
     silent! EskkMap -type=enter-key -unique <CR>
