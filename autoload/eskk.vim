@@ -2036,8 +2036,8 @@ function! s:initialize() "{{{
 
     silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
 
-    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" <Esc> eskk#escape_key()
-    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" <C-c> eskk#escape_key()
+    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" -unique <Esc> eskk#escape_key()
+    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" -unique <C-c> eskk#escape_key()
     " }}}
 
     " Map temporary key to keys to use in that mode {{{
