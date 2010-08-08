@@ -349,7 +349,8 @@ function! s:get_inserted_str(with_marker) "{{{
     " (where is the best place to show the warning?)
 
     let pos = s:get_buftable_pos()[1]
-    let line = getline('.')
+    let buftable = eskk#get_buftable()
+    let line = getline('.') . buftable.get_display_str(1)
     let [begin, end] = [pos[2] - 1, col('.') - 2]
     if !a:with_marker
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
