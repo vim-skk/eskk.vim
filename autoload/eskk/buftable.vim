@@ -173,8 +173,6 @@ function! s:buftable.rewrite() dict "{{{
         call eskk#util#logf('new display string = %s', string(new))
     endif
 
-    let bs_expr = self.make_remove_bs_expr()
-
     " FIXME
     " - Current implementation depends on &backspace
     " when inserted string has newline.
@@ -185,7 +183,7 @@ function! s:buftable.rewrite() dict "{{{
     if old ==# inserted_str
         return ''
     elseif inserted_str == ''
-        return eval(bs_expr)
+        return eval(self.make_remove_bs_expr())
     elseif stridx(inserted_str, old) == 0
         " When inserted_str == "foobar", old == "foo"
         " Insert "bar".
@@ -201,7 +199,7 @@ function! s:buftable.rewrite() dict "{{{
         \   '<buffer>'
         \   '<Plug>(eskk:internal:_inserted)'
         \   eskk#util#str2map(inserted_str)
-        return eval(bs_expr) . "\<Plug>(eskk:internal:_inserted)"
+        return eval(self.make_remove_bs_expr()) . "\<Plug>(eskk:internal:_inserted)"
     endif
 endfunction "}}}
 function! s:buftable.make_remove_bs_expr() dict "{{{
