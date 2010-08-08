@@ -1845,6 +1845,22 @@ function! eskk#set_cursor_color() "{{{
     endif
 endfunction "}}}
 
+
+" <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f)
+function! eskk#jump_one_char(cmd) "{{{
+    if a:cmd !=# 't' && a:cmd !=# 'f'
+        return
+    endif
+    let is_t = a:cmd ==# 't'
+
+    let char = eskk#util#getchar()
+    let rest_line = getline('.')[col('.') :]
+    let idx = stridx(rest_line, char)
+    if idx != -1
+        call cursor(line('.'), col('.') + idx + 1 - is_t)
+    endif
+endfunction "}}}
+
 " }}}
 
 " Exceptions {{{
