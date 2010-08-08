@@ -1848,16 +1848,32 @@ endfunction "}}}
 
 " <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f)
 function! eskk#jump_one_char(cmd) "{{{
-    if a:cmd !=# 't' && a:cmd !=# 'f'
+    if a:cmd !=? 't' && a:cmd !=? 'f'
         return
     endif
-    let is_t = a:cmd ==# 't'
+    let is_t = a:cmd ==? 't'
+    let is_forward = a:cmd ==# tolower(a:cmd)
 
     let char = eskk#util#getchar()
-    let rest_line = getline('.')[col('.') :]
-    let idx = stridx(rest_line, char)
-    if idx != -1
-        call cursor(line('.'), col('.') + idx + 1 - is_t)
+    if is_forward
+        if col('.') == col('$')
+            return
+        endif
+        let rest_line = getline('.')[col('.') :]
+        let idx = stridx(rest_line, char)
+        if idx != -1
+            call cursor(line('.'), col('.') + idx + 1 - is_t)
+        endif
+    else
+        if col('.') == 1
+            return
+        endif
+        let rest_line = getline('.')[: col('.') - 2]
+        let idx = strridx(rest_line, char)
+        if idx != -1
+            Dump [idx, is_t]
+            call cursor(line('.'), idx + 1 + is_t)
+        endif
     endif
 endfunction "}}}
 
