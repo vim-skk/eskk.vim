@@ -1871,7 +1871,6 @@ function! eskk#jump_one_char(cmd) "{{{
         let rest_line = getline('.')[: col('.') - 2]
         let idx = strridx(rest_line, char)
         if idx != -1
-            Dump [idx, is_t]
             call cursor(line('.'), idx + 1 + is_t)
         endif
     endif
