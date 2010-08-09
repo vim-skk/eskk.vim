@@ -20,51 +20,53 @@ License:
 ==============================================================================
 CONTENTS						*eskk-contents*
 
-Introduction		|eskk-introduction|
-Interface			|eskk-interface|
-  Keymappings		|eskk-keymappings|
-  Variables			|eskk-variables|
-  Commands			|eskk-commands|
-  Functions			|eskk-functions|
-Modes				|eskk-modes|
-Phases				|eskk-phases|
-Completion			|eskk-completion|
+概要		|eskk-introduction|
+インターフェース			|eskk-interface|
+  キーマッピング		|eskk-keymappings|
+  変数			|eskk-variables|
+  コマンド			|eskk-commands|
+  関数			|eskk-functions|
+モード				|eskk-modes|
+フェーズ				|eskk-phases|
+補完			|eskk-completion|
 FAQ					|eskk-faq|
 TODO				|eskk-todo|
 Changelog			|eskk-changelog|
 
 
 ==============================================================================
-INTRODUCTION						*eskk-introduction* {{{
+概要						*eskk-introduction* {{{
 
-|eskk| aims to provide powerful input method platform in Vim.
+|eskk| はVimでパワフルなIM環境を実現することを目指して作られた、
+まったく新しいプラグインです。
 
-We also maintain skk.vim (|skk|, if you have installed).
-But we decided to create eskk,
-because skk.vim is mostly unmaintainable
-due to Vim 6 compatible code.
+私達はskk.vimというプラグインもメンテナンスしています。
+(もしあなたがインストールしていれば |skk| で見られるはずです)
 
-eskk provides enhanced and extendable platform
-such as multibyte text in Vim.
+しかしskk.vimはVim 6でも動くよう互換性を図るため、
+ほとんどメンテナンス不可能になっていました。
+そこで私達はeskkを開発することを決めました。
+
+eskkは拡張された、そしてさらなる拡張性を秘めたマルチバイト環境を提供します。
 
 }}}
 ==============================================================================
-INTERFACE				*eskk-interface* {{{
+インターフェース				*eskk-interface* {{{
 ------------------------------------------------------------------------------
-KEYMAPPINGS					*eskk-keymappings* {{{
+キーマッピング					*eskk-keymappings* {{{
 
 <Plug>(eskk:enable) (icl)		*<Plug>(eskk:enable)*
 <Plug>(eskk:disable) (icl)		*<Plug>(eskk:disable)*
 <Plug>(eskk:toggle) (icl)		*<Plug>(eskk:toggle)*
 
-	Keymappings version of |eskk#enable()|, |eskk#disable()|, |eskk#toggle()|.
+	|eskk#enable()|, |eskk#disable()|, |eskk#toggle()|のキーマッピング版。
 
 
 <Plug>(eskk:save-dictionary) (n)		*<Plug>(eskk:save-dictionary)*
 
-	Save SKK dictionary if it's modified.
-	(one or more new words are registered)
-	This is keymapping version of|:EskkUpdateDictionary|,  |eskk#update_dictionary()|.
+	SKK辞書が変更されていたら (1つ以上の単語が登録されていれば)
+	ユーザ辞書に保存する。
+	|:EskkUpdateDictionary| や |eskk#update_dictionary()| のキーマッピング版。
 
 <Plug>(eskk:alpha-t) (n)		*<Plug>(eskk:alpha-t)*
 <Plug>(eskk:alpha-f) (n)		*<Plug>(eskk:alpha-f)*
@@ -73,12 +75,11 @@ KEYMAPPINGS					*eskk-keymappings* {{{
 <Plug>(eskk:alpha-,) (n)		*<Plug>(eskk:alpha-,)*
 <Plug>(eskk:alpha-;) (n)		*<Plug>(eskk:alpha-;)*
 
-	Vim script implementation of |t|, |f|, |T|, |F|, |,|, |;|.
-	Why I implemented this in Vim script
-	is that |language-mapping| is enabled for above commands' arguments
-	when lang-mode (see |i_CTRL-^|) is on.
+	|t|, |f|, |T|, |F|, |,|, |;| コマンドのVimスクリプト実装。
+	これを実装した理由は、lang-mode (|i_CTRL-^| 参照) がオンの時に
+	上のコマンドの引数において|language-mapping| が有効になるから。
 
-	If you want those behaviors in |Normal-mode|, you can use them.
+	もし|Normal-mode|での上のコマンドの動作を望んでいるなら有用なはず。
 	 >
     function! ToggleEskkMap(enable)
         if a:enable
@@ -109,40 +110,40 @@ KEYMAPPINGS					*eskk-keymappings* {{{
     \   [0],
     \)
 <
-	Paste above code in your .vimrc.
-	That will create <buffer> keymappings only when eskk is enabled,
-	and delete those keymappings when eskk is disabled.
+	上のコードを.vimrcに貼り付けると、
+	eskkが有効になった時のみ<buffer>なキーマッピングを用意し、
+	無効になった時にキーマッピングを削除するようになる。
 
 
-Default keymappings				*eskk-default-keymappings*
+デフォルトキーマッピング				*eskk-default-keymappings*
 ----------------------
 <C-j> => <Plug>(eskk:toggle)   (icl)
 
 }}}
 ------------------------------------------------------------------------------
-VARIABLES					*eskk-variables* {{{
+変数					*eskk-variables* {{{
 
 
-SKK dicitionary
+SKK辞書に関する変数
 ------------------
 
 g:eskk_dictionary			*g:eskk_dictionary*
-							(Default: See below)
-	User SKK dictionary's information.
+							(デフォルト値: 下を参照)
+	ユーザ辞書の情報。
 
-	This variable value is:
-		If user defined:
-			String: >
+	この変数の定義は：
+		もしユーザが定義していたら：
+			文字列型なら： >
 				let g:eskk_dictionary = {
 				\	'path': {value},
 				\	'sorted': 0,
 				\	'encoding': 'utf-8',
 				\}
-<			Dictionary:
-				Keep user settings
-				and extend missing keys of {value}
-				by "not defined" value.
-		not defined: >
+<			辞書型なら：
+				ユーザの辞書型を保存しながら
+				「定義していなかったら」の値で
+				補う形で追加していく
+		定義していなかったら： >
 				let g:eskk_dictionary = {
 				\	'path': "~/.skk-jisyo",
 				\	'sorted': 0,
@@ -150,23 +151,24 @@ g:eskk_dictionary			*g:eskk_dictionary*
 				\}
 <
 
-g:eskk_large_dictionary		*g:eskk_large_dictionary*
-							(Default: See below)
-	System SKK dictionary's information.
 
-	This variable value is:
-		If user defined:
-			String: >
+g:eskk_large_dictionary		*g:eskk_large_dictionary*
+							(デフォルト値: 下を参照)
+	システム辞書の情報。
+
+	この変数の定義は:
+		もしユーザが定義していたら:
+			文字列型なら: >
 				let g:eskk_large_dictionary = {
 				\	'path': {value},
 				\	'sorted': 0,
 				\	'encoding': 'euc-jp',
 				\}
-<			Dictionary:
-				Keep user settings
-				and extend missing keys of {value}
-				by "not defined" value.
-		not defined: >
+<			辞書型なら:
+				ユーザの辞書型を保存しながら
+				「定義していなかったら」の値で
+				補う形で追加していく
+		定義していなかったら: >
 				let g:eskk_large_dictionary = {
 				\	'path': "/usr/local/share/SKK/SKK-JISYO",
 				\	'sorted': 0,
@@ -174,69 +176,68 @@ g:eskk_large_dictionary		*g:eskk_large_dictionary*
 				\}
 
 g:eskk_backup_dictionary	*g:eskk_backup_dictionary*
-							(Default: g:eskk_dictionary.path . ".BAK")
+							(デフォルト値: g:eskk_dictionary.path . ".BAK")
 	(TODO)
 
 g:eskk_auto_save_dictionary_at_exit		*g:eskk_auto_save_dictionary_at_exit*
-							(Default: 1)
-	If true and one or more words are registered in SKK dictionary,
-	Automatically save its modification to |g:eskk_dictionary|
-	when Vim exits (|VimLeave|).
+							(デフォルト値: 1)
+	もし真なら1つ以上の単語が登録されていたら、
+	Vimの終了時 (|VimLeave|) に自動的にユーザ辞書 (|g:eskk_dictionary|) へ保存する。
 
 
-Some kanji conversion keys, Annotation
+漢字変換、アノテーションに関する変数
 -----------------------------------------
 
 g:eskk_select_cand_keys		*g:eskk_select_cand_keys*
-							(Default: "asdfjkl")
-	Keys to select candidates at |eskk-select-candidates|.
-	This value is String consisted of each character of keys.
+							(デフォルト値: "asdfjkl")
+	|eskk-select-candidates| で候補を選択するキー。
+	キーは各文字をつなげた文字列として与えられる。
 
 g:eskk_show_candidates_count	*g:eskk_show_candidates_count*
-							(Default: 4)
-	At |eskk-henkan-select-phase|,
-	If the number user typed the henkan key exceeded
-	this number,
-	Switch to |eskk-select-candidates|.
+							(デフォルト値: 4)
+	|eskk-henkan-select-phase| において、
+	もしユーザが変換キーをタイプした回数がこの値を上回るなら、
+	|eskk-select-candidates| に移る。
 
 g:eskk_show_annotation			*g:eskk_show_annotation*
-							(Default: 0)
-	If true, show annotation at |eskk-select-candidates|.
+							(デフォルト値: 0)
+	もし真なら、|eskk-select-candidates| の時にアノテーションを表示する。
 
 
-Keymappings
+キーマッピングに関する変数
 -----------
 
 g:eskk_no_default_mappings		*g:eskk_no_default_mappings*
-							(Default: 0)
-	If true, eskk does not prepare any |eskk-default-keymappings| for user.
+							(デフォルト値: 0)
+	もし真なら、eskkは デフォルトキーマッピング (|eskk-default-keymappings|)
+	を用意しない。
 
 g:eskk_dont_map_default_if_already_mapped	*g:eskk_dont_map_default_if_already_mapped*
-							(Default: 1)
-	If true and keys are already mapped, do not map default keys.
+							(デフォルト値: 1)
+	もし真でデフォルトキーマッピングがマッピングされていたら、
+	マッピングしない。
 
 g:eskk_mapped_keys				*g:eskk_mapped_keys*
-							(Default: EskkDefaultMappedKeys())
-	List of String consisted of |key-notation| (not keycode).
-	See |EskkDefaultMappedKeys()|'s value.
-	Note that you have to write "<Bar>" when you write "|".
+							(デフォルト値: EskkDefaultMappedKeys())
+	(keycodeではなく) |key-notation| の文字列を含むリスト。
+	|EskkDefaultMappedKeys()| の値参照。
+	"|"を含めたい場合、"<Bar>"と書く必要があることに気を付けること。
 
 
-Mode
+モードに関する変数
 -------
 
 g:eskk_initial_mode			*g:eskk_initial_mode*
-							(Default: "hira")
-	When |eskk#enable()| is called,
-	eskk sets this mode to initial value.
+							(デフォルト値: "hira")
+	|eskk#enable()| が呼ばれた時、
+	eskkはこの値をモードの初期値とする。
 
 g:eskk_statusline_mode_strings	*g:eskk_statusline_mode_strings*
-							(Default: See below)
-	Current mode's strings at |'statusline'|.
-	Statusline string of modes.
-	This changes |eskk#get_stl()|'s return value.
+							(デフォルト値: 下を参照)
+	|'statusline'| に表示される現在のモードの文字列。
+	これは |eskk#get_stl()| の返り値を変える。
 
-	Default value is: >
+	デフォルト値は： >
 	let g:eskk_statusline_mode_strings = {
 	\	'hira': 'あ',
 	\	'kata': 'ア',
@@ -247,12 +248,11 @@ g:eskk_statusline_mode_strings	*g:eskk_statusline_mode_strings*
 	\}
 <
 g:eskk_mode_use_tables			*g:eskk_mode_use_tables*
-							(Default: See below)
-	Keys are modes.
-	Values are table names.
-	See |eskk-table| to create own table.
+							(デフォルト値: 下を参照)
+	キーはモード、値はテーブルの名前。
+	モードを作る場合には |eskk-table| を参照のこと。
 
-	Default value is: >
+	デフォルト値は： >
 	let g:eskk_mode_use_tables = {
 	\	'hira': 'rom_to_hira',
 	\	'kata': 'rom_to_kata',
@@ -261,58 +261,58 @@ g:eskk_mode_use_tables			*g:eskk_mode_use_tables*
 	\}
 <
 
-Table
+テーブルに関する変数
 --------
 
 g:eskk_cache_table_map			*g:eskk_cache_table_map*
-							(Default: 1)
+							(デフォルト値: 1)
 
 g:eskk_cache_table_candidates			*g:eskk_cache_table_candidates*
-							(Default: 1)
+							(デフォルト値: 1)
 
 
-Markers
+マーカーに関する変数
 ----------
 
 g:eskk_marker_henkan			*g:eskk_marker_henkan*
-							(Default: "▽")
+							(デフォルト値: "▽")
 
 g:eskk_marker_okuri			*g:eskk_marker_okuri*
-							(Default: "*")
+							(デフォルト値: "*")
 
 g:eskk_marker_henkan_select			*g:eskk_marker_henkan_select*
-							(Default: "▼")
+							(デフォルト値: "▼")
 
 g:eskk_marker_jisyo_touroku			*g:eskk_marker_jisyo_touroku*
-							(Default: "?")
+							(デフォルト値: "?")
 	(TODO)
 
 g:eskk_marker_popup			*g:eskk_marker_popup*
-							(Default: "#")
+							(デフォルト値: "#")
 
 
-Completion
+補完に関する変数
 -------------
 
 g:eskk_enable_completion		*g:eskk_enable_completion*
-							(Default: 0)
+							(デフォルト値: 0)
 
 g:eskk_candidates_max			*g:eskk_candidates_max*
-							(Default: 10)
+							(デフォルト値: 10)
 
 g:eskk_compl_enter_send_keys			*g:eskk_compl_enter_send_keys*
-							(Default: ["<CR>"])
+							(デフォルト値: ["<CR>"])
 
 
-Cursor color
+カーソルの色に関する変数
 ---------------
 
 g:eskk_use_color_cursor			*g:eskk_use_color_cursor*
-							(Default: 1)
+							(デフォルト値: 1)
 
 g:eskk_cursor_color			*g:eskk_cursor_color*
-							(Default: See below)
-	Default value is: >
+							(デフォルト値: 下を参照)
+	デフォルト値は： >
     " ascii: ivory4:#8b8b83, gray:#bebebe
     " hira: coral4:#8b3e2f, pink:#ffc0cb
     " kata: forestgreen:#228b22, green:#00ff00
@@ -327,46 +327,46 @@ g:eskk_cursor_color			*g:eskk_cursor_color*
     \}
 <
 
-Misc.
+その他の変数
 --------
 
 g:eskk_egg_like_newline			*g:eskk_egg_like_newline*
-							(Default: 0)
+							(デフォルト値: 0)
 
 g:eskk_keep_state			*g:eskk_keep_state*
-							(Default: 0)
+							(デフォルト値: 0)
 
 g:eskk_keep_state_beyond_buffer		*g:eskk_keep_state_beyond_buffer*
-							(Default: 0)
+							(デフォルト値: 0)
 
 g:eskk_revert_henkan_style			*g:eskk_revert_henkan_style*
-							(Default: "okuri")
+							(デフォルト値: "okuri")
 
 g:eskk_delete_implies_kakutei			*g:eskk_delete_implies_kakutei*
-							(Default: 0)
+							(デフォルト値: 0)
 
 g:eskk_rom_input_style			*g:eskk_rom_input_style*
-							(Default: "skk")
+							(デフォルト値: "skk")
 
 g:eskk_auto_henkan_at_okuri_match			*g:eskk_auto_henkan_at_okuri_match*
-							(Default: 1)
+							(デフォルト値: 1)
 
 g:eskk_error_log_file				*g:eskk_error_log_file*
-							(Default: "~/eskk-error.log")
+							(デフォルト値: "~/eskk-error.log")
 
 g:eskk_set_undo_point				*g:eskk_set_undo_point*
-							(Default: See below)
-	Default value is: >
+							(デフォルト値: 下を参照)
+	デフォルト値は： >
 	let g:eskk_set_undo_point = {
 	\	'sticky': 1,
 	\	'kakutei': 1,
 	\}
 <
 g:eskk_context_control				*g:eskk_context_control*
-							(Default: [])
+							(デフォルト値: [])
 
 g:eskk_fix_extra_okuri				*g:eskk_fix_extra_okuri*
-							(Default: 1)
+							(デフォルト値: 1)
 	 >
 	▽おくr {henkan-key}
 <
@@ -374,51 +374,50 @@ g:eskk_fix_extra_okuri				*g:eskk_fix_extra_okuri*
 	▽おく*r
 <
 g:eskk_ignore_continuous_sticky		*g:eskk_ignore_continuous_sticky*
-							(Default: 1)
+							(デフォルト値: 1)
 
 g:eskk_convert_at_exact_match		*g:eskk_convert_at_exact_match*
-							(Default: 0)
+							(デフォルト値: 0)
 
 g:eskk_kata_convert_to_hira_at_henkan	*g:eskk_kata_convert_to_hira_at_henkan*
-							(Default: 1)
-	In |eskk-kata-mode|, Convert hiragana to katakana
-	before looking up SKK dictionary.
-	Therefore, eskk will find the candidates in SKK dictionary.
-	(Because SKK dictionary only contains pairs of hiragana and candidates)
+							(デフォルト値: 1)
+	|eskk-kata-mode|において、SKK辞書を探索する前にカタカナをひらがなに変換する。
+	したがってeskkはSKK辞書から候補を探し出すことができるようになる。
+	(SKK辞書はひらがなとその候補しか含まないため)
 
 g:eskk_kata_convert_to_hira_at_completion	*g:eskk_kata_convert_to_hira_at_completion*
-							(Default: 1)
-	Same as |g:eskk_kata_convert_to_hira_at_henkan|,
-	But this works at |eskk-completion|.
+							(デフォルト値: 1)
+	|g:eskk_kata_convert_to_hira_at_henkan| と同じだが、
+	|eskk-completion| において働く。
 
 
 
 
 
-Debugging variables
+デバッグ用変数
 ----------------------
 
 g:eskk_debug			*g:eskk_debug*
-						(Default: 0)
-	If true, output debugging messages to command-line
-	or |g:eskk_debug_file| (if exists).
+						(デフォルト値: 0)
+	もし真なら、デバッグメッセージをコマンドラインか
+	|g:eskk_debug_file| (もし定義されていたら) に出力する。
 
 g:eskk_debug_file		*g:eskk_debug_file*
-						(Default: does not exist)
-	This variable will not be defined at startup.
-	String for the path of debug file.
+						(デフォルト値: does not exist)
+	この変数は自動的には定義されない。
+	デバッグ用ファイルへのパス (文字列型)。
 
 g:eskk_debug_wait_ms	*g:eskk_debug_wait_ms*
-						(Default: 0)
-	If this variable is greater than 0,
-	Do |:sleep| for this value (millisecond).
+						(デフォルト値: 0)
+	もしこの変数が0より大きければ、
+	指定時間 |:sleep| する。(ミリ秒)
 
 g:eskk_version			*g:eskk_version*
-	Current version number string.
+	現在のバージョンの数値を表す文字列。
 
 }}}
 ------------------------------------------------------------------------------
-COMMANDS					*eskk-commands* {{{
+コマンド					*eskk-commands* {{{
 
 :EskkMap						*:EskkMap*
 :EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
@@ -426,7 +425,7 @@ COMMANDS					*eskk-commands* {{{
 
 }}}
 ------------------------------------------------------------------------------
-FUNCTIONS					*eskk-functions* {{{
+関数					*eskk-functions* {{{
 
 eskk#enable()			*eskk#enable()*
 eskk#disable()			*eskk#disable()*
@@ -450,54 +449,54 @@ EskkDefaultMappedKeys()			*EskkDefaultMappedKeys()*
 }}}
 }}}
 ==============================================================================
-MODES					*eskk-modes* {{{
+モード					*eskk-modes* {{{
 
 ------------------------------------------------------------------------------
-HIRA MODE				*eskk-hira-mode* {{{
+hiraモード				*eskk-hira-mode* {{{
 }}}
 ------------------------------------------------------------------------------
-KATA MODE				*eskk-kata-mode* {{{
+kataモード				*eskk-kata-mode* {{{
 }}}
 ------------------------------------------------------------------------------
-HANKATA MODE				*eskk-hankata-mode* {{{
+hankataモード				*eskk-hankata-mode* {{{
 }}}
 ------------------------------------------------------------------------------
-ABBREV MODE				*eskk-abbrev-mode* {{{
+abbrevモード				*eskk-abbrev-mode* {{{
 }}}
 ------------------------------------------------------------------------------
-ASCII MODE				*eskk-ascii-mode* {{{
+asciiモード				*eskk-ascii-mode* {{{
 }}}
 ------------------------------------------------------------------------------
-ZENEI MODE				*eskk-zenei-mode* {{{
-}}}
-
-}}}
-==============================================================================
-PHASES					*eskk-phases* {{{
-
-------------------------------------------------------------------------------
-NORMAL PHASE			*eskk-normal-phase* {{{
-}}}
-------------------------------------------------------------------------------
-HENKAN PHASE			*eskk-henkan-phase* {{{
-}}}
-------------------------------------------------------------------------------
-OKURI PHASE			*eskk-okuri-phase* {{{
-}}}
-------------------------------------------------------------------------------
-HENKAN SELECT PHASE			*eskk-henkan-select-phase* {{{
+zeneiモード				*eskk-zenei-mode* {{{
 }}}
 
 }}}
 ==============================================================================
-COMPLETION				*eskk-completion* {{{
+フェーズ					*eskk-phases* {{{
+
+------------------------------------------------------------------------------
+ノーマルフェーズ			*eskk-normal-phase* {{{
+}}}
+------------------------------------------------------------------------------
+変換フェーズ			*eskk-henkan-phase* {{{
+}}}
+------------------------------------------------------------------------------
+送り仮名フェーズ			*eskk-okuri-phase* {{{
+}}}
+------------------------------------------------------------------------------
+変換選択フェーズ			*eskk-henkan-select-phase* {{{
+}}}
+
+}}}
+==============================================================================
+補完				*eskk-completion* {{{
 }}}
 ==============================================================================
 FAQ					*eskk-faq* {{{
 
 									*eskk-tfTF*
-Q. I can't use |t|, |f|, |T|, |F| commands when eskk is enabled.
-A. See |<Plug>(eskk:alpha-t)| and similar keymappings.
+Q. eskk が有効になっていると |t|, |f|, |T|, |F|が使えません。
+A. |<Plug>(eskk:alpha-t)| とその周辺のマッピングを参考にしてください。
 
 }}}
 ==============================================================================
