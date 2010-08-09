@@ -1855,7 +1855,7 @@ function! eskk#jump_one_char(cmd, ...) "{{{
         return
     endif
     let is_t = a:cmd ==? 't'
-    let is_forward = a:cmd ==# tolower(a:cmd)
+    let is_forward = eskk#util#is_lower(a:cmd)
     let s:last_jump_cmd = a:cmd
 
     if a:0 == 0
@@ -1885,11 +1885,22 @@ function! eskk#jump_one_char(cmd, ...) "{{{
         endif
     endif
 endfunction "}}}
-function! eskk#repeat_last_jump() "{{{
+function! eskk#repeat_last_jump(cmd) "{{{
+    if a:cmd !=# ',' && a:cmd !=# ';'
+        return
+    endif
     if type(s:last_jump_cmd) == type("")
     \   && type(s:last_jump_char) == type("")
-        call eskk#jump_one_char(s:last_jump_cmd, s:last_jump_char)
+        return
     endif
+
+    if a:cmd ==# ','
+        let s:last_jump_char = s:invert_direction(s:last_jump_char)
+    endif
+    call eskk#jump_one_char(s:last_jump_cmd, s:last_jump_char)
+endfunction "}}}
+function! s:invert_direction(cmd) "{{{
+    return eskk#util#is_lower(a:cmd) ? toupper(a:cmd) : tolower(a:cmd)
 endfunction "}}}
 
 " }}}
