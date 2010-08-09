@@ -86,12 +86,14 @@ KEYMAPPINGS					*eskk-keymappings* {{{
             nmap <buffer> f <Plug>(eskk:alpha-f)
             nmap <buffer> T <Plug>(eskk:alpha-T)
             nmap <buffer> F <Plug>(eskk:alpha-F)
+            nmap <buffer> , <Plug>(eskk:alpha-,)
             nmap <buffer> ; <Plug>(eskk:alpha-;)
         else
             nunmap <buffer> t
             nunmap <buffer> f
             nunmap <buffer> T
             nunmap <buffer> F
+            nunmap <buffer> ,
             nunmap <buffer> ;
         endif
     endfunction
