@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 417))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 418))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -162,6 +162,7 @@ endif
 if !exists('g:eskk_cache_table_map')
     let g:eskk_cache_table_map = 1
 endif
+
 if !exists('g:eskk_cache_table_candidates')
     let g:eskk_cache_table_candidates = 1
 endif
@@ -185,62 +186,6 @@ endif
 
 if !exists("g:eskk_marker_popup")
     let g:eskk_marker_popup = '#'
-endif
-
-" Misc.
-if !exists("g:eskk_egg_like_newline")
-    let g:eskk_egg_like_newline = 0
-endif
-
-if !exists("g:eskk_keep_state")
-    let g:eskk_keep_state = 0
-endif
-
-if !exists("g:eskk_revert_henkan_style")
-    let g:eskk_revert_henkan_style = 'okuri'
-endif
-
-if !exists("g:eskk_delete_implies_kakutei")
-    let g:eskk_delete_implies_kakutei = 0
-endif
-
-if !exists("g:eskk_rom_input_style")
-    let g:eskk_rom_input_style = 'skk'
-endif
-
-if !exists("g:eskk_auto_henkan_at_okuri_match")
-    let g:eskk_auto_henkan_at_okuri_match = 1
-endif
-
-if !exists("g:eskk_error_log_file")
-    let g:eskk_error_log_file = '~/eskk-error.log'
-endif
-
-if !exists("g:eskk_set_undo_point")
-    let g:eskk_set_undo_point = {
-    \   'sticky': 1,
-    \   'kakutei': 1,
-    \}
-endif
-
-if !exists("g:eskk_context_control")
-    let g:eskk_context_control = []
-endif
-
-if !exists('g:eskk_keep_state_beyond_buffer')
-    let g:eskk_keep_state_beyond_buffer = 0
-endif
-
-if !exists("g:eskk_fix_extra_okuri")
-    let g:eskk_fix_extra_okuri = 1
-endif
-
-if !exists('g:eskk_ignore_continuous_sticky')
-    let g:eskk_ignore_continuous_sticky = 1
-endif
-
-if !exists('g:eskk_convert_at_exact_match')
-    let g:eskk_convert_at_exact_match = 0
 endif
 
 " Completion
@@ -274,6 +219,62 @@ if !exists('g:eskk_cursor_color')
     \   'abbrev': '#4169e1',
     \   'zenei': '#ffd700',
     \}
+endif
+
+" Misc.
+if !exists("g:eskk_egg_like_newline")
+    let g:eskk_egg_like_newline = 0
+endif
+
+if !exists("g:eskk_keep_state")
+    let g:eskk_keep_state = 0
+endif
+
+if !exists('g:eskk_keep_state_beyond_buffer')
+    let g:eskk_keep_state_beyond_buffer = 0
+endif
+
+if !exists("g:eskk_revert_henkan_style")
+    let g:eskk_revert_henkan_style = 'okuri'
+endif
+
+if !exists("g:eskk_delete_implies_kakutei")
+    let g:eskk_delete_implies_kakutei = 0
+endif
+
+if !exists("g:eskk_rom_input_style")
+    let g:eskk_rom_input_style = 'skk'
+endif
+
+if !exists("g:eskk_auto_henkan_at_okuri_match")
+    let g:eskk_auto_henkan_at_okuri_match = 1
+endif
+
+if !exists("g:eskk_error_log_file")
+    let g:eskk_error_log_file = '~/eskk-error.log'
+endif
+
+if !exists("g:eskk_set_undo_point")
+    let g:eskk_set_undo_point = {
+    \   'sticky': 1,
+    \   'kakutei': 1,
+    \}
+endif
+
+if !exists("g:eskk_context_control")
+    let g:eskk_context_control = []
+endif
+
+if !exists("g:eskk_fix_extra_okuri")
+    let g:eskk_fix_extra_okuri = 1
+endif
+
+if !exists('g:eskk_ignore_continuous_sticky')
+    let g:eskk_ignore_continuous_sticky = 1
+endif
+
+if !exists('g:eskk_convert_at_exact_match')
+    let g:eskk_convert_at_exact_match = 0
 endif
 
 " }}}
