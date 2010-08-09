@@ -1347,8 +1347,8 @@ function! eskk#set_mode(next_mode) "{{{
     let self = eskk#get_current_instance()
     call eskk#util#logf("mode change: %s => %s", self.mode, a:next_mode)
     if !eskk#is_supported_mode(a:next_mode)
-        call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
-        call eskk#util#warnf('s:available_modes = %s', string(s:available_modes))
+        call eskk#util#logf("warning: mode '%s' is not supported.", a:next_mode)
+        call eskk#util#logf('warning: s:available_modes = %s', string(s:available_modes))
         return
     endif
 
@@ -1549,7 +1549,7 @@ function! s:filter(self, char) "{{{
         call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
         " Check irregular circumstance.
         if !eskk#is_supported_mode(self.mode)
-            call eskk#util#warn('current mode is not supported: ' . self.mode)
+            call eskk#util#log('warning: current mode is not supported: ' . self.mode)
             sleep 1
         endif
     endif
@@ -1697,9 +1697,7 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        for l in lines
-            call eskk#util#warn(l)
-        endfor
+        call eskk#util#logf("warning: Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight

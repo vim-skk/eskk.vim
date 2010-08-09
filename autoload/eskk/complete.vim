@@ -83,7 +83,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 
         return s:complete(eskk_mode)
     else
-        call eskk#util#warn('No completion supported.')
+        call eskk#util#log('warning: No completion supported.')
         return []
     endif
 endfunction "}}}
