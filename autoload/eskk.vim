@@ -1590,6 +1590,9 @@ function! s:filter(self, char) "{{{
 
     finally
         call eskk#throw_event('filter-finalize')
+        if g:eskk_debug
+            call eskk#util#logstrf('buftable.dump() = %s', buftable.dump())
+        endif
     endtry
 endfunction "}}}
 function! s:call_filter_fn(stash) "{{{
