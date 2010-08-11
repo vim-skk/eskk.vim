@@ -881,8 +881,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         call eskk#register_temp_event(
         \   'filter-begin',
-        \   eskk#util#get_local_func('clear_filtered_string', s:SID_PREFIX),
-        \   []
+        \   eskk#util#get_local_func('clear_buffer_string', s:SID_PREFIX),
+        \   [g:eskk#buftable#HENKAN_PHASE_NORMAL]
         \)
 
         if g:eskk_convert_at_exact_match
@@ -1080,9 +1080,9 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     endwhile
 endfunction "}}}
 " Clear filtered string when eskk#filter()'s finalizing.
-function! s:clear_filtered_string() "{{{
+function! s:clear_buffer_string(phase) "{{{
     let buftable = eskk#get_buftable()
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if buftable.get_henkan_phase() ==# a:phase
         let buf_str = buftable.get_current_buf_str()
         call buf_str.clear_matched()
     endif
