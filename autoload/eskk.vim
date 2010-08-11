@@ -590,7 +590,7 @@ function! eskk#get_current_instance() "{{{
     let ns = s:get_inst_namespace()
     if !s:exists_instance()
         let ns.eskk_instances = [s:eskk_new()]
-        " Index number for current instance in s:eskk_instances.
+        " Index number for current instance.
         let ns.eskk_instance_id = 0
     endif
     return ns.eskk_instances[ns.eskk_instance_id]
@@ -1847,7 +1847,7 @@ function! eskk#set_cursor_color() "{{{
 endfunction "}}}
 
 
-" <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f)
+" <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f), ...
 function! eskk#jump_one_char(cmd, ...) "{{{
     if a:cmd !=? 't' && a:cmd !=? 'f'
         return
