@@ -39,6 +39,7 @@ let s:popup_func_table = {
     \   eskk#util#key2char("<C-p>") : 's:select_insert_item',
     \   eskk#util#key2char("<C-h>") : 's:do_backspace',
     \   eskk#util#key2char("<BS>") : 's:do_backspace',
+    \   eskk#util#key2char("<Esc>") : 's:do_escape',
     \ }
 " }}}
 
@@ -83,7 +84,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 
         return s:complete(eskk_mode)
     else
-        call eskk#util#warn('No completion supported.')
+        call eskk#util#log('warning: No completion supported.')
         return []
     endif
 endfunction "}}}
@@ -282,6 +283,20 @@ function! s:do_backspace(stash) "{{{
     endif
     let buftable = eskk#get_buftable()
     call buftable.do_backspace(a:stash)
+endfunction "}}}
+function! s:do_escape(stash) "{{{
+    call s:set_selected_item()
+
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#util#identity',
+    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+    \)
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#util#identity',
+    \   [eskk#util#key2char(eskk#get_named_map('<Esc>'))]
+    \)
 endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char

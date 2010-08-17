@@ -590,7 +590,7 @@ function! eskk#get_current_instance() "{{{
     let ns = s:get_inst_namespace()
     if !s:exists_instance()
         let ns.eskk_instances = [s:eskk_new()]
-        " Index number for current instance in s:eskk_instances.
+        " Index number for current instance.
         let ns.eskk_instance_id = 0
     endif
     return ns.eskk_instances[ns.eskk_instance_id]
@@ -766,6 +766,9 @@ function! s:asym_filter.filter(stash) dict "{{{
             \   [eskk#util#key2char(eskk#get_named_map(tolower(char)))]
             \)
             return
+        elseif eskk#is_special_lhs(char, 'escape-key')
+            call buftable.do_escape(a:stash)
+            return
         else
             " Fall through.
         endif
@@ -881,8 +884,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         call eskk#register_temp_event(
         \   'filter-begin',
-        \   eskk#util#get_local_func('clear_filtered_string', s:SID_PREFIX),
-        \   []
+        \   eskk#util#get_local_func('clear_buffer_string', s:SID_PREFIX),
+        \   [g:eskk#buftable#HENKAN_PHASE_NORMAL]
         \)
 
         if g:eskk_convert_at_exact_match
@@ -1080,9 +1083,9 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     endwhile
 endfunction "}}}
 " Clear filtered string when eskk#filter()'s finalizing.
-function! s:clear_filtered_string() "{{{
+function! s:clear_buffer_string(phase) "{{{
     let buftable = eskk#get_buftable()
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if buftable.get_henkan_phase() ==# a:phase
         let buf_str = buftable.get_current_buf_str()
         call buf_str.clear_matched()
     endif
@@ -1174,10 +1177,9 @@ function! eskk#disable() "{{{
 
     let self.enabled = 0
 
-    let kakutei_str = eskk#kakutei_str()
-
     if mode() =~# '^[ic]$'
-        return kakutei_str . "\<C-^>"
+        let buftable = eskk#get_buftable()
+        return buftable.generate_kakutei_str() . "\<C-^>"
     else
         return eskk#emulate_toggle_im()
     endif
@@ -1312,34 +1314,9 @@ function! eskk#unmap_all_keys() "{{{
     unlet s:has_mapped[bufnr('%')]
 endfunction "}}}
 
-" Manipulate display string.
-function! eskk#remove_display_str() "{{{
-    let current_str = eskk#get_buftable().get_display_str()
-
-    " NOTE: This function return value is not remapped.
-    let bs = eskk#get_special_key('backspace-key')
-    call eskk#util#assert(bs != '')
-
-    return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
-endfunction "}}}
-function! eskk#kakutei_str() "{{{
-    return eskk#remove_display_str() . eskk#get_buftable().get_display_str(0)
-endfunction "}}}
-
 " Big letter keys
 function! eskk#is_big_letter(char) "{{{
     return a:char =~# '^[A-Z]$'
-endfunction "}}}
-
-" Escape key
-function! eskk#escape_key() "{{{
-    let kakutei_str = eskk#kakutei_str()
-
-    " NOTE: This function return value is not remapped.
-    let esc = eskk#get_special_key('escape-key')
-    call eskk#util#assert(esc != '')
-
-    return kakutei_str . eskk#util#key2char(esc)
 endfunction "}}}
 
 " Mode
@@ -1347,8 +1324,8 @@ function! eskk#set_mode(next_mode) "{{{
     let self = eskk#get_current_instance()
     call eskk#util#logf("mode change: %s => %s", self.mode, a:next_mode)
     if !eskk#is_supported_mode(a:next_mode)
-        call eskk#util#warnf("mode '%s' is not supported.", a:next_mode)
-        call eskk#util#warnf('s:available_modes = %s', string(s:available_modes))
+        call eskk#util#logf("warning: mode '%s' is not supported.", a:next_mode)
+        call eskk#util#logf('warning: s:available_modes = %s', string(s:available_modes))
         return
     endif
 
@@ -1549,7 +1526,7 @@ function! s:filter(self, char) "{{{
         call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
         " Check irregular circumstance.
         if !eskk#is_supported_mode(self.mode)
-            call eskk#util#warn('current mode is not supported: ' . self.mode)
+            call eskk#util#log('warning: current mode is not supported: ' . self.mode)
             sleep 1
         endif
     endif
@@ -1586,10 +1563,13 @@ function! s:filter(self, char) "{{{
 
     catch
         call s:write_error_log_file(v:exception, v:throwpoint, a:char)
-        return eskk#escape_key() . a:char
+        return buftable.do_escape() . a:char
 
     finally
         call eskk#throw_event('filter-finalize')
+        if g:eskk_debug
+            call eskk#util#logstrf('buftable.dump() = %s', buftable.dump())
+        endif
     endtry
 endfunction "}}}
 function! s:call_filter_fn(stash) "{{{
@@ -1697,9 +1677,7 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        for l in lines
-            call eskk#util#warn(l)
-        endfor
+        call eskk#util#logf("warning: Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight
@@ -1849,7 +1827,7 @@ function! eskk#set_cursor_color() "{{{
 endfunction "}}}
 
 
-" <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f)
+" <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f), ...
 function! eskk#jump_one_char(cmd, ...) "{{{
     if a:cmd !=? 't' && a:cmd !=? 'f'
         return
@@ -2062,8 +2040,8 @@ function! s:initialize() "{{{
 
     silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
 
-    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" -unique <Esc> eskk#escape_key()
-    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" -unique <C-c> eskk#escape_key()
+    silent! EskkMap -noremap -map-if="mode() ==# 'i'" -unique <Esc>
+    silent! EskkMap -noremap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
     " Map temporary key to keys to use in that mode {{{

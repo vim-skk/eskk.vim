@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 419))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 426))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -36,42 +36,51 @@ if !exists('g:eskk_debug_wait_ms')
 endif
 
 " Dictionary
-if !exists("g:eskk_dictionary")
-    let g:eskk_dictionary = "~/.skk-jisyo"
+let s:default = {
+\   'path': "~/.skk-jisyo",
+\   'sorted': 1,
+\   'encoding': 'utf-8',
+\}
+if exists('g:eskk_dictionary')
+    if type(g:eskk_dictionary) == type("")
+        let s:default.path = g:eskk_dictionary
+        unlet g:eskk_dictionary
+        let g:eskk_dictionary = s:default
+    elseif type(g:eskk_dictionary) == type({})
+        call extend(g:eskk_dictionary, s:default, "keep")
+    else
+        call eskk#util#warn(
+        \   "g:eskk_dictionary's type is either String or Dictionary."
+        \)
+    endif
+else
+    let g:eskk_dictionary = s:default
 endif
-if type(g:eskk_dictionary) == type("")
-    let s:temp = g:eskk_dictionary
-    unlet g:eskk_dictionary
-    let g:eskk_dictionary = {
-    \   'path': s:temp,
-    \   'sorted': 0,
-    \   'encoding': 'utf-8',
-    \}
-    unlet s:temp
-elseif type(g:eskk_dictionary) != type({})
-    call eskk#util#warn(
-    \   "g:eskk_dictionary's type is either String or Dictionary."
-    \)
-endif
+unlet s:default
 
 
-if !exists("g:eskk_large_dictionary")
-    let g:eskk_large_dictionary = "/usr/local/share/skk/SKK-JISYO.L"
+let s:default = {
+\   'path': "/usr/local/share/skk/SKK-JISYO.L",
+\   'sorted': 1,
+\   'encoding': 'euc-jp',
+\}
+if exists('g:eskk_large_dictionary')
+    if type(g:eskk_large_dictionary) == type("")
+        let s:default.path = g:eskk_large_dictionary
+        unlet g:eskk_large_dictionary
+        let g:eskk_large_dictionary = s:default
+    elseif type(g:eskk_large_dictionary) == type({})
+        call extend(g:eskk_large_dictionary, s:default, "keep")
+    else
+        call eskk#util#warn(
+        \   "g:eskk_large_dictionary's type is either String or Dictionary."
+        \)
+    endif
+else
+    let g:eskk_large_dictionary = s:default
 endif
-if type(g:eskk_large_dictionary) == type("")
-    let s:temp = g:eskk_large_dictionary
-    unlet g:eskk_large_dictionary
-    let g:eskk_large_dictionary = {
-    \   'path': s:temp,
-    \   'sorted': 1,
-    \   'encoding': 'euc-jp',
-    \}
-    unlet s:temp
-elseif type(g:eskk_large_dictionary) != type({})
-    call eskk#util#warn(
-    \   "g:eskk_large_dictionary's type is either String or Dictionary."
-    \)
-endif
+unlet s:default
+
 
 if !exists("g:eskk_backup_dictionary")
     let g:eskk_backup_dictionary = g:eskk_dictionary.path . ".BAK"
