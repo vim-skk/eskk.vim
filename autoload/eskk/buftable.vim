@@ -105,6 +105,11 @@ function! s:buffer_string.get_input_rom() dict "{{{
     return self.get_matched_rom() . self.get_rom_str()
 endfunction "}}}
 
+function! s:buffer_string.empty() dict "{{{
+    return self.get_rom_str() == ''
+    \   && empty(self.get_matched())
+endfunction "}}}
+
 
 function! s:buffer_string.clear() dict "{{{
     call self.clear_rom_str()
@@ -916,6 +921,16 @@ function! s:buftable.set_begin_pos(expr) dict "{{{
     else
         call eskk#util#logf("warning: called eskk from mode '%s'.", mode())
     endif
+endfunction "}}}
+
+
+function! s:buftable.empty() dict "{{{
+    for buf_str in map(self.get_all_phases(), 'self.get_buf_str(v:val)')
+        if !buf_str.empty()
+            return 0
+        endif
+    endfor
+    return 1
 endfunction "}}}
 
 
