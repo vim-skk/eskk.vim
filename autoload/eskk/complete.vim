@@ -366,7 +366,7 @@ function! s:get_buftable_str(with_marker) "{{{
     let pos = s:get_buftable_pos()[1]
     let buftable = eskk#get_buftable()
     let line = getline('.') . buftable.get_display_str(1)
-    let [begin, end] = [pos[2] - 1, col('.') - 2]
+    let begin = pos[2] - 1
     if !a:with_marker
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
             let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
@@ -376,7 +376,7 @@ function! s:get_buftable_str(with_marker) "{{{
             call eskk#util#assert(0, '404: marker not found')
         endif
     endif
-    return line[begin : end]
+    return strpart(line, begin)
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
