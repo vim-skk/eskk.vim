@@ -784,6 +784,15 @@ endfunction "}}}
 function! s:buftable.do_q_key() dict "{{{
     return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
+function! s:buftable.do_escape(stash) dict "{{{
+    let kakutei_str = eskk#kakutei_str()
+
+    " NOTE: This function return value is not remapped.
+    let esc = eskk#get_special_key('escape-key')
+    call eskk#util#assert(esc != '')
+
+    let a:stash.return = kakutei_str . eskk#util#key2char(esc)
+endfunction "}}}
 
 " TODO: These functions are very similar. Refactoring them.
 function! s:buftable.convert_rom_str(phases) dict "{{{

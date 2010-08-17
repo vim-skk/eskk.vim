@@ -766,6 +766,9 @@ function! s:asym_filter.filter(stash) dict "{{{
             \   [eskk#util#key2char(eskk#get_named_map(tolower(char)))]
             \)
             return
+        elseif eskk#is_special_lhs(char, 'escape-key')
+            call buftable.do_escape(a:stash)
+            return
         else
             " Fall through.
         endif
@@ -1331,17 +1334,6 @@ function! eskk#is_big_letter(char) "{{{
     return a:char =~# '^[A-Z]$'
 endfunction "}}}
 
-" Escape key
-function! eskk#escape_key() "{{{
-    let kakutei_str = eskk#kakutei_str()
-
-    " NOTE: This function return value is not remapped.
-    let esc = eskk#get_special_key('escape-key')
-    call eskk#util#assert(esc != '')
-
-    return kakutei_str . eskk#util#key2char(esc)
-endfunction "}}}
-
 " Mode
 function! eskk#set_mode(next_mode) "{{{
     let self = eskk#get_current_instance()
@@ -1586,7 +1578,7 @@ function! s:filter(self, char) "{{{
 
     catch
         call s:write_error_log_file(v:exception, v:throwpoint, a:char)
-        return eskk#escape_key() . a:char
+        return buftable.do_escape() . a:char
 
     finally
         call eskk#throw_event('filter-finalize')
@@ -2063,8 +2055,8 @@ function! s:initialize() "{{{
 
     silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
 
-    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" -unique <Esc> eskk#escape_key()
-    silent! EskkMap -expr -noremap -map-if="mode() ==# 'i'" -unique <C-c> eskk#escape_key()
+    silent! EskkMap -noremap -map-if="mode() ==# 'i'" -unique <Esc>
+    silent! EskkMap -noremap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
     " Map temporary key to keys to use in that mode {{{
