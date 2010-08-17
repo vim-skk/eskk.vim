@@ -1177,10 +1177,9 @@ function! eskk#disable() "{{{
 
     let self.enabled = 0
 
-    let kakutei_str = eskk#kakutei_str()
-
     if mode() =~# '^[ic]$'
-        return kakutei_str . "\<C-^>"
+        let buftable = eskk#get_buftable()
+        return buftable.generate_kakutei_str() . "\<C-^>"
     else
         return eskk#emulate_toggle_im()
     endif
@@ -1313,20 +1312,6 @@ function! eskk#unmap_all_keys() "{{{
     endfor
 
     unlet s:has_mapped[bufnr('%')]
-endfunction "}}}
-
-" Manipulate display string.
-function! eskk#remove_display_str() "{{{
-    let current_str = eskk#get_buftable().get_display_str()
-
-    " NOTE: This function return value is not remapped.
-    let bs = eskk#get_special_key('backspace-key')
-    call eskk#util#assert(bs != '')
-
-    return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
-endfunction "}}}
-function! eskk#kakutei_str() "{{{
-    return eskk#remove_display_str() . eskk#get_buftable().get_display_str(0)
 endfunction "}}}
 
 " Big letter keys

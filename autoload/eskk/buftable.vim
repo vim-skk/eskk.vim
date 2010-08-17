@@ -785,7 +785,7 @@ function! s:buftable.do_q_key() dict "{{{
     return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_escape(stash) dict "{{{
-    let kakutei_str = eskk#kakutei_str()
+    let kakutei_str = self.generate_kakutei_str()
 
     " NOTE: This function return value is not remapped.
     let esc = eskk#get_special_key('escape-key')
@@ -886,6 +886,18 @@ function! s:buftable.clear_all() dict "{{{
     endfor
 endfunction "}}}
 
+function! s:buftable.remove_display_str() dict "{{{
+    let current_str = self.get_display_str()
+
+    " NOTE: This function return value is not remapped.
+    let bs = eskk#get_special_key('backspace-key')
+    call eskk#util#assert(bs != '')
+
+    return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
+endfunction "}}}
+function! s:buftable.generate_kakutei_str() dict "{{{
+    return self.remove_display_str() . self.get_display_str(0)
+endfunction "}}}
 
 function! s:buftable.get_begin_pos() dict "{{{
     return self._begin_pos
