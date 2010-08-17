@@ -116,7 +116,7 @@ function! s:complete(mode) "{{{
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
 
-    let filter_str = s:get_inserted_str(0)
+    let filter_str = s:get_buftable_str(0)
     let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
     let marker = g:eskk_marker_popup . g:eskk_marker_henkan
     
@@ -305,7 +305,7 @@ function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
     let buftable = eskk#get_buftable()
-    let filter_str = s:get_inserted_str(0)
+    let filter_str = s:get_buftable_str(0)
     if filter_str =~# '[a-z]$'
         let [filter_str, rom_str] = [
         \   substitute(filter_str, '.$', '', ''),
@@ -328,12 +328,12 @@ function! s:set_selected_item() "{{{
 
     call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     " Do not rewrite anything.
-    call buftable.set_old_str(s:get_inserted_str(1))
+    call buftable.set_old_str(s:get_buftable_str(1))
 
     call s:initialize_variables()
 endfunction "}}}
 function! s:check_yomigana() "{{{
-    let filter_str = s:get_inserted_str(0)
+    let filter_str = s:get_buftable_str(0)
 
     if eskk#get_mode() ==# 'ascii'
         " ASCII mode.
@@ -358,7 +358,7 @@ function! s:get_buftable_pos() "{{{
     call eskk#util#assert(mode ==# 'i')
     return [mode, pos]
 endfunction "}}}
-function! s:get_inserted_str(with_marker) "{{{
+function! s:get_buftable_str(with_marker) "{{{
     " TODO: Show warning if g:eskk_marker_popup
     " and g:eskk_marker_henkan are the same.
     " (where is the best place to show the warning?)
