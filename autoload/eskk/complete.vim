@@ -45,7 +45,6 @@ let s:popup_func_table = {
 
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
-    let eskk_mode = eskk#get_mode()
     if a:findstart
         let buftable_pos = s:get_buftable_pos()
         if empty(buftable_pos)
@@ -64,6 +63,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1
     endif
 
+    let eskk_mode = eskk#get_mode()
     if eskk_mode ==# 'ascii'
         " ASCII mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
@@ -365,6 +365,11 @@ function! s:get_buftable_str(with_marker) "{{{
 
     let pos = s:get_buftable_pos()[1]
     let buftable = eskk#get_buftable()
+    " NOTE: getline('.') returns string without string after a:base
+    " while matching the head of input string,
+    " but eskk#complete#eskkcomplete() returns `pos[2] - 1`
+    " it always does not match to input string
+    " so getline('.') returns whole string.
     let line = getline('.') . buftable.get_display_str(1)
     let begin = pos[2] - 1
     if !a:with_marker
