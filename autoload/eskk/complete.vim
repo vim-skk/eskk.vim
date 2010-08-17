@@ -363,15 +363,13 @@ function! s:get_buftable_str(with_marker) "{{{
     " and g:eskk_marker_henkan are the same.
     " (where is the best place to show the warning?)
 
-    let pos = s:get_buftable_pos()[1]
-    let buftable = eskk#get_buftable()
     " NOTE: getline('.') returns string without string after a:base
     " while matching the head of input string,
     " but eskk#complete#eskkcomplete() returns `pos[2] - 1`
     " it always does not match to input string
     " so getline('.') returns whole string.
-    let line = getline('.') . buftable.get_display_str(1)
-    let begin = pos[2] - 1
+    let line = getline('.')
+    let begin = s:get_buftable_pos()[1][2] - 1
     if !a:with_marker
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
             let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
