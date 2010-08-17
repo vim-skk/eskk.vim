@@ -64,6 +64,8 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     endif
 
     let eskk_mode = eskk#get_mode()
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
     if eskk_mode ==# 'ascii'
         " ASCII mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
@@ -73,6 +75,8 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
         return s:complete(eskk_mode)
     elseif eskk_mode =~# 'hira\|kata'
+    \   && eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
+    \   && !buftable.empty()
         " Kanji mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
