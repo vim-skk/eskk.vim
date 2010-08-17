@@ -75,11 +75,15 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
         return s:complete(eskk_mode)
     elseif eskk_mode =~# 'hira\|kata'
-    \   && eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
-    \   && !buftable.empty()
         " Kanji mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
+        if !eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
+            return []
+        endif
+        if buftable.empty()
+            return []
+        endif
         " Do not complete while inputting rom string.
         if a:base =~ '\a$'
             call eskk#util#log('eskk#complete#eskkcomplete(): kanji - skip.')
