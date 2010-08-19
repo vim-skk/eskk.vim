@@ -1942,40 +1942,43 @@ function! s:initialize() "{{{
     " }}}
 
     " Write timestamp to debug file {{{
-    call eskk#util#log('')
+    function! s:initialize_debug_file()
+        call eskk#util#log('')
 
-    call eskk#util#log(repeat('-', 80))
+        call eskk#util#log(repeat('-', 80))
 
-    call eskk#util#log(strftime('%c'))
+        call eskk#util#log(strftime('%c'))
 
-    let lface = "( ._.) <"
-    let v = printf(" g:eskk_version = %s /", string(g:eskk_version))
-    call eskk#util#log(repeat(' ', strlen(lface)).' '.repeat('-', strlen(v) - 1))
-    call eskk#util#log(lface.v)
-    call eskk#util#log(repeat(' ', strlen(lface)).repeat('-', strlen(v) - 1))
+        let lface = "( ._.) <"
+        let v = printf(" g:eskk_version = %s /", string(g:eskk_version))
+        call eskk#util#log(repeat(' ', strlen(lface)).' '.repeat('-', strlen(v) - 1))
+        call eskk#util#log(lface.v)
+        call eskk#util#log(repeat(' ', strlen(lface)).repeat('-', strlen(v) - 1))
 
-    let rface = "> ('-' )"
-    let v = printf("/ v:version = %s ", string(v:version))
-    call eskk#util#log(' '.repeat('-', strlen(v) - 1))
-    call eskk#util#log(v.rface)
-    call eskk#util#log(repeat('-', strlen(v) - 1))
+        let rface = "> ('-' )"
+        let v = printf("/ v:version = %s ", string(v:version))
+        call eskk#util#log(' '.repeat('-', strlen(v) - 1))
+        call eskk#util#log(v.rface)
+        call eskk#util#log(repeat('-', strlen(v) - 1))
 
-    call eskk#util#log('')
-    let n = eskk#util#rand(3)
-    if n ==# 0
-        call eskk#util#log("e = extended,enhanced,environment,...enlightenment?")
-    elseif n ==# 1
-        call eskk#util#log('SKK = I')
-        call eskk#util#log('e * SKK = Inf.')
-    else
-        call eskk#util#log("( '-')                  ('-' )")
-        call eskk#util#log('(/ *_*)/******************(*_* )*********')
-    endif
+        call eskk#util#log('')
+        let n = eskk#util#rand(3)
+        if n ==# 0
+            call eskk#util#log("e = extended,enhanced,environment,...enlightenment?")
+        elseif n ==# 1
+            call eskk#util#log('SKK = I')
+            call eskk#util#log('e * SKK = Inf.')
+        else
+            call eskk#util#log("( '-')                  ('-' )")
+            call eskk#util#log('(/ *_*)/******************(*_* )*********')
+        endif
 
-    call eskk#util#log(repeat('-', 80))
+        call eskk#util#log(repeat('-', 80))
 
-    call eskk#util#log('')
-    call eskk#util#log('')
+        call eskk#util#log('')
+        call eskk#util#log('')
+    endfunction
+    call s:initialize_debug_file()
     " }}}
 
     " Egg-like-newline {{{
@@ -2083,200 +2086,206 @@ function! s:initialize() "{{{
     " }}}
 
     " Register builtin-modes. {{{
-    call eskk#util#log('Registering builtin modes...')
+    function! s:initialize_builtin_modes()
+        call eskk#util#log('Registering builtin modes...')
 
-    function! s:set_current_to_begin_pos() "{{{
-        call eskk#get_buftable().set_begin_pos('.')
-    endfunction "}}}
+        function! s:set_current_to_begin_pos() "{{{
+            call eskk#get_buftable().set_begin_pos('.')
+        endfunction "}}}
 
 
-    " 'ascii' mode {{{
-    call eskk#register_mode('ascii')
-    let dict = eskk#get_mode_structure('ascii')
+        " 'ascii' mode {{{
+        call eskk#register_mode('ascii')
+        let dict = eskk#get_mode_structure('ascii')
 
-    function! dict.filter(stash)
-        let this = eskk#get_mode_structure('ascii')
-        if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
-            call eskk#set_mode('hira')
-        else
-            if a:stash.char !=# "\<BS>"
-            \   && a:stash.char !=# "\<C-h>"
-                if a:stash.char =~# '\w'
-                    if !has_key(this.sandbox, 'already_set_for_this_word')
-                        " Set start col of word.
-                        call s:set_current_to_begin_pos()
-                        let this.sandbox.already_set_for_this_word = 1
-                    endif
-                else
-                    if has_key(this.sandbox, 'already_set_for_this_word')
-                        unlet this.sandbox.already_set_for_this_word
+        function! dict.filter(stash)
+            let this = eskk#get_mode_structure('ascii')
+            if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
+                call eskk#set_mode('hira')
+            else
+                if a:stash.char !=# "\<BS>"
+                \   && a:stash.char !=# "\<C-h>"
+                    if a:stash.char =~# '\w'
+                        if !has_key(this.sandbox, 'already_set_for_this_word')
+                            " Set start col of word.
+                            call s:set_current_to_begin_pos()
+                            let this.sandbox.already_set_for_this_word = 1
+                        endif
+                    else
+                        if has_key(this.sandbox, 'already_set_for_this_word')
+                            unlet this.sandbox.already_set_for_this_word
+                        endif
                     endif
                 endif
-            endif
 
-            if has_key(g:eskk_mode_use_tables, 'ascii')
+                if has_key(g:eskk_mode_use_tables, 'ascii')
+                    if !has_key(this.sandbox, 'table')
+                        let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
+                    endif
+                    let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
+                else
+                    let a:stash.return = a:stash.char
+                endif
+            endif
+        endfunction
+
+        call eskk#validate_mode_structure('ascii')
+        " }}}
+
+        " 'zenei' mode {{{
+        call eskk#register_mode('zenei')
+        let dict = eskk#get_mode_structure('zenei')
+
+        function! dict.filter(stash)
+            let this = eskk#get_mode_structure('zenei')
+            if eskk#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
+                call eskk#set_mode('hira')
+            else
                 if !has_key(this.sandbox, 'table')
-                    let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
+                    let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
                 endif
                 let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
-            else
-                let a:stash.return = a:stash.char
             endif
-        endif
-    endfunction
+        endfunction
 
-    call eskk#validate_mode_structure('ascii')
-    " }}}
+        call eskk#register_event(
+        \   'enter-mode-abbrev',
+        \   eskk#util#get_local_func('set_current_to_begin_pos', s:SID_PREFIX),
+        \   []
+        \)
 
-    " 'zenei' mode {{{
-    call eskk#register_mode('zenei')
-    let dict = eskk#get_mode_structure('zenei')
+        call eskk#validate_mode_structure('zenei')
+        " }}}
 
-    function! dict.filter(stash)
-        let this = eskk#get_mode_structure('zenei')
-        if eskk#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
-            call eskk#set_mode('hira')
-        else
-            if !has_key(this.sandbox, 'table')
-                let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
-            endif
-            let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
-        endif
-    endfunction
+        " 'hira' mode {{{
+        call eskk#register_mode('hira')
+        let dict = eskk#get_mode_structure('hira')
 
-    call eskk#register_event(
-    \   'enter-mode-abbrev',
-    \   eskk#util#get_local_func('set_current_to_begin_pos', s:SID_PREFIX),
-    \   []
-    \)
+        call extend(dict, eskk#create_asym_filter(g:eskk_mode_use_tables.hira))
 
-    call eskk#validate_mode_structure('zenei')
-    " }}}
+        call eskk#validate_mode_structure('hira')
+        " }}}
 
-    " 'hira' mode {{{
-    call eskk#register_mode('hira')
-    let dict = eskk#get_mode_structure('hira')
+        " 'kata' mode {{{
+        call eskk#register_mode('kata')
+        let dict = eskk#get_mode_structure('kata')
 
-    call extend(dict, eskk#create_asym_filter(g:eskk_mode_use_tables.hira))
+        call extend(dict, eskk#create_asym_filter(g:eskk_mode_use_tables.kata))
 
-    call eskk#validate_mode_structure('hira')
-    " }}}
+        call eskk#validate_mode_structure('kata')
+        " }}}
 
-    " 'kata' mode {{{
-    call eskk#register_mode('kata')
-    let dict = eskk#get_mode_structure('kata')
+        " 'hankata' mode {{{
+        call eskk#register_mode('hankata')
+        let dict = eskk#get_mode_structure('hankata')
 
-    call extend(dict, eskk#create_asym_filter(g:eskk_mode_use_tables.kata))
+        call extend(dict, eskk#create_asym_filter(g:eskk_mode_use_tables.hankata))
 
-    call eskk#validate_mode_structure('kata')
-    " }}}
+        call eskk#validate_mode_structure('hankata')
+        " }}}
 
-    " 'hankata' mode {{{
-    call eskk#register_mode('hankata')
-    let dict = eskk#get_mode_structure('hankata')
+        " 'abbrev' mode {{{
+        call eskk#register_mode('abbrev')
+        let dict = eskk#get_mode_structure('abbrev')
 
-    call extend(dict, eskk#create_asym_filter(g:eskk_mode_use_tables.hankata))
+        function! dict.filter(stash) "{{{
+            let char = a:stash.char
+            let buftable = eskk#get_buftable()
+            let this = eskk#get_mode_structure('abbrev')
+            let buf_str = buftable.get_current_buf_str()
+            let phase = buftable.get_henkan_phase()
 
-    call eskk#validate_mode_structure('hankata')
-    " }}}
-
-    " 'abbrev' mode {{{
-    call eskk#register_mode('abbrev')
-    let dict = eskk#get_mode_structure('abbrev')
-
-    function! dict.filter(stash) "{{{
-        let char = a:stash.char
-        let buftable = eskk#get_buftable()
-        let this = eskk#get_mode_structure('abbrev')
-        let buf_str = buftable.get_current_buf_str()
-        let phase = buftable.get_henkan_phase()
-
-        " Handle special characters.
-        " These characters are handled regardless of current phase.
-        if eskk#is_special_lhs(char, 'backspace-key')
-            if buf_str.get_rom_str() == ''
-                " If backspace-key was pressed at empty string,
-                " leave abbrev mode.
-                " TODO: Back to previous mode?
-                call eskk#set_mode('hira')
-            else
-                call buftable.do_backspace(a:stash)
-            endif
-            return
-        elseif eskk#is_special_lhs(char, 'enter-key')
-            call buftable.do_enter(a:stash)
-            call eskk#set_mode('hira')
-            return
-        else
-            " Fall through.
-        endif
-
-        " Handle other characters.
-        if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-            if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
-                call buftable.do_henkan(a:stash)
-            else
-                call buf_str.push_rom_str(char)
-            endif
-        elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-            if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
-                call buftable.choose_next_candidate(a:stash)
+            " Handle special characters.
+            " These characters are handled regardless of current phase.
+            if eskk#is_special_lhs(char, 'backspace-key')
+                if buf_str.get_rom_str() == ''
+                    " If backspace-key was pressed at empty string,
+                    " leave abbrev mode.
+                    " TODO: Back to previous mode?
+                    call eskk#set_mode('hira')
+                else
+                    call buftable.do_backspace(a:stash)
+                endif
                 return
-            elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
-                call buftable.choose_prev_candidate(a:stash)
+            elseif eskk#is_special_lhs(char, 'enter-key')
+                call buftable.do_enter(a:stash)
+                call eskk#set_mode('hira')
                 return
             else
-                call buftable.push_kakutei_str(buftable.get_display_str(0))
-                call buftable.clear_all()
-                call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#util#identity',
-                \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
-                \)
-
-                " Leave abbrev mode.
-                " TODO: Back to previous mode?
-                call eskk#set_mode('hira')
+                " Fall through.
             endif
-        else
-            let msg = printf("'abbrev' mode does not support phase %d.", phase)
-            throw eskk#internal_error(['eskk'], msg)
-        endif
-    endfunction "}}}
-    function! dict.get_init_phase() "{{{
-        return g:eskk#buftable#HENKAN_PHASE_HENKAN
-    endfunction "}}}
-    function! dict.get_supported_phases() "{{{
-        return [
-        \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
-        \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
-        \]
-    endfunction "}}}
 
-    call eskk#register_event(
-    \   'enter-mode-abbrev',
-    \   eskk#util#get_local_func('set_current_to_begin_pos', s:SID_PREFIX),
-    \   []
-    \)
+            " Handle other characters.
+            if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+                if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
+                    call buftable.do_henkan(a:stash)
+                else
+                    call buf_str.push_rom_str(char)
+                endif
+            elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+                if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
+                    call buftable.choose_next_candidate(a:stash)
+                    return
+                elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
+                    call buftable.choose_prev_candidate(a:stash)
+                    return
+                else
+                    call buftable.push_kakutei_str(buftable.get_display_str(0))
+                    call buftable.clear_all()
+                    call eskk#register_temp_event(
+                    \   'filter-redispatch-post',
+                    \   'eskk#util#identity',
+                    \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
+                    \)
 
-    call eskk#validate_mode_structure('abbrev')
-    " }}}
+                    " Leave abbrev mode.
+                    " TODO: Back to previous mode?
+                    call eskk#set_mode('hira')
+                endif
+            else
+                let msg = printf("'abbrev' mode does not support phase %d.", phase)
+                throw eskk#internal_error(['eskk'], msg)
+            endif
+        endfunction "}}}
+        function! dict.get_init_phase() "{{{
+            return g:eskk#buftable#HENKAN_PHASE_HENKAN
+        endfunction "}}}
+        function! dict.get_supported_phases() "{{{
+            return [
+            \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
+            \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
+            \]
+        endfunction "}}}
+
+        call eskk#register_event(
+        \   'enter-mode-abbrev',
+        \   eskk#util#get_local_func('set_current_to_begin_pos', s:SID_PREFIX),
+        \   []
+        \)
+
+        call eskk#validate_mode_structure('abbrev')
+        " }}}
+    endfunction
+    call s:initialize_builtin_modes()
     " }}}
 
     " Register builtin-tables. {{{
-    call eskk#util#log('Registering builtin tables...')
-    " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-    let tables = eskk#table#get_all_tables()
-    call eskk#util#logstrf('tables = %s', tables)
-    let tabletmpl = {}    " dummy object
-    function! tabletmpl.init() dict
-        call self.add_from_dict(eskk#table#{self.name}#load())
+    function! s:initialize_builtin_tables()
+        call eskk#util#log('Registering builtin tables...')
+        " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
+        let tables = eskk#table#get_all_tables()
+        call eskk#util#logstrf('tables = %s', tables)
+        let tabletmpl = {}    " dummy object
+        function! tabletmpl.init() dict
+            call self.add_from_dict(eskk#table#{self.name}#load())
+        endfunction
+        for name in tables
+            let table = eskk#table#create(name)
+            let table.init = tabletmpl.init
+            call table.register()
+        endfor
     endfunction
-    for name in tables
-        let table = eskk#table#create(name)
-        let table.init = tabletmpl.init
-        call table.register()
-    endfor
+    call s:initialize_builtin_tables()
     " }}}
 
     " BufEnter: Map keys if enabled. {{{
