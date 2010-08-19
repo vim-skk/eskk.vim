@@ -404,7 +404,7 @@ function! s:get_buftable_str(with_marker) "{{{
         return ''
     endif
     let begin = pos[2] - 1
-    if !a:with_marker
+    if !a:with_marker && s:has_marker()
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
             let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
         elseif line[begin : begin + strlen(g:eskk_marker_henkan) - 1] == g:eskk_marker_henkan
@@ -414,6 +414,17 @@ function! s:get_buftable_str(with_marker) "{{{
         endif
     endif
     return strpart(line, begin)
+endfunction "}}}
+function! s:has_marker() "{{{
+    return
+    \   eskk#get_mode() =~# 'hira\|kata'
+    \   && eskk#util#list_any(
+    \       eskk#get_buftable().get_henkan_phase(),
+    \       [
+    \           g:eskk#buftable#HENKAN_PHASE_HENKAN,
+    \           g:eskk#buftable#HENKAN_PHASE_OKURI,
+    \       ]
+    \   )
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
