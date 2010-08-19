@@ -123,6 +123,15 @@ Default keymappings				*eskk-default-keymappings*
 VARIABLES					*eskk-variables* {{{
 
 
+Directory that eskk creates
+------------------------------
+
+g:eskk_directory			*g:eskk_directory*
+							(Default: "~/.eskk")
+	Under this directory,
+	misc. directories/files about eskk
+	will be created.
+
 SKK dicitionary
 ------------------
 
@@ -400,18 +409,21 @@ Debugging variables
 
 g:eskk_debug			*g:eskk_debug*
 						(Default: 0)
-	If true, output debugging messages to command-line
-	or |g:eskk_debug_file| (if exists).
-
-g:eskk_debug_file		*g:eskk_debug_file*
-						(Default: does not exist)
-	This variable will not be defined at startup.
-	String for the path of debug file.
+	If true, output debugging messages to command-line or file.
+	|g:eskk_debug_stdout| changes which to output.
 
 g:eskk_debug_wait_ms	*g:eskk_debug_wait_ms*
 						(Default: 0)
 	If this variable is greater than 0,
 	Do |:sleep| for this value (millisecond).
+
+g:eskk_debug_stdout		*g:eskk_debug_stdout*
+						(Default: "file")
+	The value is "file" or "cmdline".
+	If "file", log file is created at: >
+	{g:eskk_directory}/log/debug.log
+<
+	If "cmdline", output to command-line.
 
 g:eskk_version			*g:eskk_version*
 	Current version number string.
