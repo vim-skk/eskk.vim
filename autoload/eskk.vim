@@ -1928,13 +1928,11 @@ function! s:initialize() "{{{
     " Set up g:eskk_dictionary. {{{
     function! s:initialize_set_up_eskk_directory()
         let dir = expand(g:eskk_directory)
-
-        if !eskk#util#mkdir_nothrow(dir)
-            call eskk#util#warnf("warning: can't create directory '%s'.", dir)
-        endif
-        if !eskk#util#mkdir_nothrow(eskk#util#join_path(dir, 'log'))
-            call eskk#util#warnf("warning: can't create directory '%s'.", eskk#util#join_path(dir, 'log'))
-        endif
+        for d in [dir, eskk#util#join_path(dir, 'log')]
+            if !isdirectory(d) && !eskk#util#mkdir_nothrow(d)
+                call eskk#util#warnf("warning: can't create directory '%s'.", d)
+            endif
+        endfor
     endfunction
     call s:initialize_set_up_eskk_directory()
     " }}}
