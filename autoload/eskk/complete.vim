@@ -49,20 +49,16 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     let buftable = eskk#get_buftable()
     let phase = buftable.get_henkan_phase()
 
+    call eskk#util#logstrf('eskk#complete#handle_special_key(): findstart = %s, base = %s', a:findstart, a:base)
+
     if a:findstart
         if eskk_mode =~# 'hira\|kata'
         \   && !eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
             return -1
         endif
 
-        let buftable_pos = s:get_buftable_pos()
-        if empty(buftable_pos)
-            return -1
-        endif
-        
-        let [mode, pos] = buftable_pos
-        if mode !=# 'i'
-            " Command line mode completion is not implemented.
+        let [success, mode, pos] = s:get_buftable_pos()
+        if !success
             return -1
         endif
 
@@ -291,7 +287,10 @@ function! s:do_space(stash) "{{{
     endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
-    let pos = s:get_buftable_pos()[1]
+    let [success, _, pos] = s:get_buftable_pos()
+    if !success
+        return
+    endif
     if pos[2] >= col('.')
         call s:close_pum(a:stash)
     endif
@@ -366,11 +365,13 @@ function! s:get_buftable_pos() "{{{
     let l = buftable.get_begin_pos()
     if empty(l)
         call eskk#util#log("warning: Can't get begin pos.")
-        return []
+        return [0, 0, 0]
     endif
     let [mode, pos] = l
-    call eskk#util#assert(mode ==# 'i')
-    return [mode, pos]
+    if mode !=# 'i'
+        return [0, mode, pos]
+    endif
+    return [1, mode, pos]
 endfunction "}}}
 function! s:get_buftable_str(with_marker) "{{{
     " TODO: Show warning if g:eskk_marker_popup
@@ -386,7 +387,12 @@ function! s:get_buftable_str(with_marker) "{{{
         return ''
     endif
     let line = getline('.')[: col('.') - 2]
-    let begin = s:get_buftable_pos()[1][2] - 1
+    let [success, _, pos] = s:get_buftable_pos()
+    if !success
+        call eskk#util#log('warning: s:get_buftable_pos() failed')
+        return ''
+    endif
+    let begin = pos[2] - 1
     if !a:with_marker
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
             let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
