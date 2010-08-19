@@ -317,6 +317,18 @@ function! eskk#util#getchar(...) "{{{
     let c = call('getchar', a:000)
     return type(c) == type("") ? c : nr2char(c)
 endfunction "}}}
+function! eskk#util#mkdir_nothrow(...) "{{{
+    try
+        call call('mkdir', a:000)
+        return 1
+    catch
+        return 0
+    endtry
+endfunction "}}}
+function! eskk#util#join_path(dir, ...) "{{{
+    " TODO
+    return join([dir] + a:000, '/')
+endfunction "}}}
 
 
 " Restore 'cpoptions' {{{
