@@ -1551,7 +1551,14 @@ function! s:filter(self, char) "{{{
     try
         let do_filter = 1
         if g:eskk_enable_completion && pumvisible() && self.has_started_completion
-            let do_filter = eskk#complete#handle_special_key(stash)
+            try
+                let do_filter = eskk#complete#handle_special_key(stash)
+            catch
+                if g:eskk_debug
+                    call eskk#util#log('error: eskk#complete#handle_special_key() throwed exception')
+                    call eskk#util#logstrf('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
+                endif
+            endtry
         else
             let self.has_started_completion = 0
         endif
