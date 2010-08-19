@@ -48,8 +48,10 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     try
         return s:eskkcomplete(a:findstart, a:base)
     catch
+        redraw
         call eskk#util#warn('warning: s:eskkcomplete() throwed exception.')
         sleep 200m
+
         if a:findstart
             return -1
         else
