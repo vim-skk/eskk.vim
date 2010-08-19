@@ -192,8 +192,9 @@ function! s:buftable.rewrite() dict "{{{
     let self._set_begin_pos_at_rewrite = 0
 
     if set_begin_pos
-        " Simplest algorithm.
-        " Delete current string, and insert new string.
+        " 1. Delete current string
+        " 2. Set begin pos
+        " 3. Insert new string
         execute
         \   eskk#get_map_command(0)
         \   '<buffer>'
