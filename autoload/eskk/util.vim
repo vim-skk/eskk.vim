@@ -325,9 +325,10 @@ function! eskk#util#mkdir_nothrow(...) "{{{
         return 0
     endtry
 endfunction "}}}
+
+let s:path_sep = has('win32') ? "\\" : '/'
 function! eskk#util#join_path(dir, ...) "{{{
-    " TODO
-    return join([a:dir] + a:000, '/')
+    return join([a:dir] + a:000, s:path_sep)
 endfunction "}}}
 
 
