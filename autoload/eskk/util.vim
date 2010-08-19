@@ -31,8 +31,14 @@ function! eskk#util#log(msg) "{{{
 
     redraw
 
-    if exists('g:eskk_debug_file')
-        let file = expand(g:eskk_debug_file)
+    let stdout = eskk#util#option_value(
+    \   g:eskk_debug_stdout,
+    \   ['file', 'cmdline'],
+    \   0
+    \)
+
+    if stdout ==# 'file'
+        let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'debug.log'))
         execute 'redir >>' file
         silent echo a:msg
         redir END

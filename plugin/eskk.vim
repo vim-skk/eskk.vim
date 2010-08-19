@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 438))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 439))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -33,6 +33,10 @@ endif
 
 if !exists('g:eskk_debug_wait_ms')
     let g:eskk_debug_wait_ms = 0
+endif
+
+if !exists('g:eskk_debug_stdout')
+    let g:eskk_debug_stdout = "file"
 endif
 
 if !exists('g:eskk_directory')
