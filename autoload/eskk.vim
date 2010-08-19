@@ -1678,7 +1678,7 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     call add(lines, "Please report this error to author.")
     call add(lines, "`:help eskk` to see author's e-mail address.")
 
-    let log_file = expand(g:eskk_error_log_file)
+    let log_file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'error.log'))
     let write_success = 0
     try
         call writefile(lines, log_file)
@@ -1925,6 +1925,16 @@ endfunction "}}}
 " }}}
 
 function! s:initialize() "{{{
+    " Set up g:eskk_dictionary. {{{
+    function! s:initialize_set_up_eskk_directory()
+        let dir = expand(g:eskk_directory)
+
+        call eskk#util#mkdir_nothrow(dir)
+        call eskk#util#mkdir_nothrow(eskk#util#join_path(dir, 'log'))
+    endfunction
+    call s:initialize_set_up_eskk_directory()
+    " }}}
+
     " Create eskk augroup. {{{
     augroup eskk
         autocmd!

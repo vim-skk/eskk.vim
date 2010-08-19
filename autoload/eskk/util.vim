@@ -327,7 +327,7 @@ function! eskk#util#mkdir_nothrow(...) "{{{
 endfunction "}}}
 function! eskk#util#join_path(dir, ...) "{{{
     " TODO
-    return join([dir] + a:000, '/')
+    return join([a:dir] + a:000, '/')
 endfunction "}}}
 
 

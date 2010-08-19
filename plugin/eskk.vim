@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 437))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 2, 438))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -33,6 +33,10 @@ endif
 
 if !exists('g:eskk_debug_wait_ms')
     let g:eskk_debug_wait_ms = 0
+endif
+
+if !exists('g:eskk_directory')
+    let g:eskk_directory = '~/.eskk'
 endif
 
 " Dictionary
@@ -257,10 +261,6 @@ endif
 
 if !exists("g:eskk_auto_henkan_at_okuri_match")
     let g:eskk_auto_henkan_at_okuri_match = 1
-endif
-
-if !exists("g:eskk_error_log_file")
-    let g:eskk_error_log_file = '~/eskk-error.log'
 endif
 
 if !exists("g:eskk_set_undo_point")
