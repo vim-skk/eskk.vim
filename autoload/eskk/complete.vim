@@ -52,6 +52,12 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         call eskk#util#warn('warning: s:eskkcomplete() throwed exception.')
         sleep 200m
 
+        if g:eskk_debug
+            call eskk#util#log('warning: s:eskkcomplete() throwed exception.')
+            call eskk#util#logf('v:exception = %s', v:exception)
+            call eskk#util#logf('v:throwpoint = %s', v:throwpoint)
+        endif
+
         if a:findstart
             return -1
         else
