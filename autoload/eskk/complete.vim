@@ -62,7 +62,7 @@ function! s:eskkcomplete(findstart, base) "{{{
     let buftable = eskk#get_buftable()
     let phase = buftable.get_henkan_phase()
 
-    call eskk#util#logstrf('eskk#complete#handle_special_key(): findstart = %s, base = %s', a:findstart, a:base)
+    call eskk#util#logstrf('eskk#complete#eskkcomplete(): findstart = %s, base = %s', a:findstart, a:base)
 
     if a:findstart
         if eskk_mode =~# 'hira\|kata'
