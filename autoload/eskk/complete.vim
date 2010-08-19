@@ -61,14 +61,11 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 endfunction "}}}
 function! s:eskkcomplete(findstart, base) "{{{
     let eskk_mode = eskk#get_mode()
-    let buftable = eskk#get_buftable()
-    let phase = buftable.get_henkan_phase()
 
     call eskk#util#logstrf('eskk#complete#eskkcomplete(): findstart = %s, base = %s', a:findstart, a:base)
 
     if a:findstart
-        if eskk_mode =~# 'hira\|kata'
-        \   && !eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
+        if !s:has_marker()
             return -1
         endif
 
@@ -95,9 +92,12 @@ function! s:eskkcomplete(findstart, base) "{{{
         " Kanji mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
-        if !eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
+        if !s:has_marker()
             return []
         endif
+
+        let buftable = eskk#get_buftable()
+        let phase = buftable.get_henkan_phase()
         if buftable.empty()
             return []
         endif
