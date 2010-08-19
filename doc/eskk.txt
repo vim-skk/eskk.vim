@@ -360,9 +360,6 @@ g:eskk_rom_input_style			*g:eskk_rom_input_style*
 g:eskk_auto_henkan_at_okuri_match			*g:eskk_auto_henkan_at_okuri_match*
 							(Default: 1)
 
-g:eskk_error_log_file				*g:eskk_error_log_file*
-							(Default: "~/eskk-error.log")
-
 g:eskk_set_undo_point				*g:eskk_set_undo_point*
 							(Default: See below)
 	Default value is: >
