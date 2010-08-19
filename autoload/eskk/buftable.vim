@@ -216,6 +216,13 @@ function! s:buftable.rewrite() dict "{{{
             return ''
         elseif inserted_str == ''
             return eval(self.make_remove_bs_expr())
+        elseif stridx(old, inserted_str) == 0
+            " When inserted_str == "foo", old == "foobar"
+            " Insert Remove "bar"
+            return repeat(
+            \   eskk#util#key2char(eskk#get_special_map("backspace-key")),
+            \   eskk#util#mb_strlen(old) - eskk#util#mb_strlen(inserted_str)
+            \)
         elseif stridx(inserted_str, old) == 0
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
