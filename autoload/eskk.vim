@@ -1570,7 +1570,7 @@ function! s:filter(self, char) "{{{
 
     catch
         call s:write_error_log_file(v:exception, v:throwpoint, a:char)
-        return buftable.do_escape() . a:char
+        return a:char
 
     finally
         call eskk#throw_event('filter-finalize')
@@ -1691,7 +1691,7 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     setlocal cmdheight=3
     try
         call eskk#util#warnf(
-        \   "Error has occurred!! Please see %s to check and please report to plugin author.",
+        \   "Error!! See %s and report to author.",
         \   (write_success ? string(log_file) : ':messages')
         \)
         sleep 500m
