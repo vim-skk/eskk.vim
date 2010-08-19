@@ -382,7 +382,10 @@ function! s:get_buftable_str(with_marker) "{{{
     " but eskk#complete#eskkcomplete() returns `pos[2] - 1`
     " it always does not match to input string
     " so getline('.') returns whole string.
-    let line = getline('.')
+    if col('.') == 1
+        return ''
+    endif
+    let line = getline('.')[: col('.') - 2]
     let begin = s:get_buftable_pos()[1][2] - 1
     if !a:with_marker
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
