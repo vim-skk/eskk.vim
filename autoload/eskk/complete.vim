@@ -374,10 +374,6 @@ function! s:get_buftable_pos() "{{{
     return [1, mode, pos]
 endfunction "}}}
 function! s:get_buftable_str(with_marker) "{{{
-    " TODO: Show warning if g:eskk_marker_popup
-    " and g:eskk_marker_henkan are the same.
-    " (where is the best place to show the warning?)
-
     " NOTE: getline('.') returns string without string after a:base
     " while matching the head of input string,
     " but eskk#complete#eskkcomplete() returns `pos[2] - 1`

@@ -2374,6 +2374,15 @@ function! s:initialize() "{{{
     " Create <Plug>(eskk:internal:set-begin-pos) {{{
     noremap! <expr> <Plug>(eskk:internal:set-begin-pos) [eskk#get_buftable().set_begin_pos('.'), ''][1]
     " }}}
+
+    " Check some variables values. {{{
+    function! s:initialize_check_variables()
+        if g:eskk_marker_henkan ==# g:eskk_marker_popup
+            call eskk#util#warn('g:eskk_marker_henkan and g:eskk_marker_popup must be different.')
+        endif
+    endfunction
+    call s:initialize_check_variables()
+    " }}}
 endfunction "}}}
 
 " Restore 'cpoptions' {{{
