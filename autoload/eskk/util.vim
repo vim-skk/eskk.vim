@@ -288,18 +288,12 @@ function! eskk#util#get_local_func(funcname, sid) "{{{
     return printf('<SNR>%d_%s', a:sid, a:funcname)
 endfunction "}}}
 function! eskk#util#option_value(value, list, default_index) "{{{
-    let match = 0
     for _ in a:list
         if _ ==# a:value
-            let match = 1
-            break
+            return a:value
         endif
     endfor
-    if match
-        return a:value
-    else
-        return a:list[a:default_index]
-    endif
+    return a:list[a:default_index]
 endfunction "}}}
 function! eskk#util#identity(value) "{{{
     return a:value
