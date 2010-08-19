@@ -45,7 +45,16 @@ let s:popup_func_table = {
 
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
+    let eskk_mode = eskk#get_mode()
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+
     if a:findstart
+        if eskk_mode =~# 'hira\|kata'
+        \   && !eskk#util#list_any(phase, [g:eskk#buftable#HENKAN_PHASE_HENKAN, g:eskk#buftable#HENKAN_PHASE_OKURI])
+            return -1
+        endif
+
         let buftable_pos = s:get_buftable_pos()
         if empty(buftable_pos)
             return -1
@@ -63,9 +72,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return pos[2] - 1
     endif
 
-    let eskk_mode = eskk#get_mode()
-    let buftable = eskk#get_buftable()
-    let phase = buftable.get_henkan_phase()
     if eskk_mode ==# 'ascii'
         " ASCII mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
