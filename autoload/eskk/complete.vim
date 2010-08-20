@@ -74,15 +74,19 @@ function! s:eskkcomplete(findstart, base) "{{{
         if !s:has_marker()
             return -1
         endif
-
         let [success, mode, pos] = s:get_buftable_pos()
         if !success
             return -1
         endif
+        if !s:has_marker()
+            return -1
+        endif
+        let buftable = eskk#get_buftable()
+        if buftable.empty()
+            return -1
+        endif
 
         call s:initialize_variables()
-        " :help getpos()
-
         return pos[2] - 1
     endif
 
@@ -98,15 +102,6 @@ function! s:eskkcomplete(findstart, base) "{{{
         " Kanji mode.
         call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
-        if !s:has_marker()
-            return []
-        endif
-
-        let buftable = eskk#get_buftable()
-        let phase = buftable.get_henkan_phase()
-        if buftable.empty()
-            return []
-        endif
         " Do not complete while inputting rom string.
         if a:base =~ '\a$'
             call eskk#util#log('eskk#complete#eskkcomplete(): kanji - skip.')
@@ -403,13 +398,13 @@ function! s:get_buftable_str(with_marker) "{{{
     if col('.') == 1
         return ''
     endif
-    let line = getline('.')[: col('.') - 2]
     let [success, _, pos] = s:get_buftable_pos()
     if !success
         call eskk#util#log('warning: s:get_buftable_pos() failed')
         return ''
     endif
     let begin = pos[2] - 1
+    let line = getline('.')[: col('.') - 2]
     if !a:with_marker && s:has_marker()
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
             let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
