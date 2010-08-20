@@ -208,15 +208,15 @@ function! eskk#complete#handle_special_key(stash) "{{{
     " Close pum.
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+    \   'eskk#util#key2char',
+    \   [eskk#get_nore_map('<C-y>')]
     \)
     " Do kakutei and postpone a:char process.
     for key in ['<CR>', char]
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map(key))]
+        \   'eskk#util#key2char',
+        \   [eskk#get_named_map(key)]
         \)
     endfor
 
@@ -229,8 +229,8 @@ function! s:close_pum_pre(stash) "{{{
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map('<C-y>'))]
+        \   'eskk#util#key2char',
+        \   [eskk#get_named_map('<C-y>')]
         \)
         let s:selected = 0
     else
@@ -242,8 +242,8 @@ function! s:close_pum(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+    \   'eskk#util#key2char',
+    \   [eskk#get_nore_map('<C-y>')]
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
@@ -253,8 +253,8 @@ function! s:do_enter_pre(stash) "{{{
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
+        \   'eskk#util#key2char',
+        \   [eskk#get_named_map('<CR>')]
         \)
         let s:selected = 0
     else
@@ -266,8 +266,8 @@ function! s:do_enter(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+    \   'eskk#util#key2char',
+    \   [eskk#get_nore_map('<C-y>')]
     \)
     " FIXME:
     " When g:eskk_compl_enter_send_keys == ['<CR>', '<CR>']
@@ -275,8 +275,8 @@ function! s:do_enter(stash) "{{{
     for key in g:eskk_compl_enter_send_keys
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map(key))]
+        \   'eskk#util#key2char',
+        \   [eskk#get_named_map(key)]
         \)
     endfor
 endfunction "}}}
@@ -294,21 +294,21 @@ function! s:do_space(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+    \   'eskk#util#key2char',
+    \   [eskk#get_nore_map('<C-y>')]
     \)
 
     if s:check_yomigana()
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map('<Space>'))]
+        \   'eskk#util#key2char',
+        \   [eskk#get_named_map('<Space>')]
         \)
     else
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
+        \   'eskk#util#key2char',
+        \   [eskk#get_named_map('<CR>')]
         \)
     endif
 endfunction "}}}
@@ -328,13 +328,13 @@ function! s:do_escape(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+    \   'eskk#util#key2char',
+    \   [eskk#get_nore_map('<C-y>')]
     \)
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#util#identity',
-    \   [eskk#util#key2char(eskk#get_named_map('<Esc>'))]
+    \   'eskk#util#key2char',
+    \   [eskk#get_named_map('<Esc>')]
     \)
 endfunction "}}}
 function! s:identity(stash) "{{{

@@ -762,8 +762,8 @@ function! s:asym_filter.filter(stash) dict "{{{
             call buftable.do_sticky(a:stash)
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
-            \   'eskk#util#identity',
-            \   [eskk#util#key2char(eskk#get_named_map(tolower(char)))]
+            \   'eskk#util#key2char',
+            \   [eskk#get_named_map(tolower(char))]
             \)
             return
         elseif eskk#is_special_lhs(char, 'escape-key')
@@ -803,8 +803,8 @@ function! s:asym_filter.filter(stash) dict "{{{
             call buftable.do_enter(a:stash)
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
-            \   'eskk#util#identity',
-            \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
+            \   'eskk#util#key2char',
+            \   [eskk#get_named_map(a:stash.char)]
             \)
         endif
     else
@@ -1015,8 +1015,8 @@ function! s:filter_rom_no_match(stash, table) "{{{
                     if a:table.has_rest(matched)
                         call eskk#register_temp_event(
                         \   'filter-redispatch-post',
-                        \   'eskk#util#identity',
-                        \   [eskk#util#key2char(eskk#get_named_map(a:table.get_rest(matched)))]
+                        \   'eskk#util#key2char',
+                        \   [eskk#get_named_map(a:table.get_rest(matched))]
                         \)
                     endif
                     call buf_str.push_matched(matched, a:table.get_map(matched))
@@ -2236,8 +2236,8 @@ function! s:initialize() "{{{
                     call buftable.clear_all()
                     call eskk#register_temp_event(
                     \   'filter-redispatch-post',
-                    \   'eskk#util#identity',
-                    \   [eskk#util#key2char(eskk#get_named_map(a:stash.char))]
+                    \   'eskk#util#key2char',
+                    \   [eskk#get_named_map(a:stash.char)]
                     \)
 
                     " Leave abbrev mode.
