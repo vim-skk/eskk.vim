@@ -255,9 +255,6 @@ function! s:do_enter(stash) "{{{
     \   'eskk#util#key2char',
     \   [eskk#get_nore_map('<C-y>')]
     \)
-    " FIXME:
-    " When g:eskk_compl_enter_send_keys == ['<CR>', '<CR>']
-    " unnecessary whitesace " " is inserted at the end of col.
     for key in g:eskk_compl_enter_send_keys
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
