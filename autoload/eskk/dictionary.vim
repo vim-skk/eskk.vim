@@ -164,7 +164,7 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         let [min, max] = [a:1, len(whole_lines) - 1]
     elseif a:0 >= 2
         let [min, max] = a:000
-        call eskk#util#assert(min < max, 'min < max')
+        call eskk#util#assert(min <=# max, 'min <=# max')
     elseif a:has_okuri
         let [min, max] = [a:ph_dict.okuri_ari_idx, len(whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
