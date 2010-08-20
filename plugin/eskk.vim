@@ -46,7 +46,7 @@ endif
 " Dictionary
 let s:default = {
 \   'path': "~/.skk-jisyo",
-\   'sorted': 1,
+\   'sorted': 0,
 \   'encoding': 'utf-8',
 \}
 if exists('g:eskk_dictionary')
