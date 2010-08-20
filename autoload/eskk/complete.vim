@@ -112,25 +112,25 @@ function! s:mode_func_table.hira(findstart, base) "{{{
         return []
     endif
 
-    return s:complete(eskk#get_mode())
+    return s:complete(eskk#get_mode(), a:base)
 endfunction "}}}
 let s:mode_func_table.kata = s:mode_func_table.hira
-function! s:mode_func_table.ascii(...) "{{{
+function! s:mode_func_table.ascii(findstart, base) "{{{
     " ASCII mode.
     call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
-    return s:complete("ascii")
+    return s:complete("ascii", a:base)
 endfunction "}}}
-function! s:mode_func_table.abbrev(...) "{{{
+function! s:mode_func_table.abbrev(findstart, base) "{{{
     " abbrev mode.
     call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
-    return s:complete("abbrev")
+    return s:complete("abbrev", a:base)
 endfunction "}}}
 
 function! s:initialize_variables() "{{{
     let s:selected = 0
     let s:inserted = 0
 endfunction "}}}
-function! s:complete(mode) "{{{
+function! s:complete(mode, base) "{{{
     " Get candidates.
     let list = []
     let dict = eskk#get_dictionary()
@@ -154,7 +154,7 @@ function! s:complete(mode) "{{{
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
 
-    let filter_str = s:get_buftable_str(0)
+    let filter_str = s:get_buftable_str(0, a:base)
     let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
     let marker = g:eskk_marker_popup . g:eskk_marker_henkan
 
@@ -399,7 +399,7 @@ function! s:get_buftable_pos() "{{{
     endif
     return [1, mode, pos]
 endfunction "}}}
-function! s:get_buftable_str(with_marker) "{{{
+function! s:get_buftable_str(with_marker, ...) "{{{
     " NOTE: getline('.') returns string without string after a:base
     " while matching the head of input string,
     " but eskk#complete#eskkcomplete() returns `pos[2] - 1`
@@ -408,13 +408,21 @@ function! s:get_buftable_str(with_marker) "{{{
     if col('.') == 1
         return ''
     endif
+
     let [success, _, pos] = s:get_buftable_pos()
     if !success
         call eskk#util#log('warning: s:get_buftable_pos() failed')
         return ''
     endif
     let begin = pos[2] - 1
-    let line = getline('.')[: col('.') - 2]
+    if a:0 && !s:neocomplcache_has_completed()
+        " Manual completion (not by neocomplcache).
+        " a:1 is a:base.
+        let line = getline('.')[: col('.') - 2] . a:1
+    else
+        let line = getline('.')[: col('.') - 2]
+    endif
+
     if !a:with_marker && s:has_marker()
         if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
             let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
@@ -424,6 +432,7 @@ function! s:get_buftable_str(with_marker) "{{{
             call eskk#util#assert(0, '404: marker not found')
         endif
     endif
+
     return strpart(line, begin)
 endfunction "}}}
 function! s:has_marker() "{{{
@@ -436,6 +445,10 @@ function! s:has_marker() "{{{
     \           g:eskk#buftable#HENKAN_PHASE_OKURI,
     \       ]
     \   )
+endfunction "}}}
+function! s:neocomplcache_has_completed() "{{{
+    return
+    \   exists(':NeoComplCacheDisable') && !neocomplcache#is_locked()
 endfunction "}}}
 
 
