@@ -21,6 +21,8 @@ endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
+
+
 " Variables {{{
 let s:selected = 0
 let s:inserted = 0
@@ -43,6 +45,8 @@ let s:popup_func_table = {
     \ }
 let s:mode_func_table = {}
 " }}}
+
+
 
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
@@ -67,9 +71,9 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     endtry
 endfunction "}}}
 function! s:eskkcomplete(findstart, base) "{{{
+    call eskk#util#logstrf('eskk#complete#eskkcomplete(): findstart = %s, base = %s', a:findstart, a:base)
     let eskk_mode = eskk#get_mode()
 
-    call eskk#util#logstrf('eskk#complete#eskkcomplete(): findstart = %s, base = %s', a:findstart, a:base)
 
     if a:findstart
         if !has_key(s:mode_func_table, eskk_mode)
@@ -132,7 +136,7 @@ function! s:complete(mode) "{{{
     let dict = eskk#get_dictionary()
     let buftable = eskk#get_buftable()
     let is_katakana = g:eskk_kata_convert_to_hira_at_completion && a:mode ==# 'kata'
-    
+
     if is_katakana
         let henkan_buf_str = buftable.filter_rom(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
@@ -153,7 +157,7 @@ function! s:complete(mode) "{{{
     let filter_str = s:get_buftable_str(0)
     let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
     let marker = g:eskk_marker_popup . g:eskk_marker_henkan
-    
+
     for [yomigana, okuri_rom, kanji_list] in dict.search(key, has_okuri, okuri, okuri_rom)
         if is_katakana
             call filter(kanji_list, 'stridx(v:val.result, ' . string(filter_str) . ') == 0')
@@ -181,6 +185,9 @@ function! s:complete(mode) "{{{
     return list
 endfunction "}}}
 
+
+
+" Handler for the key while popup displayed.
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
     call eskk#util#logf('eskk#complete#handle_special_key(): char = %s', char)
@@ -196,7 +203,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
         " Do filter.
         return 1
     endif
-    
+
     " Select item.
     call s:set_selected_item()
 
@@ -435,6 +442,8 @@ function! s:has_marker() "{{{
     \       ]
     \   )
 endfunction "}}}
+
+
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
