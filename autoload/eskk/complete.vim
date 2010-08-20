@@ -41,6 +41,7 @@ let s:popup_func_table = {
     \   eskk#util#key2char("<BS>") : 's:do_backspace',
     \   eskk#util#key2char("<Esc>") : 's:do_escape',
     \ }
+let s:mode_func_table = {}
 " }}}
 
 " Complete function.
@@ -71,6 +72,9 @@ function! s:eskkcomplete(findstart, base) "{{{
     call eskk#util#logstrf('eskk#complete#eskkcomplete(): findstart = %s, base = %s', a:findstart, a:base)
 
     if a:findstart
+        if !has_key(s:mode_func_table, eskk_mode)
+            return -1
+        endif
         if !s:has_marker()
             return -1
         endif
@@ -90,30 +94,34 @@ function! s:eskkcomplete(findstart, base) "{{{
         return pos[2] - 1
     endif
 
-    if eskk_mode ==# 'ascii'
-        " ASCII mode.
-        call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
-        return s:complete(eskk_mode)
-    elseif eskk_mode ==# 'abbrev'
-        " abbrev mode.
-        call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
-        return s:complete(eskk_mode)
-    elseif eskk_mode =~# 'hira\|kata'
-        " Kanji mode.
-        call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
+    return s:mode_func_table[eskk_mode](a:findstart, a:base)
+endfunction "}}}
 
-        " Do not complete while inputting rom string.
-        if a:base =~ '\a$'
-            call eskk#util#log('eskk#complete#eskkcomplete(): kanji - skip.')
-            return []
-        endif
+" s:mode_func_table
+function! s:mode_func_table.hira(findstart, base) "{{{
+    " Kanji mode.
+    call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
-        return s:complete(eskk_mode)
-    else
-        call eskk#util#log('warning: No completion supported.')
+    " Do not complete while inputting rom string.
+    if a:base =~ '\a$'
+        call eskk#util#log('eskk#complete#eskkcomplete(): kanji - skip.')
         return []
     endif
+
+    return s:complete(eskk#get_mode())
 endfunction "}}}
+let s:mode_func_table.kata = s:mode_func_table.hira
+function! s:mode_func_table.ascii(...) "{{{
+    " ASCII mode.
+    call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
+    return s:complete("ascii")
+endfunction "}}}
+function! s:mode_func_table.abbrev(...) "{{{
+    " abbrev mode.
+    call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
+    return s:complete("abbrev")
+endfunction "}}}
+
 function! s:initialize_variables() "{{{
     let s:selected = 0
     let s:inserted = 0
