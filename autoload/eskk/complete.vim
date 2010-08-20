@@ -255,13 +255,13 @@ function! s:do_enter(stash) "{{{
     \   'eskk#util#key2char',
     \   [eskk#get_nore_map('<C-y>')]
     \)
-    for key in g:eskk_compl_enter_send_keys
+    if g:eskk_completion_egg_like_newline
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
         \   'eskk#util#key2char',
-        \   [eskk#get_named_map(key)]
+        \   [eskk#get_named_map('<CR>')]
         \)
-    endfor
+    endif
 endfunction "}}}
 function! s:select_item(stash) "{{{
     let s:selected = 1
