@@ -26,23 +26,7 @@ delfunc s:SID
 " Variables {{{
 let s:selected = 0
 let s:inserted = 0
-let s:popup_func_table = {
-    \   eskk#util#key2char("<CR>") : 's:do_enter_pre',
-    \   eskk#util#key2char("<C-y>") : 's:close_pum_pre',
-    \   eskk#util#key2char("<C-l>") : 's:identity',
-    \   eskk#util#key2char("<C-e>") : 's:identity',
-    \   eskk#util#key2char("<PageUp>") : 's:identity',
-    \   eskk#util#key2char("<PageDown>") : 's:identity',
-    \   eskk#util#key2char("<Up>") : 's:select_item',
-    \   eskk#util#key2char("<Down>") : 's:select_item',
-    \   eskk#util#key2char("<Space>") : 's:do_space',
-    \   eskk#util#key2char("<Tab>") : 's:select_insert_item',
-    \   eskk#util#key2char("<C-n>") : 's:select_insert_item',
-    \   eskk#util#key2char("<C-p>") : 's:select_insert_item',
-    \   eskk#util#key2char("<C-h>") : 's:do_backspace',
-    \   eskk#util#key2char("<BS>") : 's:do_backspace',
-    \   eskk#util#key2char("<Esc>") : 's:do_escape',
-    \ }
+let s:popup_func_table = {}
 let s:mode_func_table = {}
 " }}}
 
@@ -194,7 +178,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
 
     " Check popupmenu-keys
     if has_key(s:popup_func_table, char)
-        call {s:popup_func_table[char]}(a:stash)
+        call s:popup_func_table[char](a:stash)
         call eskk#util#logf('%s -> %s', char, s:popup_func_table[char])
         return 0
     endif
@@ -222,6 +206,8 @@ function! eskk#complete#handle_special_key(stash) "{{{
 
     return 0
 endfunction "}}}
+
+" s:popup_func_table
 function! s:close_pum_pre(stash) "{{{
     if s:selected && !s:inserted
         " Insert selected item.
@@ -340,6 +326,24 @@ endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
+let s:popup_func_table = {
+\   eskk#util#key2char("<CR>") : function('s:do_enter_pre'),
+\   eskk#util#key2char("<C-y>") : function('s:close_pum_pre'),
+\   eskk#util#key2char("<C-l>") : function('s:identity'),
+\   eskk#util#key2char("<C-e>") : function('s:identity'),
+\   eskk#util#key2char("<PageUp>") : function('s:identity'),
+\   eskk#util#key2char("<PageDown>") : function('s:identity'),
+\   eskk#util#key2char("<Up>") : function('s:select_item'),
+\   eskk#util#key2char("<Down>") : function('s:select_item'),
+\   eskk#util#key2char("<Space>") : function('s:do_space'),
+\   eskk#util#key2char("<Tab>") : function('s:select_insert_item'),
+\   eskk#util#key2char("<C-n>") : function('s:select_insert_item'),
+\   eskk#util#key2char("<C-p>") : function('s:select_insert_item'),
+\   eskk#util#key2char("<C-h>") : function('s:do_backspace'),
+\   eskk#util#key2char("<BS>") : function('s:do_backspace'),
+\   eskk#util#key2char("<Esc>") : function('s:do_escape'),
+\}
+
 function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
