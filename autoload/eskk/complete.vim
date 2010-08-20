@@ -200,31 +200,26 @@ function! eskk#complete#handle_special_key(stash) "{{{
     endif
 
     if s:check_yomigana()
-        " Do filter.
         return 1
     endif
 
     " Select item.
     call s:set_selected_item()
+    " Close pum.
+    call eskk#register_temp_event(
+    \   'filter-redispatch-pre',
+    \   'eskk#util#identity',
+    \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
+    \)
+    " Do kakutei and postpone a:char process.
+    for key in ['<CR>', char]
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   'eskk#util#identity',
+        \   [eskk#util#key2char(eskk#get_named_map(key))]
+        \)
+    endfor
 
-    call eskk#register_temp_event(
-                \   'filter-redispatch-pre',
-                \   'eskk#util#identity',
-                \   [eskk#util#key2char(eskk#get_nore_map('<C-y>'))]
-                \)
-    call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#util#identity',
-                \   [eskk#util#key2char(eskk#get_named_map('<CR>'))]
-                \)
-    " Postpone a:char process.
-    call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#util#identity',
-                \   [eskk#util#key2char(eskk#get_named_map(char))]
-                \)
-
-    " Not handled.
     return 0
 endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
