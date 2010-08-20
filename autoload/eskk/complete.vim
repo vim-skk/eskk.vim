@@ -453,6 +453,15 @@ endfunction "}}}
 
 
 
+function! eskk#complete#completing() "{{{
+    return
+    \   g:eskk_enable_completion
+    \   && pumvisible()
+    \   && eskk#get_current_instance().has_started_completion
+endfunction "}}}
+
+
+
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
 " }}}

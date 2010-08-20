@@ -1550,7 +1550,7 @@ function! s:filter(self, char) "{{{
 
     try
         let do_filter = 1
-        if g:eskk_enable_completion && pumvisible() && self.has_started_completion
+        if eskk#complete#completing()
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
