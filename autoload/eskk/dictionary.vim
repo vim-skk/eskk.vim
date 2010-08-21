@@ -104,6 +104,7 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
         call eskk#util#logf('eskk#dictionary#search_candidate() - found!: %s', string(conv_line))
         return [conv_line, result[1]]
     else
+        call eskk#util#logf('eskk#dictionary#search_candidate() - not found.')
         return ['', -1]
     endif
 endfunction "}}}
@@ -124,11 +125,7 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
 
-    if g:eskk_debug
-        call eskk#util#logf('s:search_binary(): Initial: min = %d, max = %d', min, max)
-
-        call eskk#util#log('--- s:search_binary() ---')
-    endif
+    " call eskk#util#logf('s:search_binary(): Initial: min = %d, max = %d', min, max)
 
     if a:has_okuri
         while max - min > a:limit
@@ -152,7 +149,6 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
         endwhile
     endif
 
-    call eskk#util#log('--- s:search_binary() ---')
     " NOTE: min, max: Give index number, not lnum.
     return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
 endfunction "}}}
@@ -176,7 +172,7 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number.")
-    call eskk#util#logf('s:search_linear(): Initial: min = %d, max = %d', min, max)
+    " call eskk#util#logf('s:search_linear(): Initial: min = %d, max = %d', min, max)
 
     while min <=# max
         if stridx(whole_lines[min], a:needle) == 0
@@ -184,7 +180,6 @@ function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
         endif
         let min += 1
     endwhile
-    call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
     return ['', -1]
 endfunction "}}}
 
