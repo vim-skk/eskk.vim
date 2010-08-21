@@ -701,8 +701,10 @@ endfunction "}}}
 
 
 " Dictionary
-function! eskk#update_dictionary() "{{{
-    call eskk#get_dictionary().update_dictionary()
+function! eskk#update_dictionary(...) "{{{
+    let silent = a:0 ? a:1 : 0
+    let dict = eskk#get_dictionary()
+    execute (silent ? 'silent' : '') 'call dict.update_dictionary()'
 endfunction "}}}
 function! eskk#forget_registered_words() "{{{
     call eskk#get_dictionary().forget_registered_words()
@@ -2083,7 +2085,7 @@ function! s:initialize() "{{{
 
     " Save dictionary if modified {{{
     if g:eskk_auto_save_dictionary_at_exit
-        autocmd eskk VimLeavePre * call eskk#update_dictionary()
+        autocmd eskk VimLeavePre * call eskk#update_dictionary(0)
     endif
     " }}}
 
