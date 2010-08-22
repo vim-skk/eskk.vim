@@ -69,7 +69,7 @@ function! s:eskkcomplete(findstart, base) "{{{
         return pos[2] - 1
     endif
 
-    return s:mode_func_table[eskk#get_mode()](a:findstart, a:base)
+    return s:mode_func_table[eskk#get_mode()](a:base)
 endfunction "}}}
 function! eskk#complete#can_find_start() "{{{
     if !has_key(s:mode_func_table, eskk#get_mode())
@@ -95,7 +95,7 @@ function! eskk#complete#can_find_start() "{{{
 endfunction "}}}
 
 " s:mode_func_table
-function! s:mode_func_table.hira(findstart, base) "{{{
+function! s:mode_func_table.hira(base) "{{{
     " Kanji mode.
     call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
 
@@ -108,12 +108,12 @@ function! s:mode_func_table.hira(findstart, base) "{{{
     return s:complete(eskk#get_mode(), a:base)
 endfunction "}}}
 let s:mode_func_table.kata = s:mode_func_table.hira
-function! s:mode_func_table.ascii(findstart, base) "{{{
+function! s:mode_func_table.ascii(base) "{{{
     " ASCII mode.
     call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
     return s:complete("ascii", a:base)
 endfunction "}}}
-function! s:mode_func_table.abbrev(findstart, base) "{{{
+function! s:mode_func_table.abbrev(base) "{{{
     " abbrev mode.
     call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
     return s:complete("abbrev", a:base)
