@@ -34,6 +34,7 @@ let s:mode_func_table = {}
 
 " Complete function.
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
+    " Complete function should not throw exception.
     try
         return s:eskkcomplete(a:findstart, a:base)
     catch
@@ -56,31 +57,41 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
 endfunction "}}}
 function! s:eskkcomplete(findstart, base) "{{{
     call eskk#util#logstrf('eskk#complete#eskkcomplete(): findstart = %s, base = %s', a:findstart, a:base)
-    let eskk_mode = eskk#get_mode()
-
-
     if a:findstart
-        if !has_key(s:mode_func_table, eskk_mode)
-            return -1
-        endif
-        if !s:has_marker()
-            return -1
-        endif
-        let [success, mode, pos] = s:get_buftable_pos()
-        if !success
-            return -1
-        endif
-        let buftable = eskk#get_buftable()
-        let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
-        if buf_str.empty()
+        if !eskk#complete#can_find_start()
             return -1
         endif
 
         call s:initialize_variables()
+
+        let [success, _, pos] = s:get_buftable_pos()
+        call eskk#util#assert(success, "s:get_buftable_pos() must not fail")
         return pos[2] - 1
     endif
 
-    return s:mode_func_table[eskk_mode](a:findstart, a:base)
+    return s:mode_func_table[eskk#get_mode()](a:findstart, a:base)
+endfunction "}}}
+function! eskk#complete#can_find_start() "{{{
+    if !has_key(s:mode_func_table, eskk#get_mode())
+        return 0
+    endif
+
+    if !s:has_marker()
+        return 0
+    endif
+
+    let [success, mode, pos] = s:get_buftable_pos()
+    if !success
+        return 0
+    endif
+
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
+    if buf_str.empty()
+        return 0
+    endif
+
+    return 1
 endfunction "}}}
 
 " s:mode_func_table
