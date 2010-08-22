@@ -383,7 +383,7 @@ function! eskk#get_nore_map(key, ...) "{{{
     let key = eskk#util#str2map(key)
 
     let lhs = printf('<Plug>(eskk:noremap:%s)', key)
-    if maparg(lhs, 'l') != ''
+    if maparg(lhs, 'icl') != ''
         return lhs
     endif
 
