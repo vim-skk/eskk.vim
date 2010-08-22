@@ -70,11 +70,9 @@ function! s:eskkcomplete(findstart, base) "{{{
         if !success
             return -1
         endif
-        if !s:has_marker()
-            return -1
-        endif
         let buftable = eskk#get_buftable()
-        if buftable.empty()
+        let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
+        if buf_str.empty()
             return -1
         endif
 
