@@ -193,7 +193,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#key2char',
-    \   [eskk#get_nore_map('<C-y>')]
+    \   [eskk#util#get_nore_map('<C-y>')]
     \)
     " Do kakutei and postpone a:char process.
     for key in ['<CR>', char]
@@ -211,7 +211,7 @@ endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:selected && !s:inserted
         " Insert selected item.
-        let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-n><C-p>'))
+        let a:stash.return = eskk#util#key2char(eskk#util#get_nore_map('<C-n><C-p>'))
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
@@ -229,13 +229,13 @@ function! s:close_pum(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#key2char',
-    \   [eskk#get_nore_map('<C-y>')]
+    \   [eskk#util#get_nore_map('<C-y>')]
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
     if s:selected && !s:inserted
         " Insert selected item.
-        let a:stash.return = eskk#util#key2char(eskk#get_nore_map('<C-n><C-p>'))
+        let a:stash.return = eskk#util#key2char(eskk#util#get_nore_map('<C-n><C-p>'))
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
@@ -253,7 +253,7 @@ function! s:do_enter(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#key2char',
-    \   [eskk#get_nore_map('<C-y>')]
+    \   [eskk#util#get_nore_map('<C-y>')]
     \)
     if g:eskk_completion_egg_like_newline
         call eskk#register_temp_event(
@@ -278,7 +278,7 @@ function! s:do_space(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#key2char',
-    \   [eskk#get_nore_map('<C-y>')]
+    \   [eskk#util#get_nore_map('<C-y>')]
     \)
 
     if s:check_yomigana()
@@ -312,7 +312,7 @@ function! s:do_escape(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
     \   'eskk#util#key2char',
-    \   [eskk#get_nore_map('<C-y>')]
+    \   [eskk#util#get_nore_map('<C-y>')]
     \)
     call eskk#register_temp_event(
     \   'filter-redispatch-post',

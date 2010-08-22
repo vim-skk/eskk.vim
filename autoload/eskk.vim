@@ -372,29 +372,6 @@ function! eskk#get_named_map(key) "{{{
 
     return lhs
 endfunction "}}}
-function! eskk#get_nore_map(key, ...) "{{{
-    " NOTE:
-    " a:key is escaped. So when a:key is '<C-a>', return value is
-    "   `<Plug>(eskk:filter:<C-a>)`
-    " not
-    "   `<Plug>(eskk:filter:^A)` (^A is control character)
-
-    let [rhs, key] = [a:key, a:key]
-    let key = eskk#util#str2map(key)
-
-    let lhs = printf('<Plug>(eskk:noremap:%s)', key)
-    if maparg(lhs, 'icl') != ''
-        return lhs
-    endif
-
-    execute
-    \   eskk#get_map_command(0)
-    \   (a:0 ? s:mapopt_chars2raw(a:1) : '')
-    \   lhs
-    \   rhs
-
-    return lhs
-endfunction "}}}
 function! eskk#get_map_command(...) "{{{
     " XXX: :lmap can't remap to :lmap. It's Vim's bug.
     "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/

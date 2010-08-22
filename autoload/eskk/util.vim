@@ -277,16 +277,55 @@ function! eskk#util#is_upper(char) "{{{
 endfunction "}}}
 
 
+" Mappings
+function! eskk#util#get_nore_map(key, ...) "{{{
+    " NOTE:
+    " a:key is escaped. So when a:key is '<C-a>', return value is
+    "   `<Plug>(eskk:filter:<C-a>)`
+    " not
+    "   `<Plug>(eskk:filter:^A)` (^A is control character)
+
+    let [rhs, key] = [a:key, a:key]
+    let key = eskk#util#str2map(key)
+
+    let lhs = printf('<Plug>(eskk:noremap:%s)', key)
+    if maparg(lhs, 'icl') != ''
+        return lhs
+    endif
+
+    execute
+    \   eskk#get_map_command(0)
+    \   (a:0 ? s:mapopt_chars2raw(a:1) : '')
+    \   lhs
+    \   rhs
+
+    return lhs
+endfunction "}}}
+function! eskk#util#get_local_func(funcname, sid) "{{{
+    " :help <SID>
+    return printf('<SNR>%d_%s', a:sid, a:funcname)
+endfunction "}}}
+function! eskk#util#get_sid_from_source(regex) "{{{
+    redir => output
+    silent scriptnames
+    redir END
+
+    for line in split(output, '\n')
+        if line =~# a:regex
+            let sid = matchstr(line, '\C'.'\s*\zs\d\+')
+            return sid != '' ? str2nr(sid) : -1
+        endif
+    endfor
+endfunction "}}}
+
+
 " Misc.
 function! eskk#util#assert(cond, ...) "{{{
     if !a:cond
         throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
     endif
 endfunction "}}}
-function! eskk#util#get_local_func(funcname, sid) "{{{
-    " :help <SID>
-    return printf('<SNR>%d_%s', a:sid, a:funcname)
-endfunction "}}}
+
 function! eskk#util#option_value(value, list, default_index) "{{{
     for _ in a:list
         if _ ==# a:value
