@@ -1597,9 +1597,20 @@ function! s:rewrite_string(return_string) "{{{
     if completion_enabled
         NeoComplCacheLock
     endif
+
+    if type(a:return_string) == type("")
+        execute
+        \   eskk#get_map_command(0)
+        \   '<buffer>'
+        \   '<Plug>(eskk:_return_string)'
+        \   eskk#util#str2map(a:return_string)
+        let string = "\<Plug>(eskk:_return_string)"
+    else
+        let string = eskk#get_buftable().rewrite()
+    endif
     return
     \   redispatch_pre
-    \   . (type(a:return_string) == type("") ? a:return_string : eskk#get_buftable().rewrite())
+    \   . string
     \   . redispatch_post
     \   . (completion_enabled ?
     \       "\<Plug>(eskk:_neocomplcache_unlock)" .
