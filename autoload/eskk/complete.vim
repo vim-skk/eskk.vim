@@ -414,7 +414,7 @@ function! s:get_buftable_str(with_marker, ...) "{{{
         return ''
     endif
     let begin = pos[2] - 1
-    if a:0 && !s:neocomplcache_has_completed()
+    if a:0
         " Manual completion (not by neocomplcache).
         " a:1 is a:base.
         let line = getline('.')[: col('.') - 2] . a:1
@@ -444,10 +444,6 @@ function! s:has_marker() "{{{
     \           g:eskk#buftable#HENKAN_PHASE_OKURI,
     \       ]
     \   )
-endfunction "}}}
-function! s:neocomplcache_has_completed() "{{{
-    return
-    \   exists(':NeoComplCacheDisable') && !neocomplcache#is_locked()
 endfunction "}}}
 
 
