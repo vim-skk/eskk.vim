@@ -336,6 +336,11 @@ function! s:buftable.get_henkan_phase() dict "{{{
     return self._henkan_phase
 endfunction "}}}
 function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
+    if a:henkan_phase ==# self._henkan_phase
+        call eskk#util#logf('warning: tried to change into same phase: (%d) -> (%d)', a:henkan_phase, a:henkan_phase)
+        return
+    endif
+
     call s:validate_table_idx(self._table, a:henkan_phase)
 
     call eskk#throw_event('leave-phase-' . self.get_phase_name(self._henkan_phase))
