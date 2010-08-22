@@ -223,7 +223,7 @@ endfunction "}}}
 function! s:close_pum_pre(stash) "{{{
     if s:selected && !s:inserted
         " Insert selected item.
-        let a:stash.return = eskk#util#key2char(eskk#util#get_nore_map('<C-n><C-p>'))
+        let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
@@ -247,7 +247,7 @@ endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
     if s:selected && !s:inserted
         " Insert selected item.
-        let a:stash.return = eskk#util#key2char(eskk#util#get_nore_map('<C-n><C-p>'))
+        let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',

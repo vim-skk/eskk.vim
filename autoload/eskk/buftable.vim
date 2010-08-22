@@ -452,7 +452,7 @@ function! s:buftable.do_backspace(stash, ...) dict "{{{
     let done_for_group = a:0 ? a:1 : 1
 
     if self.get_old_str() == ''
-        let a:stash.return = eskk#util#key2char(eskk#get_special_map('backspace-key'))
+        let a:stash.return = eskk#util#key2char(eskk#get_special_key('backspace-key'))
         return
     endif
 
