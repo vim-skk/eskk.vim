@@ -1590,10 +1590,23 @@ function! s:rewrite_string(return_string) "{{{
         let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
     endif
 
+    let completion_enabled =
+    \   g:eskk_enable_completion
+    \   && exists('g:loaded_neocomplcache')
+    \   && !neocomplcache#is_locked()
+    if completion_enabled
+        NeoComplCacheLock
+    endif
     return
     \   redispatch_pre
     \   . (type(a:return_string) == type("") ? a:return_string : eskk#get_buftable().rewrite())
     \   . redispatch_post
+    \   . (completion_enabled ?
+    \       "\<Plug>(eskk:_neocomplcache_unlock)" .
+    \           (eskk#complete#can_find_start() ?
+    \               "\<Plug>(eskk:_do_complete)" :
+    \               '') :
+    \       '')
 endfunction "}}}
 function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     let lines = []
@@ -2363,6 +2376,31 @@ function! s:initialize() "{{{
         endif
     endfunction
     call s:initialize_check_variables()
+    " }}}
+
+    " neocomplcache {{{
+    function! s:initialize_neocomplcache()
+        function! s:initialize_neocomplcache_unlock()
+            NeoComplCacheUnlock
+            return ''
+        endfunction
+        execute
+        \   eskk#get_map_command(0)
+        \   '<expr>'
+        \   '<Plug>(eskk:_neocomplcache_unlock)'
+        \   eskk#util#get_local_func('initialize_neocomplcache_unlock', s:SID_PREFIX) . '()'
+    endfunction
+    call s:initialize_neocomplcache()
+    " }}}
+
+    " Completion {{{
+    function! s:initialize_completion()
+        execute
+        \   eskk#get_map_command(0)
+        \   '<Plug>(eskk:_do_complete)'
+        \   "\<C-x>\<C-o>\<C-p>"
+    endfunction
+    call s:initialize_completion()
     " }}}
 endfunction "}}}
 
