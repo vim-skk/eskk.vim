@@ -2400,6 +2400,11 @@ function! s:initialize() "{{{
         \   '<expr>'
         \   '<Plug>(eskk:_neocomplcache_unlock)'
         \   eskk#util#get_local_func('initialize_neocomplcache_unlock', s:SID_PREFIX) . '()'
+        execute
+        \   'map'
+        \   '<expr>'
+        \   '<Plug>(eskk:_neocomplcache_unlock)'
+        \   eskk#util#get_local_func('initialize_neocomplcache_unlock', s:SID_PREFIX) . '()'
     endfunction
     call s:initialize_neocomplcache()
     " }}}
