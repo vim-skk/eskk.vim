@@ -82,9 +82,9 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
     if g:eskk_debug
-        call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
-        \               string(needle), string(a:key_filter), string(a:okuri_rom))
-        call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
+        call eskk#util#logstrf('needle = %s, key = %s, okuri_rom = %s',
+        \               needle, a:key_filter, a:okuri_rom)
+        call eskk#util#logstrf('Search %s in %s.', needle, a:physical_dict.path)
     endif
 
     if !a:physical_dict.is_valid()
@@ -101,10 +101,10 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     endif
     if result[1] !=# -1
         let conv_line = s:iconv(result[0], a:physical_dict.encoding, &l:encoding)
-        call eskk#util#logf('eskk#dictionary#search_candidate() - found!: %s', string(conv_line))
+        call eskk#util#logstrf('eskk#dictionary#search_candidate() - found!: %s', conv_line)
         return [conv_line, result[1]]
     else
-        call eskk#util#logf('eskk#dictionary#search_candidate() - not found.')
+        call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
         return ['', -1]
     endif
 endfunction "}}}
