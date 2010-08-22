@@ -410,6 +410,7 @@ function! s:henkan_result_select_candidates(this, with_okuri) "{{{
 
     while 1
         " Show candidates.
+        echo join(repeat([''], &cmdheight-1), "\n")
         redraw
         for [c, word] in pages[page_index]
             if g:eskk_show_annotation
