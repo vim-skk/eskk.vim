@@ -179,7 +179,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     " Check popupmenu-keys
     if has_key(s:popup_func_table, char)
         call s:popup_func_table[char](a:stash)
-        call eskk#util#logf('%s -> %s', char, s:popup_func_table[char])
+        call eskk#util#logstrf('%s -> %s', char, s:popup_func_table[char])
         return 0
     endif
 
