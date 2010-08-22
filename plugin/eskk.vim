@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 37))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 38))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -212,10 +212,6 @@ endif
 
 if !exists('g:eskk_candidates_max')
     let g:eskk_candidates_max = 10
-endif
-
-if !exists('g:eskk_completion_egg_like_newline')
-    let g:eskk_completion_egg_like_newline = 0
 endif
 
 " Cursor color
