@@ -93,6 +93,9 @@ function! eskk#complete#can_find_start() "{{{
 
     return 1
 endfunction "}}}
+function! eskk#complete#do_complete(base) "{{{
+    return s:mode_func_table[eskk#get_mode()](a:base)
+endfunction "}}}
 
 " s:mode_func_table
 function! s:mode_func_table.hira(base) "{{{
