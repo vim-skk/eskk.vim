@@ -1211,6 +1211,9 @@ function! eskk#emulate_toggle_im() "{{{
     endif
     return ''
 endfunction "}}}
+function! eskk#is_initialized() "{{{
+    return s:is_initialized
+endfunction "}}}
 
 function! eskk#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error when `s:map[a:type]` does not exist.

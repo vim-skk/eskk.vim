@@ -28,6 +28,10 @@ function! eskk#util#log(msg) "{{{
     if !g:eskk_debug
         return
     endif
+    if !eskk#is_initialized()
+        call eskk#register_temp_event('enable-im', 'eskk#util#log', [a:msg])
+        return
+    endif
 
     redraw
 
