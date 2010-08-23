@@ -388,10 +388,39 @@ function! eskk#get_map_modes() "{{{
     return 'ic'
 endfunction "}}}
 
-" eskk#map()
-function! eskk#map(type, options, lhs, rhs) "{{{
-    return s:create_map(eskk#get_current_instance(), a:type, s:mapopt_chars2dict(a:options), a:lhs, a:rhs, 'eskk#map()')
+function! s:mapopt_chars2dict(options) "{{{
+    let opt = s:create_default_mapopt()
+    for c in split(a:options, '\zs')
+        if c ==# 'b'
+            let opt.buffer = 1
+        elseif c ==# 'e'
+            let opt.expr = 1
+        elseif c ==# 's'
+            let opt.silent = 1
+        elseif c ==# 'u'
+            let opt.unique = 1
+        elseif c ==# 'r'
+            let opt.remap = 1
+        endif
+    endfor
+    return opt
 endfunction "}}}
+function! s:mapopt_dict2raw(options) "{{{
+    let ret = ''
+    for [key, val] in items(a:options)
+        if key ==# 'remap' || key ==# 'map-if'
+            continue
+        endif
+        if val
+            let ret .= printf('<%s>', key)
+        endif
+    endfor
+    return ret
+endfunction "}}}
+function! s:mapopt_chars2raw(options) "{{{
+    return s:mapopt_dict2raw(s:mapopt_chars2dict(a:options))
+endfunction "}}}
+
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
     let self = a:self
     let lhs = a:lhs
@@ -425,38 +454,6 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
         let type_st.lhs = lhs
     endif
 endfunction "}}}
-function! s:mapopt_chars2dict(options) "{{{
-    let opt = s:create_default_mapopt()
-    for c in split(a:options, '\zs')
-        if c ==# 'b'
-            let opt.buffer = 1
-        elseif c ==# 'e'
-            let opt.expr = 1
-        elseif c ==# 's'
-            let opt.silent = 1
-        elseif c ==# 'u'
-            let opt.unique = 1
-        elseif c ==# 'r'
-            let opt.remap = 1
-        endif
-    endfor
-    return opt
-endfunction "}}}
-function! s:mapopt_dict2raw(options) "{{{
-    let ret = ''
-    for [key, val] in items(a:options)
-        if key ==# 'remap' || key ==# 'map-if'
-            continue
-        endif
-        if val
-            let ret .= printf('<%s>', key)
-        endif
-    endfor
-    return ret
-endfunction "}}}
-function! s:mapopt_chars2raw(options) "{{{
-    return s:mapopt_dict2raw(s:mapopt_chars2dict(a:options))
-endfunction "}}}
 function! s:create_default_mapopt() "{{{
     return {
     \   'buffer': 0,
@@ -468,7 +465,7 @@ function! s:create_default_mapopt() "{{{
     \}
 endfunction "}}}
 
-" :EskkMap - Ex command for eskk#map()
+" :EskkMap - Ex command for s:create_map()
 function! s:skip_white(args) "{{{
     return substitute(a:args, '^\s*', '', '')
 endfunction "}}}
