@@ -365,20 +365,19 @@ function! eskk#get_named_map(key) "{{{
     endif
 
     execute
-    \   eskk#get_map_command()
+    \   eskk#get_map_command(1)
     \   '<expr>'
     \   lhs
     \   printf('eskk#filter(%s)', string(a:key))
 
     return lhs
 endfunction "}}}
-function! eskk#get_map_command(...) "{{{
+function! eskk#get_map_command(remap) "{{{
     " XXX: :lmap can't remap to :lmap. It's Vim's bug.
     "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
     " So I use :map! mappings for 'fallback' of :lmap.
 
-    let remap = a:0 ? a:1 : 1
-    return remap ? 'map!' : 'noremap!'
+    return a:remap ? 'map!' : 'noremap!'
 endfunction "}}}
 function! eskk#get_map_modes() "{{{
     " XXX: :lmap can't remap to :lmap. It's Vim's bug.
@@ -1573,7 +1572,7 @@ function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
     if eskk#has_event('filter-redispatch-pre')
         execute
-        \   eskk#get_map_command()
+        \   eskk#get_map_command(1)
         \   '<buffer><expr>'
         \   '<Plug>(eskk:_filter_redispatch_pre)'
         \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
@@ -1583,7 +1582,7 @@ function! s:rewrite_string(return_string) "{{{
     let redispatch_post = ''
     if eskk#has_event('filter-redispatch-post')
         execute
-        \   eskk#get_map_command()
+        \   eskk#get_map_command(1)
         \   '<buffer><expr>'
         \   '<Plug>(eskk:_filter_redispatch_post)'
         \   'join(eskk#throw_event("filter-redispatch-post"), "")'
