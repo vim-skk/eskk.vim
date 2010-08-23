@@ -297,7 +297,7 @@ function! eskk#util#get_nore_map(key, ...) "{{{
         return lhs
     endif
 
-    call eskk#map((a:0 ? a:1 : ''), lhs, rhs)
+    call eskk#map((a:0 ? substitute(a:1, 'r', '', 'g') : ''), lhs, rhs)
 
     return lhs
 endfunction "}}}
