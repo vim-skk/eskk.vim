@@ -554,7 +554,7 @@ endfunction "}}}
 function! s:physical_dict.get_lines(...) dict "{{{
     let force = a:0 ? a:1 : 0
 
-    if self._loaded && !force
+    if self._loaded && self._ftime_at_read ==# getftime(self.path) && !force
         return self._content_lines
     endif
 
@@ -750,11 +750,6 @@ function! s:dict.update_dictionary() dict "{{{
             " Echo "user dictionary format is invalid. overwrite with new words?".
             " And do not read, just overwrite it with new words.
             return
-        endif
-
-        if self._user_dict._ftime_at_read !=# getftime(self._user_dict.path)
-            " Update dictionary's lines.
-            call self._user_dict.get_lines(1)
         endif
     else
         " Create new lines.
