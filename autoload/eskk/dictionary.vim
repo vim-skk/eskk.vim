@@ -738,26 +738,30 @@ function! s:dict.update_dictionary() dict "{{{
     if !self.is_modified()
         return
     endif
+
     let user_dict_exists = filereadable(self._user_dict.path)
-    if !self._user_dict.is_valid() && user_dict_exists
-        " TODO:
-        " Echo "user dictionary format is invalid. overwrite with new words?".
-        " And do not read, just overwrite it with new words.
-        return
-    endif
-
-    if self._user_dict._ftime_at_read !=# getftime(self._user_dict.path)
-        " Update dictionary's lines.
-        call self._user_dict.get_lines(1)
-    endif
-
+    let user_dict_lines = self._user_dict.get_lines()
     if user_dict_exists
-        let user_dict_lines = self._user_dict.get_lines()
+        if empty(user_dict_lines)
+            " user dictionary exists but .get_lines() returned empty list.
+            " format is invalid.
+
+            " TODO:
+            " Echo "user dictionary format is invalid. overwrite with new words?".
+            " And do not read, just overwrite it with new words.
+            return
+        endif
+
+        if self._user_dict._ftime_at_read !=# getftime(self._user_dict.path)
+            " Update dictionary's lines.
+            call self._user_dict.get_lines(1)
+        endif
     else
         " Create new lines.
-        let lines = [';; okuri-ari entries.', ';; okuri-nasi entries.']
-        call self._user_dict.set_lines(lines)
-        let user_dict_lines = lines
+        let user_dict_lines = [';; okuri-ari entries.', ';; okuri-nasi entries.']
+        call self._user_dict.set_lines(user_dict_lines)
+        " NOTE: .set_lines() does not write to dictionary.
+        " Because at this time dictionary file does not exist.
     endif
 
     " Check if a:self.user_dict really does not have added words.
