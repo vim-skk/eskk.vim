@@ -297,11 +297,7 @@ function! eskk#util#get_nore_map(key, ...) "{{{
         return lhs
     endif
 
-    execute
-    \   eskk#get_map_command(0)
-    \   (a:0 ? s:mapopt_chars2raw(a:1) : '')
-    \   lhs
-    \   rhs
+    call eskk#map((a:0 ? a:1 : ''), lhs, rhs)
 
     return lhs
 endfunction "}}}

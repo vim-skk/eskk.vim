@@ -364,20 +364,9 @@ function! eskk#get_named_map(key) "{{{
         return lhs
     endif
 
-    execute
-    \   eskk#get_map_command(1)
-    \   '<expr>'
-    \   lhs
-    \   printf('eskk#filter(%s)', string(a:key))
+    call eskk#map('re', lhs, printf('eskk#filter(%s)', string(a:key)))
 
     return lhs
-endfunction "}}}
-function! eskk#get_map_command(remap) "{{{
-    " XXX: :lmap can't remap to :lmap. It's Vim's bug.
-    "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
-    " So I use :map! mappings for 'fallback' of :lmap.
-
-    return a:remap ? 'map!' : 'noremap!'
 endfunction "}}}
 function! eskk#get_map_modes() "{{{
     " XXX: :lmap can't remap to :lmap. It's Vim's bug.
@@ -385,6 +374,18 @@ function! eskk#get_map_modes() "{{{
     " So I use :map! mappings for 'fallback' of :lmap.
 
     return 'ic'
+endfunction "}}}
+function! eskk#map(options, lhs, rhs, ...) "{{{
+    if a:lhs == '' || a:rhs == ''
+        call eskk#util#logstrf('warning: lhs or rhs is empty: lhs = %s, rhs = %s', a:lhs, a:rhs)
+        return
+    endif
+
+    let map = stridx(a:options, 'r') != -1 ? 'map' : 'noremap'
+    let opt = s:mapopt_chars2raw(a:options)
+    for mode in split((a:0 ? a:1 : eskk#get_map_modes()), '\zs')
+        execute mode . map opt a:lhs a:rhs
+    endfor
 endfunction "}}}
 
 function! s:mapopt_chars2dict(options) "{{{
@@ -1234,10 +1235,7 @@ function! eskk#get_special_map(type) "{{{
         let map = printf('<Plug>(eskk:internal:_noremap_%s)', a:type)
         if maparg(map, eskk#get_map_modes()) == ''
             " Not to remap.
-            execute
-            \   eskk#get_map_command(0)
-            \   map
-            \   s:map[a:type].lhs
+            call eskk#map('', map, s:map[a:type].lhs)
         endif
         return map
     else
@@ -1577,21 +1575,21 @@ endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
     if eskk#has_event('filter-redispatch-pre')
-        execute
-        \   eskk#get_map_command(1)
-        \   '<buffer><expr>'
-        \   '<Plug>(eskk:_filter_redispatch_pre)'
+        call eskk#map(
+        \   'rbe',
+        \   '<Plug>(eskk:_filter_redispatch_pre)',
         \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
+        \)
         let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
     endif
 
     let redispatch_post = ''
     if eskk#has_event('filter-redispatch-post')
-        execute
-        \   eskk#get_map_command(1)
-        \   '<buffer><expr>'
-        \   '<Plug>(eskk:_filter_redispatch_post)'
+        call eskk#map(
+        \   'rbe',
+        \   '<Plug>(eskk:_filter_redispatch_post)',
         \   'join(eskk#throw_event("filter-redispatch-post"), "")'
+        \)
         let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
     endif
 
@@ -1604,11 +1602,7 @@ function! s:rewrite_string(return_string) "{{{
     endif
 
     if type(a:return_string) == type("")
-        execute
-        \   eskk#get_map_command(0)
-        \   '<buffer>'
-        \   '<Plug>(eskk:_return_string)'
-        \   eskk#util#str2map(a:return_string)
+        call eskk#map('b', '<Plug>(eskk:_return_string)', eskk#util#str2map(a:return_string))
         let string = "\<Plug>(eskk:_return_string)"
     else
         let string = eskk#get_buftable().rewrite()
@@ -2400,26 +2394,19 @@ function! s:initialize() "{{{
             NeoComplCacheUnlock
             return ''
         endfunction
-        execute
-        \   eskk#get_map_command(0)
-        \   '<expr>'
-        \   '<Plug>(eskk:_neocomplcache_unlock)'
-        \   eskk#util#get_local_func('initialize_neocomplcache_unlock', s:SID_PREFIX) . '()'
-        execute
-        \   'map'
-        \   '<expr>'
-        \   '<Plug>(eskk:_neocomplcache_unlock)'
-        \   eskk#util#get_local_func('initialize_neocomplcache_unlock', s:SID_PREFIX) . '()'
+        call eskk#map(
+        \   'e',
+        \   '<Plug>(eskk:_neocomplcache_unlock)',
+        \   eskk#util#get_local_func('initialize_neocomplcache_unlock', s:SID_PREFIX) . '()',
+        \   eskk#get_map_modes() . 'n'
+        \)
     endfunction
     call s:initialize_neocomplcache()
     " }}}
 
     " Completion {{{
     function! s:initialize_completion()
-        execute
-        \   eskk#get_map_command(0)
-        \   '<Plug>(eskk:_do_complete)'
-        \   "\<C-x>\<C-o>\<C-p>"
+        call eskk#map('', '<Plug>(eskk:_do_complete)', '<C-x><C-o><C-p>')
     endfunction
     call s:initialize_completion()
     " }}}

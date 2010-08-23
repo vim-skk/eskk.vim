@@ -197,16 +197,8 @@ function! s:buftable.rewrite() dict "{{{
         " 2. Set begin pos
         " 3. Insert new string
 
-        execute
-        \   eskk#get_map_command(0)
-        \   '<buffer>'
-        \   '<Plug>(eskk:internal:_inserted_kakutei)'
-        \   eskk#util#str2map(kakutei)
-        execute
-        \   eskk#get_map_command(0)
-        \   '<buffer>'
-        \   '<Plug>(eskk:internal:_inserted_new)'
-        \   eskk#util#str2map(new)
+        call eskk#map('b', '<Plug>(eskk:internal:_inserted_kakutei)', eskk#util#str2map(kakutei))
+        call eskk#map('b', '<Plug>(eskk:internal:_inserted_new)', eskk#util#str2map(new))
 
         return
         \   eval(self.make_remove_bs_expr())
@@ -233,21 +225,21 @@ function! s:buftable.rewrite() dict "{{{
             call eskk#util#log('s:buftable.rewrite(): Add minimum string.')
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
-            execute
-            \   eskk#get_map_command(0)
-            \   '<buffer>'
-            \   '<Plug>(eskk:internal:_inserted)'
+            call eskk#map(
+            \   'b',
+            \   '<Plug>(eskk:internal:_inserted)',
             \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
+            \)
             return "\<Plug>(eskk:internal:_inserted)"
         else
             call eskk#util#log('s:buftable.rewrite(): Remove old, Add new.')
             " Simplest algorithm.
             " Delete current string, and insert new string.
-            execute
-            \   eskk#get_map_command(0)
-            \   '<buffer>'
-            \   '<Plug>(eskk:internal:_inserted)'
+            call eskk#map(
+            \   'b',
+            \   '<Plug>(eskk:internal:_inserted)',
             \   eskk#util#str2map(inserted_str)
+            \)
             return eval(self.make_remove_bs_expr()) . "\<Plug>(eskk:internal:_inserted)"
         endif
     endif
