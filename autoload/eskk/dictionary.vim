@@ -560,21 +560,23 @@ function! s:physical_dict.get_lines(...) dict "{{{
 
     let path = self.path
     try
-        if filereadable(path)
-            call eskk#util#logf('reading %s...', path)
-            let self._content_lines  = readfile(path)
-            call s:physical_dict_parse_lines(self, self._content_lines)
-            call eskk#util#logf('reading %s... - done.', path)
-        else
-            call eskk#util#logf("Can't read '%s'!", path)
-        endif
+        call eskk#util#logf('reading %s...', path)
+        let self._content_lines  = readfile(path)
+        call eskk#util#logf('reading %s... - done.', path)
+
+        call eskk#util#logf('parsing %s...', path)
+        call s:physical_dict_parse_lines(self, self._content_lines)
+        call eskk#util#logf('parsing %s... - done.', path)
+
+        let self._ftime_at_read = getftime(path)
+        let self._loaded = 1
+    catch /^E484:/    " Can't open file
+        call eskk#util#logf("Can't read '%s'!", path)
     catch /^eskk: parse error/
         call eskk#util#log('warning: ' . v:exception)
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
-    let self._ftime_at_read = getftime(path)
-    let self._loaded = 1
 
     return self._content_lines
 endfunction "}}}
