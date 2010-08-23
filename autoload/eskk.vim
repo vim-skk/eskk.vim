@@ -360,7 +360,7 @@ function! eskk#get_named_map(key) "{{{
     "   `<Plug>(eskk:filter:^A)` (^A is control character)
 
     let lhs = printf('<Plug>(eskk:filter:%s)', a:key)
-    if maparg(lhs, 'l') != ''
+    if maparg(lhs, eskk#get_map_modes()) != ''
         return lhs
     endif
 
@@ -1227,7 +1227,7 @@ endfunction "}}}
 function! eskk#get_special_map(type) "{{{
     if has_key(s:map, a:type)
         let map = printf('<Plug>(eskk:internal:_noremap_%s)', a:type)
-        if maparg(map) == ''
+        if maparg(map, eskk#get_map_modes()) == ''
             " Not to remap.
             execute
             \   eskk#get_map_command(0)
@@ -1712,7 +1712,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
     let clear_buftable = a:0 ? a:1 : 1
     let ret = ''
     let plug = strtrans("\<Plug>")
-    let mapmode = eskk#get_map_modes()[0:0]
+    let mapmode = eskk#get_map_modes()
     for c in split(a:chars, '\zs')
         let r = eskk#filter(c)
         let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
