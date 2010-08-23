@@ -213,7 +213,7 @@ function! s:buftable.rewrite() dict "{{{
         elseif inserted_str == ''
             call eskk#util#log('s:buftable.rewrite(): No inserted string. Remove old string.')
             return eval(self.make_remove_bs_expr())
-        elseif stridx(old, inserted_str) == 0
+        elseif inserted_str != '' && stridx(old, inserted_str) == 0
             call eskk#util#log('s:buftable.rewrite(): Remove minimum string.')
             " When inserted_str == "foo", old == "foobar"
             " Insert Remove "bar"
@@ -221,7 +221,7 @@ function! s:buftable.rewrite() dict "{{{
             \   eskk#util#key2char(eskk#get_special_map("backspace-key")),
             \   eskk#util#mb_strlen(old) - eskk#util#mb_strlen(inserted_str)
             \)
-        elseif stridx(inserted_str, old) == 0
+        elseif old != '' && stridx(inserted_str, old) == 0
             call eskk#util#log('s:buftable.rewrite(): Add minimum string.')
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
