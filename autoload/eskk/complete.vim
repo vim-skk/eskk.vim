@@ -334,21 +334,21 @@ function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
 let s:popup_func_table = {
-\   eskk#util#key2char("<CR>") : function('s:do_enter_pre'),
-\   eskk#util#key2char("<C-y>") : function('s:close_pum_pre'),
-\   eskk#util#key2char("<C-l>") : function('s:identity'),
-\   eskk#util#key2char("<C-e>") : function('s:identity'),
-\   eskk#util#key2char("<PageUp>") : function('s:identity'),
-\   eskk#util#key2char("<PageDown>") : function('s:identity'),
-\   eskk#util#key2char("<Up>") : function('s:select_item'),
-\   eskk#util#key2char("<Down>") : function('s:select_item'),
-\   eskk#util#key2char("<Space>") : function('s:do_space'),
-\   eskk#util#key2char("<Tab>") : function('s:select_insert_item'),
-\   eskk#util#key2char("<C-n>") : function('s:select_insert_item'),
-\   eskk#util#key2char("<C-p>") : function('s:select_insert_item'),
-\   eskk#util#key2char("<C-h>") : function('s:do_backspace'),
-\   eskk#util#key2char("<BS>") : function('s:do_backspace'),
-\   eskk#util#key2char("<Esc>") : function('s:do_escape'),
+\   "\<CR>" : function('s:do_enter_pre'),
+\   "\<C-y>" : function('s:close_pum_pre'),
+\   "\<C-l>" : function('s:identity'),
+\   "\<C-e>" : function('s:identity'),
+\   "\<PageUp>" : function('s:identity'),
+\   "\<PageDown>" : function('s:identity'),
+\   "\<Up>" : function('s:select_item'),
+\   "\<Down>" : function('s:select_item'),
+\   "\<Space>" : function('s:do_space'),
+\   "\<Tab>" : function('s:select_insert_item'),
+\   "\<C-n>" : function('s:select_insert_item'),
+\   "\<C-p>" : function('s:select_insert_item'),
+\   "\<C-h>" : function('s:do_backspace'),
+\   "\<BS>" : function('s:do_backspace'),
+\   "\<Esc>" : function('s:do_escape'),
 \}
 
 function! s:set_selected_item() "{{{
