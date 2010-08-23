@@ -417,7 +417,13 @@ function! s:mapopt_dict2raw(options) "{{{
     return ret
 endfunction "}}}
 function! s:mapopt_chars2raw(options) "{{{
-    return s:mapopt_dict2raw(s:mapopt_chars2dict(a:options))
+    let table = {
+    \   'b': '<buffer>',
+    \   'e': '<expr>',
+    \   's': '<silent>',
+    \   'u': '<unique>',
+    \}
+    return join(map(split(a:options, '\zs'), 'get(table, v:val, "")'), '')
 endfunction "}}}
 
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
