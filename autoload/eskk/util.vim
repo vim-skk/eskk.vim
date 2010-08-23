@@ -232,8 +232,14 @@ function! eskk#util#key2char(key) "{{{
 endfunction "}}}
 function! eskk#util#str2map(str) "{{{
     let s = a:str
-    let s = substitute(s, '<', '<lt>', 'g')
-    let s = substitute(s, ' ', '<Space>', 'g')
+    for key in [
+    \   '<lt>',
+    \   '<Space>',
+    \   '<Esc>',
+    \   '<Tab>',
+    \]
+        let s = substitute(s, eskk#util#key2char(key), key, 'g')
+    endfor
     return s != '' ? s : '<Nop>'
 endfunction "}}}
 function! eskk#util#do_remap(map, modes) "{{{
