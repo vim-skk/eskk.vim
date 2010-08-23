@@ -28,6 +28,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_o
         call eskk#util#logf('Search %s in %s.', string(needle), string(a:physical_dict.path))
     endif
 
+    let whole_lines = a:physical_dict.get_lines()
     if !a:physical_dict.is_valid()
         return []
     endif
@@ -35,14 +36,14 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_o
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, converted, a:has_okuri, limit)
+
+        let result = s:search_binary(a:physical_dict, whole_lines, converted, a:has_okuri, limit)
 
         if result[1] == -1
             return []
         endif
 
         " Get lines until limit.
-        let whole_lines = a:physical_dict.get_lines()
         let begin = result[1]
         let i = begin + 1
         while eskk#util#has_idx(whole_lines, i)
@@ -64,7 +65,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_o
         let lines = []
         let start = 1
         while 1
-            let result = s:search_linear(a:physical_dict, converted, a:has_okuri, start)
+            let result = s:search_linear(a:physical_dict, whole_lines, converted, a:has_okuri, start)
 
             if result[1] == -1
                 break
@@ -87,6 +88,7 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
         call eskk#util#logstrf('Search %s in %s.', needle, a:physical_dict.path)
     endif
 
+    let whole_lines = a:physical_dict.get_lines()
     if !a:physical_dict.is_valid()
         return ['', -1]
     endif
@@ -94,10 +96,10 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, converted, has_okuri, 5)
+        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 5)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        let result = s:search_linear(a:physical_dict, converted, has_okuri)
+        let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
     endif
     if result[1] !=# -1
         let conv_line = s:iconv(result[0], a:physical_dict.encoding, &l:encoding)
@@ -108,20 +110,15 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
         return ['', -1]
     endif
 endfunction "}}}
-function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
+function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    let whole_lines = a:ph_dict.get_lines()
-    if !a:ph_dict.is_valid()
-        return ['', -1]
-    endif
-
     " NOTE: min, max, mid are index number. not lnum.
 
     if a:has_okuri
         let [min, max] = [a:ph_dict.okuri_ari_idx, a:ph_dict.okuri_nasi_idx - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
     else
-        let [min, max] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
+        let [min, max] = [a:ph_dict.okuri_nasi_idx, len(a:whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
 
@@ -130,7 +127,7 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     if a:has_okuri
         while max - min > a:limit
             let mid = (min + max) / 2
-            let line = whole_lines[mid]
+            let line = a:whole_lines[mid]
             if a:needle >=# line
                 let max = mid
             else
@@ -140,7 +137,7 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     else
         while max - min > a:limit
             let mid = (min + max) / 2
-            let line = whole_lines[mid]
+            let line = a:whole_lines[mid]
             if a:needle >=# line
                 let min = mid
             else
@@ -150,33 +147,28 @@ function! s:search_binary(ph_dict, needle, has_okuri, limit) "{{{
     endif
 
     " NOTE: min, max: Give index number, not lnum.
-    return s:search_linear(a:ph_dict, a:needle, a:has_okuri, min, max)
+    return s:search_linear(a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max)
 endfunction "}}}
-function! s:search_linear(ph_dict, needle, has_okuri, ...) "{{{
+function! s:search_linear(ph_dict, whole_lines, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    let whole_lines = a:ph_dict.get_lines()
-    if !a:ph_dict.is_valid()
-        return ['', -1]
-    endif
-
     if a:0 == 1
-        let [min, max] = [a:1, len(whole_lines) - 1]
+        let [min, max] = [a:1, len(a:whole_lines) - 1]
     elseif a:0 >= 2
         let [min, max] = a:000
         call eskk#util#assert(min <=# max, 'min <=# max')
     elseif a:has_okuri
-        let [min, max] = [a:ph_dict.okuri_ari_idx, len(whole_lines) - 1]
+        let [min, max] = [a:ph_dict.okuri_ari_idx, len(a:whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
     else
-        let [min, max] = [a:ph_dict.okuri_nasi_idx, len(whole_lines) - 1]
+        let [min, max] = [a:ph_dict.okuri_nasi_idx, len(a:whole_lines) - 1]
         call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
     endif
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number.")
     " call eskk#util#logf('s:search_linear(): Initial: min = %d, max = %d', min, max)
 
     while min <=# max
-        if stridx(whole_lines[min], a:needle) == 0
-            return [whole_lines[min], min]
+        if stridx(a:whole_lines[min], a:needle) == 0
+            return [a:whole_lines[min], min]
         endif
         let min += 1
     endwhile
