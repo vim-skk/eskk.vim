@@ -242,6 +242,9 @@ function! eskk#util#str2map(str) "{{{
     endfor
     return s != '' ? s : '<Nop>'
 endfunction "}}}
+function! eskk#util#get_tab_raw_str() "{{{
+    return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
+endfunction "}}}
 function! eskk#util#do_remap(map, modes) "{{{
     let m = maparg(a:map, a:modes)
     return m != '' ? m : a:map

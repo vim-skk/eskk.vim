@@ -811,6 +811,9 @@ function! s:buftable.do_escape(stash) dict "{{{
 
     let a:stash.return = kakutei_str . eskk#util#key2char(esc)
 endfunction "}}}
+function! s:buftable.do_tab(stash) dict "{{{
+    call a:stash.buf_str.push_rom_str(eskk#util#get_tab_raw_str())
+endfunction "}}}
 
 " TODO: These functions are very similar. Refactoring them.
 function! s:buftable.convert_rom_str(phases) dict "{{{

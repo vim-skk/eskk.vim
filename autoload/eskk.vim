@@ -73,6 +73,7 @@ let s:map = {
 \   'escape-key': {},
 \   'enter-key': {},
 \   'undo-key': {},
+\   'tab': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -750,6 +751,9 @@ function! s:asym_filter.filter(stash) dict "{{{
             return
         elseif eskk#is_special_lhs(char, 'escape-key')
             call buftable.do_escape(a:stash)
+            return
+        elseif eskk#is_special_lhs(char, 'tab')
+            call buftable.do_tab(a:stash)
             return
         else
             " Fall through.
@@ -2019,6 +2023,7 @@ function! s:initialize() "{{{
     silent! EskkMap -type=enter-key -unique <CR>
     silent! EskkMap -type=escape-key -unique <Esc>
     silent! EskkMap -type=undo-key -unique <C-g>u
+    silent! EskkMap -type=tab -unique <Tab>
 
     silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
 
