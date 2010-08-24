@@ -1530,7 +1530,7 @@ function! s:filter(self, char) "{{{
         return s:rewrite_string(stash.return)
 
     catch
-        call s:write_error_log_file(v:exception, v:throwpoint, a:char)
+        call s:write_error_log_file(a:char)
         return a:char
 
     finally
@@ -1597,7 +1597,7 @@ function! s:rewrite_string(return_string) "{{{
     \               '') :
     \       '')
 endfunction "}}}
-function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
+function! s:write_error_log_file(char) "{{{
     let lines = []
     call add(lines, '--- g:eskk_version ---')
     call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
@@ -1608,14 +1608,14 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     call add(lines, '--- char ---')
     call add(lines, '')
     call add(lines, '--- exception ---')
-    if a:v_exception =~# '^eskk:'
+    if v:exception =~# '^eskk:'
         call add(lines, 'exception type: eskk exception')
-        call add(lines, printf('v:exception: %s', a:v_exception))
+        call add(lines, printf('v:exception: %s', v:exception))
     else
         call add(lines, 'exception type: Vim internal error')
-        call add(lines, printf('v:exception: %s', a:v_exception))
+        call add(lines, printf('v:exception: %s', v:exception))
     endif
-    call add(lines, printf('v:throwpoint: %s', a:v_throwpoint))
+    call add(lines, printf('v:throwpoint: %s', v:throwpoint))
     call add(lines, '--- exception ---')
     call add(lines, '')
     call add(lines, '--- buftable ---')
