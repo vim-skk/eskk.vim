@@ -270,7 +270,7 @@ function! s:register_skeleton.register() dict "{{{
         "
         let msg = printf("'%s' has been already registered.", self.name)
         " throw eskk#internal_error(['eskk', 'table'], msg)
-        call eskk#util#log('warning: ' . msg)
+        call eskk#util#log_warn(msg)
         return
     endif
 

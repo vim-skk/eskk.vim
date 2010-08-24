@@ -39,14 +39,8 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return s:eskkcomplete(a:findstart, a:base)
     catch
         redraw
-        call eskk#util#warn('warning: s:eskkcomplete() throwed exception.')
+        call eskk#util#log_exception('s:eskkcomplete()')
         sleep 200m
-
-        if g:eskk_debug
-            call eskk#util#log('warning: s:eskkcomplete() throwed exception.')
-            call eskk#util#logf('v:exception = %s', v:exception)
-            call eskk#util#logf('v:throwpoint = %s', v:throwpoint)
-        endif
 
         if a:findstart
             return -1
@@ -408,7 +402,7 @@ function! s:get_buftable_pos() "{{{
     let buftable = eskk#get_buftable()
     let l = buftable.get_begin_pos()
     if empty(l)
-        call eskk#util#log("warning: Can't get begin pos.")
+        call eskk#util#log_warn("Can't get begin pos.")
         return [0, 0, 0]
     endif
     let [mode, pos] = l
@@ -429,7 +423,7 @@ function! s:get_buftable_str(with_marker, ...) "{{{
 
     let [success, _, pos] = s:get_buftable_pos()
     if !success
-        call eskk#util#log('warning: s:get_buftable_pos() failed')
+        call eskk#util#log_warn('s:get_buftable_pos() failed')
         return ''
     endif
     let begin = pos[2] - 1

@@ -936,7 +936,7 @@ function! s:buftable.set_begin_pos(expr) dict "{{{
     elseif mode() ==# 'c'
         let self._begin_pos = ['c', getcmdpos()]
     else
-        call eskk#util#logf("warning: called eskk from mode '%s'.", mode())
+        call eskk#util#logf_warn("called eskk from mode '%s'.", mode())
     endif
 endfunction "}}}
 

@@ -322,7 +322,7 @@ function! eskk#set_up_temp_key_restore(lhs) "{{{
         call eskk#unmap('l', 'b', temp_key)
         call eskk#map('rb', a:lhs, saved_rhs, 'l')
     else
-        call eskk#util#logf("warning: called eskk#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
+        call eskk#util#logf_warn("called eskk#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
         call eskk#set_up_key(a:lhs)
     endif
 endfunction "}}}
@@ -369,7 +369,7 @@ function! eskk#get_map_modes() "{{{
 endfunction "}}}
 function! eskk#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
-        call eskk#util#logstrf('warning: lhs or rhs is empty: lhs = %s, rhs = %s', a:lhs, a:rhs)
+        call eskk#util#logstrf_warn('lhs or rhs is empty: lhs = %s, rhs = %s', a:lhs, a:rhs)
         return
     endif
 
@@ -386,7 +386,7 @@ function! eskk#map(options, lhs, rhs, ...) "{{{
 endfunction "}}}
 function! eskk#unmap(modes, options, lhs) "{{{
     if a:lhs == ''
-        call eskk#util#logstrf('warning: lhs is empty: lhs = %s', a:lhs)
+        call eskk#util#logstrf_warn('lhs is empty: lhs = %s', a:lhs)
         return
     endif
 
@@ -1285,8 +1285,8 @@ function! eskk#set_mode(next_mode) "{{{
     let self = eskk#get_current_instance()
     call eskk#util#logf("mode change: %s => %s", self.mode, a:next_mode)
     if !eskk#is_supported_mode(a:next_mode)
-        call eskk#util#logf("warning: mode '%s' is not supported.", a:next_mode)
-        call eskk#util#logf('warning: s:available_modes = %s', string(s:available_modes))
+        call eskk#util#logf_warn("mode '%s' is not supported.", a:next_mode)
+        call eskk#util#logf_warn('s:available_modes = %s', string(s:available_modes))
         return
     endif
 
@@ -1487,7 +1487,7 @@ function! s:filter(self, char) "{{{
         call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
         " Check irregular circumstance.
         if !eskk#is_supported_mode(self.mode)
-            call eskk#util#log('warning: current mode is not supported: ' . self.mode)
+            call eskk#util#log_warn('current mode is not supported: ' . self.mode)
             sleep 1
         endif
     endif
@@ -1665,7 +1665,7 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        call eskk#util#logf("warning: Cannot write to log file '%s'.", log_file)
+        call eskk#util#logf_warn("Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight
@@ -1911,7 +1911,7 @@ function! s:initialize() "{{{
         let dir = expand(g:eskk_directory)
         for d in [dir, eskk#util#join_path(dir, 'log')]
             if !isdirectory(d) && !eskk#util#mkdir_nothrow(d)
-                call eskk#util#warnf("warning: can't create directory '%s'.", d)
+                call eskk#util#logf_warn("can't create directory '%s'.", d)
             endif
         endfor
     endfunction

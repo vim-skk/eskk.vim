@@ -342,10 +342,7 @@ function! s:henkan_result_advance(this, advance) "{{{
         return 0
     catch /^eskk: dictionary look up error:/
         " Shut up error. This function does not throw exception.
-        if g:eskk_debug
-            call eskk#util#log('warning: s:henkan_result_get_result() throwed exception')
-            call eskk#util#logstrf('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
-        endif
+        call eskk#util#log_exception('s:henkan_result_get_result()')
         return 0
     endtry
 endfunction "}}}
@@ -635,7 +632,7 @@ function! s:physical_dict.get_lines(...) dict "{{{
     catch /^E484:/    " Can't open file
         call eskk#util#logf("Can't read '%s'!", path)
     catch /^eskk: parse error/
-        call eskk#util#log('warning: ' . v:exception)
+        call eskk#util#log_exception('s:physical_dict.get_lines()')
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
@@ -650,7 +647,7 @@ function! s:physical_dict.set_lines(lines) dict "{{{
         let self._loaded = 1
         let self._is_modified = 1
     catch /^eskk: parse error/
-        call eskk#util#log('warning: ' . v:exception)
+        call eskk#util#log_exception('s:physical_dict.set_lines()')
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
@@ -736,7 +733,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
     " inputsave()
     let success = 0
     if inputsave() !=# success
-        call eskk#util#log("warning: inputsave() failed")
+        call eskk#util#log_warn("inputsave() failed")
     endif
 
     " Save `&imsearch`.
@@ -762,7 +759,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
         try
             call eskk#destroy_current_instance()
         catch /^eskk:/
-            call eskk#log('warning: ' . eskk#get_exception_message(v:exception))
+            call eskk#log_warn('eskk#destroy_current_instance()')
         endtry
 
         " Enable eskk mapping if it has been disabled.
@@ -773,7 +770,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
         " inputrestore()
         if inputrestore() !=# success
-            call eskk#util#log("warning: inputrestore() failed")
+            call eskk#util#log_warn("inputrestore() failed")
         endif
     endtry
 
