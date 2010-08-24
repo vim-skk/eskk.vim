@@ -9,13 +9,13 @@ set cpo&vim
 
 
 function! s:do_general_test()
-    Is eskk#emulate_filter_keys('a'), 'あ', '"a" => "あ"'
-    Is eskk#emulate_filter_keys('sa'), 'さ', '"sa" => "さ"'
-    Is eskk#emulate_filter_keys(' sa'), ' さ', '" sa" => " さ"'
-    Is eskk#emulate_filter_keys('sa '), 'さ ', '"sa " => "さ "'
-    Is eskk#emulate_filter_keys('tty'), 'っty', '"tty" => "っty"'
-    Is eskk#emulate_filter_keys(' ka'), ' か', '" ka" => " か"'
-    Is eskk#emulate_filter_keys('&ka'), '&か', '"&ka" => "&か"'
+    Is eskk#test#emulate_filter_keys('a'), 'あ', '"a" => "あ"'
+    Is eskk#test#emulate_filter_keys('sa'), 'さ', '"sa" => "さ"'
+    Is eskk#test#emulate_filter_keys(' sa'), ' さ', '" sa" => " さ"'
+    Is eskk#test#emulate_filter_keys('sa '), 'さ ', '"sa " => "さ "'
+    Is eskk#test#emulate_filter_keys('tty'), 'っty', '"tty" => "っty"'
+    Is eskk#test#emulate_filter_keys(' ka'), ' か', '" ka" => " か"'
+    Is eskk#test#emulate_filter_keys('&ka'), '&か', '"&ka" => "&か"'
 endfunction
 
 function! s:do_test_skk()
@@ -23,9 +23,9 @@ function! s:do_test_skk()
     Diag 'let g:eskk_rom_input_style = "skk"'
 
     call s:do_general_test()
-    Is eskk#emulate_filter_keys('jka'), 'か', '"jka" => "か"'
-    Is eskk#emulate_filter_keys('jkjka'), 'か', '"jkjka" => "か"'
-    Is eskk#emulate_filter_keys('jkjkka'), 'っか', '"jkjkka" => "っか"'
+    Is eskk#test#emulate_filter_keys('jka'), 'か', '"jka" => "か"'
+    Is eskk#test#emulate_filter_keys('jkjka'), 'か', '"jkjka" => "か"'
+    Is eskk#test#emulate_filter_keys('jkjkka'), 'っか', '"jkjkka" => "っか"'
 endfunction
 
 function! s:do_test_msime()
@@ -33,9 +33,9 @@ function! s:do_test_msime()
     Diag 'let g:eskk_rom_input_style = "msime"'
 
     call s:do_general_test()
-    Is eskk#emulate_filter_keys('jka'), 'jか', '"jka" => "jか"'
-    Is eskk#emulate_filter_keys('jkjka'), 'jkjか', '"jkjka" => "jkjか"'
-    Is eskk#emulate_filter_keys('jkjkka'), 'jkjっか', '"jkjkka" => "jkjっか"'
+    Is eskk#test#emulate_filter_keys('jka'), 'jか', '"jka" => "jか"'
+    Is eskk#test#emulate_filter_keys('jkjka'), 'jkjか', '"jkjka" => "jkjか"'
+    Is eskk#test#emulate_filter_keys('jkjkka'), 'jkjっか', '"jkjkka" => "jkjっか"'
 endfunction
 
 function! s:do_test_quickmatch()

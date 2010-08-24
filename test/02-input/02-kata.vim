@@ -9,15 +9,15 @@ set cpo&vim
 
 
 function! s:run()
-    Is eskk#emulate_filter_keys('qaq'), 'ア'
-    Is eskk#emulate_filter_keys('qsq'), ''
-    Is eskk#emulate_filter_keys("qasq"), "ア"
-    Is eskk#emulate_filter_keys("qasaq"), "アサ"
+    Is eskk#test#emulate_filter_keys('qaq'), 'ア'
+    Is eskk#test#emulate_filter_keys('qsq'), ''
+    Is eskk#test#emulate_filter_keys("qasq"), "ア"
+    Is eskk#test#emulate_filter_keys("qasaq"), "アサ"
 
-    Is eskk#emulate_filter_keys(';aq'), 'ア'
-    Is eskk#emulate_filter_keys(';sq'), ''
-    Is eskk#emulate_filter_keys(";asq"), "ア"
-    Is eskk#emulate_filter_keys(";asaq"), "アサ"
+    Is eskk#test#emulate_filter_keys(';aq'), 'ア'
+    Is eskk#test#emulate_filter_keys(';sq'), ''
+    Is eskk#test#emulate_filter_keys(";asq"), "ア"
+    Is eskk#test#emulate_filter_keys(";asaq"), "アサ"
 endfunction
 
 call s:run()
