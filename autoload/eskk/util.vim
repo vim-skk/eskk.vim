@@ -215,42 +215,6 @@ function! eskk#util#unget_arg(arg, str) "{{{
 endfunction "}}}
 
 
-" Key/Char/Map
-function! s:split_to_keys(lhs)  "{{{
-    " From arpeggio.vim
-    "
-    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
-    "             a:lhs doesn't directly contain any escape sequences.
-    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
-endfunction "}}}
-function! eskk#util#key2char(key) "{{{
-    " From arpeggio.vim
-
-    let keys = s:split_to_keys(a:key)
-    call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
-    return join(keys, '')
-endfunction "}}}
-function! eskk#util#str2map(str) "{{{
-    let s = a:str
-    for key in [
-    \   '<lt>',
-    \   '<Space>',
-    \   '<Esc>',
-    \   '<Tab>',
-    \]
-        let s = substitute(s, eskk#util#key2char(key), key, 'g')
-    endfor
-    return s != '' ? s : '<Nop>'
-endfunction "}}}
-function! eskk#util#get_tab_raw_str() "{{{
-    return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
-endfunction "}}}
-function! eskk#util#do_remap(map, modes) "{{{
-    let m = maparg(a:map, a:modes)
-    return m != '' ? m : a:map
-endfunction "}}}
-
-
 " String/Regex
 function! eskk#util#escape_regex(regex) "{{{
     " XXX
@@ -291,6 +255,39 @@ endfunction "}}}
 
 
 " Mappings
+function! s:split_to_keys(lhs)  "{{{
+    " From arpeggio.vim
+    "
+    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
+    "             a:lhs doesn't directly contain any escape sequences.
+    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
+endfunction "}}}
+function! eskk#util#key2char(key) "{{{
+    " From arpeggio.vim
+
+    let keys = s:split_to_keys(a:key)
+    call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
+    return join(keys, '')
+endfunction "}}}
+function! eskk#util#str2map(str) "{{{
+    let s = a:str
+    for key in [
+    \   '<lt>',
+    \   '<Space>',
+    \   '<Esc>',
+    \   '<Tab>',
+    \]
+        let s = substitute(s, eskk#util#key2char(key), key, 'g')
+    endfor
+    return s != '' ? s : '<Nop>'
+endfunction "}}}
+function! eskk#util#get_tab_raw_str() "{{{
+    return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
+endfunction "}}}
+function! eskk#util#do_remap(map, modes) "{{{
+    let m = maparg(a:map, a:modes)
+    return m != '' ? m : a:map
+endfunction "}}}
 function! eskk#util#get_nore_map(key, ...) "{{{
     " NOTE:
     " a:key is escaped. So when a:key is '<C-a>', return value is
