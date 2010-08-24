@@ -798,14 +798,16 @@ function! s:dict_write_to_file(this) "{{{
     let ret_success = 0
     try
         if writefile(user_dict_lines, a:this._user_dict.path) ==# ret_success
-            echo "\r" . save_msg . 'Done.'
+            redraw
+            echo save_msg . 'Done.'
         else
             let msg = printf("can't write to '%s'.", a:this._user_dict.path)
             throw eskk#internal_error(['eskk', 'dictionary'], msg)
         endif
     catch
+        redraw
         echohl WarningMsg
-        echo "\r" . save_msg . "Error. Please check permission of"
+        echomsg save_msg . "Error. Please check permission of"
         \    "'" . a:this._user_dict.path . "' - " . v:exception
         echohl None
     endtry
