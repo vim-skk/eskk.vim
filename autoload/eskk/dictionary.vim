@@ -301,7 +301,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
     \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
-    \       '_result': (empty(added) ? [] : [map(added, '{"result": v:val}'), 0]),
+    \       '_result': (empty(added) ? [] : [map(added, '{"result": v:val}'), 0, -1]),
     \   },
     \   'force'
     \)
@@ -367,11 +367,12 @@ function! s:henkan_result_get_result(this) "{{{
         \       get(a:this._result, 0, [])
         \   ]),
         \   0,
+        \   user_dict_result[1],
         \]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
         return a:this._result
     elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
-        let [candidates, idx] = a:this._result
+        let [candidates, idx, _] = a:this._result
         if eskk#util#has_idx(candidates, idx)
             return a:this._result
         else
@@ -478,7 +479,7 @@ function! s:henkan_result.get_candidate(...) dict "{{{
 
     " Save `result` reference to modify.
     let result = s:henkan_result_get_result(self)
-    let [candidates, idx] = result
+    let [candidates, idx, _] = result
     call eskk#util#logf('idx = %d, counter = %d', idx, counter)
 
     if idx >= counter
