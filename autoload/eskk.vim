@@ -275,7 +275,7 @@ function! s:asym_filter.filter(stash) dict "{{{
         elseif eskk#mappings#is_special_lhs(char, 'sticky')
             call buftable.do_sticky(a:stash)
             return
-        elseif eskk#is_big_letter(char)
+        elseif char =~# '^[A-Z]$'
             if !eskk#mappings#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
                 call buftable.do_sticky(a:stash)
                 call eskk#register_temp_event(
@@ -763,11 +763,6 @@ function! eskk#emulate_toggle_im() "{{{
 endfunction "}}}
 function! eskk#is_initialized() "{{{
     return s:is_initialized
-endfunction "}}}
-
-" Big letter keys
-function! eskk#is_big_letter(char) "{{{
-    return a:char =~# '^[A-Z]$'
 endfunction "}}}
 
 " Mode
