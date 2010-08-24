@@ -41,13 +41,14 @@ function! eskk#util#log(msg) "{{{
     \   0
     \)
 
+    let msg = printf('[%s]::%s', strftime('%c'), a:msg)
     if stdout ==# 'file'
         let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'debug.log'))
         execute 'redir >>' file
-        silent echo a:msg
+        silent echo msg
         redir END
     else
-        call eskk#util#warn(a:msg)
+        call eskk#util#warn(msg)
     endif
 
     if g:eskk_debug_wait_ms !=# 0
@@ -83,13 +84,14 @@ function! eskk#util#log_warn(msg) "{{{
     \   0
     \)
 
+    let msg = printf('[%s]::%s', strftime('%c'), a:msg)
     if out ==# 'file'
         let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'warnings.log'))
         execute 'redir >>' file
-        silent echo a:msg
+        silent echo msg
         redir END
     else
-        call eskk#util#warn(a:msg)
+        call eskk#util#warn(msg)
     endif
 endfunction "}}}
 function! eskk#util#logf_warn(fmt, ...) "{{{
