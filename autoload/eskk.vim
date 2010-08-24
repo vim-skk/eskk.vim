@@ -288,11 +288,12 @@ function! s:map_key(key, options) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
     " Map a:key.
-    execute
-    \   'lmap'
-    \   '<buffer>' . eskk#util#mapopt_dict2raw(a:options)
-    \   a:key
-    \   eskk#get_named_map(a:key)
+    call eskk#map(
+    \   'rb' . eskk#util#mapopt_dict2chars(a:options),
+    \   a:key,
+    \   eskk#get_named_map(a:key),
+    \   'l'
+    \)
 endfunction "}}}
 function! eskk#set_up_temp_key(lhs, ...) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
@@ -303,19 +304,11 @@ function! eskk#set_up_temp_key(lhs, ...) "{{{
     if save_rhs != '' && maparg(save_lhs) == ''
         " TODO Check if a:lhs is buffer local.
         call eskk#util#log('Save temp key: ' . maparg(a:lhs, 'l'))
-        execute
-        \   'lmap'
-        \   '<buffer>'
-        \   save_lhs
-        \   save_rhs
+        call eskk#map('rb', save_lhs, save_rhs, 'l')
     endif
 
     if a:0
-        execute
-        \   'lmap'
-        \   '<buffer>'
-        \   a:lhs
-        \   a:1
+        call eskk#map('rb', a:lhs, a:1, 'l')
     else
         call eskk#set_up_key(a:lhs)
     endif
@@ -326,8 +319,8 @@ function! eskk#set_up_temp_key_restore(lhs) "{{{
 
     if saved_rhs != ''
         call eskk#util#log('Restore saved temp key: ' . saved_rhs)
-        execute 'lunmap <buffer>' temp_key
-        execute 'lmap <buffer>' a:lhs saved_rhs
+        call eskk#unmap('l', 'b', temp_key)
+        call eskk#map('rb', a:lhs, saved_rhs, 'l')
     else
         call eskk#util#logf("warning: called eskk#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
         call eskk#set_up_key(a:lhs)
@@ -342,10 +335,7 @@ function! eskk#unmap_key(key) "{{{
     " Assumption: a:key must be '<Bar>' not '|'.
 
     " Unmap a:key.
-    execute
-    \   'lunmap'
-    \   '<buffer>'
-    \   a:key
+    call eskk#unmap('l', 'b', a:key)
 
     " TODO Restore buffer local mapping?
 endfunction "}}}
@@ -387,6 +377,17 @@ function! eskk#map(options, lhs, rhs, ...) "{{{
     let opt = eskk#util#mapopt_chars2raw(a:options)
     for mode in split((a:0 ? a:1 : eskk#get_map_modes()), '\zs')
         execute mode . map opt a:lhs a:rhs
+    endfor
+endfunction "}}}
+function! eskk#unmap(modes, options, lhs) "{{{
+    if a:lhs == ''
+        call eskk#util#logstrf('warning: lhs is empty: lhs = %s', a:lhs)
+        return
+    endif
+
+    let opt = eskk#util#mapopt_chars2raw(a:options)
+    for mode in split(a:modes, '\zs')
+        execute mode . 'unmap' opt a:lhs
     endfor
 endfunction "}}}
 
@@ -1237,11 +1238,14 @@ function! eskk#map_all_keys(...) "{{{
         if opt.rhs == ''
             call s:map_key(key, opt.options)
         else
-            execute
-            \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
-            \   '<buffer>' . eskk#util#mapopt_dict2raw(opt.options)
-            \   key
-            \   opt.rhs
+            call eskk#map(
+            \   'b'
+            \       . (opt.options.remap ? 'r' : '')
+            \       . eskk#util#mapopt_dict2chars(opt.options),
+            \   key,
+            \   opt.rhs,
+            \   'l'
+            \)
         endif
     endfor
 
