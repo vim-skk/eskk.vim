@@ -65,8 +65,9 @@ function! eskk#util#log_exception(what) "{{{
         return
     endif
 
-    call eskk#util#logf_warn("'%s' throws exception", a:what)
-    call eskk#util#logstrf_warn('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
+    call eskk#util#log_warn("'" . a:what . "' throwed exception")
+    call eskk#util#log_warn('v:exception = ' . string(v:exception))
+    call eskk#util#log_warn('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
 function! eskk#util#log_warn(msg) "{{{
     if !eskk#is_initialized()
