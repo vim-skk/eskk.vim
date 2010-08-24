@@ -321,14 +321,6 @@ function! eskk#has_temp_key(lhs) "{{{
     let saved_rhs = maparg(temp_key, 'l')
     return saved_rhs != ''
 endfunction "}}}
-function! eskk#unmap_key(key) "{{{
-    " Assumption: a:key must be '<Bar>' not '|'.
-
-    " Unmap a:key.
-    call eskk#unmap('l', 'b', a:key)
-
-    " TODO Restore buffer local mapping?
-endfunction "}}}
 function! s:temp_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
@@ -1259,7 +1251,7 @@ function! eskk#unmap_all_keys() "{{{
     endif
 
     for key in g:eskk_mapped_keys
-        call eskk#unmap_key(key)
+        call eskk#unmap('l', 'b', key)
     endfor
 
     unlet s:has_mapped[bufnr('%')]
