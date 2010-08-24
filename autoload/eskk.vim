@@ -281,7 +281,7 @@ function! eskk#set_up_key(key, ...) "{{{
     if a:0
         return s:map_key(a:key, eskk#util#mapopt_chars2dict(a:1))
     else
-        return s:map_key(a:key, s:create_default_mapopt())
+        return s:map_key(a:key, eskk#util#create_default_mapopt())
     endif
 endfunction "}}}
 function! s:map_key(key, options) "{{{
@@ -423,16 +423,6 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
         let type_st.lhs = lhs
     endif
 endfunction "}}}
-function! s:create_default_mapopt() "{{{
-    return {
-    \   'buffer': 0,
-    \   'expr': 0,
-    \   'silent': 0,
-    \   'unique': 0,
-    \   'remap': 0,
-    \   'map-if': '1',
-    \}
-endfunction "}}}
 
 " :EskkMap - Ex command for s:create_map()
 function! s:skip_white(args) "{{{
@@ -485,7 +475,7 @@ endfunction "}}}
 function! s:parse_options(args) "{{{
     let args = a:args
     let type = 'general'
-    let opt = s:create_default_mapopt()
+    let opt = eskk#util#create_default_mapopt()
     let opt.noremap = 0
 
     while args != ''

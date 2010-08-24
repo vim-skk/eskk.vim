@@ -323,8 +323,18 @@ function! eskk#util#get_sid_from_source(regex) "{{{
         endif
     endfor
 endfunction "}}}
+function! eskk#util#create_default_mapopt() "{{{
+    return {
+    \   'buffer': 0,
+    \   'expr': 0,
+    \   'silent': 0,
+    \   'unique': 0,
+    \   'remap': 0,
+    \   'map-if': '1',
+    \}
+endfunction "}}}
 function! eskk#util#mapopt_chars2dict(options) "{{{
-    let opt = s:create_default_mapopt()
+    let opt = eskk#util#create_default_mapopt()
     for c in split(a:options, '\zs')
         if c ==# 'b'
             let opt.buffer = 1
