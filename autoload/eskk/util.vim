@@ -60,6 +60,14 @@ endfunction "}}}
 function! eskk#util#logstrf(fmt, ...) "{{{
     return call('eskk#util#logf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
+function! eskk#util#log_exception(what) "{{{
+    if !g:eskk_debug
+        return
+    endif
+
+    call eskk#util#logf("warning: '%s' throws exception", a:what)
+    call eskk#util#logstrf('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
+endfunction "}}}
 
 function! eskk#util#printstrf(fmt, ...) "{{{
     return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
