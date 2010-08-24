@@ -388,7 +388,7 @@ endfunction "}}}
 
 function! s:henkan_result_select_candidates(this, with_okuri, skip_num) "{{{
     " Select candidates by getchar()'s character.
-    let words = copy(a:this._result[0])
+    let words = copy(s:henkan_result_get_result(a:this)[0])
     let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))
     let page_index = 0
     let pages = []
@@ -522,7 +522,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
     if self._status !=# g:eskk#dictionary#HR_GOT_RESULT
         return
     endif
-    let [candidates, idx, user_dict_idx] = self._result
+    let [candidates, idx, user_dict_idx] = s:henkan_result_get_result(self)
 
     if !eskk#util#has_idx(candidates, idx)
         return
