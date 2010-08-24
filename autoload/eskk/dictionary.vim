@@ -639,6 +639,7 @@ let s:dict = {
 \   '_user_dict': {},
 \   '_system_dict': {},
 \   '_added_words': [],
+\   '_is_modified': 0,
 \}
 
 function! eskk#dictionary#new(user_dict, system_dict) "{{{
@@ -735,10 +736,11 @@ endfunction "}}}
 
 function! s:dict.remember_word(input, key, okuri, okuri_rom) dict "{{{
     call add(self._added_words, [a:input, a:key, a:okuri, a:okuri_rom])
+    let self._is_modified = 1
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
-    return !empty(self._added_words)
+    return self._is_modified
 endfunction "}}}
 
 function! s:dict.update_dictionary() dict "{{{
@@ -767,6 +769,7 @@ function! s:dict.update_dictionary() dict "{{{
     endif
 
     call s:dict_write_to_file(self)
+    let self._is_modified = 0
 endfunction "}}}
 function! s:dict_write_to_file(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
