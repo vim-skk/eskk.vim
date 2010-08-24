@@ -1435,24 +1435,18 @@ endfunction "}}}
 function! eskk#filter(char) "{{{
     call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
-    return s:filter(self, a:char)
-endfunction "}}}
-function! s:filter(self, char) "{{{
-    let self = a:self
-    let buftable = eskk#get_buftable()
 
-    if g:eskk_debug
-        call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
-        " Check irregular circumstance.
-        if !eskk#is_supported_mode(self.mode)
-            call eskk#util#log_warn('current mode is not supported: ' . self.mode)
-            sleep 1
-        endif
+    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
+    " Check irregular circumstance.
+    if !eskk#is_supported_mode(self.mode)
+        call eskk#util#log_warn('current mode is not supported: ' . self.mode)
+        sleep 1
     endif
 
 
     call eskk#throw_event('filter-begin')
 
+    let buftable = eskk#get_buftable()
     let stash = {
     \   'char': a:char,
     \   'return': 0,
