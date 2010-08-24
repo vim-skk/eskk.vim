@@ -210,19 +210,16 @@ function! eskk#mappings#create_default_mapopt() "{{{
     \}
 endfunction "}}}
 function! eskk#mappings#mapopt_chars2dict(options) "{{{
+    let table = {
+    \   'b': 'buffer',
+    \   'e': 'expr',
+    \   's': 'silent',
+    \   'u': 'unique',
+    \   'r': 'remap',
+    \}
     let opt = eskk#mappings#create_default_mapopt()
     for c in split(a:options, '\zs')
-        if c ==# 'b'
-            let opt.buffer = 1
-        elseif c ==# 'e'
-            let opt.expr = 1
-        elseif c ==# 's'
-            let opt.silent = 1
-        elseif c ==# 'u'
-            let opt.unique = 1
-        elseif c ==# 'r'
-            let opt.remap = 1
-        endif
+        let opt[table[c]] = 1
     endfor
     return opt
 endfunction "}}}
