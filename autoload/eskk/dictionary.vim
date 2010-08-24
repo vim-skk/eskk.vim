@@ -479,8 +479,8 @@ function! s:henkan_result.get_candidate(...) dict "{{{
     " Save `result` reference to modify.
     let result = s:henkan_result_get_result(self)
     let [candidates, idx] = result
-
     call eskk#util#logf('idx = %d, counter = %d', idx, counter)
+
     if idx >= counter
         try
             let self._candidate = s:henkan_result_select_candidates(self, with_okuri, counter)
