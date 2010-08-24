@@ -376,7 +376,12 @@ function! eskk#map(options, lhs, rhs, ...) "{{{
     let map = stridx(a:options, 'r') != -1 ? 'map' : 'noremap'
     let opt = eskk#util#mapopt_chars2raw(a:options)
     for mode in split((a:0 ? a:1 : eskk#get_map_modes()), '\zs')
-        execute mode . map opt a:lhs a:rhs
+        let mapcmd = join([mode . map, opt, a:lhs, a:rhs])
+        try
+            execute mapcmd
+        catch
+            call eskk#util#log_exception(mapcmd)
+        endtry
     endfor
 endfunction "}}}
 function! eskk#unmap(modes, options, lhs) "{{{
@@ -387,7 +392,12 @@ function! eskk#unmap(modes, options, lhs) "{{{
 
     let opt = eskk#util#mapopt_chars2raw(a:options)
     for mode in split(a:modes, '\zs')
-        execute mode . 'unmap' opt a:lhs
+        let mapcmd = join([mode . 'unmap', opt, a:lhs])
+        try
+            execute mapcmd
+        catch
+            call eskk#util#log_exception(mapcmd)
+        endtry
     endfor
 endfunction "}}}
 
