@@ -399,7 +399,7 @@ function! s:henkan_result_get_result(this) "{{{
     endif
 endfunction "}}}
 
-function! s:henkan_result_select_candidates(this, with_okuri, skip_num) "{{{
+function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor) "{{{
     " Select candidates by getchar()'s character.
     let words = copy(s:henkan_result_get_result(a:this)[0])
     let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))
@@ -436,16 +436,17 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num) "{{{
         endfor
         echon printf('(%d/%d)', page_index, len(pages) - 1)
 
+        let result = s:henkan_result_get_result(a:this)
         " Get char for selected candidate.
         try
             let char = eskk#util#getchar()
         catch /^Vim:Interrupt$/
-            throw 'eskk: leave henkan select'
+            return a:functor.funcall()
         endtry
 
 
         if eskk#is_special_lhs(char, 'phase:henkan-select:escape')
-            throw 'eskk: leave henkan select'
+            return a:functor.funcall()
         elseif eskk#is_special_lhs(char, 'phase:henkan-select:next-page')
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
@@ -463,7 +464,7 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num) "{{{
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
-                throw 'eskk: leave henkan select'
+                return a:functor.funcall()
             endif
         elseif stridx(g:eskk_select_cand_keys, char) != -1
             let selected = g:eskk_select_cand_keys[stridx(g:eskk_select_cand_keys, char)]
@@ -496,14 +497,19 @@ function! s:henkan_result.get_candidate(...) dict "{{{
     call eskk#util#logf('idx = %d, counter = %d', idx, counter)
 
     if idx >= counter
-        try
-            let self._candidate = s:henkan_result_select_candidates(self, with_okuri, counter)
-        catch /^eskk: leave henkan select$/
-            if result[1] > 0
-                let result[1] -= 1
+        let functor = {'result': result, 'this': self, 'with_okuri': with_okuri}
+        function functor.funcall()
+            if self.result[1] > 0
+                call self.this.back()
             endif
-            let self._candidate = [candidates[result[1]].result, (with_okuri ? self._okuri : '')]
-        endtry
+            let [candidates, idx, _] = self.result
+            return [
+            \   candidates[idx].result,
+            \   (self.with_okuri ? self.this._okuri : '')
+            \]
+        endfunction
+
+        let self._candidate = s:henkan_result_select_candidates(self, with_okuri, counter, functor)
     else
         let self._candidate = [candidates[idx].result, (with_okuri ? self._okuri : '')]
     endif
