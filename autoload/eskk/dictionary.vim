@@ -518,6 +518,40 @@ function! s:henkan_result.back() dict "{{{
     return s:henkan_result_advance(self, 0)
 endfunction "}}}
 
+function! s:henkan_result.delete_from_dict() dict "{{{
+    if self._status !=# g:eskk#dictionary#HR_GOT_RESULT
+        return
+    endif
+    let [candidates, idx, user_dict_idx] = self._result
+
+    if !eskk#util#has_idx(candidates, idx)
+        return
+    endif
+
+    let user_dict_lines = self._dict._user_dict.get_lines()
+    if !self._dict._user_dict.is_valid()
+        return
+    endif
+
+    if g:eskk_debug
+        call eskk#util#logstrf('Delete from dict: %s', candidates[idx])
+        call eskk#util#logstrf('Delete from dict: %s', user_dict_lines[user_dict_idx])
+    endif
+
+    call remove(user_dict_lines, user_dict_idx)
+    try
+        call self._dict._user_dict.set_lines(user_dict_lines)
+        let self._dict._is_modified = 1
+    catch /^eskk: parse error/
+        return
+    endtry
+
+    " TODO Initialize self._status, self._result
+
+    redraw
+    call self._dict.update_dictionary()
+endfunction "}}}
+
 lockvar s:henkan_result
 " }}}
 

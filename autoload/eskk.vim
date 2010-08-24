@@ -81,6 +81,7 @@ let s:map = {
 \   'phase:henkan-select:next-page': {},
 \   'phase:henkan-select:prev-page': {},
 \   'phase:henkan-select:escape': {},
+\   'phase:henkan-select:delete-from-dict': {},
 \   'mode:hira:toggle-hankata': {},
 \   'mode:hira:ctrl-q-key': {},
 \   'mode:hira:toggle-kata': {},
@@ -742,13 +743,15 @@ function! s:asym_filter.filter(stash) dict "{{{
             call buftable.do_sticky(a:stash)
             return
         elseif eskk#is_big_letter(char)
-            call buftable.do_sticky(a:stash)
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#util#key2char',
-            \   [eskk#get_named_map(tolower(char))]
-            \)
-            return
+            if !eskk#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
+                call buftable.do_sticky(a:stash)
+                call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#util#key2char',
+                \   [eskk#get_named_map(tolower(char))]
+                \)
+                return
+            endif
         elseif eskk#is_special_lhs(char, 'escape-key')
             call buftable.do_escape(a:stash)
             return
@@ -785,6 +788,11 @@ function! s:asym_filter.filter(stash) dict "{{{
         elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
             call buftable.choose_prev_candidate(a:stash)
             return
+        elseif eskk#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
+            let henkan_result = eskk#get_prev_henkan_result()
+            if !empty(henkan_result)
+                call henkan_result.delete_from_dict()
+            endif
         else
             call buftable.do_enter(a:stash)
             call eskk#register_temp_event(
@@ -2036,6 +2044,8 @@ function! s:initialize() "{{{
     silent! EskkMap -type=phase:henkan-select:prev-page -unique x
 
     silent! EskkMap -type=phase:henkan-select:escape -unique <C-g>
+
+    silent! EskkMap -type=phase:henkan-select:delete-from-dict -unique X
 
     silent! EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
     silent! EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
