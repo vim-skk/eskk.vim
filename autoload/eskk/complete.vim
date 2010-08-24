@@ -277,6 +277,13 @@ function! s:select_item(stash) "{{{
     let s:selected = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
+function! s:do_tab(stash) "{{{
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#util#key2char',
+    \   [eskk#util#get_nore_map('<C-n>')]
+    \)
+endfunction "}}}
 function! s:select_insert_item(stash) "{{{
     let s:selected = 1
     let s:inserted = 1
@@ -343,7 +350,7 @@ let s:popup_func_table = {
 \   "\<Up>" : function('s:select_item'),
 \   "\<Down>" : function('s:select_item'),
 \   "\<Space>" : function('s:do_space'),
-\   "\<Tab>" : function('s:select_insert_item'),
+\   "\<Tab>" : function('s:do_tab'),
 \   "\<C-n>" : function('s:select_insert_item'),
 \   "\<C-p>" : function('s:select_insert_item'),
 \   "\<C-h>" : function('s:do_backspace'),
