@@ -282,6 +282,7 @@ let s:henkan_result = {
 \   '_okuri': '',
 \   '_status': -1,
 \   '_result': [],
+\   '_added_words': [],
 \}
 
 function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_input) "{{{
@@ -301,7 +302,8 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, registered_
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
     \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
-    \       '_result': (empty(added) ? [] : [map(added, '{"result": v:val}'), 0, -1]),
+    \       '_result': (empty(added) ? [] : [map(copy(added), '{"result": v:val}'), 0, -1]),
+    \       '_added_words': added,
     \   },
     \   'force'
     \)
