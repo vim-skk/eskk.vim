@@ -293,7 +293,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, added_words
         endif
     endfor
 
-    return extend(
+    let obj = extend(
     \   deepcopy(s:henkan_result, 1),
     \   {
     \       'buftable': a:buftable,
@@ -301,9 +301,20 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, added_words
     \       '_key': a:key,
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
-    \       '_status': (empty(added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
-    \       '_result': (empty(added) ? [] : [map(copy(added), '{"result": v:val}'), 0, -1]),
-    \       '_added_words': added,
+    \   },
+    \   'force'
+    \)
+    call s:henkan_result_init(obj, added)
+    return obj
+endfunction "}}}
+
+function! s:henkan_result_init(this, added) "{{{
+    return extend(
+    \   a:this,
+    \   {
+    \       '_status': (empty(a:added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
+    \       '_result': (empty(a:added) ? [] : [map(copy(a:added), '{"result": v:val}'), 0, -1]),
+    \       '_added_words': a:added,
     \   },
     \   'force'
     \)
@@ -548,7 +559,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endtry
 
-    " TODO Initialize self._status, self._result
+    call s:henkan_result_init(self, self._added_words)
 
     redraw
     call self._dict.update_dictionary()
