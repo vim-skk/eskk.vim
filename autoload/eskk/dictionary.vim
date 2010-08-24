@@ -329,6 +329,10 @@ function! s:henkan_result_advance(this, advance) "{{{
         return 0
     catch /^eskk: dictionary look up error:/
         " Shut up error. This function does not throw exception.
+        if g:eskk_debug
+            call eskk#util#log('warning: s:henkan_result_get_result() throwed exception')
+            call eskk#util#logstrf('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
+        endif
         return 0
     endtry
 endfunction "}}}
