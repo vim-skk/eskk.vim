@@ -278,18 +278,8 @@ endfunction "}}}
 
 " These mapping functions actually map key using ":lmap".
 function! eskk#set_up_key(key, ...) "{{{
-    if a:0
-        return s:map_key(a:key, eskk#util#mapopt_chars2dict(a:1))
-    else
-        return s:map_key(a:key, eskk#util#create_default_mapopt())
-    endif
-endfunction "}}}
-function! s:map_key(key, options) "{{{
-    " Assumption: a:key must be '<Bar>' not '|'.
-
-    " Map a:key.
     call eskk#map(
-    \   'rb' . eskk#util#mapopt_dict2chars(a:options),
+    \   'rb' . (a:0 ? a:1 : ''),
     \   a:key,
     \   eskk#get_named_map(a:key),
     \   'l'
@@ -1246,7 +1236,7 @@ function! eskk#map_all_keys(...) "{{{
             continue
         endif
         if opt.rhs == ''
-            call s:map_key(key, opt.options)
+            call eskk#set_up_key(key, eskk#util#mapopt_dict2chars(opt.options))
         else
             call eskk#map(
             \   'b'
