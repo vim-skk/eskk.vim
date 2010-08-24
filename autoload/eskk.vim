@@ -792,6 +792,8 @@ function! s:asym_filter.filter(stash) dict "{{{
             let henkan_result = eskk#get_prev_henkan_result()
             if !empty(henkan_result)
                 call henkan_result.delete_from_dict()
+                call buftable.push_kakutei_str(buftable.get_display_str(0))
+                call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
             endif
         else
             call buftable.do_enter(a:stash)
