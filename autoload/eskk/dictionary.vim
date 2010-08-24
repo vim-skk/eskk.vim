@@ -442,9 +442,9 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
         endtry
 
 
-        if eskk#is_special_lhs(char, 'phase:henkan-select:escape')
+        if eskk#mappings#is_special_lhs(char, 'phase:henkan-select:escape')
             return a:functor.funcall()
-        elseif eskk#is_special_lhs(char, 'phase:henkan-select:next-page')
+        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:next-page')
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
@@ -457,7 +457,7 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
                 \   okuri_buf_str.get_matched_filter()
                 \]
             endif
-        elseif eskk#is_special_lhs(char, 'phase:henkan-select:prev-page')
+        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:prev-page')
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else

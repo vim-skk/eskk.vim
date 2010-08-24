@@ -198,8 +198,8 @@ function! s:buftable.rewrite() dict "{{{
         " 2. Set begin pos
         " 3. Insert new string
 
-        call eskk#map('b', '<Plug>(eskk:internal:_inserted_kakutei)', eskk#util#str2map(kakutei))
-        call eskk#map('b', '<Plug>(eskk:internal:_inserted_new)', eskk#util#str2map(new))
+        call eskk#mappings#map('b', '<Plug>(eskk:internal:_inserted_kakutei)', eskk#util#str2map(kakutei))
+        call eskk#mappings#map('b', '<Plug>(eskk:internal:_inserted_new)', eskk#util#str2map(new))
 
         return
         \   eval(self.make_remove_bs_expr())
@@ -219,14 +219,14 @@ function! s:buftable.rewrite() dict "{{{
             " When inserted_str == "foo", old == "foobar"
             " Insert Remove "bar"
             return repeat(
-            \   eskk#util#key2char(eskk#get_special_map("backspace-key")),
+            \   eskk#util#key2char(eskk#mappings#get_special_map("backspace-key")),
             \   eskk#util#mb_strlen(old) - eskk#util#mb_strlen(inserted_str)
             \)
         elseif old != '' && stridx(inserted_str, old) == 0
             call eskk#util#log('s:buftable.rewrite(): Add minimum string.')
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
-            call eskk#map(
+            call eskk#mappings#map(
             \   'b',
             \   '<Plug>(eskk:internal:_inserted)',
             \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
@@ -236,7 +236,7 @@ function! s:buftable.rewrite() dict "{{{
             call eskk#util#log('s:buftable.rewrite(): Remove old, Add new.')
             " Simplest algorithm.
             " Delete current string, and insert new string.
-            call eskk#map(
+            call eskk#mappings#map(
             \   'b',
             \   '<Plug>(eskk:internal:_inserted)',
             \   eskk#util#str2map(inserted_str)
@@ -249,7 +249,7 @@ function! s:buftable.make_remove_bs_expr() dict "{{{
     let old = self._old_str
     return join([
     \   'repeat(',
-    \       'eskk#util#key2char(eskk#get_special_map("backspace-key")),',
+    \       'eskk#util#key2char(eskk#mappings#get_special_map("backspace-key")),',
     \       'eskk#util#mb_strlen(',
     \       string(old),
     \       ')',
@@ -390,8 +390,8 @@ function! s:buftable.do_enter(stash) dict "{{{
     let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     let phase = self.get_henkan_phase()
-    let enter_char = eskk#util#key2char(eskk#get_special_map('enter-key'))
-    let undo_char  = eskk#util#key2char(eskk#get_special_map('undo-key'))
+    let enter_char = eskk#util#key2char(eskk#mappings#get_special_map('enter-key'))
+    let undo_char  = eskk#util#key2char(eskk#mappings#get_special_map('undo-key'))
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call self.convert_rom_str([phase])
@@ -445,7 +445,7 @@ function! s:buftable.do_backspace(stash, ...) dict "{{{
     let done_for_group = a:0 ? a:1 : 1
 
     if self.get_old_str() == ''
-        let a:stash.return = eskk#util#key2char(eskk#get_special_key('backspace-key'))
+        let a:stash.return = eskk#util#key2char(eskk#mappings#get_special_key('backspace-key'))
         return
     endif
 
@@ -629,7 +629,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
             call buf_str.clear()
         endif
         if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            let undo_char = eskk#util#key2char(eskk#get_special_map('undo-key'))
+            let undo_char = eskk#util#key2char(eskk#mappings#get_special_map('undo-key'))
             call eskk#register_temp_event('filter-redispatch-pre', 'eskk#util#identity', [undo_char])
         endif
         let self._set_begin_pos_at_rewrite = 1
@@ -807,7 +807,7 @@ function! s:buftable.do_escape(stash) dict "{{{
     let kakutei_str = self.generate_kakutei_str()
 
     " NOTE: This function return value is not remapped.
-    let esc = eskk#get_special_key('escape-key')
+    let esc = eskk#mappings#get_special_key('escape-key')
     call eskk#util#assert(esc != '')
 
     let a:stash.return = kakutei_str . eskk#util#key2char(esc)
@@ -912,7 +912,7 @@ function! s:buftable.remove_display_str() dict "{{{
     let current_str = self.get_display_str()
 
     " NOTE: This function return value is not remapped.
-    let bs = eskk#get_special_key('backspace-key')
+    let bs = eskk#mappings#get_special_key('backspace-key')
     call eskk#util#assert(bs != '')
 
     return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))

@@ -322,29 +322,6 @@ endfunction "}}}
 function! eskk#util#get_tab_raw_str() "{{{
     return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
 endfunction "}}}
-function! eskk#util#do_remap(map, modes) "{{{
-    let m = maparg(a:map, a:modes)
-    return m != '' ? m : a:map
-endfunction "}}}
-function! eskk#util#get_nore_map(key, ...) "{{{
-    " NOTE:
-    " a:key is escaped. So when a:key is '<C-a>', return value is
-    "   `<Plug>(eskk:filter:<C-a>)`
-    " not
-    "   `<Plug>(eskk:filter:^A)` (^A is control character)
-
-    let [rhs, key] = [a:key, a:key]
-    let key = eskk#util#str2map(key)
-
-    let lhs = printf('<Plug>(eskk:noremap:%s)', key)
-    if maparg(lhs, 'icl') != ''
-        return lhs
-    endif
-
-    call eskk#map((a:0 ? substitute(a:1, 'r', '', 'g') : ''), lhs, rhs)
-
-    return lhs
-endfunction "}}}
 function! eskk#util#get_local_func(funcname, sid) "{{{
     " :help <SID>
     return printf('<SNR>%d_%s', a:sid, a:funcname)
@@ -360,64 +337,6 @@ function! eskk#util#get_sid_from_source(regex) "{{{
             return sid != '' ? str2nr(sid) : -1
         endif
     endfor
-endfunction "}}}
-function! eskk#util#create_default_mapopt() "{{{
-    return {
-    \   'buffer': 0,
-    \   'expr': 0,
-    \   'silent': 0,
-    \   'unique': 0,
-    \   'remap': 0,
-    \   'map-if': '1',
-    \}
-endfunction "}}}
-function! eskk#util#mapopt_chars2dict(options) "{{{
-    let opt = eskk#util#create_default_mapopt()
-    for c in split(a:options, '\zs')
-        if c ==# 'b'
-            let opt.buffer = 1
-        elseif c ==# 'e'
-            let opt.expr = 1
-        elseif c ==# 's'
-            let opt.silent = 1
-        elseif c ==# 'u'
-            let opt.unique = 1
-        elseif c ==# 'r'
-            let opt.remap = 1
-        endif
-    endfor
-    return opt
-endfunction "}}}
-function! eskk#util#mapopt_dict2raw(options) "{{{
-    let ret = ''
-    for [key, val] in items(a:options)
-        if key ==# 'remap' || key ==# 'map-if'
-            continue
-        endif
-        if val
-            let ret .= printf('<%s>', key)
-        endif
-    endfor
-    return ret
-endfunction "}}}
-function! eskk#util#mapopt_dict2chars(options) "{{{
-    let table = {
-    \   'buffer': 'b',
-    \   'expr': 'e',
-    \   'silent': 's',
-    \   'unique': 'u',
-    \   'remap': 'r',
-    \}
-    return join(map(keys(a:options), 'a:options[v:val] && has_key(table, v:val) ? table[v:val] : ""'), '')
-endfunction "}}}
-function! eskk#util#mapopt_chars2raw(options) "{{{
-    let table = {
-    \   'b': '<buffer>',
-    \   'e': '<expr>',
-    \   's': '<silent>',
-    \   'u': '<unique>',
-    \}
-    return join(map(split(a:options, '\zs'), 'get(table, v:val, "")'), '')
 endfunction "}}}
 
 

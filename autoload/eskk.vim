@@ -65,194 +65,10 @@ lockvar s:eskk
 
 " Supported modes and their structures.
 let s:available_modes = {}
-" Database for misc. keys.
-let s:map = {
-\   'general': {},
-\   'sticky': {},
-\   'backspace-key': {},
-\   'escape-key': {},
-\   'enter-key': {},
-\   'undo-key': {},
-\   'tab': {},
-\   'phase:henkan:henkan-key': {},
-\   'phase:okuri:henkan-key': {},
-\   'phase:henkan-select:choose-next': {},
-\   'phase:henkan-select:choose-prev': {},
-\   'phase:henkan-select:next-page': {},
-\   'phase:henkan-select:prev-page': {},
-\   'phase:henkan-select:escape': {},
-\   'phase:henkan-select:delete-from-dict': {},
-\   'mode:hira:toggle-hankata': {},
-\   'mode:hira:ctrl-q-key': {},
-\   'mode:hira:toggle-kata': {},
-\   'mode:hira:q-key': {},
-\   'mode:hira:to-ascii': {},
-\   'mode:hira:to-zenei': {},
-\   'mode:hira:to-abbrev': {},
-\   'mode:kata:toggle-hankata': {},
-\   'mode:kata:ctrl-q-key': {},
-\   'mode:kata:toggle-kata': {},
-\   'mode:kata:q-key': {},
-\   'mode:kata:to-ascii': {},
-\   'mode:kata:to-zenei': {},
-\   'mode:kata:to-abbrev': {},
-\   'mode:hankata:toggle-hankata': {},
-\   'mode:hankata:ctrl-q-key': {},
-\   'mode:hankata:toggle-kata': {},
-\   'mode:hankata:q-key': {},
-\   'mode:hankata:to-ascii': {},
-\   'mode:hankata:to-zenei': {},
-\   'mode:hankata:to-abbrev': {},
-\   'mode:ascii:to-hira': {},
-\   'mode:zenei:to-hira': {},
-\   'mode:abbrev:henkan-key': {},
-\}
-" TODO s:map should contain this info.
-" Keys used by only its mode.
-let s:mode_local_keys = {
-\   'hira': [
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:hira:toggle-hankata',
-\       'mode:hira:ctrl-q-key',
-\       'mode:hira:toggle-kata',
-\       'mode:hira:q-key',
-\       'mode:hira:to-ascii',
-\       'mode:hira:to-zenei',
-\       'mode:hira:to-abbrev',
-\   ],
-\   'kata': [
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:kata:toggle-hankata',
-\       'mode:kata:ctrl-q-key',
-\       'mode:kata:toggle-kata',
-\       'mode:kata:q-key',
-\       'mode:kata:to-ascii',
-\       'mode:kata:to-zenei',
-\       'mode:kata:to-abbrev',
-\   ],
-\   'hankata': [
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:hankata:toggle-hankata',
-\       'mode:hankata:ctrl-q-key',
-\       'mode:hankata:toggle-kata',
-\       'mode:hankata:q-key',
-\       'mode:hankata:to-ascii',
-\       'mode:hankata:to-zenei',
-\       'mode:hankata:to-abbrev',
-\   ],
-\   'ascii': [
-\       'mode:ascii:to-hira',
-\   ],
-\   'zenei': [
-\       'mode:zenei:to-hira',
-\   ],
-\}
-" TODO s:map should contain this info.
-function! eskk#handle_toggle_hankata(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
-        return 1
-    endif
-    return 0
-endfunction "}}}
-function! eskk#handle_toggle_kata(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
-        return 1
-    endif
-    return 0
-endfunction "}}}
-function! eskk#handle_ctrl_q_key(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call a:stash.buftable.do_ctrl_q_key()
-        return 1
-    endif
-    return 0
-endfunction "}}}
-function! eskk#handle_q_key(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call a:stash.buftable.do_q_key()
-        return 1
-    endif
-    return 0
-endfunction "}}}
-function! eskk#handle_to_ascii(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.get_rom_str() == ''
-        call eskk#set_mode('ascii')
-        return 1
-    endif
-    return 0
-endfunction "}}}
-function! eskk#handle_to_zenei(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.get_rom_str() == ''
-        call eskk#set_mode('zenei')
-        return 1
-    endif
-    return 0
-endfunction "}}}
-function! eskk#handle_to_abbrev(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.get_rom_str() == ''
-        call eskk#set_mode('abbrev')
-        return 1
-    endif
-    return 0
-endfunction "}}}
-let s:map_fn = {
-\   'mode:hira:toggle-hankata': 'eskk#handle_toggle_hankata',
-\   'mode:hira:ctrl-q-key': 'eskk#handle_ctrl_q_key',
-\   'mode:hira:toggle-kata': 'eskk#handle_toggle_kata',
-\   'mode:hira:q-key': 'eskk#handle_q_key',
-\   'mode:hira:to-ascii': 'eskk#handle_to_ascii',
-\   'mode:hira:to-zenei': 'eskk#handle_to_zenei',
-\   'mode:hira:to-abbrev': 'eskk#handle_to_abbrev',
-\
-\   'mode:kata:toggle-hankata': 'eskk#handle_toggle_hankata',
-\   'mode:kata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
-\   'mode:kata:toggle-kata': 'eskk#handle_toggle_kata',
-\   'mode:kata:q-key': 'eskk#handle_q_key',
-\   'mode:kata:to-ascii': 'eskk#handle_to_ascii',
-\   'mode:kata:to-zenei': 'eskk#handle_to_zenei',
-\   'mode:kata:to-abbrev': 'eskk#handle_to_abbrev',
-\
-\   'mode:hankata:toggle-hankata': 'eskk#handle_toggle_hankata',
-\   'mode:hankata:ctrl-q-key': 'eskk#handle_ctrl_q_key',
-\   'mode:hankata:toggle-kata': 'eskk#handle_toggle_kata',
-\   'mode:hankata:q-key': 'eskk#handle_q_key',
-\   'mode:hankata:to-ascii': 'eskk#handle_to_ascii',
-\   'mode:hankata:to-zenei': 'eskk#handle_to_zenei',
-\   'mode:hankata:to-abbrev': 'eskk#handle_to_abbrev',
-\
-\
-\}
 " Same structure as `s:eskk.stash`, but this is set by `s:mutable_stash.init()`.
 let s:stash_prototype = {}
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
-" `eskk#map_all_keys()` and `eskk#unmap_all_keys()` toggle this value.
-let s:has_mapped = {}
 " SKK dicionary.
 let s:skk_dict = {}
 " For eskk#register_map(), eskk#unregister_map().
@@ -275,233 +91,6 @@ function! eskk#load() "{{{
 endfunction "}}}
 
 
-
-" These mapping functions actually map key using ":lmap".
-function! eskk#set_up_key(key, ...) "{{{
-    call eskk#map(
-    \   'rb' . (a:0 ? a:1 : ''),
-    \   a:key,
-    \   eskk#get_named_map(a:key),
-    \   'l'
-    \)
-endfunction "}}}
-function! eskk#set_up_temp_key(lhs, ...) "{{{
-    " Assumption: a:lhs must be '<Bar>' not '|'.
-
-    " Save current a:lhs mapping.
-    let save_lhs = s:temp_key_map(a:lhs)
-    let save_rhs = maparg(a:lhs, 'l')
-    if save_rhs != '' && maparg(save_lhs) == ''
-        " TODO Check if a:lhs is buffer local.
-        call eskk#util#log('Save temp key: ' . maparg(a:lhs, 'l'))
-        call eskk#map('rb', save_lhs, save_rhs, 'l')
-    endif
-
-    if a:0
-        call eskk#map('rb', a:lhs, a:1, 'l')
-    else
-        call eskk#set_up_key(a:lhs)
-    endif
-endfunction "}}}
-function! eskk#set_up_temp_key_restore(lhs) "{{{
-    let temp_key = s:temp_key_map(a:lhs)
-    let saved_rhs = maparg(temp_key, 'l')
-
-    if saved_rhs != ''
-        call eskk#util#log('Restore saved temp key: ' . saved_rhs)
-        call eskk#unmap('l', 'b', temp_key)
-        call eskk#map('rb', a:lhs, saved_rhs, 'l')
-    else
-        call eskk#util#logf_warn("called eskk#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
-        call eskk#set_up_key(a:lhs)
-    endif
-endfunction "}}}
-function! eskk#has_temp_key(lhs) "{{{
-    let temp_key = s:temp_key_map(a:lhs)
-    let saved_rhs = maparg(temp_key, 'l')
-    return saved_rhs != ''
-endfunction "}}}
-function! s:temp_key_map(key) "{{{
-    return printf('<Plug>(eskk:prevmap:%s)', a:key)
-endfunction "}}}
-function! eskk#get_named_map(key) "{{{
-    " FIXME: Rename this to eskk#get_filter_map()
-    "
-    " NOTE:
-    " a:key is escaped. So when a:key is '<C-a>', return value is
-    "   `<Plug>(eskk:filter:<C-a>)`
-    " not
-    "   `<Plug>(eskk:filter:^A)` (^A is control character)
-
-    let lhs = printf('<Plug>(eskk:filter:%s)', a:key)
-    if maparg(lhs, eskk#get_map_modes()) != ''
-        return lhs
-    endif
-
-    call eskk#map('re', lhs, printf('eskk#filter(%s)', string(a:key)))
-
-    return lhs
-endfunction "}}}
-function! eskk#get_map_modes() "{{{
-    " XXX: :lmap can't remap to :lmap. It's Vim's bug.
-    "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
-    " So I use :map! mappings for 'fallback' of :lmap.
-
-    return 'ic'
-endfunction "}}}
-function! eskk#map(options, lhs, rhs, ...) "{{{
-    if a:lhs == '' || a:rhs == ''
-        call eskk#util#logstrf_warn('lhs or rhs is empty: lhs = %s, rhs = %s', a:lhs, a:rhs)
-        return
-    endif
-
-    let map = stridx(a:options, 'r') != -1 ? 'map' : 'noremap'
-    let opt = eskk#util#mapopt_chars2raw(a:options)
-    for mode in split((a:0 ? a:1 : eskk#get_map_modes()), '\zs')
-        let mapcmd = join([mode . map, opt, a:lhs, a:rhs])
-        try
-            execute mapcmd
-        catch
-            call eskk#util#log_exception(mapcmd)
-        endtry
-    endfor
-endfunction "}}}
-function! eskk#unmap(modes, options, lhs) "{{{
-    if a:lhs == ''
-        call eskk#util#logstrf_warn('lhs is empty: lhs = %s', a:lhs)
-        return
-    endif
-
-    let opt = eskk#util#mapopt_chars2raw(a:options)
-    for mode in split(a:modes, '\zs')
-        let mapcmd = join([mode . 'unmap', opt, a:lhs])
-        try
-            execute mapcmd
-        catch
-            call eskk#util#log_exception(mapcmd)
-        endtry
-    endfor
-endfunction "}}}
-
-function! s:create_map(self, type, options, lhs, rhs, from) "{{{
-    let self = a:self
-    let lhs = a:lhs
-    let rhs = a:rhs
-
-    if !has_key(s:map, a:type)
-        call eskk#util#warnf('%s: unknown type: %s', a:from, a:type)
-        return
-    endif
-    let type_st = s:map[a:type]
-
-    if a:type ==# 'general'
-        if lhs == ''
-            call eskk#util#warn("lhs must not be empty string.")
-            return
-        endif
-        if has_key(type_st, lhs) && a:options.unique
-            call eskk#util#warnf("%s: Already mapped to '%s'.", a:from, lhs)
-            return
-        endif
-        let type_st[lhs] = {
-        \   'options': a:options,
-        \   'rhs': rhs
-        \}
-    else
-        if a:options.unique && has_key(type_st, 'lhs')
-            call eskk#util#warnf('%s: -unique is specified and mapping already exists. skip.', a:type)
-            return
-        endif
-        let type_st.options = a:options
-        let type_st.lhs = lhs
-    endif
-endfunction "}}}
-
-" :EskkMap - Ex command for s:create_map()
-function! s:skip_white(args) "{{{
-    return substitute(a:args, '^\s*', '', '')
-endfunction "}}}
-function! s:parse_one_arg_from_q_args(args) "{{{
-    let arg = s:skip_white(a:args)
-    let head = matchstr(arg, '^.\{-}[^\\]\ze\([ \t]\|$\)')
-    let rest = strpart(arg, strlen(head))
-    return [head, rest]
-endfunction "}}}
-function! s:parse_string_from_q_args(args) "{{{
-    let arg = s:skip_white(a:args)
-    if arg =~# '^[''"]'    " If arg is string-ish, just eval(it).
-        let pat = (arg =~# "^'" ? '^\(''\).\{-}[^''\\]\1' : '^\("\).\{-}[^\\]\1')
-        let m = matchstr(arg, pat.'\C')
-        let rest = strpart(arg, strlen(m))
-        return [eval(m), rest]
-    else
-        return s:parse_one_arg_from_q_args(a:args)
-    endif
-endfunction "}}}
-function! s:parse_options_get_optargs(args) "{{{
-    let OPT_CHARS = '[A-Za-z0-9\-]'
-    let a = s:skip_white(a:args)
-
-    if a[0] !=# '-'
-        return ['--', '', a]
-    endif
-    if a ==# '--'
-        let rest = s:parse_one_arg_from_q_args(a)[1]
-        return ['--', '', rest]
-    endif
-    let a = a[1:]
-    if a !~# '^'.OPT_CHARS.'\+'
-        throw eskk#parse_error(['eskk'], ":EskkMap argument's key must be word.")
-    endif
-
-    if a =~# '^'.OPT_CHARS.'\+='    " key has a value.
-        let [m, optname; _] = matchlist(a, '^\('.OPT_CHARS.'\+\)='.'\C')
-        let rest = strpart(a, strlen(m))
-        let [value, rest] = s:parse_string_from_q_args(rest)
-        return [optname, value, rest]
-    else
-        let m = matchstr(a, '^'.OPT_CHARS.'\+'.'\C')
-        let rest = strpart(a, strlen(m))
-        return [m, 1, rest]
-    endif
-endfunction "}}}
-function! s:parse_options(args) "{{{
-    let args = a:args
-    let type = 'general'
-    let opt = eskk#util#create_default_mapopt()
-    let opt.noremap = 0
-
-    while args != ''
-        let [optname, value, args] = s:parse_options_get_optargs(args)
-        if optname ==# '--'
-            break
-        endif
-        if optname ==# 'type'
-            let type = value
-        elseif has_key(opt, optname)
-            let opt[optname] = value
-        else
-            throw eskk#parse_error(['eskk'], printf("unknown option '%s'.", optname))
-        endif
-    endwhile
-
-    let opt.remap = !remove(opt, 'noremap')
-    return [opt, type, args]
-endfunction "}}}
-function! eskk#_cmd_eskk_map(args) "{{{
-    let [options, type, args] = s:parse_options(a:args)
-
-    let args = s:skip_white(args)
-    let [lhs, args] = s:parse_one_arg_from_q_args(args)
-
-    let args = s:skip_white(args)
-    if args == ''
-        call s:create_map(eskk#get_current_instance(), type, options, lhs, '', 'EskkMap')
-        return
-    endif
-
-    call s:create_map(eskk#get_current_instance(), type, options, lhs, args, 'EskkMap')
-endfunction "}}}
 
 
 " Manipulate eskk instances.
@@ -664,7 +253,7 @@ function! s:asym_filter.filter(stash) dict "{{{
     let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
 
     for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei, to_abbrev]
-        if eskk#handle_special_lhs(char, key, a:stash)
+        if eskk#mappings#handle_special_lhs(char, key, a:stash)
             " Handled.
             call eskk#util#logf("Handled '%s' key.", key)
             return
@@ -677,29 +266,29 @@ function! s:asym_filter.filter(stash) dict "{{{
     try
         " Handle special characters.
         " These characters are handled regardless of current phase.
-        if eskk#is_special_lhs(char, 'backspace-key')
+        if eskk#mappings#is_special_lhs(char, 'backspace-key')
             call buftable.do_backspace(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'enter-key')
+        elseif eskk#mappings#is_special_lhs(char, 'enter-key')
             call buftable.do_enter(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'sticky')
+        elseif eskk#mappings#is_special_lhs(char, 'sticky')
             call buftable.do_sticky(a:stash)
             return
         elseif eskk#is_big_letter(char)
-            if !eskk#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
+            if !eskk#mappings#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
                 call buftable.do_sticky(a:stash)
                 call eskk#register_temp_event(
                 \   'filter-redispatch-post',
                 \   'eskk#util#key2char',
-                \   [eskk#get_named_map(tolower(char))]
+                \   [eskk#mappings#get_filter_map(tolower(char))]
                 \)
                 return
             endif
-        elseif eskk#is_special_lhs(char, 'escape-key')
+        elseif eskk#mappings#is_special_lhs(char, 'escape-key')
             call buftable.do_escape(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'tab')
+        elseif eskk#mappings#is_special_lhs(char, 'tab')
             call buftable.do_tab(a:stash)
             return
         else
@@ -714,25 +303,25 @@ function! s:asym_filter.filter(stash) dict "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return s:filter_rom(a:stash, self.table)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
+        if eskk#mappings#is_special_lhs(char, 'phase:henkan:henkan-key')
             call buftable.do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, self.table)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        if eskk#is_special_lhs(char, 'phase:okuri:henkan-key')
+        if eskk#mappings#is_special_lhs(char, 'phase:okuri:henkan-key')
             call buftable.do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, self.table)
         endif
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
+        if eskk#mappings#is_special_lhs(char, 'phase:henkan-select:choose-next')
             call buftable.choose_next_candidate(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
+        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:choose-prev')
             call buftable.choose_prev_candidate(a:stash)
             return
-        elseif eskk#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
+        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
             let henkan_result = eskk#get_prev_henkan_result()
             if !empty(henkan_result)
                 call henkan_result.delete_from_dict()
@@ -744,7 +333,7 @@ function! s:asym_filter.filter(stash) dict "{{{
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
             \   'eskk#util#key2char',
-            \   [eskk#get_named_map(a:stash.char)]
+            \   [eskk#mappings#get_filter_map(a:stash.char)]
             \)
         endif
     else
@@ -809,14 +398,14 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         " Assumption: 'a:table.has_map(rest)' returns false here.
         if rest !=# -1
             " XXX:
-            "     eskk#get_named_map(char)
+            "     eskk#mappings#get_filter_map(char)
             " should
-            "     eskk#get_named_map(eskk#util#uneval_key(char))
+            "     eskk#mappings#get_filter_map(eskk#util#uneval_key(char))
             for rest_char in split(rest, '\zs')
                 call eskk#register_temp_event(
                 \   'filter-redispatch-post',
                 \   'eskk#util#key2char',
-                \   [eskk#get_named_map(rest_char)]
+                \   [eskk#mappings#get_filter_map(rest_char)]
                 \)
             endfor
         endif
@@ -895,14 +484,14 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
             if rest !=# -1
                 " XXX:
-                "     eskk#get_named_map(char)
+                "     eskk#mappings#get_filter_map(char)
                 " should
-                "     eskk#get_named_map(eskk#util#uneval_key(char))
+                "     eskk#mappings#get_filter_map(eskk#util#uneval_key(char))
                 for rest_char in split(rest, '\zs')
                     call eskk#register_temp_event(
                     \   'filter-redispatch-post',
                     \   'eskk#util#key2char',
-                    \   [eskk#get_named_map(rest_char)]
+                    \   [eskk#mappings#get_filter_map(rest_char)]
                     \)
                 endfor
                 let has_rest = 1
@@ -956,7 +545,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
                         call eskk#register_temp_event(
                         \   'filter-redispatch-post',
                         \   'eskk#util#key2char',
-                        \   [eskk#get_named_map(a:table.get_rest(matched))]
+                        \   [eskk#mappings#get_filter_map(a:table.get_rest(matched))]
                         \)
                     endif
                     call buf_str.push_matched(matched, a:table.get_map(matched))
@@ -1066,7 +655,7 @@ function! eskk#enable(...) "{{{
 
     " Set up Mappings.
     if do_map
-        call eskk#map_all_keys()
+        call eskk#mappings#map_all_keys()
     endif
 
     call eskk#set_mode(g:eskk_initial_mode)
@@ -1108,7 +697,7 @@ function! eskk#disable() "{{{
     call eskk#throw_event('disable-im')
 
     if do_unmap
-        call eskk#unmap_all_keys()
+        call eskk#mappings#unmap_all_keys()
     endif
 
     if g:eskk_enable_completion && has_key(self, 'omnifunc_save')
@@ -1174,87 +763,6 @@ function! eskk#emulate_toggle_im() "{{{
 endfunction "}}}
 function! eskk#is_initialized() "{{{
     return s:is_initialized
-endfunction "}}}
-
-function! eskk#is_special_lhs(char, type) "{{{
-    " NOTE: This function must not show error when `s:map[a:type]` does not exist.
-    return has_key(s:map, a:type)
-    \   && eskk#util#key2char(s:map[a:type].lhs) ==# a:char
-endfunction "}}}
-function! eskk#get_special_key(type) "{{{
-    if has_key(s:map, a:type)
-        return s:map[a:type].lhs
-    else
-        throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
-    endif
-endfunction "}}}
-function! eskk#get_special_map(type) "{{{
-    if has_key(s:map, a:type)
-        let map = printf('<Plug>(eskk:internal:_noremap_%s)', a:type)
-        if maparg(map, eskk#get_map_modes()) == ''
-            " Not to remap.
-            call eskk#map('', map, s:map[a:type].lhs)
-        endif
-        return map
-    else
-        throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
-    endif
-endfunction "}}}
-function! eskk#handle_special_lhs(char, type, stash) "{{{
-    return
-    \   eskk#is_special_lhs(a:char, a:type)
-    \   && has_key(s:map_fn, a:type)
-    \   && call(s:map_fn[a:type], [a:stash])
-endfunction "}}}
-
-" Mappings
-function! eskk#map_all_keys(...) "{{{
-    let self = eskk#get_current_instance()
-    if has_key(s:has_mapped, bufnr('%'))
-        return
-    endif
-
-
-    lmapclear <buffer>
-
-    " Map mapped keys.
-    for key in g:eskk_mapped_keys
-        call call('eskk#set_up_key', [key] + a:000)
-    endfor
-
-    " Map `:EskkMap -general` keys.
-    for [key, opt] in items(s:map.general)
-        if !eval(opt.options['map-if'])
-            continue
-        endif
-        if opt.rhs == ''
-            call eskk#set_up_key(key, eskk#util#mapopt_dict2chars(opt.options))
-        else
-            call eskk#map(
-            \   'b'
-            \       . (opt.options.remap ? 'r' : '')
-            \       . eskk#util#mapopt_dict2chars(opt.options),
-            \   key,
-            \   opt.rhs,
-            \   'l'
-            \)
-        endif
-    endfor
-
-    call eskk#util#assert(!has_key(s:has_mapped, bufnr('%')))
-    let s:has_mapped[bufnr('%')] = 1
-endfunction "}}}
-function! eskk#unmap_all_keys() "{{{
-    let self = eskk#get_current_instance()
-    if !has_key(s:has_mapped, bufnr('%'))
-        return
-    endif
-
-    for key in g:eskk_mapped_keys
-        call eskk#unmap('l', 'b', key)
-    endfor
-
-    unlet s:has_mapped[bufnr('%')]
 endfunction "}}}
 
 " Big letter keys
@@ -1536,7 +1044,7 @@ endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
     if eskk#has_event('filter-redispatch-pre')
-        call eskk#map(
+        call eskk#mappings#map(
         \   'rbe',
         \   '<Plug>(eskk:_filter_redispatch_pre)',
         \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
@@ -1546,7 +1054,7 @@ function! s:rewrite_string(return_string) "{{{
 
     let redispatch_post = ''
     if eskk#has_event('filter-redispatch-post')
-        call eskk#map(
+        call eskk#mappings#map(
         \   'rbe',
         \   '<Plug>(eskk:_filter_redispatch_post)',
         \   'join(eskk#throw_event("filter-redispatch-post"), "")'
@@ -1563,7 +1071,7 @@ function! s:rewrite_string(return_string) "{{{
     endif
 
     if type(a:return_string) == type("")
-        call eskk#map('b', '<Plug>(eskk:_return_string)', eskk#util#str2map(a:return_string))
+        call eskk#mappings#map('b', '<Plug>(eskk:_return_string)', eskk#util#str2map(a:return_string))
         let string = "\<Plug>(eskk:_return_string)"
     else
         let string = eskk#get_buftable().rewrite()
@@ -1672,7 +1180,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
     let clear_buftable = a:0 ? a:1 : 1
     let ret = ''
     let plug = strtrans("\<Plug>")
-    let mapmode = eskk#get_map_modes()
+    let mapmode = eskk#mappings#get_map_modes()
     for c in split(a:chars, '\zs')
         let r = eskk#filter(c)
         let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
@@ -1692,7 +1200,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
         endif
 
         " Expand <Plug> mappings.
-        let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+        let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))', 'g')
 
         let [r, ret] = s:emulate_backspace(r, ret)
 
@@ -1701,9 +1209,9 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
             let _ = eval(pre)
             let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
             let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))', 'g')
             let ret .= _
-            let ret .= eskk#util#do_remap(eval(pre), mapmode)
+            let ret .= eskk#mappings#do_remap(eval(pre), mapmode)
         endif
 
         " Handle rewritten text.
@@ -1714,7 +1222,7 @@ function! eskk#emulate_filter_keys(chars, ...) "{{{
             let _ = eval(post)
             let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
             let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#util#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))', 'g')
             let ret .= _
         endif
     endfor
@@ -1943,13 +1451,13 @@ function! s:initialize() "{{{
     " Egg-like-newline {{{
     function! s:do_lmap_non_egg_like_newline(do_map) "{{{
         if a:do_map
-            if !eskk#has_temp_key('<CR>')
+            if !eskk#mappings#has_temp_key('<CR>')
                 call eskk#util#log("Map *non* egg like newline...: <CR> => <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)")
-                call eskk#set_up_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
+                call eskk#mappings#set_up_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
             endif
         else
             call eskk#util#log("Restore *non* egg like newline...: <CR>")
-            call eskk#register_temp_event('filter-begin', 'eskk#set_up_temp_key_restore', ['<CR>'])
+            call eskk#register_temp_event('filter-begin', 'eskk#mappings#set_up_temp_key_restore', ['<CR>'])
         endif
     endfunction "}}}
     if !g:eskk_egg_like_newline
@@ -2027,18 +1535,7 @@ function! s:initialize() "{{{
     " }}}
 
     " Map temporary key to keys to use in that mode {{{
-    function! s:map_mode_local_keys() "{{{
-        let mode = eskk#get_mode()
-
-        if has_key(s:mode_local_keys, mode)
-            for key in s:mode_local_keys[mode]
-                let real_key = eskk#get_special_key(key)
-                call eskk#set_up_temp_key(real_key)
-                call eskk#register_temp_event('leave-mode-' . mode, 'eskk#set_up_temp_key_restore', [real_key])
-            endfor
-        endif
-    endfunction "}}}
-    call eskk#register_event('enter-mode', eskk#util#get_local_func('map_mode_local_keys', s:SID_PREFIX), [])
+    call eskk#register_event('enter-mode', 'eskk#mappings#map_mode_local_keys', [])
     " }}}
 
     " Save dictionary if modified {{{
@@ -2062,7 +1559,7 @@ function! s:initialize() "{{{
 
         function! dict.filter(stash)
             let this = eskk#get_mode_structure('ascii')
-            if eskk#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
+            if eskk#mappings#is_special_lhs(a:stash.char, 'mode:ascii:to-hira')
                 call eskk#set_mode('hira')
             else
                 if a:stash.char !=# "\<BS>"
@@ -2100,7 +1597,7 @@ function! s:initialize() "{{{
 
         function! dict.filter(stash)
             let this = eskk#get_mode_structure('zenei')
-            if eskk#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
+            if eskk#mappings#is_special_lhs(a:stash.char, 'mode:zenei:to-hira')
                 call eskk#set_mode('hira')
             else
                 if !has_key(this.sandbox, 'table')
@@ -2159,7 +1656,7 @@ function! s:initialize() "{{{
 
             " Handle special characters.
             " These characters are handled regardless of current phase.
-            if eskk#is_special_lhs(char, 'backspace-key')
+            if eskk#mappings#is_special_lhs(char, 'backspace-key')
                 if buf_str.get_rom_str() == ''
                     " If backspace-key was pressed at empty string,
                     " leave abbrev mode.
@@ -2169,7 +1666,7 @@ function! s:initialize() "{{{
                     call buftable.do_backspace(a:stash)
                 endif
                 return
-            elseif eskk#is_special_lhs(char, 'enter-key')
+            elseif eskk#mappings#is_special_lhs(char, 'enter-key')
                 call buftable.do_enter(a:stash)
                 call eskk#set_mode('hira')
                 return
@@ -2179,16 +1676,16 @@ function! s:initialize() "{{{
 
             " Handle other characters.
             if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-                if eskk#is_special_lhs(char, 'phase:henkan:henkan-key')
+                if eskk#mappings#is_special_lhs(char, 'phase:henkan:henkan-key')
                     call buftable.do_henkan(a:stash)
                 else
                     call buf_str.push_rom_str(char)
                 endif
             elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-                if eskk#is_special_lhs(char, 'phase:henkan-select:choose-next')
+                if eskk#mappings#is_special_lhs(char, 'phase:henkan-select:choose-next')
                     call buftable.choose_next_candidate(a:stash)
                     return
-                elseif eskk#is_special_lhs(char, 'phase:henkan-select:choose-prev')
+                elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:choose-prev')
                     call buftable.choose_prev_candidate(a:stash)
                     return
                 else
@@ -2197,7 +1694,7 @@ function! s:initialize() "{{{
                     call eskk#register_temp_event(
                     \   'filter-redispatch-post',
                     \   'eskk#util#key2char',
-                    \   [eskk#get_named_map(a:stash.char)]
+                    \   [eskk#mappings#get_filter_map(a:stash.char)]
                     \)
 
                     " Leave abbrev mode.
@@ -2251,7 +1748,7 @@ function! s:initialize() "{{{
     " }}}
 
     " BufEnter: Map keys if enabled. {{{
-    autocmd eskk BufEnter * if eskk#is_enabled() | call eskk#map_all_keys() | endif
+    autocmd eskk BufEnter * if eskk#is_enabled() | call eskk#mappings#map_all_keys() | endif
     " }}}
 
     " BufEnter: Restore global option value of &iminsert, &imsearch {{{
@@ -2352,11 +1849,11 @@ function! s:initialize() "{{{
             NeoComplCacheUnlock
             return ''
         endfunction
-        call eskk#map(
+        call eskk#mappings#map(
         \   'e',
         \   '<Plug>(eskk:_neocomplcache_unlock)',
         \   eskk#util#get_local_func('initialize_neocomplcache_unlock', s:SID_PREFIX) . '()',
-        \   eskk#get_map_modes() . 'n'
+        \   eskk#mappings#get_map_modes() . 'n'
         \)
     endfunction
     call s:initialize_neocomplcache()
@@ -2364,7 +1861,7 @@ function! s:initialize() "{{{
 
     " Completion {{{
     function! s:initialize_completion()
-        call eskk#map('e', '<Plug>(eskk:_do_complete)', 'pumvisible() ? "" : "\<C-x>\<C-o>\<C-p>"')
+        call eskk#mappings#map('e', '<Plug>(eskk:_do_complete)', 'pumvisible() ? "" : "\<C-x>\<C-o>\<C-p>"')
     endfunction
     call s:initialize_completion()
     " }}}

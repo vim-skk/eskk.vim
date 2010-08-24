@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 86))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 87))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -339,7 +339,7 @@ endif
 command!
 \   -nargs=+
 \   EskkMap
-\   call eskk#_cmd_eskk_map(<q-args>)
+\   call eskk#mappings#_cmd_eskk_map(<q-args>)
 
 command!
 \   -bar
