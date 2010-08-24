@@ -370,7 +370,7 @@ function! eskk#util#mapopt_dict2chars(options) "{{{
     \   'unique': 'u',
     \   'remap': 'r',
     \}
-    return join(map(keys(a:options), 'get(table, v:val, "")'), '')
+    return join(map(keys(a:options), 'a:options[v:val] && has_key(table, v:val) ? table[v:val] : ""'), '')
 endfunction "}}}
 function! eskk#util#mapopt_chars2raw(options) "{{{
     let table = {
