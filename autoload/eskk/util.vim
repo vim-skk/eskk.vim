@@ -287,10 +287,10 @@ function! eskk#util#remove_all_ctrl_chars(s, ctrl_char) "{{{
     return s
 endfunction "}}}
 function! eskk#util#is_lower(char) "{{{
-    return a:char ==# tolower(a:char)
+    return a:char =~ '^\a$' && a:char ==# tolower(a:char)
 endfunction "}}}
 function! eskk#util#is_upper(char) "{{{
-    return a:char ==# toupper(a:char)
+    return a:char =~ '^\a$' && a:char ==# toupper(a:char)
 endfunction "}}}
 
 
