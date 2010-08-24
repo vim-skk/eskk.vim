@@ -2411,7 +2411,7 @@ function! s:initialize() "{{{
 
     " Completion {{{
     function! s:initialize_completion()
-        call eskk#map('', '<Plug>(eskk:_do_complete)', '<C-x><C-o><C-p>')
+        call eskk#map('e', '<Plug>(eskk:_do_complete)', 'pumvisible() ? "" : "\<C-x>\<C-o>\<C-p>"')
     endfunction
     call s:initialize_completion()
     " }}}
