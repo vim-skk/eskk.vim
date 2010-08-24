@@ -326,6 +326,44 @@ function! eskk#util#get_sid_from_source(regex) "{{{
         endif
     endfor
 endfunction "}}}
+function! eskk#util#mapopt_chars2dict(options) "{{{
+    let opt = s:create_default_mapopt()
+    for c in split(a:options, '\zs')
+        if c ==# 'b'
+            let opt.buffer = 1
+        elseif c ==# 'e'
+            let opt.expr = 1
+        elseif c ==# 's'
+            let opt.silent = 1
+        elseif c ==# 'u'
+            let opt.unique = 1
+        elseif c ==# 'r'
+            let opt.remap = 1
+        endif
+    endfor
+    return opt
+endfunction "}}}
+function! eskk#util#mapopt_dict2raw(options) "{{{
+    let ret = ''
+    for [key, val] in items(a:options)
+        if key ==# 'remap' || key ==# 'map-if'
+            continue
+        endif
+        if val
+            let ret .= printf('<%s>', key)
+        endif
+    endfor
+    return ret
+endfunction "}}}
+function! eskk#util#mapopt_chars2raw(options) "{{{
+    let table = {
+    \   'b': '<buffer>',
+    \   'e': '<expr>',
+    \   's': '<silent>',
+    \   'u': '<unique>',
+    \}
+    return join(map(split(a:options, '\zs'), 'get(table, v:val, "")'), '')
+endfunction "}}}
 
 
 " Misc.

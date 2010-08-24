@@ -279,7 +279,7 @@ endfunction "}}}
 " These mapping functions actually map key using ":lmap".
 function! eskk#set_up_key(key, ...) "{{{
     if a:0
-        return s:map_key(a:key, s:mapopt_chars2dict(a:1))
+        return s:map_key(a:key, eskk#util#mapopt_chars2dict(a:1))
     else
         return s:map_key(a:key, s:create_default_mapopt())
     endif
@@ -290,7 +290,7 @@ function! s:map_key(key, options) "{{{
     " Map a:key.
     execute
     \   'lmap'
-    \   '<buffer>' . s:mapopt_dict2raw(a:options)
+    \   '<buffer>' . eskk#util#mapopt_dict2raw(a:options)
     \   a:key
     \   eskk#get_named_map(a:key)
 endfunction "}}}
@@ -384,49 +384,10 @@ function! eskk#map(options, lhs, rhs, ...) "{{{
     endif
 
     let map = stridx(a:options, 'r') != -1 ? 'map' : 'noremap'
-    let opt = s:mapopt_chars2raw(a:options)
+    let opt = eskk#util#mapopt_chars2raw(a:options)
     for mode in split((a:0 ? a:1 : eskk#get_map_modes()), '\zs')
         execute mode . map opt a:lhs a:rhs
     endfor
-endfunction "}}}
-
-function! s:mapopt_chars2dict(options) "{{{
-    let opt = s:create_default_mapopt()
-    for c in split(a:options, '\zs')
-        if c ==# 'b'
-            let opt.buffer = 1
-        elseif c ==# 'e'
-            let opt.expr = 1
-        elseif c ==# 's'
-            let opt.silent = 1
-        elseif c ==# 'u'
-            let opt.unique = 1
-        elseif c ==# 'r'
-            let opt.remap = 1
-        endif
-    endfor
-    return opt
-endfunction "}}}
-function! s:mapopt_dict2raw(options) "{{{
-    let ret = ''
-    for [key, val] in items(a:options)
-        if key ==# 'remap' || key ==# 'map-if'
-            continue
-        endif
-        if val
-            let ret .= printf('<%s>', key)
-        endif
-    endfor
-    return ret
-endfunction "}}}
-function! s:mapopt_chars2raw(options) "{{{
-    let table = {
-    \   'b': '<buffer>',
-    \   'e': '<expr>',
-    \   's': '<silent>',
-    \   'u': '<unique>',
-    \}
-    return join(map(split(a:options, '\zs'), 'get(table, v:val, "")'), '')
 endfunction "}}}
 
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
@@ -1288,7 +1249,7 @@ function! eskk#map_all_keys(...) "{{{
         else
             execute
             \   printf('l%smap', (opt.options.remap ? '' : 'nore'))
-            \   '<buffer>' . s:mapopt_dict2raw(opt.options)
+            \   '<buffer>' . eskk#util#mapopt_dict2raw(opt.options)
             \   key
             \   opt.rhs
         endif
