@@ -65,8 +65,37 @@ function! eskk#util#log_exception(what) "{{{
         return
     endif
 
-    call eskk#util#logf("warning: '%s' throws exception", a:what)
-    call eskk#util#logstrf('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
+    call eskk#util#logf_warn("'%s' throws exception", a:what)
+    call eskk#util#logstrf_warn('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
+endfunction "}}}
+function! eskk#util#log_warn(msg) "{{{
+    if !eskk#is_initialized()
+        call eskk#register_temp_event('enable-im', 'eskk#util#log_warn', [a:msg])
+        return
+    endif
+
+    redraw
+
+    let out = eskk#util#option_value(
+    \   g:eskk_warnings_out,
+    \   ['file', 'cmdline'],
+    \   0
+    \)
+
+    if out ==# 'file'
+        let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'warnings.log'))
+        execute 'redir >>' file
+        silent echo a:msg
+        redir END
+    else
+        call eskk#util#warn(a:msg)
+    endif
+endfunction "}}}
+function! eskk#util#logf_warn(fmt, ...) "{{{
+    call eskk#util#log_warn(call('printf', [a:fmt] + a:000))
+endfunction "}}}
+function! eskk#util#logstrf_warn(fmt, ...) "{{{
+    return call('eskk#util#logf_warn', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
 
 function! eskk#util#printstrf(fmt, ...) "{{{
