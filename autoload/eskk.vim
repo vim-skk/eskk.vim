@@ -1610,7 +1610,7 @@ function! s:write_error_log_file(v_exception, v_throwpoint, char) "{{{
     call add(lines, '--- exception ---')
     if a:v_exception =~# '^eskk:'
         call add(lines, 'exception type: eskk exception')
-        call add(lines, printf('v:exception: %s', eskk#get_exception_message(a:v_exception)))
+        call add(lines, printf('v:exception: %s', a:v_exception))
     else
         call add(lines, 'exception type: Vim internal error')
         call add(lines, printf('v:exception: %s', a:v_exception))
@@ -1874,12 +1874,6 @@ endfunction "}}}
 " Exceptions {{{
 function! s:build_error(from, msg) "{{{
     return 'eskk: ' . join(a:msg, ': ') . ' at ' . join(a:from, '#')
-endfunction "}}}
-function! eskk#get_exception_message(error_str) "{{{
-    " Get only `a:msg` of s:build_error().
-    let s = a:error_str
-    let s = substitute(s, '^eskk: ', '', '')
-    return s
 endfunction "}}}
 
 function! eskk#internal_error(from, ...) "{{{
