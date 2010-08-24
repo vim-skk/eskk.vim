@@ -560,7 +560,6 @@ function! s:henkan_result.delete_from_dict() dict "{{{
     call remove(user_dict_lines, user_dict_idx)
     try
         call self._dict._user_dict.set_lines(user_dict_lines)
-        let self._dict._is_modified = 1
     catch /^eskk: parse error/
         return
     endtry
@@ -593,6 +592,7 @@ let s:physical_dict = {
 \   'path': '',
 \   'sorted': 0,
 \   'encoding': '',
+\   '_is_modified': 0,
 \}
 
 function! s:physical_dict_new(path, sorted, encoding) "{{{
@@ -648,6 +648,7 @@ function! s:physical_dict.set_lines(lines) dict "{{{
         let self._content_lines  = a:lines
         call s:physical_dict_parse_lines(self, a:lines)
         let self._loaded = 1
+        let self._is_modified = 1
     catch /^eskk: parse error/
         call eskk#util#log('warning: ' . v:exception)
         let self.okuri_ari_idx = -1
@@ -692,7 +693,7 @@ let s:dict = {
 \   '_user_dict': {},
 \   '_system_dict': {},
 \   '_added_words': [],
-\   '_is_modified': 0,
+\   '_added_words_modified': 0,
 \}
 
 function! eskk#dictionary#new(user_dict, system_dict) "{{{
@@ -789,11 +790,19 @@ endfunction "}}}
 
 function! s:dict.remember_word(input, key, okuri, okuri_rom) dict "{{{
     call add(self._added_words, [a:input, a:key, a:okuri, a:okuri_rom])
-    let self._is_modified = 1
+    let self._added_words_modified = 1
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
-    return self._is_modified
+    " No need to check system dictionary.
+    " Because it is immutable.
+    return
+    \   self._added_words_modified
+    \   || self._user_dict._is_modified
+endfunction "}}}
+function! s:dict_clear_modified_flags(this) "{{{
+    let a:this._added_words_modified = 0
+    let a:this._user_dict._is_modified = 0
 endfunction "}}}
 
 function! s:dict.update_dictionary() dict "{{{
@@ -822,7 +831,7 @@ function! s:dict.update_dictionary() dict "{{{
     endif
 
     call s:dict_write_to_file(self)
-    let self._is_modified = 0
+    call s:dict_clear_modified_flags(self)
 endfunction "}}}
 function! s:dict_write_to_file(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
