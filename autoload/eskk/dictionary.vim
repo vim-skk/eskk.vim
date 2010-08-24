@@ -594,14 +594,12 @@ function! s:physical_dict.set_lines(lines) dict "{{{
     try
         let self._content_lines  = a:lines
         call s:physical_dict_parse_lines(self, a:lines)
+        let self._loaded = 1
     catch /^eskk: parse error/
         call eskk#util#log('warning: ' . v:exception)
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
-    let self._loaded = 1
-
-    return self._content_lines
 endfunction "}}}
 
 function! s:physical_dict_parse_lines(self, lines) "{{{
