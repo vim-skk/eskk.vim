@@ -381,12 +381,16 @@ function! s:henkan_result_get_result(this) "{{{
     endif
 endfunction "}}}
 
-function! s:henkan_result_select_candidates(this, with_okuri) "{{{
+function! s:henkan_result_select_candidates(this, with_okuri, skip_num) "{{{
     " Select candidates by getchar()'s character.
     let words = copy(a:this._result[0])
     let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))
     let page_index = 0
     let pages = []
+
+    call eskk#util#assert(len(words) > a:skip_num, "words has more than skip_num words.")
+    let words = words[a:skip_num :]
+
     while !empty(words)
         let words_in_page = []
         " Add words to `words_in_page` as number of
@@ -475,7 +479,7 @@ function! s:henkan_result.get_candidate(...) dict "{{{
     call eskk#util#logf('idx = %d, counter = %d', idx, counter)
     if idx >= counter
         try
-            let self._candidate = s:henkan_result_select_candidates(self, with_okuri)
+            let self._candidate = s:henkan_result_select_candidates(self, with_okuri, counter)
         catch /^eskk: leave henkan select$/
             if result[1] > 0
                 let result[1] -= 1
