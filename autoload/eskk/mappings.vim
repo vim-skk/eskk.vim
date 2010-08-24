@@ -459,7 +459,7 @@ function! eskk#mappings#get_special_key(type) "{{{
 endfunction "}}}
 function! eskk#mappings#get_special_map(type) "{{{
     if has_key(s:map, a:type)
-        let map = printf('<Plug>(eskk:internal:_noremap_%s)', a:type)
+        let map = printf('<Plug>(eskk:_noremap_%s)', a:type)
         if maparg(map, eskk#mappings#get_map_modes()) == ''
             " Not to remap.
             call eskk#mappings#map('', map, s:map[a:type].lhs)

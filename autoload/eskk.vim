@@ -1062,10 +1062,6 @@ function! s:initialize() "{{{
     endif
     " }}}
 
-    " Create <Plug>(eskk:internal:set-begin-pos) {{{
-    noremap! <expr> <Plug>(eskk:internal:set-begin-pos) [eskk#get_buftable().set_begin_pos('.'), ''][1]
-    " }}}
-
     " Check some variables values. {{{
     function! s:initialize_check_variables()
         if g:eskk_marker_henkan ==# g:eskk_marker_popup

@@ -198,14 +198,14 @@ function! s:buftable.rewrite() dict "{{{
         " 2. Set begin pos
         " 3. Insert new string
 
-        call eskk#mappings#map('b', '<Plug>(eskk:internal:_inserted_kakutei)', eskk#util#str2map(kakutei))
-        call eskk#mappings#map('b', '<Plug>(eskk:internal:_inserted_new)', eskk#util#str2map(new))
+        call eskk#mappings#map('b', '<Plug>(eskk:_inserted_kakutei)', eskk#util#str2map(kakutei))
+        call eskk#mappings#map('b', '<Plug>(eskk:_inserted_new)', eskk#util#str2map(new))
 
         return
         \   eval(self.make_remove_bs_expr())
-        \   . "\<Plug>(eskk:internal:_inserted_kakutei)"
-        \   . "\<Plug>(eskk:internal:set-begin-pos)"
-        \   . "\<Plug>(eskk:internal:_inserted_new)"
+        \   . "\<Plug>(eskk:_inserted_kakutei)"
+        \   . "\<Plug>(eskk:_set-begin-pos)"
+        \   . "\<Plug>(eskk:_inserted_new)"
     else
         let inserted_str = kakutei . new
         if old ==# inserted_str
@@ -228,20 +228,20 @@ function! s:buftable.rewrite() dict "{{{
             " Insert "bar".
             call eskk#mappings#map(
             \   'b',
-            \   '<Plug>(eskk:internal:_inserted)',
+            \   '<Plug>(eskk:_inserted)',
             \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
             \)
-            return "\<Plug>(eskk:internal:_inserted)"
+            return "\<Plug>(eskk:_inserted)"
         else
             call eskk#util#log('s:buftable.rewrite(): Remove old, Add new.')
             " Simplest algorithm.
             " Delete current string, and insert new string.
             call eskk#mappings#map(
             \   'b',
-            \   '<Plug>(eskk:internal:_inserted)',
+            \   '<Plug>(eskk:_inserted)',
             \   eskk#util#str2map(inserted_str)
             \)
-            return eval(self.make_remove_bs_expr()) . "\<Plug>(eskk:internal:_inserted)"
+            return eval(self.make_remove_bs_expr()) . "\<Plug>(eskk:_inserted)"
         endif
     endif
 endfunction "}}}

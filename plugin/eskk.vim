@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 97))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 98))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -310,6 +310,8 @@ nnoremap <silent> <Plug>(eskk:alpha-T) :<C-u>call eskk#jump_one_char('T')<CR>
 nnoremap <silent> <Plug>(eskk:alpha-F) :<C-u>call eskk#jump_one_char('F')<CR>
 nnoremap <silent> <Plug>(eskk:alpha-,) :<C-u>call eskk#repeat_last_jump(',')<CR>
 nnoremap <silent> <Plug>(eskk:alpha-;) :<C-u>call eskk#repeat_last_jump(';')<CR>
+
+noremap! <expr> <Plug>(eskk:_set-begin-pos) [eskk#get_buftable().set_begin_pos('.'), ''][1]
 
 if !g:eskk_no_default_mappings
     function! s:do_map(rhs, mode)
