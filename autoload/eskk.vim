@@ -59,7 +59,7 @@ let s:eskk = {
 
 
 
-" NOTE: Following variables are non-local between instances.
+" NOTE: Following variables are non-local (global) between instances.
 
 " Supported modes and their structures.
 let s:available_modes = {}
@@ -1052,7 +1052,7 @@ function! s:initialize() "{{{
     " }}}
 
     " InsertLeave: Restore &backspace value {{{
-    " NOTE: Due to current implementation,
+    " FIXME: Due to current implementation,
     " s:buftable.rewrite() assumes that &backspace contains "eol".
     if &l:backspace !~# '\<eol\>'
         let s:saved_backspace = &l:backspace
