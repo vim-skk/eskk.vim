@@ -105,6 +105,7 @@ function! s:buffer_string.get_input_rom() dict "{{{
     return self.get_matched_rom() . self.get_rom_str()
 endfunction "}}}
 
+
 function! s:buffer_string.empty() dict "{{{
     return self.get_rom_str() == ''
     \   && empty(self.get_matched())
