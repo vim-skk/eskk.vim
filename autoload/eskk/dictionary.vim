@@ -766,13 +766,18 @@ function! s:dict.update_dictionary() dict "{{{
         " Because at this time dictionary file does not exist.
     endif
 
-    " Check if a:self.user_dict really does not have added words.
-    for [input, key, okuri, okuri_rom] in self._added_words
-        let [line, index] = eskk#dictionary#search_candidate(self._user_dict, key, okuri_rom)
+    call s:dict_write_to_file(self)
+endfunction "}}}
+function! s:dict_write_to_file(this) "{{{
+    let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
+
+    " Check if a:this.user_dict really does not have added words.
+    for [input, key, okuri, okuri_rom] in a:this._added_words
+        let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, key, okuri_rom)
         if okuri_rom != ''
-            let lnum = self._user_dict.okuri_ari_idx + 1
+            let lnum = a:this._user_dict.okuri_ari_idx + 1
         else
-            let lnum = self._user_dict.okuri_nasi_idx + 1
+            let lnum = a:this._user_dict.okuri_nasi_idx + 1
         endif
         " Delete old entry.
         if index !=# -1
@@ -787,23 +792,21 @@ function! s:dict.update_dictionary() dict "{{{
         \)
     endfor
 
-
-    " Write to dictionary.
-    let save_msg = printf("Saving to '%s'...", self._user_dict.path)
+    let save_msg = printf("Saving to '%s'...", a:this._user_dict.path)
     echo save_msg
 
     let ret_success = 0
     try
-        if writefile(user_dict_lines, self._user_dict.path) ==# ret_success
+        if writefile(user_dict_lines, a:this._user_dict.path) ==# ret_success
             echo "\r" . save_msg . 'Done.'
         else
-            let msg = printf("can't write to '%s'.", self._user_dict.path)
+            let msg = printf("can't write to '%s'.", a:this._user_dict.path)
             throw eskk#internal_error(['eskk', 'dictionary'], msg)
         endif
     catch
         echohl WarningMsg
         echo "\r" . save_msg . "Error. Please check permission of"
-        \    "'" . self._user_dict.path . "' - " . v:exception
+        \    "'" . a:this._user_dict.path . "' - " . v:exception
         echohl None
     endtry
 endfunction "}}}
