@@ -1467,10 +1467,7 @@ function! eskk#filter(char) "{{{
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
-                if g:eskk_debug
-                    call eskk#util#log('error: eskk#complete#handle_special_key() throwed exception')
-                    call eskk#util#logstrf('v:exception = %s, v:throwpoint = %s', v:exception, v:throwpoint)
-                endif
+                call eskk#util#log_exception('eskk#complete#handle_special_key()')
             endtry
         else
             let self.has_started_completion = 0
