@@ -352,6 +352,16 @@ function! eskk#util#mapopt_dict2raw(options) "{{{
     endfor
     return ret
 endfunction "}}}
+function! eskk#util#mapopt_dict2chars(options) "{{{
+    let table = {
+    \   'buffer': 'b',
+    \   'expr': 'e',
+    \   'silent': 's',
+    \   'unique': 'u',
+    \   'remap': 'r',
+    \}
+    return join(map(keys(a:options), 'get(table, v:val, "")'), '')
+endfunction "}}}
 function! eskk#util#mapopt_chars2raw(options) "{{{
     let table = {
     \   'b': '<buffer>',
