@@ -707,8 +707,6 @@ function! s:initialize() "{{{
     " }}}
 
     " Default mappings - :EskkMap {{{
-    silent! EskkMap -unique <C-^> <Plug>(eskk:toggle)
-
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=backspace-key -unique <C-h>
     silent! EskkMap -type=enter-key -unique <CR>
@@ -760,10 +758,12 @@ function! s:initialize() "{{{
 
     silent! EskkMap -type=mode:abbrev:henkan-key -unique <Space>
 
-    silent! EskkMap <BS> <Plug>(eskk:filter:<C-h>)
+    silent! EskkMap -remap -unique <C-^> <Plug>(eskk:toggle)
 
-    silent! EskkMap -noremap -map-if="mode() ==# 'i'" -unique <Esc>
-    silent! EskkMap -noremap -map-if="mode() ==# 'i'" -unique <C-c>
+    silent! EskkMap -remap <BS> <Plug>(eskk:filter:<C-h>)
+
+    silent! EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
+    silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
     " Map temporary key to keys to use in that mode {{{

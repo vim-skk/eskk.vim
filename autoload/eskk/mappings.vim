@@ -564,7 +564,6 @@ function! s:parse_options(args) "{{{
     let args = a:args
     let type = 'general'
     let opt = eskk#mappings#create_default_mapopt()
-    let opt.noremap = 0
 
     while args != ''
         let [optname, value, args] = s:parse_options_get_optargs(args)
@@ -580,7 +579,6 @@ function! s:parse_options(args) "{{{
         endif
     endwhile
 
-    let opt.remap = !remove(opt, 'noremap')
     return [opt, type, args]
 endfunction "}}}
 function! eskk#mappings#_cmd_eskk_map(args) "{{{
