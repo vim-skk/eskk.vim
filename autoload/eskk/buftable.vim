@@ -198,14 +198,18 @@ function! s:buftable.rewrite() dict "{{{
         " 2. Set begin pos
         " 3. Insert new string
 
-        call eskk#mappings#map('b', '<Plug>(eskk:_inserted_kakutei)', eskk#util#str2map(kakutei))
-        call eskk#mappings#map('b', '<Plug>(eskk:_inserted_new)', eskk#util#str2map(new))
+        if kakutei != ''
+            call eskk#mappings#map('b', '<Plug>(eskk:_inserted_kakutei)', eskk#util#str2map(kakutei))
+        endif
+        if new != ''
+            call eskk#mappings#map('b', '<Plug>(eskk:_inserted_new)', eskk#util#str2map(new))
+        endif
 
         return
         \   self.make_remove_bs()
-        \   . "\<Plug>(eskk:_inserted_kakutei)"
+        \   . (kakutei != '' ? "\<Plug>(eskk:_inserted_kakutei)" : '')
         \   . "\<Plug>(eskk:_set_begin_pos)"
-        \   . "\<Plug>(eskk:_inserted_new)"
+        \   . (new != '' ? "\<Plug>(eskk:_inserted_new)" : '')
     else
         let inserted_str = kakutei . new
         if old ==# inserted_str
