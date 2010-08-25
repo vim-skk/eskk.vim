@@ -20,7 +20,6 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
 
     let clear_buftable = a:0 ? a:1 : 1
     let ret = ''
-    let plug = strtrans("\<Plug>")
     let mapmode = eskk#mappings#get_map_modes()
     for c in split(a:chars, '\zs')
         let r = eskk#filter(c)
@@ -39,6 +38,10 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
             let post = maparg('<Plug>(eskk:_filter_redispatch_post)', mapmode)
             let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
         endif
+
+        " Remove `<Plug>(eskk:_set_begin_pos)`.
+        " it is <expr> and does not effect to result string.
+        let r = substitute(r, '(eskk:_set_begin_pos)', '', 'g')
 
         " Expand <Plug> mappings.
         let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))', 'g')
