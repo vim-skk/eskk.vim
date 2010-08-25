@@ -18,9 +18,10 @@ runtime! plugin/eskk.vim
 
 " Utility autoload functions {{{
 
-function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_okuri, okuri_rom, ...) "{{{
+function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
-    let needle = a:key_filter . (a:has_okuri ? a:okuri_rom[0] : '')
+    let has_okuri = a:okuri_rom != ''
+    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
 
     if g:eskk_debug
         call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
@@ -37,7 +38,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_o
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
 
-        let result = s:search_binary(a:physical_dict, whole_lines, converted, a:has_okuri, limit)
+        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, limit)
 
         if result[1] == -1
             return []
@@ -65,7 +66,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, has_o
         let lines = []
         let start = 1
         while 1
-            let result = s:search_linear(a:physical_dict, whole_lines, converted, a:has_okuri, start)
+            let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri, start)
 
             if result[1] == -1
                 break
@@ -875,7 +876,7 @@ function! s:dict_write_to_file(this) "{{{
     endtry
 endfunction "}}}
 
-function! s:dict.search(key, has_okuri, okuri, okuri_rom) dict "{{{
+function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom
@@ -905,14 +906,14 @@ function! s:dict.search(key, has_okuri, okuri, okuri_rom) dict "{{{
     
     let max = g:eskk_candidates_max
     if len < g:eskk_candidates_max
-        let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, a:has_okuri, okuri_rom, g:eskk_candidates_max - len)
+        let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, g:eskk_candidates_max - len)
         if is_katakana
             call filter(lines, 'stridx(v:val, ' . string(filter_str) . ') > 0')
         endif
 
         let len += len(lines)
         if len < g:eskk_candidates_max
-            let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, a:has_okuri, okuri_rom, g:eskk_candidates_max - len)
+            let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, g:eskk_candidates_max - len)
 
             if is_katakana
                 call filter(lines, 'stridx(v:val, ' . string(filter_str) . ') > 0')

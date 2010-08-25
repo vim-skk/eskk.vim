@@ -145,10 +145,9 @@ function! s:complete(mode, base) "{{{
     let okuri_rom = okuri_buf_str.get_matched_rom()
 
     let filter_str = s:get_buftable_str(0, a:base)
-    let has_okuri = (filter_str =~ '^[あ-んー。！？]\+\*$') || okuri_rom != ''
     let marker = g:eskk_marker_popup . g:eskk_marker_henkan
 
-    for [yomigana, okuri_rom, kanji_list] in dict.search(key, has_okuri, okuri, okuri_rom)
+    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
         if is_katakana
             call filter(kanji_list, 'stridx(v:val.result, filter_str) == 0')
         elseif len(kanji_list) > 2
