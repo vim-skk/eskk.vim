@@ -202,7 +202,7 @@ function! s:buftable.rewrite() dict "{{{
         call eskk#mappings#map('b', '<Plug>(eskk:_inserted_new)', eskk#util#str2map(new))
 
         return
-        \   eval(self.make_remove_bs_expr())
+        \   self.make_remove_bs()
         \   . "\<Plug>(eskk:_inserted_kakutei)"
         \   . "\<Plug>(eskk:_set-begin-pos)"
         \   . "\<Plug>(eskk:_inserted_new)"
@@ -213,7 +213,7 @@ function! s:buftable.rewrite() dict "{{{
             return ''
         elseif inserted_str == ''
             call eskk#util#log('s:buftable.rewrite(): No inserted string. Remove old string.')
-            return eval(self.make_remove_bs_expr())
+            return self.make_remove_bs()
         elseif inserted_str != '' && stridx(old, inserted_str) == 0
             call eskk#util#log('s:buftable.rewrite(): Remove minimum string.')
             " When inserted_str == "foo", old == "foobar"
@@ -241,20 +241,16 @@ function! s:buftable.rewrite() dict "{{{
             \   '<Plug>(eskk:_inserted)',
             \   eskk#util#str2map(inserted_str)
             \)
-            return eval(self.make_remove_bs_expr()) . "\<Plug>(eskk:_inserted)"
+            return self.make_remove_bs() . "\<Plug>(eskk:_inserted)"
         endif
     endif
 endfunction "}}}
-function! s:buftable.make_remove_bs_expr() dict "{{{
+function! s:buftable.make_remove_bs() dict "{{{
     let old = self._old_str
-    return join([
-    \   'repeat(',
-    \       'eskk#util#key2char(eskk#mappings#get_special_map("backspace-key")),',
-    \       'eskk#util#mb_strlen(',
-    \       string(old),
-    \       ')',
-    \   ')',
-    \])
+    return repeat(
+    \   eskk#util#key2char(eskk#mappings#get_special_map("backspace-key")),
+    \   eskk#util#mb_strlen(old),
+    \)
 endfunction "}}}
 
 function! s:buftable.has_changed() dict "{{{
