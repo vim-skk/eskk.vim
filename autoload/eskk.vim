@@ -1329,8 +1329,10 @@ endfunction "}}}
 
 " Statusline
 function! eskk#get_stl() "{{{
-    let self = eskk#get_current_instance()
-    return eskk#is_enabled() ? printf('[eskk:%s]', get(g:eskk_statusline_mode_strings, self.mode, '??')) : ''
+    return eskk#is_enabled() ? get(g:eskk_statusline_mode_strings, eskk#get_current_instance().mode, '??') : ''
+endfunction "}}}
+function! eskk#format_stl(fmt, default) "{{{
+    return eskk#is_enabled() ? printf(a:fmt, eskk#get_stl()) : a:default
 endfunction "}}}
 
 " Buftable
