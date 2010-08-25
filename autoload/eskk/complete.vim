@@ -150,7 +150,7 @@ function! s:complete(mode, base) "{{{
 
     for [yomigana, okuri_rom, kanji_list] in dict.search(key, has_okuri, okuri, okuri_rom)
         if is_katakana
-            call filter(kanji_list, 'stridx(v:val.result, ' . string(filter_str) . ') == 0')
+            call filter(kanji_list, 'stridx(v:val.result, filter_str) == 0')
         elseif len(kanji_list) > 2
             " Add yomigana.
             if yomigana != ''
