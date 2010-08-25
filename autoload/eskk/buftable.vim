@@ -204,7 +204,7 @@ function! s:buftable.rewrite() dict "{{{
         return
         \   self.make_remove_bs()
         \   . "\<Plug>(eskk:_inserted_kakutei)"
-        \   . "\<Plug>(eskk:_set-begin-pos)"
+        \   . "\<Plug>(eskk:_set_begin_pos)"
         \   . "\<Plug>(eskk:_inserted_new)"
     else
         let inserted_str = kakutei . new
