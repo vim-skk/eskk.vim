@@ -545,17 +545,30 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endif
 
-    if g:eskk_debug
-        call eskk#util#logstrf('Delete from dict: %s', candidates[idx])
-        call eskk#util#logstrf('Delete from dict: %s', user_dict_lines[user_dict_idx])
+    " NOTE: user_dict_idx is -1
+    " when the current candidate is from added words.
+    if !eskk#util#has_idx(user_dict_lines, user_dict_idx)
+        " Remove current candidate from added words.
+        for i in range(len(self._added_words))
+            let parsed = s:added_word2parsed(self._added_words[i])
+            if candidates[idx].result ==# parsed[2][0].result
+                call remove(candidates, idx)
+                return
+            endif
+        endfor
+        return
     endif
-
     call remove(user_dict_lines, user_dict_idx)
     try
         call self._dict._user_dict.set_lines(user_dict_lines)
     catch /^eskk: parse error/
         return
     endtry
+
+    if g:eskk_debug
+        call eskk#util#logstrf('Removed from dict: %s', candidates[idx])
+        call eskk#util#logstrf('Removed from dict: %s', user_dict_lines[user_dict_idx])
+    endif
 
     call s:henkan_result_init(self, self._added_words)
 
@@ -790,6 +803,10 @@ function! s:dict.remember_word(input, key, okuri, okuri_rom) dict "{{{
     \})
     let self._added_words_modified = 1
 endfunction "}}}
+function! s:added_word2parsed(added_word) "{{{
+    let w = a:added_word
+    return [w.key, w.okuri_rom, [{'result': w.input . w.okuri}]]
+endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
     " No need to check system dictionary.
@@ -890,7 +907,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let added = []
     for w in self._added_words
         if stridx(w.key, key) == 0
-            call add(added, [w.key, w.okuri_rom, [{'result': w.input . w.okuri}]]
+            call add(added, s:added_word2parsed(w)
         endif
     endfor
 
