@@ -309,7 +309,7 @@ function! s:henkan_result_init(this, added) "{{{
     \   a:this,
     \   {
     \       '_status': (empty(a:added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
-    \       '_result': (empty(a:added) ? [] : [map(copy(a:added), '{"result": v:val.key}'), 0, -1]),
+    \       '_result': (empty(a:added) ? [] : [map(copy(a:added), '{"result": v:val.input}'), 0, -1]),
     \       '_added_words': a:added,
     \   },
     \   'force'
