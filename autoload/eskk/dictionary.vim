@@ -289,7 +289,7 @@ function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, added_words
     let added = []
     for [added_input, added_key, added_okuri, added_okuri_rom] in a:added_words
         if added_key ==# a:key && added_okuri_rom[0] ==# a:okuri_rom[0]
-            call add(added, added_input)
+            call add(added, [added_input, added_key, added_okuri, added_okuri_rom])
         endif
     endfor
 
@@ -313,7 +313,7 @@ function! s:henkan_result_init(this, added) "{{{
     \   a:this,
     \   {
     \       '_status': (empty(a:added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
-    \       '_result': (empty(a:added) ? [] : [map(copy(a:added), '{"result": v:val}'), 0, -1]),
+    \       '_result': (empty(a:added) ? [] : [map(copy(a:added), '{"result": v:val[0]}'), 0, -1]),
     \       '_added_words': a:added,
     \   },
     \   'force'
