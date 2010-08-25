@@ -715,7 +715,7 @@ function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
     \   a:okuri_rom,
     \   a:okuri,
     \   deepcopy(a:buftable, 1),
-    \   copy(self._added_words),
+    \   self._added_words,
     \)
 endfunction "}}}
 
