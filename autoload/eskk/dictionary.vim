@@ -178,17 +178,20 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
-    let [yomi, okuri] = [matchstr(list[0], '^[^a-z ]\+'), matchstr(list[0], '[a-z]\+')]
+    let [key, okuri_rom] = [matchstr(list[0], '^[^a-z ]\+'), matchstr(list[0], '[a-z]\+')]
 
     let candidates = []
     for _ in list[1:]
         let semicolon = stridx(_, ';')
-        call add(candidates, (semicolon != -1) ?
-              \ {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]} :
-              \ {'result': _})
+        call add(
+        \   candidates,
+        \   semicolon != -1 ?
+        \       {'result': _[: semicolon - 1], 'annotation': _[semicolon + 1 :]} :
+        \       {'result': _}
+        \)
     endfor
 
-    return [yomi, okuri, candidates]
+    return [key, okuri_rom, candidates]
 endfunction "}}}
 
 function! eskk#dictionary#merge_results(results) "{{{
