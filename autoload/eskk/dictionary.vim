@@ -286,12 +286,7 @@ let s:henkan_result = {
 \}
 
 function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, added_words) "{{{
-    let added = []
-    for [added_input, added_key, added_okuri, added_okuri_rom] in a:added_words
-        if added_key ==# a:key && added_okuri_rom[0] ==# a:okuri_rom[0]
-            call add(added, [added_input, added_key, added_okuri, added_okuri_rom])
-        endif
-    endfor
+    let added = filter(copy(a:added_words), 'v:val[0] ==# a:key && v:val[3][0] ==# a:okuri_rom[0]')
 
     let obj = extend(
     \   deepcopy(s:henkan_result, 1),
