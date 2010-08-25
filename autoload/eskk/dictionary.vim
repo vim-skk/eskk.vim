@@ -286,7 +286,7 @@ let s:henkan_result = {
 \}
 
 function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable, added_words) "{{{
-    let added = filter(copy(a:added_words), 'v:val[0] ==# a:key && v:val[3][0] ==# a:okuri_rom[0]')
+    let added = filter(copy(a:added_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
 
     let obj = extend(
     \   deepcopy(s:henkan_result, 1),
@@ -781,7 +781,12 @@ function! s:dict.forget_registered_words() dict "{{{
 endfunction "}}}
 
 function! s:dict.remember_word(input, key, okuri, okuri_rom) dict "{{{
-    call add(self._added_words, [a:input, a:key, a:okuri, a:okuri_rom])
+    call add(self._added_words, {
+    \   'input': a:input,
+    \   'key': a:key,
+    \   'okuri': a:okuri,
+    \   'okuri_rom': a:okuri_rom,
+    \})
     let self._added_words_modified = 1
 endfunction "}}}
 
@@ -829,9 +834,9 @@ function! s:dict_write_to_file(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this.user_dict really does not have added words.
-    for [input, key, okuri, okuri_rom] in a:this._added_words
-        let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, key, okuri_rom)
-        if okuri_rom != ''
+    for w in a:this._added_words
+        let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, w.key, w.okuri_rom)
+        if w.okuri_rom != ''
             let lnum = a:this._user_dict.okuri_ari_idx + 1
         else
             let lnum = a:this._user_dict.okuri_nasi_idx + 1
@@ -844,7 +849,7 @@ function! s:dict_write_to_file(this) "{{{
         " Merge old one and create new entry.
         call insert(
         \   user_dict_lines,
-        \   eskk#dictionary#create_new_entry(input, key, okuri, okuri_rom, line),
+        \   eskk#dictionary#create_new_entry(w.input, w.key, w.okuri, w.okuri_rom, line),
         \   lnum
         \)
     endfor
@@ -882,9 +887,9 @@ function! s:dict.search(key, has_okuri, okuri, okuri_rom) dict "{{{
     " Convert `self._added_words` to same value
     " of return value of `eskk#dictionary#parse_skk_dict_line()`.
     let added = []
-    for [added_input, added_key, added_okuri, added_okuri_rom] in self._added_words
-        if stridx(added_key, key) == 0
-            call add(added, [added_key, added_okuri_rom, [{'result': added_input . added_okuri}]])
+    for w in self._added_words
+        if stridx(w.key, key) == 0
+            call add(added, [w.key, w.okuri_rom, {'result': w.input . w.okuri}]
         endif
     endfor
 
