@@ -638,7 +638,7 @@ function! s:physical_dict.get_lines(...) dict "{{{
 
         let self._ftime_at_read = getftime(path)
         let self._loaded = 1
-    catch /^E484:/    " Can't open file
+    catch /E484:/    " Can't open file
         call eskk#util#logf("Can't read '%s'!", path)
     catch /^eskk: parse error/
         call eskk#util#log_exception('s:physical_dict.get_lines()')
