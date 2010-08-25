@@ -1436,7 +1436,7 @@ function! eskk#filter(char) "{{{
     call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
 
-    call eskk#util#logf('a:char = %s(%d)', a:char, char2nr(a:char))
+    call eskk#util#logstrf('a:char = %s(%d)', a:char, char2nr(a:char))
     " Check irregular circumstance.
     if !eskk#is_supported_mode(self.mode)
         call eskk#util#log_warn('current mode is not supported: ' . self.mode)

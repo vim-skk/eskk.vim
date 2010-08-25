@@ -179,7 +179,7 @@ endfunction "}}}
 " Handler for the key while popup displayed.
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
-    call eskk#util#logf('eskk#complete#handle_special_key(): char = %s', char)
+    call eskk#util#logstrf('eskk#complete#handle_special_key(): char = %s', char)
 
     " Check popupmenu-keys
     if has_key(s:popup_func_table, char)
