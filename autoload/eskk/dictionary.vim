@@ -890,7 +890,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let added = []
     for w in self._added_words
         if stridx(w.key, key) == 0
-            call add(added, [w.key, w.okuri_rom, {'result': w.input . w.okuri}]
+            call add(added, [w.key, w.okuri_rom, [{'result': w.input . w.okuri}]]
         endif
     endfor
 
