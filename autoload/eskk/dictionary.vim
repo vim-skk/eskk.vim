@@ -206,12 +206,9 @@ function! eskk#dictionary#merge_results(results) "{{{
         let str = r.result
 
         if has_key(unique, str)
-            if get(r, 'annotation', '') ==# get(unique[str], 'annotation', '')
-                " If `result` and `annotation` is same as old one, Remove new one.
-                call remove(results, i)
-                " Next element is results[i], Don't increment.
-                continue
-            endif
+            call extend(r, remove(results, i), 'keep')
+            " Next element is results[i], Don't increment.
+            continue
         else
             let unique[str] = r
         endif
