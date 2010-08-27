@@ -1328,13 +1328,13 @@ function! eskk#get_mode_table(mode) "{{{
 endfunction "}}}
 
 " Statusline
-function! eskk#stl(...) "{{{
+function! eskk#statusline(...) "{{{
     return eskk#is_enabled()
     \      ? printf(get(a:000, 0, '[eskk:%s]'),
     \               get(g:eskk_statusline_mode_strings,
     \                   eskk#get_current_instance().mode, '??'))
     \      : get(a:000, 1, '')
-endfunction
+endfunction "}}}
 
 " Buftable
 function! eskk#get_buftable() "{{{
