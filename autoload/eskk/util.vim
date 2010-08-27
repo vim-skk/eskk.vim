@@ -115,25 +115,6 @@ function! eskk#util#mb_chop(str) "{{{
 endfunction "}}}
 
 
-" Argument
-function! eskk#util#get_args(args, ...) "{{{
-    let ret_args = []
-    let i = 0
-
-    while i < len(a:000)
-        call add(
-        \   ret_args,
-        \   eskk#util#has_idx(a:args, i) ?
-        \       a:args[i]
-        \       : a:000[i]
-        \)
-        let i += 1
-    endwhile
-
-    return ret_args
-endfunction "}}}
-
-
 " List function
 function! eskk#util#unique(list) "{{{
     let list = []
@@ -365,7 +346,7 @@ function! eskk#util#rand(max) "{{{
     return (next / 65536) % (a:max + 1)
 endfunction "}}}
 function! eskk#util#get_syn_names(...) "{{{
-    let [line, col] = eskk#util#get_args(a:000, line('.'), col('.'))
+    let [line, col] = [get(a:000, 0, line('.')), get(a:000, 1, col('.'))]
     " synstack() returns strange value when col is over $ pos. Bug?
     if col >= col('$')
         return []
