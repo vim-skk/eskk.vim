@@ -545,6 +545,12 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endif
 
+    " Dialog
+    let input = eskk#util#input('Really purge? (yes/no)')
+    if input !~? '^y\%[es]$'
+        return
+    endif
+
     " NOTE: user_dict_idx is -1
     " when the current candidate is from added words.
     if !eskk#util#has_idx(user_dict_lines, user_dict_idx)
