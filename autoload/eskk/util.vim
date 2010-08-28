@@ -347,6 +347,19 @@ function! eskk#util#getchar(...) "{{{
     let c = call('getchar', a:000)
     return type(c) == type("") ? c : nr2char(c)
 endfunction "}}}
+function! eskk#util#input(...) "{{{
+    let success = 0
+    if inputsave() !=# success
+        call eskk#util#log_warn("inputsave() failed")
+    endif
+    try
+        return call('input', a:000)
+    finally
+        if inputrestore() !=# success
+            call eskk#util#log_warn("inputrestore() failed")
+        endif
+    endtry
+endfunction "}}}
 function! eskk#util#mkdir_nothrow(...) "{{{
     try
         call call('mkdir', a:000)

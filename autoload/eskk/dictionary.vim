@@ -739,12 +739,6 @@ function! s:dict.register_word(henkan_result) dict "{{{
     let okuri_rom = a:henkan_result.get_okuri_rom()
 
 
-    " inputsave()
-    let success = 0
-    if inputsave() !=# success
-        call eskk#util#log_warn("inputsave() failed")
-    endif
-
     " Save `&imsearch`.
     let save_imsearch = &l:imsearch
     let &l:imsearch = 1
@@ -760,7 +754,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
             let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
         endif
         redraw
-        let input  = input(prompt)
+        let input  = eskk#util#input(prompt)
     catch /^Vim:Interrupt$/
         let input = ''
     finally
@@ -776,11 +770,6 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
         " Restore `&imsearch`.
         let &l:imsearch = save_imsearch
-
-        " inputrestore()
-        if inputrestore() !=# success
-            call eskk#util#log_warn("inputrestore() failed")
-        endif
     endtry
 
 
