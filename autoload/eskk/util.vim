@@ -297,6 +297,7 @@ function! eskk#util#str2map(str) "{{{
     \   '<Space>',
     \   '<Esc>',
     \   '<Tab>',
+    \   '<Bar>',
     \]
         let s = substitute(s, eskk#util#key2char(key), key, 'g')
     endfor
