@@ -222,20 +222,6 @@ function! eskk#util#can_access(cont, key) "{{{
 endfunction "}}}
 
 
-" Parsing
-function! eskk#util#skip_spaces(str) "{{{
-    return substitute(a:str, '^\s*', '', '')
-endfunction "}}}
-" TODO Escape + Whitespace
-function! eskk#util#get_arg(arg) "{{{
-    let matched = matchstr(a:arg, '^\S\+')
-    return [matched, strpart(a:arg, strlen(matched))]
-endfunction "}}}
-function! eskk#util#unget_arg(arg, str) "{{{
-    return a:str . a:arg
-endfunction "}}}
-
-
 " String/Regex
 function! eskk#util#escape_regex(regex) "{{{
     " XXX
