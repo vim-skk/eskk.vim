@@ -1533,7 +1533,7 @@ function! s:rewrite_string(return_string) "{{{
     endif
 
     if type(a:return_string) == type("")
-        call eskk#mappings#map('b', '<Plug>(eskk:_return_string)', eskk#util#str2map(a:return_string))
+        call eskk#mappings#map('eb', '<Plug>(eskk:_return_string)', string(a:return_string))
         let string = "\<Plug>(eskk:_return_string)"
     else
         let string = eskk#get_buftable().rewrite()
