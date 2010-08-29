@@ -371,19 +371,31 @@ function! s:henkan_result_get_result(this) "{{{
             let a:this._status = g:eskk#dictionary#HR_NO_RESULT
             throw eskk#dictionary_look_up_error(['eskk', 'dictionary'], errormsg)
         endif
+
         " Merge and unique user dict result and system dict result.
-        let parsed_user_dict_result   = user_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(user_dict_result[0])[2]
-        let parsed_system_dict_result = system_dict_result[1] ==# -1 ? [] : eskk#dictionary#parse_skk_dict_line(system_dict_result[0])[2]
+        let results = []
+        if user_dict_result[1] !=# -1
+            let p = eskk#dictionary#parse_skk_dict_line(user_dict_result[0])
+            call eskk#util#assert(p[0] ==# a:this._key, "p[0] ==# a:this._key")
+            call eskk#util#assert(p[1] ==# a:this._okuri_rom, "p[1] ==# a:this._okuri_rom")
+            call add(results, p[2])
+        endif
+        if system_dict_result[1] !=# -1
+            let p = eskk#dictionary#parse_skk_dict_line(system_dict_result[0])
+            call eskk#util#assert(p[0] ==# a:this._key, "p[0] ==# a:this._key")
+            call eskk#util#assert(p[1] ==# a:this._okuri_rom, "p[1] ==# a:this._okuri_rom")
+            call add(results, p[2])
+        endif
+        if !empty(a:this._result)
+            call add(results, a:this._result[0])
+        endif
         let a:this._result = [
-        \   eskk#dictionary#merge_results([
-        \       parsed_user_dict_result,
-        \       parsed_system_dict_result,
-        \       get(a:this._result, 0, [])
-        \   ]),
+        \   eskk#dictionary#merge_results(results),
         \   0,
         \   user_dict_result[1],
         \]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
+
         return a:this._result
     elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
         let [candidates, idx, _] = a:this._result
