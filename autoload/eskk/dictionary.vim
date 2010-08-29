@@ -18,6 +18,7 @@ runtime! plugin/eskk.vim
 
 " Utility autoload functions {{{
 
+" Returns all lines matching the candidate.
 function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
     let has_okuri = a:okuri_rom != ''
@@ -79,6 +80,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         return map(lines, 's:iconv(v:val, a:physical_dict.encoding, &l:encoding)')
     endif
 endfunction "}}}
+" Returns [line_string, lnum] matching the candidate.
 function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
@@ -111,6 +113,7 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
         return ['', -1]
     endif
 endfunction "}}}
+" Returns [line_string, lnum] matching the candidate.
 function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     " NOTE: min, max, mid are index number. not lnum.
@@ -150,6 +153,7 @@ function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     " NOTE: min, max: Give index number, not lnum.
     return s:search_linear(a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max)
 endfunction "}}}
+" Returns [line_string, lnum] matching the candidate.
 function! s:search_linear(ph_dict, whole_lines, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     if a:0 == 1
@@ -176,6 +180,7 @@ function! s:search_linear(ph_dict, whole_lines, needle, has_okuri, ...) "{{{
     return ['', -1]
 endfunction "}}}
 
+" Returns [key, okuri_rom, candidates] which line contains.
 function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
@@ -195,6 +200,8 @@ function! eskk#dictionary#parse_skk_dict_line(line) "{{{
     return [key, okuri_rom, candidates]
 endfunction "}}}
 
+" Returns List.
+" This return value is s:henkan_result_data
 function! eskk#dictionary#merge_results(results) "{{{
     " Flatten list.
     let results = []
@@ -222,6 +229,7 @@ function! eskk#dictionary#merge_results(results) "{{{
     return results
 endfunction "}}}
 
+" Returns String of the created entry from arguments values.
 function! eskk#dictionary#create_new_entry(new_word, key, okuri, okuri_rom, existing_line) "{{{
     " TODO:
     " Rewrite for eskk.
