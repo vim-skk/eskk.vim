@@ -197,12 +197,6 @@ let s:mode_local_keys = {
 \   ],
 \}
 let s:prev_im_options = {}
-let s:expr_map = {
-\   '<Plug>(eskk:_inserted_kakutei)': 1,
-\   '<Plug>(eskk:_inserted_new)': 1,
-\   '<Plug>(eskk:_inserted)': 1,
-\   '<Plug>(eskk:_return_string)': 1,
-\}
 
 
 " Utilities
@@ -304,17 +298,9 @@ function! eskk#mappings#get_nore_map(key, ...) "{{{
 
     return lhs
 endfunction "}}}
-function! eskk#mappings#is_expr_map(map) "{{{
-    return has_key(s:expr_map, a:map)
-endfunction "}}}
 function! eskk#mappings#do_remap(map, modes) "{{{
-    if eskk#mappings#is_expr_map(a:map)
-        let m = maparg(a:map, a:modes)
-        return m != '' ? eval(m) : a:map
-    else
-        let m = maparg(a:map, a:modes)
-        return m != '' ? m : a:map
-    endif
+    let m = maparg(a:map, a:modes)
+    return m != '' ? m : a:map
 endfunction "}}}
 
 function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
