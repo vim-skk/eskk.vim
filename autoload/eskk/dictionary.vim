@@ -13,9 +13,6 @@ set cpo&vim
 " }}}
 runtime! plugin/eskk.vim
 
-" TODO
-" - Compile dictionary (s:dict._dict_info) to refer to result.
-
 
 
 " Utility autoload functions {{{
