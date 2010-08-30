@@ -405,7 +405,7 @@ function! s:henkan_result_get_candidates(this, ...) "{{{
         endif
 
         if from_hr_see_registered_words
-            let results += a:this.candidates
+            let results += a:this._candidates
         endif
 
         let a:this._user_dict_found_index = user_dict_result[1]
