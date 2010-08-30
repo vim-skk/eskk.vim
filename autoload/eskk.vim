@@ -1554,11 +1554,14 @@ function! s:write_error_log_file(char) "{{{
     call add(lines, '--- g:eskk_version ---')
     call add(lines, printf('g:eskk_version = %s', string(g:eskk_version)))
     call add(lines, '--- g:eskk_version ---')
+
     call add(lines, '--- char ---')
     call add(lines, printf('char: %s(%d)', string(a:char), char2nr(a:char)))
     call add(lines, printf('mode(): %s', mode()))
     call add(lines, '--- char ---')
+
     call add(lines, '')
+
     call add(lines, '--- exception ---')
     if v:exception =~# '^eskk:'
         call add(lines, 'exception type: eskk exception')
@@ -1568,26 +1571,76 @@ function! s:write_error_log_file(char) "{{{
         call add(lines, printf('v:exception: %s', v:exception))
     endif
     call add(lines, printf('v:throwpoint: %s', v:throwpoint))
-    call add(lines, '--- exception ---')
+
     call add(lines, '')
+
+    let arg = {
+    \   'snr_funcname': '<SNR>\d\+_\w\+',
+    \   'autoload_funcname': '[\w#]\+',
+    \   'global_funcname': '[A-Z]\w*',
+    \   'lines': lines,
+    \}
+    let o = {}
+
+    function o['a'](arg)
+        let a:arg.stacktrace = matchstr(v:throwpoint, '\C'.'^function \zs\S\+\ze, ')
+        return a:arg.stacktrace != ''
+    endfunction
+
+    function o['b'](arg)
+        let a:arg.funcname = get(split(a:arg.stacktrace, '\.\.'), -1, '')
+        return a:arg.funcname != ''
+    endfunction
+
+    function o['c'](arg)
+        try
+            return exists('*' . a:arg.funcname)
+        catch    " E129: Function name required
+            " but "s:" prefixed function also raises this error.
+            return a:arg.funcname =~# a:arg.snr_funcname ? 1 : 0
+        endtry
+    endfunction
+
+    function o['d'](arg)
+        redir => output
+        silent execute 'function' a:arg.funcname
+        redir END
+
+        let a:arg.lines += split(output, '\n')
+    endfunction
+
+    for k in sort(keys(o))
+        if !o[k](arg)
+            break
+        endif
+    endfor
+    call add(lines, '--- exception ---')
+
+    call add(lines, '')
+
     call add(lines, '--- buftable ---')
     let lines += eskk#get_buftable().dump()
     call add(lines, '--- buftable ---')
+
     call add(lines, '')
+
     call add(lines, "--- Vim's :version ---")
     redir => output
     silent version
     redir END
     let lines += split(output, '\n')
     call add(lines, "--- Vim's :version ---")
+
     call add(lines, '')
     call add(lines, '')
+
     if executable('uname')
         call add(lines, "--- Operating System ---")
         call add(lines, printf('"uname -a" = %s', system('uname -a')))
         call add(lines, "--- Operating System ---")
         call add(lines, '')
     endif
+
     call add(lines, '--- feature-list ---')
     call add(lines, 'gui_running = '.has('gui_running'))
     call add(lines, 'unix = '.has('unix'))
@@ -1606,10 +1659,14 @@ function! s:write_error_log_file(char) "{{{
     call add(lines, 'qnx = '.has('qnx'))
     call add(lines, 'vms = '.has('vms'))
     call add(lines, '--- feature-list ---')
+
     call add(lines, '')
     call add(lines, '')
+
     call add(lines, "Please report this error to author.")
     call add(lines, "`:help eskk` to see author's e-mail address.")
+
+
 
     let log_file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'error.log'))
     let write_success = 0
