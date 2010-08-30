@@ -794,7 +794,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
 
     if input != ''
-        call self.remember_word(input, key, okuri, okuri_rom)
+        call self.remember_registered_words(input, key, okuri, okuri_rom)
     endif
     return [input, key, okuri]
 endfunction "}}}
@@ -803,7 +803,7 @@ function! s:dict.forget_registered_words() dict "{{{
     let self._added_words = []
 endfunction "}}}
 
-function! s:dict.remember_word(input, key, okuri, okuri_rom) dict "{{{
+function! s:dict.remember_registered_words(input, key, okuri, okuri_rom) dict "{{{
     call add(self._added_words, {
     \   'input': a:input,
     \   'key': a:key,
