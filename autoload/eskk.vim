@@ -305,6 +305,11 @@ function! s:asym_filter.filter(stash) dict "{{{
             let henkan_result = eskk#get_prev_henkan_result()
             if !empty(henkan_result)
                 call henkan_result.delete_from_dict()
+
+                " Do not use this after calling .delete_from_dict() !
+                unlet henkan_result
+                call eskk#clear_henkan_result()
+
                 call buftable.push_kakutei_str(buftable.get_display_str(0))
                 call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
             endif
@@ -1411,6 +1416,9 @@ endfunction "}}}
 function! eskk#set_henkan_result(henkan_result) "{{{
     let self = eskk#get_current_instance()
     let self.prev_henkan_result = a:henkan_result
+endfunction "}}}
+function! eskk#clear_henkan_result()
+    call eskk#set_henkan_result({})
 endfunction "}}}
 
 " Locking diff old string
