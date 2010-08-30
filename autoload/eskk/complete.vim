@@ -394,7 +394,7 @@ function! s:check_yomigana() "{{{
         return filter_str =~ '^[[:alnum:]-]\+$'
     else
         " Kanji mode.
-        return filter_str =~ '^[ア-ンあ-んー。！？*]\+$'
+        return filter_str =~ '^[ア-ンあ-んぁ-ぉー。！？*]\+$'
     endif
 endfunction "}}}
 function! s:get_buftable_pos() "{{{
