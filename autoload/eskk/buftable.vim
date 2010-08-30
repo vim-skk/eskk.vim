@@ -551,7 +551,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
 
     call eskk#util#assert(self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT, "current phase is henkan select phase.")
 
-    if henkan_result[a:next ? 'advance' : 'back']()
+    if henkan_result[a:next ? 'forward' : 'back']()
         let candidate = henkan_result.get_candidate()
 
         " Set candidate.

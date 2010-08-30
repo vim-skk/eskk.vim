@@ -588,7 +588,7 @@ function! s:henkan_result.get_status() dict "{{{
     return self._status
 endfunction "}}}
 
-function! s:henkan_result.advance() dict "{{{
+function! s:henkan_result.forward() dict "{{{
     return s:henkan_result_advance(self, 1)
 endfunction "}}}
 
