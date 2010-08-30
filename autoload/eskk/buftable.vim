@@ -425,11 +425,13 @@ function! s:buftable.do_enter(stash) dict "{{{
         let henkan_result = eskk#get_prev_henkan_result()
         if henkan_result.get_status() ==# g:eskk#dictionary#HR_GOT_RESULT
             let dict = eskk#get_dictionary()
-            call dict.remember_word(
-            \   henkan_result.get_candidate(0),
-            \   henkan_result.get_key(),
-            \   henkan_result.get_okuri(),
-            \   henkan_result.get_okuri_rom(),
+            call dict.remember_registered_word(
+            \   eskk#dictionary#registered_word_new(
+            \       henkan_result.get_candidate(0),
+            \       henkan_result.get_key(),
+            \       henkan_result.get_okuri(),
+            \       henkan_result.get_okuri_rom(),
+            \   )
             \)
         endif
 
