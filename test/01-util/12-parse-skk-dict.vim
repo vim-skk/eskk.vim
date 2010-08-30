@@ -10,19 +10,19 @@ set cpo&vim
 
 function! s:run()
     IsDeeply eskk#dictionary#parse_skk_dict_line(
-    \   'かんがe /考/稽;<rare>/勘;<rare>/攷;<rare>/'
+    \   'かんがe /考/稽;<rare>/勘;<rare>/攷;<rare>/', -1
     \), ['かんが', 'e', [
-    \       {'result': '考'},
-    \       {'result': '稽', 'annotation': '<rare>'},
-    \       {'result': '勘', 'annotation': '<rare>'},
-    \       {'result': '攷', 'annotation': '<rare>'},
+    \       {'from_type': -1, 'input': '考'},
+    \       {'from_type': -1, 'input': '稽', 'annotation': '<rare>'},
+    \       {'from_type': -1, 'input': '勘', 'annotation': '<rare>'},
+    \       {'from_type': -1, 'input': '攷', 'annotation': '<rare>'},
     \   ]]
 
     IsDeeply eskk#dictionary#parse_skk_dict_line(
-    \   'わんたんめん /雲呑麺/ワンタン麺/'
+    \   'わんたんめん /雲呑麺/ワンタン麺/', -1
     \), ['わんたんめん', '', [
-    \       {'result': '雲呑麺'},
-    \       {'result': 'ワンタン麺'},
+    \       {'from_type': -1, 'input': '雲呑麺'},
+    \       {'from_type': -1, 'input': 'ワンタン麺'},
     \   ]]
 endfunction
 
