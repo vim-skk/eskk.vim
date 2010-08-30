@@ -625,7 +625,6 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         " Remove current candidate from added words.
         for i in range(len(self._dict._registered_words))
             if candidates[candidates_index].input ==# self._dict._registered_words[i].input
-                call remove(candidates, candidates_index)
                 call remove(self._dict._registered_words, i)
             endif
         endfor
@@ -924,6 +923,7 @@ function! s:dict.update_dictionary() dict "{{{
     endif
 
     call s:dict_write_to_file(self)
+    call self.forget_registered_words()
     call s:dict_clear_modified_flags(self)
 endfunction "}}}
 function! s:dict_write_to_file(this) "{{{
