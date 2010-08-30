@@ -384,17 +384,17 @@ function! s:temp_key_map(key) "{{{
     return printf('<Plug>(eskk:prevmap:%s)', a:key)
 endfunction "}}}
 
-    function! eskk#mappings#map_mode_local_keys() "{{{
-        let mode = eskk#get_mode()
+function! eskk#mappings#map_mode_local_keys() "{{{
+    let mode = eskk#get_mode()
 
-        if has_key(s:mode_local_keys, mode)
-            for key in s:mode_local_keys[mode]
-                let real_key = eskk#mappings#get_special_key(key)
-                call eskk#mappings#set_up_temp_key(real_key)
-                call eskk#register_temp_event('leave-mode-' . mode, 'eskk#mappings#set_up_temp_key_restore', [real_key])
-            endfor
-        endif
-    endfunction "}}}
+    if has_key(s:mode_local_keys, mode)
+        for key in s:mode_local_keys[mode]
+            let real_key = eskk#mappings#get_special_key(key)
+            call eskk#mappings#set_up_temp_key(real_key)
+            call eskk#register_temp_event('leave-mode-' . mode, 'eskk#mappings#set_up_temp_key_restore', [real_key])
+        endfor
+    endif
+endfunction "}}}
 
 
 " Functions using s:map
