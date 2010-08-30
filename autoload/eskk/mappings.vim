@@ -196,6 +196,7 @@ let s:mode_local_keys = {
 \       'mode:zenei:to-hira',
 \   ],
 \}
+let s:prev_im_options = {}
 
 
 " Utilities
@@ -394,6 +395,40 @@ function! eskk#mappings#map_mode_local_keys() "{{{
             call eskk#register_temp_event('leave-mode-' . mode, 'eskk#mappings#set_up_temp_key_restore', [real_key])
         endfor
     endif
+endfunction "}}}
+
+function! eskk#mappings#map_normal_keys() "{{{
+    " From s:SkkMapNormal() in plugin/skk.vim
+
+    let restore_commands =
+    \   ':<C-u>'
+    \   . 'let [&l:iminsert, &l:imsearch] = '
+    \       . string([&l:iminsert, &l:imsearch])
+    \   . '<CR>'
+    for key in split('iIaAoOcCsSR', '\zs')
+        call eskk#mappings#map('sb', key, restore_commands . key, 'n')
+    endfor
+endfunction "}}}
+function! eskk#mappings#unmap_normal_keys() "{{{
+    for key in split('iIaAoOcCsSR', '\zs')
+        call eskk#mappings#unmap('n', 'b', key)
+    endfor
+endfunction "}}}
+
+function! eskk#mappings#do_insert_enter() "{{{
+    call eskk#mappings#unmap_normal_keys()
+    " Restore previous im options.
+    let nr = bufnr('%')
+    if has_key(s:prev_im_options, nr)
+        let [&l:iminsert, &l:imsearch] = s:prev_im_options[nr]
+        unlet s:prev_im_options[nr]
+    endif
+endfunction "}}}
+function! eskk#mappings#do_insert_leave() "{{{
+    call eskk#mappings#map_normal_keys()
+    " Save im options.
+    let s:prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
+    let [&l:iminsert, &l:imsearch] = [0, 0]
 endfunction "}}}
 
 

@@ -1093,6 +1093,13 @@ function! s:initialize() "{{{
     endfunction
     call s:initialize_completion()
     " }}}
+
+    " InsertLeave, InsertEnter: g:eskk_map_normal_keys {{{
+    if g:eskk_map_normal_keys
+        autocmd eskk InsertEnter * call eskk#mappings#do_insert_enter()
+        autocmd eskk InsertLeave * call eskk#mappings#do_insert_leave()
+    endif
+    " }}}
 endfunction "}}}
 function! eskk#is_initialized() "{{{
     return s:is_initialized
