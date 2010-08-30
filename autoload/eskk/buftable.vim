@@ -199,10 +199,10 @@ function! s:buftable.rewrite() dict "{{{
         " 3. Insert new string
 
         if kakutei != ''
-            call eskk#mappings#map('b', '<Plug>(eskk:_inserted_kakutei)', eskk#util#str2map(kakutei))
+            call eskk#mappings#map('eb', '<Plug>(eskk:_inserted_kakutei)', string(kakutei))
         endif
         if new != ''
-            call eskk#mappings#map('b', '<Plug>(eskk:_inserted_new)', eskk#util#str2map(new))
+            call eskk#mappings#map('eb', '<Plug>(eskk:_inserted_new)', string(new))
         endif
 
         return
@@ -231,9 +231,9 @@ function! s:buftable.rewrite() dict "{{{
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
             call eskk#mappings#map(
-            \   'b',
+            \   'eb',
             \   '<Plug>(eskk:_inserted)',
-            \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
+            \   string(strpart(inserted_str, strlen(old)))
             \)
             return "\<Plug>(eskk:_inserted)"
         else
@@ -241,9 +241,9 @@ function! s:buftable.rewrite() dict "{{{
             " Simplest algorithm.
             " Delete current string, and insert new string.
             call eskk#mappings#map(
-            \   'b',
+            \   'eb',
             \   '<Plug>(eskk:_inserted)',
-            \   eskk#util#str2map(inserted_str)
+            \   string(inserted_str)
             \)
             return self.make_remove_bs() . "\<Plug>(eskk:_inserted)"
         endif
