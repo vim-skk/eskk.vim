@@ -272,8 +272,6 @@ lockvar g:eskk#dictionary#HR_SEE_ADDED_WORDS
 let g:eskk#dictionary#HR_GOT_RESULT = 3
 lockvar g:eskk#dictionary#HR_GOT_RESULT
 
-" self._dict:
-"   Instance of s:dict
 " self._key, self._okuri_rom, self._okuri:
 "   Query for this henkan result.
 " self._status:
@@ -290,7 +288,6 @@ lockvar g:eskk#dictionary#HR_GOT_RESULT
 "   Used by s:henkan_result.delete_from_dict()
 let s:henkan_result = {
 \   'buftable': {},
-\   '_dict': {},
 \   '_key': '',
 \   '_okuri_rom': '',
 \   '_okuri': '',
@@ -300,14 +297,14 @@ let s:henkan_result = {
 \   '_user_dict_found_index': -1,
 \}
 
-function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable) "{{{
-    let added = filter(copy(a:dict._registered_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
+function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
+    let dict = eskk#dictionary#get_instance()
+    let added = filter(copy(dict._registered_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
 
     let obj = extend(
     \   deepcopy(s:henkan_result, 1),
     \   {
     \       'buftable': a:buftable,
-    \       '_dict': a:dict,
     \       '_key': a:key,
     \       '_okuri_rom': a:okuri_rom,
     \       '_okuri': a:okuri,
@@ -366,7 +363,8 @@ function! s:henkan_result_get_candidates(this, ...) "{{{
         return a:this._candidates
 
     elseif a:this._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-        let [user_dict, system_dict] = [a:this._dict._user_dict, a:this._dict._system_dict]
+        let dict = eskk#dictionary#get_instance()
+        let [user_dict, system_dict] = [dict._user_dict, dict._system_dict]
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_candidate(
         \   user_dict, a:this._key, a:this._okuri_rom
@@ -490,7 +488,8 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
                 let page_index += 1
             else
                 " No more pages. Register new word.
-                let input = a:this._dict.register_word(a:this)[0]
+                let dict = eskk#dictionary#get_instance()
+                let input = dict.register_word(a:this)[0]
                 let henkan_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
                 return [
@@ -608,16 +607,17 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endif
 
-    let user_dict_lines = self._dict._user_dict.get_lines()
-    if !self._dict._user_dict.is_valid()
+    let dict = eskk#dictionary#get_instance()
+    let user_dict_lines = dict._user_dict.get_lines()
+    if !dict._user_dict.is_valid()
         return
     endif
 
     if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_ADDED_WORDS
         " Remove all elements matching with current candidate from added words.
-        for i in range(len(self._dict._registered_words))
-            if candidates[candidates_index].input ==# self._dict._registered_words[i].input
-                call remove(self._dict._registered_words, i)
+        for i in range(len(dict._registered_words))
+            if candidates[candidates_index].input ==# dict._registered_words[i].input
+                call remove(dict._registered_words, i)
             endif
         endfor
         return
@@ -637,7 +637,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
 
     call remove(user_dict_lines, user_dict_idx)
     try
-        call self._dict._user_dict.set_lines(user_dict_lines)
+        call dict._user_dict.set_lines(user_dict_lines)
     catch /^eskk: parse error/
         return
     endtry
@@ -647,10 +647,10 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         call eskk#util#logstrf('Removed from dict: %s', candidates[candidates_index])
     endif
 
-    call s:henkan_result_init(self, copy(self._dict._registered_words))
+    call s:henkan_result_init(self, copy(dict._registered_words))
 
     redraw
-    call self._dict.update_dictionary()
+    call dict.update_dictionary()
 endfunction "}}}
 
 lockvar s:henkan_result
@@ -825,7 +825,6 @@ endfunction "}}}
 
 function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
     return s:henkan_result_new(
-    \   self,
     \   a:key,
     \   a:okuri_rom,
     \   a:okuri,
