@@ -337,12 +337,12 @@ function! s:henkan_result_advance(this, advance) "{{{
     endif
 
     try
-        let candidates = self._candidates
-        let idx = self._candidates_index
+        let candidates = a:this._candidates
+        let idx = a:this._candidates_index
         if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
             " Next time to call s:henkan_result_get_candidates(),
             " eskk will getchar() if `idx >= g:eskk_show_candidates_count`
-            let self._candidates_index +=  (a:advance ? 1 : -1)
+            let a:this._candidates_index +=  (a:advance ? 1 : -1)
             return 1
         elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
             let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
@@ -641,7 +641,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
 
     if g:eskk_debug
         call eskk#util#logstrf('Removed from dict: %s', user_dict_lines[user_dict_idx])
-        call eskk#util#logstrf('Removed from dict: %s', candidates[idx])
+        call eskk#util#logstrf('Removed from dict: %s', candidates[candidates_index])
     endif
 
     call s:henkan_result_init(self, copy(self._dict._registered_words))
