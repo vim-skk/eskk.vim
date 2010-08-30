@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 140))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 141))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -306,7 +306,7 @@ lnoremap <expr> <Plug>(eskk:disable)    eskk#disable()
 noremap! <expr> <Plug>(eskk:toggle)     eskk#toggle()
 lnoremap <expr> <Plug>(eskk:toggle)     eskk#toggle()
 
-nnoremap        <Plug>(eskk:save-dictionary) :<C-u>call eskk#update_dictionary()<CR>
+nnoremap        <Plug>(eskk:save-dictionary) :<C-u>EskkUpdateDictionary<CR>
 
 nnoremap <silent> <Plug>(eskk:alpha-t) :<C-u>call eskk#jump_one_char('t')<CR>
 nnoremap <silent> <Plug>(eskk:alpha-f) :<C-u>call eskk#jump_one_char('f')<CR>
@@ -347,15 +347,27 @@ command!
 \   EskkMap
 \   call eskk#mappings#_cmd_eskk_map(<q-args>)
 
+
 command!
 \   -bar
 \   EskkForgetRegisteredWords
-\   call eskk#forget_registered_words()
+\   call s:cmd_forget_registered_words()
+
+function! s:cmd_forget_registered_words()
+    call eskk#dictionary#get_instance().forget_registered_words()
+endfunction
+
 
 command!
 \   -bar -bang
 \   EskkUpdateDictionary
-\   call eskk#update_dictionary(<bang>0)
+\   call s:cmd_update_dictionary(<bang>0)
+
+function! s:cmd_update_dictionary(silent)
+    let silent = a:0 ? a:1 : 0
+    let dict = eskk#dictionary#get_instance()
+    execute (silent ? 'silent' : '') 'call dict.update_dictionary()'
+endfunction
 
 " }}}
 

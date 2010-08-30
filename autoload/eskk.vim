@@ -65,8 +65,6 @@ let s:eskk = {
 let s:available_modes = {}
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
-" SKK dicionary.
-let s:skk_dict = {}
 " For eskk#register_map(), eskk#unregister_map().
 let s:key_handler = {}
 " Global values of &iminsert, &imsearch.
@@ -207,22 +205,6 @@ endfunction "}}}
 
 lockvar s:mutable_stash
 " }}}
-
-" Dictionary
-function! eskk#get_dictionary() "{{{
-    if empty(s:skk_dict)
-        let s:skk_dict = eskk#dictionary#new(g:eskk_dictionary, g:eskk_large_dictionary)
-    endif
-    return s:skk_dict
-endfunction "}}}
-function! eskk#update_dictionary(...) "{{{
-    let silent = a:0 ? a:1 : 0
-    let dict = eskk#get_dictionary()
-    execute (silent ? 'silent' : '') 'call dict.update_dictionary()'
-endfunction "}}}
-function! eskk#forget_registered_words() "{{{
-    call eskk#get_dictionary().forget_registered_words()
-endfunction "}}}
 
 " Filter
 " s:asym_filter {{{
@@ -772,7 +754,7 @@ function! s:initialize() "{{{
 
     " Save dictionary if modified {{{
     if g:eskk_auto_save_dictionary_at_exit
-        autocmd eskk VimLeavePre * call eskk#update_dictionary(0)
+        autocmd eskk VimLeavePre * EskkUpdateDictionary
     endif
     " }}}
 

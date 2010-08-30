@@ -792,7 +792,7 @@ let s:dict = {
 \   '_added_words_modified': 0,
 \}
 
-function! eskk#dictionary#new(user_dict, system_dict) "{{{
+function! s:dict_new(user_dict, system_dict) "{{{
     return extend(
     \   deepcopy(s:dict, 1),
     \   {
@@ -809,6 +809,15 @@ function! eskk#dictionary#new(user_dict, system_dict) "{{{
     \   },
     \   'force'
     \)
+endfunction "}}}
+
+let s:skk_dict_instance = {}
+
+function! eskk#dictionary#get_instance() "{{{
+    if empty(s:skk_dict_instance)
+        let s:skk_dict_instance = s:dict_new(g:eskk_dictionary, g:eskk_large_dictionary)
+    endif
+    return s:skk_dict_instance
 endfunction "}}}
 
 
