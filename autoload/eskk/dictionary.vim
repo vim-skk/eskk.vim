@@ -376,14 +376,14 @@ function! s:henkan_result_get_result(this) "{{{
         let results = []
         if user_dict_result[1] !=# -1
             let p = eskk#dictionary#parse_skk_dict_line(user_dict_result[0])
-            call eskk#util#assert(p[0] ==# a:this._key, "p[0] ==# a:this._key")
-            call eskk#util#assert(p[1] ==# a:this._okuri_rom, "p[1] ==# a:this._okuri_rom")
+            call eskk#util#assert(p[0] ==# a:this._key, string(p[0])." ==# ".string(a:this._key))
+            call eskk#util#assert(p[1] ==# a:this._okuri_rom[0], string(p[1])." ==# ".string(a:this._okuri_rom))
             call add(results, p[2])
         endif
         if system_dict_result[1] !=# -1
             let p = eskk#dictionary#parse_skk_dict_line(system_dict_result[0])
-            call eskk#util#assert(p[0] ==# a:this._key, "p[0] ==# a:this._key")
-            call eskk#util#assert(p[1] ==# a:this._okuri_rom, "p[1] ==# a:this._okuri_rom")
+            call eskk#util#assert(p[0] ==# a:this._key, string(p[0])." ==# ".string(a:this._key))
+            call eskk#util#assert(p[1] ==# a:this._okuri_rom[0], string(p[1])." ==# ".string(a:this._okuri_rom))
             call add(results, p[2])
         endif
         if !empty(a:this._result)
