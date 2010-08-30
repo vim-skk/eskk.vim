@@ -613,12 +613,6 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endif
 
-    " Dialog
-    let input = eskk#util#input('Really purge? (yes/no)')
-    if input !~? '^y\%[es]$'
-        return
-    endif
-
     if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_ADDED_WORDS
         " Remove all elements matching with current candidate from added words.
         for i in range(len(self._dict._registered_words))
@@ -629,8 +623,19 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endif
 
-    call remove(user_dict_lines, user_dict_idx)
+    let input = eskk#util#input(
+    \   'Really purge? /'
+    \   . candidates[candidates_index].input
+    \   . (has_key(candidates[candidates_index], 'annotation') ?
+    \       ';' . candidates[candidates_index].annotation :
+    \       '')
+    \   . '/ (yes/no)'
+    \)
+    if input !~? '^y\%[es]$'
+        return
+    endif
 
+    call remove(user_dict_lines, user_dict_idx)
     try
         call self._dict._user_dict.set_lines(user_dict_lines)
     catch /^eskk: parse error/
