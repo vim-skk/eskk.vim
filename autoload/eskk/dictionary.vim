@@ -431,7 +431,6 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
 
     while 1
         " Show candidates.
-        echo join(repeat([''], &cmdheight-1), "\n")
         redraw
         for [c, word] in pages[page_index]
             if g:eskk_show_annotation
@@ -925,16 +924,15 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
 
     let is_katakana = g:eskk_kata_convert_to_hira_at_completion && eskk#get_mode() ==# 'kata'
     if is_katakana
-        let buftable = eskk#get_buftable()
-        let [mode, pos] = buftable.get_begin_pos()
-        let filter_str = getline('.')[pos[2] - 1 + strlen(g:eskk_marker_henkan) : col('.') - 2]
+        " Dummy string.
+        let filter_str = ''
     endif
     
     let max = g:eskk_candidates_max
     if len < g:eskk_candidates_max
         let lines += eskk#dictionary#search_all_candidates(self._user_dict, key, okuri_rom, g:eskk_candidates_max - len)
         if is_katakana
-            call filter(lines, 'stridx(v:val, ' . string(filter_str) . ') > 0')
+            call filter(lines, 'stridx(v:val, ' . string(filter_str) . ') == 0')
         endif
 
         let len += len(lines)
@@ -942,7 +940,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
             let lines += eskk#dictionary#search_all_candidates(self._system_dict, key, okuri_rom, g:eskk_candidates_max - len)
 
             if is_katakana
-                call filter(lines, 'stridx(v:val, ' . string(filter_str) . ') > 0')
+                call filter(lines, 'stridx(v:val, ' . string(filter_str) . ') == 0')
             endif
         endif
     endif
