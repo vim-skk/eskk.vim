@@ -301,7 +301,7 @@ let s:henkan_result = {
 \}
 
 function! s:henkan_result_new(dict, key, okuri_rom, okuri, buftable) "{{{
-    let added = filter(copy(a:dict._added_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
+    let added = filter(copy(a:dict._registered_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
 
     let obj = extend(
     \   deepcopy(s:henkan_result, 1),
@@ -359,7 +359,7 @@ function! s:henkan_result_advance(this, advance) "{{{
 endfunction "}}}
 
 function! s:henkan_result_get_candidates(this, ...) "{{{
-    let from_hr_see_added_words = a:0 ? a:1 : 0
+    let from_hr_see_registered_words = a:0 ? a:1 : 0
 
     if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
         call eskk#util#assert(!empty(a:this._candidates), "a:this._candidates must be not empty.")
@@ -404,7 +404,7 @@ function! s:henkan_result_get_candidates(this, ...) "{{{
             let results += candidates
         endif
 
-        if from_hr_see_added_words
+        if from_hr_see_registered_words
             let results += a:this.candidates
         endif
 
@@ -623,10 +623,10 @@ function! s:henkan_result.delete_from_dict() dict "{{{
     " when the current candidate is from added words.
     if !eskk#util#has_idx(user_dict_lines, user_dict_idx)
         " Remove current candidate from added words.
-        for i in range(len(self._dict._added_words))
-            if candidates[candidates_index].input ==# self._dict._added_words[i].input
+        for i in range(len(self._dict._registered_words))
+            if candidates[candidates_index].input ==# self._dict._registered_words[i].input
                 call remove(candidates, candidates_index)
-                call remove(self._dict._added_words, i)
+                call remove(self._dict._registered_words, i)
             endif
         endfor
         return
@@ -645,7 +645,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         call eskk#util#logstrf('Removed from dict: %s', candidates[idx])
     endif
 
-    call s:henkan_result_init(self, copy(self._dict._added_words))
+    call s:henkan_result_init(self, copy(self._dict._registered_words))
 
     redraw
     call self._dict.update_dictionary()
@@ -788,8 +788,8 @@ endfunction "}}}
 let s:dict = {
 \   '_user_dict': {},
 \   '_system_dict': {},
-\   '_added_words': [],
-\   '_added_words_modified': 0,
+\   '_registered_words': [],
+\   '_registered_words_modified': 0,
 \}
 
 function! s:dict_new(user_dict, system_dict) "{{{
@@ -878,23 +878,23 @@ function! s:dict.register_word(henkan_result) dict "{{{
 endfunction "}}}
 
 function! s:dict.forget_registered_words() dict "{{{
-    let self._added_words = []
+    let self._registered_words = []
 endfunction "}}}
 
 function! s:dict.remember_registered_word(registered_word) dict "{{{
-    call add(self._added_words, a:registered_word)
-    let self._added_words_modified = 1
+    call add(self._registered_words, a:registered_word)
+    let self._registered_words_modified = 1
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
     " No need to check system dictionary.
     " Because it is immutable.
     return
-    \   self._added_words_modified
+    \   self._registered_words_modified
     \   || self._user_dict._is_modified
 endfunction "}}}
 function! s:dict_clear_modified_flags(this) "{{{
-    let a:this._added_words_modified = 0
+    let a:this._registered_words_modified = 0
     let a:this._user_dict._is_modified = 0
 endfunction "}}}
 
@@ -930,7 +930,7 @@ function! s:dict_write_to_file(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this.user_dict really does not have added words.
-    for w in a:this._added_words
+    for w in a:this._registered_words
         let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, w.key, w.okuri_rom)
         if w.okuri_rom != ''
             let lnum = a:this._user_dict.okuri_ari_idx + 1
@@ -983,7 +983,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     " To unique candidates.
     let candidates = {}
 
-    for w in self._added_words
+    for w in self._registered_words
         if w.key ==# key
             let k = w.key . w.okuri_rom
             if !has_key(candidates, k)
