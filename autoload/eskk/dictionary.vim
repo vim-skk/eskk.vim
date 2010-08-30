@@ -203,13 +203,7 @@ endfunction "}}}
 " Returns List.
 " This return value is s:henkan_result_data
 function! eskk#dictionary#merge_results(results) "{{{
-    " Flatten list.
-    let results = []
-    for _ in a:results
-        let results += _
-    endfor
-
-    " Unique.
+    let results = a:results
     let unique = {}
     let i = 0
     while i < len(results)
@@ -378,16 +372,16 @@ function! s:henkan_result_get_result(this) "{{{
             let p = eskk#dictionary#parse_skk_dict_line(user_dict_result[0])
             call eskk#util#assert(p[0] ==# a:this._key, string(p[0])." ==# ".string(a:this._key))
             call eskk#util#assert(p[1] ==# a:this._okuri_rom[0], string(p[1])." ==# ".string(a:this._okuri_rom))
-            call add(results, p[2])
+            let results += p[2]
         endif
         if system_dict_result[1] !=# -1
             let p = eskk#dictionary#parse_skk_dict_line(system_dict_result[0])
             call eskk#util#assert(p[0] ==# a:this._key, string(p[0])." ==# ".string(a:this._key))
             call eskk#util#assert(p[1] ==# a:this._okuri_rom[0], string(p[1])." ==# ".string(a:this._okuri_rom))
-            call add(results, p[2])
+            let results += p[2]
         endif
         if !empty(a:this._result)
-            call add(results, a:this._result[0])
+            let results += a:this._result[0]
         endif
         let a:this._result = [
         \   eskk#dictionary#merge_results(results),
