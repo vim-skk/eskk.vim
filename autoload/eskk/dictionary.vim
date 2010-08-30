@@ -619,10 +619,8 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endif
 
-    " NOTE: user_dict_idx is -1
-    " when the current candidate is from added words.
-    if !eskk#util#has_idx(user_dict_lines, user_dict_idx)
-        " Remove current candidate from added words.
+    if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_ADDED_WORDS
+        " Remove all elements matching with current candidate from added words.
         for i in range(len(self._dict._registered_words))
             if candidates[candidates_index].input ==# self._dict._registered_words[i].input
                 call remove(self._dict._registered_words, i)
