@@ -80,7 +80,13 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     endif
 endfunction "}}}
 " Returns [line_string, lnum] matching the candidate.
+let s:search_candidate_memoize = {}
 function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
+    let cache_key = a:physical_dict._ftime_at_read . a:physical_dict.path . a:key_filter . a:okuri_rom
+    if has_key(s:search_candidate_memoize, cache_key)
+        return s:search_candidate_memoize[cache_key]
+    endif
+
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
@@ -103,14 +109,17 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
         let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
     endif
+
     if result[1] !=# -1
         let conv_line = s:iconv(result[0], a:physical_dict.encoding, &l:encoding)
         call eskk#util#logstrf('eskk#dictionary#search_candidate() - found!: %s', conv_line)
-        return [conv_line, result[1]]
+        let s:search_candidate_memoize[cache_key] = [conv_line, result[1]]
     else
         call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
-        return ['', -1]
+        let s:search_candidate_memoize[cache_key] = ['', -1]
     endif
+
+    return s:search_candidate_memoize[cache_key]
 endfunction "}}}
 " Returns [line_string, lnum] matching the candidate.
 function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
