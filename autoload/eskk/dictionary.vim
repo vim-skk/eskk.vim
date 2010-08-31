@@ -976,25 +976,38 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
             if !has_key(candidates, k)
                 let candidates[k] =
                 \   [len(candidates), s:candidate_new(s:CANDIDATE_FROM_ADDED_WORDS, w.input)]
+                if len(candidates) >= g:eskk_candidates_max
+                    break
+                endif
             endif
         endif
     endfor
 
-    for [dict, from_type] in [
-    \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
-    \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
-    \]
-        for line in eskk#dictionary#search_all_candidates(dict, key, okuri_rom, g:eskk_candidates_max - len(candidates))
+    if len(candidates) < g:eskk_candidates_max
+        for [dict, from_type] in [
+        \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
+        \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
+        \]
             if len(candidates) >= g:eskk_candidates_max
                 break
             endif
-            let [line_key, line_okuri_rom, list] = eskk#dictionary#parse_skk_dict_line(line, from_type)
-            let k = line_key . line_okuri_rom
-            if !has_key(candidates, k)
-                let candidates[k] = [len(candidates), list]
+            let do_break = 0
+            for line in eskk#dictionary#search_all_candidates(dict, key, okuri_rom, g:eskk_candidates_max - len(candidates))
+                if len(candidates) >= g:eskk_candidates_max
+                    let do_break = 1
+                    break
+                endif
+                let [line_key, line_okuri_rom, list] = eskk#dictionary#parse_skk_dict_line(line, from_type)
+                let k = line_key . line_okuri_rom
+                if !has_key(candidates, k)
+                    let candidates[k] = [len(candidates), list]
+                endif
+            endfor
+            if do_break
+                break
             endif
         endfor
-    endfor
+    endif
 
     return [key, okuri_rom] + map(sort(values(candidates), 's:sort_fn_by_head_nr'), 'v:val[1]')
 endfunction "}}}
