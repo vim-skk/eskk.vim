@@ -596,30 +596,21 @@ function! s:henkan_result.back() dict "{{{
 endfunction "}}}
 
 function! s:henkan_result.delete_from_dict() dict "{{{
-    if self._status !=# g:eskk#dictionary#HR_GOT_RESULT
-        return
-    endif
+    call eskk#util#log('s:henkan_result.delete_from_dict()')
+
     let candidates = s:henkan_result_get_candidates(self)
     let candidates_index = self._candidates_index
     let user_dict_idx = self._user_dict_found_index
 
     if !eskk#util#has_idx(candidates, candidates_index)
+        call eskk#util#log('.delete_from_dict(): candidates_index is out of range')
         return
     endif
 
     let dict = eskk#dictionary#get_instance()
     let user_dict_lines = dict._user_dict.get_lines()
     if !dict._user_dict.is_valid()
-        return
-    endif
-
-    if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_ADDED_WORDS
-        " Remove all elements matching with current candidate from added words.
-        for i in range(len(dict._registered_words))
-            if candidates[candidates_index].input ==# dict._registered_words[i].input
-                call remove(dict._registered_words, i)
-            endif
-        endfor
+        call eskk#util#log('.delete_from_dict(): user dictionary is invalid.')
         return
     endif
 
@@ -632,6 +623,18 @@ function! s:henkan_result.delete_from_dict() dict "{{{
     \   . '/ (yes/no)'
     \)
     if input !~? '^y\%[es]$'
+        call eskk#util#log('.delete_from_dict(): user input "' . input . '".')
+        return
+    endif
+
+    if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_ADDED_WORDS
+        " Remove all elements matching with current candidate from added words.
+        for i in range(len(dict._registered_words))
+            if candidates[candidates_index].input ==# dict._registered_words[i].input
+                call remove(dict._registered_words, i)
+            endif
+        endfor
+        call eskk#util#log('.delete_from_dict(): removed candidates from added words.')
         return
     endif
 
@@ -639,6 +642,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
     try
         call dict._user_dict.set_lines(user_dict_lines)
     catch /^eskk: parse error/
+        call eskk#util#log('.delete_from_dict(): removed the line so parse error occurred')
         return
     endtry
 
