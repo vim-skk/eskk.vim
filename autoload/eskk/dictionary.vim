@@ -334,7 +334,7 @@ function! s:henkan_result_advance(this, advance) "{{{
     endif
 
     try
-        let candidates = a:this._candidates
+        let candidates = s:henkan_result_get_candidates(a:this)
         let idx = a:this._candidates_index
         if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
             " Next time to call s:henkan_result_get_candidates(),
