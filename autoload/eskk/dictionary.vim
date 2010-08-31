@@ -968,39 +968,60 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     endif
 
     " To unique candidates.
-    let candidates = {}
+    let candidates = {'_candidates': {}, 'counter': 0}
+    function candidates.merge(key, candidates)
+        if has_key(self._candidates, a:key)
+            let self._candidates[a:key][1] += a:candidates
+        else
+            let self._candidates[a:key] = [self.counter, a:candidates]
+            let self.counter += 1
+        endif
+    endfunction
+    function! candidates.get()
+        return eskk#util#flatten(
+        \   map(
+        \       sort(
+        \           values(self._candidates),
+        \           's:sort_fn_by_head_nr'
+        \       ),
+        \       'v:val[1]'
+        \   )
+        \)
+    endfunction
+    let max_count = g:eskk_candidates_max
 
+    " self._registered_words
     for w in self._registered_words
         if w.key ==# key
-            let k = w.key . w.okuri_rom
-            if !has_key(candidates, k)
-                let candidates[k] =
-                \   [len(candidates), s:candidate_new(s:CANDIDATE_FROM_ADDED_WORDS, w.input)]
-                if len(candidates) >= g:eskk_candidates_max
-                    break
-                endif
+            call candidates.merge(
+            \   w.key . w.okuri_rom,
+            \   [s:candidate_new(s:CANDIDATE_FROM_ADDED_WORDS, w.input)]
+            \)
+            if len(candidates) >= max_count
+                break
             endif
         endif
     endfor
 
-    if len(candidates) < g:eskk_candidates_max
+    if len(candidates) < max_count
+        " User dictionary, System dictionary
         for [dict, from_type] in [
         \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
         \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
         \]
-            if len(candidates) >= g:eskk_candidates_max
+            if len(candidates) >= max_count
                 break
             endif
             let do_break = 0
-            for line in eskk#dictionary#search_all_candidates(dict, key, okuri_rom, g:eskk_candidates_max - len(candidates))
-                if len(candidates) >= g:eskk_candidates_max
+            for line in eskk#dictionary#search_all_candidates(
+            \   dict, key, okuri_rom, max_count - len(candidates)
+            \)
+                let [line_key, line_okuri_rom, list] =
+                \   eskk#dictionary#parse_skk_dict_line(line, from_type)
+                call candidates.merge(line_key . line_okuri_rom, list)
+                if len(candidates) >= max_count
                     let do_break = 1
                     break
-                endif
-                let [line_key, line_okuri_rom, list] = eskk#dictionary#parse_skk_dict_line(line, from_type)
-                let k = line_key . line_okuri_rom
-                if !has_key(candidates, k)
-                    let candidates[k] = [len(candidates), list]
                 endif
             endfor
             if do_break
@@ -1009,7 +1030,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
         endfor
     endif
 
-    return [key, okuri_rom] + map(sort(values(candidates), 's:sort_fn_by_head_nr'), 'v:val[1]')
+    return [key, okuri_rom, candidates.get()]
 endfunction "}}}
 
 function! s:sort_fn_by_head_nr(a, b) "{{{

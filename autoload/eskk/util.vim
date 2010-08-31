@@ -129,7 +129,17 @@ function! eskk#util#unique(list) "{{{
 
     return list
 endfunction "}}}
-
+function! eskk#util#flatten(list) "{{{
+    let ret = []
+    for _ in a:list
+        if type(_) == type([])
+            let ret += eskk#util#flatten(_)
+        else
+            call add(ret, _)
+        endif
+    endfor
+    return ret
+endfunction "}}}
 function! eskk#util#list_any(elem, list) "{{{
     for _ in a:list
         if _ ==# a:elem
