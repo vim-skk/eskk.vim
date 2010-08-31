@@ -994,7 +994,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     for w in self._registered_words
         if w.key ==# key
             call candidates.merge(
-            \   w.key . w.okuri_rom,
+            \   w.key . w.okuri_rom[0],
             \   [s:candidate_new(s:CANDIDATE_FROM_ADDED_WORDS, w.input)]
             \)
             if len(candidates) >= max_count
