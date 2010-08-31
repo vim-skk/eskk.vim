@@ -687,8 +687,11 @@ function! s:initialize() "{{{
     endif
     " }}}
 
-    " InsertLeave: g:eskk_keep_state: eskk#disable() {{{
-    if !g:eskk_keep_state
+    " InsertLeave: g:eskk_keep_state {{{
+    if g:eskk_keep_state
+        autocmd eskk InsertEnter * call eskk#mappings#do_insert_enter()
+        autocmd eskk InsertLeave * call eskk#mappings#do_insert_leave()
+    else
         autocmd eskk InsertLeave * call eskk#disable()
     endif
     " }}}
@@ -1079,13 +1082,6 @@ function! s:initialize() "{{{
         call eskk#mappings#map('e', '<Plug>(eskk:_do_complete)', 'pumvisible() ? "" : "\<C-x>\<C-o>\<C-p>"')
     endfunction
     call s:initialize_completion()
-    " }}}
-
-    " InsertLeave, InsertEnter: g:eskk_map_normal_keys {{{
-    if g:eskk_map_normal_keys
-        autocmd eskk InsertEnter * call eskk#mappings#do_insert_enter()
-        autocmd eskk InsertLeave * call eskk#mappings#do_insert_leave()
-    endif
     " }}}
 endfunction "}}}
 function! eskk#is_initialized() "{{{

@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 163))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 164))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -163,10 +163,6 @@ function! EskkDefaultMappedKeys() "{{{
 endfunction "}}}
 if !exists('g:eskk_mapped_keys')
     let g:eskk_mapped_keys = EskkDefaultMappedKeys()
-endif
-
-if !exists('g:eskk_map_normal_keys')
-    let g:eskk_map_normal_keys = 1
 endif
 
 " Mode
