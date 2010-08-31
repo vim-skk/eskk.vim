@@ -344,8 +344,18 @@ function! eskk#util#globpath(pat) "{{{
     return split(globpath(&runtimepath, a:pat), '\n')
 endfunction "}}}
 function! eskk#util#getchar(...) "{{{
-    let c = call('getchar', a:000)
-    return type(c) == type("") ? c : nr2char(c)
+    let success = 0
+    if inputsave() !=# success
+        call eskk#util#log_warn("inputsave() failed")
+    endif
+    try
+        let c = call('getchar', a:000)
+        return type(c) == type("") ? c : nr2char(c)
+    finally
+        if inputrestore() !=# success
+            call eskk#util#log_warn("inputrestore() failed")
+        endif
+    endtry
 endfunction "}}}
 function! eskk#util#input(...) "{{{
     let success = 0
