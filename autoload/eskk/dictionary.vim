@@ -549,13 +549,13 @@ function! s:henkan_result.get_candidate(...) dict "{{{
     endif
 
     call eskk#util#logf('Get candidate for: buftable.dump() = %s', string(self.buftable.dump()))
-    let counter = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
+    let max_count = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
 
     let candidates = s:henkan_result_get_candidates(self)
     let idx = self._candidates_index
-    call eskk#util#logf('idx = %d, counter = %d', idx, counter)
+    call eskk#util#logf('idx = %d, max_count = %d', idx, max_count)
 
-    if idx >= counter
+    if idx >= max_count
         let functor = {'candidates': candidates, 'idx': idx, 'this': self, 'with_okuri': with_okuri}
         function functor.funcall()
             if self.idx > 0
@@ -567,7 +567,7 @@ function! s:henkan_result.get_candidate(...) dict "{{{
             \]
         endfunction
 
-        let self._candidate = s:henkan_result_select_candidates(self, with_okuri, counter, functor)
+        let self._candidate = s:henkan_result_select_candidates(self, with_okuri, max_count, functor)
     else
         let self._candidate = [candidates[idx].input, (with_okuri ? self._okuri : '')]
     endif
