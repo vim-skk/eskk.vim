@@ -454,6 +454,7 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
 
     while 1
         " Show candidates.
+        echo repeat("\n", &cmdheight - 2)
         redraw
         for [c, word] in pages[page_index]
             if g:eskk_show_annotation
