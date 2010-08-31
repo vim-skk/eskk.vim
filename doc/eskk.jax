@@ -306,7 +306,7 @@ g:eskk_marker_popup			*g:eskk_marker_popup*
 g:eskk_enable_completion		*g:eskk_enable_completion*
 							(デフォルト値: 0)
 
-g:eskk_candidates_max			*g:eskk_candidates_max*
+g:eskk_max_candidates			*g:eskk_max_candidates*
 							(デフォルト値: 10)
 
 g:eskk_compl_enter_send_keys			*g:eskk_compl_enter_send_keys*

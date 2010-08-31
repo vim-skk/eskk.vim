@@ -306,7 +306,7 @@ Completion
 g:eskk_enable_completion		*g:eskk_enable_completion*
 							(Default: 0)
 
-g:eskk_candidates_max			*g:eskk_candidates_max*
+g:eskk_max_candidates			*g:eskk_max_candidates*
 							(Default: 10)
 
 g:eskk_compl_enter_send_keys			*g:eskk_compl_enter_send_keys*

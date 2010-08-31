@@ -1015,7 +1015,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     " To unique candidates.
     let candidates = s:uniqued_candidates
     call candidates.clear()
-    let max_count = g:eskk_candidates_max
+    let max_count = g:eskk_max_candidates
 
     " self._registered_words
     for w in self._registered_words
