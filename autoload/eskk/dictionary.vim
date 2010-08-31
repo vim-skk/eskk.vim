@@ -958,6 +958,40 @@ function! s:dict_write_to_file(this) "{{{
     endtry
 endfunction "}}}
 
+" s:uniqued_candidates {{{
+let s:uniqued_candidates = {'_candidates': {}, 'counter': 0}
+
+function s:uniqued_candidates.merge(key, candidates) "{{{
+    if has_key(self._candidates, a:key)
+        let self._candidates[a:key][1] += a:candidates
+    else
+        let self._candidates[a:key] = [self.counter, a:candidates]
+        let self.counter += 1
+    endif
+endfunction "}}}
+
+function! s:uniqued_candidates.get_length() "{{{
+    return len(self._candidates)
+endfunction "}}}
+
+function! s:uniqued_candidates.get() "{{{
+    return eskk#util#flatten(
+    \   map(
+    \       sort(
+    \           values(self._candidates),
+    \           's:sort_fn_by_head_nr'
+    \       ),
+    \       'v:val[1]'
+    \   )
+    \)
+endfunction "}}}
+
+function! s:uniqued_candidates.clear() "{{{
+    let self._candidates = {}
+    let self.counter = 0
+endfunction "}}}
+
+" }}}
 function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let key = a:key
     let okuri = a:okuri
@@ -968,29 +1002,8 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     endif
 
     " To unique candidates.
-    let candidates = {'_candidates': {}, 'counter': 0}
-    function candidates.merge(key, candidates)
-        if has_key(self._candidates, a:key)
-            let self._candidates[a:key][1] += a:candidates
-        else
-            let self._candidates[a:key] = [self.counter, a:candidates]
-            let self.counter += 1
-        endif
-    endfunction
-    function! candidates.get_length()
-        return len(self._candidates)
-    endfunction
-    function! candidates.get()
-        return eskk#util#flatten(
-        \   map(
-        \       sort(
-        \           values(self._candidates),
-        \           's:sort_fn_by_head_nr'
-        \       ),
-        \       'v:val[1]'
-        \   )
-        \)
-    endfunction
+    let candidates = s:uniqued_candidates
+    call candidates.clear()
     let max_count = g:eskk_candidates_max
 
     " self._registered_words
