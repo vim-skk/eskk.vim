@@ -18,10 +18,16 @@ runtime! plugin/eskk.vim
 " Utility autoload functions {{{
 
 " Returns all lines matching the candidate.
+let s:search_all_candidate_memoize = {}
 function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
+    
+    let cache_key = a:physical_dict._ftime_at_read . a:physical_dict.path . a:key_filter . a:okuri_rom . limit
+    if has_key(s:search_all_candidate_memoize, cache_key)
+        return s:search_all_candidate_memoize[cache_key]
+    endif
 
     if g:eskk_debug
         call eskk#util#logf('needle = %s, key = %s, okuri_rom = %s',
@@ -41,6 +47,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, limit)
 
         if result[1] == -1
+            let s:search_all_candidate_memoize[cache_key] = []
             return []
         endif
 
@@ -57,7 +64,8 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             let end = begin + limit
         endif
 
-        return map(whole_lines[begin : end],
+        let s:search_all_candidate_memoize[cache_key] = 
+                    \ map(whole_lines[begin : end],
                     \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
                     \)
     else
@@ -76,8 +84,11 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             let start = result[1] + 1
         endwhile
 
-        return map(lines, 's:iconv(v:val, a:physical_dict.encoding, &l:encoding)')
+        let s:search_all_candidate_memoize[cache_key] =
+                    \ map(lines, 's:iconv(v:val, a:physical_dict.encoding, &l:encoding)')
     endif
+
+    return s:search_all_candidate_memoize[cache_key]
 endfunction "}}}
 " Returns [line_string, lnum] matching the candidate.
 let s:search_candidate_memoize = {}
