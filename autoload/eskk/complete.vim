@@ -147,24 +147,24 @@ function! s:complete(mode, base) "{{{
     let filter_str = s:get_buftable_str(0, a:base)
     let marker = g:eskk_marker_popup . g:eskk_marker_henkan
 
-    for [yomigana, okuri_rom, kanji_list] in dict.search(key, okuri, okuri_rom)
-        if is_katakana
-            call filter(kanji_list, 'stridx(v:val.result, filter_str) == 0')
-        elseif len(kanji_list) > 2
-            " Add yomigana.
-            if yomigana != ''
-                call add(list, {'word' : marker . yomigana, 'abbr' : yomigana, 'menu' : a:mode})
-            endif
-        endif
+    let s = dict.search(key, okuri, okuri_rom)
+    if empty(s)
+        return []
+    endif
 
-        " Add kanji.
-        for kanji in kanji_list[: 1]
-            call add(list, {
-            \   'word': marker . kanji.result,
-            \   'abbr': (has_key(kanji, 'annotation') ? kanji.result . '; ' . kanji.annotation : kanji.result),
-            \   'menu': 'kanji'
-            \})
-        endfor
+    let [yomigana, _, candidates] = s
+    call add(list, {
+    \   'word' : marker . yomigana,
+    \   'abbr' : yomigana,
+    \   'menu' : a:mode,
+    \})
+
+    for c in candidates
+        call add(list, {
+        \   'word': marker . c.input,
+        \   'abbr': (has_key(c, 'annotation') ? c.input . '; ' . c.annotation : c.input),
+        \   'menu': 'kanji'
+        \})
     endfor
 
     if !empty(list)
