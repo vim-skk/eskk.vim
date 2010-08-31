@@ -267,9 +267,7 @@ let g:eskk#dictionary#HR_NO_RESULT = 0
 lockvar g:eskk#dictionary#HR_NO_RESULT
 let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 1
 lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-let g:eskk#dictionary#HR_SEE_ADDED_WORDS = 2
-lockvar g:eskk#dictionary#HR_SEE_ADDED_WORDS
-let g:eskk#dictionary#HR_GOT_RESULT = 3
+let g:eskk#dictionary#HR_GOT_RESULT = 2
 lockvar g:eskk#dictionary#HR_GOT_RESULT
 
 " self._key, self._okuri_rom, self._okuri:
@@ -319,7 +317,7 @@ function! s:henkan_result_init(this, added) "{{{
     return extend(
     \   a:this,
     \   {
-    \       '_status': (empty(a:added) ? g:eskk#dictionary#HR_LOOK_UP_DICTIONARY : g:eskk#dictionary#HR_SEE_ADDED_WORDS),
+    \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
     \       '_candidates': (empty(a:added) ? [] : s:henkan_result_merge_candidates(map(copy(a:added), 's:candidate_new(s:CANDIDATE_FROM_ADDED_WORDS, v:val.input)'))),
     \       '_candidates_index': 0,
     \   },
@@ -341,9 +339,6 @@ function! s:henkan_result_advance(this, advance) "{{{
             " eskk will getchar() if `idx >= g:eskk_show_candidates_count`
             let a:this._candidates_index +=  (a:advance ? 1 : -1)
             return 1
-        elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
-            let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-            return s:henkan_result_advance(a:this, a:advance)
         else
             return 0
         endif
@@ -355,9 +350,7 @@ function! s:henkan_result_advance(this, advance) "{{{
     endtry
 endfunction "}}}
 
-function! s:henkan_result_get_candidates(this, ...) "{{{
-    let from_hr_see_registered_words = a:0 ? a:1 : 0
-
+function! s:henkan_result_get_candidates(this) "{{{
     if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
         call eskk#util#assert(!empty(a:this._candidates), "a:this._candidates must be not empty.")
         return a:this._candidates
@@ -402,24 +395,12 @@ function! s:henkan_result_get_candidates(this, ...) "{{{
             let results += candidates
         endif
 
-        if from_hr_see_registered_words
-            let results += a:this._candidates
-        endif
+        let results += a:this._candidates
 
         let a:this._user_dict_found_index = user_dict_result[1]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
         let a:this._candidates = s:henkan_result_merge_candidates(results)
         return a:this._candidates
-
-    elseif a:this._status ==# g:eskk#dictionary#HR_SEE_ADDED_WORDS
-        let candidates = a:this._candidates
-        let idx        = a:this._candidates_index
-        if eskk#util#has_idx(candidates, idx)
-            return candidates
-        else
-            let a:this._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-            return s:henkan_result_get_candidates(a:this, 1)
-        endif
 
     elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
         throw eskk#dictionary_look_up_error(
