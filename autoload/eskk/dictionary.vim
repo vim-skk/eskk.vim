@@ -959,14 +959,14 @@ function! s:dict_write_to_file(this) "{{{
 endfunction "}}}
 
 " s:uniqued_candidates {{{
-let s:uniqued_candidates = {'_candidates': {}, 'counter': 0}
+let s:uniqued_candidates = {'_candidates': {}, '_counter': 0}
 
 function s:uniqued_candidates.merge(key, candidates) "{{{
     if has_key(self._candidates, a:key)
         let self._candidates[a:key][1] += a:candidates
     else
-        let self._candidates[a:key] = [self.counter, a:candidates]
-        let self.counter += 1
+        let self._candidates[a:key] = [self._counter, a:candidates]
+        let self._counter += 1
     endif
 endfunction "}}}
 
@@ -988,7 +988,7 @@ endfunction "}}}
 
 function! s:uniqued_candidates.clear() "{{{
     let self._candidates = {}
-    let self.counter = 0
+    let self._counter = 0
 endfunction "}}}
 
 " }}}
