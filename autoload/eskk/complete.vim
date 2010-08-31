@@ -153,11 +153,11 @@ function! s:complete(mode, base) "{{{
     endif
 
     let [yomigana, _, candidates] = s
-    call add(list, {
-    \   'word' : marker . yomigana,
-    \   'abbr' : yomigana,
-    \   'menu' : a:mode,
-    \})
+    " call add(list, {
+    " \   'word' : marker . yomigana,
+    " \   'abbr' : yomigana,
+    " \   'menu' : a:mode,
+    " \})
 
     for c in candidates
         call add(list, {
