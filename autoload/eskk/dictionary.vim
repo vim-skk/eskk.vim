@@ -44,7 +44,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
 
-        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, limit)
+        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
 
         if result[1] == -1
             let s:search_all_candidate_memoize[cache_key] = []
@@ -109,7 +109,7 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 5)
+        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
         let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
