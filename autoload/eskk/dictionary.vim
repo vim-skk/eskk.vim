@@ -44,15 +44,15 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
 
-        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
+        let [line, lnum] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
 
-        if result[1] == -1
+        if lnum == -1
             let s:search_all_candidate_memoize[cache_key] = []
             return []
         endif
 
         " Get lines until limit.
-        let begin = result[1]
+        let begin = lnum
         let i = begin + 1
         while eskk#util#has_idx(whole_lines, i)
                     \   && stridx(whole_lines[i], converted) == 0
@@ -74,14 +74,14 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         let lines = []
         let start = 1
         while 1
-            let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri, start)
+            let [line, lnum] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri, start)
 
-            if result[1] == -1
+            if lnum == -1
                 break
             endif
 
-            call add(lines, result[0])
-            let start = result[1] + 1
+            call add(lines, line)
+            let start = lnum + 1
         endwhile
 
         let s:search_all_candidate_memoize[cache_key] =
@@ -110,15 +110,15 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
+        let [line, lnum] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
+        let [line, lnum] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
     endif
-    if result[1] !=# -1
-        let conv_line = s:iconv(result[0], a:physical_dict.encoding, &l:encoding)
+    if lnum !=# -1
+        let conv_line = s:iconv(line, a:physical_dict.encoding, &l:encoding)
         call eskk#util#logstrf('eskk#dictionary#search_candidate() - found!: %s', conv_line)
-        return [conv_line, result[1]]
+        return [conv_line, lnum]
     else
         call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
         return ['', -1]
