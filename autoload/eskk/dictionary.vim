@@ -253,8 +253,8 @@ endfunction "}}}
 
 let s:CANDIDATE_FROM_USER_DICT = 0
 let s:CANDIDATE_FROM_SYSTEM_DICT = 1
-let s:CANDIDATE_FROM_ADDED_WORDS = 2
-lockvar s:CANDIDATE_FROM_USER_DICT s:CANDIDATE_FROM_SYSTEM_DICT s:CANDIDATE_FROM_ADDED_WORDS
+let s:CANDIDATE_FROM_REGISTERED_WORDS = 2
+lockvar s:CANDIDATE_FROM_USER_DICT s:CANDIDATE_FROM_SYSTEM_DICT s:CANDIDATE_FROM_REGISTERED_WORDS
 
 function! s:candidate_new(from_type, input, ...) "{{{
     let obj = {'from_type': a:from_type, 'input': a:input}
@@ -308,7 +308,7 @@ let s:henkan_result = {
 
 function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
     let dict = eskk#dictionary#get_instance()
-    let added = filter(copy(dict._registered_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
+    let registered = filter(copy(dict._registered_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
 
     let obj = extend(
     \   deepcopy(s:henkan_result, 1),
@@ -320,16 +320,16 @@ function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
     \   },
     \   'force'
     \)
-    call s:henkan_result_init(obj, added)
+    call s:henkan_result_init(obj, registered)
     return obj
 endfunction "}}}
 
-function! s:henkan_result_init(this, added) "{{{
+function! s:henkan_result_init(this, registered) "{{{
     return extend(
     \   a:this,
     \   {
     \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
-    \       '_candidates': (empty(a:added) ? [] : s:henkan_result_merge_candidates(map(copy(a:added), 's:candidate_new(s:CANDIDATE_FROM_ADDED_WORDS, v:val.input)'))),
+    \       '_candidates': (empty(a:registered) ? [] : s:henkan_result_merge_candidates(map(copy(a:registered), 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input)'))),
     \       '_candidates_index': 0,
     \   },
     \   'force'
@@ -622,14 +622,14 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         return
     endif
 
-    if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_ADDED_WORDS
-        " Remove all elements matching with current candidate from added words.
+    if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_REGISTERED_WORDS
+        " Remove all elements matching with current candidate from registered words.
         for i in range(len(dict._registered_words))
             if candidates[candidates_index].input ==# dict._registered_words[i].input
                 call remove(dict._registered_words, i)
             endif
         endfor
-        call eskk#util#log('.delete_from_dict(): removed candidates from added words.')
+        call eskk#util#log('.delete_from_dict(): removed candidates from registered words.')
         return
     endif
 
@@ -930,7 +930,7 @@ endfunction "}}}
 function! s:dict_write_to_file(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
-    " Check if a:this.user_dict really does not have added words.
+    " Check if a:this._user_dict really does not have registered words.
     for w in a:this._registered_words
         let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, w.key, w.okuri_rom)
         if w.okuri_rom != ''
@@ -1025,7 +1025,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
         if w.key ==# key
             call candidates.merge(
             \   w.key . w.okuri_rom[0],
-            \   [s:candidate_new(s:CANDIDATE_FROM_ADDED_WORDS, w.input)]
+            \   [s:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, w.input)]
             \)
             if candidates.get_length() >= max_count
                 break
