@@ -608,12 +608,14 @@ function! s:henkan_result.delete_from_dict() dict "{{{
     endif
 
     let input = eskk#util#input(
-    \   'Really purge? /'
+    \   'Really purge? '
+    \   . self._key . self._okuri_rom[0]
+    \   . ' /'
     \   . candidates[candidates_index].input
     \   . (has_key(candidates[candidates_index], 'annotation') ?
     \       ';' . candidates[candidates_index].annotation :
     \       '')
-    \   . '/ (yes/no)'
+    \   . '/ (yes/no):'
     \)
     if input !~? '^y\%[es]$'
         call eskk#util#log('.delete_from_dict(): user input "' . input . '".')
