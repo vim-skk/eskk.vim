@@ -31,35 +31,35 @@ let s:map = {
 \   'phase:henkan-select:prev-page': {},
 \   'phase:henkan-select:escape': {},
 \   'phase:henkan-select:delete-from-dict': {},
-\   'mode:hira:toggle-hankata': {},
-\   'mode:hira:ctrl-q-key': {},
-\   'mode:hira:toggle-kata': {},
-\   'mode:hira:q-key': {},
-\   'mode:hira:l-key': {},
-\   'mode:hira:to-ascii': {},
-\   'mode:hira:to-zenei': {},
-\   'mode:hira:to-abbrev': {},
-\   'mode:kata:toggle-hankata': {},
-\   'mode:kata:ctrl-q-key': {},
-\   'mode:kata:toggle-kata': {},
-\   'mode:kata:q-key': {},
-\   'mode:kata:l-key': {},
-\   'mode:kata:to-ascii': {},
-\   'mode:kata:to-zenei': {},
-\   'mode:kata:to-abbrev': {},
-\   'mode:hankata:toggle-hankata': {},
-\   'mode:hankata:ctrl-q-key': {},
-\   'mode:hankata:toggle-kata': {},
-\   'mode:hankata:q-key': {},
-\   'mode:hankata:l-key': {},
-\   'mode:hankata:to-ascii': {},
-\   'mode:hankata:to-zenei': {},
-\   'mode:hankata:to-abbrev': {},
-\   'mode:ascii:to-hira': {},
-\   'mode:zenei:to-hira': {},
+\   'mode:hira:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
+\   'mode:hira:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
+\   'mode:hira:toggle-kata': {'fn': 's:handle_toggle_kata'},
+\   'mode:hira:q-key': {'fn': 's:handle_q_key'},
+\   'mode:hira:l-key': {'fn': 's:handle_l_key'},
+\   'mode:hira:to-ascii': {'fn': 's:handle_to_ascii'},
+\   'mode:hira:to-zenei': {'fn': 's:handle_to_zenei'},
+\   'mode:hira:to-abbrev': {'fn': 's:handle_to_abbrev'},
+\   'mode:kata:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
+\   'mode:kata:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
+\   'mode:kata:toggle-kata': {'fn': 's:handle_toggle_kata'},
+\   'mode:kata:q-key': {'fn': 's:handle_q_key'},
+\   'mode:kata:l-key': {'fn': 's:handle_l_key'},
+\   'mode:kata:to-ascii': {'fn': 's:handle_to_ascii'},
+\   'mode:kata:to-zenei': {'fn': 's:handle_to_zenei'},
+\   'mode:kata:to-abbrev': {'fn': 's:handle_to_abbrev'},
+\   'mode:hankata:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
+\   'mode:hankata:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
+\   'mode:hankata:toggle-kata': {'fn': 's:handle_toggle_kata'},
+\   'mode:hankata:q-key': {'fn': 's:handle_q_key'},
+\   'mode:hankata:l-key': {'fn': 's:handle_l_key'},
+\   'mode:hankata:to-ascii': {'fn': 's:handle_to_ascii'},
+\   'mode:hankata:to-zenei': {'fn': 's:handle_to_zenei'},
+\   'mode:hankata:to-abbrev': {'fn': 's:handle_to_abbrev'},
+\   'mode:ascii:to-hira': {'fn': 's:handle_toggle_hankata'},
+\   'mode:zenei:to-hira': {'fn': 's:handle_toggle_hankata'},
 \   'mode:abbrev:henkan-key': {},
 \}
-" TODO s:map should contain this info.
+
 function! s:handle_toggle_hankata(stash) "{{{
     if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
@@ -122,36 +122,7 @@ function! s:handle_to_abbrev(stash) "{{{
     endif
     return 0
 endfunction "}}}
-let s:map_fn = {
-\   'mode:hira:toggle-hankata': 's:handle_toggle_hankata',
-\   'mode:hira:ctrl-q-key': 's:handle_ctrl_q_key',
-\   'mode:hira:toggle-kata': 's:handle_toggle_kata',
-\   'mode:hira:q-key': 's:handle_q_key',
-\   'mode:hira:l-key': 's:handle_l_key',
-\   'mode:hira:to-ascii': 's:handle_to_ascii',
-\   'mode:hira:to-zenei': 's:handle_to_zenei',
-\   'mode:hira:to-abbrev': 's:handle_to_abbrev',
-\
-\   'mode:kata:toggle-hankata': 's:handle_toggle_hankata',
-\   'mode:kata:ctrl-q-key': 's:handle_ctrl_q_key',
-\   'mode:kata:toggle-kata': 's:handle_toggle_kata',
-\   'mode:kata:q-key': 's:handle_q_key',
-\   'mode:kata:l-key': 's:handle_l_key',
-\   'mode:kata:to-ascii': 's:handle_to_ascii',
-\   'mode:kata:to-zenei': 's:handle_to_zenei',
-\   'mode:kata:to-abbrev': 's:handle_to_abbrev',
-\
-\   'mode:hankata:toggle-hankata': 's:handle_toggle_hankata',
-\   'mode:hankata:ctrl-q-key': 's:handle_ctrl_q_key',
-\   'mode:hankata:toggle-kata': 's:handle_toggle_kata',
-\   'mode:hankata:q-key': 's:handle_q_key',
-\   'mode:hankata:l-key': 's:handle_l_key',
-\   'mode:hankata:to-ascii': 's:handle_to_ascii',
-\   'mode:hankata:to-zenei': 's:handle_to_zenei',
-\   'mode:hankata:to-abbrev': 's:handle_to_abbrev',
-\
-\
-\}
+
 " TODO s:map should contain this info.
 " Keys used by only its mode.
 let s:mode_local_keys = {
@@ -521,8 +492,8 @@ endfunction "}}}
 function! eskk#mappings#handle_special_lhs(char, type, stash) "{{{
     return
     \   eskk#mappings#is_special_lhs(a:char, a:type)
-    \   && has_key(s:map_fn, a:type)
-    \   && call(s:map_fn[a:type], [a:stash])
+    \   && has_key(s:map, a:type)
+    \   && call(s:map[a:type].fn, [a:stash])
 endfunction "}}}
 
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
