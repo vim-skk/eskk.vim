@@ -1417,7 +1417,7 @@ function! eskk#set_henkan_result(henkan_result) "{{{
     let self = eskk#get_current_instance()
     let self.prev_henkan_result = a:henkan_result
 endfunction "}}}
-function! eskk#clear_henkan_result()
+function! eskk#clear_henkan_result() "{{{
     call eskk#set_henkan_result({})
 endfunction "}}}
 
