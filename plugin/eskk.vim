@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 171))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 178))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -48,51 +48,35 @@ if !exists('g:eskk_directory')
 endif
 
 " Dictionary
-let s:default = {
-\   'path': "~/.skk-jisyo",
-\   'sorted': 0,
-\   'encoding': 'utf-8',
-\}
-if exists('g:eskk_dictionary')
-    if type(g:eskk_dictionary) == type("")
-        let s:default.path = g:eskk_dictionary
-        unlet g:eskk_dictionary
-        let g:eskk_dictionary = s:default
-    elseif type(g:eskk_dictionary) == type({})
-        call extend(g:eskk_dictionary, s:default, "keep")
+for [s:varname, s:default] in [
+\   ['g:eskk_dictionary', {
+\       'path': "~/.skk-jisyo",
+\       'sorted': 0,
+\       'encoding': 'utf-8',
+\   }],
+\   ['g:eskk_large_dictionary', {
+\       'path': "/usr/local/share/skk/SKK-JISYO.L",
+\       'sorted': 1,
+\       'encoding': 'euc-jp',
+\   }],
+\]
+    if exists(s:varname)
+        if type({s:varname}) == type("")
+            let s:default.path = {s:varname}
+            unlet g:[s:varname]
+            let {s:varname} = s:default
+        elseif type({s:varname}) == type({})
+            call extend({s:varname}, s:default, "keep")
+        else
+            call eskk#util#warn(
+            \   s:varname . "'s type is either String or Dictionary."
+            \)
+        endif
     else
-        call eskk#util#warn(
-        \   "g:eskk_dictionary's type is either String or Dictionary."
-        \)
+        let {s:varname} = s:default
     endif
-else
-    let g:eskk_dictionary = s:default
-endif
-unlet s:default
-
-
-let s:default = {
-\   'path': "/usr/local/share/skk/SKK-JISYO.L",
-\   'sorted': 1,
-\   'encoding': 'euc-jp',
-\}
-if exists('g:eskk_large_dictionary')
-    if type(g:eskk_large_dictionary) == type("")
-        let s:default.path = g:eskk_large_dictionary
-        unlet g:eskk_large_dictionary
-        let g:eskk_large_dictionary = s:default
-    elseif type(g:eskk_large_dictionary) == type({})
-        call extend(g:eskk_large_dictionary, s:default, "keep")
-    else
-        call eskk#util#warn(
-        \   "g:eskk_large_dictionary's type is either String or Dictionary."
-        \)
-    endif
-else
-    let g:eskk_large_dictionary = s:default
-endif
-unlet s:default
-
+endfor
+unlet! s:varname s:default
 
 if !exists("g:eskk_backup_dictionary")
     let g:eskk_backup_dictionary = g:eskk_dictionary.path . ".BAK"

@@ -23,7 +23,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     let limit = a:0 ? a:1 : -1    " No limit by default.
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
-    
+
     let cache_key = a:physical_dict._ftime_at_read . a:physical_dict.path . a:key_filter . a:okuri_rom . limit
     if has_key(s:search_all_candidate_memoize, cache_key)
         return s:search_all_candidate_memoize[cache_key]
@@ -44,15 +44,15 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
 
-        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, limit)
+        let [line, idx] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
 
-        if result[1] == -1
+        if idx == -1
             let s:search_all_candidate_memoize[cache_key] = []
             return []
         endif
 
         " Get lines until limit.
-        let begin = result[1]
+        let begin = idx
         let i = begin + 1
         while eskk#util#has_idx(whole_lines, i)
                     \   && stridx(whole_lines[i], converted) == 0
@@ -64,7 +64,7 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             let end = begin + limit
         endif
 
-        let s:search_all_candidate_memoize[cache_key] = 
+        let s:search_all_candidate_memoize[cache_key] =
                     \ map(whole_lines[begin : end],
                     \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
                     \)
@@ -74,14 +74,14 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
         let lines = []
         let start = 1
         while 1
-            let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri, start)
+            let [line, idx] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri, start)
 
-            if result[1] == -1
+            if idx == -1
                 break
             endif
 
-            call add(lines, result[0])
-            let start = result[1] + 1
+            call add(lines, line)
+            let start = idx + 1
         endwhile
 
         let s:search_all_candidate_memoize[cache_key] =
@@ -90,7 +90,8 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
 
     return s:search_all_candidate_memoize[cache_key]
 endfunction "}}}
-" Returns [line_string, lnum] matching the candidate.
+
+" Returns [line_string, idx] matching the candidate.
 function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
@@ -109,40 +110,33 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         call eskk#util#log('dictionary is sorted. Try binary search...')
-        let result = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 5)
+        let [line, idx] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
     else
         call eskk#util#log('dictionary is *not* sorted. Try linear search....')
-        let result = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
+        let [line, idx] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
     endif
-    if result[1] !=# -1
-        let conv_line = s:iconv(result[0], a:physical_dict.encoding, &l:encoding)
+    if idx !=# -1
+        let conv_line = s:iconv(line, a:physical_dict.encoding, &l:encoding)
         call eskk#util#logstrf('eskk#dictionary#search_candidate() - found!: %s', conv_line)
-        return [conv_line, result[1]]
+        return [conv_line, idx]
     else
         call eskk#util#log('eskk#dictionary#search_candidate() - not found.')
         return ['', -1]
     endif
 endfunction "}}}
-" Returns [line_string, lnum] matching the candidate.
+" Returns [line_string, idx] matching the candidate.
 function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     " NOTE: min, max, mid are index number. not lnum.
 
-    if a:has_okuri
-        let [min, max] = [a:ph_dict.okuri_ari_idx, a:ph_dict.okuri_nasi_idx - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
-    else
-        let [min, max] = [a:ph_dict.okuri_nasi_idx, len(a:whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
-    endif
-
+    let min = a:has_okuri ? a:ph_dict.okuri_ari_idx : a:ph_dict.okuri_nasi_idx
+    let max = a:has_okuri ? a:ph_dict.okuri_nasi_idx : len(a:whole_lines) - 1
     " call eskk#util#logf('s:search_binary(): Initial: min = %d, max = %d', min, max)
 
     if a:has_okuri
         while max - min > a:limit
             let mid = (min + max) / 2
-            let line = a:whole_lines[mid]
-            if a:needle >=# line
+            if a:needle >=# a:whole_lines[mid]
                 let max = mid
             else
                 let min = mid
@@ -151,8 +145,7 @@ function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     else
         while max - min > a:limit
             let mid = (min + max) / 2
-            let line = a:whole_lines[mid]
-            if a:needle >=# line
+            if a:needle >=# a:whole_lines[mid]
                 let min = mid
             else
                 let max = mid
@@ -163,21 +156,13 @@ function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     " NOTE: min, max: Give index number, not lnum.
     return s:search_linear(a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max)
 endfunction "}}}
-" Returns [line_string, lnum] matching the candidate.
+" Returns [line_string, idx] matching the candidate.
 function! s:search_linear(ph_dict, whole_lines, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    if a:0 == 1
-        let [min, max] = [a:1, len(a:whole_lines) - 1]
-    elseif a:0 >= 2
-        let [min, max] = a:000
-        call eskk#util#assert(min <=# max, 'min <=# max')
-    elseif a:has_okuri
-        let [min, max] = [a:ph_dict.okuri_ari_idx, len(a:whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_ari_idx !=# -1, 'okuri_ari_idx is not -1')
-    else
-        let [min, max] = [a:ph_dict.okuri_nasi_idx, len(a:whole_lines) - 1]
-        call eskk#util#assert(a:ph_dict.okuri_nasi_idx !=# -1, 'okuri_nasi_idx is not -1')
-    endif
+    let min = get(a:000, 0, a:ph_dict[a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'])
+    let max = get(a:000, 1, len(a:whole_lines) - 1)
+
+    call eskk#util#assert(min <=# max, 'min <=# max')
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number.")
     " call eskk#util#logf('s:search_linear(): Initial: min = %d, max = %d', min, max)
 

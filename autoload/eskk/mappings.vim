@@ -35,6 +35,7 @@ let s:map = {
 \   'mode:hira:ctrl-q-key': {},
 \   'mode:hira:toggle-kata': {},
 \   'mode:hira:q-key': {},
+\   'mode:hira:l-key': {},
 \   'mode:hira:to-ascii': {},
 \   'mode:hira:to-zenei': {},
 \   'mode:hira:to-abbrev': {},
@@ -42,6 +43,7 @@ let s:map = {
 \   'mode:kata:ctrl-q-key': {},
 \   'mode:kata:toggle-kata': {},
 \   'mode:kata:q-key': {},
+\   'mode:kata:l-key': {},
 \   'mode:kata:to-ascii': {},
 \   'mode:kata:to-zenei': {},
 \   'mode:kata:to-abbrev': {},
@@ -49,6 +51,7 @@ let s:map = {
 \   'mode:hankata:ctrl-q-key': {},
 \   'mode:hankata:toggle-kata': {},
 \   'mode:hankata:q-key': {},
+\   'mode:hankata:l-key': {},
 \   'mode:hankata:to-ascii': {},
 \   'mode:hankata:to-zenei': {},
 \   'mode:hankata:to-abbrev': {},
@@ -87,6 +90,14 @@ function! s:handle_q_key(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! s:handle_l_key(stash) "{{{
+    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call a:stash.buftable.do_l_key()
+        return 1
+    endif
+    return 0
+endfunction "}}}
 function! s:handle_to_ascii(stash) "{{{
     if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   && a:stash.buf_str.get_rom_str() == ''
@@ -116,6 +127,7 @@ let s:map_fn = {
 \   'mode:hira:ctrl-q-key': 's:handle_ctrl_q_key',
 \   'mode:hira:toggle-kata': 's:handle_toggle_kata',
 \   'mode:hira:q-key': 's:handle_q_key',
+\   'mode:hira:l-key': 's:handle_l_key',
 \   'mode:hira:to-ascii': 's:handle_to_ascii',
 \   'mode:hira:to-zenei': 's:handle_to_zenei',
 \   'mode:hira:to-abbrev': 's:handle_to_abbrev',
@@ -124,6 +136,7 @@ let s:map_fn = {
 \   'mode:kata:ctrl-q-key': 's:handle_ctrl_q_key',
 \   'mode:kata:toggle-kata': 's:handle_toggle_kata',
 \   'mode:kata:q-key': 's:handle_q_key',
+\   'mode:kata:l-key': 's:handle_l_key',
 \   'mode:kata:to-ascii': 's:handle_to_ascii',
 \   'mode:kata:to-zenei': 's:handle_to_zenei',
 \   'mode:kata:to-abbrev': 's:handle_to_abbrev',
@@ -132,6 +145,7 @@ let s:map_fn = {
 \   'mode:hankata:ctrl-q-key': 's:handle_ctrl_q_key',
 \   'mode:hankata:toggle-kata': 's:handle_toggle_kata',
 \   'mode:hankata:q-key': 's:handle_q_key',
+\   'mode:hankata:l-key': 's:handle_l_key',
 \   'mode:hankata:to-ascii': 's:handle_to_ascii',
 \   'mode:hankata:to-zenei': 's:handle_to_zenei',
 \   'mode:hankata:to-abbrev': 's:handle_to_abbrev',
