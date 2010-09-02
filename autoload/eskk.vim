@@ -228,11 +228,12 @@ function! s:asym_filter.filter(stash) dict "{{{
     let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
     let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
     let q_key = printf('mode:%s:q-key', cur_mode)
+    let l_key = printf('mode:%s:l-key', cur_mode)
     let to_ascii = printf('mode:%s:to-ascii', cur_mode)
     let to_zenei = printf('mode:%s:to-zenei', cur_mode)
     let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
 
-    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, to_ascii, to_zenei, to_abbrev]
+    for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, l_key, to_ascii, to_zenei, to_abbrev]
         if eskk#mappings#handle_special_lhs(char, key, a:stash)
             " Handled.
             call eskk#util#logf("Handled '%s' key.", key)
@@ -722,6 +723,7 @@ function! s:initialize() "{{{
     silent! EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
     silent! EskkMap -type=mode:hira:toggle-kata -unique q
     silent! EskkMap -type=mode:hira:q-key -unique q
+    silent! EskkMap -type=mode:hira:l-key -unique l
     silent! EskkMap -type=mode:hira:to-ascii -unique l
     silent! EskkMap -type=mode:hira:to-zenei -unique L
     silent! EskkMap -type=mode:hira:to-abbrev -unique /
@@ -730,6 +732,7 @@ function! s:initialize() "{{{
     silent! EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
     silent! EskkMap -type=mode:kata:toggle-kata -unique q
     silent! EskkMap -type=mode:kata:q-key -unique q
+    silent! EskkMap -type=mode:kata:l-key -unique l
     silent! EskkMap -type=mode:kata:to-ascii -unique l
     silent! EskkMap -type=mode:kata:to-zenei -unique L
     silent! EskkMap -type=mode:kata:to-abbrev -unique /
@@ -738,6 +741,7 @@ function! s:initialize() "{{{
     silent! EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
     silent! EskkMap -type=mode:hankata:toggle-kata -unique q
     silent! EskkMap -type=mode:hankata:q-key -unique q
+    silent! EskkMap -type=mode:hankata:l-key -unique l
     silent! EskkMap -type=mode:hankata:to-ascii -unique l
     silent! EskkMap -type=mode:hankata:to-zenei -unique L
     silent! EskkMap -type=mode:hankata:to-abbrev -unique /

@@ -805,6 +805,9 @@ endfunction "}}}
 function! s:buftable.do_q_key() dict "{{{
     return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
+function! s:buftable.do_l_key() dict "{{{
+    return s:convert_again_with_table(self, {})
+endfunction "}}}
 function! s:buftable.do_escape(stash) dict "{{{
     let kakutei_str = self.generate_kakutei_str()
 
@@ -879,7 +882,11 @@ function! s:convert_again_with_table(self, table) "{{{
 
     for cur_buf_str in [henkan_buf_str, okuri_buf_str]
         for m in cur_buf_str.get_matched()
-            call normal_buf_str.push_matched(m[0], a:table.get_map(m[0], m[1]))
+            if empty(a:table)
+                call normal_buf_str.push_matched(m[0], m[0])
+            else
+                call normal_buf_str.push_matched(m[0], a:table.get_map(m[0], m[1]))
+            endif
         endfor
     endfor
 
