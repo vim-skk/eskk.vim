@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 178))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 179))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -63,7 +63,7 @@ for [s:varname, s:default] in [
     if exists(s:varname)
         if type({s:varname}) == type("")
             let s:default.path = {s:varname}
-            unlet g:[s:varname]
+            unlet {s:varname}
             let {s:varname} = s:default
         elseif type({s:varname}) == type({})
             call extend({s:varname}, s:default, "keep")
