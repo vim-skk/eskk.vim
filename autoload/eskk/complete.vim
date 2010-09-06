@@ -98,7 +98,7 @@ function! s:mode_func_table.hira(base) "{{{
 
     " Do not complete while inputting rom string.
     if a:base =~ '\a$'
-        call eskk#util#log('eskk#complete#eskkcomplete(): kanji - skip.')
+        call eskk#util#logstrf('eskk#complete#eskkcomplete(): kanji - skip: a:base = %s', a:base)
         return []
     endif
 
