@@ -659,49 +659,6 @@ endfunction "}}}
 lockvar s:henkan_result
 " }}}
 
-" s:uniqued_candidates {{{
-let s:uniqued_candidates = {'_candidates': {}, '_counter': 0}
-
-function! s:uniqued_candidates_new() "{{{
-    return deepcopy(s:uniqued_candidates)
-endfunction "}}}
-
-function s:uniqued_candidates.merge(key, candidates) "{{{
-    if has_key(self._candidates, a:key)
-        let self._candidates[a:key][1] += a:candidates
-    else
-        let self._candidates[a:key] = [self._counter, a:candidates]
-        let self._counter += 1
-    endif
-endfunction "}}}
-
-function! s:uniqued_candidates.get_length() "{{{
-    return len(self._candidates)
-endfunction "}}}
-
-function! s:uniqued_candidates.get() "{{{
-    return eskk#util#flatten(
-    \   map(
-    \       sort(
-    \           values(self._candidates),
-    \           's:sort_fn_by_head_nr'
-    \       ),
-    \       'v:val[1]'
-    \   )
-    \)
-endfunction "}}}
-
-function! s:uniqued_candidates.has(key) "{{{
-    return has_key(self._candidates, a:key)
-endfunction "}}}
-
-function! s:uniqued_candidates.clear() "{{{
-    let self._candidates = {}
-    let self._counter = 0
-endfunction "}}}
-
-" }}}
-
 
 " s:physical_dict {{{
 "
@@ -814,6 +771,7 @@ endfunction "}}}
 lockvar s:physical_dict
 " }}}
 
+
 " s:registered_word: s:registered_word_new() {{{
 
 function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
@@ -823,6 +781,54 @@ function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
     \   'okuri': a:okuri,
     \   'okuri_rom': a:okuri_rom,
     \}
+endfunction "}}}
+
+" }}}
+
+" s:uniqued_candidates {{{
+let s:uniqued_candidates = {'_candidates': {}, '_counter': 0}
+
+function! s:uniqued_candidates_new() "{{{
+    return deepcopy(s:uniqued_candidates)
+endfunction "}}}
+
+function s:uniqued_candidates.merge(key, candidates) "{{{
+    if has_key(self._candidates, a:key)
+        let self._candidates[a:key][1] += a:candidates
+    else
+        let self._candidates[a:key] = [self._counter, a:candidates]
+        let self._counter += 1
+    endif
+endfunction "}}}
+
+function! s:uniqued_candidates.get_length() "{{{
+    return len(self._candidates)
+endfunction "}}}
+
+function! s:uniqued_candidates.get() "{{{
+    return eskk#util#flatten(
+    \   map(
+    \       sort(
+    \           values(self._candidates),
+    \           's:sort_fn_by_head_nr'
+    \       ),
+    \       'v:val[1]'
+    \   )
+    \)
+endfunction "}}}
+
+function! s:sort_fn_by_head_nr(a, b) "{{{
+    let [a, b] = [a:a[0], a:b[0]]
+    return a ==# b ? 0 : a ># b ? 1 : -1
+endfunction "}}}
+
+function! s:uniqued_candidates.has(key) "{{{
+    return has_key(self._candidates, a:key)
+endfunction "}}}
+
+function! s:uniqued_candidates.clear() "{{{
+    let self._candidates = {}
+    let self._counter = 0
 endfunction "}}}
 
 " }}}
@@ -1111,11 +1117,6 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     endif
 
     return [key, okuri_rom, candidates.get()]
-endfunction "}}}
-
-function! s:sort_fn_by_head_nr(a, b) "{{{
-    let [a, b] = [a:a[0], a:b[0]]
-    return a ==# b ? 0 : a ># b ? 1 : -1
 endfunction "}}}
 
 lockvar s:dict
