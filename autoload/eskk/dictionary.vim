@@ -180,6 +180,7 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
     let [key, okuri_rom] = [matchstr(list[0], '^[^a-z ]\+'), matchstr(list[0], '[a-z]\+')]
+    let has_okuri = okuri_rom != ''
 
     let candidates = []
     for _ in list[1:]
@@ -187,8 +188,8 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
         call add(
         \   candidates,
         \   semicolon != -1 ?
-        \       s:candidate_new(a:from_type, _[: semicolon - 1], _[semicolon + 1 :]) :
-        \       s:candidate_new(a:from_type, _)
+        \       s:candidate_new(a:from_type, _[: semicolon - 1], has_okuri, _[semicolon + 1 :]) :
+        \       s:candidate_new(a:from_type, _, has_okuri)
         \)
     endfor
 
@@ -241,8 +242,8 @@ let s:CANDIDATE_FROM_SYSTEM_DICT = 1
 let s:CANDIDATE_FROM_REGISTERED_WORDS = 2
 lockvar s:CANDIDATE_FROM_USER_DICT s:CANDIDATE_FROM_SYSTEM_DICT s:CANDIDATE_FROM_REGISTERED_WORDS
 
-function! s:candidate_new(from_type, input, ...) "{{{
-    let obj = {'from_type': a:from_type, 'input': a:input}
+function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
+    let obj = {'from_type': a:from_type, 'input': a:input, 'has_okuri': a:has_okuri}
 
     if a:0
         let obj.annotation = a:1
@@ -314,7 +315,7 @@ function! s:henkan_result_init(this, registered) "{{{
     \   a:this,
     \   {
     \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
-    \       '_candidates': (empty(a:registered) ? [] : s:henkan_result_merge_candidates(map(copy(a:registered), 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input)'))),
+    \       '_candidates': (empty(a:registered) ? [] : s:henkan_result_merge_candidates(map(copy(a:registered), 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input, v:val.okuri_rom != "")'))),
     \       '_candidates_index': 0,
     \   },
     \   'force'
@@ -1013,7 +1014,11 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
         if w.key ==# key
             call candidates.merge(
             \   w.key . w.okuri_rom[0],
-            \   [s:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, w.input)]
+            \   [s:candidate_new(
+            \       s:CANDIDATE_FROM_REGISTERED_WORDS,
+            \       w.input,
+            \       w.okuri_rom != ""
+            \   )]
             \)
             if candidates.get_length() >= max_count
                 break
