@@ -81,7 +81,7 @@ function! eskk#complete#can_find_start() "{{{
 
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
-    if buf_str.empty()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN && buf_str.empty()
         return 0
     endif
 
@@ -159,7 +159,19 @@ function! s:complete(mode, base) "{{{
     " \   'menu' : a:mode,
     " \})
 
+    let do_list_okuri_candidates = buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_OKURI
     for c in candidates
+        if do_list_okuri_candidates
+            if c.has_okuri
+                call add(list, {
+                \   'word': marker . c.input,
+                \   'abbr': (has_key(c, 'annotation') ? c.input . '; ' . c.annotation : c.input),
+                \   'menu': 'kanji:okuri'
+                \})
+            endif
+            continue
+        endif
+
         call add(list, {
         \   'word': marker . c.input,
         \   'abbr': (has_key(c, 'annotation') ? c.input . '; ' . c.annotation : c.input),
