@@ -661,6 +661,48 @@ endfunction "}}}
 lockvar s:henkan_result
 " }}}
 
+" s:uniqued_candidates {{{
+let s:uniqued_candidates = {'_candidates': {}, '_counter': 0}
+
+function! s:uniqued_candidates_new() "{{{
+    return deepcopy(s:uniqued_candidates)
+endfunction "}}}
+
+function s:uniqued_candidates.merge(key, candidates) "{{{
+    if has_key(self._candidates, a:key)
+        let self._candidates[a:key][1] += a:candidates
+    else
+        let self._candidates[a:key] = [self._counter, a:candidates]
+        let self._counter += 1
+    endif
+endfunction "}}}
+
+function! s:uniqued_candidates.get_length() "{{{
+    return len(self._candidates)
+endfunction "}}}
+
+function! s:uniqued_candidates.get() "{{{
+    return eskk#util#flatten(
+    \   map(
+    \       sort(
+    \           values(self._candidates),
+    \           's:sort_fn_by_head_nr'
+    \       ),
+    \       'v:val[1]'
+    \   )
+    \)
+endfunction "}}}
+
+function! s:uniqued_candidates.has(key) "{{{
+    return has_key(self._candidates, a:key)
+endfunction "}}}
+
+function! s:uniqued_candidates.clear() "{{{
+    let self._candidates = {}
+    let self._counter = 0
+endfunction "}}}
+
+" }}}
 
 
 " s:physical_dict {{{
@@ -1007,48 +1049,6 @@ function! s:dict_write_to_file(this) "{{{
     endtry
 endfunction "}}}
 
-" s:uniqued_candidates {{{
-let s:uniqued_candidates = {'_candidates': {}, '_counter': 0}
-
-function! s:uniqued_candidates_new() "{{{
-    return deepcopy(s:uniqued_candidates)
-endfunction "}}}
-
-function s:uniqued_candidates.merge(key, candidates) "{{{
-    if has_key(self._candidates, a:key)
-        let self._candidates[a:key][1] += a:candidates
-    else
-        let self._candidates[a:key] = [self._counter, a:candidates]
-        let self._counter += 1
-    endif
-endfunction "}}}
-
-function! s:uniqued_candidates.get_length() "{{{
-    return len(self._candidates)
-endfunction "}}}
-
-function! s:uniqued_candidates.get() "{{{
-    return eskk#util#flatten(
-    \   map(
-    \       sort(
-    \           values(self._candidates),
-    \           's:sort_fn_by_head_nr'
-    \       ),
-    \       'v:val[1]'
-    \   )
-    \)
-endfunction "}}}
-
-function! s:uniqued_candidates.has(key) "{{{
-    return has_key(self._candidates, a:key)
-endfunction "}}}
-
-function! s:uniqued_candidates.clear() "{{{
-    let self._candidates = {}
-    let self._counter = 0
-endfunction "}}}
-
-" }}}
 let s:dict_search_candidates = s:uniqued_candidates_new()
 function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let key = a:key
