@@ -293,8 +293,6 @@ let s:henkan_result = {
 \}
 
 function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
-    let dict = eskk#dictionary#get_instance()
-
     let obj = extend(
     \   deepcopy(s:henkan_result, 1),
     \   {
