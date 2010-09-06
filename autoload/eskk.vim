@@ -41,9 +41,6 @@ delfunc s:SID
 "   Vim's mode() return value when calling eskk#enable().
 " mutable_stash:
 "   Stash for instance-local variables. See `s:mutable_stash`.
-" prev_henkan_result:
-"   Previous henkan result.
-"   See `s:henkan_result` in `autoload/eskk/dictionary.vim`.
 " has_started_completion:
 "   completion has been started from eskk.
 let s:eskk = {
@@ -53,7 +50,6 @@ let s:eskk = {
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'mutable_stash': {},
-\   'prev_henkan_result': {},
 \   'has_started_completion': 0,
 \}
 
@@ -303,13 +299,9 @@ function! s:asym_filter.filter(stash) "{{{
             call buftable.choose_prev_candidate(a:stash)
             return
         elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
-            let henkan_result = eskk#get_prev_henkan_result()
+            let henkan_result = eskk#dictionary#get_instance().get_henkan_result()
             if !empty(henkan_result)
                 call henkan_result.delete_from_dict()
-
-                " Do not use this after calling .delete_from_dict() !
-                unlet henkan_result
-                call eskk#clear_henkan_result()
 
                 call buftable.push_kakutei_str(buftable.get_display_str(0))
                 call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
@@ -1413,19 +1405,6 @@ function! eskk#unregister_map(map, Fn, args) "{{{
     if has_key(s:key_handler, map)
         unlet s:key_handler[map]
     endif
-endfunction "}}}
-
-" Henkan result
-function! eskk#get_prev_henkan_result() "{{{
-    let self = eskk#get_current_instance()
-    return self.prev_henkan_result
-endfunction "}}}
-function! eskk#set_henkan_result(henkan_result) "{{{
-    let self = eskk#get_current_instance()
-    let self.prev_henkan_result = a:henkan_result
-endfunction "}}}
-function! eskk#clear_henkan_result() "{{{
-    call eskk#set_henkan_result({})
 endfunction "}}}
 
 " Locking diff old string

@@ -422,9 +422,9 @@ function! s:buftable.do_enter(stash) "{{{
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', [undo_char])
         endif
 
-        let henkan_result = eskk#get_prev_henkan_result()
+        let dict = eskk#dictionary#get_instance()
+        let henkan_result = dict.get_henkan_result()
         if henkan_result.get_status() ==# g:eskk#dictionary#HR_GOT_RESULT
-            let dict = eskk#dictionary#get_instance()
             call dict.remember_registered_word(
             \   henkan_result.get_candidate(0),
             \   henkan_result.get_key(),
@@ -543,7 +543,8 @@ endfunction "}}}
 function! s:get_next_candidate(self, stash, next) "{{{
     let self = a:self
     let cur_buf_str = self.get_current_buf_str()
-    let henkan_result = eskk#get_prev_henkan_result()
+    let dict = eskk#dictionary#get_instance()
+    let henkan_result = dict.get_henkan_result()
     let prev_buftable = henkan_result.buftable
     let rom_str = cur_buf_str.get_matched_rom()
 
@@ -563,8 +564,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
         if a:next
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
-            let [input, hira, okuri] =
-            \   eskk#dictionary#get_instance().register_word(eskk#get_prev_henkan_result())
+            let [input, hira, okuri] = dict.register_word(dict.get_henkan_result())
             if input != ''
                 call self.clear_all()
                 call self.push_kakutei_str(input . okuri)
@@ -710,10 +710,11 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) "{{{
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
     let rom_str = henkan_buf_str.get_rom_str()
-    call eskk#set_henkan_result(eskk#dictionary#get_instance().refer(self, rom_str, '', ''))
+    let dict = eskk#dictionary#get_instance()
+    call dict.refer(self, rom_str, '', '')
 
     try
-        let candidate = eskk#get_prev_henkan_result().get_candidate()
+        let candidate = dict.get_henkan_result().get_candidate()
         " No exception throwed. continue...
 
         call self.clear_all()
@@ -725,8 +726,7 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) "{{{
         endif
     catch /^eskk: dictionary look up error:/
         " No candidates.
-        let [input, hira, okuri] =
-        \   eskk#dictionary#get_instance().register_word(eskk#get_prev_henkan_result())
+        let [input, hira, okuri] = dict.register_word(dict.get_henkan_result())
         if input != ''
             call self.clear_all()
             call self.push_kakutei_str(input . okuri)
@@ -767,16 +767,17 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     let hira = henkan_buf_str.get_matched_filter()
     let okuri = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    call eskk#set_henkan_result(eskk#dictionary#get_instance().refer(self, hira, okuri, okuri_rom))
+    let dict = eskk#dictionary#get_instance()
+    call dict.refer(self, hira, okuri, okuri_rom)
 
     " Clear phase henkan/okuri buffer string.
-    " NOTE: I assume that `eskk#dictionary#get_instance().refer()`
+    " NOTE: I assume that `dict.refer()`
     " saves necessary strings even if I clear these.
     let henkan_matched_rom = henkan_buf_str.get_matched_rom()
     let okuri_matched_rom = okuri_buf_str.get_matched_rom()
     let rom_str = henkan_matched_rom . okuri_matched_rom
     try
-        let candidate = eskk#get_prev_henkan_result().get_candidate()
+        let candidate = dict.get_henkan_result().get_candidate()
         " No exception throwed. continue...
 
         call self.clear_all()
@@ -790,8 +791,7 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
         call eskk#util#logstrf('404 not found such candidate: hira = %s, okuri = %s, okuri_rom = %s', hira, okuri, okuri_rom)
 
         " No candidates.
-        let [input, hira, okuri] =
-        \   eskk#dictionary#get_instance().register_word(eskk#get_prev_henkan_result())
+        let [input, hira, okuri] = dict.register_word(dict.get_henkan_result())
         if input != ''
             call self.clear_all()
             call self.push_kakutei_str(input . okuri)

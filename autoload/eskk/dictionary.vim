@@ -592,11 +592,20 @@ function! s:henkan_result.back() "{{{
 endfunction "}}}
 
 function! s:henkan_result.delete_from_dict() "{{{
+    try
+        return s:henkan_result_delete_from_dict(self)
+    finally
+        let dict = eskk#dictionary#get_instance()
+        call dict.clear_henkan_result()
+    endtry
+endfunction "}}}
+
+function! s:henkan_result_delete_from_dict(this) "{{{
     call eskk#util#log('s:henkan_result.delete_from_dict()')
 
-    let candidates = s:henkan_result_get_candidates(self)
-    let candidates_index = self._candidates_index
-    let user_dict_idx = self._user_dict_found_index
+    let candidates = s:henkan_result_get_candidates(a:this)
+    let candidates_index = a:this._candidates_index
+    let user_dict_idx = a:this._user_dict_found_index
 
     if !eskk#util#has_idx(candidates, candidates_index)
         call eskk#util#log('.delete_from_dict(): candidates_index is out of range')
@@ -612,7 +621,7 @@ function! s:henkan_result.delete_from_dict() "{{{
 
     let input = eskk#util#input(
     \   'Really purge? '
-    \   . self._key . self._okuri_rom[0]
+    \   . a:this._key . a:this._okuri_rom[0]
     \   . ' /'
     \   . candidates[candidates_index].input
     \   . (has_key(candidates[candidates_index], 'annotation') ?
@@ -650,7 +659,7 @@ function! s:henkan_result.delete_from_dict() "{{{
         call eskk#util#logstrf('Removed from dict: %s', candidates[candidates_index])
     endif
 
-    call s:henkan_result_reset(self)
+    call s:henkan_result_reset(a:this)
 
     redraw
     call dict.update_dictionary()
@@ -842,11 +851,24 @@ endfunction "}}}
 " See section `Searching Functions` for
 " implementation of searching dictionaries.
 
+" _user_dict:
+"   User dictionary.
+"
+" _system_dict:
+"   System dictionary.
+"
+" _registered_words:
+"   s:uniqued_array object.
+"
+" _current_henkan_result:
+"   Current henkan result.
+
 let s:dict = {
 \   '_user_dict': {},
 \   '_system_dict': {},
 \   '_registered_words': {},
 \   '_registered_words_modified': 0,
+\   '_current_henkan_result': {},
 \}
 
 function! s:dict_new(user_dict, system_dict) "{{{
@@ -880,12 +902,14 @@ endfunction "}}}
 
 
 function! s:dict.refer(buftable, key, okuri, okuri_rom) "{{{
-    return s:henkan_result_new(
+    let hr = s:henkan_result_new(
     \   a:key,
     \   a:okuri_rom,
     \   a:okuri,
     \   deepcopy(a:buftable, 1),
     \)
+    let self._current_henkan_result = hr
+    return hr
 endfunction "}}}
 
 function! s:dict.register_word(henkan_result) "{{{
@@ -947,9 +971,8 @@ function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) "{{{
     call self._registered_words.merge(id, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom))
     let self._registered_words_modified = 1
 
-    let henkan_result = eskk#get_prev_henkan_result()
-    if !empty(henkan_result)
-        call s:henkan_result_reset(henkan_result)
+    if !empty(self._current_henkan_result)
+        call s:henkan_result_reset(self._current_henkan_result)
     endif
 
     if g:eskk_debug
@@ -1117,6 +1140,14 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     endif
 
     return [key, okuri_rom, candidates.get()]
+endfunction "}}}
+
+function! s:dict.get_henkan_result() "{{{
+    return self._current_henkan_result
+endfunction "}}}
+
+function! s:dict.clear_henkan_result() "{{{
+    let self._current_henkan_result = {}
 endfunction "}}}
 
 lockvar s:dict
