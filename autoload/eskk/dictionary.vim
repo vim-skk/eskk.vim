@@ -770,9 +770,9 @@ endfunction "}}}
 lockvar s:physical_dict
 " }}}
 
-" s:registered_word: eskk#dictionary#registered_word_new() {{{
+" s:registered_word: s:registered_word_new() {{{
 
-function! eskk#dictionary#registered_word_new(input, key, okuri, okuri_rom) "{{{
+function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
     return {
     \   'input': a:input,
     \   'key': a:key,
@@ -878,7 +878,7 @@ function! s:dict.register_word(henkan_result) dict "{{{
 
 
     if input != ''
-        call self.remember_registered_word(eskk#dictionary#registered_word_new(input, key, okuri, okuri_rom))
+        call self.remember_registered_word(input, key, okuri, okuri_rom)
     endif
     return [input, key, okuri]
 endfunction "}}}
@@ -887,8 +887,8 @@ function! s:dict.forget_registered_words() dict "{{{
     let self._registered_words = []
 endfunction "}}}
 
-function! s:dict.remember_registered_word(registered_word) dict "{{{
-    call add(self._registered_words, a:registered_word)
+function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) dict "{{{
+    call add(self._registered_words, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom))
     let self._registered_words_modified = 1
 
     let henkan_result = eskk#get_prev_henkan_result()

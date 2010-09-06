@@ -426,12 +426,10 @@ function! s:buftable.do_enter(stash) dict "{{{
         if henkan_result.get_status() ==# g:eskk#dictionary#HR_GOT_RESULT
             let dict = eskk#dictionary#get_instance()
             call dict.remember_registered_word(
-            \   eskk#dictionary#registered_word_new(
-            \       henkan_result.get_candidate(0),
-            \       henkan_result.get_key(),
-            \       henkan_result.get_okuri(),
-            \       henkan_result.get_okuri_rom(),
-            \   )
+            \   henkan_result.get_candidate(0),
+            \   henkan_result.get_key(),
+            \   henkan_result.get_okuri(),
+            \   henkan_result.get_okuri_rom(),
             \)
         endif
 
