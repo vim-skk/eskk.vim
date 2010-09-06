@@ -310,7 +310,7 @@ function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
 endfunction "}}}
 
 function! s:henkan_result_init(this) "{{{
-    return extend(
+    call extend(
     \   a:this,
     \   {
     \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
@@ -319,13 +319,13 @@ function! s:henkan_result_init(this) "{{{
     \   },
     \   'force'
     \)
+    call s:henkan_result_remove_cache(a:this)
+
+    call eskk#util#logstrf('re-initialized henkan result: a:this._key = %s, a:this._okuri = %s, a:this._okuri_rom = %s', a:this._key, a:this._okuri, a:this._okuri_rom)
 endfunction "}}}
 
 function! s:henkan_result_advance(this, advance) "{{{
-    if has_key(a:this, '_candidate')
-        " Delete current candidate cache.
-        unlet a:this._candidate
-    endif
+    call s:henkan_result_remove_cache(a:this)
 
     try
         let candidates = s:henkan_result_get_candidates(a:this)
@@ -352,6 +352,8 @@ function! s:henkan_result_get_candidates(this) "{{{
         return a:this._candidates
 
     elseif a:this._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
+        call eskk#util#logstrf('s:henkan_result_get_candidates(): Look up dictionary for: a:this._key = %s, a:this._okuri = %s, a:this._okuri_rom = %s', a:this._key, a:this._okuri, a:this._okuri_rom)
+
         let dict = eskk#dictionary#get_instance()
         let [user_dict, system_dict] = [dict._user_dict, dict._system_dict]
         " Look up this henkan result in dictionaries.
@@ -393,6 +395,7 @@ function! s:henkan_result_get_candidates(this) "{{{
 
         " Merge registered words.
         let registered = filter(copy(dict._registered_words), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
+        call eskk#util#logstrf('s:henkan_result_get_candidates(): Gathering matched registered words: %s', registered)
         if !empty(registered)
             let results += map(registered, 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input, v:val.okuri_rom != "")')
         endif
@@ -523,6 +526,12 @@ function! s:henkan_result_merge_candidates(candidates) "{{{
         let i += 1
     endwhile
     return candidates
+endfunction "}}}
+
+function! s:henkan_result_remove_cache(this) "{{{
+    if has_key(a:this, '_candidate')
+        unlet a:this._candidate
+    endif
 endfunction "}}}
 
 
@@ -880,6 +889,13 @@ endfunction "}}}
 function! s:dict.remember_registered_word(registered_word) dict "{{{
     call add(self._registered_words, a:registered_word)
     let self._registered_words_modified = 1
+
+    let henkan_result = eskk#get_prev_henkan_result()
+    if !empty(henkan_result)
+        call s:henkan_result_init(henkan_result)
+    endif
+
+    call eskk#util#logstrf('registered word: %s', self._registered_words)
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
