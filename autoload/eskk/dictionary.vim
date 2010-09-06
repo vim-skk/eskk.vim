@@ -394,7 +394,7 @@ function! s:henkan_result_get_candidates(this) "{{{
         endif
 
         " Merge registered words.
-        let registered = filter(copy(dict._registered_words), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
+        let registered = filter(copy(dict.get_registered_words()), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
         call eskk#util#logstrf('s:henkan_result_get_candidates(): Gathering matched registered words: %s', registered)
         if !empty(registered)
             let results += map(registered, 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input, v:val.okuri_rom != "")')
@@ -629,9 +629,10 @@ function! s:henkan_result.delete_from_dict() dict "{{{
 
     if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_REGISTERED_WORDS
         " Remove all elements matching with current candidate from registered words.
-        for i in range(len(dict._registered_words))
-            if candidates[candidates_index].input ==# dict._registered_words[i].input
-                call remove(dict._registered_words, i)
+        let words = dict.get_registered_words()
+        for i in range(len(words))
+            if candidates[candidates_index].input ==# words[i].input
+                call dict.remove_registered_word(words[i].input, words[i].key, words[i].okuri, words[i].okuri_rom)
             endif
         endfor
         call eskk#util#log('.delete_from_dict(): removed candidates from registered words.')
@@ -896,6 +897,23 @@ function! s:dict.remember_registered_word(registered_word) dict "{{{
     endif
 
     call eskk#util#logstrf('registered word: %s', self._registered_words)
+endfunction "}}}
+
+function! s:dict.get_registered_words() dict "{{{
+    return self._registered_words
+endfunction "}}}
+
+function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) dict "{{{
+    for i in range(len(self._registered_words))
+        let w = self._registered_words[i]
+        if w.input ==# a:input
+        \   && w.key ==# a:key
+        \   && w.okuri ==# a:okuri
+        \   && w.okuri_rom ==# a:okuri_rom
+            call remove(self._registered_words, i)
+            break
+        endif
+    endfor
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
