@@ -294,7 +294,6 @@ let s:henkan_result = {
 
 function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
     let dict = eskk#dictionary#get_instance()
-    let registered = filter(copy(dict._registered_words), 'v:val.key ==# a:key && v:val.okuri_rom[0] ==# a:okuri_rom[0]')
 
     let obj = extend(
     \   deepcopy(s:henkan_result, 1),
@@ -306,16 +305,16 @@ function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
     \   },
     \   'force'
     \)
-    call s:henkan_result_init(obj, registered)
+    call s:henkan_result_init(obj)
     return obj
 endfunction "}}}
 
-function! s:henkan_result_init(this, registered) "{{{
+function! s:henkan_result_init(this) "{{{
     return extend(
     \   a:this,
     \   {
     \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
-    \       '_candidates': (empty(a:registered) ? [] : s:henkan_result_merge_candidates(map(copy(a:registered), 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input, v:val.okuri_rom != "")'))),
+    \       '_candidates': [],
     \       '_candidates_index': 0,
     \   },
     \   'force'
@@ -392,7 +391,11 @@ function! s:henkan_result_get_candidates(this) "{{{
             let results += candidates
         endif
 
-        let results += a:this._candidates
+        " Merge registered words.
+        let registered = filter(copy(dict._registered_words), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
+        if !empty(registered)
+            let results += map(registered, 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input, v:val.okuri_rom != "")')
+        endif
 
         let a:this._user_dict_found_index = user_dict_result[1]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
@@ -639,7 +642,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         call eskk#util#logstrf('Removed from dict: %s', candidates[candidates_index])
     endif
 
-    call s:henkan_result_init(self, copy(dict._registered_words))
+    call s:henkan_result_init(self)
 
     redraw
     call dict.update_dictionary()
