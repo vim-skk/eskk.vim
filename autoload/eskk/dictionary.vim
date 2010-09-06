@@ -1049,6 +1049,7 @@ function! s:uniqued_candidates.clear() "{{{
 endfunction "}}}
 
 " }}}
+let s:dict_search_candidates = s:uniqued_candidates_new()
 function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let key = a:key
     let okuri = a:okuri
@@ -1059,7 +1060,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     endif
 
     " To unique candidates.
-    let candidates = s:uniqued_candidates
+    let candidates = s:dict_search_candidates
     call candidates.clear()
     let max_count = g:eskk_max_candidates
 
