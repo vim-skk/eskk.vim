@@ -305,11 +305,11 @@ function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
     \   },
     \   'force'
     \)
-    call s:henkan_result_init(obj)
+    call s:henkan_result_reset(obj)
     return obj
 endfunction "}}}
 
-function! s:henkan_result_init(this) "{{{
+function! s:henkan_result_reset(this) "{{{
     call extend(
     \   a:this,
     \   {
@@ -652,7 +652,7 @@ function! s:henkan_result.delete_from_dict() dict "{{{
         call eskk#util#logstrf('Removed from dict: %s', candidates[candidates_index])
     endif
 
-    call s:henkan_result_init(self)
+    call s:henkan_result_reset(self)
 
     redraw
     call dict.update_dictionary()
@@ -941,7 +941,7 @@ function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) dict "{{
 
     let henkan_result = eskk#get_prev_henkan_result()
     if !empty(henkan_result)
-        call s:henkan_result_init(henkan_result)
+        call s:henkan_result_reset(henkan_result)
     endif
 
     if g:eskk_debug
