@@ -353,7 +353,7 @@ function! s:henkan_result_get_candidates(this) "{{{
         call eskk#util#logstrf('s:henkan_result_get_candidates(): Look up dictionary for: a:this._key = %s, a:this._okuri = %s, a:this._okuri_rom = %s', a:this._key, a:this._okuri, a:this._okuri_rom)
 
         let dict = eskk#dictionary#get_instance()
-        let [user_dict, system_dict] = [dict._user_dict, dict._system_dict]
+        let [user_dict, system_dict] = [dict.get_user_dict(), dict.get_system_dict()]
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_candidate(
         \   user_dict, a:this._key, a:this._okuri_rom
@@ -613,8 +613,8 @@ function! s:henkan_result_delete_from_dict(this) "{{{
     endif
 
     let dict = eskk#dictionary#get_instance()
-    let user_dict_lines = dict._user_dict.get_lines()
-    if !dict._user_dict.is_valid()
+    let user_dict_lines = dict.get_user_dict().get_lines()
+    if !dict.get_user_dict().is_valid()
         call eskk#util#log('.delete_from_dict(): user dictionary is invalid.')
         return
     endif
@@ -648,7 +648,7 @@ function! s:henkan_result_delete_from_dict(this) "{{{
 
     call remove(user_dict_lines, user_dict_idx)
     try
-        call dict._user_dict.set_lines(user_dict_lines)
+        call dict.get_user_dict().set_lines(user_dict_lines)
     catch /^eskk: parse error/
         call eskk#util#log('.delete_from_dict(): removed the line so parse error occurred')
         return
@@ -1148,6 +1148,14 @@ endfunction "}}}
 
 function! s:dict.clear_henkan_result() "{{{
     let self._current_henkan_result = {}
+endfunction "}}}
+
+function! s:dict.get_user_dict() "{{{
+    return self._user_dict
+endfunction "}}}
+
+function! s:dict.get_system_dict() "{{{
+    return self._system_dict
 endfunction "}}}
 
 lockvar s:dict
