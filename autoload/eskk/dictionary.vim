@@ -795,7 +795,7 @@ endfunction "}}}
 let s:dict = {
 \   '_user_dict': {},
 \   '_system_dict': {},
-\   '_registered_words': [],
+\   '_registered_words': {},
 \   '_registered_words_modified': 0,
 \}
 
@@ -813,6 +813,7 @@ function! s:dict_new(user_dict, system_dict) "{{{
     \           a:system_dict.sorted,
     \           a:system_dict.encoding,
     \       ),
+    \       '_registered_words': s:uniqued_candidates_new(),
     \   },
     \   'force'
     \)
@@ -884,11 +885,16 @@ function! s:dict.register_word(henkan_result) dict "{{{
 endfunction "}}}
 
 function! s:dict.forget_registered_words() dict "{{{
-    let self._registered_words = []
+    let self._registered_words = s:uniqued_candidates_new()
 endfunction "}}}
 
 function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) dict "{{{
-    call add(self._registered_words, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom))
+    let id = s:dict_make_registered_word_id(a:input, a:key, a:okuri, a:okuri_rom)
+    if self._registered_words.has(id)
+        return
+    endif
+
+    call self._registered_words.merge(id, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom))
     let self._registered_words_modified = 1
 
     let henkan_result = eskk#get_prev_henkan_result()
@@ -896,24 +902,23 @@ function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) dict "{{
         call s:henkan_result_init(henkan_result)
     endif
 
-    call eskk#util#logstrf('registered word: %s', self._registered_words)
+    if g:eskk_debug
+        call eskk#util#logstrf('registered word: %s', self._registered_words.get())
+    endif
 endfunction "}}}
 
 function! s:dict.get_registered_words() dict "{{{
-    return self._registered_words
+    return self._registered_words.get()
 endfunction "}}}
 
 function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) dict "{{{
-    for i in range(len(self._registered_words))
-        let w = self._registered_words[i]
-        if w.input ==# a:input
-        \   && w.key ==# a:key
-        \   && w.okuri ==# a:okuri
-        \   && w.okuri_rom ==# a:okuri_rom
-            call remove(self._registered_words, i)
-            break
-        endif
-    endfor
+    call self._registered_words.remove(
+    \   s:dict_make_registered_word_id(a:input, a:key, a:okuri, a:okuri_rom)
+    \)
+endfunction "}}}
+
+function! s:dict_make_registered_word_id(input, key, okuri, okuri_rom) "{{{
+    return join([a:input, a:key, a:okuri, a:okuri_rom], ';')
 endfunction "}}}
 
 function! s:dict.is_modified() dict "{{{
@@ -961,7 +966,7 @@ function! s:dict_write_to_file(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this._user_dict really does not have registered words.
-    for w in a:this._registered_words
+    for w in a:this._registered_words.get()
         let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, w.key, w.okuri_rom)
         if w.okuri_rom != ''
             let lnum = a:this._user_dict.okuri_ari_idx + 1
@@ -1005,6 +1010,10 @@ endfunction "}}}
 " s:uniqued_candidates {{{
 let s:uniqued_candidates = {'_candidates': {}, '_counter': 0}
 
+function! s:uniqued_candidates_new() "{{{
+    return deepcopy(s:uniqued_candidates)
+endfunction "}}}
+
 function s:uniqued_candidates.merge(key, candidates) "{{{
     if has_key(self._candidates, a:key)
         let self._candidates[a:key][1] += a:candidates
@@ -1030,6 +1039,10 @@ function! s:uniqued_candidates.get() "{{{
     \)
 endfunction "}}}
 
+function! s:uniqued_candidates.has(key) "{{{
+    return has_key(self._candidates, a:key)
+endfunction "}}}
+
 function! s:uniqued_candidates.clear() "{{{
     let self._candidates = {}
     let self._counter = 0
@@ -1051,7 +1064,7 @@ function! s:dict.search(key, okuri, okuri_rom) dict "{{{
     let max_count = g:eskk_max_candidates
 
     " self._registered_words
-    for w in self._registered_words
+    for w in self._registered_words.get()
         if w.key ==# key
             call candidates.merge(
             \   w.key . w.okuri_rom[0],
