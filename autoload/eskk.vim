@@ -152,7 +152,7 @@ endfunction "}}}
 
 
 " This a:value will be set when new eskk instances are created.
-function! s:mutable_stash.init(varname, value) dict "{{{
+function! s:mutable_stash.init(varname, value) "{{{
     call eskk#util#logf("s:mutable_stash - Initialize %s with %s.", a:varname, string(a:value))
 
     if !has_key(s:stash_prototype, self.namespace)
@@ -166,7 +166,7 @@ function! s:mutable_stash.init(varname, value) dict "{{{
     endif
 endfunction "}}}
 
-function! s:mutable_stash.get(varname) dict "{{{
+function! s:mutable_stash.get(varname) "{{{
     call eskk#util#logf("s:mutable_stash - Get %s.", a:varname)
 
     let inst = eskk#get_current_instance()
@@ -192,7 +192,7 @@ function! s:mutable_stash.get(varname) dict "{{{
     endif
 endfunction "}}}
 
-function! s:mutable_stash.set(varname, value) dict "{{{
+function! s:mutable_stash.set(varname, value) "{{{
     call eskk#util#logf("s:mutable_stash - Set %s '%s'.", a:varname, string(a:value))
 
     let inst = eskk#get_current_instance()
@@ -216,7 +216,7 @@ function! eskk#create_asym_filter(table_name) "{{{
     return obj
 endfunction "}}}
 
-function! s:asym_filter.filter(stash) dict "{{{
+function! s:asym_filter.filter(stash) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let phase = a:stash.phase
@@ -961,7 +961,7 @@ function! s:initialize() "{{{
         let tables = eskk#table#get_all_tables()
         call eskk#util#logstrf('tables = %s', tables)
         let tabletmpl = {}    " dummy object
-        function! tabletmpl.init() dict
+        function! tabletmpl.init()
             call self.add_from_dict(eskk#table#{self.name}#load())
         endfunction
         for name in tables

@@ -533,7 +533,7 @@ function! s:henkan_result_remove_cache(this) "{{{
 endfunction "}}}
 
 
-function! s:henkan_result.get_candidate(...) dict "{{{
+function! s:henkan_result.get_candidate(...) "{{{
     let with_okuri = a:0 ? a:1 : 1
 
     if has_key(self, '_candidate')
@@ -570,28 +570,28 @@ function! s:henkan_result.get_candidate(...) dict "{{{
 
     return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
 endfunction "}}}
-function! s:henkan_result.get_key() dict "{{{
+function! s:henkan_result.get_key() "{{{
     return self._key
 endfunction "}}}
-function! s:henkan_result.get_okuri() dict "{{{
+function! s:henkan_result.get_okuri() "{{{
     return self._okuri
 endfunction "}}}
-function! s:henkan_result.get_okuri_rom() dict "{{{
+function! s:henkan_result.get_okuri_rom() "{{{
     return self._okuri_rom
 endfunction "}}}
-function! s:henkan_result.get_status() dict "{{{
+function! s:henkan_result.get_status() "{{{
     return self._status
 endfunction "}}}
 
-function! s:henkan_result.forward() dict "{{{
+function! s:henkan_result.forward() "{{{
     return s:henkan_result_advance(self, 1)
 endfunction "}}}
 
-function! s:henkan_result.back() dict "{{{
+function! s:henkan_result.back() "{{{
     return s:henkan_result_advance(self, 0)
 endfunction "}}}
 
-function! s:henkan_result.delete_from_dict() dict "{{{
+function! s:henkan_result.delete_from_dict() "{{{
     call eskk#util#log('s:henkan_result.delete_from_dict()')
 
     let candidates = s:henkan_result_get_candidates(self)
@@ -743,7 +743,7 @@ endfunction "}}}
 
 
 
-function! s:physical_dict.get_lines(...) dict "{{{
+function! s:physical_dict.get_lines(...) "{{{
     let force = a:0 ? a:1 : 0
 
     if self._loaded && self._ftime_at_read ==# getftime(self.path) && !force
@@ -773,7 +773,7 @@ function! s:physical_dict.get_lines(...) dict "{{{
     return self._content_lines
 endfunction "}}}
 
-function! s:physical_dict.set_lines(lines) dict "{{{
+function! s:physical_dict.set_lines(lines) "{{{
     try
         let self._content_lines  = a:lines
         call s:physical_dict_parse_lines(self, a:lines)
@@ -802,7 +802,7 @@ function! s:physical_dict_parse_lines(self, lines) "{{{
     endif
 endfunction "}}}
 
-function! s:physical_dict.is_valid() dict "{{{
+function! s:physical_dict.is_valid() "{{{
     " Succeeded to parse SKK dictionary.
     return self.okuri_ari_idx >= 0 && self.okuri_nasi_idx >= 0
 endfunction "}}}
@@ -873,7 +873,7 @@ function! eskk#dictionary#get_instance() "{{{
 endfunction "}}}
 
 
-function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
+function! s:dict.refer(buftable, key, okuri, okuri_rom) "{{{
     return s:henkan_result_new(
     \   a:key,
     \   a:okuri_rom,
@@ -882,7 +882,7 @@ function! s:dict.refer(buftable, key, okuri, okuri_rom) dict "{{{
     \)
 endfunction "}}}
 
-function! s:dict.register_word(henkan_result) dict "{{{
+function! s:dict.register_word(henkan_result) "{{{
     let key       = a:henkan_result.get_key()
     let okuri     = a:henkan_result.get_okuri()
     let okuri_rom = a:henkan_result.get_okuri_rom()
@@ -928,11 +928,11 @@ function! s:dict.register_word(henkan_result) dict "{{{
     return [input, key, okuri]
 endfunction "}}}
 
-function! s:dict.forget_registered_words() dict "{{{
+function! s:dict.forget_registered_words() "{{{
     let self._registered_words = s:uniqued_candidates_new()
 endfunction "}}}
 
-function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) dict "{{{
+function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) "{{{
     let id = s:dict_make_registered_word_id(a:input, a:key, a:okuri, a:okuri_rom)
     if self._registered_words.has(id)
         return
@@ -951,11 +951,11 @@ function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) dict "{{
     endif
 endfunction "}}}
 
-function! s:dict.get_registered_words() dict "{{{
+function! s:dict.get_registered_words() "{{{
     return self._registered_words.get()
 endfunction "}}}
 
-function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) dict "{{{
+function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) "{{{
     call self._registered_words.remove(
     \   s:dict_make_registered_word_id(a:input, a:key, a:okuri, a:okuri_rom)
     \)
@@ -965,7 +965,7 @@ function! s:dict_make_registered_word_id(input, key, okuri, okuri_rom) "{{{
     return join([a:input, a:key, a:okuri, a:okuri_rom], ';')
 endfunction "}}}
 
-function! s:dict.is_modified() dict "{{{
+function! s:dict.is_modified() "{{{
     " No need to check system dictionary.
     " Because it is immutable.
     return
@@ -977,7 +977,7 @@ function! s:dict_clear_modified_flags(this) "{{{
     let a:this._user_dict._is_modified = 0
 endfunction "}}}
 
-function! s:dict.update_dictionary() dict "{{{
+function! s:dict.update_dictionary() "{{{
     if !self.is_modified()
         return
     endif
@@ -1052,7 +1052,7 @@ function! s:dict_write_to_file(this) "{{{
 endfunction "}}}
 
 let s:dict_search_candidates = s:uniqued_candidates_new()
-function! s:dict.search(key, okuri, okuri_rom) dict "{{{
+function! s:dict.search(key, okuri, okuri_rom) "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom

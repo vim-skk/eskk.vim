@@ -236,11 +236,11 @@ function! eskk#table#create(name, ...) "{{{
     return obj
 endfunction "}}}
 
-function! s:register_skeleton.is_base() dict "{{{
+function! s:register_skeleton.is_base() "{{{
     return !has_key(self, 'bases')
 endfunction "}}}
 
-function! s:register_skeleton.add(lhs, map, ...) dict "{{{
+function! s:register_skeleton.add(lhs, map, ...) "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
     if self.is_base()
         let self.data[a:lhs] = pair
@@ -250,7 +250,7 @@ function! s:register_skeleton.add(lhs, map, ...) dict "{{{
     return self
 endfunction "}}}
 
-function! s:register_skeleton.remove(lhs) dict "{{{
+function! s:register_skeleton.remove(lhs) "{{{
     if self.is_base()
         throw eskk#user_error(['eskk', 'table'], "Must not remove base class map.")
     else
@@ -259,12 +259,12 @@ function! s:register_skeleton.remove(lhs) dict "{{{
     return self
 endfunction "}}}
 
-function! s:register_skeleton.add_from_dict(dict) dict "{{{
+function! s:register_skeleton.add_from_dict(dict) "{{{
     let self.data = a:dict
     return self
 endfunction "}}}
 
-function! s:register_skeleton.register() dict "{{{
+function! s:register_skeleton.register() "{{{
     if has_key(s:table_defs, self.name)
         " Do not allow override table.
         "
@@ -320,30 +320,30 @@ function! s:table_obj_new(table_name) "{{{
 endfunction "}}}
 
 
-function! s:table_obj.has_candidates(lhs_head) dict "{{{
+function! s:table_obj.has_candidates(lhs_head) "{{{
     let not_found = {}
     return self.get_candidates(a:lhs_head, 1, not_found) isnot not_found
 endfunction "}}}
 
-function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) dict "{{{
+function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) "{{{
     return call('s:get_candidates', [self.table_name, a:lhs_head, a:max_candidates] + a:000)
 endfunction "}}}
 
-function! s:table_obj.has_map(lhs) dict "{{{
+function! s:table_obj.has_map(lhs) "{{{
     let not_found = {}
     return self.get_map(a:lhs, not_found) isnot not_found
 endfunction "}}}
 
-function! s:table_obj.get_map(lhs, ...) dict "{{{
+function! s:table_obj.get_map(lhs, ...) "{{{
     return call('s:get_map', [self.table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
 endfunction "}}}
 
-function! s:table_obj.has_rest(lhs) dict "{{{
+function! s:table_obj.has_rest(lhs) "{{{
     let not_found = {}
     return self.get_rest(a:lhs, not_found) isnot not_found
 endfunction "}}}
 
-function! s:table_obj.get_rest(lhs, ...) dict "{{{
+function! s:table_obj.get_rest(lhs, ...) "{{{
     return call('s:get_map', [self.table_name, a:lhs, s:REST_INDEX] + a:000)
 endfunction "}}}
 

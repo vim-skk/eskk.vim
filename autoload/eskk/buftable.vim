@@ -45,7 +45,7 @@ function! s:buffer_string_new() "{{{
 endfunction "}}}
 
 
-function! s:buffer_string.reset() dict "{{{
+function! s:buffer_string.reset() "{{{
     for k in keys(s:buffer_string)
         if has_key(self, k)
             let self[k] = deepcopy(s:buffer_string[k])
@@ -54,65 +54,65 @@ function! s:buffer_string.reset() dict "{{{
 endfunction "}}}
 
 
-function! s:buffer_string.get_rom_str() dict "{{{
+function! s:buffer_string.get_rom_str() "{{{
     return self._rom_str
 endfunction "}}}
-function! s:buffer_string.set_rom_str(str) dict "{{{
+function! s:buffer_string.set_rom_str(str) "{{{
     let self._rom_str = a:str
 endfunction "}}}
-function! s:buffer_string.push_rom_str(str) dict "{{{
+function! s:buffer_string.push_rom_str(str) "{{{
     call self.set_rom_str(self.get_rom_str() . a:str)
 endfunction "}}}
-function! s:buffer_string.pop_rom_str() dict "{{{
+function! s:buffer_string.pop_rom_str() "{{{
     let s = self.get_rom_str()
     call self.set_rom_str(strpart(s, 0, strlen(s) - 1))
 endfunction "}}}
-function! s:buffer_string.clear_rom_str() dict "{{{
+function! s:buffer_string.clear_rom_str() "{{{
     let self._rom_str = ''
 endfunction "}}}
 
 
-function! s:buffer_string.get_matched() dict "{{{
+function! s:buffer_string.get_matched() "{{{
     return self._matched_pairs
 endfunction "}}}
-function! s:buffer_string.get_matched_rom() dict "{{{
+function! s:buffer_string.get_matched_rom() "{{{
     return join(map(copy(self._matched_pairs), 'v:val[0]'), '')
 endfunction "}}}
-function! s:buffer_string.get_matched_filter() dict "{{{
+function! s:buffer_string.get_matched_filter() "{{{
     return join(map(copy(self._matched_pairs), 'v:val[1]'), '')
 endfunction "}}}
-function! s:buffer_string.set_matched(rom_str, filter_str) dict "{{{
+function! s:buffer_string.set_matched(rom_str, filter_str) "{{{
     let self._matched_pairs = [[a:rom_str, a:filter_str]]
 endfunction "}}}
-function! s:buffer_string.set_multiple_matched(m) dict "{{{
+function! s:buffer_string.set_multiple_matched(m) "{{{
     let self._matched_pairs = a:m
 endfunction "}}}
-function! s:buffer_string.push_matched(rom_str, filter_str) dict "{{{
+function! s:buffer_string.push_matched(rom_str, filter_str) "{{{
     call add(self._matched_pairs, [a:rom_str, a:filter_str])
 endfunction "}}}
-function! s:buffer_string.pop_matched() dict "{{{
+function! s:buffer_string.pop_matched() "{{{
     if empty(self._matched_pairs)
         return []
     endif
     return remove(self._matched_pairs, -1)
 endfunction "}}}
-function! s:buffer_string.clear_matched() dict "{{{
+function! s:buffer_string.clear_matched() "{{{
     let self._matched_pairs = []
 endfunction "}}}
 
 
-function! s:buffer_string.get_input_rom() dict "{{{
+function! s:buffer_string.get_input_rom() "{{{
     return self.get_matched_rom() . self.get_rom_str()
 endfunction "}}}
 
 
-function! s:buffer_string.empty() dict "{{{
+function! s:buffer_string.empty() "{{{
     return self.get_rom_str() == ''
     \   && empty(self.get_matched())
 endfunction "}}}
 
 
-function! s:buffer_string.clear() dict "{{{
+function! s:buffer_string.clear() "{{{
     call self.clear_rom_str()
     call self.clear_matched()
 endfunction "}}}
@@ -142,7 +142,7 @@ function! eskk#buftable#new() "{{{
 endfunction "}}}
 
 
-function! s:buftable.reset() dict "{{{
+function! s:buftable.reset() "{{{
     for k in keys(s:buftable)
         if has_key(self, k)
             let self[k] = deepcopy(s:buftable[k])
@@ -151,19 +151,19 @@ function! s:buftable.reset() dict "{{{
 endfunction "}}}
 
 
-function! s:buftable.get_buf_str(henkan_phase) dict "{{{
+function! s:buftable.get_buf_str(henkan_phase) "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
     return self._table[a:henkan_phase]
 endfunction "}}}
-function! s:buftable.get_current_buf_str() dict "{{{
+function! s:buftable.get_current_buf_str() "{{{
     return self.get_buf_str(self._henkan_phase)
 endfunction "}}}
 
 
-function! s:buftable.set_old_str(str) dict "{{{
+function! s:buftable.set_old_str(str) "{{{
     let self._old_str = a:str
 endfunction "}}}
-function! s:buftable.get_old_str() dict "{{{
+function! s:buftable.get_old_str() "{{{
     return self._old_str
 endfunction "}}}
 
@@ -175,7 +175,7 @@ endfunction "}}}
 "
 " TODO Rewrite mininum string as possible
 " when old or new string become too long.
-function! s:buftable.rewrite() dict "{{{
+function! s:buftable.rewrite() "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
 
     let kakutei = self._kakutei_str
@@ -249,7 +249,7 @@ function! s:buftable.rewrite() dict "{{{
         endif
     endif
 endfunction "}}}
-function! s:buftable.make_remove_bs() dict "{{{
+function! s:buftable.make_remove_bs() "{{{
     let old = self._old_str
     return repeat(
     \   eskk#util#key2char(eskk#mappings#get_special_map("backspace-key")),
@@ -257,7 +257,7 @@ function! s:buftable.make_remove_bs() dict "{{{
     \)
 endfunction "}}}
 
-function! s:buftable.has_changed() dict "{{{
+function! s:buftable.has_changed() "{{{
     let kakutei = self._kakutei_str
     if kakutei != ''
         return 1
@@ -272,7 +272,7 @@ function! s:buftable.has_changed() dict "{{{
     return 0
 endfunction "}}}
 
-function! s:buftable.get_display_str(...) dict "{{{
+function! s:buftable.get_display_str(...) "{{{
     let with_marker = a:0 != 0 ? a:1 : 1
     let phase = self._henkan_phase
 
@@ -325,10 +325,10 @@ endfunction "}}}
 
 
 " self._henkan_phase
-function! s:buftable.get_henkan_phase() dict "{{{
+function! s:buftable.get_henkan_phase() "{{{
     return self._henkan_phase
 endfunction "}}}
-function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
+function! s:buftable.set_henkan_phase(henkan_phase) "{{{
     if a:henkan_phase ==# self._henkan_phase
         call eskk#util#logf('warning: tried to change into same phase: (%d) -> (%d)', a:henkan_phase, a:henkan_phase)
         return
@@ -342,7 +342,7 @@ function! s:buftable.set_henkan_phase(henkan_phase) dict "{{{
 endfunction "}}}
 
 
-function! s:buftable.get_phase_name(phase) dict "{{{
+function! s:buftable.get_phase_name(phase) "{{{
     return [
     \   'normal',
     \   'henkan',
@@ -353,10 +353,10 @@ function! s:buftable.get_phase_name(phase) dict "{{{
 endfunction "}}}
 
 
-function! s:buftable.get_lower_phases() dict "{{{
+function! s:buftable.get_lower_phases() "{{{
     return reverse(range(g:eskk#buftable#HENKAN_PHASE_NORMAL, self._henkan_phase))
 endfunction "}}}
-function! s:buftable.get_all_phases() dict "{{{
+function! s:buftable.get_all_phases() "{{{
     return range(
     \   g:eskk#buftable#HENKAN_PHASE_NORMAL,
     \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
@@ -364,7 +364,7 @@ function! s:buftable.get_all_phases() dict "{{{
 endfunction "}}}
 
 
-function! s:buftable.get_marker(henkan_phase) dict "{{{
+function! s:buftable.get_marker(henkan_phase) "{{{
     let table = [
     \    '',
     \    g:eskk_marker_henkan,
@@ -380,11 +380,11 @@ function! s:buftable.get_current_marker() "{{{
 endfunction "}}}
 
 
-function! s:buftable.push_kakutei_str(str) dict "{{{
+function! s:buftable.push_kakutei_str(str) "{{{
     let self._kakutei_str .= a:str
 endfunction "}}}
 
-function! s:buftable.do_enter(stash) dict "{{{
+function! s:buftable.do_enter(stash) "{{{
     let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     let henkan_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
@@ -441,7 +441,7 @@ function! s:buftable.do_enter(stash) dict "{{{
         throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
-function! s:buftable.do_backspace(stash, ...) dict "{{{
+function! s:buftable.do_backspace(stash, ...) "{{{
     let done_for_group = a:0 ? a:1 : 1
 
     if self.get_old_str() == ''
@@ -534,10 +534,10 @@ function! s:buftable.do_backspace(stash, ...) dict "{{{
         endif
     endfor
 endfunction "}}}
-function! s:buftable.choose_next_candidate(stash) dict "{{{
+function! s:buftable.choose_next_candidate(stash) "{{{
     return s:get_next_candidate(self, a:stash, 1)
 endfunction "}}}
-function! s:buftable.choose_prev_candidate(stash) dict "{{{
+function! s:buftable.choose_prev_candidate(stash) "{{{
     return s:get_next_candidate(self, a:stash, 0)
 endfunction "}}}
 function! s:get_next_candidate(self, stash, next) "{{{
@@ -617,7 +617,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
         endif
     endif
 endfunction "}}}
-function! s:buftable.do_sticky(stash) dict "{{{
+function! s:buftable.do_sticky(stash) "{{{
     let step    = 0
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
@@ -658,7 +658,7 @@ function! s:buftable.do_sticky(stash) dict "{{{
 
     return step ? self.get_current_marker() : ''
 endfunction "}}}
-function! s:buftable.step_back_henkan_phase() dict "{{{
+function! s:buftable.step_back_henkan_phase() "{{{
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
 
@@ -685,7 +685,7 @@ function! s:buftable.step_back_henkan_phase() dict "{{{
         throw eskk#internal_error(['eskk'])
     endif
 endfunction "}}}
-function! s:buftable.do_henkan(stash, ...) dict "{{{
+function! s:buftable.do_henkan(stash, ...) "{{{
     let convert_at_exact_match = a:0 ? a:1 : 0
     let phase = a:stash.phase
     let eskk_mode = a:stash.mode
@@ -705,7 +705,7 @@ function! s:buftable.do_henkan(stash, ...) dict "{{{
         call self.do_henkan_other(a:stash, convert_at_exact_match)
     endif
 endfunction "}}}
-function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) dict "{{{
+function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) "{{{
     let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
@@ -734,7 +734,7 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) dict "{{{
         endif
     endtry
 endfunction "}}}
-function! s:buftable.do_henkan_other(stash, convert_at_exact_match) dict "{{{
+function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     let phase = a:stash.phase
     let eskk_mode = a:stash.mode
     let henkan_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
@@ -799,16 +799,16 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) dict "{{{
         endif
     endtry
 endfunction "}}}
-function! s:buftable.do_ctrl_q_key() dict "{{{
+function! s:buftable.do_ctrl_q_key() "{{{
     return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
-function! s:buftable.do_q_key() dict "{{{
+function! s:buftable.do_q_key() "{{{
     return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
-function! s:buftable.do_l_key() dict "{{{
+function! s:buftable.do_l_key() "{{{
     return s:convert_again_with_table(self, {})
 endfunction "}}}
-function! s:buftable.do_escape(stash) dict "{{{
+function! s:buftable.do_escape(stash) "{{{
     let kakutei_str = self.generate_kakutei_str()
 
     " NOTE: This function return value is not remapped.
@@ -817,12 +817,12 @@ function! s:buftable.do_escape(stash) dict "{{{
 
     let a:stash.return = kakutei_str . eskk#util#key2char(esc)
 endfunction "}}}
-function! s:buftable.do_tab(stash) dict "{{{
+function! s:buftable.do_tab(stash) "{{{
     call a:stash.buf_str.push_rom_str(eskk#util#get_tab_raw_str())
 endfunction "}}}
 
 " TODO: These functions are very similar. Refactoring them.
-function! s:buftable.convert_rom_str(phases) dict "{{{
+function! s:buftable.convert_rom_str(phases) "{{{
     if eskk#has_current_mode_table()
         if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
             let table = eskk#table#new('rom_to_hira')
@@ -838,7 +838,7 @@ function! s:buftable.convert_rom_str(phases) dict "{{{
         endfor
     endif
 endfunction "}}}
-function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
+function! s:buftable.filter_rom_inplace(phase, table_name) "{{{
     let phase = a:phase
     let table = eskk#table#new(a:table_name)
     let buf_str = self.get_buf_str(phase)
@@ -853,7 +853,7 @@ function! s:buftable.filter_rom_inplace(phase, table_name) dict "{{{
     endfor
     return buf_str
 endfunction "}}}
-function! s:buftable.filter_rom(phase, table_name) dict "{{{
+function! s:buftable.filter_rom(phase, table_name) "{{{
     let phase = a:phase
     let table = eskk#table#new(a:table_name)
     let buf_str = deepcopy(self.get_buf_str(phase), 1)
@@ -910,14 +910,14 @@ function! s:convert_again_with_table(self, table) "{{{
     \)
 endfunction "}}}
 
-function! s:buftable.clear_all() dict "{{{
+function! s:buftable.clear_all() "{{{
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call buf_str.clear()
     endfor
 endfunction "}}}
 
-function! s:buftable.remove_display_str() dict "{{{
+function! s:buftable.remove_display_str() "{{{
     let current_str = self.get_display_str()
 
     " NOTE: This function return value is not remapped.
@@ -926,14 +926,14 @@ function! s:buftable.remove_display_str() dict "{{{
 
     return repeat(eskk#util#key2char(bs), eskk#util#mb_strlen(current_str))
 endfunction "}}}
-function! s:buftable.generate_kakutei_str() dict "{{{
+function! s:buftable.generate_kakutei_str() "{{{
     return self.remove_display_str() . self.get_display_str(0)
 endfunction "}}}
 
-function! s:buftable.get_begin_pos() dict "{{{
+function! s:buftable.get_begin_pos() "{{{
     return self._begin_pos
 endfunction "}}}
-function! s:buftable.set_begin_pos(expr) dict "{{{
+function! s:buftable.set_begin_pos(expr) "{{{
     if g:eskk_debug
         call eskk#util#logf("Set begin pos '%s'.", a:expr)
         let col = col(a:expr)
@@ -950,7 +950,7 @@ function! s:buftable.set_begin_pos(expr) dict "{{{
 endfunction "}}}
 
 
-function! s:buftable.empty() dict "{{{
+function! s:buftable.empty() "{{{
     for buf_str in map(self.get_all_phases(), 'self.get_buf_str(v:val)')
         if !buf_str.empty()
             return 0
@@ -960,7 +960,7 @@ function! s:buftable.empty() dict "{{{
 endfunction "}}}
 
 
-function! s:buftable.dump() dict "{{{
+function! s:buftable.dump() "{{{
     let lines = []
     call add(lines, printf('current phase:%d', self._henkan_phase))
     call add(lines, printf('begin pos: %s', string(self.get_begin_pos())))
