@@ -337,8 +337,8 @@ function! s:filter_rom(stash, table) "{{{
     let candidates     = a:table.get_candidates(rom_str, 2, [])
 
     if g:eskk_debug
-        call eskk#util#logf('char = %s, rom_str = %s', string(char), string(rom_str))
-        call eskk#util#logf('candidates = %s', string(candidates))
+        call eskk#util#logstrf('char = %s, rom_str = %s', char, rom_str)
+        call eskk#util#logstrf('a:table.get_candidates(): candidates = %s', candidates)
     endif
 
     if match_exactly
@@ -1378,6 +1378,13 @@ function! eskk#throw_event(event_name) "{{{
 
     while !empty(all_events)
         let call_args = remove(all_events, 0)
+        if g:eskk_debug
+            redir => output
+            silent execute 'function' call_args[0]
+            redir END
+            call eskk#util#logstrf("%s: Call %s with %s", a:event_name, call_args[0], call_args[1])
+            call eskk#util#log(output)
+        endif
         call add(ret, call('call', call_args))
     endwhile
 
@@ -1433,10 +1440,9 @@ endfunction "}}}
 
 " Filter
 function! eskk#filter(char) "{{{
-    call eskk#util#log('')    " for readability.
     let self = eskk#get_current_instance()
 
-    call eskk#util#logstrf('a:char = %s(%d)', a:char, char2nr(a:char))
+    call eskk#util#logstrf('------------- a:char = %s(%d) -------------', a:char, char2nr(a:char))
     " Check irregular circumstance.
     if !eskk#is_supported_mode(self.mode)
         call eskk#util#log_warn('current mode is not supported: ' . self.mode)

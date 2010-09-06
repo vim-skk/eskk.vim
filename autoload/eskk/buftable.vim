@@ -789,6 +789,8 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) dict "{{{
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         endif
     catch /^eskk: dictionary look up error:/
+        call eskk#util#logstrf('404 not found such candidate: hira = %s, okuri = %s, okuri_rom = %s', hira, okuri, okuri_rom)
+
         " No candidates.
         let [input, hira, okuri] =
         \   eskk#dictionary#get_instance().register_word(eskk#get_prev_henkan_result())

@@ -204,6 +204,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
         return 1
     endif
 
+    call eskk#util#log('eskk#complete#handle_special_key(): Close pum and do kakutei.')
     " Select item.
     call s:set_selected_item()
     " Close pum.
