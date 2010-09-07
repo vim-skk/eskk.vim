@@ -1164,6 +1164,12 @@ function! eskk#disable() "{{{
         let &l:omnifunc = self.omnifunc_save
     endif
 
+    if g:eskk_enable_completion
+                \   && exists('g:loaded_neocomplcache')
+                \   && neocomplcache#is_locked()
+        NeoComplCacheUnLock
+    endif
+
     let self.enabled = 0
 
     if mode() =~# '^[ic]$'

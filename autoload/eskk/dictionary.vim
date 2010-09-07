@@ -420,7 +420,9 @@ function! s:henkan_result_get_candidates(this) "{{{
 endfunction "}}}
 
 function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor) "{{{
-    if exists(':NeoComplCacheUnlock')
+    if g:eskk_enable_completion
+                \   && exists('g:loaded_neocomplcache')
+                \   && neocomplcache#is_locked()
         NeoComplCacheUnlock
     endif
     
