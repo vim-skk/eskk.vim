@@ -1167,7 +1167,7 @@ function! eskk#disable() "{{{
     endif
 
     if eskk#is_neocomplcache_locked()
-        NeoComplCacheUnLock
+        NeoComplCacheUnlock
     endif
 
     let self.enabled = 0
