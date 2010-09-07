@@ -420,12 +420,10 @@ function! s:henkan_result_get_candidates(this) "{{{
 endfunction "}}}
 
 function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor) "{{{
-    if g:eskk_enable_completion
-                \   && exists('g:loaded_neocomplcache')
-                \   && neocomplcache#is_locked()
+    if eskk#is_neocomplcache_locked()
         NeoComplCacheUnlock
     endif
-    
+
     " Select candidates by getchar()'s character.
     let words = copy(s:henkan_result_get_candidates(a:this))
     let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))

@@ -1060,7 +1060,9 @@ function! s:initialize() "{{{
     " neocomplcache {{{
     function! s:initialize_neocomplcache()
         function! s:initialize_neocomplcache_unlock()
-            NeoComplCacheUnlock
+            if eskk#is_neocomplcache_locked()
+                NeoComplCacheUnlock
+            endif
             return ''
         endfunction
         call eskk#mappings#map(
@@ -1164,9 +1166,7 @@ function! eskk#disable() "{{{
         let &l:omnifunc = self.omnifunc_save
     endif
 
-    if g:eskk_enable_completion
-                \   && exists('g:loaded_neocomplcache')
-                \   && neocomplcache#is_locked()
+    if eskk#is_neocomplcache_locked()
         NeoComplCacheUnLock
     endif
 
@@ -1760,6 +1760,15 @@ function! eskk#repeat_last_jump(cmd) "{{{
 endfunction "}}}
 function! s:invert_direction(cmd) "{{{
     return eskk#util#is_lower(a:cmd) ? toupper(a:cmd) : tolower(a:cmd)
+endfunction "}}}
+
+" Misc.
+function! eskk#is_neocomplcache_locked() "{{{
+    return
+    \   g:eskk_enable_completion
+    \   && exists('g:loaded_neocomplcache')
+    \   && exists(':NeoComplCacheUnlock')
+    \   && neocomplcache#is_locked()
 endfunction "}}}
 
 " Exceptions
