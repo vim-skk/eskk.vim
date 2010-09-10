@@ -234,7 +234,6 @@ endfunction "}}}
 " }}}
 
 
-
 " s:candidate: s:candidate_new() {{{
 
 let s:CANDIDATE_FROM_USER_DICT = 0
@@ -253,6 +252,69 @@ function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
 endfunction "}}}
 
 " }}}
+
+" s:registered_word: s:registered_word_new() {{{
+
+function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
+    return {
+    \   'input': a:input,
+    \   'key': a:key,
+    \   'okuri': a:okuri,
+    \   'okuri_rom': a:okuri_rom,
+    \}
+endfunction "}}}
+
+" }}}
+
+" s:uniqued_array {{{
+let s:uniqued_candidates = {'_elements': {}, '_counter': 0}
+
+function! s:uniqued_candidates_new() "{{{
+    return deepcopy(s:uniqued_candidates)
+endfunction "}}}
+
+function s:uniqued_candidates.merge(key, candidates) "{{{
+    if has_key(self._elements, a:key)
+        let self._elements[a:key][1] += a:candidates
+    else
+        let self._elements[a:key] = [self._counter, a:candidates]
+        let self._counter += 1
+    endif
+endfunction "}}}
+
+function! s:uniqued_candidates.get_length() "{{{
+    return len(self._elements)
+endfunction "}}}
+
+function! s:uniqued_candidates.get() "{{{
+    return eskk#util#flatten(
+    \   map(
+    \       sort(
+    \           values(self._elements),
+    \           's:sort_fn_by_head_nr'
+    \       ),
+    \       'v:val[1]'
+    \   )
+    \)
+endfunction "}}}
+
+function! s:sort_fn_by_head_nr(a, b) "{{{
+    let [a, b] = [a:a[0], a:b[0]]
+    return a ==# b ? 0 : a ># b ? 1 : -1
+endfunction "}}}
+
+function! s:uniqued_candidates.has(key) "{{{
+    return has_key(self._elements, a:key)
+endfunction "}}}
+
+function! s:uniqued_candidates.clear() "{{{
+    let self._elements = {}
+    let self._counter = 0
+endfunction "}}}
+
+" }}}
+
+
 
 " s:henkan_result {{{
 
@@ -669,7 +731,6 @@ endfunction "}}}
 lockvar s:henkan_result
 " }}}
 
-
 " s:physical_dict {{{
 "
 " Database for physical file dictionary.
@@ -779,68 +840,6 @@ function! s:physical_dict.get_ftime_at_read() "{{{
 endfunction "}}}
 
 lockvar s:physical_dict
-" }}}
-
-
-" s:registered_word: s:registered_word_new() {{{
-
-function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
-    return {
-    \   'input': a:input,
-    \   'key': a:key,
-    \   'okuri': a:okuri,
-    \   'okuri_rom': a:okuri_rom,
-    \}
-endfunction "}}}
-
-" }}}
-
-" s:uniqued_array {{{
-let s:uniqued_candidates = {'_elements': {}, '_counter': 0}
-
-function! s:uniqued_candidates_new() "{{{
-    return deepcopy(s:uniqued_candidates)
-endfunction "}}}
-
-function s:uniqued_candidates.merge(key, candidates) "{{{
-    if has_key(self._elements, a:key)
-        let self._elements[a:key][1] += a:candidates
-    else
-        let self._elements[a:key] = [self._counter, a:candidates]
-        let self._counter += 1
-    endif
-endfunction "}}}
-
-function! s:uniqued_candidates.get_length() "{{{
-    return len(self._elements)
-endfunction "}}}
-
-function! s:uniqued_candidates.get() "{{{
-    return eskk#util#flatten(
-    \   map(
-    \       sort(
-    \           values(self._elements),
-    \           's:sort_fn_by_head_nr'
-    \       ),
-    \       'v:val[1]'
-    \   )
-    \)
-endfunction "}}}
-
-function! s:sort_fn_by_head_nr(a, b) "{{{
-    let [a, b] = [a:a[0], a:b[0]]
-    return a ==# b ? 0 : a ># b ? 1 : -1
-endfunction "}}}
-
-function! s:uniqued_candidates.has(key) "{{{
-    return has_key(self._elements, a:key)
-endfunction "}}}
-
-function! s:uniqued_candidates.clear() "{{{
-    let self._elements = {}
-    let self._counter = 0
-endfunction "}}}
-
 " }}}
 
 " s:dict {{{
