@@ -277,21 +277,33 @@ endfunction "}}}
 " }}}
 
 " s:uniqued_array {{{
-let s:uniqued_array = {'_elements': {}, '_counter': 0}
+let s:uniqued_array = {'_elements': {}, '_max_counter': 0, '_min_counter': -1}
 
 function! s:uniqued_array_new() "{{{
     return deepcopy(s:uniqued_array)
 endfunction "}}}
 
-function s:uniqued_array.merge(key, elem, ...) "{{{
+function s:uniqued_array.push(key, elem, ...) "{{{
     if has_key(self._elements, a:key)
         let overwrite = a:0 ? a:1 : 1
         if overwrite
             let self._elements[a:key][1] = a:elem
         endif
     else
-        let self._elements[a:key] = [self._counter, a:elem]
-        let self._counter += 1
+        let self._elements[a:key] = [self._max_counter, a:elem]
+        let self._max_counter += 1
+    endif
+endfunction "}}}
+
+function! s:uniqued_array.unshift(key, elem, ...) "{{{
+    if has_key(self._elements, a:key)
+        let overwrite = a:0 ? a:1 : 1
+        if overwrite
+            let self._elements[a:key][1] = a:elem
+        endif
+    else
+        let self._elements[a:key] = [self._min_counter, a:elem]
+        let self._min_counter -= 1
     endif
 endfunction "}}}
 
@@ -322,7 +334,8 @@ endfunction "}}}
 
 function! s:uniqued_array.clear() "{{{
     let self._elements = {}
-    let self._counter = 0
+    let self._max_counter = 0
+    let self._min_counter = 0
 endfunction "}}}
 
 function! s:uniqued_array.remove(key) "{{{
@@ -468,7 +481,7 @@ function! s:henkan_result_get_candidates(this) "{{{
             call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "user dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
 
             for c in candidates
-                call a:this._candidates.merge(s:candidate_make_key(c), c)
+                call a:this._candidates.push(s:candidate_make_key(c), c)
             endfor
         endif
 
@@ -478,7 +491,7 @@ function! s:henkan_result_get_candidates(this) "{{{
             call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "system dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
 
             for c in candidates
-                call a:this._candidates.merge(s:candidate_make_key(c), c)
+                call a:this._candidates.push(s:candidate_make_key(c), c)
             endfor
         endif
 
@@ -488,7 +501,7 @@ function! s:henkan_result_get_candidates(this) "{{{
         if !empty(registered)
             for rw in registered
                 let c = s:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, rw.input, rw.okuri_rom != "")
-                call a:this._candidates.merge(rw.input, c)
+                call a:this._candidates.push(rw.input, c)
             endfor
         endif
 
@@ -1011,7 +1024,7 @@ function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) "{{{
         return
     endif
 
-    call self._registered_words.merge(id, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom))
+    call self._registered_words.push(id, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom))
     let self._registered_words_modified = 1
 
     if !empty(self._current_henkan_result)
@@ -1149,7 +1162,7 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     " self._registered_words
     for w in self._registered_words.get()
         if w.key ==# key && w.okuri_rom[0] ==# okuri_rom[0] && !candidates.has(w.input)
-            call candidates.merge(
+            call candidates.push(
             \   w.input,
             \   s:candidate_new(
             \       s:CANDIDATE_FROM_REGISTERED_WORDS,
@@ -1175,7 +1188,7 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
                 \)
                     for c in eskk#dictionary#parse_skk_dict_line(line, from_type)[2]
                         if !candidates.has(c.input)
-                            call candidates.merge(
+                            call candidates.push(
                             \   c.input,
                             \   s:candidate_new(
                             \       s:CANDIDATE_FROM_REGISTERED_WORDS,
