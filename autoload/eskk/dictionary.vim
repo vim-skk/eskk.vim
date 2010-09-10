@@ -274,10 +274,11 @@ function! s:uniqued_array_new() "{{{
 endfunction "}}}
 
 function s:uniqued_array.merge(key, candidates) "{{{
+    let candidates = type(a:candidates) == type([]) ? a:candidates : [a:candidates]
     if has_key(self._elements, a:key)
-        let self._elements[a:key][1] += a:candidates
+        let self._elements[a:key][1] += candidates
     else
-        let self._elements[a:key] = [self._counter, a:candidates]
+        let self._elements[a:key] = [self._counter, candidates]
         let self._counter += 1
     endif
 endfunction "}}}
@@ -1102,11 +1103,11 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
         if w.key ==# key
             call candidates.merge(
             \   w.key . w.okuri_rom[0],
-            \   [s:candidate_new(
+            \   s:candidate_new(
             \       s:CANDIDATE_FROM_REGISTERED_WORDS,
             \       w.input,
             \       w.okuri_rom != ""
-            \   )]
+            \   )
             \)
             if candidates.get_length() >= max_count
                 break
