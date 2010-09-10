@@ -352,7 +352,7 @@ let s:henkan_result = {
 \   '_okuri_rom': '',
 \   '_okuri': '',
 \   '_status': -1,
-\   '_candidates': [],
+\   '_candidates': {},
 \   '_candidates_index': -1,
 \   '_user_dict_found_index': -1,
 \}
@@ -377,7 +377,7 @@ function! s:henkan_result_reset(this) "{{{
     \   a:this,
     \   {
     \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
-    \       '_candidates': {},
+    \       '_candidates': s:uniqued_array_new(),
     \       '_candidates_index': 0,
     \   },
     \   'force'
@@ -411,8 +411,7 @@ endfunction "}}}
 
 function! s:henkan_result_get_candidates(this) "{{{
     if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
-        call eskk#util#assert(!empty(a:this._candidates), "a:this._candidates must be not empty.")
-        return a:this._candidates
+        return a:this._candidates.get()
 
     elseif a:this._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
         call eskk#util#logstrf('s:henkan_result_get_candidates(): Look up dictionary for: a:this._key = %s, a:this._okuri = %s, a:this._okuri_rom = %s', a:this._key, a:this._okuri, a:this._okuri_rom)
@@ -440,33 +439,43 @@ function! s:henkan_result_get_candidates(this) "{{{
         endif
 
         " Merge and unique user dict result and system dict result.
-        let results = []
 
         if user_dict_result[1] !=# -1
             let [key, okuri_rom, candidates] = eskk#dictionary#parse_skk_dict_line(user_dict_result[0], s:CANDIDATE_FROM_USER_DICT)
             call eskk#util#assert(key ==# a:this._key, "user dict:".string(key)." ==# ".string(a:this._key))
             call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "user dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
-            let results += candidates
+
+            for c in candidates
+                let id = c.input . (has_key(c, 'annotation') ? ';' . c.annotation : '')
+                call a:this._candidates.merge(id, c)
+            endfor
         endif
 
         if system_dict_result[1] !=# -1
             let [key, okuri_rom, candidates] = eskk#dictionary#parse_skk_dict_line(system_dict_result[0], s:CANDIDATE_FROM_SYSTEM_DICT)
             call eskk#util#assert(key ==# a:this._key, "system dict:".string(key)." ==# ".string(a:this._key))
             call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "system dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
-            let results += candidates
+
+            for c in candidates
+                let id = c.input . (has_key(c, 'annotation') ? ';' . c.annotation : '')
+                call a:this._candidates.merge(id, c)
+            endfor
         endif
 
         " Merge registered words.
         let registered = filter(copy(dict.get_registered_words()), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
         call eskk#util#logstrf('s:henkan_result_get_candidates(): Gathering matched registered words: %s', registered)
         if !empty(registered)
-            let results += map(registered, 's:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, v:val.input, v:val.okuri_rom != "")')
+            for rw in registered
+                let c = s:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, rw.input, rw.okuri_rom != "")
+                call a:this._candidates.merge(rw.input, c)
+            endfor
         endif
 
         let a:this._user_dict_found_index = user_dict_result[1]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
-        let a:this._candidates = s:henkan_result_merge_candidates(results)
-        return a:this._candidates
+
+        return a:this._candidates.get()
 
     elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
         throw eskk#dictionary_look_up_error(
@@ -566,29 +575,6 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
             endfor
         endif
     endwhile
-endfunction "}}}
-
-function! s:henkan_result_merge_candidates(candidates) "{{{
-    let candidates = copy(a:candidates)
-    if empty(candidates)
-        return candidates
-    endif
-    let unique = {}
-    let i = 0
-    while i < len(candidates)
-        let r = candidates[i]
-        let k = r.input . (has_key(r, 'annotation') ? ";" . r.annotation : '')
-
-        if has_key(unique, k)
-            call remove(candidates, i)
-            " Next element is candidates[i], Don't increment.
-            continue
-        else
-            let unique[k] = r
-        endif
-        let i += 1
-    endwhile
-    return candidates
 endfunction "}}}
 
 function! s:henkan_result_remove_cache(this) "{{{
