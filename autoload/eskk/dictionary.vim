@@ -270,7 +270,7 @@ function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
     \}
 endfunction "}}}
 
-function! s:registered_word_make_key(input, key, okuri, okuri_rom) "{{{
+function! s:registered_word_make_key_from_members(input, key, okuri, okuri_rom) "{{{
     return join([a:input, a:key, a:okuri, a:okuri_rom], ';')
 endfunction "}}}
 
@@ -1006,7 +1006,7 @@ endfunction "}}}
 
 " Add registered word.
 function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) "{{{
-    let id = s:registered_word_make_key(a:input, a:key, a:okuri, a:okuri_rom)
+    let id = s:registered_word_make_key_from_members(a:input, a:key, a:okuri, a:okuri_rom)
     if self._registered_words.has(id)
         return
     endif
@@ -1031,7 +1031,7 @@ endfunction "}}}
 " Remove registered word matching with arguments values.
 function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) "{{{
     call self._registered_words.remove(
-    \   s:registered_word_make_key(a:input, a:key, a:okuri, a:okuri_rom)
+    \   s:registered_word_make_key_from_members(a:input, a:key, a:okuri, a:okuri_rom)
     \)
 endfunction "}}}
 
