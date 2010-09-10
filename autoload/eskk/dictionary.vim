@@ -251,6 +251,12 @@ function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
     return obj
 endfunction "}}}
 
+function! s:candidate_make_key(candidate) "{{{
+    return
+    \   a:candidate.input
+    \   . (has_key(a:candidate, 'annotation') ? ';' . a:candidate.annotation : '')
+endfunction "}}}
+
 " }}}
 
 " s:registered_word: s:registered_word_new() {{{
@@ -462,8 +468,7 @@ function! s:henkan_result_get_candidates(this) "{{{
             call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "user dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
 
             for c in candidates
-                let id = c.input . (has_key(c, 'annotation') ? ';' . c.annotation : '')
-                call a:this._candidates.merge(id, c)
+                call a:this._candidates.merge(s:candidate_make_key(c), c)
             endfor
         endif
 
@@ -473,8 +478,7 @@ function! s:henkan_result_get_candidates(this) "{{{
             call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "system dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
 
             for c in candidates
-                let id = c.input . (has_key(c, 'annotation') ? ';' . c.annotation : '')
-                call a:this._candidates.merge(id, c)
+                call a:this._candidates.merge(s:candidate_make_key(c), c)
             endfor
         endif
 
