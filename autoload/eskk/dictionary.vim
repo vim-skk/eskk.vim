@@ -372,6 +372,9 @@ function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
     return obj
 endfunction "}}}
 
+" Reset candidates.
+" After calling this function,
+" s:henkan_result_get_candidates() will look up dictionary again.
 function! s:henkan_result_reset(this) "{{{
     call extend(
     \   a:this,
@@ -387,6 +390,8 @@ function! s:henkan_result_reset(this) "{{{
     call eskk#util#logstrf('re-initialized henkan result: a:this._key = %s, a:this._okuri = %s, a:this._okuri_rom = %s', a:this._key, a:this._okuri, a:this._okuri_rom)
 endfunction "}}}
 
+" Forward/Back self._candidates_index safely
+" Returns true value when succeeded / false value when failed
 function! s:henkan_result_advance(this, advance) "{{{
     call s:henkan_result_remove_cache(a:this)
 
@@ -409,6 +414,7 @@ function! s:henkan_result_advance(this, advance) "{{{
     endtry
 endfunction "}}}
 
+" Returns List of candidates.
 function! s:henkan_result_get_candidates(this) "{{{
     if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
         return a:this._candidates.get()
@@ -493,6 +499,7 @@ function! s:henkan_result_get_candidates(this) "{{{
     endif
 endfunction "}}}
 
+" Select candidate from command-line.
 function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor) "{{{
     if eskk#is_neocomplcache_locked()
         NeoComplCacheUnlock
@@ -577,6 +584,7 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
     endwhile
 endfunction "}}}
 
+" Clear cache of current candidate.
 function! s:henkan_result_remove_cache(this) "{{{
     if has_key(a:this, '_candidate')
         unlet a:this._candidate
@@ -584,6 +592,9 @@ function! s:henkan_result_remove_cache(this) "{{{
 endfunction "}}}
 
 
+" Returns candidate String.
+" if optional {with_okuri} arguments are supplied,
+" returns candidate String with okuri.
 function! s:henkan_result.get_candidate(...) "{{{
     let with_okuri = a:0 ? a:1 : 1
 
@@ -624,27 +635,39 @@ function! s:henkan_result.get_candidate(...) "{{{
 
     return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
 endfunction "}}}
+" Getter for self._key
 function! s:henkan_result.get_key() "{{{
     return self._key
 endfunction "}}}
+" Getter for self._okuri
 function! s:henkan_result.get_okuri() "{{{
     return self._okuri
 endfunction "}}}
+" Getter for self._okuri_rom
 function! s:henkan_result.get_okuri_rom() "{{{
     return self._okuri_rom
 endfunction "}}}
+" Getter for self._status
 function! s:henkan_result.get_status() "{{{
     return self._status
 endfunction "}}}
 
+" Forward current candidate index number (self._candidates_index)
 function! s:henkan_result.forward() "{{{
     return s:henkan_result_advance(self, 1)
 endfunction "}}}
-
+" Back current candidate index number (self._candidates_index)
 function! s:henkan_result.back() "{{{
     return s:henkan_result_advance(self, 0)
 endfunction "}}}
 
+" Delete current candidate from all places.
+" e.g.:
+" - s:skk_dict_instance._registered_words
+" - self._candidates
+" - SKK dictionary
+" -- User dictionary
+" -- TODO: System dictionary (skk-ignore-dic-word) (Issue #86)
 function! s:henkan_result.delete_from_dict() "{{{
     try
         return s:henkan_result_delete_from_dict(self)
@@ -653,7 +676,6 @@ function! s:henkan_result.delete_from_dict() "{{{
         call dict.clear_henkan_result()
     endtry
 endfunction "}}}
-
 function! s:henkan_result_delete_from_dict(this) "{{{
     call eskk#util#log('s:henkan_result.delete_from_dict()')
 
@@ -762,6 +784,7 @@ endfunction "}}}
 
 
 
+" Get List of whole lines of dictionary.
 function! s:physical_dict.get_lines(...) "{{{
     let force = a:0 ? a:1 : 0
 
@@ -792,6 +815,7 @@ function! s:physical_dict.get_lines(...) "{{{
     return self._content_lines
 endfunction "}}}
 
+" Set List of whole lines of dictionary.
 function! s:physical_dict.set_lines(lines) "{{{
     try
         let self._content_lines  = a:lines
@@ -805,6 +829,8 @@ function! s:physical_dict.set_lines(lines) "{{{
     endtry
 endfunction "}}}
 
+" - Validate List of whole lines of dictionary.
+" - Set self.okuri_ari_idx, self.okuri_nasi_idx.
 function! s:physical_dict_parse_lines(self, lines) "{{{
     let self = a:self
 
@@ -821,11 +847,15 @@ function! s:physical_dict_parse_lines(self, lines) "{{{
     endif
 endfunction "}}}
 
+" Returns true value if "self.okuri_ari_idx" and
+" "self.okuri_nasi_idx" is valid range.
 function! s:physical_dict.is_valid() "{{{
     " Succeeded to parse SKK dictionary.
     return self.okuri_ari_idx >= 0 && self.okuri_nasi_idx >= 0
 endfunction "}}}
 
+" Get self._ftime_at_read.
+" See self._ftime_at_read description at "s:physical_dict".
 function! s:physical_dict.get_ftime_at_read() "{{{
     return self._ftime_at_read
 endfunction "}}}
@@ -892,6 +922,11 @@ function! eskk#dictionary#get_instance() "{{{
 endfunction "}}}
 
 
+" Find matching candidates from all places.
+"
+" This actually just sets "self._current_henkan_result"
+" which is "s:henkan_result"'s instance.
+" This is interface so s:henkan_result is implementation.
 function! s:dict.refer(buftable, key, okuri, okuri_rom) "{{{
     let hr = s:henkan_result_new(
     \   a:key,
@@ -903,6 +938,7 @@ function! s:dict.refer(buftable, key, okuri, okuri_rom) "{{{
     return hr
 endfunction "}}}
 
+" Register new word (registered word) at command-line.
 function! s:dict.register_word(henkan_result) "{{{
     let key       = a:henkan_result.get_key()
     let okuri     = a:henkan_result.get_okuri()
@@ -949,10 +985,12 @@ function! s:dict.register_word(henkan_result) "{{{
     return [input, key, okuri]
 endfunction "}}}
 
+" Clear current registered words.
 function! s:dict.forget_registered_words() "{{{
     call self._registered_words.clear()
 endfunction "}}}
 
+" Add registered word.
 function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) "{{{
     let id = s:dict_make_registered_word_id(a:input, a:key, a:okuri, a:okuri_rom)
     if self._registered_words.has(id)
@@ -971,10 +1009,12 @@ function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) "{{{
     endif
 endfunction "}}}
 
+" Get List of registered words.
 function! s:dict.get_registered_words() "{{{
     return self._registered_words.get()
 endfunction "}}}
 
+" Remove registered word matching with arguments values.
 function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) "{{{
     call self._registered_words.remove(
     \   s:dict_make_registered_word_id(a:input, a:key, a:okuri, a:okuri_rom)
@@ -985,6 +1025,9 @@ function! s:dict_make_registered_word_id(input, key, okuri, okuri_rom) "{{{
     return join([a:input, a:key, a:okuri, a:okuri_rom], ';')
 endfunction "}}}
 
+" Returns true value if new registered is added
+" or user dictionary's lines are modified by "s:physical_dict_new.set_lines()".
+" If this value is false, s:dict.update_dictionary() does nothing.
 function! s:dict.is_modified() "{{{
     " No need to check system dictionary.
     " Because it is immutable.
@@ -992,11 +1035,18 @@ function! s:dict.is_modified() "{{{
     \   self._registered_words_modified
     \   || self._user_dict._is_modified
 endfunction "}}}
+
+" After calling this function,
+" s:dict.is_modified() will returns false.
+" but after calling "s:physical_dict_new.set_lines()",
+" s:dict.is_modified() will returns true.
 function! s:dict_clear_modified_flags(this) "{{{
     let a:this._registered_words_modified = 0
     let a:this._user_dict._is_modified = 0
 endfunction "}}}
 
+" Write to user dictionary.
+" By default, This function is executed at VimLeavePre.
 function! s:dict.update_dictionary() "{{{
     if !self.is_modified()
         return
@@ -1137,20 +1187,23 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     return [key, okuri_rom, candidates.get()]
 endfunction "}}}
 
+
+" Getter for self._current_henkan_result
 function! s:dict.get_henkan_result() "{{{
     return self._current_henkan_result
 endfunction "}}}
-
-function! s:dict.clear_henkan_result() "{{{
-    let self._current_henkan_result = {}
-endfunction "}}}
-
+" Getter for self._user_dict
 function! s:dict.get_user_dict() "{{{
     return self._user_dict
 endfunction "}}}
-
+" Getter for self._system_dict
 function! s:dict.get_system_dict() "{{{
     return self._system_dict
+endfunction "}}}
+
+" Clear self._current_henkan_result
+function! s:dict.clear_henkan_result() "{{{
+    let self._current_henkan_result = {}
 endfunction "}}}
 
 lockvar s:dict
