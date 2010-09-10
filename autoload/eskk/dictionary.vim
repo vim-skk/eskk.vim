@@ -552,13 +552,14 @@ function! s:henkan_result.get_candidate(...) "{{{
     endif
 
     if idx >= max_count
-        let functor = {'candidates': candidates, 'idx': idx, 'this': self, 'with_okuri': with_okuri}
+        let functor = {'candidates': candidates, 'this': self, 'with_okuri': with_okuri}
         function functor.funcall()
-            if self.idx > 0
+            if self.this._candidates_index > 0
+                " This changes self.this._candidates_index.
                 call self.this.back()
             endif
             return [
-            \   self.candidates[self.idx].input,
+            \   self.candidates[self.this._candidates_index].input,
             \   (self.with_okuri ? self.this._okuri : '')
             \]
         endfunction
