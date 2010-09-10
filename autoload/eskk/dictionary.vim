@@ -273,12 +273,14 @@ function! s:uniqued_array_new() "{{{
     return deepcopy(s:uniqued_array)
 endfunction "}}}
 
-function s:uniqued_array.merge(key, candidates) "{{{
-    let candidates = type(a:candidates) == type([]) ? a:candidates : [a:candidates]
+function s:uniqued_array.merge(key, elem, ...) "{{{
     if has_key(self._elements, a:key)
-        let self._elements[a:key][1] += candidates
+        let overwrite = a:0 ? a:1 : 1
+        if overwrite
+            let self._elements[a:key][1] = a:elem
+        endif
     else
-        let self._elements[a:key] = [self._counter, candidates]
+        let self._elements[a:key] = [self._counter, a:elem]
         let self._counter += 1
     endif
 endfunction "}}}
