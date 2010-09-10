@@ -257,6 +257,15 @@ function! s:candidate_make_key(candidate) "{{{
     \   . (has_key(a:candidate, 'annotation') ? ';' . a:candidate.annotation : '')
 endfunction "}}}
 
+function! s:candidate2registered_word(candidate, key, okuri, okuri_rom) "{{{
+    return s:registered_word_new(
+    \   a:candidate.input,
+    \   a:key,
+    \   a:okuri,
+    \   a:okuri_rom
+    \)
+endfunction "}}}
+
 " }}}
 
 " s:registered_word: s:registered_word_new() {{{
@@ -272,6 +281,11 @@ endfunction "}}}
 
 function! s:registered_word_make_key_from_members(input, key, okuri, okuri_rom) "{{{
     return join([a:input, a:key, a:okuri, a:okuri_rom], ';')
+endfunction "}}}
+
+function! s:registered_word_make_key(rw) "{{{
+    let w = a:rw
+    return s:registered_word_make_key_from_members(w.input, w.key, w.okuri, w.okuri_rom)
 endfunction "}}}
 
 " }}}
@@ -473,8 +487,20 @@ function! s:henkan_result_get_candidates(this) "{{{
             \)
         endif
 
-        " Merge and unique user dict result and system dict result.
+        " NOTE: The order is important.
+        " registered word, user dictionary, system dictionary.
 
+        " Merge registered words.
+        let registered = filter(copy(dict.get_registered_words()), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
+        call eskk#util#logstrf('s:henkan_result_get_candidates(): Gathering matched registered words: %s', registered)
+        if !empty(registered)
+            for rw in registered
+                let c = s:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, rw.input, rw.okuri_rom != "")
+                call a:this._candidates.push(rw.input, c)
+            endfor
+        endif
+
+        " Merge user dictionary.
         if user_dict_result[1] !=# -1
             let [key, okuri_rom, candidates] = eskk#dictionary#parse_skk_dict_line(user_dict_result[0], s:CANDIDATE_FROM_USER_DICT)
             call eskk#util#assert(key ==# a:this._key, "user dict:".string(key)." ==# ".string(a:this._key))
@@ -485,6 +511,7 @@ function! s:henkan_result_get_candidates(this) "{{{
             endfor
         endif
 
+        " Merge system dictionary.
         if system_dict_result[1] !=# -1
             let [key, okuri_rom, candidates] = eskk#dictionary#parse_skk_dict_line(system_dict_result[0], s:CANDIDATE_FROM_SYSTEM_DICT)
             call eskk#util#assert(key ==# a:this._key, "system dict:".string(key)." ==# ".string(a:this._key))
@@ -492,16 +519,6 @@ function! s:henkan_result_get_candidates(this) "{{{
 
             for c in candidates
                 call a:this._candidates.push(s:candidate_make_key(c), c)
-            endfor
-        endif
-
-        " Merge registered words.
-        let registered = filter(copy(dict.get_registered_words()), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
-        call eskk#util#logstrf('s:henkan_result_get_candidates(): Gathering matched registered words: %s', registered)
-        if !empty(registered)
-            for rw in registered
-                let c = s:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, rw.input, rw.okuri_rom != "")
-                call a:this._candidates.push(rw.input, c)
             endfor
         endif
 
@@ -600,10 +617,12 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
         elseif stridx(g:eskk_select_cand_keys, char) != -1
             let selected = g:eskk_select_cand_keys[stridx(g:eskk_select_cand_keys, char)]
             call eskk#util#logf("Selected char '%s'.", selected)
-            for [c, word] in pages[page_index]
+            for idx in range(len(pages[page_index]))
+                let [c, word] = pages[page_index][idx]
                 if c ==# selected
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
+                    let a:this._candidates_index = idx + a:skip_num
                     return [word.input, (a:with_okuri ? a:this._okuri : '')]
                 endif
             endfor
@@ -766,6 +785,29 @@ function! s:henkan_result_delete_from_dict(this) "{{{
 
     redraw
     call dict.update_dictionary()
+endfunction "}}}
+
+" TODO doc
+function! s:henkan_result.update_candidate() "{{{
+    let candidates = s:henkan_result_get_candidates(self)
+    let candidates_index = self._candidates_index
+
+    if !eskk#util#has_idx(candidates, candidates_index)
+        call eskk#util#log('.update_candidate(): candidates_index is out of range')
+        return
+    endif
+    let rw = s:candidate2registered_word(
+    \   candidates[candidates_index],
+    \   self._key,
+    \   self._okuri,
+    \   self._okuri_rom,
+    \)
+
+    " Move current candidate to the first.
+    let dict = eskk#dictionary#get_instance()
+    let key = s:registered_word_make_key(rw)
+    call dict._registered_words.remove(key)
+    call dict._registered_words.unshift(key, rw)
 endfunction "}}}
 
 lockvar s:henkan_result

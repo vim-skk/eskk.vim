@@ -385,13 +385,11 @@ function! s:buftable.push_kakutei_str(str) "{{{
 endfunction "}}}
 
 function! s:buftable.do_enter(stash) "{{{
-    let normal_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_NORMAL)
-    let henkan_buf_str        = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-    let okuri_buf_str         = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
-    let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
-    let phase = self.get_henkan_phase()
+    let phase = a:stash.phase
     let enter_char = eskk#util#key2char(eskk#mappings#get_special_map('enter-key'))
     let undo_char  = eskk#util#key2char(eskk#mappings#get_special_map('undo-key'))
+    let dict = eskk#dictionary#get_instance()
+    let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call self.convert_rom_str([phase])
@@ -405,6 +403,10 @@ function! s:buftable.do_enter(stash) "{{{
         call self.push_kakutei_str(self.get_display_str(0))
         call self.clear_all()
 
+        if !empty(henkan_result)
+            call henkan_result.update_candidate()
+        endif
+
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
         call self.convert_rom_str([g:eskk#buftable#HENKAN_PHASE_HENKAN, phase])
@@ -415,6 +417,10 @@ function! s:buftable.do_enter(stash) "{{{
         call self.push_kakutei_str(self.get_display_str(0))
         call self.clear_all()
 
+        if !empty(henkan_result)
+            call henkan_result.update_candidate()
+        endif
+
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         call self.convert_rom_str([phase])
@@ -422,15 +428,8 @@ function! s:buftable.do_enter(stash) "{{{
             call eskk#register_temp_event('filter-redispatch-post', 'eskk#util#identity', [undo_char])
         endif
 
-        let dict = eskk#dictionary#get_instance()
-        let henkan_result = dict.get_henkan_result()
-        if henkan_result.get_status() ==# g:eskk#dictionary#HR_GOT_RESULT
-            call dict.remember_registered_word(
-            \   henkan_result.get_candidate(0),
-            \   henkan_result.get_key(),
-            \   henkan_result.get_okuri(),
-            \   henkan_result.get_okuri_rom(),
-            \)
+        if !empty(henkan_result)
+            call henkan_result.update_candidate()
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
