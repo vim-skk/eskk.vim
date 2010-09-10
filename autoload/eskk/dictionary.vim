@@ -959,7 +959,7 @@ function! s:dict.register_word(henkan_result) "{{{
 endfunction "}}}
 
 function! s:dict.forget_registered_words() "{{{
-    let self._registered_words = s:uniqued_candidates_new()
+    call self._registered_words.clear()
 endfunction "}}}
 
 function! s:dict.remember_registered_word(input, key, okuri, okuri_rom) "{{{
