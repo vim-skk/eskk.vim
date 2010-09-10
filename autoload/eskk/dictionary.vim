@@ -319,6 +319,12 @@ function! s:uniqued_array.clear() "{{{
     let self._counter = 0
 endfunction "}}}
 
+function! s:uniqued_array.remove(key) "{{{
+    if has_key(self._elements, a:key)
+        unlet self._elements[a:key]
+    endif
+endfunction "}}}
+
 " }}}
 
 
