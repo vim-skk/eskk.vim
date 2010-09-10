@@ -1100,9 +1100,9 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
 
     " self._registered_words
     for w in self._registered_words.get()
-        if w.key ==# key
+        if w.key ==# key && w.okuri_rom[0] ==# okuri_rom[0] && !candidates.has(w.input)
             call candidates.merge(
-            \   w.key . w.okuri_rom[0],
+            \   w.input,
             \   s:candidate_new(
             \       s:CANDIDATE_FROM_REGISTERED_WORDS,
             \       w.input,
@@ -1117,29 +1117,33 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
 
     if candidates.get_length() < max_count
         " User dictionary, System dictionary
-        for [dict, from_type] in [
-        \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
-        \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
-        \]
-            if candidates.get_length() >= max_count
-                break
-            endif
-            let do_break = 0
-            for line in eskk#dictionary#search_all_candidates(
-            \   dict, key, okuri_rom, max_count - candidates.get_length()
-            \)
-                let [line_key, line_okuri_rom, list] =
-                \   eskk#dictionary#parse_skk_dict_line(line, from_type)
-                call candidates.merge(line_key . line_okuri_rom, list)
-                if candidates.get_length() >= max_count
-                    let do_break = 1
-                    break
-                endif
+        try
+            for [dict, from_type] in [
+            \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
+            \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
+            \]
+                for line in eskk#dictionary#search_all_candidates(
+                \   dict, key, okuri_rom, max_count - candidates.get_length()
+                \)
+                    for c in eskk#dictionary#parse_skk_dict_line(line, from_type)[2]
+                        if !candidates.has(c.input)
+                            call candidates.merge(
+                            \   c.input,
+                            \   s:candidate_new(
+                            \       s:CANDIDATE_FROM_REGISTERED_WORDS,
+                            \       c.input,
+                            \       okuri_rom != ""
+                            \   )
+                            \)
+                            if candidates.get_length() >= max_count
+                                throw 'break'
+                            endif
+                        endif
+                    endfor
+                endfor
             endfor
-            if do_break
-                break
-            endif
-        endfor
+        catch /^break$/
+        endtry
     endif
 
     return [key, okuri_rom, candidates.get()]
