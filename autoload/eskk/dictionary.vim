@@ -267,13 +267,13 @@ endfunction "}}}
 " }}}
 
 " s:uniqued_array {{{
-let s:uniqued_candidates = {'_elements': {}, '_counter': 0}
+let s:uniqued_array = {'_elements': {}, '_counter': 0}
 
-function! s:uniqued_candidates_new() "{{{
-    return deepcopy(s:uniqued_candidates)
+function! s:uniqued_array_new() "{{{
+    return deepcopy(s:uniqued_array)
 endfunction "}}}
 
-function s:uniqued_candidates.merge(key, candidates) "{{{
+function s:uniqued_array.merge(key, candidates) "{{{
     if has_key(self._elements, a:key)
         let self._elements[a:key][1] += a:candidates
     else
@@ -282,11 +282,11 @@ function s:uniqued_candidates.merge(key, candidates) "{{{
     endif
 endfunction "}}}
 
-function! s:uniqued_candidates.get_length() "{{{
+function! s:uniqued_array.get_length() "{{{
     return len(self._elements)
 endfunction "}}}
 
-function! s:uniqued_candidates.get() "{{{
+function! s:uniqued_array.get() "{{{
     return eskk#util#flatten(
     \   map(
     \       sort(
@@ -303,11 +303,11 @@ function! s:sort_fn_by_head_nr(a, b) "{{{
     return a ==# b ? 0 : a ># b ? 1 : -1
 endfunction "}}}
 
-function! s:uniqued_candidates.has(key) "{{{
+function! s:uniqued_array.has(key) "{{{
     return has_key(self._elements, a:key)
 endfunction "}}}
 
-function! s:uniqued_candidates.clear() "{{{
+function! s:uniqued_array.clear() "{{{
     let self._elements = {}
     let self._counter = 0
 endfunction "}}}
@@ -374,7 +374,7 @@ function! s:henkan_result_reset(this) "{{{
     \   a:this,
     \   {
     \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
-    \       '_candidates': [],
+    \       '_candidates': {},
     \       '_candidates_index': 0,
     \   },
     \   'force'
@@ -885,7 +885,7 @@ function! s:dict_new(user_dict, system_dict) "{{{
     \           a:system_dict.sorted,
     \           a:system_dict.encoding,
     \       ),
-    \       '_registered_words': s:uniqued_candidates_new(),
+    \       '_registered_words': s:uniqued_array_new(),
     \   },
     \   'force'
     \)
@@ -1080,7 +1080,7 @@ function! s:dict_write_to_file(this) "{{{
     endtry
 endfunction "}}}
 
-let s:dict_search_candidates = s:uniqued_candidates_new()
+let s:dict_search_candidates = s:uniqued_array_new()
 function! s:dict.search(key, okuri, okuri_rom) "{{{
     let key = a:key
     let okuri = a:okuri
