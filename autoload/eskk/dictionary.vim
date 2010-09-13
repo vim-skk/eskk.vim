@@ -198,11 +198,14 @@ endfunction "}}}
 
 " Returns String of the created entry from arguments values.
 function! eskk#dictionary#create_new_entry(new_word, key, okuri, okuri_rom, existing_line) "{{{
+    " XXX:
     " TODO:
     " Rewrite for eskk.
     " This function is from skk.vim's s:SkkMakeNewEntry().
 
-    " Modify to make same input to original s:SkkMakeNewEntry().
+    " XXX:
+    " Modify them to make the same input to
+    " the original s:SkkMakeNewEntry()'s arguments.
     let key = a:key . (a:okuri_rom == '' ? '' : a:okuri_rom[0]) . ' '
     let cand = a:new_word
     let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
@@ -935,7 +938,7 @@ lockvar s:physical_dict
 " s:dict {{{
 "
 " Interface for multiple dictionary.
-" This behave like one file dictionary.
+" This behaves like one file dictionary.
 " But it may have multiple dictionaries.
 "
 " See section `Searching Functions` for
@@ -1186,7 +1189,9 @@ function! s:dict_write_to_file(this) "{{{
     endtry
 endfunction "}}}
 
+" Reduce the losses of creating instance.
 let s:dict_search_candidates = s:uniqued_array_new()
+" Search candidates matching with arguments.
 function! s:dict.search(key, okuri, okuri_rom) "{{{
     let key = a:key
     let okuri = a:okuri
