@@ -804,9 +804,8 @@ function! s:henkan_result.update_candidate() "{{{
 
     " Move current candidate to the first.
     let dict = eskk#dictionary#get_instance()
-    let key = s:registered_word_make_key(rw)
-    call dict._registered_words.remove(key)
-    call dict._registered_words.unshift(key, rw)
+    call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
+    call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
 endfunction "}}}
 
 lockvar s:henkan_result
@@ -1056,6 +1055,27 @@ endfunction "}}}
 " Clear all registered words.
 function! s:dict.forget_all_words() "{{{
     call self._registered_words.clear()
+endfunction "}}}
+
+" Clear given registered word.
+function! s:dict.forget_word(input, key, okuri, okuri_rom) "{{{
+    let id = s:registered_word_make_key_from_members(a:input, a:key, a:okuri, a:okuri_rom)
+    if !self._registered_words.has(id)
+        return
+    endif
+
+    let self._registered_words.remove(id)
+    let self._registered_words_modified = 1
+
+    if !empty(self._current_henkan_result)
+        call s:henkan_result_reset(self._current_henkan_result)
+    endif
+
+    if g:eskk_debug
+        call eskk#util#logstrf(
+        \   's:dict.forget_word(): registered word: %s', self._registered_words.get()
+        \)
+    endif
 endfunction "}}}
 
 " Add registered word.
