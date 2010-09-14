@@ -294,33 +294,31 @@ endfunction "}}}
 " }}}
 
 " s:uniqued_array {{{
-let s:uniqued_array = {'_elements': {}, '_max_counter': 0, '_min_counter': -1}
+let s:uniqued_array = {'_elements': [], '_keys': {}}
 
 function! s:uniqued_array_new() "{{{
     return deepcopy(s:uniqued_array)
 endfunction "}}}
 
 function s:uniqued_array.push(key, elem, ...) "{{{
-    if has_key(self._elements, a:key)
-        let overwrite = a:0 ? a:1 : 1
-        if overwrite
-            let self._elements[a:key][1] = a:elem
+    let overwrite = a:0 ? a:1 : 1
+    if !has_key(self._keys, a:key) || !overwrite
+        if has_key(self._keys, a:key)
+            call self.remove(a:key)
         endif
-    else
-        let self._elements[a:key] = [self._max_counter, a:elem]
-        let self._max_counter += 1
+        call add(self._elements, [a:key, a:elem])
+        let self._keys[a:key] = 1
     endif
 endfunction "}}}
 
 function! s:uniqued_array.unshift(key, elem, ...) "{{{
-    if has_key(self._elements, a:key)
-        let overwrite = a:0 ? a:1 : 1
-        if overwrite
-            let self._elements[a:key][1] = a:elem
+    let overwrite = a:0 ? a:1 : 1
+    if !has_key(self._keys, a:key) || !overwrite
+        if has_key(self._keys, a:key)
+            call self.remove(a:key)
         endif
-    else
-        let self._elements[a:key] = [self._min_counter, a:elem]
-        let self._min_counter -= 1
+        call insert(self._elements, [a:key, a:elem])
+        let self._keys[a:key] = 1
     endif
 endfunction "}}}
 
@@ -329,36 +327,34 @@ function! s:uniqued_array.get_length() "{{{
 endfunction "}}}
 
 function! s:uniqued_array.get() "{{{
-    return eskk#util#flatten(
-    \   map(
-    \       sort(
-    \           values(self._elements),
-    \           's:sort_fn_by_head_nr'
-    \       ),
-    \       'v:val[1]'
-    \   )
-    \)
-endfunction "}}}
-
-function! s:sort_fn_by_head_nr(a, b) "{{{
-    let [a, b] = [a:a[0], a:b[0]]
-    return a ==# b ? 0 : a ># b ? 1 : -1
+    return map(copy(self._elements), 'v:val[1]')
 endfunction "}}}
 
 function! s:uniqued_array.has(key) "{{{
-    return has_key(self._elements, a:key)
+    return has_key(self._keys, a:key)
 endfunction "}}}
 
 function! s:uniqued_array.clear() "{{{
-    let self._elements = {}
-    let self._max_counter = 0
-    let self._min_counter = 0
+    for k in keys(s:uniqued_array)
+        if has_key(self, k)
+            let self[k] = deepcopy(s:uniqued_array[k])
+        endif
+    endfor
 endfunction "}}}
 
 function! s:uniqued_array.remove(key) "{{{
-    if has_key(self._elements, a:key)
-        unlet self._elements[a:key]
+    if !has_key(self._keys, a:key)
+        return
     endif
+
+    unlet self._keys[a:key]
+    for i in range(len(self._elements))
+        let [key, elem] = self._elements[i]
+        if key ==# a:key
+            call remove(self._elements, i)
+            break
+        endif
+    endfor
 endfunction "}}}
 
 " }}}
