@@ -1064,7 +1064,7 @@ function! s:dict.forget_word(input, key, okuri, okuri_rom) "{{{
         return
     endif
 
-    let self._registered_words.remove(id)
+    call self._registered_words.remove(id)
     let self._registered_words_modified = 1
 
     if !empty(self._current_henkan_result)
