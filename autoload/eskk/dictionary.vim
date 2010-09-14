@@ -1057,8 +1057,8 @@ function! s:dict.register_word(henkan_result) "{{{
     return [input, key, okuri]
 endfunction "}}}
 
-" Clear current registered words.
-function! s:dict.forget_registered_words() "{{{
+" Clear all registered words.
+function! s:dict.forget_all_words() "{{{
     call self._registered_words.clear()
 endfunction "}}}
 
@@ -1141,7 +1141,7 @@ function! s:dict.update_dictionary() "{{{
     endif
 
     call s:dict_write_to_file(self)
-    call self.forget_registered_words()
+    call self.forget_all_words()
     call s:dict_clear_modified_flags(self)
 endfunction "}}}
 function! s:dict_write_to_file(this) "{{{

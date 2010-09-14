@@ -3,7 +3,7 @@ scriptencoding utf-8
 
 " See 'doc/eskk.txt'.
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 216))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 3, 217))
 
 " Load Once {{{
 if exists('g:loaded_eskk') && g:loaded_eskk
@@ -334,7 +334,7 @@ command!
 \   call s:cmd_forget_registered_words()
 
 function! s:cmd_forget_registered_words()
-    call eskk#dictionary#get_instance().forget_registered_words()
+    call eskk#dictionary#get_instance().forget_all_words()
 endfunction
 
 
