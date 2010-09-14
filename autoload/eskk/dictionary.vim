@@ -1085,7 +1085,9 @@ function! s:dict.remember_word(input, key, okuri, okuri_rom) "{{{
         return
     endif
 
-    call self._registered_words.push(id, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom))
+    call self._registered_words.unshift(
+    \   id, s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom)
+    \)
     let self._registered_words_modified = 1
 
     if !empty(self._current_henkan_result)
@@ -1093,7 +1095,9 @@ function! s:dict.remember_word(input, key, okuri, okuri_rom) "{{{
     endif
 
     if g:eskk_debug
-        call eskk#util#logstrf('registered word: %s', self._registered_words.get())
+        call eskk#util#logstrf(
+        \   's:dict.forget_word(): registered word: %s', self._registered_words.get()
+        \)
     endif
 endfunction "}}}
 
