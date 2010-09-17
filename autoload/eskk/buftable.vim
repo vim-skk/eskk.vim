@@ -799,7 +799,7 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     endtry
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() "{{{
-  return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_q_key() "{{{
     return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
@@ -907,7 +907,7 @@ function! s:convert_again_with_table(self, table) "{{{
     \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
     \   []
     \)
-    
+
     " Update dictionary.
     let dict = eskk#dictionary#get_instance()
     let henkan_result = dict.get_henkan_result()
