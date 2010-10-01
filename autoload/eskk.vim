@@ -1094,9 +1094,6 @@ function! eskk#enable(...) "{{{
     let self = eskk#get_current_instance()
     let do_map = a:0 != 0 ? a:1 : 1
 
-    if eskk#is_enabled()
-        return ''
-    endif
     call eskk#util#log('')
     call eskk#util#log('enabling eskk...')
 
@@ -1146,9 +1143,6 @@ function! eskk#disable() "{{{
     let self = eskk#get_current_instance()
     let do_unmap = a:0 != 0 ? a:1 : 0
 
-    if !eskk#is_enabled()
-        return ''
-    endif
     call eskk#util#log('')
     call eskk#util#log('disabling eskk...')
 
@@ -1591,7 +1585,7 @@ function! s:write_error_log_file(char) "{{{
 
     function o['d'](arg)
         redir => output
-        silent execute 'function' a:arg.funcname
+            silent execute 'function' a:arg.funcname
         redir END
 
         let a:arg.lines += split(output, '\n')
@@ -1614,7 +1608,7 @@ function! s:write_error_log_file(char) "{{{
 
     call add(lines, "--- Vim's :version ---")
     redir => output
-    silent version
+        silent version
     redir END
     let lines += split(output, '\n')
     call add(lines, "--- Vim's :version ---")
@@ -1653,8 +1647,6 @@ function! s:write_error_log_file(char) "{{{
 
     call add(lines, "Please report this error to author.")
     call add(lines, "`:help eskk` to see author's e-mail address.")
-
-
 
     let log_file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'error' . strftime('-%Y-%m-%d-%H%M%S') . '.log'))
     let write_success = 0
