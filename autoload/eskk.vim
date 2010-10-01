@@ -1656,7 +1656,7 @@ function! s:write_error_log_file(char) "{{{
 
 
 
-    let log_file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'error.log'))
+    let log_file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'error' . strftime('-%Y-%m-%d-%H%M%S') . '.log'))
     let write_success = 0
     try
         call writefile(lines, log_file)
