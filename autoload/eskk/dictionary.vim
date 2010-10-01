@@ -525,20 +525,22 @@ function! s:henkan_result_get_candidates(this) "{{{
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
 
         return a:this._candidates.get()
-
-    elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
-        throw eskk#dictionary_look_up_error(
-        \   ['eskk', 'dictionary'],
-        \   "Can't look up '"
-        \   . g:eskk_marker_henkan
-        \   . a:this._key
-        \   . g:eskk_marker_okuri
-        \   . a:this._okuri_rom
-        \   . "' in dictionaries."
-        \)
-
     else
-        throw eskk#internal_error(['eskk', 'dictionary'])
+        return []
+
+        " This routine makes error when using completion.
+    "elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
+        "throw eskk#dictionary_look_up_error(
+        "\   ['eskk', 'dictionary'],
+        "\   "Can't look up '"
+        "\   . g:eskk_marker_henkan
+        "\   . a:this._key
+        "\   . g:eskk_marker_okuri
+        "\   . a:this._okuri_rom
+        "\   . "' in dictionaries."
+        "\)
+    "else
+        "throw eskk#internal_error(['eskk', 'dictionary'])
     endif
 endfunction "}}}
 
