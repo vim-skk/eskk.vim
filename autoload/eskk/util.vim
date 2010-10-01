@@ -86,7 +86,7 @@ function! eskk#util#log_warn(msg) "{{{
 
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
     if out ==# 'file'
-        let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'warnings' . strftime('-%Y-%m-%d') . '.log'))
+        let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'warnings'. strftime('-%Y-%m-%d') . '.log'))
         execute 'redir >>' file
         silent echo msg
         redir END
