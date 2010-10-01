@@ -1139,7 +1139,7 @@ function! eskk#enable(...) "{{{
     if self.enabled_mode =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
-        return eskk#emulate_toggle_im()
+        return eskk#enable_im()
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
@@ -1176,13 +1176,13 @@ function! eskk#disable() "{{{
         let buftable = eskk#get_buftable()
         return buftable.generate_kakutei_str() . "\<C-^>"
     else
-        return eskk#emulate_toggle_im()
+        return eskk#disable_im()
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
-function! eskk#emulate_toggle_im() "{{{
+function! eskk#enable_im() "{{{
     let save_lang = v:lang
     lang messages C
     try
@@ -1195,36 +1195,26 @@ function! eskk#emulate_toggle_im() "{{{
     let defined_langmap = (output !~# '^\n*No mapping found\n*$')
 
     " :help i_CTRL-^
-    if defined_langmap
-        if &l:iminsert ==# 1
-            let &l:iminsert = 0
-        else
-            let &l:iminsert = 1
-        endif
-    else
-        if &l:iminsert ==# 2
-            let &l:iminsert = 0
-        else
-            let &l:iminsert = 2
-        endif
-    endif
+    let &l:iminsert = defined_langmap ? 1 : 2
+    let &l:imsearch = &l:iminsert
+    
+    return ''
+endfunction "}}}
+function! eskk#disable_im() "{{{
+    let save_lang = v:lang
+    lang messages C
+    try
+        redir => output
+        silent lmap
+        redir END
+    finally
+        execute 'lang messages' save_lang
+    endtry
+    let defined_langmap = (output !~# '^\n*No mapping found\n*$')
 
-    " :help c_CTRL-^
-    if &l:imsearch ==# -1
-        let &l:imsearch = &l:iminsert
-    elseif defined_langmap
-        if &l:imsearch ==# 1
-            let &l:imsearch = 0
-        else
-            let &l:imsearch = 1
-        endif
-    else
-        if &l:imsearch ==# 2
-            let &l:imsearch = 0
-        else
-            let &l:imsearch = 2
-        endif
-    endif
+    let &l:iminsert = 0
+    let &l:imsearch = 0
+    
     return ''
 endfunction "}}}
 
