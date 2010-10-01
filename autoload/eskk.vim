@@ -1091,10 +1091,6 @@ function! eskk#is_enabled() "{{{
     return eskk#get_current_instance().enabled
 endfunction "}}}
 function! eskk#enable(...) "{{{
-    if eskk#is_enabled() && &l:iminsert != 0
-        return ''
-    endif
-    
     let self = eskk#get_current_instance()
     let do_map = a:0 != 0 ? a:1 : 1
 
@@ -1144,10 +1140,6 @@ function! eskk#enable(...) "{{{
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
-    if !eskk#is_enabled() && &l:iminsert == 0
-        return ''
-    endif
-    
     let self = eskk#get_current_instance()
     let do_unmap = a:0 != 0 ? a:1 : 0
 
