@@ -1170,17 +1170,21 @@ function! s:dict_write_to_file(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this._user_dict really does not have registered words.
+    let ari_idx = a:this._user_dict.okuri_ari_idx + 1
+    let nasi_idx = a:this._user_dict.okuri_nasi_idx + 1
     for w in a:this._registered_words.get()
         let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, w.key, w.okuri_rom)
         if w.okuri_rom != ''
-            let lnum = a:this._user_dict.okuri_ari_idx + 1
+            let lnum = ari_idx
         else
-            let lnum = a:this._user_dict.okuri_nasi_idx + 1
+            let lnum = nasi_idx
         endif
         " Delete old entry.
         if index !=# -1
             call remove(user_dict_lines, index)
             call eskk#util#assert(line != '')
+        elseif w.okuri_rom != ''
+            let nasi_idx += 1
         endif
         " Merge old one and create new entry.
         call insert(
