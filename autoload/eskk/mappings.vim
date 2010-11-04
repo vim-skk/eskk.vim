@@ -182,6 +182,7 @@ let s:mode_local_keys = {
 \   ],
 \}
 let s:prev_im_options = {}
+let s:prev_normal_keys = {}
 
 
 " Utilities
@@ -321,6 +322,26 @@ function! eskk#mappings#unmap(modes, options, lhs) "{{{
         endtry
     endfor
 endfunction "}}}
+function! eskk#mappings#map_from_maparg_dict(dict) "{{{
+    if empty(a:dict)
+        " The mapping does not exist.
+        return
+    endif
+
+    let lhs = a:dict.lhs
+    let rhs = a:dict.rhs
+    let options = ''
+    for [from, to] in items({
+    \   'silent': 's',
+    \   'expr': 'e',
+    \   'buffer': 'b',
+    \})
+        let options .= a:dict[from] ? to : ''
+    endfor
+    let options .= a:dict.noremap ? '' : 'r'
+    let modes = a:dict.mode
+    return eskk#mappings#map(options, lhs, rhs, modes)
+endfunction "}}}
 
 function! eskk#mappings#set_up_key(key, ...) "{{{
     call eskk#mappings#map(
@@ -402,8 +423,26 @@ function! eskk#mappings#unmap_normal_keys() "{{{
         call eskk#mappings#unmap('n', 'b', key)
     endfor
 endfunction "}}}
+function! eskk#mappings#save_normal_keys() "{{{
+    " TODO: return when maparg() patch is not applied.
+    let keys = {'info': {}}
+    for key in s:get_normal_keys()
+        let keys.info[key] = maparg(key, '', 0, 1)
+    endfor
+    function! keys.restore()
+        for info in values(self.info)
+            call eskk#mappings#map_from_maparg_dict(info)
+        endfor
+    endfunction
+    return keys
+endfunction "}}}
+function! eskk#mappings#restore_normal_keys(keys) "{{{
+    " TODO: return when maparg() patch is not applied.
+    call a:keys.restore()
+endfunction "}}}
 
 function! eskk#mappings#do_insert_enter() "{{{
+    let s:prev_normal_keys = eskk#mappings#save_normal_keys()
     call eskk#mappings#unmap_normal_keys()
     " Restore previous im options.
     let nr = bufnr('%')
@@ -413,6 +452,10 @@ function! eskk#mappings#do_insert_enter() "{{{
     endif
 endfunction "}}}
 function! eskk#mappings#do_insert_leave() "{{{
+    if !empty(s:prev_normal_keys)
+        call eskk#mappings#restore_normal_keys(s:prev_normal_keys)
+        let s:prev_normal_keys = {}
+    endif
     call eskk#mappings#map_normal_keys()
     " Save im options.
     let s:prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
