@@ -382,6 +382,9 @@ function! eskk#mappings#map_mode_local_keys() "{{{
     endif
 endfunction "}}}
 
+function! s:get_normal_keys() "{{{
+    return split('iIaAoOcCsSR', '\zs')
+endfunction "}}}
 function! eskk#mappings#map_normal_keys() "{{{
     " From s:SkkMapNormal() in plugin/skk.vim
 
@@ -390,12 +393,12 @@ function! eskk#mappings#map_normal_keys() "{{{
     \   . 'let [&l:iminsert, &l:imsearch] = '
     \       . string([&l:iminsert, &l:imsearch])
     \   . '<CR>'
-    for key in split('iIaAoOcCsSR', '\zs')
+    for key in s:get_normal_keys()
         call eskk#mappings#map('sb', key, restore_commands . key, 'n')
     endfor
 endfunction "}}}
 function! eskk#mappings#unmap_normal_keys() "{{{
-    for key in split('iIaAoOcCsSR', '\zs')
+    for key in s:get_normal_keys()
         call eskk#mappings#unmap('n', 'b', key)
     endfor
 endfunction "}}}
