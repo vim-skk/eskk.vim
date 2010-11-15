@@ -424,23 +424,22 @@ function! eskk#mappings#unmap_normal_keys() "{{{
     endfor
 endfunction "}}}
 function! eskk#mappings#save_normal_keys() "{{{
-    if !(v:version > 703 || v:version == 703 && has('patch32'))
+    if !savemap#supported_version()
         return {}
     endif
 
     let keys = {'info': {}}
     for key in s:get_normal_keys()
-        let keys.info[key] = maparg(key, '', 0, 1)
+        let keys.info[key] = savemap#save_map('n', key)
     endfor
     function! keys.restore()
-        for info in values(self.info)
-            call eskk#mappings#map_from_maparg_dict(info)
+        for map in values(self.info)
+            call map.restore()
         endfor
     endfunction
     return keys
 endfunction "}}}
 function! eskk#mappings#restore_normal_keys(keys) "{{{
-    " TODO: return when maparg() patch is not applied.
     call a:keys.restore()
 endfunction "}}}
 
