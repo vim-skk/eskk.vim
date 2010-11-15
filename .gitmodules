@@ -1,3 +1,6 @@
 [submodule "lib/simpletap"]
 	path = lib/simpletap
 	url = git://github.com/tyru/simpletap.vim.git
+[submodule "lib/savemap.vim"]
+	path = lib/savemap.vim
+	url = git://github.com/tyru/savemap.vim.git
