@@ -402,7 +402,7 @@ function! s:get_buftable_pos() "{{{
     let buftable = eskk#get_buftable()
     let l = buftable.get_begin_pos()
     if empty(l)
-        call eskk#util#log_warn("Can't get begin pos.")
+        call eskk#util#log("Can't get begin pos.")
         return [0, 0, 0]
     endif
     let [mode, pos] = l
@@ -423,7 +423,7 @@ function! s:get_buftable_str(with_marker, ...) "{{{
 
     let [success, _, pos] = s:get_buftable_pos()
     if !success
-        call eskk#util#log_warn('s:get_buftable_pos() failed')
+        call eskk#util#log('s:get_buftable_pos() failed')
         return ''
     endif
     let begin = pos[2] - 1

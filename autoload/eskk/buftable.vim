@@ -318,7 +318,7 @@ function! s:buftable.get_henkan_phase() "{{{
 endfunction "}}}
 function! s:buftable.set_henkan_phase(henkan_phase) "{{{
     if a:henkan_phase ==# self._henkan_phase
-        call eskk#util#logf_warn('tried to change into same phase: (%d) -> (%d)', a:henkan_phase, a:henkan_phase)
+        call eskk#util#logf('tried to change into same phase: (%d) -> (%d)', a:henkan_phase, a:henkan_phase)
         return
     endif
 
@@ -931,7 +931,7 @@ function! s:buftable.set_begin_pos(expr) "{{{
     elseif mode() ==# 'c'
         let self._begin_pos = ['c', getcmdpos()]
     else
-        call eskk#util#logf_warn("called eskk from mode '%s'.", mode())
+        call eskk#util#logf("called eskk from mode '%s'.", mode())
     endif
 endfunction "}}}
 

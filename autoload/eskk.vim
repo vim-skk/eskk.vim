@@ -584,7 +584,7 @@ function! s:initialize() "{{{
         let dir = expand(g:eskk_directory)
         for d in [dir, eskk#util#join_path(dir, 'log')]
             if !isdirectory(d) && !eskk#util#mkdir_nothrow(d)
-                call eskk#util#logf_warn("can't create directory '%s'.", d)
+                call eskk#util#logf("can't create directory '%s'.", d)
             endif
         endfor
     endfunction
@@ -1149,8 +1149,8 @@ endfunction "}}}
 function! eskk#set_mode(next_mode) "{{{
     let self = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:next_mode)
-        call eskk#util#logf_warn("mode '%s' is not supported.", a:next_mode)
-        call eskk#util#logf_warn('s:available_modes = %s', string(s:available_modes))
+        call eskk#util#logf("mode '%s' is not supported.", a:next_mode)
+        call eskk#util#logf('s:available_modes = %s', string(s:available_modes))
         return
     endif
 
@@ -1341,7 +1341,7 @@ function! eskk#filter(char) "{{{
 
     " Check irregular circumstance.
     if !eskk#is_supported_mode(self.mode)
-        call eskk#util#log_warn('current mode is not supported: ' . self.mode)
+        call eskk#util#log('current mode is not supported: ' . self.mode)
         sleep 1
     endif
 
@@ -1570,7 +1570,7 @@ function! s:write_error_log_file(char) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        call eskk#util#logf_warn("Cannot write to log file '%s'.", log_file)
+        call eskk#util#logf("Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight

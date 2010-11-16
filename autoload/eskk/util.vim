@@ -66,39 +66,9 @@ function! eskk#util#log_exception(what) "{{{
         return
     endif
 
-    call eskk#util#log_warn("'" . a:what . "' throwed exception")
-    call eskk#util#log_warn('v:exception = ' . string(v:exception))
-    call eskk#util#log_warn('v:throwpoint = ' . string(v:throwpoint))
-endfunction "}}}
-function! eskk#util#log_warn(msg) "{{{
-    if !eskk#is_initialized()
-        call eskk#register_temp_event('enable-im', 'eskk#util#log_warn', [a:msg])
-        return
-    endif
-
-    redraw
-
-    let out = eskk#util#option_value(
-    \   g:eskk_warnings_out,
-    \   ['file', 'cmdline'],
-    \   0
-    \)
-
-    let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    if out ==# 'file'
-        let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'warnings'. strftime('-%Y-%m-%d') . '.log'))
-        execute 'redir >>' file
-        silent echo msg
-        redir END
-    else
-        call eskk#util#warn(msg)
-    endif
-endfunction "}}}
-function! eskk#util#logf_warn(fmt, ...) "{{{
-    call eskk#util#log_warn(call('printf', [a:fmt] + a:000))
-endfunction "}}}
-function! eskk#util#logstrf_warn(fmt, ...) "{{{
-    return call('eskk#util#logf_warn', [a:fmt] + map(copy(a:000), 'string(v:val)'))
+    call eskk#util#log("'" . a:what . "' throwed exception")
+    call eskk#util#log('v:exception = ' . string(v:exception))
+    call eskk#util#log('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
 
 function! eskk#util#formatstrf(fmt, ...) "{{{
@@ -356,27 +326,27 @@ endfunction "}}}
 function! eskk#util#getchar(...) "{{{
     let success = 0
     if inputsave() !=# success
-        call eskk#util#log_warn("inputsave() failed")
+        call eskk#util#log("inputsave() failed")
     endif
     try
         let c = call('getchar', a:000)
         return type(c) == type("") ? c : nr2char(c)
     finally
         if inputrestore() !=# success
-            call eskk#util#log_warn("inputrestore() failed")
+            call eskk#util#log("inputrestore() failed")
         endif
     endtry
 endfunction "}}}
 function! eskk#util#input(...) "{{{
     let success = 0
     if inputsave() !=# success
-        call eskk#util#log_warn("inputsave() failed")
+        call eskk#util#log("inputsave() failed")
     endif
     try
         return call('input', a:000)
     finally
         if inputrestore() !=# success
-            call eskk#util#log_warn("inputrestore() failed")
+            call eskk#util#log("inputrestore() failed")
         endif
     endtry
 endfunction "}}}

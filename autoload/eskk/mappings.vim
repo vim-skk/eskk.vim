@@ -291,7 +291,7 @@ endfunction "}}}
 
 function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
-        call eskk#util#logstrf_warn('lhs or rhs is empty: lhs = %s, rhs = %s', a:lhs, a:rhs)
+        call eskk#util#logstrf('lhs or rhs is empty: lhs = %s, rhs = %s', a:lhs, a:rhs)
         return
     endif
 
@@ -308,7 +308,7 @@ function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
 endfunction "}}}
 function! eskk#mappings#unmap(modes, options, lhs) "{{{
     if a:lhs == ''
-        call eskk#util#logstrf_warn('lhs is empty: lhs = %s', a:lhs)
+        call eskk#util#logstrf('lhs is empty: lhs = %s', a:lhs)
         return
     endif
 
@@ -376,7 +376,7 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
         call eskk#mappings#unmap('l', 'b', temp_key)
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
     else
-        call eskk#util#logf_warn("called eskk#mappings#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
+        call eskk#util#logf("called eskk#mappings#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
         call eskk#mappings#set_up_key(a:lhs)
     endif
 endfunction "}}}
