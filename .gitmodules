@@ -4,3 +4,6 @@
 [submodule "lib/savemap.vim"]
 	path = lib/savemap.vim
 	url = git://github.com/tyru/savemap.vim.git
+[submodule "lib/cul.vim"]
+	path = lib/cul.vim
+	url = git://github.com/tyru/cul.vim.git
