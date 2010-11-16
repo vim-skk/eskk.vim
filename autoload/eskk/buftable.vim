@@ -559,33 +559,25 @@ function! s:get_next_candidate(self, stash, next) "{{{
             endif
         else
             " Restore previous buftable state
-
-            let revert_style = eskk#util#option_value(
-            \   g:eskk_revert_henkan_style,
-            \   ['okuri-one', 'okuri', 'delete-okuri', 'concat-okuri'],
-            \   1
-            \)
-
             let henkan_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
             let okuri_buf_str = prev_buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
             let okuri_rom_str = okuri_buf_str.get_matched_rom()
-
-            if revert_style ==# 'okuri-one'
+            if g:eskk_revert_henkan_style ==# 'okuri-one'
                 " "▼書く" => "▽か*k"
                 if okuri_rom_str != ''
                     call okuri_buf_str.set_rom_str(okuri_rom_str[0])
                     call okuri_buf_str.clear_matched()
                 endif
-            elseif revert_style ==# 'okuri'
+            elseif g:eskk_revert_henkan_style ==# 'okuri'
                 " "▼書く" => "▽か*く"
-            elseif revert_style ==# 'delete-okuri'
+            elseif g:eskk_revert_henkan_style ==# 'delete-okuri'
                 " "▼書く" => "▽か"
                 if okuri_rom_str != ''
                     " Clear roms of `okuri_buf_str`.
                     call okuri_buf_str.clear()
                     call prev_buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 endif
-            elseif revert_style ==# 'concat-okuri'
+            elseif g:eskk_revert_henkan_style ==# 'concat-okuri'
                 " "▼書く" => "▽かく"
                 if okuri_rom_str != ''
                     " Copy roms of `okuri_buf_str` to `henkan_buf_str`.

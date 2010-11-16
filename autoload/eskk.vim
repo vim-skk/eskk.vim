@@ -478,11 +478,10 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let buf_str = a:stash.buf_str
     let rom_str_without_char = buf_str.get_rom_str()
     let rom_str = rom_str_without_char . char
-    let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
 
     let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
     if empty(matched_map_list)
-        if input_style ==# 'skk'
+        if g:eskk_rom_input_style ==# 'skk'
             if rest ==# char
                 let a:stash.return = char
             else

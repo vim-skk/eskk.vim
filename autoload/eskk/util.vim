@@ -37,14 +37,8 @@ function! eskk#util#log(msg) "{{{
 
     redraw
 
-    let stdout = eskk#util#option_value(
-    \   g:eskk_debug_stdout,
-    \   ['file', 'cmdline'],
-    \   0
-    \)
-
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    if stdout ==# 'file'
+    if g:eskk_debug_stdout ==# 'file'
         let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'debug' . strftime('-%Y-%m-%d') . '.log'))
         execute 'redir >>' file
         silent echo msg
@@ -299,14 +293,6 @@ function! eskk#util#assert(cond, ...) "{{{
     endif
 endfunction "}}}
 
-function! eskk#util#option_value(value, list, default_index) "{{{
-    for _ in a:list
-        if _ ==# a:value
-            return a:value
-        endif
-    endfor
-    return a:list[a:default_index]
-endfunction "}}}
 function! eskk#util#identity(value) "{{{
     return a:value
 endfunction "}}}
