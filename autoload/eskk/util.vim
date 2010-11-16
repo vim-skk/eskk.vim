@@ -15,7 +15,7 @@ set cpo&vim
 " }}}
 
 
-" Logging/Output
+" Message
 function! eskk#util#warn(msg) "{{{
     echohl WarningMsg
     echomsg a:msg
@@ -24,6 +24,8 @@ endfunction "}}}
 function! eskk#util#warnf(msg, ...) "{{{
     call eskk#util#warn(call('printf', [a:msg] + a:000))
 endfunction "}}}
+
+" Logging
 function! eskk#util#log(msg) "{{{
     if !g:eskk_debug
         return
