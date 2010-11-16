@@ -390,7 +390,7 @@ endfunction "}}}
 " Returns List of candidates.
 function! s:henkan_result_get_candidates(this) "{{{
     if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
-        return a:this._candidates.to_array()
+        return a:this._candidates.to_list()
 
     elseif a:this._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
         call eskk#util#logstrf('s:henkan_result_get_candidates(): Look up dictionary for: a:this._key = %s, a:this._okuri = %s, a:this._okuri_rom = %s', a:this._key, a:this._okuri, a:this._okuri_rom)
@@ -455,7 +455,7 @@ function! s:henkan_result_get_candidates(this) "{{{
         let a:this._user_dict_found_index = user_dict_result[1]
         let a:this._status = g:eskk#dictionary#HR_GOT_RESULT
 
-        return a:this._candidates.to_array()
+        return a:this._candidates.to_list()
     else
         return []
 
@@ -1008,7 +1008,7 @@ function! s:dict.forget_word(input, key, okuri, okuri_rom) "{{{
 
     if g:eskk_debug
         call eskk#util#logstrf(
-        \   's:dict.forget_word(): registered word: %s', self._registered_words.to_array()
+        \   's:dict.forget_word(): registered word: %s', self._registered_words.to_list()
         \)
     endif
 endfunction "}}}
@@ -1029,14 +1029,14 @@ function! s:dict.remember_word(input, key, okuri, okuri_rom) "{{{
 
     if g:eskk_debug
         call eskk#util#logstrf(
-        \   's:dict.forget_word(): registered word: %s', self._registered_words.to_array()
+        \   's:dict.forget_word(): registered word: %s', self._registered_words.to_list()
         \)
     endif
 endfunction "}}}
 
 " Get List of registered words.
 function! s:dict.get_registered_words() "{{{
-    return self._registered_words.to_array()
+    return self._registered_words.to_list()
 endfunction "}}}
 
 " Remove registered word matching with arguments values.
@@ -1103,7 +1103,7 @@ function! s:dict_write_to_file(this) "{{{
     " Check if a:this._user_dict really does not have registered words.
     let ari_idx = a:this._user_dict.okuri_ari_idx + 1
     let nasi_idx = a:this._user_dict.okuri_nasi_idx + 1
-    for w in a:this._registered_words.to_array()
+    for w in a:this._registered_words.to_list()
         let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, w.key, w.okuri_rom)
         if w.okuri_rom != ''
             let lnum = ari_idx
@@ -1168,7 +1168,7 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     let max_count = g:eskk_max_candidates
 
     " self._registered_words
-    for w in self._registered_words.to_array()
+    for w in self._registered_words.to_list()
         if w.key ==# key && w.okuri_rom[0] ==# okuri_rom[0]
             call candidates.push(
             \   s:candidate_new(
@@ -1211,7 +1211,7 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
         endtry
     endif
 
-    return [key, okuri_rom, candidates.to_array()]
+    return [key, okuri_rom, candidates.to_list()]
 endfunction "}}}
 
 
