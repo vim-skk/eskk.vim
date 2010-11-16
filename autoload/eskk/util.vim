@@ -101,7 +101,7 @@ function! eskk#util#logstrf_warn(fmt, ...) "{{{
     return call('eskk#util#logf_warn', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
 
-function! eskk#util#printstrf(fmt, ...) "{{{
+function! eskk#util#formatstrf(fmt, ...) "{{{
     return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
 endfunction "}}}
 

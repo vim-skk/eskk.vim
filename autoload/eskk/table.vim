@@ -178,7 +178,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     else
         throw eskk#internal_error(
         \   ['eskk', 'table'],
-        \   eskk#util#printstrf(
+        \   eskk#util#formatstrf(
         \       'table name = %s, lhs = %s, index = %d',
         \       a:table_name, a:lhs, a:index
         \   )
