@@ -72,10 +72,8 @@ function! s:load_table(table_name) "{{{
     if def._loaded
         return
     endif
-    call eskk#util#logf("Loading table %s...", a:table_name)
 
     if has_key(def, 'bases')
-        call eskk#util#logf("table %s is derived table. Let's load base tables...", a:table_name)
         for base in def.bases
             call s:load_table(base.name)
         endfor
@@ -86,7 +84,6 @@ function! s:load_table(table_name) "{{{
     endif
 
     let def._loaded = 1
-    call eskk#util#logf('table %s has been loaded.', a:table_name)
 endfunction "}}}
 
 function! s:get_table_data(table_name, ...) "{{{
@@ -132,22 +129,15 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     endif
 
     if s:is_base_table(a:table_name)
-        call eskk#util#logf('table %s is base table.', a:table_name)
-
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
-            call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
             if g:eskk_cache_table_map
                 call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs])
             endif
             return data[a:lhs][a:index]
         endif
     else
-        call eskk#util#logf('table %s is derived table.', a:table_name)
-
         if has_key(data, a:lhs)
-            call eskk#util#logstrf('found %s: %s', a:lhs, data[a:lhs])
-
             if data[a:lhs].method ==# 'add' && data[a:lhs].data[a:index] != ''
                 if g:eskk_cache_table_map
                     call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs].data)
@@ -200,7 +190,6 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     endif
 
     if !empty(candidates)
-        call eskk#util#logstrf('found %s: %s', a:lhs_head, candidates)
         return candidates
     endif
 
@@ -230,12 +219,10 @@ endfunction "}}}
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
 function! eskk#table#create(name, ...) "{{{
-    call eskk#util#logf('created table %s', a:name)
     let obj = deepcopy(s:register_skeleton, 1)
     let obj.name = a:name
     if a:0
         let names = type(a:1) == type([]) ? a:1 : [a:1]
-        call eskk#util#logstrf('created table %s: base tables are %s', a:name, names)
         let obj.bases = map(names, 'eskk#table#create(v:val)')
     endif
     return obj
@@ -279,7 +266,6 @@ function! s:register_skeleton.register() "{{{
         return
     endif
 
-    call eskk#util#logf('Register table %s.', self.name)
     let s:table_defs[self.name] = self
     return self
 endfunction "}}}

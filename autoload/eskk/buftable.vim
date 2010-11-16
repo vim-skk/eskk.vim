@@ -181,19 +181,12 @@ function! s:buftable.rewrite() "{{{
     let kakutei = self._kakutei_str
     let self._kakutei_str = ''
 
-    if g:eskk_debug
-        call eskk#util#logf('old string = %s', string(old))
-        call eskk#util#logf('kakutei string = %s', string(kakutei))
-        call eskk#util#logf('new display string = %s', string(new))
-    endif
-
     let set_begin_pos =
     \   self._set_begin_pos_at_rewrite
     \   && self._henkan_phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
     let self._set_begin_pos_at_rewrite = 0
 
     if set_begin_pos
-        call eskk#util#log('s:buftable.rewrite(): set_begin_pos = 1')
         " 1. Delete current string
         " 2. Set begin pos
         " 3. Insert new string
@@ -213,13 +206,10 @@ function! s:buftable.rewrite() "{{{
     else
         let inserted_str = kakutei . new
         if old ==# inserted_str
-            call eskk#util#log('s:buftable.rewrite(): Nothing changed.')
             return ''
         elseif inserted_str == ''
-            call eskk#util#log('s:buftable.rewrite(): No inserted string. Remove old string.')
             return self.make_remove_bs()
         elseif inserted_str != '' && stridx(old, inserted_str) == 0
-            call eskk#util#log('s:buftable.rewrite(): Remove minimum string.')
             " When inserted_str == "foo", old == "foobar"
             " Insert Remove "bar"
             return repeat(
@@ -227,7 +217,6 @@ function! s:buftable.rewrite() "{{{
             \   eskk#util#mb_strlen(old) - eskk#util#mb_strlen(inserted_str)
             \)
         elseif old != '' && stridx(inserted_str, old) == 0
-            call eskk#util#log('s:buftable.rewrite(): Add minimum string.')
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
             call eskk#mappings#map(
@@ -237,7 +226,6 @@ function! s:buftable.rewrite() "{{{
             \)
             return "\<Plug>(eskk:_inserted)"
         else
-            call eskk#util#log('s:buftable.rewrite(): Remove old, Add new.')
             " Simplest algorithm.
             " Delete current string, and insert new string.
             call eskk#mappings#map(
@@ -330,7 +318,7 @@ function! s:buftable.get_henkan_phase() "{{{
 endfunction "}}}
 function! s:buftable.set_henkan_phase(henkan_phase) "{{{
     if a:henkan_phase ==# self._henkan_phase
-        call eskk#util#logf('warning: tried to change into same phase: (%d) -> (%d)', a:henkan_phase, a:henkan_phase)
+        call eskk#util#logf_warn('tried to change into same phase: (%d) -> (%d)', a:henkan_phase, a:henkan_phase)
         return
     endif
 
@@ -787,8 +775,6 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
         endif
     catch /^eskk: dictionary look up error:/
-        call eskk#util#logstrf('404 not found such candidate: hira = %s, okuri = %s, okuri_rom = %s', hira, okuri, okuri_rom)
-
         " No candidates.
         let [input, hira, okuri] = dict.register_word(dict.get_henkan_result())
         if input != ''
@@ -940,12 +926,6 @@ function! s:buftable.get_begin_pos() "{{{
     return self._begin_pos
 endfunction "}}}
 function! s:buftable.set_begin_pos(expr) "{{{
-    if g:eskk_debug
-        call eskk#util#logf("Set begin pos '%s'.", a:expr)
-        let col = col(a:expr)
-        let line = getline('.')
-        call eskk#util#logf("%s|%s", line[: col - 2], line[col - 1 :])
-    endif
     if mode() ==# 'i'
         let self._begin_pos = ['i', getpos(a:expr)]
     elseif mode() ==# 'c'

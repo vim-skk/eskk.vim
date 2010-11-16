@@ -111,8 +111,6 @@ function! eskk#create_new_instance() "{{{
     call add(ns.eskk_instances, inst)
     let ns.eskk_instance_id += 1
 
-    call eskk#util#logf('Create instance: %d => %d', ns.eskk_instance_id - 1, ns.eskk_instance_id)
-
     " Initialize instance.
     call eskk#enable(0)
 
@@ -128,8 +126,6 @@ function! eskk#destroy_current_instance() "{{{
     " Destroy current instance.
     call remove(ns.eskk_instances, ns.eskk_instance_id)
     let ns.eskk_instance_id -= 1
-
-    call eskk#util#logf('Destroy instance: %d => %d', ns.eskk_instance_id + 1, ns.eskk_instance_id)
 endfunction "}}}
 
 " s:mutable_stash "{{{
@@ -149,8 +145,6 @@ endfunction "}}}
 
 " This a:value will be set when new eskk instances are created.
 function! s:mutable_stash.init(varname, value) "{{{
-    call eskk#util#logf("s:mutable_stash - Initialize %s with %s.", a:varname, string(a:value))
-
     if !has_key(s:stash_prototype, self.namespace)
         let s:stash_prototype[self.namespace] = {}
     endif
@@ -163,8 +157,6 @@ function! s:mutable_stash.init(varname, value) "{{{
 endfunction "}}}
 
 function! s:mutable_stash.get(varname) "{{{
-    call eskk#util#logf("s:mutable_stash - Get %s.", a:varname)
-
     let inst = eskk#get_current_instance()
     if !has_key(inst.mutable_stash, self.namespace)
         let inst.mutable_stash[self.namespace] = {}
@@ -189,8 +181,6 @@ function! s:mutable_stash.get(varname) "{{{
 endfunction "}}}
 
 function! s:mutable_stash.set(varname, value) "{{{
-    call eskk#util#logf("s:mutable_stash - Set %s '%s'.", a:varname, string(a:value))
-
     let inst = eskk#get_current_instance()
     if !has_key(inst.mutable_stash, self.namespace)
         let inst.mutable_stash[self.namespace] = {}
@@ -232,7 +222,6 @@ function! s:asym_filter.filter(stash) "{{{
     for key in [toggle_hankata, ctrl_q_key, toggle_kata, q_key, l_key, to_ascii, to_zenei, to_abbrev]
         if eskk#mappings#handle_special_lhs(char, key, a:stash)
             " Handled.
-            call eskk#util#logf("Handled '%s' key.", key)
             return
         endif
     endfor
@@ -328,28 +317,20 @@ function! s:filter_rom(stash, table) "{{{
     let match_exactly  = a:table.has_map(rom_str)
     let candidates     = a:table.get_candidates(rom_str, 2, [])
 
-    if g:eskk_debug
-        call eskk#util#logstrf('char = %s, rom_str = %s', char, rom_str)
-        call eskk#util#logstrf('a:table.get_candidates(): candidates = %s', candidates)
-    endif
-
     if match_exactly
         call eskk#util#assert(!empty(candidates))
     endif
 
     if match_exactly && len(candidates) == 1
         " Match!
-        call eskk#util#logf('%s - match!', rom_str)
         return s:filter_rom_exact_match(a:stash, a:table)
 
     elseif !empty(candidates)
         " Has candidates but not match.
-        call eskk#util#logf('%s - wait for a next key.', rom_str)
         return s:filter_rom_has_candidates(a:stash)
 
     else
         " No candidates.
-        call eskk#util#logf('%s - no candidates.', rom_str)
         return s:filter_rom_no_match(a:stash, a:table)
     endif
 endfunction "}}}
@@ -500,7 +481,6 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let input_style = eskk#util#option_value(g:eskk_rom_input_style, ['skk', 'msime', 'quickmatch'], 0)
 
     let [matched_map_list, rest] = s:get_matched_and_rest(a:table, rom_str, 1)
-    call eskk#util#logstrf('matched_map_list = %s, rest = %s', matched_map_list, rest)
     if empty(matched_map_list)
         if input_style ==# 'skk'
             if rest ==# char
@@ -511,7 +491,6 @@ function! s:filter_rom_no_match(stash, table) "{{{
             endif
         else
             let [matched_map_list, head_no_match] = s:get_matched_and_rest(a:table, rom_str, 0)
-            call eskk#util#logstrf('matched_map_list = %s, head_no_match = %s', matched_map_list, head_no_match)
             if empty(matched_map_list)
                 call buf_str.set_rom_str(head_no_match)
             else
@@ -570,8 +549,6 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
         for str in list
             let counter += 1
             if a:table.has_map(str)
-                call eskk#util#logstrf('s:generate_map_list(%s, %d) = %s', rest, a:tail, list)
-                call eskk#util#logstrf('found! - %s has map', str)
                 let has_map_str = str
                 break
             endif
@@ -620,55 +597,13 @@ function! s:initialize() "{{{
     augroup END
     " }}}
 
-    " Write timestamp to debug file {{{
-    function! s:initialize_debug_file()
-        call eskk#util#log('')
-
-        call eskk#util#log(repeat('-', 80))
-
-        call eskk#util#log(strftime('%c'))
-
-        let lface = "( ._.) <"
-        let v = printf(" g:eskk_version = %s /", string(g:eskk_version))
-        call eskk#util#log(repeat(' ', strlen(lface)).' '.repeat('-', strlen(v) - 1))
-        call eskk#util#log(lface.v)
-        call eskk#util#log(repeat(' ', strlen(lface)).repeat('-', strlen(v) - 1))
-
-        let rface = "> ('-' )"
-        let v = printf("/ v:version = %s ", string(v:version))
-        call eskk#util#log(' '.repeat('-', strlen(v) - 1))
-        call eskk#util#log(v.rface)
-        call eskk#util#log(repeat('-', strlen(v) - 1))
-
-        call eskk#util#log('')
-        let n = eskk#util#rand(3)
-        if n ==# 0
-            call eskk#util#log("e = extended,enhanced,environment,...enlightenment?")
-        elseif n ==# 1
-            call eskk#util#log('SKK = I')
-            call eskk#util#log('e * SKK = Inf.')
-        else
-            call eskk#util#log("( '-')                  ('-' )")
-            call eskk#util#log('(/ *_*)/******************(*_* )*********')
-        endif
-
-        call eskk#util#log(repeat('-', 80))
-
-        call eskk#util#log('')
-        call eskk#util#log('')
-    endfunction
-    call s:initialize_debug_file()
-    " }}}
-
     " Egg-like-newline {{{
     function! s:do_lmap_non_egg_like_newline(do_map) "{{{
         if a:do_map
             if !eskk#mappings#has_temp_key('<CR>')
-                call eskk#util#log("Map *non* egg like newline...: <CR> => <Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)")
                 call eskk#mappings#set_up_temp_key('<CR>', '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)')
             endif
         else
-            call eskk#util#log("Restore *non* egg like newline...: <CR>")
             call eskk#register_temp_event('filter-begin', 'eskk#mappings#set_up_temp_key_restore', ['<CR>'])
         endif
     endfunction "}}}
@@ -764,8 +699,6 @@ function! s:initialize() "{{{
 
     " Register builtin-modes. {{{
     function! s:initialize_builtin_modes()
-        call eskk#util#log('Registering builtin modes...')
-
         function! s:set_current_to_begin_pos() "{{{
             call eskk#get_buftable().set_begin_pos('.')
         endfunction "}}}
@@ -948,10 +881,8 @@ function! s:initialize() "{{{
 
     " Register builtin-tables. {{{
     function! s:initialize_builtin_tables()
-        call eskk#util#log('Registering builtin tables...')
         " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
         let tables = eskk#table#get_all_tables()
-        call eskk#util#logstrf('tables = %s', tables)
         let tabletmpl = {}    " dummy object
         function! tabletmpl.init()
             call self.add_from_dict(eskk#table#{self.name}#load())
@@ -1097,8 +1028,6 @@ function! eskk#enable(...) "{{{
     if eskk#is_enabled()
         return ''
     endif
-    call eskk#util#log('')
-    call eskk#util#log('enabling eskk...')
 
     if mode() ==# 'c'
         let &l:iminsert = 1
@@ -1149,8 +1078,6 @@ function! eskk#disable() "{{{
     if !eskk#is_enabled()
         return ''
     endif
-    call eskk#util#log('')
-    call eskk#util#log('disabling eskk...')
 
     if mode() ==# 'c'
         return "\<C-^>"
@@ -1221,7 +1148,6 @@ endfunction "}}}
 " Mode
 function! eskk#set_mode(next_mode) "{{{
     let self = eskk#get_current_instance()
-    call eskk#util#logf("mode change: %s => %s", self.mode, a:next_mode)
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#util#logf_warn("mode '%s' is not supported.", a:next_mode)
         call eskk#util#logf_warn('s:available_modes = %s', string(s:available_modes))
@@ -1353,8 +1279,6 @@ function! s:register_event(st, event_names, Fn, head_args, self) "{{{
     endfor
 endfunction "}}}
 function! eskk#throw_event(event_name) "{{{
-    call eskk#util#log("Do event - " . a:event_name)
-
     let self = eskk#get_current_instance()
     let ret        = []
     let event      = get(s:event_hook_fn, a:event_name, [])
@@ -1370,8 +1294,6 @@ function! eskk#throw_event(event_name) "{{{
             redir => output
             silent execute 'function' call_args[0]
             redir END
-            call eskk#util#logstrf("%s: Call %s with %s", a:event_name, call_args[0], call_args[1])
-            call eskk#util#log(output)
         endif
         call add(ret, call('call', call_args))
     endwhile
@@ -1417,7 +1339,6 @@ endfunction "}}}
 function! eskk#filter(char) "{{{
     let self = eskk#get_current_instance()
 
-    call eskk#util#logstrf('------------- a:char = %s(%d) -------------', a:char, char2nr(a:char))
     " Check irregular circumstance.
     if !eskk#is_supported_mode(self.mode)
         call eskk#util#log_warn('current mode is not supported: ' . self.mode)
@@ -1465,9 +1386,6 @@ function! eskk#filter(char) "{{{
 
     finally
         call eskk#throw_event('filter-finalize')
-        if g:eskk_debug
-            call eskk#util#logstrf('buftable.dump() = %s', buftable.dump())
-        endif
     endtry
 endfunction "}}}
 function! s:call_filter_fn(stash) "{{{

@@ -50,7 +50,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     endtry
 endfunction "}}}
 function! s:eskkcomplete(findstart, base) "{{{
-    call eskk#util#logstrf('eskk#complete#eskkcomplete(): findstart = %s, base = %s', a:findstart, a:base)
     if a:findstart
         if !eskk#complete#can_find_start()
             return -1
@@ -93,12 +92,8 @@ endfunction "}}}
 
 " s:mode_func_table
 function! s:mode_func_table.hira(base) "{{{
-    " Kanji mode.
-    call eskk#util#log('eskk#complete#eskkcomplete(): kanji')
-
     " Do not complete while inputting rom string.
     if a:base =~ '\a$'
-        call eskk#util#logstrf('eskk#complete#eskkcomplete(): kanji - skip: a:base = %s', a:base)
         return []
     endif
 
@@ -107,12 +102,10 @@ endfunction "}}}
 let s:mode_func_table.kata = s:mode_func_table.hira
 function! s:mode_func_table.ascii(base) "{{{
     " ASCII mode.
-    call eskk#util#log('eskk#complete#eskkcomplete(): ascii')
     return s:complete("ascii", a:base)
 endfunction "}}}
 function! s:mode_func_table.abbrev(base) "{{{
     " abbrev mode.
-    call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
     return s:complete("abbrev", a:base)
 endfunction "}}}
 
@@ -191,12 +184,10 @@ endfunction "}}}
 " Handler for the key while popup displayed.
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
-    call eskk#util#logstrf('eskk#complete#handle_special_key(): char = %s', char)
 
     " Check popupmenu-keys
     if has_key(s:popup_func_table, char)
         call s:popup_func_table[char](a:stash)
-        call eskk#util#logstrf('%s -> %s', char, s:popup_func_table[char])
         return 0
     endif
 
@@ -204,7 +195,6 @@ function! eskk#complete#handle_special_key(stash) "{{{
         return 1
     endif
 
-    call eskk#util#log('eskk#complete#handle_special_key(): Close pum and do kakutei.')
     " Select item.
     call s:set_selected_item()
     " Close pum.
@@ -377,7 +367,6 @@ function! s:set_selected_item() "{{{
     else
         let rom_str = ''
     endif
-    call eskk#util#logstrf('Got selected item by pum: filter_str = %s, rom_str = %s', filter_str, rom_str)
 
     let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     call henkan_buf_str.clear()
@@ -403,7 +392,6 @@ function! s:check_yomigana() "{{{
         return filter_str =~ '^[[:alnum:]-]\+$'
     elseif eskk#get_mode() ==# 'abbrev'
         " abbrev mode.
-        call eskk#util#log('eskk#complete#eskkcomplete(): abbrev')
         return filter_str =~ '^[[:alnum:]-]\+$'
     else
         " Kanji mode.

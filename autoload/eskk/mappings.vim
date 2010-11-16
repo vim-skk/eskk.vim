@@ -359,7 +359,6 @@ function! eskk#mappings#set_up_temp_key(lhs, ...) "{{{
     let save_rhs = maparg(a:lhs, 'l')
     if save_rhs != '' && maparg(save_lhs) == ''
         " TODO Check if a:lhs is buffer local.
-        call eskk#util#log('Save temp key: ' . maparg(a:lhs, 'l'))
         call eskk#mappings#map('rb', save_lhs, save_rhs, 'l')
     endif
 
@@ -374,7 +373,6 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
     let saved_rhs = maparg(temp_key, 'l')
 
     if saved_rhs != ''
-        call eskk#util#log('Restore saved temp key: ' . saved_rhs)
         call eskk#mappings#unmap('l', 'b', temp_key)
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
     else
