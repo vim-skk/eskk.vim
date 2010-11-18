@@ -21,7 +21,7 @@ endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
-" Variables {{{
+" Constants {{{
 " Normal
 let eskk#buftable#HENKAN_PHASE_NORMAL = 0
 lockvar eskk#buftable#HENKAN_PHASE_NORMAL
