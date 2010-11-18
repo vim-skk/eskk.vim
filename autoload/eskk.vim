@@ -53,6 +53,8 @@ let s:eskk = {
 \   'has_started_completion': 0,
 \   'prev_im_options': {},
 \   'prev_normal_keys': {},
+\   'completion_selected': 0,
+\   'completion_inserted': 0,
 \}
 
 

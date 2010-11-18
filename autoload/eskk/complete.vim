@@ -23,9 +23,7 @@ delfunc s:SID
 
 
 
-" Variables {{{
-let s:selected = 0
-let s:inserted = 0
+" Constants {{{
 let s:popup_func_table = {}
 let s:mode_func_table = {}
 " }}}
@@ -110,8 +108,9 @@ function! s:mode_func_table.abbrev(base) "{{{
 endfunction "}}}
 
 function! s:initialize_variables() "{{{
-    let s:selected = 0
-    let s:inserted = 0
+    let inst = eskk#get_current_instance()
+    let inst.completion_selected = 0
+    let inst.completion_inserted = 0
 endfunction "}}}
 function! s:complete(mode, base) "{{{
     " Get candidates.
@@ -217,7 +216,8 @@ endfunction "}}}
 
 " s:popup_func_table
 function! s:close_pum_pre(stash) "{{{
-    if s:selected && !s:inserted
+    let inst = eskk#get_current_instance()
+    if inst.completion_selected && !inst.completion_inserted
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -226,7 +226,7 @@ function! s:close_pum_pre(stash) "{{{
         \   'eskk#util#key2char',
         \   [eskk#mappings#get_filter_map('<C-y>')]
         \)
-        let s:selected = 0
+        let inst.completion_selected = 0
     else
         call s:close_pum(a:stash)
     endif
@@ -241,7 +241,8 @@ function! s:close_pum(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
-    if s:selected && !s:inserted
+    let inst = eskk#get_current_instance()
+    if inst.completion_selected && !inst.completion_inserted
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -250,7 +251,7 @@ function! s:do_enter_pre(stash) "{{{
         \   'eskk#util#key2char',
         \   [eskk#mappings#get_filter_map('<CR>')]
         \)
-        let s:selected = 0
+        let inst.completion_selected = 0
     else
         call s:do_enter(a:stash)
     endif
@@ -270,7 +271,8 @@ function! s:do_enter(stash) "{{{
     \)
 endfunction "}}}
 function! s:select_item(stash) "{{{
-    let s:selected = 1
+    let inst = eskk#get_current_instance()
+    let inst.completion_selected = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:do_tab(stash) "{{{
@@ -281,8 +283,9 @@ function! s:do_tab(stash) "{{{
     \)
 endfunction "}}}
 function! s:select_insert_item(stash) "{{{
-    let s:selected = 1
-    let s:inserted = 1
+    let inst = eskk#get_current_instance()
+    let inst.completion_selected = 1
+    let inst.completion_inserted = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:do_space(stash) "{{{
