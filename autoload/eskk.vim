@@ -51,6 +51,8 @@ let s:eskk = {
 \   'enabled': 0,
 \   'mutable_stash': {},
 \   'has_started_completion': 0,
+\   'prev_im_options': {},
+\   'prev_normal_keys': {},
 \}
 
 
