@@ -1154,6 +1154,15 @@ function! s:initialize() "{{{
     endfunction
     call s:initialize_completion()
     " }}}
+
+
+    " Create "eskk-initialize" autocmd event.
+    " If no "User eskk-initialize" events,
+    " Vim complains like "No matching autocommands".
+    autocmd eskk User eskk-initialize :
+
+    " Throw eskk-initialize event.
+    doautocmd User eskk-initialize
 endfunction "}}}
 function! eskk#is_initialized() "{{{
     return s:is_initialized

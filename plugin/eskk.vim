@@ -22,7 +22,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 4, 31))
+let g:eskk_version = str2nr(printf('%2d%02d%03d', 0, 4, 32))
 
 " Global Variables {{{
 
