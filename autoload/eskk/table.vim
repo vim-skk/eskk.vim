@@ -115,7 +115,8 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
     let cached_maps = eskk#_get_cached_maps()
 
-    if g:eskk_cache_table_map && eskk#util#has_key_f(cached_maps, [a:table_name, a:lhs])
+    if g:eskk_cache_table_map
+    \   && eskk#util#has_key_f(cached_maps, [a:table_name, a:lhs])
         if cached_maps[a:table_name][a:lhs][a:index] != ''
             return cached_maps[a:table_name][a:lhs][a:index]
         else
@@ -132,15 +133,24 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             if g:eskk_cache_table_map
-                call eskk#util#let_f(cached_maps, [a:table_name, a:lhs], data[a:lhs])
+                call eskk#util#let_f(
+                \   cached_maps,
+                \   [a:table_name, a:lhs],
+                \   data[a:lhs]
+                \)
             endif
             return data[a:lhs][a:index]
         endif
     else
         if has_key(data, a:lhs)
-            if data[a:lhs].method ==# 'add' && data[a:lhs].data[a:index] != ''
+            if data[a:lhs].method ==# 'add'
+            \   && data[a:lhs].data[a:index] != ''
                 if g:eskk_cache_table_map
-                    call eskk#util#let_f(cached_maps, [a:table_name, a:lhs], data[a:lhs].data)
+                    call eskk#util#let_f(
+                    \   cached_maps,
+                    \   [a:table_name, a:lhs],
+                    \   data[a:lhs].data
+                    \)
                 endif
                 return data[a:lhs].data[a:index]
             elseif data[a:lhs].method ==# 'remove'
@@ -178,16 +188,29 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
 endfunction "}}}
 
 function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
-    call eskk#util#assert(a:max_candidates !=# 0, "a:max_candidates must be negative or positive.")
+    call eskk#util#assert(
+    \   a:max_candidates !=# 0,
+    \   "a:max_candidates must be negative or positive."
+    \)
 
     let cached_candidates = eskk#_get_cached_candidates()
-    if g:eskk_cache_table_candidates && eskk#util#has_key_f(cached_candidates, [a:table_name, a:lhs_head])
+    if g:eskk_cache_table_candidates
+    \   && eskk#util#has_key_f(
+    \           cached_candidates,
+    \           [a:table_name, a:lhs_head]
+    \       )
         let candidates = cached_candidates[a:table_name][a:lhs_head]
     else
         let data = s:get_table_data(a:table_name)
-        let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
+        let candidates = filter(
+        \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
+        \)
         if g:eskk_cache_table_candidates
-            call eskk#util#let_f(cached_candidates, [a:table_name, a:lhs_head], candidates)
+            call eskk#util#let_f(
+            \   cached_candidates,
+            \   [a:table_name, a:lhs_head],
+            \   candidates
+            \)
         endif
     endif
 
@@ -200,7 +223,12 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
         for parent in table_defs[a:table_name].bases
-            let r = s:get_candidates(parent.name, a:lhs_head, a:max_candidates, not_found)
+            let r = s:get_candidates(
+            \   parent.name,
+            \   a:lhs_head,
+            \   a:max_candidates,
+            \   not_found
+            \)
             if r isnot not_found
                 return r
             endif
@@ -247,7 +275,10 @@ endfunction "}}}
 
 function! s:register_skeleton.remove(lhs) "{{{
     if self.is_base()
-        throw eskk#user_error(['eskk', 'table'], "Must not remove base class map.")
+        throw eskk#user_error(
+        \   ['eskk', 'table'],
+        \   "Must not remove base class map."
+        \)
     else
         let self.data[a:lhs] = {'method': 'remove'}
     endif
@@ -262,11 +293,10 @@ endfunction "}}}
 function! s:register_skeleton.register() "{{{
     let table_defs = eskk#_get_table_defs()
     if has_key(table_defs, self.name)
-        " Do not allow override table.
-        "
-        let msg = printf("'%s' has been already registered.", self.name)
-        " throw eskk#internal_error(['eskk', 'table'], msg)
-        call eskk#util#log(msg)
+        " Do not allow overriding the table.
+        call eskk#util#log(
+        \   "'" . self.name . "' has been already registered."
+        \)
         return
     endif
 
@@ -281,7 +311,10 @@ lockvar s:register_skeleton
 " Autoload functions {{{
 
 function! eskk#table#get_all_tables() "{{{
-    return map(eskk#util#globpath('autoload/eskk/table/*.vim'), 'fnamemodify(v:val, ":t:r")')
+    return map(
+    \   eskk#util#globpath('autoload/eskk/table/*.vim'),
+    \   'fnamemodify(v:val, ":t:r")'
+    \)
 endfunction "}}}
 
 function! eskk#table#get_all_registered_tables() "{{{
@@ -311,7 +344,10 @@ function! s:table_obj.has_candidates(lhs_head) "{{{
 endfunction "}}}
 
 function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) "{{{
-    return call('s:get_candidates', [self.table_name, a:lhs_head, a:max_candidates] + a:000)
+    return call(
+    \   's:get_candidates',
+    \   [self.table_name, a:lhs_head, a:max_candidates] + a:000
+    \)
 endfunction "}}}
 
 function! s:table_obj.has_map(lhs) "{{{
@@ -320,7 +356,10 @@ function! s:table_obj.has_map(lhs) "{{{
 endfunction "}}}
 
 function! s:table_obj.get_map(lhs, ...) "{{{
-    return call('s:get_map', [self.table_name, a:lhs, s:MAP_TO_INDEX] + a:000)
+    return call(
+    \   's:get_map',
+    \   [self.table_name, a:lhs, s:MAP_TO_INDEX] + a:000
+    \)
 endfunction "}}}
 
 function! s:table_obj.has_rest(lhs) "{{{
@@ -329,7 +368,10 @@ function! s:table_obj.has_rest(lhs) "{{{
 endfunction "}}}
 
 function! s:table_obj.get_rest(lhs, ...) "{{{
-    return call('s:get_map', [self.table_name, a:lhs, s:REST_INDEX] + a:000)
+    return call(
+    \   's:get_map',
+    \   [self.table_name, a:lhs, s:REST_INDEX] + a:000
+    \)
 endfunction "}}}
 
 
