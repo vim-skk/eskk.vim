@@ -18,6 +18,10 @@ runtime! plugin/eskk.vim
 " Utility autoload functions {{{
 
 " Returns all lines matching the candidate.
+"
+" TODO: memoization should be done by `autload/eskk.vim`.
+" `autoload/eskk/**/*.vim` for libraries.
+" They should not have side-effect due to testability.
 let s:search_all_candidate_memoize = {}
 function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
