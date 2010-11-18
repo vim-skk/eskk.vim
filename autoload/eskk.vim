@@ -29,7 +29,7 @@ delfunc s:SID
 
 " mode:
 "   Current mode.
-" _buftable:
+" buftable:
 "   Buffer strings for inserted, filtered and so on.
 " is_locked_old_str:
 "   Lock current diff old string?
@@ -45,7 +45,7 @@ delfunc s:SID
 "   completion has been started from eskk.
 let s:eskk = {
 \   'mode': '',
-\   '_buftable': {},
+\   'buftable': {},
 \   'is_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
@@ -1290,17 +1290,17 @@ endfunction "}}}
 " Buftable
 function! eskk#get_buftable() "{{{
     let self = eskk#get_current_instance()
-    if empty(self._buftable)
-        let self._buftable = eskk#buftable#new()
+    if empty(self.buftable)
+        let self.buftable = eskk#buftable#new()
     endif
-    return self._buftable
+    return self.buftable
 endfunction "}}}
 function! eskk#set_buftable(buftable) "{{{
     let self = eskk#get_current_instance()
     call a:buftable.set_old_str(
-    \   empty(self._buftable) ? '' : self._buftable.get_old_str()
+    \   empty(self.buftable) ? '' : self.buftable.get_old_str()
     \)
-    let self._buftable = a:buftable
+    let self.buftable = a:buftable
 endfunction "}}}
 
 " Event
