@@ -48,7 +48,6 @@ runtime! plugin/eskk.vim
 
 " Variables {{{
 let s:table_defs = {}
-let s:cached_maps = {}
 let s:cached_candidates = {}
 
 let s:MAP_TO_INDEX = 0
@@ -113,10 +112,11 @@ endfunction "}}}
 
 function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
+    let cached_maps = eskk#_get_cached_maps()
 
-    if g:eskk_cache_table_map && eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
-        if s:cached_maps[a:table_name][a:lhs][a:index] != ''
-            return s:cached_maps[a:table_name][a:lhs][a:index]
+    if g:eskk_cache_table_map && eskk#util#has_key_f(cached_maps, [a:table_name, a:lhs])
+        if cached_maps[a:table_name][a:lhs][a:index] != ''
+            return cached_maps[a:table_name][a:lhs][a:index]
         else
             " No lhs in `s:table_defs`.
             if a:0
@@ -131,7 +131,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             if g:eskk_cache_table_map
-                call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs])
+                call eskk#util#let_f(cached_maps, [a:table_name, a:lhs], data[a:lhs])
             endif
             return data[a:lhs][a:index]
         endif
@@ -139,7 +139,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         if has_key(data, a:lhs)
             if data[a:lhs].method ==# 'add' && data[a:lhs].data[a:index] != ''
                 if g:eskk_cache_table_map
-                    call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs].data)
+                    call eskk#util#let_f(cached_maps, [a:table_name, a:lhs], data[a:lhs].data)
                 endif
                 return data[a:lhs].data[a:index]
             elseif data[a:lhs].method ==# 'remove'

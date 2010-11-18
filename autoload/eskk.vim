@@ -79,6 +79,9 @@ let s:skk_dict = {}
 " Cached table instances.
 " Tables are created by eskk#create_table().
 let s:cached_tables = {}
+" Cached table mappings.
+" See eskk#_get_cached_maps() and `autoload/eskk/table.vim`.
+let s:cached_maps = {}
 " }}}
 
 
@@ -1248,6 +1251,10 @@ function! eskk#create_table(table_name) "{{{
     " Cache under s:cached_tables.
     let s:cached_tables[a:table_name] = eskk#table#new(a:table_name)
     return s:cached_tables[a:table_name]
+endfunction "}}}
+
+function! eskk#_get_cached_maps() "{{{
+    return s:cached_maps
 endfunction "}}}
 
 " Statusline
