@@ -7,11 +7,11 @@ endif
 
 
 syn case match
-syn match SkkComment '^;.*$'
-syn match SkkLine '^\S\+\s\+/.\+/$' contains=SkkHiragana,SkkCandidates,SkkAnnotation
-syn match SkkHiragana '^\S\+' contained
-syn match SkkCandidates '\%\(^\S\+\s\+\)\@<=/.\+/$' contained contains=SkkAnnotation
-syn match SkkAnnotation ';[^/]\+' contained
+syn match skkComment '^;.*$'
+syn match skkLine '^\S\+\s\+/.\+/$' contains=skkHiragana,skkCandidates,skkAnnotation
+syn match skkHiragana '^\S\+' contained
+syn match skkCandidates '\%\(^\S\+\s\+\)\@<=/.\+/$' contained contains=skkAnnotation
+syn match skkAnnotation ';[^/]\+' contained
 
 
 
@@ -22,10 +22,10 @@ if v:version >= 508 || !exists("did_skk_syn_inits")
   else
     command -nargs=+ HiLink hi def link <args>
   endif
-  HiLink SkkComment Comment
-  HiLink SkkHiragana Identifier
-  HiLink SkkCandidates Type
-  HiLink SkkAnnotation Comment
+  HiLink skkComment Comment
+  HiLink skkHiragana Identifier
+  HiLink skkCandidates Type
+  HiLink skkAnnotation Comment
   delcommand HiLink
 endif
 
