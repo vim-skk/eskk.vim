@@ -13,7 +13,6 @@ let s:loaded = 1
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
-runtime! plugin/eskk.vim
 
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
