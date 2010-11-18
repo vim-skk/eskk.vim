@@ -76,6 +76,9 @@ let s:last_jump_cmd = -1
 let s:last_jump_char = -1
 " SKK Dictionary
 let s:skk_dict = {}
+" Cached table instances.
+" Tables are created by eskk#create_table().
+let s:cached_tables = {}
 " }}}
 
 
@@ -202,7 +205,7 @@ let s:asym_filter = {'table': {}}
 
 function! eskk#create_asym_filter(table_name) "{{{
     let obj = deepcopy(s:asym_filter)
-    let obj.table = eskk#table#new(a:table_name)
+    let obj.table = eskk#create_table(a:table_name)
     return obj
 endfunction "}}}
 
@@ -733,7 +736,7 @@ function! s:initialize() "{{{
 
                 if has_key(g:eskk_mode_use_tables, 'ascii')
                     if !has_key(this.sandbox, 'table')
-                        let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
+                        let this.sandbox.table = eskk#create_table(g:eskk_mode_use_tables.ascii)
                     endif
                     let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
                 else
@@ -755,7 +758,7 @@ function! s:initialize() "{{{
                 call eskk#set_mode('hira')
             else
                 if !has_key(this.sandbox, 'table')
-                    let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
+                    let this.sandbox.table = eskk#create_table(g:eskk_mode_use_tables.zenei)
                 endif
                 let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
             endif
@@ -1236,6 +1239,15 @@ function! eskk#get_current_mode_table() "{{{
 endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
     return g:eskk_mode_use_tables[a:mode]
+endfunction "}}}
+function! eskk#create_table(table_name) "{{{
+    if has_key(s:cached_tables, a:table_name)
+        return s:cached_tables[a:table_name]
+    endif
+
+    " Cache under s:cached_tables.
+    let s:cached_tables[a:table_name] = eskk#table#new(a:table_name)
+    return s:cached_tables[a:table_name]
 endfunction "}}}
 
 " Statusline

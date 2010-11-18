@@ -48,7 +48,6 @@ runtime! plugin/eskk.vim
 
 " Variables {{{
 let s:table_defs = {}
-let s:cached_tables = {}
 let s:cached_maps = {}
 let s:cached_candidates = {}
 
@@ -294,16 +293,6 @@ endfunction "}}}
 let s:table_obj = {}
 
 function! eskk#table#new(table_name) "{{{
-    if has_key(s:cached_tables, a:table_name)
-        return s:cached_tables[a:table_name]
-    endif
-
-    " Cache under s:cached_tables.
-    let s:cached_tables[a:table_name] = s:table_obj_new(a:table_name)
-    return s:cached_tables[a:table_name]
-endfunction "}}}
-
-function! s:table_obj_new(table_name) "{{{
     let obj = deepcopy(s:table_obj)
     let obj.table_name = a:table_name
 
