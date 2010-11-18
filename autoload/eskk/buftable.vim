@@ -21,7 +21,7 @@ endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
-" Variables {{{
+" Constants {{{
 " Normal
 let eskk#buftable#HENKAN_PHASE_NORMAL = 0
 lockvar eskk#buftable#HENKAN_PHASE_NORMAL
@@ -376,7 +376,7 @@ function! s:buftable.do_enter(stash) "{{{
     let phase = a:stash.phase
     let enter_char = eskk#util#key2char(eskk#mappings#get_special_map('enter-key'))
     let undo_char  = eskk#util#key2char(eskk#mappings#get_special_map('undo-key'))
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -530,7 +530,7 @@ endfunction "}}}
 function! s:get_next_candidate(self, stash, next) "{{{
     let self = a:self
     let cur_buf_str = self.get_current_buf_str()
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
     let prev_buftable = henkan_result.buftable
     let rom_str = cur_buf_str.get_matched_rom()
@@ -689,7 +689,7 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) "{{{
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
     let rom_str = henkan_buf_str.get_rom_str()
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     call dict.refer(self, rom_str, '', '')
 
     try
@@ -746,7 +746,7 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     let hira = henkan_buf_str.get_matched_filter()
     let okuri = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     call dict.refer(self, hira, okuri, okuri_rom)
 
     " Clear phase henkan/okuri buffer string.
@@ -777,10 +777,10 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     endtry
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() "{{{
-    return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#create_table(eskk#get_mode() ==# 'hira' ? 'rom_to_hankata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_q_key() "{{{
-    return s:convert_again_with_table(self, eskk#table#new(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
+    return s:convert_again_with_table(self, eskk#create_table(eskk#get_mode() ==# 'hira' ? 'rom_to_kata' : 'rom_to_hira'))
 endfunction "}}}
 function! s:buftable.do_l_key() "{{{
     return s:convert_again_with_table(self, {})
@@ -802,9 +802,9 @@ endfunction "}}}
 function! s:buftable.convert_rom_str(phases) "{{{
     if eskk#has_current_mode_table()
         if g:eskk_kata_convert_to_hira_at_henkan && eskk#get_mode() ==# 'kata'
-            let table = eskk#table#new('rom_to_hira')
+            let table = eskk#create_table('rom_to_hira')
         else
-            let table = eskk#table#new(eskk#get_current_mode_table())
+            let table = eskk#create_table(eskk#get_current_mode_table())
         endif
         for buf_str in map(a:phases, 'self.get_buf_str(v:val)')
             let rom_str = buf_str.get_rom_str()
@@ -817,7 +817,7 @@ function! s:buftable.convert_rom_str(phases) "{{{
 endfunction "}}}
 function! s:buftable.filter_rom_inplace(phase, table_name) "{{{
     let phase = a:phase
-    let table = eskk#table#new(a:table_name)
+    let table = eskk#create_table(a:table_name)
     let buf_str = self.get_buf_str(phase)
 
     let matched = buf_str.get_matched()
@@ -832,7 +832,7 @@ function! s:buftable.filter_rom_inplace(phase, table_name) "{{{
 endfunction "}}}
 function! s:buftable.filter_rom(phase, table_name) "{{{
     let phase = a:phase
-    let table = eskk#table#new(a:table_name)
+    let table = eskk#create_table(a:table_name)
     let buf_str = deepcopy(self.get_buf_str(phase), 1)
 
     let matched = buf_str.get_matched()
@@ -887,7 +887,7 @@ function! s:convert_again_with_table(self, table) "{{{
     \)
 
     " Update dictionary.
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
     if !empty(henkan_result)
       call henkan_result.update_candidate()

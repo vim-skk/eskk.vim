@@ -46,12 +46,7 @@ runtime! plugin/eskk.vim
 "   ],
 " }
 
-" Variables {{{
-let s:table_defs = {}
-let s:cached_tables = {}
-let s:cached_maps = {}
-let s:cached_candidates = {}
-
+" Constants {{{
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
 lockvar s:MAP_TO_INDEX
@@ -63,11 +58,12 @@ lockvar s:REST_INDEX
 " Primitive table functions {{{
 
 function! s:load_table(table_name) "{{{
-    if !has_key(s:table_defs, a:table_name)
+    let table_defs = eskk#_get_table_defs()
+    if !has_key(table_defs, a:table_name)
         let msg = printf('%s is not registered.', a:table_name)
         throw eskk#internal_error(['eskk', 'table'], msg)
     endif
-    let def = s:table_defs[a:table_name]
+    let def = table_defs[a:table_name]
 
     if def._loaded
         return
@@ -87,39 +83,43 @@ function! s:load_table(table_name) "{{{
 endfunction "}}}
 
 function! s:get_table_data(table_name, ...) "{{{
-    if s:table_defs[a:table_name]._loaded
-        return s:table_defs[a:table_name].data
+    let table_defs = eskk#_get_table_defs()
+    if table_defs[a:table_name]._loaded
+        return table_defs[a:table_name].data
     endif
 
     " Lazy loading.
-    if !s:table_defs[a:table_name]._loaded
+    if !table_defs[a:table_name]._loaded
         call s:load_table(a:table_name)
     endif
-    return s:table_defs[a:table_name].data
+    return table_defs[a:table_name].data
 endfunction "}}}
 
 function! s:has_table(table_name) "{{{
-    if !s:table_defs[a:table_name]._loaded
+    let table_defs = eskk#_get_table_defs()
+    if !table_defs[a:table_name]._loaded
         call s:load_table(a:table_name)
     endif
-    return has_key(s:table_defs, a:table_name)
+    return has_key(table_defs, a:table_name)
 endfunction "}}}
 
 function! s:is_base_table(table_name) "{{{
-    if !s:table_defs[a:table_name]._loaded
+    let table_defs = eskk#_get_table_defs()
+    if !table_defs[a:table_name]._loaded
         call s:load_table(a:table_name)
     endif
-    return !has_key(s:table_defs[a:table_name], 'bases')
+    return !has_key(table_defs[a:table_name], 'bases')
 endfunction "}}}
 
 function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
+    let cached_maps = eskk#_get_cached_maps()
 
-    if g:eskk_cache_table_map && eskk#util#has_key_f(s:cached_maps, [a:table_name, a:lhs])
-        if s:cached_maps[a:table_name][a:lhs][a:index] != ''
-            return s:cached_maps[a:table_name][a:lhs][a:index]
+    if g:eskk_cache_table_map && eskk#util#has_key_f(cached_maps, [a:table_name, a:lhs])
+        if cached_maps[a:table_name][a:lhs][a:index] != ''
+            return cached_maps[a:table_name][a:lhs][a:index]
         else
-            " No lhs in `s:table_defs`.
+            " No lhs in `eskk#_get_table_defs()`.
             if a:0
                 return a:1
             else
@@ -132,7 +132,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             if g:eskk_cache_table_map
-                call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs])
+                call eskk#util#let_f(cached_maps, [a:table_name, a:lhs], data[a:lhs])
             endif
             return data[a:lhs][a:index]
         endif
@@ -140,11 +140,11 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         if has_key(data, a:lhs)
             if data[a:lhs].method ==# 'add' && data[a:lhs].data[a:index] != ''
                 if g:eskk_cache_table_map
-                    call eskk#util#let_f(s:cached_maps, [a:table_name, a:lhs], data[a:lhs].data)
+                    call eskk#util#let_f(cached_maps, [a:table_name, a:lhs], data[a:lhs].data)
                 endif
                 return data[a:lhs].data[a:index]
             elseif data[a:lhs].method ==# 'remove'
-                " No lhs in `s:table_defs`.
+                " No lhs in `eskk#_get_table_defs()`.
                 if a:0
                     return a:1
                 else
@@ -154,7 +154,8 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         endif
 
         let not_found = {}
-        for parent in s:table_defs[a:table_name].bases
+        let table_defs = eskk#_get_table_defs()
+        for parent in table_defs[a:table_name].bases
             let r = s:get_map(parent.name, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r
@@ -162,7 +163,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         endfor
     endif
 
-    " No lhs in `s:table_defs`.
+    " No lhs in `eskk#_get_table_defs()`.
     if a:0
         return a:1
     else
@@ -179,13 +180,14 @@ endfunction "}}}
 function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     call eskk#util#assert(a:max_candidates !=# 0, "a:max_candidates must be negative or positive.")
 
-    if g:eskk_cache_table_candidates && eskk#util#has_key_f(s:cached_candidates, [a:table_name, a:lhs_head])
-        let candidates = s:cached_candidates[a:table_name][a:lhs_head]
+    let cached_candidates = eskk#_get_cached_candidates()
+    if g:eskk_cache_table_candidates && eskk#util#has_key_f(cached_candidates, [a:table_name, a:lhs_head])
+        let candidates = cached_candidates[a:table_name][a:lhs_head]
     else
         let data = s:get_table_data(a:table_name)
         let candidates = filter(copy(data), 'stridx(v:key, a:lhs_head) == 0')
         if g:eskk_cache_table_candidates
-            call eskk#util#let_f(s:cached_candidates, [a:table_name, a:lhs_head], candidates)
+            call eskk#util#let_f(cached_candidates, [a:table_name, a:lhs_head], candidates)
         endif
     endif
 
@@ -196,7 +198,8 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     if !s:is_base_table(a:table_name)
         " Search parent tables.
         let not_found = {}
-        for parent in s:table_defs[a:table_name].bases
+        let table_defs = eskk#_get_table_defs()
+        for parent in table_defs[a:table_name].bases
             let r = s:get_candidates(parent.name, a:lhs_head, a:max_candidates, not_found)
             if r isnot not_found
                 return r
@@ -204,7 +207,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         endfor
     endif
 
-    " No lhs_head in `s:table_defs`.
+    " No lhs_head in `eskk#_get_table_defs()`.
     if a:0
         return a:1
     else
@@ -257,7 +260,8 @@ function! s:register_skeleton.add_from_dict(dict) "{{{
 endfunction "}}}
 
 function! s:register_skeleton.register() "{{{
-    if has_key(s:table_defs, self.name)
+    let table_defs = eskk#_get_table_defs()
+    if has_key(table_defs, self.name)
         " Do not allow override table.
         "
         let msg = printf("'%s' has been already registered.", self.name)
@@ -266,7 +270,7 @@ function! s:register_skeleton.register() "{{{
         return
     endif
 
-    let s:table_defs[self.name] = self
+    let table_defs[self.name] = self
     return self
 endfunction "}}}
 
@@ -281,11 +285,11 @@ function! eskk#table#get_all_tables() "{{{
 endfunction "}}}
 
 function! eskk#table#get_all_registered_tables() "{{{
-    return keys(s:table_defs)
+    return keys(eskk#_get_table_defs())
 endfunction "}}}
 
 function! eskk#table#has_table(table_name) "{{{
-    return has_key(s:table_defs, a:table_name)
+    return has_key(eskk#_get_table_defs(), a:table_name)
 endfunction "}}}
 
 " }}}
@@ -294,16 +298,6 @@ endfunction "}}}
 let s:table_obj = {}
 
 function! eskk#table#new(table_name) "{{{
-    if has_key(s:cached_tables, a:table_name)
-        return s:cached_tables[a:table_name]
-    endif
-
-    " Cache under s:cached_tables.
-    let s:cached_tables[a:table_name] = s:table_obj_new(a:table_name)
-    return s:cached_tables[a:table_name]
-endfunction "}}}
-
-function! s:table_obj_new(table_name) "{{{
     let obj = deepcopy(s:table_obj)
     let obj.table_name = a:table_name
 
@@ -346,8 +340,7 @@ lockvar s:table_obj
 " Debug {{{
 
 function! eskk#table#_dump() "{{{
-    let def = s:table_defs
-    PP def
+    PP eskk#_get_table_defs()
 endfunction "}}}
 
 " }}}

@@ -181,8 +181,6 @@ let s:mode_local_keys = {
 \       'mode:zenei:to-hira',
 \   ],
 \}
-let s:prev_im_options = {}
-let s:prev_normal_keys = {}
 
 
 " Utilities
@@ -442,23 +440,27 @@ function! eskk#mappings#restore_normal_keys(keys) "{{{
 endfunction "}}}
 
 function! eskk#mappings#do_insert_enter() "{{{
-    let s:prev_normal_keys = eskk#mappings#save_normal_keys()
+    let inst = eskk#get_current_instance()
+    let inst.prev_normal_keys = eskk#mappings#save_normal_keys()
     call eskk#mappings#unmap_normal_keys()
     " Restore previous im options.
     let nr = bufnr('%')
-    if has_key(s:prev_im_options, nr)
-        let [&l:iminsert, &l:imsearch] = s:prev_im_options[nr]
-        unlet s:prev_im_options[nr]
+    let prev_im_options = eskk#get_current_instance().prev_im_options
+    if has_key(prev_im_options, nr)
+        let [&l:iminsert, &l:imsearch] = prev_im_options[nr]
+        unlet prev_im_options[nr]
     endif
 endfunction "}}}
 function! eskk#mappings#do_insert_leave() "{{{
-    if !empty(s:prev_normal_keys)
-        call eskk#mappings#restore_normal_keys(s:prev_normal_keys)
-        let s:prev_normal_keys = {}
+    let inst = eskk#get_current_instance()
+    if !empty(inst.prev_normal_keys)
+        call eskk#mappings#restore_normal_keys(inst.prev_normal_keys)
+        let inst.prev_normal_keys = {}
     endif
     call eskk#mappings#map_normal_keys()
     " Save im options.
-    let s:prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
+    let prev_im_options = eskk#get_current_instance().prev_im_options
+    let prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
     let [&l:iminsert, &l:imsearch] = [0, 0]
 endfunction "}}}
 

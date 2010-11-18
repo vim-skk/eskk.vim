@@ -51,6 +51,10 @@ let s:eskk = {
 \   'enabled': 0,
 \   'mutable_stash': {},
 \   'has_started_completion': 0,
+\   'prev_im_options': {},
+\   'prev_normal_keys': {},
+\   'completion_selected': 0,
+\   'completion_inserted': 0,
 \}
 
 
@@ -72,6 +76,17 @@ let s:is_initialized = 0
 " Last command's string. See eskk#jump_one_char().
 let s:last_jump_cmd = -1
 let s:last_jump_char = -1
+" SKK Dictionary (singleton)
+let s:skk_dict = {}
+" Cached table instances.
+" Tables are created by eskk#create_table().
+let s:cached_tables = {}
+" Cached table mappings.
+" See eskk#_get_cached_maps() and `autoload/eskk/table.vim`.
+let s:cached_maps = {}
+let s:cached_candidates = {}
+" All tables structures.
+let s:table_defs = {}
 " }}}
 
 
@@ -198,7 +213,7 @@ let s:asym_filter = {'table': {}}
 
 function! eskk#create_asym_filter(table_name) "{{{
     let obj = deepcopy(s:asym_filter)
-    let obj.table = eskk#table#new(a:table_name)
+    let obj.table = eskk#create_table(a:table_name)
     return obj
 endfunction "}}}
 
@@ -288,7 +303,7 @@ function! s:asym_filter.filter(stash) "{{{
             call buftable.choose_prev_candidate(a:stash)
             return
         elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
-            let henkan_result = eskk#dictionary#get_instance().get_henkan_result()
+            let henkan_result = eskk#get_skk_dict().get_henkan_result()
             if !empty(henkan_result)
                 call henkan_result.delete_from_dict()
 
@@ -729,7 +744,7 @@ function! s:initialize() "{{{
 
                 if has_key(g:eskk_mode_use_tables, 'ascii')
                     if !has_key(this.sandbox, 'table')
-                        let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.ascii)
+                        let this.sandbox.table = eskk#create_table(g:eskk_mode_use_tables.ascii)
                     endif
                     let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
                 else
@@ -751,7 +766,7 @@ function! s:initialize() "{{{
                 call eskk#set_mode('hira')
             else
                 if !has_key(this.sandbox, 'table')
-                    let this.sandbox.table = eskk#table#new(g:eskk_mode_use_tables.zenei)
+                    let this.sandbox.table = eskk#create_table(g:eskk_mode_use_tables.zenei)
                 endif
                 let a:stash.return = this.sandbox.table.get_map(a:stash.char, a:stash.char)
             endif
@@ -1233,6 +1248,25 @@ endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
     return g:eskk_mode_use_tables[a:mode]
 endfunction "}}}
+function! eskk#create_table(table_name) "{{{
+    if has_key(s:cached_tables, a:table_name)
+        return s:cached_tables[a:table_name]
+    endif
+
+    " Cache under s:cached_tables.
+    let s:cached_tables[a:table_name] = eskk#table#new(a:table_name)
+    return s:cached_tables[a:table_name]
+endfunction "}}}
+
+function! eskk#_get_cached_maps() "{{{
+    return s:cached_maps
+endfunction "}}}
+function! eskk#_get_cached_candidates() "{{{
+    return s:cached_candidates
+endfunction "}}}
+function! eskk#_get_table_defs() "{{{
+    return s:table_defs
+endfunction "}}}
 
 " Statusline
 function! eskk#statusline(...) "{{{
@@ -1241,6 +1275,16 @@ function! eskk#statusline(...) "{{{
     \               get(g:eskk_statusline_mode_strings,
     \                   eskk#get_current_instance().mode, '??'))
     \      : get(a:000, 1, '')
+endfunction "}}}
+
+" Dictionary
+function! eskk#get_skk_dict() "{{{
+    if empty(s:skk_dict)
+        let s:skk_dict = eskk#dictionary#new(
+        \   g:eskk_dictionary, g:eskk_large_dictionary
+        \)
+    endif
+    return s:skk_dict
 endfunction "}}}
 
 " Buftable
