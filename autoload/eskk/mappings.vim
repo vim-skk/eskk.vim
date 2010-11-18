@@ -12,7 +12,8 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-" `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()` toggle this value.
+" `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()`
+" toggle this value.
 let s:has_mapped = {}
 " Database for misc. keys.
 let s:map = {
@@ -228,7 +229,14 @@ function! eskk#mappings#mapopt_dict2chars(options) "{{{
     \   'unique': 'u',
     \   'remap': 'r',
     \}
-    return join(map(keys(a:options), 'a:options[v:val] && has_key(table, v:val) ? table[v:val] : ""'), '')
+    return join(
+    \   map(
+    \       keys(a:options),
+    \       'a:options[v:val]'
+    \           . ' && has_key(table, v:val) ? table[v:val] : ""'
+    \   ),
+    \   ''
+    \)
 endfunction "}}}
 function! eskk#mappings#mapopt_chars2raw(options) "{{{
     let table = {
@@ -237,7 +245,13 @@ function! eskk#mappings#mapopt_chars2raw(options) "{{{
     \   's': '<silent>',
     \   'u': '<unique>',
     \}
-    return join(map(split(a:options, '\zs'), 'get(table, v:val, "")'), '')
+    return join(
+    \   map(
+    \       split(a:options, '\zs'),
+    \       'get(table, v:val, "")'
+    \   ),
+    \   ''
+    \)
 endfunction "}}}
 
 function! eskk#mappings#get_map_modes() "{{{
@@ -259,7 +273,7 @@ function! eskk#mappings#get_filter_map(key) "{{{
         return lhs
     endif
 
-    call eskk#mappings#map('re', lhs, printf('eskk#filter(%s)', string(a:key)))
+    call eskk#mappings#map('re', lhs, 'eskk#filter(' . string(a:key) . ')')
 
     return lhs
 endfunction "}}}
@@ -278,7 +292,8 @@ function! eskk#mappings#get_nore_map(key, ...) "{{{
         return lhs
     endif
 
-    call eskk#mappings#map((a:0 ? substitute(a:1, 'r', '', 'g') : ''), lhs, rhs)
+    let options = a:0 ? substitute(a:1, 'r', '', 'g') : ''
+    call eskk#mappings#map(options, lhs, rhs)
 
     return lhs
 endfunction "}}}
@@ -289,13 +304,18 @@ endfunction "}}}
 
 function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
-        call eskk#util#logstrf('lhs or rhs is empty: lhs = %s, rhs = %s', a:lhs, a:rhs)
+        call eskk#util#logstrf(
+        \   'lhs or rhs is empty: lhs = %s, rhs = %s',
+        \   a:lhs,
+        \   a:rhs
+        \)
         return
     endif
 
     let map = stridx(a:options, 'r') != -1 ? 'map' : 'noremap'
     let opt = eskk#mappings#mapopt_chars2raw(a:options)
-    for mode in split((a:0 ? a:1 : eskk#mappings#get_map_modes()), '\zs')
+    let modes = a:0 ? a:1 : eskk#mappings#get_map_modes()
+    for mode in split(modes, '\zs')
         let mapcmd = join([mode . map, opt, a:lhs, a:rhs])
         try
             execute mapcmd
@@ -374,7 +394,11 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
         call eskk#mappings#unmap('l', 'b', temp_key)
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
     else
-        call eskk#util#logf("called eskk#mappings#set_up_temp_key_restore() but no '%s' key is stashed.", a:lhs)
+        call eskk#util#logf(
+        \   "called eskk#mappings#set_up_temp_key_restore()"
+        \       . " but no '%s' key is stashed.",
+        \   a:lhs
+        \)
         call eskk#mappings#set_up_key(a:lhs)
     endif
 endfunction "}}}
@@ -394,7 +418,11 @@ function! eskk#mappings#map_mode_local_keys() "{{{
         for key in s:mode_local_keys[mode]
             let real_key = eskk#mappings#get_special_key(key)
             call eskk#mappings#set_up_temp_key(real_key)
-            call eskk#register_temp_event('leave-mode-' . mode, 'eskk#mappings#set_up_temp_key_restore', [real_key])
+            call eskk#register_temp_event(
+            \   'leave-mode-' . mode,
+            \   'eskk#mappings#set_up_temp_key_restore',
+            \   [real_key]
+            \)
         endfor
     endif
 endfunction "}}}
@@ -485,7 +513,10 @@ function! eskk#mappings#map_all_keys(...) "{{{
             continue
         endif
         if opt.rhs == ''
-            call eskk#mappings#set_up_key(key, eskk#mappings#mapopt_dict2chars(opt.options))
+            call eskk#mappings#set_up_key(
+            \   key,
+            \   eskk#mappings#mapopt_dict2chars(opt.options)
+            \)
         else
             call eskk#mappings#map(
             \   'b'
@@ -514,7 +545,8 @@ function! eskk#mappings#unmap_all_keys() "{{{
 endfunction "}}}
 
 function! eskk#mappings#is_special_lhs(char, type) "{{{
-    " NOTE: This function must not show error when `s:map[a:type]` does not exist.
+    " NOTE: This function must not show error
+    " when `s:map[a:type]` does not exist.
     return has_key(s:map, a:type)
     \   && eskk#util#key2char(s:map[a:type].lhs) ==# a:char
 endfunction "}}}
@@ -522,7 +554,10 @@ function! eskk#mappings#get_special_key(type) "{{{
     if has_key(s:map, a:type)
         return s:map[a:type].lhs
     else
-        throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
+        throw eskk#internal_error(
+        \   ['eskk'],
+        \   "Unknown map type: " . a:type
+        \)
     endif
 endfunction "}}}
 function! eskk#mappings#get_special_map(type) "{{{
@@ -534,7 +569,10 @@ function! eskk#mappings#get_special_map(type) "{{{
         endif
         return map
     else
-        throw eskk#internal_error(['eskk'], "Unknown map type: " . a:type)
+        throw eskk#internal_error(
+        \   ['eskk'],
+        \   "Unknown map type: " . a:type
+        \)
     endif
 endfunction "}}}
 function! eskk#mappings#handle_special_lhs(char, type, stash) "{{{
@@ -550,7 +588,9 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
     let rhs = a:rhs
 
     if !has_key(s:map, a:type)
-        call eskk#util#warnf('%s: unknown type: %s', a:from, a:type)
+        call eskk#util#warn(
+        \   a:from . ": unknown type '" . a:type . "'."
+        \)
         return
     endif
     let type_st = s:map[a:type]
@@ -561,7 +601,9 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
             return
         endif
         if has_key(type_st, lhs) && a:options.unique
-            call eskk#util#warnf("%s: Already mapped to '%s'.", a:from, lhs)
+            call eskk#util#warn(
+            \   a:from . ": Already mapped to '" . lhs . "'."
+            \)
             return
         endif
         let type_st[lhs] = {
@@ -570,7 +612,10 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
         \}
     else
         if a:options.unique && has_key(type_st, 'lhs')
-            call eskk#util#warnf('%s: -unique is specified and mapping already exists. skip.', a:type)
+            call eskk#util#warn(
+            \   a:type . ': -unique is specified'
+            \       . ' and mapping already exists. skip.'
+            \)
             return
         endif
         let type_st.options = a:options
@@ -593,7 +638,9 @@ endfunction "}}}
 function! s:parse_string_from_q_args(args) "{{{
     let arg = s:skip_white(a:args)
     if arg =~# '^[''"]'    " If arg is string-ish, just eval(it).
-        let pat = (arg =~# "^'" ? '^\(''\).\{-}[^''\\]\1' : '^\("\).\{-}[^\\]\1')
+        let regexp_string = '^\(''\).\{-}[^''\\]\1'
+        let regexp_bare_word = '^\("\).\{-}[^\\]\1'
+        let pat = (arg =~# "^'" ? regexp_string : regexp_bare_word)
         let m = matchstr(arg, pat.'\C')
         let rest = strpart(arg, strlen(m))
         return [eval(m), rest]
@@ -614,11 +661,15 @@ function! s:parse_options_get_optargs(args) "{{{
     endif
     let a = a[1:]
     if a !~# '^'.OPT_CHARS.'\+'
-        throw eskk#parse_error(['eskk'], ":EskkMap argument's key must be word.")
+        throw eskk#parse_error(
+        \   ['eskk'],
+        \   "':EskkMap' argument's key must be word."
+        \)
     endif
 
     if a =~# '^'.OPT_CHARS.'\+='    " key has a value.
-        let [m, optname; _] = matchlist(a, '^\('.OPT_CHARS.'\+\)='.'\C')
+        let r = '^\('.OPT_CHARS.'\+\)='.'\C'
+        let [m, optname; _] = matchlist(a, r)
         let rest = strpart(a, strlen(m))
         let [value, rest] = s:parse_string_from_q_args(rest)
         return [optname, value, rest]
@@ -643,7 +694,10 @@ function! s:parse_options(args) "{{{
         elseif has_key(opt, optname)
             let opt[optname] = value
         else
-            throw eskk#parse_error(['eskk'], printf("unknown option '%s'.", optname))
+            throw eskk#parse_error(
+            \   ['eskk'],
+            \   printf("unknown option '%s'.", optname)
+            \)
         endif
     endwhile
 
@@ -657,11 +711,25 @@ function! eskk#mappings#_cmd_eskk_map(args) "{{{
 
     let args = s:skip_white(args)
     if args == ''
-        call s:create_map(eskk#get_current_instance(), type, options, lhs, '', 'EskkMap')
+        call s:create_map(
+        \   eskk#get_current_instance(),
+        \   type,
+        \   options,
+        \   lhs,
+        \   '',
+        \   'EskkMap'
+        \)
         return
     endif
 
-    call s:create_map(eskk#get_current_instance(), type, options, lhs, args, 'EskkMap')
+    call s:create_map(
+    \   eskk#get_current_instance(),
+    \   type,
+    \   options,
+    \   lhs,
+    \   args,
+    \   'EskkMap'
+    \)
 endfunction "}}}
 
 
