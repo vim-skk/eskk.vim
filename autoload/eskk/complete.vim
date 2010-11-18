@@ -78,7 +78,8 @@ function! eskk#complete#can_find_start() "{{{
 
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN && buf_str.empty()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   && buf_str.empty()
         return 0
     endif
 
@@ -117,7 +118,9 @@ function! s:complete(mode, base) "{{{
     let list = []
     let dict = eskk#get_skk_dict()
     let buftable = eskk#get_buftable()
-    let is_katakana = g:eskk_kata_convert_to_hira_at_completion && a:mode ==# 'kata'
+    let is_katakana =
+    \   g:eskk_kata_convert_to_hira_at_completion
+    \   && a:mode ==# 'kata'
 
     if is_katakana
         let henkan_buf_str = buftable.filter_rom(
@@ -129,8 +132,12 @@ function! s:complete(mode, base) "{{{
         \   'rom_to_hira'
         \)
     else
-        let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        let henkan_buf_str = buftable.get_buf_str(
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \)
+        let okuri_buf_str = buftable.get_buf_str(
+        \   g:eskk#buftable#HENKAN_PHASE_OKURI
+        \)
     endif
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
@@ -151,13 +158,15 @@ function! s:complete(mode, base) "{{{
     " \   'menu' : a:mode,
     " \})
 
-    let do_list_okuri_candidates = buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    let do_list_okuri_candidates =
+    \   buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_OKURI
     for c in candidates
         if do_list_okuri_candidates
             if c.has_okuri
                 call add(list, {
                 \   'word': marker . c.input,
-                \   'abbr': (has_key(c, 'annotation') ? c.input . '; ' . c.annotation : c.input),
+                \   'abbr': (has_key(c, 'annotation') ?
+                \               c.input . '; ' . c.annotation : c.input),
                 \   'menu': 'kanji:okuri'
                 \})
             endif
@@ -166,7 +175,8 @@ function! s:complete(mode, base) "{{{
 
         call add(list, {
         \   'word': marker . c.input,
-        \   'abbr': (has_key(c, 'annotation') ? c.input . '; ' . c.annotation : c.input),
+        \   'abbr': (has_key(c, 'annotation') ?
+        \               c.input . '; ' . c.annotation : c.input),
         \   'menu': 'kanji'
         \})
     endfor
@@ -371,13 +381,17 @@ function! s:set_selected_item() "{{{
         let rom_str = ''
     endif
 
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let henkan_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \)
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
         call henkan_buf_str.push_matched('', char)
     endfor
 
-    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let okuri_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#HENKAN_PHASE_OKURI
+    \)
     call okuri_buf_str.clear()
     call okuri_buf_str.set_rom_str(rom_str)
 
@@ -439,9 +453,12 @@ function! s:get_buftable_str(with_marker, ...) "{{{
     endif
 
     if !a:with_marker && s:has_marker()
-        if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
-            let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
-        elseif line[begin : begin + strlen(g:eskk_marker_henkan) - 1] == g:eskk_marker_henkan
+        if line[begin : begin + strlen(g:eskk_marker_popup) - 1]
+        \   ==# g:eskk_marker_popup
+            let begin += strlen(g:eskk_marker_popup)
+            \               + strlen(g:eskk_marker_henkan)
+        elseif line[begin : begin + strlen(g:eskk_marker_henkan) - 1]
+        \   ==# g:eskk_marker_henkan
             let begin += strlen(g:eskk_marker_henkan)
         else
             call eskk#util#assert(0, '404: marker not found')
