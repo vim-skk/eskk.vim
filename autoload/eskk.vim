@@ -578,7 +578,7 @@ endfunction "}}}
 
 " Initialization
 function! s:initialize() "{{{
-    " Set up g:eskk_dictionary. {{{
+    " Set up g:eskk_directory. {{{
     function! s:initialize_set_up_eskk_directory()
         let dir = expand(g:eskk_directory)
         for d in [dir, eskk#util#join_path(dir, 'log')]
