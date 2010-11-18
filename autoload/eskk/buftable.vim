@@ -376,7 +376,7 @@ function! s:buftable.do_enter(stash) "{{{
     let phase = a:stash.phase
     let enter_char = eskk#util#key2char(eskk#mappings#get_special_map('enter-key'))
     let undo_char  = eskk#util#key2char(eskk#mappings#get_special_map('undo-key'))
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
@@ -530,7 +530,7 @@ endfunction "}}}
 function! s:get_next_candidate(self, stash, next) "{{{
     let self = a:self
     let cur_buf_str = self.get_current_buf_str()
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
     let prev_buftable = henkan_result.buftable
     let rom_str = cur_buf_str.get_matched_rom()
@@ -689,7 +689,7 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) "{{{
     let henkan_select_buf_str = self.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
 
     let rom_str = henkan_buf_str.get_rom_str()
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     call dict.refer(self, rom_str, '', '')
 
     try
@@ -746,7 +746,7 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     let hira = henkan_buf_str.get_matched_filter()
     let okuri = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     call dict.refer(self, hira, okuri, okuri_rom)
 
     " Clear phase henkan/okuri buffer string.
@@ -887,7 +887,7 @@ function! s:convert_again_with_table(self, table) "{{{
     \)
 
     " Update dictionary.
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
     if !empty(henkan_result)
       call henkan_result.update_candidate()

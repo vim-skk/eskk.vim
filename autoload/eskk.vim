@@ -72,6 +72,8 @@ let s:is_initialized = 0
 " Last command's string. See eskk#jump_one_char().
 let s:last_jump_cmd = -1
 let s:last_jump_char = -1
+" SKK Dictionary
+let s:skk_dict = {}
 " }}}
 
 
@@ -288,7 +290,7 @@ function! s:asym_filter.filter(stash) "{{{
             call buftable.choose_prev_candidate(a:stash)
             return
         elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:delete-from-dict')
-            let henkan_result = eskk#dictionary#get_instance().get_henkan_result()
+            let henkan_result = eskk#get_skk_dict().get_henkan_result()
             if !empty(henkan_result)
                 call henkan_result.delete_from_dict()
 
@@ -1241,6 +1243,16 @@ function! eskk#statusline(...) "{{{
     \               get(g:eskk_statusline_mode_strings,
     \                   eskk#get_current_instance().mode, '??'))
     \      : get(a:000, 1, '')
+endfunction "}}}
+
+" Dictionary
+function! eskk#get_skk_dict() "{{{
+    if empty(s:skk_dict)
+        let s:skk_dict = eskk#dictionary#new(
+        \   g:eskk_dictionary, g:eskk_large_dictionary
+        \)
+    endif
+    return s:skk_dict
 endfunction "}}}
 
 " Buftable

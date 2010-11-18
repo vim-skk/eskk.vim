@@ -116,7 +116,7 @@ endfunction "}}}
 function! s:complete(mode, base) "{{{
     " Get candidates.
     let list = []
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let buftable = eskk#get_buftable()
     let is_katakana = g:eskk_kata_convert_to_hira_at_completion && a:mode ==# 'kata'
 

@@ -369,7 +369,7 @@ function! s:henkan_result_get_candidates(this) "{{{
         return a:this._candidates.to_list()
 
     elseif a:this._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-        let dict = eskk#dictionary#get_instance()
+        let dict = eskk#get_skk_dict()
         let [user_dict, system_dict] = [dict.get_user_dict(), dict.get_system_dict()]
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_candidate(
@@ -504,7 +504,7 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
                 let page_index += 1
             else
                 " No more pages. Register new word.
-                let dict = eskk#dictionary#get_instance()
+                let dict = eskk#get_skk_dict()
                 let input = dict.register_word(a:this)[0]
                 let henkan_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
                 let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
@@ -607,7 +607,7 @@ endfunction "}}}
 
 " Delete current candidate from all places.
 " e.g.:
-" - s:skk_dict_instance._registered_words
+" - s:dict._registered_words
 " - self._candidates
 " - SKK dictionary
 " -- User dictionary
@@ -616,7 +616,7 @@ function! s:henkan_result.delete_from_dict() "{{{
     try
         return s:henkan_result_delete_from_dict(self)
     finally
-        let dict = eskk#dictionary#get_instance()
+        let dict = eskk#get_skk_dict()
         call dict.clear_henkan_result()
     endtry
 endfunction "}}}
@@ -629,7 +629,7 @@ function! s:henkan_result_delete_from_dict(this) "{{{
         return
     endif
 
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let user_dict_lines = dict.get_user_dict().get_lines()
     if !dict.get_user_dict().is_valid()
         return
@@ -689,7 +689,7 @@ function! s:henkan_result.update_candidate() "{{{
     \)
 
     " Move current candidate to the first.
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
     call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
 endfunction "}}}
@@ -840,19 +840,21 @@ let s:dict = {
 \   '_current_henkan_result': {},
 \}
 
-function! s:dict_new(user_dict, system_dict) "{{{
+function! eskk#dictionary#new(...) "{{{
+    let user_dict = get(a:000, 0, g:eskk_directory)
+    let system_dict = get(a:000, 1, g:eskk_large_dictionary)
     return extend(
     \   deepcopy(s:dict, 1),
     \   {
     \       '_user_dict': s:physical_dict_new(
-    \           a:user_dict.path,
-    \           a:user_dict.sorted,
-    \           a:user_dict.encoding,
+    \           user_dict.path,
+    \           user_dict.sorted,
+    \           user_dict.encoding,
     \       ),
     \       '_system_dict': s:physical_dict_new(
-    \           a:system_dict.path,
-    \           a:system_dict.sorted,
-    \           a:system_dict.encoding,
+    \           system_dict.path,
+    \           system_dict.sorted,
+    \           system_dict.encoding,
     \       ),
     \       '_registered_words': cul#ordered_set#new(
     \           {'Fn_identifier': 'eskk#dictionary#_registered_word_identifier'}
@@ -860,15 +862,6 @@ function! s:dict_new(user_dict, system_dict) "{{{
     \   },
     \   'force'
     \)
-endfunction "}}}
-
-let s:skk_dict_instance = {}
-
-function! eskk#dictionary#get_instance() "{{{
-    if empty(s:skk_dict_instance)
-        let s:skk_dict_instance = s:dict_new(g:eskk_dictionary, g:eskk_large_dictionary)
-    endif
-    return s:skk_dict_instance
 endfunction "}}}
 
 
