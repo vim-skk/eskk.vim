@@ -108,7 +108,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     let data = s:get_table_data(a:table_name)
     let cached_maps = eskk#_get_cached_maps()
 
-    if g:eskk_cache_table_map
+    if g:eskk#cache_table_map
     \   && eskk#util#has_key_f(cached_maps, [a:table_name, a:lhs])
         if cached_maps[a:table_name][a:lhs][a:index] != ''
             return cached_maps[a:table_name][a:lhs][a:index]
@@ -125,7 +125,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
     if s:is_base_table(a:table_name)
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
-            if g:eskk_cache_table_map
+            if g:eskk#cache_table_map
                 call eskk#util#let_f(
                 \   cached_maps,
                 \   [a:table_name, a:lhs],
@@ -138,7 +138,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         if has_key(data, a:lhs)
             if data[a:lhs].method ==# 'add'
             \   && data[a:lhs].data[a:index] != ''
-                if g:eskk_cache_table_map
+                if g:eskk#cache_table_map
                     call eskk#util#let_f(
                     \   cached_maps,
                     \   [a:table_name, a:lhs],
@@ -187,7 +187,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     \)
 
     let cached_candidates = eskk#_get_cached_candidates()
-    if g:eskk_cache_table_candidates
+    if g:eskk#cache_table_candidates
     \   && eskk#util#has_key_f(
     \           cached_candidates,
     \           [a:table_name, a:lhs_head]
@@ -198,7 +198,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         let candidates = filter(
         \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
         \)
-        if g:eskk_cache_table_candidates
+        if g:eskk#cache_table_candidates
             call eskk#util#let_f(
             \   cached_candidates,
             \   [a:table_name, a:lhs_head],

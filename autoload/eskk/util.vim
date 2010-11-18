@@ -23,7 +23,7 @@ endfunction "}}}
 function! s:write_to_log_file(msg) "{{{
     execute 'redir >>' expand(
     \   eskk#util#join_path(
-    \       g:eskk_directory,
+    \       g:eskk#directory,
     \       'log',
     \       'debug' . strftime('-%Y-%m-%d') . '.log'
     \   )
@@ -32,7 +32,7 @@ function! s:write_to_log_file(msg) "{{{
     redir END
 endfunction "}}}
 function! eskk#util#log(msg) "{{{
-    if !g:eskk_debug
+    if !g:eskk#debug
         return
     endif
     if !eskk#is_initialized()
@@ -47,7 +47,7 @@ function! eskk#util#log(msg) "{{{
     redraw
 
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    if g:eskk_debug_stdout ==# 'file'
+    if g:eskk#debug_stdout ==# 'file'
         execute
         \   'autocmd eskk VimLeavePre *'
         \   'call s:write_to_log_file(' . string(msg) . ')'
@@ -55,8 +55,8 @@ function! eskk#util#log(msg) "{{{
         call eskk#util#warn(msg)
     endif
 
-    if g:eskk_debug_wait_ms !=# 0
-        execute printf('sleep %dm', g:eskk_debug_wait_ms)
+    if g:eskk#debug_wait_ms !=# 0
+        execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}
 function! eskk#util#logf(fmt, ...) "{{{
@@ -69,7 +69,7 @@ function! eskk#util#logstrf(fmt, ...) "{{{
     \)
 endfunction "}}}
 function! eskk#util#log_exception(what) "{{{
-    if !g:eskk_debug
+    if !g:eskk#debug
         return
     endif
 

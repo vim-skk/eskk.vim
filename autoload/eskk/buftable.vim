@@ -376,10 +376,10 @@ endfunction "}}}
 function! s:buftable.get_marker(henkan_phase) "{{{
     let table = [
     \    '',
-    \    g:eskk_marker_henkan,
-    \    g:eskk_marker_okuri,
-    \    g:eskk_marker_henkan_select,
-    \    g:eskk_marker_jisyo_touroku,
+    \    g:eskk#marker_henkan,
+    \    g:eskk#marker_okuri,
+    \    g:eskk#marker_henkan_select,
+    \    g:eskk#marker_jisyo_touroku,
     \]
     call s:validate_table_idx(table, a:henkan_phase)
     return table[a:henkan_phase]
@@ -411,7 +411,7 @@ function! s:buftable.do_enter(stash) "{{{
         \)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         call self.convert_rom_str([phase])
-        if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
+        if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
             \   'eskk#util#identity',
@@ -431,7 +431,7 @@ function! s:buftable.do_enter(stash) "{{{
         call self.convert_rom_str(
         \   [g:eskk#buftable#HENKAN_PHASE_HENKAN, phase]
         \)
-        if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
+        if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
             \   'eskk#util#identity',
@@ -449,7 +449,7 @@ function! s:buftable.do_enter(stash) "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         call self.convert_rom_str([phase])
-        if get(g:eskk_set_undo_point, 'kakutei', 0) && mode() ==# 'i'
+        if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
             \   'eskk#util#identity',
@@ -481,7 +481,7 @@ function! s:buftable.do_backspace(stash, ...) "{{{
 
     let phase = self.get_henkan_phase()
     if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        if g:eskk_delete_implies_kakutei
+        if g:eskk#delete_implies_kakutei
             " Enter normal phase and delete one character.
             let filter_str = eskk#util#mb_chop(self.get_display_str(0))
             call self.push_kakutei_str(filter_str)
@@ -500,13 +500,13 @@ function! s:buftable.do_backspace(stash, ...) "{{{
     endif
 
     let mode_st = eskk#get_current_mode_structure()
-    if g:eskk_convert_at_exact_match
+    if g:eskk#convert_at_exact_match
     \   && has_key(mode_st.sandbox, 'real_matched_pairs')
 
         let p = mode_st.sandbox.real_matched_pairs
         unlet mode_st.sandbox.real_matched_pairs
 
-        if g:eskk_delete_implies_kakutei
+        if g:eskk#delete_implies_kakutei
             " Enter normal phase and delete one character.
             let filter_str = eskk#util#mb_chop(self.get_display_str(0))
             call self.push_kakutei_str(filter_str)
@@ -623,15 +623,15 @@ function! s:get_next_candidate(self, stash, next) "{{{
             \   g:eskk#buftable#HENKAN_PHASE_OKURI
             \)
             let okuri_rom_str = okuri_buf_str.get_matched_rom()
-            if g:eskk_revert_henkan_style ==# 'okuri-one'
+            if g:eskk#revert_henkan_style ==# 'okuri-one'
                 " "▼書く" => "▽か*k"
                 if okuri_rom_str != ''
                     call okuri_buf_str.set_rom_str(okuri_rom_str[0])
                     call okuri_buf_str.clear_matched()
                 endif
-            elseif g:eskk_revert_henkan_style ==# 'okuri'
+            elseif g:eskk#revert_henkan_style ==# 'okuri'
                 " "▼書く" => "▽か*く"
-            elseif g:eskk_revert_henkan_style ==# 'delete-okuri'
+            elseif g:eskk#revert_henkan_style ==# 'delete-okuri'
                 " "▼書く" => "▽か"
                 if okuri_rom_str != ''
                     " Clear roms of `okuri_buf_str`.
@@ -640,7 +640,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
                     \   g:eskk#buftable#HENKAN_PHASE_HENKAN
                     \)
                 endif
-            elseif g:eskk_revert_henkan_style ==# 'concat-okuri'
+            elseif g:eskk#revert_henkan_style ==# 'concat-okuri'
                 " "▼書く" => "▽かく"
                 if okuri_rom_str != ''
                     " Copy roms of `okuri_buf_str` to `henkan_buf_str`.
@@ -679,7 +679,7 @@ function! s:buftable.do_sticky(stash) "{{{
             call self.push_kakutei_str(self.get_display_str(0))
             call buf_str.clear()
         endif
-        if get(g:eskk_set_undo_point, 'sticky', 0) && mode() ==# 'i'
+        if get(g:eskk#set_undo_point, 'sticky', 0) && mode() ==# 'i'
             let undo_char = eskk#util#key2char(
             \   eskk#mappings#get_special_map('undo-key')
             \)
@@ -693,7 +693,7 @@ function! s:buftable.do_sticky(stash) "{{{
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        if g:eskk_ignore_continuous_sticky
+        if g:eskk#ignore_continuous_sticky
         \   && empty(buf_str.get_matched())
             let step = 0
         elseif buf_str.get_rom_str() != ''
@@ -821,7 +821,7 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
     \)
 
-    if g:eskk_kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
+    if g:eskk#kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
         call self.filter_rom_inplace(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
         \   'rom_to_hira'
@@ -838,7 +838,7 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     \   g:eskk#buftable#HENKAN_PHASE_OKURI
     \])
 
-    if g:eskk_fix_extra_okuri
+    if g:eskk#fix_extra_okuri
     \   && henkan_buf_str.get_rom_str() != ''
     \   && phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         call okuri_buf_str.set_rom_str(henkan_buf_str.get_rom_str())
@@ -921,7 +921,7 @@ endfunction "}}}
 " TODO: These functions are very similar. Refactoring them.
 function! s:buftable.convert_rom_str(phases) "{{{
     if eskk#has_current_mode_table()
-        if g:eskk_kata_convert_to_hira_at_henkan
+        if g:eskk#kata_convert_to_hira_at_henkan
         \   && eskk#get_mode() ==# 'kata'
             let table = eskk#create_table('rom_to_hira')
         else

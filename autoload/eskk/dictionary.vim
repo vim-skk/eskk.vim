@@ -398,7 +398,7 @@ function! s:henkan_result_advance(this, advance) "{{{
         let idx = a:this._candidates_index
         if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
             " Next time to call s:henkan_result_get_candidates(),
-            " eskk will getchar() if `idx >= g:eskk_show_candidates_count`
+            " eskk will getchar() if `idx >= g:eskk#show_candidates_count`
             let a:this._candidates_index +=  (a:advance ? 1 : -1)
             return 1
         else
@@ -433,9 +433,9 @@ function! s:henkan_result_get_candidates(this) "{{{
             throw eskk#dictionary_look_up_error(
             \   ['eskk', 'dictionary'],
             \   "Can't look up '"
-            \   . g:eskk_marker_henkan
+            \   . g:eskk#marker_henkan
             \   . a:this._key
-            \   . g:eskk_marker_okuri
+            \   . g:eskk#marker_okuri
             \   . a:this._okuri_rom
             \   . "' in dictionaries."
             \)
@@ -514,9 +514,9 @@ function! s:henkan_result_get_candidates(this) "{{{
         "throw eskk#dictionary_look_up_error(
         "\   ['eskk', 'dictionary'],
         "\   "Can't look up '"
-        "\   . g:eskk_marker_henkan
+        "\   . g:eskk#marker_henkan
         "\   . a:this._key
-        "\   . g:eskk_marker_okuri
+        "\   . g:eskk#marker_okuri
         "\   . a:this._okuri_rom
         "\   . "' in dictionaries."
         "\)
@@ -533,7 +533,7 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
 
     " Select candidates by getchar()'s character.
     let words = copy(s:henkan_result_get_candidates(a:this))
-    let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))
+    let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
     let page_index = 0
     let pages = []
 
@@ -546,8 +546,8 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
     while !empty(words)
         let words_in_page = []
         " Add words to `words_in_page` as number of
-        " string length of `g:eskk_select_cand_keys`.
-        for c in split(g:eskk_select_cand_keys, '\zs')
+        " string length of `g:eskk#select_cand_keys`.
+        for c in split(g:eskk#select_cand_keys, '\zs')
             if empty(words)
                 break
             endif
@@ -560,7 +560,7 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
         " Show candidates.
         redraw
         for [c, word] in pages[page_index]
-            if g:eskk_show_annotation
+            if g:eskk#show_annotation
                 echon printf('%s:%s%s  ', c, word.input,
                 \       (has_key(word, 'annotation') ?
                 \           ';' . word.annotation : ''))
@@ -611,9 +611,9 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
             else
                 return a:functor.funcall()
             endif
-        elseif stridx(g:eskk_select_cand_keys, char) != -1
-            let selected = g:eskk_select_cand_keys[
-            \   stridx(g:eskk_select_cand_keys, char)
+        elseif stridx(g:eskk#select_cand_keys, char) != -1
+            let selected = g:eskk#select_cand_keys[
+            \   stridx(g:eskk#select_cand_keys, char)
             \]
             for idx in range(len(pages[page_index]))
                 let [c, word] = pages[page_index][idx]
@@ -649,8 +649,8 @@ function! s:henkan_result.get_candidate(...) "{{{
         return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
     endif
 
-    let max_count = g:eskk_show_candidates_count >= 0 ?
-    \                   g:eskk_show_candidates_count : 0
+    let max_count = g:eskk#show_candidates_count >= 0 ?
+    \                   g:eskk#show_candidates_count : 0
     let candidates = s:henkan_result_get_candidates(self)
 
     if self._candidates_index >= max_count
@@ -972,8 +972,8 @@ let s:dict = {
 \}
 
 function! eskk#dictionary#new(...) "{{{
-    let user_dict = get(a:000, 0, g:eskk_directory)
-    let system_dict = get(a:000, 1, g:eskk_large_dictionary)
+    let user_dict = get(a:000, 0, g:eskk#directory)
+    let system_dict = get(a:000, 1, g:eskk#large_dictionary)
     return extend(
     \   deepcopy(s:dict, 1),
     \   {
@@ -1032,7 +1032,7 @@ function! s:dict.register_word(henkan_result) "{{{
         if okuri == ''
             let prompt = printf('%s ', key)
         else
-            let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+            let prompt = printf('%s%s%s ', key, g:eskk#marker_okuri, okuri)
         endif
         redraw
         let input  = eskk#util#input(prompt)
@@ -1239,7 +1239,7 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     " To unique candidates.
     let candidates = s:dict_search_candidates
     call candidates.clear()
-    let max_count = g:eskk_max_candidates
+    let max_count = g:eskk#max_candidates
 
     " self._registered_words
     for w in self._registered_words.to_list()

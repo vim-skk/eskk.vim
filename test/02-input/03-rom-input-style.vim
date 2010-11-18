@@ -19,8 +19,8 @@ function! s:do_general_test()
 endfunction
 
 function! s:do_test_skk()
-    let g:eskk_rom_input_style = 'skk'
-    Diag 'let g:eskk_rom_input_style = "skk"'
+    let g:eskk#rom_input_style = 'skk'
+    Diag 'let g:eskk#rom_input_style = "skk"'
 
     call s:do_general_test()
     Is eskk#test#emulate_filter_keys('jka'), 'か', '"jka" => "か"'
@@ -29,8 +29,8 @@ function! s:do_test_skk()
 endfunction
 
 function! s:do_test_msime()
-    let g:eskk_rom_input_style = 'msime'
-    Diag 'let g:eskk_rom_input_style = "msime"'
+    let g:eskk#rom_input_style = 'msime'
+    Diag 'let g:eskk#rom_input_style = "msime"'
 
     call s:do_general_test()
     Is eskk#test#emulate_filter_keys('jka'), 'jか', '"jka" => "jか"'
@@ -39,31 +39,31 @@ function! s:do_test_msime()
 endfunction
 
 function! s:do_test_quickmatch()
-    let g:eskk_rom_input_style = 'quickmatch'
-    Diag 'let g:eskk_rom_input_style = "quickmatch"'
+    let g:eskk#rom_input_style = 'quickmatch'
+    Diag 'let g:eskk#rom_input_style = "quickmatch"'
 
     " TODO: Not implemented
 endfunction
 
 function! s:run()
-    let rom_input_style = g:eskk_rom_input_style
-    let cache_table_map = g:eskk_cache_table_map
+    let rom_input_style = g:eskk#rom_input_style
+    let cache_table_map = g:eskk#cache_table_map
 
     try
-        Diag 'let g:eskk_cache_table_map = 0'
-        let g:eskk_cache_table_map = 0
+        Diag 'let g:eskk#cache_table_map = 0'
+        let g:eskk#cache_table_map = 0
         call s:do_test_skk()
         call s:do_test_msime()
         call s:do_test_quickmatch()
 
-        Diag 'let g:eskk_cache_table_map = 1'
-        let g:eskk_cache_table_map = 1
+        Diag 'let g:eskk#cache_table_map = 1'
+        let g:eskk#cache_table_map = 1
         call s:do_test_skk()
         call s:do_test_msime()
         call s:do_test_quickmatch()
     finally
-        let g:eskk_rom_input_style = rom_input_style
-        let g:eskk_cache_table_map = cache_table_map
+        let g:eskk#rom_input_style = rom_input_style
+        let g:eskk#cache_table_map = cache_table_map
     endtry
 endfunction
 

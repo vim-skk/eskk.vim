@@ -112,7 +112,7 @@ function! s:complete(mode, base) "{{{
     let dict = eskk#get_skk_dict()
     let buftable = eskk#get_buftable()
     let is_katakana =
-    \   g:eskk_kata_convert_to_hira_at_completion
+    \   g:eskk#kata_convert_to_hira_at_completion
     \   && a:mode ==# 'kata'
 
     if is_katakana
@@ -137,7 +137,7 @@ function! s:complete(mode, base) "{{{
     let okuri_rom = okuri_buf_str.get_matched_rom()
 
     let filter_str = s:get_buftable_str(0, a:base)
-    let marker = g:eskk_marker_popup . g:eskk_marker_henkan
+    let marker = g:eskk#marker_popup . g:eskk#marker_henkan
 
     let s = dict.search(key, okuri, okuri_rom)
     if empty(s)
@@ -446,13 +446,13 @@ function! s:get_buftable_str(with_marker, ...) "{{{
     endif
 
     if !a:with_marker && s:has_marker()
-        if line[begin : begin + strlen(g:eskk_marker_popup) - 1]
-        \   ==# g:eskk_marker_popup
-            let begin += strlen(g:eskk_marker_popup)
-            \               + strlen(g:eskk_marker_henkan)
-        elseif line[begin : begin + strlen(g:eskk_marker_henkan) - 1]
-        \   ==# g:eskk_marker_henkan
-            let begin += strlen(g:eskk_marker_henkan)
+        if line[begin : begin + strlen(g:eskk#marker_popup) - 1]
+        \   ==# g:eskk#marker_popup
+            let begin += strlen(g:eskk#marker_popup)
+            \               + strlen(g:eskk#marker_henkan)
+        elseif line[begin : begin + strlen(g:eskk#marker_henkan) - 1]
+        \   ==# g:eskk#marker_henkan
+            let begin += strlen(g:eskk#marker_henkan)
         else
             call eskk#util#assert(0, '404: marker not found')
         endif
@@ -476,7 +476,7 @@ endfunction "}}}
 
 function! eskk#complete#completing() "{{{
     return
-    \   g:eskk_enable_completion
+    \   g:eskk#enable_completion
     \   && pumvisible()
     \   && eskk#get_current_instance().has_started_completion
 endfunction "}}}
