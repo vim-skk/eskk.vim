@@ -28,7 +28,13 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
 
-    let cache_key = a:physical_dict.get_ftime_at_read() . a:physical_dict.path . a:key_filter . a:okuri_rom . limit
+    let cache_key =
+    \   a:physical_dict.get_ftime_at_read()
+    \   . a:physical_dict.path
+    \   . a:key_filter
+    \   . a:okuri_rom
+    \   . limit
+
     if has_key(s:search_all_candidate_memoize, cache_key)
         return s:search_all_candidate_memoize[cache_key]
     endif
@@ -40,7 +46,13 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
 
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
-        let [line, idx] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
+        let [line, idx] = s:search_binary(
+        \   a:physical_dict,
+        \   whole_lines,
+        \   converted,
+        \   has_okuri,
+        \   100
+        \)
 
         if idx == -1
             let s:search_all_candidate_memoize[cache_key] = []
@@ -60,15 +72,21 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             let end = begin + limit
         endif
 
-        let s:search_all_candidate_memoize[cache_key] =
-                    \ map(whole_lines[begin : end],
-                    \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
-                    \)
+        let s:search_all_candidate_memoize[cache_key] = map(
+        \   whole_lines[begin : end],
+        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+        \)
     else
         let lines = []
         let start = 1
         while 1
-            let [line, idx] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri, start)
+            let [line, idx] = s:search_linear(
+            \   a:physical_dict,
+            \   whole_lines,
+            \   converted,
+            \   has_okuri,
+            \   start
+            \)
 
             if idx == -1
                 break
@@ -78,8 +96,10 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             let start = idx + 1
         endwhile
 
-        let s:search_all_candidate_memoize[cache_key] =
-                    \ map(lines, 's:iconv(v:val, a:physical_dict.encoding, &l:encoding)')
+        let s:search_all_candidate_memoize[cache_key] = map(
+        \   lines,
+        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+        \)
     endif
 
     return s:search_all_candidate_memoize[cache_key]
@@ -97,13 +117,19 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
 
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
-        let [line, idx] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
+        let [line, idx] = s:search_binary(
+        \   a:physical_dict, whole_lines, converted, has_okuri, 100
+        \)
     else
-        let [line, idx] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
+        let [line, idx] = s:search_linear(
+        \   a:physical_dict, whole_lines, converted, has_okuri
+        \)
     endif
     if idx !=# -1
-        let conv_line = s:iconv(line, a:physical_dict.encoding, &l:encoding)
-        return [conv_line, idx]
+        return [
+        \   s:iconv(line, a:physical_dict.encoding, &l:encoding),
+        \   idx
+        \]
     else
         return ['', -1]
     endif
@@ -113,8 +139,13 @@ function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     " NOTE: min, max, mid are index number. not lnum.
 
-    let min = a:has_okuri ? a:ph_dict.okuri_ari_idx : a:ph_dict.okuri_nasi_idx
-    let max = a:has_okuri ? a:ph_dict.okuri_nasi_idx : len(a:whole_lines) - 1
+    if a:has_okuri
+        let min = a:ph_dict.okuri_ari_idx
+        let max = a:ph_dict.okuri_nasi_idx
+    else
+        let min = a:ph_dict.okuri_nasi_idx
+        let max = len(a:whole_lines) - 1
+    endif
 
     if a:has_okuri
         while max - min > a:limit
@@ -137,12 +168,15 @@ function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     endif
 
     " NOTE: min, max: Give index number, not lnum.
-    return s:search_linear(a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max)
+    return s:search_linear(
+    \   a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max
+    \)
 endfunction "}}}
 " Returns [line_string, idx] matching the candidate.
 function! s:search_linear(ph_dict, whole_lines, needle, has_okuri, ...) "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    let min = get(a:000, 0, a:ph_dict[a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'])
+    let min_which = a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'
+    let min = get(a:000, 0, a:ph_dict[min_which])
     let max = get(a:000, 1, len(a:whole_lines) - 1)
 
     call eskk#util#assert(min <=# max, 'min <=# max')
@@ -161,18 +195,28 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
-    let [key, okuri_rom] = [matchstr(list[0], '^[^a-z ]\+'), matchstr(list[0], '[a-z]\+')]
+    let key = matchstr(list[0], '^[^a-z ]\+')
+    let okuri_rom = matchstr(list[0], '[a-z]\+')
     let has_okuri = okuri_rom != ''
 
     let candidates = []
     for _ in list[1:]
         let semicolon = stridx(_, ';')
-        call add(
-        \   candidates,
-        \   semicolon != -1 ?
-        \       s:candidate_new(a:from_type, _[: semicolon - 1], has_okuri, _[semicolon + 1 :]) :
-        \       s:candidate_new(a:from_type, _, has_okuri)
-        \)
+        if semicolon != -1
+            let c = s:candidate_new(
+            \   a:from_type,
+            \   _[: semicolon - 1],
+            \   has_okuri,
+            \   _[semicolon + 1 :]
+            \)
+        else
+            let c = s:candidate_new(
+            \   a:from_type,
+            \   _,
+            \   has_okuri
+            \)
+        endif
+        call add(candidates, c)
     endfor
 
     return [key, okuri_rom, candidates]
@@ -224,7 +268,9 @@ endfunction "}}}
 let s:CANDIDATE_FROM_USER_DICT = 0
 let s:CANDIDATE_FROM_SYSTEM_DICT = 1
 let s:CANDIDATE_FROM_REGISTERED_WORDS = 2
-lockvar s:CANDIDATE_FROM_USER_DICT s:CANDIDATE_FROM_SYSTEM_DICT s:CANDIDATE_FROM_REGISTERED_WORDS
+lockvar s:CANDIDATE_FROM_USER_DICT
+lockvar s:CANDIDATE_FROM_SYSTEM_DICT
+lockvar s:CANDIDATE_FROM_REGISTERED_WORDS
 
 function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
     let obj = {
@@ -539,9 +585,13 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
         endtry
 
 
-        if eskk#mappings#is_special_lhs(char, 'phase:henkan-select:escape')
+        if eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:escape'
+        \)
             return a:functor.funcall()
-        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:next-page')
+        elseif eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:next-page'
+        \)
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
@@ -555,11 +605,14 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
                 \   g:eskk#buftable#HENKAN_PHASE_OKURI
                 \)
                 return [
-                \   (input != '' ? input : henkan_buf_str.get_matched_filter()),
+                \   (input != '' ?
+                \       input : henkan_buf_str.get_matched_filter()),
                 \   okuri_buf_str.get_matched_filter()
                 \]
             endif
-        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:prev-page')
+        elseif eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:prev-page'
+        \)
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
@@ -575,7 +628,10 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
                     let a:this._candidates_index = idx + a:skip_num
-                    return [word.input, (a:with_okuri ? a:this._okuri : '')]
+                    return [
+                    \   word.input,
+                    \   (a:with_okuri ? a:this._okuri : '')
+                    \]
                 endif
             endfor
         endif
@@ -939,7 +995,8 @@ function! eskk#dictionary#new(...) "{{{
     \           system_dict.encoding,
     \       ),
     \       '_registered_words': cul#ordered_set#new(
-    \           {'Fn_identifier': 'eskk#dictionary#_registered_word_identifier'}
+    \           {'Fn_identifier':
+    \               'eskk#dictionary#_registered_word_identifier'}
     \       ),
     \   },
     \   'force'
@@ -1058,7 +1115,8 @@ function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) "{{{
 endfunction "}}}
 
 " Returns true value if new registered is added
-" or user dictionary's lines are modified by "s:physical_dict_new.set_lines()".
+" or user dictionary's lines are
+" modified by "s:physical_dict_new.set_lines()".
 " If this value is false, s:dict.update_dictionary() does nothing.
 function! s:dict.is_modified() "{{{
     " No need to check system dictionary.
@@ -1088,12 +1146,14 @@ function! s:dict.update_dictionary() "{{{
     let user_dict_lines = self._user_dict.get_lines()
     if user_dict_exists
         if empty(user_dict_lines)
-            " user dictionary exists but .get_lines() returned empty list.
+            " user dictionary exists but
+            " .get_lines() returned empty list.
             " format is invalid.
 
             " TODO:
-            " Echo "user dictionary format is invalid. overwrite with new words?".
-            " And do not read, just overwrite it with new words.
+            " Echo "user dictionary format is invalid.
+            " overwrite with new words?",
+            " and do not read, just overwrite it with new words.
             return
         endif
     else
@@ -1214,8 +1274,9 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
                 for line in eskk#dictionary#search_all_candidates(
                 \   dict, key, okuri_rom, max_count - candidates.size()
                 \)
-                    let _ = eskk#dictionary#parse_skk_dict_line(line, from_type)
-                    for c in _[2]    " candidates
+                    for c in eskk#dictionary#parse_skk_dict_line(
+                    \   line, from_type
+                    \)[2]    " candidates
                         call candidates.push(
                         \   s:candidate_new(
                         \       s:CANDIDATE_FROM_REGISTERED_WORDS,
