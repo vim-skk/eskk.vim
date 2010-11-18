@@ -1,12 +1,6 @@
 " vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
-" Load once {{{
-if exists('s:loaded')
-    finish
-endif
-let s:loaded = 1
-" }}}
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
 set cpo&vim
