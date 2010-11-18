@@ -74,7 +74,7 @@ let s:is_initialized = 0
 " Last command's string. See eskk#jump_one_char().
 let s:last_jump_cmd = -1
 let s:last_jump_char = -1
-" SKK Dictionary
+" SKK Dictionary (singleton)
 let s:skk_dict = {}
 " Cached table instances.
 " Tables are created by eskk#create_table().
