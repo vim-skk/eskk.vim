@@ -83,6 +83,8 @@ let s:cached_tables = {}
 " See eskk#_get_cached_maps() and `autoload/eskk/table.vim`.
 let s:cached_maps = {}
 let s:cached_candidates = {}
+" All tables structures.
+let s:table_defs = {}
 " }}}
 
 
@@ -1259,6 +1261,9 @@ function! eskk#_get_cached_maps() "{{{
 endfunction "}}}
 function! eskk#_get_cached_candidates() "{{{
     return s:cached_candidates
+endfunction "}}}
+function! eskk#_get_table_defs() "{{{
+    return s:table_defs
 endfunction "}}}
 
 " Statusline
