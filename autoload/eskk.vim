@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 50))
+let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 51))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -2146,7 +2146,8 @@ endfunction "}}}
 
 " Exceptions
 function! s:build_error(from, msg) "{{{
-    return 'eskk: ' . join(a:msg, ': ') . ' at ' . join(a:from, '#')
+    let file = 'autoload/' . join(a:from, '/') . '.vim'
+    return 'eskk: ' . join(a:msg, ': ') . ' at ' . file
 endfunction "}}}
 
 function! eskk#internal_error(from, ...) "{{{
