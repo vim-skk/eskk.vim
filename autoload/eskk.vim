@@ -11,7 +11,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 37))
+let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 38))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -133,13 +133,22 @@ if !exists('g:eskk#statusline_mode_strings')
     let g:eskk#statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
 endif
 
-let s:tmpl = {'hira': 'rom_to_hira', 'kata': 'rom_to_kata', 'zenei': 'rom_to_zenei', 'hankata': 'rom_to_hankata'}
-if !exists('g:eskk#mode_use_tables')
-    let g:eskk#mode_use_tables =  s:tmpl
-else
-    call extend(g:eskk#mode_use_tables, s:tmpl, 'keep')
-endif
-unlet s:tmpl
+function! s:set_up_mode_use_tables() "{{{
+    " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
+    let default = {
+    \   'hira': eskk#table#create_from_file('rom_to_hira'),
+    \   'kata': eskk#table#create_from_file('rom_to_kata'),
+    \   'zenei': eskk#table#create_from_file('rom_to_zenei'),
+    \   'hankata': eskk#table#create_from_file('rom_to_hankata'),
+    \}
+
+    if !exists('g:eskk#mode_use_tables')
+        let g:eskk#mode_use_tables =  default
+    else
+        call extend(g:eskk#mode_use_tables, default, 'keep')
+    endif
+endfunction "}}}
+call s:set_up_mode_use_tables()
 
 " Table
 if !exists('g:eskk#cache_table_map')
@@ -1053,11 +1062,10 @@ function! s:initialize() "{{{
                     endif
                 endif
 
-                if has_key(g:eskk#mode_use_tables, 'ascii')
+                if eskk#has_mode_table('ascii')
                     if !has_key(this.sandbox, 'table')
-                        let this.sandbox.table = eskk#create_table(
-                        \   g:eskk#mode_use_tables.ascii
-                        \)
+                        let this.sandbox.table =
+                        \   s:table_defs[eskk#get_mode_table('ascii')]
                     endif
                     let a:stash.return = this.sandbox.table.get_map(
                     \   a:stash.char, a:stash.char
@@ -1083,9 +1091,8 @@ function! s:initialize() "{{{
                 call eskk#set_mode('hira')
             else
                 if !has_key(this.sandbox, 'table')
-                    let this.sandbox.table = eskk#create_table(
-                    \   g:eskk#mode_use_tables.zenei
-                    \)
+                    let this.sandbox.table =
+                    \   s:table_defs[eskk#get_mode_table('zenei')]
                 endif
                 let a:stash.return = this.sandbox.table.get_map(
                 \   a:stash.char, a:stash.char
@@ -1111,7 +1118,7 @@ function! s:initialize() "{{{
 
         call extend(
         \   dict,
-        \   eskk#create_asym_filter(g:eskk#mode_use_tables.hira)
+        \   eskk#create_asym_filter(eskk#get_mode_table('hira'))
         \)
 
         call eskk#validate_mode_structure('hira')
@@ -1123,7 +1130,7 @@ function! s:initialize() "{{{
 
         call extend(
         \   dict,
-        \   eskk#create_asym_filter(g:eskk#mode_use_tables.kata)
+        \   eskk#create_asym_filter(eskk#get_mode_table('kata'))
         \)
 
         call eskk#validate_mode_structure('kata')
@@ -1135,7 +1142,7 @@ function! s:initialize() "{{{
 
         call extend(
         \   dict,
-        \   eskk#create_asym_filter(g:eskk#mode_use_tables.hankata)
+        \   eskk#create_asym_filter(eskk#get_mode_table('hankata'))
         \)
 
         call eskk#validate_mode_structure('hankata')
@@ -1240,20 +1247,17 @@ function! s:initialize() "{{{
     " }}}
 
     " Register builtin-tables. {{{
-    function! s:initialize_builtin_tables()
-        " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-        let tables = eskk#table#get_all_tables()
+    function! s:initialize_use_tables()
         let tabletmpl = {}    " dummy object
         function! tabletmpl.init()
             call self.add_from_dict(eskk#table#{self.name}#load())
         endfunction
-        for name in tables
-            let table = eskk#table#create(name)
+        for table in values(g:eskk#mode_use_tables)
             let table.init = tabletmpl.init
-            call table.register()
+            let s:table_defs[table.name] = table
         endfor
     endfunction
-    call s:initialize_builtin_tables()
+    call s:initialize_use_tables()
     " }}}
 
     " BufEnter: Map keys if enabled. {{{
@@ -1638,7 +1642,7 @@ function! eskk#get_current_mode_table() "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
-    return g:eskk#mode_use_tables[a:mode]
+    return g:eskk#mode_use_tables[a:mode].name
 endfunction "}}}
 function! eskk#create_table(table_name) "{{{
     if has_key(s:cached_tables, a:table_name)

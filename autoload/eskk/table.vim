@@ -252,6 +252,16 @@ function! eskk#table#create(name, ...) "{{{
     return obj
 endfunction "}}}
 
+function! eskk#table#create_from_file(name) "{{{
+    let table = eskk#table#create(a:name)
+    let def = eskk#table#{a:name}#load()
+    for lhs in keys(def)
+        let [map_to, rest] = def[lhs]
+        call table.add(lhs, map_to, rest)
+    endfor
+    return table
+endfunction "}}}
+
 function! s:register_skeleton.is_base() "{{{
     return !has_key(self, 'bases')
 endfunction "}}}
@@ -282,22 +292,6 @@ function! s:register_skeleton.add_from_dict(dict) "{{{
     let self.data = a:dict
     return self
 endfunction "}}}
-
-function! s:register_skeleton.register() "{{{
-    let table_defs = eskk#_get_table_defs()
-    if has_key(table_defs, self.name)
-        " Do not allow overriding the table.
-        call eskk#util#log(
-        \   "'" . self.name . "' has been already registered."
-        \)
-        return
-    endif
-
-    let table_defs[self.name] = self
-    return self
-endfunction "}}}
-
-lockvar s:register_skeleton
 " }}}
 
 
