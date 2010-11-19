@@ -1,7 +1,6 @@
 " vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
-" See 'plugin/eskk.vim' about the license.
 
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
