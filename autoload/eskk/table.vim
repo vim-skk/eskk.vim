@@ -360,15 +360,6 @@ endfunction "}}}
 
 " }}}
 
-
-" Debug {{{
-
-function! eskk#table#_dump() "{{{
-    PP eskk#_get_table_defs()
-endfunction "}}}
-
-" }}}
-
 " }}}
 
 " Restore 'cpoptions' {{{
