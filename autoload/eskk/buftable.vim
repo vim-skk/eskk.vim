@@ -17,16 +17,12 @@ delfunc s:SID
 " Constants {{{
 " Normal
 let eskk#buftable#HENKAN_PHASE_NORMAL = 0
-lockvar eskk#buftable#HENKAN_PHASE_NORMAL
 " Choosing henkan candidates.
 let eskk#buftable#HENKAN_PHASE_HENKAN = 1
-lockvar eskk#buftable#HENKAN_PHASE_HENKAN
 " Waiting for okurigana.
 let eskk#buftable#HENKAN_PHASE_OKURI = 2
-lockvar eskk#buftable#HENKAN_PHASE_OKURI
 " Choosing henkan candidates.
 let eskk#buftable#HENKAN_PHASE_HENKAN_SELECT = 3
-lockvar eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
 " }}}
 
 " Functions {{{
@@ -110,8 +106,6 @@ function! s:buffer_string.clear() "{{{
     call self.clear_matched()
 endfunction "}}}
 
-
-lockvar s:buffer_string
 " }}}
 " s:buftable {{{
 let s:buftable = {
@@ -1100,8 +1094,6 @@ function! s:validate_table_idx(table, henkan_phase) "{{{
     endif
 endfunction "}}}
 
-
-lockvar s:buftable
 " }}}
 " }}}
 
