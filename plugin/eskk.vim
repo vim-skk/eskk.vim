@@ -9,14 +9,6 @@ if exists('g:loaded_eskk') && g:loaded_eskk
 endif
 let g:loaded_eskk = 1
 " }}}
-" g:eskk_disable {{{
-if !exists('g:eskk_disable')
-    let g:eskk_disable = 0
-endif
-if g:eskk_disable
-    finish
-endif
-" }}}
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
 set cpo&vim
