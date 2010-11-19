@@ -11,7 +11,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 38))
+let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 39))
 
 " Debug
 if !exists('g:eskk#debug')

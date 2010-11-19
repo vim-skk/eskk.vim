@@ -42,8 +42,6 @@ set cpo&vim
 " Constants {{{
 let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
-lockvar s:MAP_TO_INDEX
-lockvar s:REST_INDEX
 " }}}
 
 " Functions {{{
@@ -361,8 +359,6 @@ function! s:table_obj.get_rest(lhs, ...) "{{{
     \)
 endfunction "}}}
 
-
-lockvar s:table_obj
 " }}}
 
 
