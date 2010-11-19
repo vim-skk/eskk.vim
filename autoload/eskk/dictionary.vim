@@ -276,9 +276,6 @@ endfunction "}}}
 let s:CANDIDATE_FROM_USER_DICT = 0
 let s:CANDIDATE_FROM_SYSTEM_DICT = 1
 let s:CANDIDATE_FROM_REGISTERED_WORDS = 2
-lockvar s:CANDIDATE_FROM_USER_DICT
-lockvar s:CANDIDATE_FROM_SYSTEM_DICT
-lockvar s:CANDIDATE_FROM_REGISTERED_WORDS
 
 function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
     let obj = {
@@ -339,11 +336,8 @@ endfunction "}}}
 " to get next candidate string.
 
 let g:eskk#dictionary#HR_NO_RESULT = 0
-lockvar g:eskk#dictionary#HR_NO_RESULT
 let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 1
-lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
 let g:eskk#dictionary#HR_GOT_RESULT = 2
-lockvar g:eskk#dictionary#HR_GOT_RESULT
 
 " self._key, self._okuri_rom, self._okuri:
 "   Query for this henkan result.
@@ -822,7 +816,6 @@ function! s:henkan_result.update_candidate() "{{{
     call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
 endfunction "}}}
 
-lockvar s:henkan_result
 " }}}
 
 " s:physical_dict {{{
@@ -957,7 +950,6 @@ function! s:physical_dict.get_ftime_at_read() "{{{
     return self._ftime_at_read
 endfunction "}}}
 
-lockvar s:physical_dict
 " }}}
 
 " s:dict {{{
@@ -1327,7 +1319,6 @@ function! s:dict.clear_henkan_result() "{{{
     let self._current_henkan_result = {}
 endfunction "}}}
 
-lockvar s:dict
 " }}}
 
 
