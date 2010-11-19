@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 53))
+let g:eskk#version = str2nr(printf('%2d%02d%03d', 0, 4, 54))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -351,8 +351,7 @@ function! s:get_inst_namespace() "{{{
     return g:eskk#keep_state_beyond_buffer ? s: : b:
 endfunction "}}}
 function! s:exists_instance() "{{{
-    let scope = g:eskk#keep_state_beyond_buffer ? 's:' : 'b:'
-    return exists(scope . 'eskk_instances')
+    return has_key(s:get_inst_namespace(), 'eskk_instances')
 endfunction "}}}
 function! eskk#get_current_instance() "{{{
     let ns = s:get_inst_namespace()
