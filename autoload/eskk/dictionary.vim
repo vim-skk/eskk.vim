@@ -16,7 +16,10 @@ set cpo&vim
 " `autoload/eskk/**/*.vim` for libraries.
 " They should not have side-effect due to testability.
 let s:search_all_candidate_memoize = {}
-function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
+" eskk#dictionary#search_all_candidates() {{{
+function! eskk#dictionary#search_all_candidates(
+\   physical_dict, key_filter, okuri_rom, ...
+\)
     let limit = a:0 ? a:1 : -1    " No limit by default.
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
@@ -99,7 +102,10 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
-function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
+" eskk#dictionary#search_candidate() {{{
+function! eskk#dictionary#search_candidate(
+\   physical_dict, key_filter, okuri_rom
+\)
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
@@ -128,7 +134,10 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
     endif
 endfunction "}}}
 " Returns [line_string, idx] matching the candidate.
-function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
+" s:search_binary() {{{
+function! s:search_binary(
+\   ph_dict, whole_lines, needle, has_okuri, limit
+\)
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     " NOTE: min, max, mid are index number. not lnum.
 
@@ -166,7 +175,10 @@ function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     \)
 endfunction "}}}
 " Returns [line_string, idx] matching the candidate.
-function! s:search_linear(ph_dict, whole_lines, needle, has_okuri, ...) "{{{
+" s:search_linear() {{{
+function! s:search_linear(
+\   ph_dict, whole_lines, needle, has_okuri, ...
+\)
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     let min_which = a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'
     let min = get(a:000, 0, a:ph_dict[min_which])
@@ -216,7 +228,10 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
 endfunction "}}}
 
 " Returns String of the created entry from arguments values.
-function! eskk#dictionary#create_new_entry(new_word, key, okuri, okuri_rom, existing_line) "{{{
+" eskk#dictionary#create_new_entry() {{{
+function! eskk#dictionary#create_new_entry(
+\   new_word, key, okuri, okuri_rom, existing_line
+\)
     " XXX:
     " TODO:
     " Rewrite for eskk.
@@ -526,7 +541,10 @@ function! s:henkan_result_get_candidates(this) "{{{
 endfunction "}}}
 
 " Select candidate from command-line.
-function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor) "{{{
+" s:henkan_result_select_candidates() {{{
+function! s:henkan_result_select_candidates(
+\   this, with_okuri, skip_num, functor
+\)
     if eskk#is_neocomplcache_locked()
         NeoComplCacheUnlock
     endif
