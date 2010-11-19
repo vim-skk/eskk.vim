@@ -1,19 +1,11 @@
 " vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
-" See 'plugin/eskk.vim' about the license.
 
-" Load once {{{
-if exists('s:loaded')
-    finish
-endif
-let s:loaded = 1
-" }}}
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
-runtime! plugin/eskk.vim
 
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
@@ -23,9 +15,7 @@ delfunc s:SID
 
 
 
-" Variables {{{
-let s:selected = 0
-let s:inserted = 0
+" Constants {{{
 let s:popup_func_table = {}
 let s:mode_func_table = {}
 " }}}
@@ -80,7 +70,8 @@ function! eskk#complete#can_find_start() "{{{
 
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN && buf_str.empty()
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   && buf_str.empty()
         return 0
     endif
 
@@ -110,35 +101,43 @@ function! s:mode_func_table.abbrev(base) "{{{
 endfunction "}}}
 
 function! s:initialize_variables() "{{{
-    let s:selected = 0
-    let s:inserted = 0
+    let inst = eskk#get_current_instance()
+    let inst.completion_selected = 0
+    let inst.completion_inserted = 0
 endfunction "}}}
 function! s:complete(mode, base) "{{{
     " Get candidates.
     let list = []
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let buftable = eskk#get_buftable()
-    let is_katakana = g:eskk_kata_convert_to_hira_at_completion && a:mode ==# 'kata'
+    let is_katakana =
+    \   g:eskk#kata_convert_to_hira_at_completion
+    \   && a:mode ==# 'kata'
 
     if is_katakana
+        let hira_table = eskk#get_mode_table('hira')
         let henkan_buf_str = buftable.filter_rom(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
-        \   'rom_to_hira'
+        \   hira_table
         \)
         let okuri_buf_str = buftable.filter_rom(
         \   g:eskk#buftable#HENKAN_PHASE_OKURI,
-        \   'rom_to_hira'
+        \   hira_table
         \)
     else
-        let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-        let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+        let henkan_buf_str = buftable.get_buf_str(
+        \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \)
+        let okuri_buf_str = buftable.get_buf_str(
+        \   g:eskk#buftable#HENKAN_PHASE_OKURI
+        \)
     endif
     let key       = henkan_buf_str.get_matched_filter()
     let okuri     = okuri_buf_str.get_matched_filter()
     let okuri_rom = okuri_buf_str.get_matched_rom()
 
     let filter_str = s:get_buftable_str(0, a:base)
-    let marker = g:eskk_marker_popup . g:eskk_marker_henkan
+    let marker = g:eskk#marker_popup . g:eskk#marker_henkan
 
     let s = dict.search(key, okuri, okuri_rom)
     if empty(s)
@@ -152,13 +151,15 @@ function! s:complete(mode, base) "{{{
     " \   'menu' : a:mode,
     " \})
 
-    let do_list_okuri_candidates = buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    let do_list_okuri_candidates =
+    \   buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_OKURI
     for c in candidates
         if do_list_okuri_candidates
             if c.has_okuri
                 call add(list, {
                 \   'word': marker . c.input,
-                \   'abbr': (has_key(c, 'annotation') ? c.input . '; ' . c.annotation : c.input),
+                \   'abbr': (has_key(c, 'annotation') ?
+                \               c.input . '; ' . c.annotation : c.input),
                 \   'menu': 'kanji:okuri'
                 \})
             endif
@@ -167,7 +168,8 @@ function! s:complete(mode, base) "{{{
 
         call add(list, {
         \   'word': marker . c.input,
-        \   'abbr': (has_key(c, 'annotation') ? c.input . '; ' . c.annotation : c.input),
+        \   'abbr': (has_key(c, 'annotation') ?
+        \               c.input . '; ' . c.annotation : c.input),
         \   'menu': 'kanji'
         \})
     endfor
@@ -217,7 +219,8 @@ endfunction "}}}
 
 " s:popup_func_table
 function! s:close_pum_pre(stash) "{{{
-    if s:selected && !s:inserted
+    let inst = eskk#get_current_instance()
+    if inst.completion_selected && !inst.completion_inserted
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -226,7 +229,7 @@ function! s:close_pum_pre(stash) "{{{
         \   'eskk#util#key2char',
         \   [eskk#mappings#get_filter_map('<C-y>')]
         \)
-        let s:selected = 0
+        let inst.completion_selected = 0
     else
         call s:close_pum(a:stash)
     endif
@@ -241,7 +244,8 @@ function! s:close_pum(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
-    if s:selected && !s:inserted
+    let inst = eskk#get_current_instance()
+    if inst.completion_selected && !inst.completion_inserted
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -250,7 +254,7 @@ function! s:do_enter_pre(stash) "{{{
         \   'eskk#util#key2char',
         \   [eskk#mappings#get_filter_map('<CR>')]
         \)
-        let s:selected = 0
+        let inst.completion_selected = 0
     else
         call s:do_enter(a:stash)
     endif
@@ -270,7 +274,8 @@ function! s:do_enter(stash) "{{{
     \)
 endfunction "}}}
 function! s:select_item(stash) "{{{
-    let s:selected = 1
+    let inst = eskk#get_current_instance()
+    let inst.completion_selected = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:do_tab(stash) "{{{
@@ -281,8 +286,9 @@ function! s:do_tab(stash) "{{{
     \)
 endfunction "}}}
 function! s:select_insert_item(stash) "{{{
-    let s:selected = 1
-    let s:inserted = 1
+    let inst = eskk#get_current_instance()
+    let inst.completion_selected = 1
+    let inst.completion_inserted = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:do_space(stash) "{{{
@@ -368,13 +374,17 @@ function! s:set_selected_item() "{{{
         let rom_str = ''
     endif
 
-    let henkan_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    let henkan_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \)
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
         call henkan_buf_str.push_matched('', char)
     endfor
 
-    let okuri_buf_str = buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+    let okuri_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#HENKAN_PHASE_OKURI
+    \)
     call okuri_buf_str.clear()
     call okuri_buf_str.set_rom_str(rom_str)
 
@@ -436,10 +446,13 @@ function! s:get_buftable_str(with_marker, ...) "{{{
     endif
 
     if !a:with_marker && s:has_marker()
-        if line[begin : begin + strlen(g:eskk_marker_popup) - 1] == g:eskk_marker_popup
-            let begin += strlen(g:eskk_marker_popup) + strlen(g:eskk_marker_henkan)
-        elseif line[begin : begin + strlen(g:eskk_marker_henkan) - 1] == g:eskk_marker_henkan
-            let begin += strlen(g:eskk_marker_henkan)
+        if line[begin : begin + strlen(g:eskk#marker_popup) - 1]
+        \   ==# g:eskk#marker_popup
+            let begin += strlen(g:eskk#marker_popup)
+            \               + strlen(g:eskk#marker_henkan)
+        elseif line[begin : begin + strlen(g:eskk#marker_henkan) - 1]
+        \   ==# g:eskk#marker_henkan
+            let begin += strlen(g:eskk#marker_henkan)
         else
             call eskk#util#assert(0, '404: marker not found')
         endif
@@ -463,7 +476,7 @@ endfunction "}}}
 
 function! eskk#complete#completing() "{{{
     return
-    \   g:eskk_enable_completion
+    \   g:eskk#enable_completion
     \   && pumvisible()
     \   && eskk#get_current_instance().has_started_completion
 endfunction "}}}

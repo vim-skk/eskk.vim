@@ -22,7 +22,7 @@ function! s:run()
 
     for name in eskk#table#get_all_tables()
         " Reference equality test.
-        Ok tables[name] is eskk#table#new(name)
+        Ok tables[name] isnot eskk#table#new(name)
     endfor
 endfunction
 

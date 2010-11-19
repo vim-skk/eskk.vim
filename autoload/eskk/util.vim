@@ -1,14 +1,7 @@
 " vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
-" See 'plugin/eskk.vim' about the license.
 
-" Load once {{{
-if exists('s:loaded')
-    finish
-endif
-let s:loaded = 1
-" }}}
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
 set cpo&vim
@@ -26,39 +19,56 @@ function! eskk#util#warnf(msg, ...) "{{{
 endfunction "}}}
 
 " Logging
+function! s:write_to_log_file(msg) "{{{
+    execute 'redir >>' expand(
+    \   eskk#util#join_path(
+    \       g:eskk#directory,
+    \       'log',
+    \       'debug' . strftime('-%Y-%m-%d') . '.log'
+    \   )
+    \)
+    silent echo a:msg
+    redir END
+endfunction "}}}
 function! eskk#util#log(msg) "{{{
-    if !g:eskk_debug
+    if !g:eskk#debug
         return
     endif
     if !eskk#is_initialized()
-        call eskk#register_temp_event('enable-im', 'eskk#util#log', [a:msg])
+        call eskk#register_temp_event(
+        \   'enable-im',
+        \   'eskk#util#log',
+        \   [a:msg]
+        \)
         return
     endif
 
     redraw
 
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    if g:eskk_debug_stdout ==# 'file'
-        let file = expand(eskk#util#join_path(g:eskk_directory, 'log', 'debug' . strftime('-%Y-%m-%d') . '.log'))
-        execute 'redir >>' file
-        silent echo msg
-        redir END
+    if g:eskk#debug_stdout ==# 'file'
+        execute
+        \   'autocmd eskk VimLeavePre *'
+        \   'call s:write_to_log_file(' . string(msg) . ')'
     else
         call eskk#util#warn(msg)
     endif
 
-    if g:eskk_debug_wait_ms !=# 0
-        execute printf('sleep %dm', g:eskk_debug_wait_ms)
+    if g:eskk#debug_wait_ms !=# 0
+        execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}
 function! eskk#util#logf(fmt, ...) "{{{
     call eskk#util#log(call('printf', [a:fmt] + a:000))
 endfunction "}}}
 function! eskk#util#logstrf(fmt, ...) "{{{
-    return call('eskk#util#logf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
+    return call(
+    \   'eskk#util#logf',
+    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
+    \)
 endfunction "}}}
 function! eskk#util#log_exception(what) "{{{
-    if !g:eskk_debug
+    if !g:eskk#debug
         return
     endif
 
@@ -68,7 +78,10 @@ function! eskk#util#log_exception(what) "{{{
 endfunction "}}}
 
 function! eskk#util#formatstrf(fmt, ...) "{{{
-    return call('printf', [a:fmt] + map(copy(a:000), 'string(v:val)'))
+    return call(
+    \   'printf',
+    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
+    \)
 endfunction "}}}
 
 
@@ -131,7 +144,10 @@ function! eskk#util#get_f(dict, keys, ...) "{{{
         return a:dict[a:keys[0]]
     else
         if eskk#util#can_access(a:dict, a:keys[0])
-            return call('eskk#util#get_f', [a:dict[a:keys[0]], a:keys[1:]] + a:000)
+            return call(
+            \   'eskk#util#get_f',
+            \   [a:dict[a:keys[0]], a:keys[1:]] + a:000
+            \)
         else
             if a:0
                 return a:1
@@ -241,16 +257,21 @@ endfunction "}}}
 function! s:split_to_keys(lhs)  "{{{
     " From arpeggio.vim
     "
-    " Assumption: Special keys such as <C-u> are escaped with < and >, i.e.,
-    "             a:lhs doesn't directly contain any escape sequences.
+    " Assumption: Special keys such as <C-u>
+    " are escaped with < and >, i.e.,
+    " a:lhs doesn't directly contain any escape sequences.
     return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
 endfunction "}}}
 function! eskk#util#key2char(key) "{{{
     " From arpeggio.vim
 
-    let keys = s:split_to_keys(a:key)
-    call map(keys, 'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val')
-    return join(keys, '')
+    return join(
+    \   map(
+    \       s:split_to_keys(a:key),
+    \       'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
+    \   ),
+    \   ''
+    \)
 endfunction "}}}
 function! eskk#util#str2map(str) "{{{
     let s = a:str
@@ -289,7 +310,10 @@ endfunction "}}}
 " Misc.
 function! eskk#util#assert(cond, ...) "{{{
     if !a:cond
-        throw call('eskk#assertion_failure_error', [['eskk', 'util']] + a:000)
+        throw call(
+        \   'eskk#assertion_failure_error',
+        \   [['eskk', 'util']] + a:000
+        \)
     endif
 endfunction "}}}
 
@@ -301,12 +325,17 @@ function! eskk#util#rand(max) "{{{
     return (next / 65536) % (a:max + 1)
 endfunction "}}}
 function! eskk#util#get_syn_names(...) "{{{
-    let [line, col] = [get(a:000, 0, line('.')), get(a:000, 1, col('.'))]
-    " synstack() returns strange value when col is over $ pos. Bug?
+    let line = get(a:000, 0, line('.'))
+    let col = get(a:000, 1, col('.'))
+    " synstack() returns strange value when col is over $ pos.
+    " it's fixed now, but remain this code for the old Vims.
     if col >= col('$')
         return []
     endif
-    return map(synstack(line, col), 'synIDattr(synIDtrans(v:val), "name")')
+    return map(
+    \   synstack(line, col),
+    \   'synIDattr(synIDtrans(v:val), "name")'
+    \)
 endfunction "}}}
 function! eskk#util#globpath(pat) "{{{
     return split(globpath(&runtimepath, a:pat), '\n')

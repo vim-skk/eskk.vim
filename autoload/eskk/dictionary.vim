@@ -1,30 +1,36 @@
 " vim:foldmethod=marker:fen:sw=4:sts=4
 scriptencoding utf-8
 
-" Load once {{{
-if exists('s:loaded')
-    finish
-endif
-let s:loaded = 1
-" }}}
 " Saving 'cpoptions' {{{
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
-runtime! plugin/eskk.vim
 
 
 
 " Utility autoload functions {{{
 
 " Returns all lines matching the candidate.
+"
+" TODO: memoization should be done by `autload/eskk.vim`.
+" `autoload/eskk/**/*.vim` for libraries.
+" They should not have side-effect due to testability.
 let s:search_all_candidate_memoize = {}
-function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri_rom, ...) "{{{
+" eskk#dictionary#search_all_candidates() {{{
+function! eskk#dictionary#search_all_candidates(
+\   physical_dict, key_filter, okuri_rom, ...
+\)
     let limit = a:0 ? a:1 : -1    " No limit by default.
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
 
-    let cache_key = a:physical_dict.get_ftime_at_read() . a:physical_dict.path . a:key_filter . a:okuri_rom . limit
+    let cache_key =
+    \   a:physical_dict.get_ftime_at_read()
+    \   . a:physical_dict.path
+    \   . a:key_filter
+    \   . a:okuri_rom
+    \   . limit
+
     if has_key(s:search_all_candidate_memoize, cache_key)
         return s:search_all_candidate_memoize[cache_key]
     endif
@@ -36,7 +42,13 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
 
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
-        let [line, idx] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
+        let [line, idx] = s:search_binary(
+        \   a:physical_dict,
+        \   whole_lines,
+        \   converted,
+        \   has_okuri,
+        \   100
+        \)
 
         if idx == -1
             let s:search_all_candidate_memoize[cache_key] = []
@@ -56,15 +68,21 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             let end = begin + limit
         endif
 
-        let s:search_all_candidate_memoize[cache_key] =
-                    \ map(whole_lines[begin : end],
-                    \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
-                    \)
+        let s:search_all_candidate_memoize[cache_key] = map(
+        \   whole_lines[begin : end],
+        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+        \)
     else
         let lines = []
         let start = 1
         while 1
-            let [line, idx] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri, start)
+            let [line, idx] = s:search_linear(
+            \   a:physical_dict,
+            \   whole_lines,
+            \   converted,
+            \   has_okuri,
+            \   start
+            \)
 
             if idx == -1
                 break
@@ -74,15 +92,20 @@ function! eskk#dictionary#search_all_candidates(physical_dict, key_filter, okuri
             let start = idx + 1
         endwhile
 
-        let s:search_all_candidate_memoize[cache_key] =
-                    \ map(lines, 's:iconv(v:val, a:physical_dict.encoding, &l:encoding)')
+        let s:search_all_candidate_memoize[cache_key] = map(
+        \   lines,
+        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+        \)
     endif
 
     return s:search_all_candidate_memoize[cache_key]
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
-function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom) "{{{
+" eskk#dictionary#search_candidate() {{{
+function! eskk#dictionary#search_candidate(
+\   physical_dict, key_filter, okuri_rom
+\)
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
@@ -93,24 +116,38 @@ function! eskk#dictionary#search_candidate(physical_dict, key_filter, okuri_rom)
 
     let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
-        let [line, idx] = s:search_binary(a:physical_dict, whole_lines, converted, has_okuri, 100)
+        let [line, idx] = s:search_binary(
+        \   a:physical_dict, whole_lines, converted, has_okuri, 100
+        \)
     else
-        let [line, idx] = s:search_linear(a:physical_dict, whole_lines, converted, has_okuri)
+        let [line, idx] = s:search_linear(
+        \   a:physical_dict, whole_lines, converted, has_okuri
+        \)
     endif
     if idx !=# -1
-        let conv_line = s:iconv(line, a:physical_dict.encoding, &l:encoding)
-        return [conv_line, idx]
+        return [
+        \   s:iconv(line, a:physical_dict.encoding, &l:encoding),
+        \   idx
+        \]
     else
         return ['', -1]
     endif
 endfunction "}}}
 " Returns [line_string, idx] matching the candidate.
-function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
+" s:search_binary() {{{
+function! s:search_binary(
+\   ph_dict, whole_lines, needle, has_okuri, limit
+\)
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     " NOTE: min, max, mid are index number. not lnum.
 
-    let min = a:has_okuri ? a:ph_dict.okuri_ari_idx : a:ph_dict.okuri_nasi_idx
-    let max = a:has_okuri ? a:ph_dict.okuri_nasi_idx : len(a:whole_lines) - 1
+    if a:has_okuri
+        let min = a:ph_dict.okuri_ari_idx
+        let max = a:ph_dict.okuri_nasi_idx
+    else
+        let min = a:ph_dict.okuri_nasi_idx
+        let max = len(a:whole_lines) - 1
+    endif
 
     if a:has_okuri
         while max - min > a:limit
@@ -133,12 +170,18 @@ function! s:search_binary(ph_dict, whole_lines, needle, has_okuri, limit) "{{{
     endif
 
     " NOTE: min, max: Give index number, not lnum.
-    return s:search_linear(a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max)
+    return s:search_linear(
+    \   a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max
+    \)
 endfunction "}}}
 " Returns [line_string, idx] matching the candidate.
-function! s:search_linear(ph_dict, whole_lines, needle, has_okuri, ...) "{{{
+" s:search_linear() {{{
+function! s:search_linear(
+\   ph_dict, whole_lines, needle, has_okuri, ...
+\)
     " Assumption: `a:needle` is encoded to dictionary file encoding.
-    let min = get(a:000, 0, a:ph_dict[a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'])
+    let min_which = a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'
+    let min = get(a:000, 0, a:ph_dict[min_which])
     let max = get(a:000, 1, len(a:whole_lines) - 1)
 
     call eskk#util#assert(min <=# max, 'min <=# max')
@@ -157,25 +200,38 @@ endfunction "}}}
 function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(!empty(list))
-    let [key, okuri_rom] = [matchstr(list[0], '^[^a-z ]\+'), matchstr(list[0], '[a-z]\+')]
+    let key = matchstr(list[0], '^[^a-z ]\+')
+    let okuri_rom = matchstr(list[0], '[a-z]\+')
     let has_okuri = okuri_rom != ''
 
     let candidates = []
     for _ in list[1:]
         let semicolon = stridx(_, ';')
-        call add(
-        \   candidates,
-        \   semicolon != -1 ?
-        \       s:candidate_new(a:from_type, _[: semicolon - 1], has_okuri, _[semicolon + 1 :]) :
-        \       s:candidate_new(a:from_type, _, has_okuri)
-        \)
+        if semicolon != -1
+            let c = s:candidate_new(
+            \   a:from_type,
+            \   _[: semicolon - 1],
+            \   has_okuri,
+            \   _[semicolon + 1 :]
+            \)
+        else
+            let c = s:candidate_new(
+            \   a:from_type,
+            \   _,
+            \   has_okuri
+            \)
+        endif
+        call add(candidates, c)
     endfor
 
     return [key, okuri_rom, candidates]
 endfunction "}}}
 
 " Returns String of the created entry from arguments values.
-function! eskk#dictionary#create_new_entry(new_word, key, okuri, okuri_rom, existing_line) "{{{
+" eskk#dictionary#create_new_entry() {{{
+function! eskk#dictionary#create_new_entry(
+\   new_word, key, okuri, okuri_rom, existing_line
+\)
     " XXX:
     " TODO:
     " Rewrite for eskk.
@@ -220,10 +276,13 @@ endfunction "}}}
 let s:CANDIDATE_FROM_USER_DICT = 0
 let s:CANDIDATE_FROM_SYSTEM_DICT = 1
 let s:CANDIDATE_FROM_REGISTERED_WORDS = 2
-lockvar s:CANDIDATE_FROM_USER_DICT s:CANDIDATE_FROM_SYSTEM_DICT s:CANDIDATE_FROM_REGISTERED_WORDS
 
 function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
-    let obj = {'from_type': a:from_type, 'input': a:input, 'has_okuri': a:has_okuri}
+    let obj = {
+    \   'from_type': a:from_type,
+    \   'input': a:input,
+    \   'has_okuri': a:has_okuri,
+    \}
 
     if a:0
         let obj.annotation = a:1
@@ -235,7 +294,8 @@ endfunction "}}}
 function! eskk#dictionary#_candidate_identifer(candidate) "{{{
     return
     \   a:candidate.input
-    \   . (has_key(a:candidate, 'annotation') ? ';' . a:candidate.annotation : '')
+    \   . (has_key(a:candidate, 'annotation') ?
+    \       ';' . a:candidate.annotation : '')
 endfunction "}}}
 
 function! s:candidate2registered_word(candidate, key, okuri, okuri_rom) "{{{
@@ -261,7 +321,8 @@ function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
 endfunction "}}}
 
 function! eskk#dictionary#_registered_word_identifier(rw) "{{{
-    return join(map(['input', 'key', 'okuri', 'okuri_rom'], 'a:rw[v:val]'), ';')
+    return join(map(
+    \   ['input', 'key', 'okuri', 'okuri_rom'], 'a:rw[v:val]'), ';')
 endfunction "}}}
 
 " }}}
@@ -275,11 +336,8 @@ endfunction "}}}
 " to get next candidate string.
 
 let g:eskk#dictionary#HR_NO_RESULT = 0
-lockvar g:eskk#dictionary#HR_NO_RESULT
 let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 1
-lockvar g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
 let g:eskk#dictionary#HR_GOT_RESULT = 2
-lockvar g:eskk#dictionary#HR_GOT_RESULT
 
 " self._key, self._okuri_rom, self._okuri:
 "   Query for this henkan result.
@@ -349,7 +407,7 @@ function! s:henkan_result_advance(this, advance) "{{{
         let idx = a:this._candidates_index
         if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
             " Next time to call s:henkan_result_get_candidates(),
-            " eskk will getchar() if `idx >= g:eskk_show_candidates_count`
+            " eskk will getchar() if `idx >= g:eskk#show_candidates_count`
             let a:this._candidates_index +=  (a:advance ? 1 : -1)
             return 1
         else
@@ -369,8 +427,9 @@ function! s:henkan_result_get_candidates(this) "{{{
         return a:this._candidates.to_list()
 
     elseif a:this._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
-        let dict = eskk#dictionary#get_instance()
-        let [user_dict, system_dict] = [dict.get_user_dict(), dict.get_system_dict()]
+        let dict = eskk#get_skk_dict()
+        let user_dict = dict.get_user_dict()
+        let system_dict = dict.get_system_dict()
         " Look up this henkan result in dictionaries.
         let user_dict_result = eskk#dictionary#search_candidate(
         \   user_dict, a:this._key, a:this._okuri_rom
@@ -383,9 +442,9 @@ function! s:henkan_result_get_candidates(this) "{{{
             throw eskk#dictionary_look_up_error(
             \   ['eskk', 'dictionary'],
             \   "Can't look up '"
-            \   . g:eskk_marker_henkan
+            \   . g:eskk#marker_henkan
             \   . a:this._key
-            \   . g:eskk_marker_okuri
+            \   . g:eskk#marker_okuri
             \   . a:this._okuri_rom
             \   . "' in dictionaries."
             \)
@@ -395,19 +454,36 @@ function! s:henkan_result_get_candidates(this) "{{{
         " registered word, user dictionary, system dictionary.
 
         " Merge registered words.
-        let registered = filter(copy(dict.get_registered_words()), 'v:val.key ==# a:this._key && v:val.okuri_rom[0] ==# a:this._okuri_rom[0]')
+        let registered = filter(
+        \   copy(dict.get_registered_words()),
+        \   'v:val.key ==# a:this._key '
+        \       . '&& v:val.okuri_rom[0] ==# a:this._okuri_rom[0]'
+        \)
         if !empty(registered)
             for rw in registered
-                let c = s:candidate_new(s:CANDIDATE_FROM_REGISTERED_WORDS, rw.input, rw.okuri_rom != "")
+                let c = s:candidate_new(
+                \   s:CANDIDATE_FROM_REGISTERED_WORDS,
+                \   rw.input, rw.okuri_rom != ""
+                \)
                 call a:this._candidates.push(c)
             endfor
         endif
 
         " Merge user dictionary.
         if user_dict_result[1] !=# -1
-            let [key, okuri_rom, candidates] = eskk#dictionary#parse_skk_dict_line(user_dict_result[0], s:CANDIDATE_FROM_USER_DICT)
-            call eskk#util#assert(key ==# a:this._key, "user dict:".string(key)." ==# ".string(a:this._key))
-            call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "user dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
+            let [key, okuri_rom, candidates] =
+            \   eskk#dictionary#parse_skk_dict_line(
+            \       user_dict_result[0],
+            \       s:CANDIDATE_FROM_USER_DICT
+            \   )
+            call eskk#util#assert(
+            \   key ==# a:this._key,
+            \   "user dict:".string(key)." ==# ".string(a:this._key)
+            \)
+            call eskk#util#assert(
+            \   okuri_rom ==# a:this._okuri_rom[0],
+            \   "user dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom)
+            \)
 
             for c in candidates
                 call a:this._candidates.push(c)
@@ -416,9 +492,19 @@ function! s:henkan_result_get_candidates(this) "{{{
 
         " Merge system dictionary.
         if system_dict_result[1] !=# -1
-            let [key, okuri_rom, candidates] = eskk#dictionary#parse_skk_dict_line(system_dict_result[0], s:CANDIDATE_FROM_SYSTEM_DICT)
-            call eskk#util#assert(key ==# a:this._key, "system dict:".string(key)." ==# ".string(a:this._key))
-            call eskk#util#assert(okuri_rom ==# a:this._okuri_rom[0], "system dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom))
+            let [key, okuri_rom, candidates] =
+            \   eskk#dictionary#parse_skk_dict_line(
+            \       system_dict_result[0],
+            \       s:CANDIDATE_FROM_SYSTEM_DICT
+            \   )
+            call eskk#util#assert(
+            \   key ==# a:this._key,
+            \   "system dict:".string(key)." ==# ".string(a:this._key)
+            \)
+            call eskk#util#assert(
+            \   okuri_rom ==# a:this._okuri_rom[0],
+            \   "system dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom)
+            \)
 
             for c in candidates
                 call a:this._candidates.push(c)
@@ -437,9 +523,9 @@ function! s:henkan_result_get_candidates(this) "{{{
         "throw eskk#dictionary_look_up_error(
         "\   ['eskk', 'dictionary'],
         "\   "Can't look up '"
-        "\   . g:eskk_marker_henkan
+        "\   . g:eskk#marker_henkan
         "\   . a:this._key
-        "\   . g:eskk_marker_okuri
+        "\   . g:eskk#marker_okuri
         "\   . a:this._okuri_rom
         "\   . "' in dictionaries."
         "\)
@@ -449,25 +535,31 @@ function! s:henkan_result_get_candidates(this) "{{{
 endfunction "}}}
 
 " Select candidate from command-line.
-function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor) "{{{
+" s:henkan_result_select_candidates() {{{
+function! s:henkan_result_select_candidates(
+\   this, with_okuri, skip_num, functor
+\)
     if eskk#is_neocomplcache_locked()
         NeoComplCacheUnlock
     endif
 
     " Select candidates by getchar()'s character.
     let words = copy(s:henkan_result_get_candidates(a:this))
-    let word_num_per_page = len(split(g:eskk_select_cand_keys, '\zs'))
+    let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
     let page_index = 0
     let pages = []
 
-    call eskk#util#assert(len(words) > a:skip_num, "words has more than skip_num words.")
+    call eskk#util#assert(
+    \   len(words) > a:skip_num,
+    \   "words has more than skip_num words."
+    \)
     let words = words[a:skip_num :]
 
     while !empty(words)
         let words_in_page = []
         " Add words to `words_in_page` as number of
-        " string length of `g:eskk_select_cand_keys`.
-        for c in split(g:eskk_select_cand_keys, '\zs')
+        " string length of `g:eskk#select_cand_keys`.
+        for c in split(g:eskk#select_cand_keys, '\zs')
             if empty(words)
                 break
             endif
@@ -480,9 +572,10 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
         " Show candidates.
         redraw
         for [c, word] in pages[page_index]
-            if g:eskk_show_annotation
+            if g:eskk#show_annotation
                 echon printf('%s:%s%s  ', c, word.input,
-                \       (has_key(word, 'annotation') ? ';' . word.annotation : ''))
+                \       (has_key(word, 'annotation') ?
+                \           ';' . word.annotation : ''))
             else
                 echon printf('%s:%s  ', c, word.input)
             endif
@@ -497,37 +590,53 @@ function! s:henkan_result_select_candidates(this, with_okuri, skip_num, functor)
         endtry
 
 
-        if eskk#mappings#is_special_lhs(char, 'phase:henkan-select:escape')
+        if eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:escape'
+        \)
             return a:functor.funcall()
-        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:next-page')
+        elseif eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:next-page'
+        \)
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
                 " No more pages. Register new word.
-                let dict = eskk#dictionary#get_instance()
+                let dict = eskk#get_skk_dict()
                 let input = dict.register_word(a:this)[0]
-                let henkan_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_HENKAN)
-                let okuri_buf_str = a:this.buftable.get_buf_str(g:eskk#buftable#HENKAN_PHASE_OKURI)
+                let henkan_buf_str = a:this.buftable.get_buf_str(
+                \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+                \)
+                let okuri_buf_str = a:this.buftable.get_buf_str(
+                \   g:eskk#buftable#HENKAN_PHASE_OKURI
+                \)
                 return [
-                \   (input != '' ? input : henkan_buf_str.get_matched_filter()),
+                \   (input != '' ?
+                \       input : henkan_buf_str.get_matched_filter()),
                 \   okuri_buf_str.get_matched_filter()
                 \]
             endif
-        elseif eskk#mappings#is_special_lhs(char, 'phase:henkan-select:prev-page')
+        elseif eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:prev-page'
+        \)
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
                 return a:functor.funcall()
             endif
-        elseif stridx(g:eskk_select_cand_keys, char) != -1
-            let selected = g:eskk_select_cand_keys[stridx(g:eskk_select_cand_keys, char)]
+        elseif stridx(g:eskk#select_cand_keys, char) != -1
+            let selected = g:eskk#select_cand_keys[
+            \   stridx(g:eskk#select_cand_keys, char)
+            \]
             for idx in range(len(pages[page_index]))
                 let [c, word] = pages[page_index][idx]
                 if c ==# selected
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
                     let a:this._candidates_index = idx + a:skip_num
-                    return [word.input, (a:with_okuri ? a:this._okuri : '')]
+                    return [
+                    \   word.input,
+                    \   (a:with_okuri ? a:this._okuri : '')
+                    \]
                 endif
             endfor
         endif
@@ -552,12 +661,16 @@ function! s:henkan_result.get_candidate(...) "{{{
         return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
     endif
 
-    let max_count = g:eskk_show_candidates_count >= 0 ? g:eskk_show_candidates_count : 0
-
+    let max_count = g:eskk#show_candidates_count >= 0 ?
+    \                   g:eskk#show_candidates_count : 0
     let candidates = s:henkan_result_get_candidates(self)
 
     if self._candidates_index >= max_count
-        let functor = {'candidates': candidates, 'this': self, 'with_okuri': with_okuri}
+        let functor = {
+        \   'candidates': candidates,
+        \   'this': self,
+        \   'with_okuri': with_okuri,
+        \}
         function functor.funcall()
             if self.this._candidates_index > 0
                 " This changes self.this._candidates_index.
@@ -569,7 +682,9 @@ function! s:henkan_result.get_candidate(...) "{{{
             \]
         endfunction
 
-        let self._candidate = s:henkan_result_select_candidates(self, with_okuri, max_count, functor)
+        let self._candidate = s:henkan_result_select_candidates(
+        \   self, with_okuri, max_count, functor
+        \)
     else
         let self._candidate = [
         \   candidates[self._candidates_index].input,
@@ -607,7 +722,7 @@ endfunction "}}}
 
 " Delete current candidate from all places.
 " e.g.:
-" - s:skk_dict_instance._registered_words
+" - s:dict._registered_words
 " - self._candidates
 " - SKK dictionary
 " -- User dictionary
@@ -616,7 +731,7 @@ function! s:henkan_result.delete_from_dict() "{{{
     try
         return s:henkan_result_delete_from_dict(self)
     finally
-        let dict = eskk#dictionary#get_instance()
+        let dict = eskk#get_skk_dict()
         call dict.clear_henkan_result()
     endtry
 endfunction "}}}
@@ -629,7 +744,7 @@ function! s:henkan_result_delete_from_dict(this) "{{{
         return
     endif
 
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     let user_dict_lines = dict.get_user_dict().get_lines()
     if !dict.get_user_dict().is_valid()
         return
@@ -649,12 +764,19 @@ function! s:henkan_result_delete_from_dict(this) "{{{
         return
     endif
 
-    if candidates[candidates_index].from_type ==# s:CANDIDATE_FROM_REGISTERED_WORDS
-        " Remove all elements matching with current candidate from registered words.
+    let from_type = candidates[candidates_index].from_type
+    if from_type ==# s:CANDIDATE_FROM_REGISTERED_WORDS
+        " Remove all elements matching with current candidate
+        " from registered words.
         let words = dict.get_registered_words()
         for i in range(len(words))
             if candidates[candidates_index].input ==# words[i].input
-                call dict.remove_registered_word(words[i].input, words[i].key, words[i].okuri, words[i].okuri_rom)
+                call dict.remove_registered_word(
+                \   words[i].input,
+                \   words[i].key,
+                \   words[i].okuri,
+                \   words[i].okuri_rom
+                \)
             endif
         endfor
         return
@@ -689,12 +811,11 @@ function! s:henkan_result.update_candidate() "{{{
     \)
 
     " Move current candidate to the first.
-    let dict = eskk#dictionary#get_instance()
+    let dict = eskk#get_skk_dict()
     call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
     call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
 endfunction "}}}
 
-lockvar s:henkan_result
 " }}}
 
 " s:physical_dict {{{
@@ -722,7 +843,11 @@ let s:physical_dict = {
 function! s:physical_dict_new(path, sorted, encoding) "{{{
     return extend(
     \   deepcopy(s:physical_dict, 1),
-    \   {'path': expand(a:path), 'sorted': a:sorted, 'encoding': a:encoding},
+    \   {
+    \       'path': expand(a:path),
+    \       'sorted': a:sorted,
+    \       'encoding': a:encoding,
+    \   },
     \   'force'
     \)
 endfunction "}}}
@@ -741,7 +866,8 @@ endfunction "}}}
 function! s:physical_dict.get_lines(...) "{{{
     let force = a:0 ? a:1 : 0
 
-    if self._loaded && self._ftime_at_read ==# getftime(self.path) && !force
+    let same_timestamp = self._ftime_at_read ==# getftime(self.path)
+    if self._loaded && same_timestamp && !force
         return self._content_lines
     endif
 
@@ -782,16 +908,32 @@ endfunction "}}}
 function! s:physical_dict_parse_lines(self, lines) "{{{
     let self = a:self
 
-    let self.okuri_ari_idx  = index(self._content_lines, ';; okuri-ari entries.')
+    let self.okuri_ari_idx  = index(
+    \   self._content_lines,
+    \   ';; okuri-ari entries.'
+    \)
     if self.okuri_ari_idx ==# -1
-        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+        throw eskk#parse_error(
+        \   ['eskk', 'dictionary'],
+        \   "SKK dictionary parse error"
+        \)
     endif
-    let self.okuri_nasi_idx = index(self._content_lines, ';; okuri-nasi entries.')
+    let self.okuri_nasi_idx = index(
+    \   self._content_lines,
+    \   ';; okuri-nasi entries.'
+    \)
     if self.okuri_nasi_idx ==# -1
-        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error")
+        throw eskk#parse_error(
+        \   ['eskk', 'dictionary'],
+        \   "SKK dictionary parse error"
+        \)
     endif
     if self.okuri_ari_idx >= self.okuri_nasi_idx
-        throw eskk#parse_error(['eskk', 'dictionary'], "SKK dictionary parse error: okuri-ari entries must be before okuri-nasi entries.")
+        throw eskk#parse_error(
+        \   ['eskk', 'dictionary'],
+        \   "SKK dictionary parse error: "
+        \   .   "okuri-ari entries must be before okuri-nasi entries."
+        \)
     endif
 endfunction "}}}
 
@@ -808,7 +950,6 @@ function! s:physical_dict.get_ftime_at_read() "{{{
     return self._ftime_at_read
 endfunction "}}}
 
-lockvar s:physical_dict
 " }}}
 
 " s:dict {{{
@@ -840,35 +981,29 @@ let s:dict = {
 \   '_current_henkan_result': {},
 \}
 
-function! s:dict_new(user_dict, system_dict) "{{{
+function! eskk#dictionary#new(...) "{{{
+    let user_dict = get(a:000, 0, g:eskk#directory)
+    let system_dict = get(a:000, 1, g:eskk#large_dictionary)
     return extend(
     \   deepcopy(s:dict, 1),
     \   {
     \       '_user_dict': s:physical_dict_new(
-    \           a:user_dict.path,
-    \           a:user_dict.sorted,
-    \           a:user_dict.encoding,
+    \           user_dict.path,
+    \           user_dict.sorted,
+    \           user_dict.encoding,
     \       ),
     \       '_system_dict': s:physical_dict_new(
-    \           a:system_dict.path,
-    \           a:system_dict.sorted,
-    \           a:system_dict.encoding,
+    \           system_dict.path,
+    \           system_dict.sorted,
+    \           system_dict.encoding,
     \       ),
     \       '_registered_words': cul#ordered_set#new(
-    \           {'Fn_identifier': 'eskk#dictionary#_registered_word_identifier'}
+    \           {'Fn_identifier':
+    \               'eskk#dictionary#_registered_word_identifier'}
     \       ),
     \   },
     \   'force'
     \)
-endfunction "}}}
-
-let s:skk_dict_instance = {}
-
-function! eskk#dictionary#get_instance() "{{{
-    if empty(s:skk_dict_instance)
-        let s:skk_dict_instance = s:dict_new(g:eskk_dictionary, g:eskk_large_dictionary)
-    endif
-    return s:skk_dict_instance
 endfunction "}}}
 
 
@@ -907,7 +1042,7 @@ function! s:dict.register_word(henkan_result) "{{{
         if okuri == ''
             let prompt = printf('%s ', key)
         else
-            let prompt = printf('%s%s%s ', key, g:eskk_marker_okuri, okuri)
+            let prompt = printf('%s%s%s ', key, g:eskk#marker_okuri, okuri)
         endif
         redraw
         let input  = eskk#util#input(prompt)
@@ -983,7 +1118,8 @@ function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) "{{{
 endfunction "}}}
 
 " Returns true value if new registered is added
-" or user dictionary's lines are modified by "s:physical_dict_new.set_lines()".
+" or user dictionary's lines are
+" modified by "s:physical_dict_new.set_lines()".
 " If this value is false, s:dict.update_dictionary() does nothing.
 function! s:dict.is_modified() "{{{
     " No need to check system dictionary.
@@ -1013,17 +1149,22 @@ function! s:dict.update_dictionary() "{{{
     let user_dict_lines = self._user_dict.get_lines()
     if user_dict_exists
         if empty(user_dict_lines)
-            " user dictionary exists but .get_lines() returned empty list.
+            " user dictionary exists but
+            " .get_lines() returned empty list.
             " format is invalid.
 
             " TODO:
-            " Echo "user dictionary format is invalid. overwrite with new words?".
-            " And do not read, just overwrite it with new words.
+            " Echo "user dictionary format is invalid.
+            " overwrite with new words?",
+            " and do not read, just overwrite it with new words.
             return
         endif
     else
         " Create new lines.
-        let user_dict_lines = [';; okuri-ari entries.', ';; okuri-nasi entries.']
+        let user_dict_lines = [
+        \   ';; okuri-ari entries.',
+        \   ';; okuri-nasi entries.'
+        \]
         call self._user_dict.set_lines(user_dict_lines)
         " NOTE: .set_lines() does not write to dictionary.
         " Because at this time dictionary file does not exist.
@@ -1040,7 +1181,9 @@ function! s:dict_write_to_file(this) "{{{
     let ari_idx = a:this._user_dict.okuri_ari_idx + 1
     let nasi_idx = a:this._user_dict.okuri_nasi_idx + 1
     for w in reverse(a:this._registered_words.to_list())
-        let [line, index] = eskk#dictionary#search_candidate(a:this._user_dict, w.key, w.okuri_rom)
+        let [line, index] = eskk#dictionary#search_candidate(
+        \   a:this._user_dict, w.key, w.okuri_rom
+        \)
         if w.okuri_rom != ''
             let lnum = ari_idx
         else
@@ -1056,7 +1199,9 @@ function! s:dict_write_to_file(this) "{{{
         " Merge old one and create new entry.
         call insert(
         \   user_dict_lines,
-        \   eskk#dictionary#create_new_entry(w.input, w.key, w.okuri, w.okuri_rom, line),
+        \   eskk#dictionary#create_new_entry(
+        \       w.input, w.key, w.okuri, w.okuri_rom, line
+        \   ),
         \   lnum
         \)
     endfor
@@ -1066,7 +1211,8 @@ function! s:dict_write_to_file(this) "{{{
 
     let ret_success = 0
     try
-        if writefile(user_dict_lines, a:this._user_dict.path) ==# ret_success
+        let ret = writefile(user_dict_lines, a:this._user_dict.path)
+        if ret ==# ret_success
             redraw
             echo save_msg . 'Done.'
         else
@@ -1087,7 +1233,9 @@ function! eskk#dictionary#_candidate_identifier(candidate) "{{{
 endfunction "}}}
 
 " Reduce the losses of creating instance.
-let s:dict_search_candidates = cul#ordered_set#new({'Fn_identifier': 'eskk#dictionary#_candidate_identifier'})
+let s:dict_search_candidates = cul#ordered_set#new(
+\   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
+\)
 " Search candidates matching with arguments.
 function! s:dict.search(key, okuri, okuri_rom) "{{{
     let key = a:key
@@ -1101,7 +1249,7 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     " To unique candidates.
     let candidates = s:dict_search_candidates
     call candidates.clear()
-    let max_count = g:eskk_max_candidates
+    let max_count = g:eskk#max_candidates
 
     " self._registered_words
     for w in self._registered_words.to_list()
@@ -1129,7 +1277,9 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
                 for line in eskk#dictionary#search_all_candidates(
                 \   dict, key, okuri_rom, max_count - candidates.size()
                 \)
-                    for c in eskk#dictionary#parse_skk_dict_line(line, from_type)[2]
+                    for c in eskk#dictionary#parse_skk_dict_line(
+                    \   line, from_type
+                    \)[2]    " candidates
                         call candidates.push(
                         \   s:candidate_new(
                         \       s:CANDIDATE_FROM_REGISTERED_WORDS,
@@ -1169,7 +1319,6 @@ function! s:dict.clear_henkan_result() "{{{
     let self._current_henkan_result = {}
 endfunction "}}}
 
-lockvar s:dict
 " }}}
 
 

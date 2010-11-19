@@ -9,19 +9,19 @@ set cpo&vim
 function! s:run()
     call simpletap#throws_ok(
     \   "throw eskk#internal_error(['eskk'])",
-    \   '^eskk: internal error at eskk$'
+    \   '^eskk: internal error at autoload/eskk\.vim$'
     \)
     call simpletap#throws_ok(
     \   "throw eskk#internal_error(['eskk', 'foo'])",
-    \   '^eskk: internal error at eskk#foo$'
+    \   '^eskk: internal error at autoload/eskk/foo\.vim$'
     \)
     call simpletap#throws_ok(
     \   "throw eskk#out_of_idx_error(['eskk'])",
-    \   '^eskk: out of index at eskk$'
+    \   '^eskk: out of index at autoload/eskk\.vim$'
     \)
     call simpletap#throws_ok(
     \   "throw eskk#out_of_idx_error(['eskk', 'foo'])",
-    \   '^eskk: out of index at eskk#foo$'
+    \   '^eskk: out of index at autoload/eskk/foo\.vim$'
     \)
 endfunction
 
