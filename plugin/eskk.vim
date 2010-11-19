@@ -14,6 +14,28 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+" Check if prereq libs are installed.
+function! s:check_if_prereq_libs_are_installed()
+    echohl ErrorMsg
+    try
+        if globpath(&rtp, 'autoload/cul/ordered_set.vim') == ''
+            echomsg 'autoload/cul/ordered_set.vim is not installed.'
+            return 0
+        endif
+        if globpath(&rtp, 'autoload/savemap.vim') == ''
+            echomsg 'autoload/savemap.vim is not installed.'
+            return 0
+        endif
+
+        return 1    " All libs are installed!
+    finally
+        echohl None
+    endtry
+endfunction "}}}
+if !s:check_if_prereq_libs_are_installed()
+    finish
+endif
+
 " Mappings {{{
 
 noremap! <expr> <Plug>(eskk:enable)     eskk#enable()
