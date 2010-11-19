@@ -822,13 +822,14 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     \)
 
     if g:eskk#kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
+        let hira_table = eskk#get_mode_table('hira')
         call self.filter_rom_inplace(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
-        \   'rom_to_hira'
+        \   hira_table
         \)
         call self.filter_rom_inplace(
         \   g:eskk#buftable#HENKAN_PHASE_OKURI,
-        \   'rom_to_hira'
+        \   hira_table
         \)
     endif
 
@@ -888,7 +889,8 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() "{{{
     let table_name = eskk#get_mode() ==# 'hira' ?
-    \                   'rom_to_hankata' : 'rom_to_hira'
+    \                   eskk#get_mode_table('hankata') :
+    \                   eskk#get_mode_table('hira')
     return s:convert_again_with_table(
     \   self,
     \   eskk#create_table(table_name)
@@ -896,7 +898,8 @@ function! s:buftable.do_ctrl_q_key() "{{{
 endfunction "}}}
 function! s:buftable.do_q_key() "{{{
     let table_name = eskk#get_mode() ==# 'hira' ?
-    \                   'rom_to_kata' : 'rom_to_hira'
+    \                   eskk#get_mode_table('kata') :
+    \                   eskk#get_mode_table('hira')
     return s:convert_again_with_table(
     \   self,
     \   eskk#create_table(table_name)
@@ -923,7 +926,7 @@ function! s:buftable.convert_rom_str(phases) "{{{
     if eskk#has_current_mode_table()
         if g:eskk#kata_convert_to_hira_at_henkan
         \   && eskk#get_mode() ==# 'kata'
-            let table = eskk#create_table('rom_to_hira')
+            let table = eskk#create_table(eskk#get_mode_table('hira'))
         else
             let table = eskk#create_table(eskk#get_current_mode_table())
         endif
