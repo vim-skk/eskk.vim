@@ -458,7 +458,9 @@ function! eskk#mappings#save_normal_keys() "{{{
     return keys
 endfunction "}}}
 function! eskk#mappings#restore_normal_keys(keys) "{{{
-    call a:keys.restore()
+    if has_key(a:keys, 'restore')
+        call a:keys.restore()
+    endif
 endfunction "}}}
 
 function! eskk#mappings#do_insert_enter() "{{{
