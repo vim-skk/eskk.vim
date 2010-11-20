@@ -132,7 +132,7 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
         endfor
     endif
 
-    " No lhs_head in `eskk#_get_table_defs()`.
+    " No lhs_head in a:table and its base tables.
     if a:0
         return a:1
     else
@@ -169,7 +169,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
         if a:table._cached_maps[a:lhs][a:index] != ''
             return a:table._cached_maps[a:lhs][a:index]
         else
-            " No lhs in `eskk#_get_table_defs()`.
+            " No lhs in a:table and its base tables.
             if a:0
                 return a:1
             else
@@ -191,11 +191,11 @@ function! s:get_map(table, lhs, index, ...) "{{{
             if data[a:lhs].method ==# 'add'
             \   && data[a:lhs].data[a:index] != ''
                 if g:eskk#cache_table_map
-                    let a:this._cached_maps[a:lhs] = data[a:lhs].data
+                    let a:table._cached_maps[a:lhs] = data[a:lhs].data
                 endif
                 return data[a:lhs].data[a:index]
             elseif data[a:lhs].method ==# 'remove'
-                " No lhs in `eskk#_get_table_defs()`.
+                " No lhs in a:table and its base tables.
                 if a:0
                     return a:1
                 else
@@ -213,7 +213,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
         endfor
     endif
 
-    " No lhs in `eskk#_get_table_defs()`.
+    " No lhs in a:table and its base tables.
     if a:0
         return a:1
     else
