@@ -316,6 +316,10 @@ function! s:table_obj.load() "{{{
     return self._data
 endfunction "}}}
 
+function! s:table_obj.is_base() "{{{
+    return has_key(self, '_bases')
+endfunction "}}}
+
 " }}}
 
 " s:mutable_table {{{
