@@ -40,11 +40,6 @@ set cpo&vim
 "   ],
 " }
 
-" Constants {{{
-let s:MAP_TO_INDEX = 0
-let s:REST_INDEX = 1
-" }}}
-
 
 function! eskk#table#get_all_tables() "{{{
     return map(
@@ -203,7 +198,7 @@ endfunction "}}}
 function! s:table_obj.get_map(lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self.table_name, a:lhs, s:MAP_TO_INDEX] + a:000
+    \   [self.table_name, a:lhs, 0] + a:000
     \)
 endfunction "}}}
 function! s:table_obj.has_rest(lhs) "{{{
@@ -213,7 +208,7 @@ endfunction "}}}
 function! s:table_obj.get_rest(lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self.table_name, a:lhs, s:REST_INDEX] + a:000
+    \   [self.table_name, a:lhs, 1] + a:000
     \)
 endfunction "}}}
 function! s:get_map(table_name, lhs, index, ...) "{{{
