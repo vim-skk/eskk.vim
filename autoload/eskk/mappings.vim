@@ -403,7 +403,9 @@ function! eskk#mappings#save_normal_keys() "{{{
     endfor
     function! keys.restore()
         for map in values(self.info)
-            call map.restore()
+            if has_key(map, 'restore')
+                call map.restore()
+            endif
         endfor
     endfunction
     return keys
