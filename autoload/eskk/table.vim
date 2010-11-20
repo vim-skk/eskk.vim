@@ -45,8 +45,6 @@ let s:REST_INDEX = 1
 
 " Functions {{{
 
-" Primitive table functions {{{
-
 function! s:load_table(table_name) "{{{
     let table_defs = eskk#_get_table_defs()
     if !has_key(table_defs, a:table_name)
@@ -75,8 +73,6 @@ endfunction "}}}
 function! s:is_base_table(table) "{{{
     return !has_key(a:table, 'bases')
 endfunction "}}}
-
-" }}}
 
 
 " s:register_skeleton {{{
