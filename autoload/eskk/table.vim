@@ -288,6 +288,7 @@ function! s:TableObj_get_mappings() dict "{{{
 endfunction "}}}
 function! s:do_initialize(table) "{{{
     if has_key(a:table, 'initialize')
+        Decho "calling .initialize() at '" . a:table._name . "' table..."
         call a:table.initialize()
         unlet a:table.initialize
 
