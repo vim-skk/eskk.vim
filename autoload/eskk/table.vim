@@ -290,8 +290,11 @@ function! s:derived_table.remove_map(lhs) "{{{
     if has_key(self._data, a:lhs)
         unlet self._data[a:lhs]
     else
-        " Assumpiton: It must be a mapping of bases.
-        " One of base tables must have this mapping.
+        " Assumpiton: It must be a lhs of bases.
+        " One of base tables must have this lhs.
+        " No way to check if this lhs is base one,
+        " because .load() is called lazily
+        " for saving memory.
         let self._data[a:lhs] = {'method': 'remove'}
     endif
 endfunction "}}}
