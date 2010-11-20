@@ -7,33 +7,35 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+" NOTE: s:table_defs is in autoload/eskk.vim
+"
 " s:table_defs = {
-"   'table_name': eskk#table#create(),
-"   'table_name2': eskk#table#create(),
+"   'table_name': eskk#table#new(),
+"   'table_name2': eskk#table#new(),
 "   ...
 " }
 "
-" BASE TABLE:
-" eskk#table#create() = {
-"   'name': 'table_name',
-"   'data': {
+" Base Table:
+" {
+"   '_name': 'table_name',
+"   '_data': {
 "       'lhs': ['map', 'rest'],
 "       'lhs2': ['map2', 'rest2'],
 "       ...
 "   },
 " }
 "
-" DERIVED TABLE:
-" eskk#table#create() = {
-"   'name': 'table_name',
-"   'data': {
+" Derived Table:
+" {
+"   '_name': 'table_name',
+"   '_data': {
 "       'lhs': {'method': 'add', 'data': ['map', 'rest']},
 "       'lhs2': {'method': 'remove'},
 "       ...
 "   },
-"   'bases': [
-"       eskk#table#create(),
-"       eskk#table#create(),
+"   '_parents': [
+"       eskk#table#new(),
+"       eskk#table#new(),
 "       ...
 "   ],
 " }
