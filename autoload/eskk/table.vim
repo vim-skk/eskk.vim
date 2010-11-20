@@ -105,7 +105,7 @@ function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
         let candidates = a:this._cached_candidates[a:lhs_head]
     else
         let candidates = filter(
-        \   copy(table._data), 'stridx(v:key, a:lhs_head) == 0'
+        \   copy(table.load()), 'stridx(v:key, a:lhs_head) == 0'
         \)
         if g:eskk#cache_table_candidates
             let a:this._cached_candidates[a:lhs_head] = candidates
@@ -164,7 +164,7 @@ endfunction "}}}
 function! s:get_map(this, table_name, lhs, index, ...) "{{{
     let table_name = a:this._name
     let table = eskk#get_table(table_name)
-    let data = table._data
+    let data = table.load()
 
     if g:eskk#cache_table_map
     \   && has_key(a:this._cached_maps, a:lhs)
