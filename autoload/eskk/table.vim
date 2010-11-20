@@ -110,7 +110,7 @@ endfunction "}}}
 
 
 function! s:is_base_table(table) "{{{
-    return !has_key(a:table, 'bases')
+    return !has_key(a:table, '_parents')
 endfunction "}}}
 
 " s:table_obj {{{
