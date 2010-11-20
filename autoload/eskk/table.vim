@@ -304,7 +304,7 @@ endfunction "}}}
 " }}}
 
 " s:table_obj {{{
-let s:table_obj = {}
+let s:table_obj = {'_data': {}}
 
 function! eskk#table#new(table_name) "{{{
     let obj = deepcopy(s:table_obj)
@@ -348,6 +348,14 @@ function! s:table_obj.get_rest(lhs, ...) "{{{
     \   's:get_map',
     \   [self.table_name, a:lhs, s:REST_INDEX] + a:000
     \)
+endfunction "}}}
+
+function! s:table_obj.load() "{{{
+    if has_key(self, 'initialize')
+        call self.initialize()
+        unlet self.initialize
+    endif
+    return self._data
 endfunction "}}}
 
 " }}}
