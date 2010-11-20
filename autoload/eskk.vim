@@ -1706,7 +1706,14 @@ function! eskk#register_table(table) "{{{
     for base in a:table.get_base_tables()
         call eskk#register_table(base)
     endfor
-    let s:table_defs[a:table.get_name()] = a:table
+    " eskk#register_table() MUST NOT allow to overwrite
+    " already registered tables.
+    " because it is harmful to be able to
+    " rewrite base (derived) tables. (what will happen? I don't know)
+    let name = a:table.get_name()
+    if !has_key(s:table_defs, name)
+        let s:table_defs[name] = a:table
+    endif
 endfunction "}}}
 
 function! eskk#_get_table_defs() "{{{
