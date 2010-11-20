@@ -45,31 +45,6 @@ let s:REST_INDEX = 1
 
 " Functions {{{
 
-function! s:load_table(table_name) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if !has_key(table_defs, a:table_name)
-        let msg = printf('%s is not registered.', a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
-    let def = table_defs[a:table_name]
-
-    if def._loaded
-        return
-    endif
-
-    if has_key(def, 'bases')
-        for base in def.bases
-            call s:load_table(base.name)
-        endfor
-    endif
-
-    if has_key(def, 'initialize')
-        call def.initialize()
-    endif
-
-    let def._loaded = 1
-endfunction "}}}
-
 function! s:is_base_table(table) "{{{
     return !has_key(a:table, 'bases')
 endfunction "}}}
