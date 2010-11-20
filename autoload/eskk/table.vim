@@ -67,6 +67,7 @@ call s:TableObj.attribute('_cached_candidates', {})
 
 " Constructor of s:ParentTable, s:ChildTable
 function! eskk#table#new(table_name, ...) "{{{
+    Decho "eskk#table#new(): creating table '" . a:table_name . "'..."
     if a:0
         let obj = s:ChildTable.clone()
         let obj._name = a:table_name
