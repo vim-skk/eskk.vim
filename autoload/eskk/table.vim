@@ -69,6 +69,7 @@ call s:TableObj.attribute('_cached_candidates', {})
 function! eskk#table#new(table_name, ...) "{{{
     Decho "eskk#table#new(): creating table '" . a:table_name . "'..."
     if a:0
+        Decho a:table_name . " is child table."
         let obj = s:ChildTable.clone()
         let obj._name = a:table_name
         let obj._bases = []
@@ -85,6 +86,7 @@ function! eskk#table#new(table_name, ...) "{{{
             call s:validate_base_tables(obj)
         endfor
     else
+        Decho a:table_name . " is base table."
         let obj = s:BaseTable.clone()
         let obj._name = a:table_name
     endif
