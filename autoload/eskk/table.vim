@@ -92,22 +92,22 @@ function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) "{{{
     \   [self, a:lhs_head, a:max_candidates] + a:000
     \)
 endfunction "}}}
-function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
-    let table_name = a:this._name
+function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
+    let table_name = a:table._name
     call eskk#util#assert(
     \   a:max_candidates !=# 0,
     \   "a:max_candidates must be negative or positive."
     \)
 
     if g:eskk#cache_table_candidates
-    \   && has_key(a:this._cached_candidates, a:lhs_head)
-        let candidates = a:this._cached_candidates[a:lhs_head]
+    \   && has_key(a:table._cached_candidates, a:lhs_head)
+        let candidates = a:table._cached_candidates[a:lhs_head]
     else
         let candidates = filter(
-        \   copy(a:this.load()), 'stridx(v:key, a:lhs_head) == 0'
+        \   copy(a:table.load()), 'stridx(v:key, a:lhs_head) == 0'
         \)
         if g:eskk#cache_table_candidates
-            let a:this._cached_candidates[a:lhs_head] = candidates
+            let a:table._cached_candidates[a:lhs_head] = candidates
         endif
     endif
 
@@ -115,7 +115,7 @@ function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
         return candidates
     endif
 
-    if !a:this.is_base()
+    if !a:table.is_base()
         " Search base tables.
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
@@ -160,14 +160,14 @@ function! s:table_obj.get_rest(lhs, ...) "{{{
     \   [self, a:lhs, 1] + a:000
     \)
 endfunction "}}}
-function! s:get_map(this, lhs, index, ...) "{{{
-    let table_name = a:this._name
-    let data = a:this.load()
+function! s:get_map(table, lhs, index, ...) "{{{
+    let table_name = a:table._name
+    let data = a:table.load()
 
     if g:eskk#cache_table_map
-    \   && has_key(a:this._cached_maps, a:lhs)
-        if a:this._cached_maps[a:lhs][a:index] != ''
-            return a:this._cached_maps[a:lhs][a:index]
+    \   && has_key(a:table._cached_maps, a:lhs)
+        if a:table._cached_maps[a:lhs][a:index] != ''
+            return a:table._cached_maps[a:lhs][a:index]
         else
             " No lhs in `eskk#_get_table_defs()`.
             if a:0
@@ -178,11 +178,11 @@ function! s:get_map(this, lhs, index, ...) "{{{
         endif
     endif
 
-    if a:this.is_base()
+    if a:table.is_base()
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             if g:eskk#cache_table_map
-                let a:this._cached_maps[a:lhs] = data[a:lhs]
+                let a:table._cached_maps[a:lhs] = data[a:lhs]
             endif
             return data[a:lhs][a:index]
         endif
@@ -205,7 +205,7 @@ function! s:get_map(this, lhs, index, ...) "{{{
         endif
 
         let not_found = {}
-        for base in a:this._bases
+        for base in a:table._bases
             let r = s:get_map(base, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r
