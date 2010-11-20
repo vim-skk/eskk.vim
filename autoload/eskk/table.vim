@@ -124,6 +124,14 @@ function! eskk#table#new(table_name, ...) "{{{
     return obj
 endfunction "}}}
 
+function! eskk#table#new_from_file(table_name) "{{{
+    let obj = eskk#table#new(a:table_name)
+    function obj.initialize()
+        call self.add_from_dict(eskk#table#{self._name}#load())
+    endfunction
+    return obj
+endfunction "}}}
+
 
 function! s:table_obj.has_candidates(lhs_head) "{{{
     let not_found = {}

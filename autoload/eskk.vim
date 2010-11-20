@@ -135,10 +135,10 @@ endif
 function! s:set_up_mode_use_tables() "{{{
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
     let default = {
-    \   'hira': eskk#table#create_from_file('rom_to_hira'),
-    \   'kata': eskk#table#create_from_file('rom_to_kata'),
-    \   'zenei': eskk#table#create_from_file('rom_to_zenei'),
-    \   'hankata': eskk#table#create_from_file('rom_to_hankata'),
+    \   'hira': eskk#table#new_from_file('rom_to_hira'),
+    \   'kata': eskk#table#new_from_file('rom_to_kata'),
+    \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
+    \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
     \}
 
     if !exists('g:eskk#mode_use_tables')
@@ -1292,15 +1292,12 @@ function! s:initialize() "{{{
     " }}}
 
     " Register builtin-tables. {{{
-    function! s:initialize_use_tables()
+    function! s:initialize_register_using_tables()
         for table in values(g:eskk#mode_use_tables)
-            function! table.initialize()
-                call self.add_from_dict(eskk#table#{self.name}#load())
-            endfunction
             call eskk#register_table(table)
         endfor
     endfunction
-    call s:initialize_use_tables()
+    call s:initialize_register_using_tables()
     " }}}
 
     " BufEnter: Map keys if enabled. {{{
