@@ -169,12 +169,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
         if a:table._cached_maps[a:lhs][a:index] != ''
             return a:table._cached_maps[a:lhs][a:index]
         else
-            " No lhs in a:table and its base tables.
-            if a:0
-                return a:1
-            else
-                throw eskk#internal_error(['eskk', 'table'])
-            endif
+            return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
         endif
     endif
 
@@ -195,12 +190,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
                 endif
                 return data[a:lhs].data[a:index]
             elseif data[a:lhs].method ==# 'remove'
-                " No lhs in a:table and its base tables.
-                if a:0
-                    return a:1
-                else
-                    throw eskk#internal_error(['eskk', 'table'])
-                endif
+                return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
             endif
         endif
 
@@ -213,15 +203,18 @@ function! s:get_map(table, lhs, index, ...) "{{{
         endfor
     endif
 
-    " No lhs in a:table and its base tables.
-    if a:0
-        return a:1
+    return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
+endfunction "}}}
+function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
+    " No lhs in a:table.
+    if !empty(a:rest_args)
+        return a:rest_args[0]
     else
         throw eskk#internal_error(
         \   ['eskk', 'table'],
         \   eskk#util#formatstrf(
         \       'table name = %s, lhs = %s, index = %d',
-        \       table_name, a:lhs, a:index
+        \       a:table._name, a:lhs, a:index
         \   )
         \)
     endif
