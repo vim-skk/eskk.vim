@@ -256,7 +256,7 @@ function! s:do_initialize(table) "{{{
 endfunction "}}}
 
 function! s:table_obj.is_base() "{{{
-    return has_key(self, '_bases')
+    return !has_key(self, '_bases')
 endfunction "}}}
 
 function! s:table_obj.get_name() "{{{
