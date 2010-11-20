@@ -337,6 +337,12 @@ endfunction "}}}
 
 " s:derived_table {{{
 let s:derived_table = deepcopy(s:table_obj)
+
+function! s:derived_table.add(lhs, map, ...) "{{{
+    let pair = [a:map, (a:0 ? a:1 : '')]
+    let self._data[a:lhs] = {'method': 'add', 'data': pair}
+endfunction "}}}
+
 " }}}
 
 
