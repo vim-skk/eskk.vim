@@ -72,12 +72,8 @@ function! s:load_table(table_name) "{{{
     let def._loaded = 1
 endfunction "}}}
 
-function! s:is_base_table(table_name) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if !table_defs[a:table_name]._loaded
-        call s:load_table(a:table_name)
-    endif
-    return !has_key(table_defs[a:table_name], 'bases')
+function! s:is_base_table(table) "{{{
+    return !has_key(a:table, 'bases')
 endfunction "}}}
 
 " }}}
@@ -177,6 +173,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     \   "a:max_candidates must be negative or positive."
     \)
 
+    let data = eskk#get_table(a:table_name)
     let cached_candidates = eskk#_get_cached_candidates()
     if g:eskk#cache_table_candidates
     \   && eskk#util#has_key_f(
@@ -185,7 +182,6 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     \       )
         let candidates = cached_candidates[a:table_name][a:lhs_head]
     else
-        let data = eskk#get_table(a:table_name)
         let candidates = filter(
         \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
         \)
@@ -202,7 +198,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         return candidates
     endif
 
-    if !s:is_base_table(a:table_name)
+    if !s:is_base_table(data)
         " Search parent tables.
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
@@ -265,7 +261,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         endif
     endif
 
-    if s:is_base_table(a:table_name)
+    if s:is_base_table(data)
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             if g:eskk#cache_table_map
