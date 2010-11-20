@@ -278,7 +278,7 @@ function! s:derived_table.add_map(lhs, map, ...) "{{{
     let self._data[a:lhs] = {'method': 'add', 'data': pair}
 endfunction "}}}
 
-function! s:derived_table.remove(lhs) "{{{
+function! s:derived_table.remove_map(lhs) "{{{
     if has_key(self._data, a:lhs)
         unlet self._data[a:lhs]
     else
