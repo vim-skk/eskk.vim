@@ -99,13 +99,12 @@ function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
     \   "a:max_candidates must be negative or positive."
     \)
 
-    let table = eskk#get_table(table_name)
     if g:eskk#cache_table_candidates
     \   && has_key(a:this._cached_candidates, a:lhs_head)
         let candidates = a:this._cached_candidates[a:lhs_head]
     else
         let candidates = filter(
-        \   copy(table.load()), 'stridx(v:key, a:lhs_head) == 0'
+        \   copy(a:this.load()), 'stridx(v:key, a:lhs_head) == 0'
         \)
         if g:eskk#cache_table_candidates
             let a:this._cached_candidates[a:lhs_head] = candidates
@@ -163,8 +162,7 @@ function! s:table_obj.get_rest(lhs, ...) "{{{
 endfunction "}}}
 function! s:get_map(this, lhs, index, ...) "{{{
     let table_name = a:this._name
-    let table = eskk#get_table(table_name)
-    let data = table.load()
+    let data = a:this.load()
 
     if g:eskk#cache_table_map
     \   && has_key(a:this._cached_maps, a:lhs)
