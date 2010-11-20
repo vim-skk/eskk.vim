@@ -6,9 +6,6 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-" `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()`
-" toggle this value.
-let s:has_mapped = {}
 " Database for misc. keys.
 let s:map = {
 \   'general': {},
@@ -491,7 +488,8 @@ endfunction "}}}
 
 " Functions using s:map
 function! eskk#mappings#map_all_keys(...) "{{{
-    if has_key(s:has_mapped, bufnr('%'))
+    let mapped_bufnr = eskk#_get_mapped_bufnr()
+    if has_key(mapped_bufnr, bufnr('%'))
         return
     endif
 
@@ -525,11 +523,12 @@ function! eskk#mappings#map_all_keys(...) "{{{
         endif
     endfor
 
-    call eskk#util#assert(!has_key(s:has_mapped, bufnr('%')))
-    let s:has_mapped[bufnr('%')] = 1
+    call eskk#util#assert(!has_key(mapped_bufnr, bufnr('%')))
+    let mapped_bufnr[bufnr('%')] = 1
 endfunction "}}}
 function! eskk#mappings#unmap_all_keys() "{{{
-    if !has_key(s:has_mapped, bufnr('%'))
+    let mapped_bufnr = eskk#_get_mapped_bufnr()
+    if !has_key(mapped_bufnr, bufnr('%'))
         return
     endif
 
@@ -537,7 +536,7 @@ function! eskk#mappings#unmap_all_keys() "{{{
         call eskk#mappings#unmap('l', 'b', key)
     endfor
 
-    unlet s:has_mapped[bufnr('%')]
+    unlet mapped_bufnr[bufnr('%')]
 endfunction "}}}
 
 function! eskk#mappings#is_special_lhs(char, type) "{{{

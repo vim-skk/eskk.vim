@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 4, 56))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 4, 57))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -333,6 +333,9 @@ let s:cached_maps = {}
 let s:cached_candidates = {}
 " All tables structures.
 let s:table_defs = {}
+" `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()`
+" toggle this value.
+let s:mapped_bufnr = {}
 " }}}
 
 
@@ -2132,6 +2135,11 @@ function! eskk#repeat_last_jump(cmd) "{{{
 endfunction "}}}
 function! s:invert_direction(cmd) "{{{
     return eskk#util#is_lower(a:cmd) ? toupper(a:cmd) : tolower(a:cmd)
+endfunction "}}}
+
+" Mapping
+function! eskk#_get_mapped_bufnr() "{{{
+    return s:mapped_bufnr
 endfunction "}}}
 
 " Misc.
