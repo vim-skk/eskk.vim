@@ -48,62 +48,6 @@ function! eskk#table#get_all_tables() "{{{
     \)
 endfunction "}}}
 
-" s:register_skeleton {{{
-let s:register_skeleton = {'data': {}, '_loaded': 0}
-
-function! eskk#table#create(name, ...) "{{{
-    let obj = deepcopy(s:register_skeleton, 1)
-    let obj.name = a:name
-    if a:0
-        let names = type(a:1) == type([]) ? a:1 : [a:1]
-        let obj.bases = map(names, 'eskk#table#create(v:val)')
-    endif
-    return obj
-endfunction "}}}
-
-function! eskk#table#create_from_file(name) "{{{
-    let table = eskk#table#create(a:name)
-    let def = eskk#table#{a:name}#load()
-    for lhs in keys(def)
-        let [map_to, rest] = def[lhs]
-        call table.add(lhs, map_to, rest)
-    endfor
-    return table
-endfunction "}}}
-
-function! s:register_skeleton.is_base() "{{{
-    return !has_key(self, 'bases')
-endfunction "}}}
-
-function! s:register_skeleton.add(lhs, map, ...) "{{{
-    let pair = [a:map, (a:0 ? a:1 : '')]
-    if self.is_base()
-        let self.data[a:lhs] = pair
-    else
-        let self.data[a:lhs] = {'method': 'add', 'data': pair}
-    endif
-    return self
-endfunction "}}}
-
-function! s:register_skeleton.remove(lhs) "{{{
-    if self.is_base()
-        throw eskk#user_error(
-        \   ['eskk', 'table'],
-        \   "Must not remove base class map."
-        \)
-    else
-        let self.data[a:lhs] = {'method': 'remove'}
-    endif
-    return self
-endfunction "}}}
-
-function! s:register_skeleton.add_from_dict(dict) "{{{
-    let self.data = a:dict
-    return self
-endfunction "}}}
-" }}}
-
-
 function! s:is_base_table(table) "{{{
     return !has_key(a:table, '_bases')
 endfunction "}}}
