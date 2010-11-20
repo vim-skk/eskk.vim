@@ -43,7 +43,13 @@ let s:MAP_TO_INDEX = 0
 let s:REST_INDEX = 1
 " }}}
 
-" Functions {{{
+
+function! eskk#table#get_all_tables() "{{{
+    return map(
+    \   eskk#util#globpath('autoload/eskk/table/*.vim'),
+    \   'fnamemodify(v:val, ":t:r")'
+    \)
+endfunction "}}}
 
 " s:register_skeleton {{{
 let s:register_skeleton = {'data': {}, '_loaded': 0}
@@ -100,17 +106,6 @@ function! s:register_skeleton.add_from_dict(dict) "{{{
 endfunction "}}}
 " }}}
 
-
-" Autoload functions {{{
-
-function! eskk#table#get_all_tables() "{{{
-    return map(
-    \   eskk#util#globpath('autoload/eskk/table/*.vim'),
-    \   'fnamemodify(v:val, ":t:r")'
-    \)
-endfunction "}}}
-
-" }}}
 
 function! s:is_base_table(table) "{{{
     return !has_key(a:table, 'bases')
@@ -312,7 +307,6 @@ endfunction "}}}
 
 " }}}
 
-" }}}
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
