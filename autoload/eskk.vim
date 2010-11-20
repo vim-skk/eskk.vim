@@ -1293,12 +1293,10 @@ function! s:initialize() "{{{
 
     " Register builtin-tables. {{{
     function! s:initialize_use_tables()
-        let tabletmpl = {}    " dummy object
-        function! tabletmpl.initialize()
-            call self.add_from_dict(eskk#table#{self.name}#load())
-        endfunction
         for table in values(g:eskk#mode_use_tables)
-            let table.initialize = tabletmpl.initialize
+            function! table.initialize()
+                call self.add_from_dict(eskk#table#{self.name}#load())
+            endfunction
             call eskk#register_table(table)
         endfor
     endfunction
