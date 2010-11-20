@@ -198,6 +198,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
         for base in a:table._bases
             let r = s:get_map(base, a:lhs, a:index, not_found)
             if r isnot not_found
+                " TODO: cache here
                 return r
             endif
         endfor
