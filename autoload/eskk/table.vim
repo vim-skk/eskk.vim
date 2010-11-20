@@ -45,11 +45,6 @@ let s:REST_INDEX = 1
 
 " Functions {{{
 
-function! s:is_base_table(table) "{{{
-    return !has_key(a:table, 'bases')
-endfunction "}}}
-
-
 " s:register_skeleton {{{
 let s:register_skeleton = {'data': {}, '_loaded': 0}
 
@@ -116,6 +111,10 @@ function! eskk#table#get_all_tables() "{{{
 endfunction "}}}
 
 " }}}
+
+function! s:is_base_table(table) "{{{
+    return !has_key(a:table, 'bases')
+endfunction "}}}
 
 " s:table_obj {{{
 let s:table_obj = {'_data': {}}
