@@ -114,9 +114,15 @@ endfunction "}}}
 " s:table_obj {{{
 let s:table_obj = {'_data': {}}
 
-function! eskk#table#new(table_name) "{{{
-    let obj = deepcopy(s:table_obj)
-    let obj.table_name = a:table_name
+function! eskk#table#new(table_name, ...) "{{{
+    if a:0
+        let obj = deepcopy(s:mutable_table)
+        let obj._table_name = a:table_name
+        let obj._parents = a:1
+    else
+        let obj = deepcopy(s:table_obj)
+        let obj.table_name = a:table_name
+    endif
 
     return obj
 endfunction "}}}
@@ -305,6 +311,10 @@ function! s:table_obj.load() "{{{
     return self._data
 endfunction "}}}
 
+" }}}
+
+" s:mutable_table {{{
+let s:mutable_table = deepcopy(s:table_obj)
 " }}}
 
 
