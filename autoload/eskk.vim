@@ -1110,7 +1110,7 @@ function! s:initialize() "{{{
                 if eskk#has_mode_table('ascii')
                     if !has_key(this.sandbox, 'table')
                         let this.sandbox.table =
-                        \   s:table_defs[eskk#get_mode_table('ascii')]
+                        \   eskk#get_table(eskk#get_mode_table('ascii'))
                     endif
                     let a:stash.return = this.sandbox.table.get_map(
                     \   a:stash.char, a:stash.char
@@ -1137,7 +1137,7 @@ function! s:initialize() "{{{
             else
                 if !has_key(this.sandbox, 'table')
                     let this.sandbox.table =
-                    \   s:table_defs[eskk#get_mode_table('zenei')]
+                    \   eskk#get_table(eskk#get_mode_table('zenei'))
                 endif
                 let a:stash.return = this.sandbox.table.get_map(
                 \   a:stash.char, a:stash.char
@@ -1299,7 +1299,7 @@ function! s:initialize() "{{{
         endfunction
         for table in values(g:eskk#mode_use_tables)
             let table.init = tabletmpl.init
-            let s:table_defs[table.name] = table
+            call eskk#register_table(table)
         endfor
     endfunction
     call s:initialize_use_tables()
@@ -1707,6 +1707,12 @@ function! eskk#has_table(table_name) "{{{
 endfunction "}}}
 function! eskk#get_all_registered_tables() "{{{
     return keys(s:table_defs)
+endfunction "}}}
+function! eskk#get_table(name) "{{{
+    return s:table_defs[a:name]
+endfunction "}}}
+function! eskk#register_table(table) "{{{
+    let s:table_defs = a:table
 endfunction "}}}
 
 function! eskk#_get_cached_maps() "{{{
