@@ -49,22 +49,25 @@ function! eskk#table#get_all_tables() "{{{
 endfunction "}}}
 
 " s:table_obj {{{
-let s:table_obj = {'_data': {}}
+let s:table_obj = {'_data': {}, '_cached_maps': {}, '_cached_candidates': {}}
 
 function! eskk#table#new(table_name, ...) "{{{
     if a:0
         let obj = deepcopy(s:derived_table)
-        let obj._table_name = a:table_name
-        let obj._bases = a:1
+        let obj._name = a:table_name
+        let obj._bases = []
+        for base in type(a:1) == type([]) ? a:1 : [a:1]
+            if type(base) == type("")
+                " Assume it's installed table name.
+                call add(obj._bases, eskk#table#new_from_file(base))
+            elseif type(base) == type({})
+                " Assume it's s:table_obj object.
+                call add(obj._bases, base)
+            endif
+        endfor
     else
         let obj = deepcopy(s:base_table)
-        let obj.table_name = a:table_name
-    endif
-    if g:eskk#cache_table_map
-        let obj._cached_maps = {}
-    endif
-    if g:eskk#cache_table_candidates
-        let obj._cached_candidates = {}
+        let obj._name = a:table_name
     endif
 
     return obj
@@ -96,13 +99,13 @@ function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
     \   "a:max_candidates must be negative or positive."
     \)
 
-    let data = eskk#get_table(table_name)
+    let table = eskk#get_table(table_name)
     if g:eskk#cache_table_candidates
     \   && has_key(a:this._cached_candidates, a:lhs_head)
         let candidates = a:this._cached_candidates[a:lhs_head]
     else
         let candidates = filter(
-        \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
+        \   copy(table._data), 'stridx(v:key, a:lhs_head) == 0'
         \)
         if g:eskk#cache_table_candidates
             let a:this._cached_candidates[a:lhs_head] = candidates
@@ -117,7 +120,7 @@ function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
         " Search base tables.
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
-        for base in table_defs[table_name].bases
+        for base in table_defs[table_name]._bases
             let r = s:get_candidates(
             \   base,
             \   a:lhs_head,
@@ -160,7 +163,8 @@ function! s:table_obj.get_rest(lhs, ...) "{{{
 endfunction "}}}
 function! s:get_map(this, table_name, lhs, index, ...) "{{{
     let table_name = a:this._name
-    let data = eskk#get_table(table_name)
+    let table = eskk#get_table(table_name)
+    let data = table._data
 
     if g:eskk#cache_table_map
     \   && has_key(a:this._cached_maps, a:lhs)
@@ -204,7 +208,7 @@ function! s:get_map(this, table_name, lhs, index, ...) "{{{
 
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
-        for base in table_defs[table_name].bases
+        for base in table_defs[table_name]._bases
             let r = s:get_map(base, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r

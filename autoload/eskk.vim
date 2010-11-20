@@ -1678,7 +1678,7 @@ function! eskk#get_current_mode_table() "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
-    return g:eskk#mode_use_tables[a:mode].name
+    return g:eskk#mode_use_tables[a:mode].get_name()
 endfunction "}}}
 function! eskk#create_table(table_name) "{{{
     " XXX: temporarily disable caching tables.
