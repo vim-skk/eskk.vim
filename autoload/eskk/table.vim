@@ -264,7 +264,7 @@ function! s:base_table.add_from_dict(dict) "{{{
     let self._data = a:dict
 endfunction "}}}
 
-function! s:base_table.add(lhs, map, ...) "{{{
+function! s:base_table.add_map(lhs, map, ...) "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
     let self._data[a:lhs] = pair
 endfunction "}}}
@@ -273,7 +273,7 @@ endfunction "}}}
 " s:derived_table {{{
 let s:derived_table = deepcopy(s:table_obj)
 
-function! s:derived_table.add(lhs, map, ...) "{{{
+function! s:derived_table.add_map(lhs, map, ...) "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
     let self._data[a:lhs] = {'method': 'add', 'data': pair}
 endfunction "}}}
