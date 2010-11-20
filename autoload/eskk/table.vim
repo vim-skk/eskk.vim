@@ -161,7 +161,7 @@ function! s:table_obj.get_rest(lhs, ...) "{{{
     \   [self, a:lhs, 1] + a:000
     \)
 endfunction "}}}
-function! s:get_map(this, table_name, lhs, index, ...) "{{{
+function! s:get_map(this, lhs, index, ...) "{{{
     let table_name = a:this._name
     let table = eskk#get_table(table_name)
     let data = table.load()
