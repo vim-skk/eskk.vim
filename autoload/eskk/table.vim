@@ -113,11 +113,11 @@ let s:table_obj = {'_data': {}}
 
 function! eskk#table#new(table_name, ...) "{{{
     if a:0
-        let obj = deepcopy(s:mutable_table)
+        let obj = deepcopy(s:derived_table)
         let obj._table_name = a:table_name
         let obj._bases = a:1
     else
-        let obj = deepcopy(s:table_obj)
+        let obj = deepcopy(s:base_table)
         let obj.table_name = a:table_name
     endif
 
@@ -322,8 +322,12 @@ endfunction "}}}
 
 " }}}
 
-" s:mutable_table {{{
-let s:mutable_table = deepcopy(s:table_obj)
+" s:base_table {{{
+let s:base_table = deepcopy(s:table_obj)
+" }}}
+
+" s:derived_table {{{
+let s:derived_table = deepcopy(s:table_obj)
 " }}}
 
 
