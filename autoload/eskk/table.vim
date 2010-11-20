@@ -25,7 +25,7 @@ set cpo&vim
 "   },
 " }
 "
-" Derived Table:
+" Child Table:
 " {
 "   '_name': 'table_name',
 "   '_data': {
@@ -53,7 +53,7 @@ let s:table_obj = {'_data': {}, '_cached_maps': {}, '_cached_candidates': {}}
 
 function! eskk#table#new(table_name, ...) "{{{
     if a:0
-        let obj = deepcopy(s:derived_table)
+        let obj = deepcopy(s:child_table)
         let obj._name = a:table_name
         let obj._bases = []
         for base in type(a:1) == type([]) ? a:1 : [a:1]
@@ -272,15 +272,15 @@ function! s:base_table.add_map(lhs, map, ...) "{{{
 endfunction "}}}
 " }}}
 
-" s:derived_table {{{
-let s:derived_table = deepcopy(s:table_obj)
+" s:child_table {{{
+let s:child_table = deepcopy(s:table_obj)
 
-function! s:derived_table.add_map(lhs, map, ...) "{{{
+function! s:child_table.add_map(lhs, map, ...) "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
     let self._data[a:lhs] = {'method': 'add', 'data': pair}
 endfunction "}}}
 
-function! s:derived_table.remove_map(lhs) "{{{
+function! s:child_table.remove_map(lhs) "{{{
     if has_key(self._data, a:lhs)
         unlet self._data[a:lhs]
     else
