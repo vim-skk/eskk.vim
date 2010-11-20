@@ -343,6 +343,16 @@ function! s:derived_table.add(lhs, map, ...) "{{{
     let self._data[a:lhs] = {'method': 'add', 'data': pair}
 endfunction "}}}
 
+function! s:derived_table.remove(lhs) "{{{
+    if has_key(self._data, a:lhs)
+        unlet self._data[a:lhs]
+    else
+        " Assumpiton: It must be a mapping of bases.
+        " One of base tables must have this mapping.
+        let self._data[a:lhs] = {'method': 'remove'}
+    endif
+endfunction "}}}
+
 " }}}
 
 
