@@ -446,12 +446,15 @@ function! s:filter_rom(stash, table) "{{{
 
     if a:table.has_n_candidates(rom_str, 2)
         " Has candidates but not match.
+        Decho 'has candidates'
         return s:filter_rom_has_candidates(a:stash)
     elseif a:table.has_map(rom_str)
         " Match!
+        Decho 'match'
         return s:filter_rom_exact_match(a:stash, a:table)
     else
         " No candidates.
+        Decho 'no candidates'
         return s:filter_rom_no_match(a:stash, a:table)
     endif
 endfunction "}}}
