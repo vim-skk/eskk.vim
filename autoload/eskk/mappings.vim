@@ -6,52 +6,6 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-" Database for misc. keys.
-let s:map = {
-\   'general': {},
-\   'sticky': {},
-\   'backspace-key': {},
-\   'escape-key': {},
-\   'enter-key': {},
-\   'undo-key': {},
-\   'tab': {},
-\   'phase:henkan:henkan-key': {},
-\   'phase:okuri:henkan-key': {},
-\   'phase:henkan-select:choose-next': {},
-\   'phase:henkan-select:choose-prev': {},
-\   'phase:henkan-select:next-page': {},
-\   'phase:henkan-select:prev-page': {},
-\   'phase:henkan-select:escape': {},
-\   'phase:henkan-select:delete-from-dict': {},
-\   'mode:hira:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
-\   'mode:hira:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
-\   'mode:hira:toggle-kata': {'fn': 's:handle_toggle_kata'},
-\   'mode:hira:q-key': {'fn': 's:handle_q_key'},
-\   'mode:hira:l-key': {'fn': 's:handle_l_key'},
-\   'mode:hira:to-ascii': {'fn': 's:handle_to_ascii'},
-\   'mode:hira:to-zenei': {'fn': 's:handle_to_zenei'},
-\   'mode:hira:to-abbrev': {'fn': 's:handle_to_abbrev'},
-\   'mode:kata:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
-\   'mode:kata:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
-\   'mode:kata:toggle-kata': {'fn': 's:handle_toggle_kata'},
-\   'mode:kata:q-key': {'fn': 's:handle_q_key'},
-\   'mode:kata:l-key': {'fn': 's:handle_l_key'},
-\   'mode:kata:to-ascii': {'fn': 's:handle_to_ascii'},
-\   'mode:kata:to-zenei': {'fn': 's:handle_to_zenei'},
-\   'mode:kata:to-abbrev': {'fn': 's:handle_to_abbrev'},
-\   'mode:hankata:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
-\   'mode:hankata:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
-\   'mode:hankata:toggle-kata': {'fn': 's:handle_toggle_kata'},
-\   'mode:hankata:q-key': {'fn': 's:handle_q_key'},
-\   'mode:hankata:l-key': {'fn': 's:handle_l_key'},
-\   'mode:hankata:to-ascii': {'fn': 's:handle_to_ascii'},
-\   'mode:hankata:to-zenei': {'fn': 's:handle_to_zenei'},
-\   'mode:hankata:to-abbrev': {'fn': 's:handle_to_abbrev'},
-\   'mode:ascii:to-hira': {'fn': 's:handle_toggle_hankata'},
-\   'mode:zenei:to-hira': {'fn': 's:handle_toggle_hankata'},
-\   'mode:abbrev:henkan-key': {},
-\}
-
 function! s:handle_toggle_hankata(stash) "{{{
     if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
@@ -115,7 +69,7 @@ function! s:handle_to_abbrev(stash) "{{{
     return 0
 endfunction "}}}
 
-" TODO s:map should contain this info.
+" TODO s:eskk_mapings should contain this info.
 " Keys used by only its mode.
 let s:mode_local_keys = {
 \   'hira': [
@@ -486,7 +440,7 @@ function! eskk#mappings#do_insert_leave() "{{{
 endfunction "}}}
 
 
-" Functions using s:map
+" Functions using s:eskk_mapings
 function! eskk#mappings#map_all_keys(...) "{{{
     let mapped_bufnr = eskk#_get_mapped_bufnr()
     if has_key(mapped_bufnr, bufnr('%'))
@@ -502,7 +456,8 @@ function! eskk#mappings#map_all_keys(...) "{{{
     endfor
 
     " Map `:EskkMap -general` keys.
-    for [key, opt] in items(s:map.general)
+    let eskk_mappings = eskk#_get_eskk_mappings()
+    for [key, opt] in items(eskk_mappings.general)
         if !eval(opt.options['map-if'])
             continue
         endif
@@ -541,13 +496,15 @@ endfunction "}}}
 
 function! eskk#mappings#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error
-    " when `s:map[a:type]` does not exist.
-    return has_key(s:map, a:type)
-    \   && eskk#util#key2char(s:map[a:type].lhs) ==# a:char
+    " when `eskk_mappings[a:type]` does not exist.
+    let eskk_mappings = eskk#_get_eskk_mappings()
+    return has_key(eskk_mappings, a:type)
+    \   && eskk#util#key2char(eskk_mappings[a:type].lhs) ==# a:char
 endfunction "}}}
 function! eskk#mappings#get_special_key(type) "{{{
-    if has_key(s:map, a:type)
-        return s:map[a:type].lhs
+    let eskk_mappings = eskk#_get_eskk_mappings()
+    if has_key(eskk_mappings, a:type)
+        return eskk_mappings[a:type].lhs
     else
         throw eskk#internal_error(
         \   ['eskk'],
@@ -556,11 +513,12 @@ function! eskk#mappings#get_special_key(type) "{{{
     endif
 endfunction "}}}
 function! eskk#mappings#get_special_map(type) "{{{
-    if has_key(s:map, a:type)
+    let eskk_mappings = eskk#_get_eskk_mappings()
+    if has_key(eskk_mappings, a:type)
         let map = printf('<Plug>(eskk:_noremap_%s)', a:type)
         if maparg(map, eskk#mappings#get_map_modes()) == ''
             " Not to remap.
-            call eskk#mappings#map('', map, s:map[a:type].lhs)
+            call eskk#mappings#map('', map, eskk_mappings[a:type].lhs)
         endif
         return map
     else
@@ -571,10 +529,11 @@ function! eskk#mappings#get_special_map(type) "{{{
     endif
 endfunction "}}}
 function! eskk#mappings#handle_special_lhs(char, type, stash) "{{{
+    let eskk_mappings = eskk#_get_eskk_mappings()
     return
     \   eskk#mappings#is_special_lhs(a:char, a:type)
-    \   && has_key(s:map, a:type)
-    \   && call(s:map[a:type].fn, [a:stash])
+    \   && has_key(eskk_mappings, a:type)
+    \   && call(eskk_mappings[a:type].fn, [a:stash])
 endfunction "}}}
 
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
@@ -582,13 +541,14 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
     let lhs = a:lhs
     let rhs = a:rhs
 
-    if !has_key(s:map, a:type)
+    let eskk_mappings = eskk#_get_eskk_mappings()
+    if !has_key(eskk_mappings, a:type)
         call eskk#util#warn(
         \   a:from . ": unknown type '" . a:type . "'."
         \)
         return
     endif
-    let type_st = s:map[a:type]
+    let type_st = eskk_mappings[a:type]
 
     if a:type ==# 'general'
         if lhs == ''
