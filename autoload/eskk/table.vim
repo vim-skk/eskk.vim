@@ -33,7 +33,7 @@ set cpo&vim
 "       'lhs2': {'method': 'remove'},
 "       ...
 "   },
-"   '_parents': [
+"   '_bases': [
 "       eskk#table#new(),
 "       eskk#table#new(),
 "       ...
@@ -105,7 +105,7 @@ endfunction "}}}
 
 
 function! s:is_base_table(table) "{{{
-    return !has_key(a:table, '_parents')
+    return !has_key(a:table, '_bases')
 endfunction "}}}
 
 " s:table_obj {{{
@@ -115,7 +115,7 @@ function! eskk#table#new(table_name, ...) "{{{
     if a:0
         let obj = deepcopy(s:mutable_table)
         let obj._table_name = a:table_name
-        let obj._parents = a:1
+        let obj._bases = a:1
     else
         let obj = deepcopy(s:table_obj)
         let obj.table_name = a:table_name
@@ -175,12 +175,12 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     endif
 
     if !s:is_base_table(data)
-        " Search parent tables.
+        " Search base tables.
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
-        for parent in table_defs[a:table_name].bases
+        for base in table_defs[a:table_name].bases
             let r = s:get_candidates(
-            \   parent.name,
+            \   base.name,
             \   a:lhs_head,
             \   a:max_candidates,
             \   not_found
@@ -273,8 +273,8 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
 
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
-        for parent in table_defs[a:table_name].bases
-            let r = s:get_map(parent.name, a:lhs, a:index, not_found)
+        for base in table_defs[a:table_name].bases
+            let r = s:get_map(base.name, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r
             endif
