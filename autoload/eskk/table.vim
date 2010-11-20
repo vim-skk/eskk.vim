@@ -262,6 +262,9 @@ endfunction "}}}
 function! s:table_obj.get_name() "{{{
     return self._name
 endfunction "}}}
+function! s:table_obj.get_base_tables() "{{{
+    return self.is_base() ? [] : self._bases
+endfunction "}}}
 
 " }}}
 

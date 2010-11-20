@@ -1703,6 +1703,9 @@ function! eskk#get_table(name) "{{{
     return s:table_defs[a:name]
 endfunction "}}}
 function! eskk#register_table(table) "{{{
+    for base in a:table.get_base_tables()
+        call eskk#register_table(base)
+    endfor
     let s:table_defs[a:table.get_name()] = a:table
 endfunction "}}}
 
