@@ -205,8 +205,7 @@ function! s:get_map(this, lhs, index, ...) "{{{
         endif
 
         let not_found = {}
-        let table_defs = eskk#_get_table_defs()
-        for base in table_defs[table_name]._bases
+        for base in a:this._bases
             let r = s:get_map(base, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r
