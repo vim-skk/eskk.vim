@@ -65,8 +65,8 @@ function! s:load_table(table_name) "{{{
         endfor
     endif
 
-    if has_key(def, 'init')
-        call def.init()
+    if has_key(def, 'initialize')
+        call def.initialize()
     endif
 
     let def._loaded = 1
