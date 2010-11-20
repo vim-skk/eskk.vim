@@ -48,10 +48,6 @@ function! eskk#table#get_all_tables() "{{{
     \)
 endfunction "}}}
 
-function! s:is_base_table(table) "{{{
-    return !has_key(a:table, '_bases')
-endfunction "}}}
-
 " s:table_obj {{{
 let s:table_obj = {'_data': {}}
 
@@ -119,7 +115,7 @@ function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
         return candidates
     endif
 
-    if !s:is_base_table(data)
+    if !a:this.is_base()
         " Search base tables.
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
@@ -183,7 +179,7 @@ function! s:get_map(this, table_name, lhs, index, ...) "{{{
         endif
     endif
 
-    if s:is_base_table(data)
+    if a:this.is_base()
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             if g:eskk#cache_table_map
