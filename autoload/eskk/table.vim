@@ -84,23 +84,24 @@ endfunction "}}}
 function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) "{{{
     return call(
     \   's:get_candidates',
-    \   [self.table_name, a:lhs_head, a:max_candidates] + a:000
+    \   [self, a:lhs_head, a:max_candidates] + a:000
     \)
 endfunction "}}}
-function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
+function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
+    let table_name = a:this._name
     call eskk#util#assert(
     \   a:max_candidates !=# 0,
     \   "a:max_candidates must be negative or positive."
     \)
 
-    let data = eskk#get_table(a:table_name)
+    let data = eskk#get_table(table_name)
     let cached_candidates = eskk#_get_cached_candidates()
     if g:eskk#cache_table_candidates
     \   && eskk#util#has_key_f(
     \           cached_candidates,
-    \           [a:table_name, a:lhs_head]
+    \           [table_name, a:lhs_head]
     \       )
-        let candidates = cached_candidates[a:table_name][a:lhs_head]
+        let candidates = cached_candidates[table_name][a:lhs_head]
     else
         let candidates = filter(
         \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
@@ -108,7 +109,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         if g:eskk#cache_table_candidates
             call eskk#util#let_f(
             \   cached_candidates,
-            \   [a:table_name, a:lhs_head],
+            \   [table_name, a:lhs_head],
             \   candidates
             \)
         endif
@@ -122,9 +123,9 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         " Search base tables.
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
-        for base in table_defs[a:table_name].bases
+        for base in table_defs[table_name].bases
             let r = s:get_candidates(
-            \   base.name,
+            \   base,
             \   a:lhs_head,
             \   a:max_candidates,
             \   not_found
