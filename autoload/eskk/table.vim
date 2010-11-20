@@ -63,6 +63,9 @@ function! eskk#table#new(table_name, ...) "{{{
     if g:eskk#cache_table_map
         let obj._cached_maps = {}
     endif
+    if g:eskk#cache_table_candidates
+        let obj._cached_candidates = {}
+    endif
 
     return obj
 endfunction "}}}
@@ -94,23 +97,15 @@ function! s:get_candidates(this, lhs_head, max_candidates, ...) "{{{
     \)
 
     let data = eskk#get_table(table_name)
-    let cached_candidates = eskk#_get_cached_candidates()
     if g:eskk#cache_table_candidates
-    \   && eskk#util#has_key_f(
-    \           cached_candidates,
-    \           [table_name, a:lhs_head]
-    \       )
-        let candidates = cached_candidates[table_name][a:lhs_head]
+    \   && has_key(a:this._cached_candidates, a:lhs_head)
+        let candidates = a:this._cached_candidates[a:lhs_head]
     else
         let candidates = filter(
         \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
         \)
         if g:eskk#cache_table_candidates
-            call eskk#util#let_f(
-            \   cached_candidates,
-            \   [table_name, a:lhs_head],
-            \   candidates
-            \)
+            let a:this._cached_candidates[a:lhs_head] = candidates
         endif
     endif
 

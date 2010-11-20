@@ -327,9 +327,6 @@ let s:skk_dict = {}
 " Cached table instances.
 " Tables are created by eskk#create_table().
 let s:cached_tables = {}
-" Cached table mappings.
-" See eskk#_get_cached_maps() and `autoload/eskk/table.vim`.
-let s:cached_candidates = {}
 " All tables structures.
 let s:table_defs = {}
 " `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()`
@@ -1709,9 +1706,6 @@ function! eskk#register_table(table) "{{{
     let s:table_defs = a:table
 endfunction "}}}
 
-function! eskk#_get_cached_candidates() "{{{
-    return s:cached_candidates
-endfunction "}}}
 function! eskk#_get_table_defs() "{{{
     return s:table_defs
 endfunction "}}}
