@@ -235,14 +235,14 @@ function! s:table_obj.load() "{{{
     call s:do_initialize(self)
     return self._data
 endfunction "}}}
+function! s:table_obj.get_mappings() "{{{
+    return self._data
+endfunction "}}}
 function! s:do_initialize(table) "{{{
     if has_key(a:table, 'initialize')
         call a:table.initialize()
         unlet a:table.initialize
-        " Overwrite (not override :)) .load() method.
-        function! a:table.load()
-            return self._data
-        endfunction
+        let a:table.load = s:table_obj.get_mappings
     endif
 endfunction "}}}
 
