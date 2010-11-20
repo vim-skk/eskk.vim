@@ -244,7 +244,7 @@ function! s:table_obj.load() "{{{
     call s:do_initialize(self)
     return self._data
 endfunction "}}}
-function! s:do_initialize(table)
+function! s:do_initialize(table) "{{{
     if has_key(a:table, 'initialize')
         call a:table.initialize()
         unlet a:table.initialize
