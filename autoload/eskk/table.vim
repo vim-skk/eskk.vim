@@ -85,14 +85,6 @@ function! s:get_table_data(table_name, ...) "{{{
     return table_defs[a:table_name].data
 endfunction "}}}
 
-function! s:has_table(table_name) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if !table_defs[a:table_name]._loaded
-        call s:load_table(a:table_name)
-    endif
-    return has_key(table_defs, a:table_name)
-endfunction "}}}
-
 function! s:is_base_table(table_name) "{{{
     let table_defs = eskk#_get_table_defs()
     if !table_defs[a:table_name]._loaded
