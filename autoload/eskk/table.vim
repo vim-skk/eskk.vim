@@ -72,19 +72,6 @@ function! s:load_table(table_name) "{{{
     let def._loaded = 1
 endfunction "}}}
 
-function! s:get_table_data(table_name, ...) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if table_defs[a:table_name]._loaded
-        return table_defs[a:table_name].data
-    endif
-
-    " Lazy loading.
-    if !table_defs[a:table_name]._loaded
-        call s:load_table(a:table_name)
-    endif
-    return table_defs[a:table_name].data
-endfunction "}}}
-
 function! s:is_base_table(table_name) "{{{
     let table_defs = eskk#_get_table_defs()
     if !table_defs[a:table_name]._loaded
@@ -198,7 +185,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     \       )
         let candidates = cached_candidates[a:table_name][a:lhs_head]
     else
-        let data = s:get_table_data(a:table_name)
+        let data = eskk#get_table(a:table_name)
         let candidates = filter(
         \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
         \)
@@ -261,7 +248,7 @@ function! s:table_obj.get_rest(lhs, ...) "{{{
     \)
 endfunction "}}}
 function! s:get_map(table_name, lhs, index, ...) "{{{
-    let data = s:get_table_data(a:table_name)
+    let data = eskk#get_table(a:table_name)
     let cached_maps = eskk#_get_cached_maps()
 
     if g:eskk#cache_table_map
