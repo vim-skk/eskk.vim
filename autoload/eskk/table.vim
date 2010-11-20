@@ -301,14 +301,6 @@ function! eskk#table#get_all_tables() "{{{
     \)
 endfunction "}}}
 
-function! eskk#table#get_all_registered_tables() "{{{
-    return keys(eskk#_get_table_defs())
-endfunction "}}}
-
-function! eskk#table#has_table(table_name) "{{{
-    return has_key(eskk#_get_table_defs(), a:table_name)
-endfunction "}}}
-
 " }}}
 
 " s:table_obj {{{

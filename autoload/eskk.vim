@@ -1698,6 +1698,12 @@ function! eskk#create_table(table_name) "{{{
     let s:cached_tables[a:table_name] = eskk#table#new(a:table_name)
     return s:cached_tables[a:table_name]
 endfunction "}}}
+function! eskk#has_table(table_name) "{{{
+    return has_key(s:table_defs, a:table_name)
+endfunction "}}}
+function! eskk#get_all_registered_tables() "{{{
+    return keys(s:table_defs)
+endfunction "}}}
 
 function! eskk#_get_cached_maps() "{{{
     return s:cached_maps
