@@ -352,6 +352,19 @@ endfunction "}}}
 
 function! s:table_obj.load() "{{{
     if has_key(self, 'initialize')
+        if has_key(self, '_bases')
+            " TODO: after initializing base tables,
+            " this object has no need to have base references.
+            " because they can ("should", curerntly) be
+            " obtained from s:table_defs in autoload/eskk.vim
+            " (it can be considered as flyweight object for all tables)
+            for base in self._bases
+                if has_key(base, 'initialize')
+                    call base.initialize()
+                    unlet base.initialize
+                endif
+            endfor
+        endif
         call self.initialize()
         unlet self.initialize
     endif
