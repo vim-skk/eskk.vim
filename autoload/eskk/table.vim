@@ -251,6 +251,10 @@ function! s:table_obj.is_base() "{{{
     return has_key(self, '_bases')
 endfunction "}}}
 
+function! s:table_obj.get_name() "{{{
+    return self._name
+endfunction "}}}
+
 " }}}
 
 " s:base_table {{{
