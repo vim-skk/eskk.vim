@@ -1703,7 +1703,7 @@ function! eskk#get_table(name) "{{{
     return s:table_defs[a:name]
 endfunction "}}}
 function! eskk#register_table(table) "{{{
-    let s:table_defs = a:table
+    let s:table_defs[a:table.get_name()] = a:table
 endfunction "}}}
 
 function! eskk#_get_table_defs() "{{{
