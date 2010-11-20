@@ -329,7 +329,6 @@ let s:skk_dict = {}
 let s:cached_tables = {}
 " Cached table mappings.
 " See eskk#_get_cached_maps() and `autoload/eskk/table.vim`.
-let s:cached_maps = {}
 let s:cached_candidates = {}
 " All tables structures.
 let s:table_defs = {}
@@ -1710,9 +1709,6 @@ function! eskk#register_table(table) "{{{
     let s:table_defs = a:table
 endfunction "}}}
 
-function! eskk#_get_cached_maps() "{{{
-    return s:cached_maps
-endfunction "}}}
 function! eskk#_get_cached_candidates() "{{{
     return s:cached_candidates
 endfunction "}}}

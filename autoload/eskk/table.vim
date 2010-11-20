@@ -60,6 +60,9 @@ function! eskk#table#new(table_name, ...) "{{{
         let obj = deepcopy(s:base_table)
         let obj.table_name = a:table_name
     endif
+    if g:eskk#cache_table_map
+        let obj._cached_maps = {}
+    endif
 
     return obj
 endfunction "}}}
@@ -163,12 +166,11 @@ endfunction "}}}
 function! s:get_map(this, table_name, lhs, index, ...) "{{{
     let table_name = a:this._name
     let data = eskk#get_table(table_name)
-    let cached_maps = eskk#_get_cached_maps()
 
     if g:eskk#cache_table_map
-    \   && eskk#util#has_key_f(cached_maps, [table_name, a:lhs])
-        if cached_maps[table_name][a:lhs][a:index] != ''
-            return cached_maps[table_name][a:lhs][a:index]
+    \   && has_key(a:this._cached_maps, a:lhs)
+        if a:this._cached_maps[a:lhs][a:index] != ''
+            return a:this._cached_maps[a:lhs][a:index]
         else
             " No lhs in `eskk#_get_table_defs()`.
             if a:0
@@ -183,11 +185,7 @@ function! s:get_map(this, table_name, lhs, index, ...) "{{{
         if eskk#util#has_key_f(data, [a:lhs, a:index])
         \   && data[a:lhs][a:index] != ''
             if g:eskk#cache_table_map
-                call eskk#util#let_f(
-                \   cached_maps,
-                \   [table_name, a:lhs],
-                \   data[a:lhs]
-                \)
+                let a:this._cached_maps[a:lhs] = data[a:lhs]
             endif
             return data[a:lhs][a:index]
         endif
@@ -196,11 +194,7 @@ function! s:get_map(this, table_name, lhs, index, ...) "{{{
             if data[a:lhs].method ==# 'add'
             \   && data[a:lhs].data[a:index] != ''
                 if g:eskk#cache_table_map
-                    call eskk#util#let_f(
-                    \   cached_maps,
-                    \   [table_name, a:lhs],
-                    \   data[a:lhs].data
-                    \)
+                    let a:this._cached_maps[a:lhs] = data[a:lhs].data
                 endif
                 return data[a:lhs].data[a:index]
             elseif data[a:lhs].method ==# 'remove'
