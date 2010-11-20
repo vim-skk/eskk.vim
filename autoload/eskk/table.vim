@@ -150,7 +150,7 @@ endfunction "}}}
 function! s:table_obj.get_map(lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self.table_name, a:lhs, 0] + a:000
+    \   [self, a:lhs, 0] + a:000
     \)
 endfunction "}}}
 function! s:table_obj.has_rest(lhs) "{{{
@@ -160,17 +160,18 @@ endfunction "}}}
 function! s:table_obj.get_rest(lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self.table_name, a:lhs, 1] + a:000
+    \   [self, a:lhs, 1] + a:000
     \)
 endfunction "}}}
-function! s:get_map(table_name, lhs, index, ...) "{{{
-    let data = eskk#get_table(a:table_name)
+function! s:get_map(this, table_name, lhs, index, ...) "{{{
+    let table_name = a:this._name
+    let data = eskk#get_table(table_name)
     let cached_maps = eskk#_get_cached_maps()
 
     if g:eskk#cache_table_map
-    \   && eskk#util#has_key_f(cached_maps, [a:table_name, a:lhs])
-        if cached_maps[a:table_name][a:lhs][a:index] != ''
-            return cached_maps[a:table_name][a:lhs][a:index]
+    \   && eskk#util#has_key_f(cached_maps, [table_name, a:lhs])
+        if cached_maps[table_name][a:lhs][a:index] != ''
+            return cached_maps[table_name][a:lhs][a:index]
         else
             " No lhs in `eskk#_get_table_defs()`.
             if a:0
@@ -187,7 +188,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
             if g:eskk#cache_table_map
                 call eskk#util#let_f(
                 \   cached_maps,
-                \   [a:table_name, a:lhs],
+                \   [table_name, a:lhs],
                 \   data[a:lhs]
                 \)
             endif
@@ -200,7 +201,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
                 if g:eskk#cache_table_map
                     call eskk#util#let_f(
                     \   cached_maps,
-                    \   [a:table_name, a:lhs],
+                    \   [table_name, a:lhs],
                     \   data[a:lhs].data
                     \)
                 endif
@@ -217,8 +218,8 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
 
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
-        for base in table_defs[a:table_name].bases
-            let r = s:get_map(base.name, a:lhs, a:index, not_found)
+        for base in table_defs[table_name].bases
+            let r = s:get_map(base, a:lhs, a:index, not_found)
             if r isnot not_found
                 return r
             endif
@@ -233,7 +234,7 @@ function! s:get_map(table_name, lhs, index, ...) "{{{
         \   ['eskk', 'table'],
         \   eskk#util#formatstrf(
         \       'table name = %s, lhs = %s, index = %d',
-        \       a:table_name, a:lhs, a:index
+        \       table_name, a:lhs, a:index
         \   )
         \)
     endif
