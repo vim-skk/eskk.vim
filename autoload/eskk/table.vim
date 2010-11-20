@@ -138,6 +138,7 @@ function! {s:TableObj.method('get_candidates')}(this, lhs_head, max_candidates, 
 endfunction "}}}
 function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     PP! ['s:get_candidates()', a:table._name, a:lhs_head, a:max_candidates, a:000]
+    Decho a:table._name . ' is base?:' . a:table.is_base()
     let table_name = a:table._name
     call eskk#error#assert(
     \   a:max_candidates !=# 0,
@@ -206,6 +207,7 @@ function! {s:TableObj.method('get_rest')}(this, lhs, ...) "{{{
 endfunction "}}}
 function! s:get_map(table, lhs, index, ...) "{{{
     PP! ['s:get_map()', a:table._name, a:lhs, a:index, a:000]
+    Decho a:table._name . ' is base?:' . a:table.is_base()
     let table_name = a:table._name
     let data = a:table.load()
 
