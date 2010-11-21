@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 11))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 12))
 
 
 function! s:SID() "{{{
@@ -64,8 +64,7 @@ let s:saved_backspace = -1
 let s:is_initialized = 0
 " SKK Dictionary (singleton)
 let s:skk_dict = {}
-" FIXME: comment and variable name
-" mode and table
+" Mode and its table.
 let s:mode_vs_table = {}
 " All tables structures.
 let s:table_defs = {}
