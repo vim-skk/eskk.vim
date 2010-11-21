@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 8))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 9))
 
 
 function! s:SID() "{{{
@@ -64,9 +64,9 @@ let s:saved_backspace = -1
 let s:is_initialized = 0
 " SKK Dictionary (singleton)
 let s:skk_dict = {}
-" Cached table instances.
-" Tables are created by eskk#create_table().
-let s:cached_tables = {}
+" FIXME: comment and variable name
+" mode and table
+let s:mode_vs_table = {}
 " All tables structures.
 let s:table_defs = {}
 " `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()`
@@ -701,12 +701,7 @@ function! eskk#_initialize() "{{{
         \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
         \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
         \}
-
-        if !exists('g:eskk#mode_use_tables')
-            let g:eskk#mode_use_tables =  default
-        else
-            call extend(g:eskk#mode_use_tables, default, 'keep')
-        endif
+        call extend(s:mode_vs_table, default, 'keep')
     endfunction "}}}
     call s:set_up_mode_use_tables()
 
@@ -1185,15 +1180,6 @@ function! eskk#_initialize() "{{{
     call s:initialize_builtin_modes()
     " }}}
 
-    " Register builtin-tables. {{{
-    function! s:initialize_register_using_tables()
-        for table in values(g:eskk#mode_use_tables)
-            call eskk#register_table(table)
-        endfor
-    endfunction
-    call s:initialize_register_using_tables()
-    " }}}
-
     " BufEnter: Map keys if enabled. {{{
     function! s:initialize_map_all_keys_if_enabled()
         if eskk#is_enabled()
@@ -1603,13 +1589,13 @@ function! eskk#has_current_mode_table() "{{{
     return eskk#has_mode_table(eskk#get_mode())
 endfunction "}}}
 function! eskk#has_mode_table(mode) "{{{
-    return has_key(g:eskk#mode_use_tables, a:mode)
+    return has_key(s:mode_vs_table, a:mode)
 endfunction "}}}
 function! eskk#get_current_mode_table() "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
-    return g:eskk#mode_use_tables[a:mode]
+    return s:mode_vs_table[a:mode]
 endfunction "}}}
 
 " Table
@@ -1643,6 +1629,10 @@ function! eskk#register_table(table) "{{{
     if !has_key(s:table_defs, name)
         let s:table_defs[name] = a:table
     endif
+endfunction "}}}
+function! eskk#register_mode_table(mode, table) "{{{
+    call eskk#register_table(a:table)
+    let s:mode_vs_table[a:mode] = a:table
 endfunction "}}}
 
 " Statusline
