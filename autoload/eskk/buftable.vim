@@ -947,9 +947,8 @@ function! s:buftable.filter_rom_inplace(phase, table) "{{{
     endfor
     return buf_str
 endfunction "}}}
-function! s:buftable.filter_rom(phase, table_name) "{{{
+function! s:buftable.filter_rom(phase, table) "{{{
     let phase = a:phase
-    let table = eskk#create_table(a:table_name)
     let buf_str = deepcopy(self.get_buf_str(phase), 1)
 
     let matched = buf_str.get_matched()
@@ -957,7 +956,7 @@ function! s:buftable.filter_rom(phase, table_name) "{{{
     for [rom_str, filter_str] in matched
         call buf_str.push_matched(
         \   rom_str,
-        \   table.get_map(rom_str, rom_str)
+        \   a:table.get_map(rom_str, rom_str)
         \)
     endfor
     return buf_str
