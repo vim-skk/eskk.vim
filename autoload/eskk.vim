@@ -8,255 +8,7 @@ set cpo&vim
 " }}}
 
 
-" Global Variables {{{
-
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 6))
-
-" Debug
-if !exists('g:eskk#debug')
-    let g:eskk#debug = 0
-endif
-
-if !exists('g:eskk#debug_wait_ms')
-    let g:eskk#debug_wait_ms = 0
-endif
-
-if !exists('g:eskk#debug_stdout')
-    let g:eskk#debug_stdout = "file"
-endif
-
-if !exists('g:eskk#directory')
-    let g:eskk#directory = '~/.eskk'
-endif
-
-" Dictionary
-for [s:varname, s:default] in [
-\   ['g:eskk#dictionary', {
-\       'path': "~/.skk-jisyo",
-\       'sorted': 0,
-\       'encoding': 'utf-8',
-\   }],
-\   ['g:eskk#large_dictionary', {
-\       'path': "/usr/local/share/skk/SKK-JISYO.L",
-\       'sorted': 1,
-\       'encoding': 'euc-jp',
-\   }],
-\]
-    if exists(s:varname)
-        if type({s:varname}) == type("")
-            let s:default.path = {s:varname}
-            unlet {s:varname}
-            let {s:varname} = s:default
-        elseif type({s:varname}) == type({})
-            call extend({s:varname}, s:default, "keep")
-        else
-            call eskk#util#warn(
-            \   s:varname . "'s type is either String or Dictionary."
-            \)
-        endif
-    else
-        let {s:varname} = s:default
-    endif
-endfor
-unlet! s:varname s:default
-
-if !exists("g:eskk#backup_dictionary")
-    let g:eskk#backup_dictionary = g:eskk#dictionary.path . ".BAK"
-endif
-
-if !exists("g:eskk#auto_save_dictionary_at_exit")
-    let g:eskk#auto_save_dictionary_at_exit = 1
-endif
-
-" Henkan
-if !exists("g:eskk#select_cand_keys")
-  let g:eskk#select_cand_keys = "asdfjkl"
-endif
-
-if !exists("g:eskk#show_candidates_count")
-  let g:eskk#show_candidates_count = 4
-endif
-
-if !exists("g:eskk#kata_convert_to_hira_at_henkan")
-  let g:eskk#kata_convert_to_hira_at_henkan = 1
-endif
-
-if !exists("g:eskk#kata_convert_to_hira_at_completion")
-  let g:eskk#kata_convert_to_hira_at_completion = 1
-endif
-
-if !exists("g:eskk#show_annotation")
-  let g:eskk#show_annotation = 0
-endif
-
-" Mappings
-function! eskk#get_default_mapped_keys() "{{{
-    return split(
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    \  .'1234567890'
-    \  .'!"#$%&''()'
-    \  .',./;:]@[-^\'
-    \  .'>?_+*}`{=~'
-    \   ,
-    \   '\zs'
-    \) + [
-    \   "<lt>",
-    \   "<Bar>",
-    \   "<Tab>",
-    \   "<BS>",
-    \   "<C-h>",
-    \   "<CR>",
-    \   "<Space>",
-    \   "<C-q>",
-    \   "<C-y>",
-    \   "<C-e>",
-    \   "<PageUp>",
-    \   "<PageDown>",
-    \   "<Up>",
-    \   "<Down>",
-    \   "<C-n>",
-    \   "<C-p>",
-    \]
-endfunction "}}}
-if !exists('g:eskk#mapped_keys')
-    let g:eskk#mapped_keys = eskk#get_default_mapped_keys()
-endif
-
-" Mode
-if !exists('g:eskk#initial_mode')
-    let g:eskk#initial_mode = 'hira'
-endif
-
-if !exists('g:eskk#statusline_mode_strings')
-    let g:eskk#statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
-endif
-
-function! s:set_up_mode_use_tables() "{{{
-    " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-    let default = {
-    \   'hira': eskk#table#new_from_file('rom_to_hira'),
-    \   'kata': eskk#table#new_from_file('rom_to_kata'),
-    \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
-    \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
-    \}
-
-    if !exists('g:eskk#mode_use_tables')
-        let g:eskk#mode_use_tables =  default
-    else
-        call extend(g:eskk#mode_use_tables, default, 'keep')
-    endif
-endfunction "}}}
-call s:set_up_mode_use_tables()
-
-" Table
-if !exists('g:eskk#cache_table_map')
-    let g:eskk#cache_table_map = 1
-endif
-
-if !exists('g:eskk#cache_table_candidates')
-    let g:eskk#cache_table_candidates = 1
-endif
-
-" Markers
-if !exists("g:eskk#marker_henkan")
-    let g:eskk#marker_henkan = '▽'
-endif
-
-if !exists("g:eskk#marker_okuri")
-    let g:eskk#marker_okuri = '*'
-endif
-
-if !exists("g:eskk#marker_henkan_select")
-    let g:eskk#marker_henkan_select = '▼'
-endif
-
-if !exists("g:eskk#marker_jisyo_touroku")
-    let g:eskk#marker_jisyo_touroku = '?'
-endif
-
-if !exists("g:eskk#marker_popup")
-    let g:eskk#marker_popup = '#'
-endif
-
-" Completion
-if !exists('g:eskk#enable_completion')
-    let g:eskk#enable_completion = 1
-endif
-
-if !exists('g:eskk#max_candidates')
-    let g:eskk#max_candidates = 30
-endif
-
-" Cursor color
-if !exists('g:eskk#use_color_cursor')
-    let g:eskk#use_color_cursor = 1
-endif
-
-if !exists('g:eskk#cursor_color')
-    " ascii: ivory4:#8b8b83, gray:#bebebe
-    " hira: coral4:#8b3e2f, pink:#ffc0cb
-    " kata: forestgreen:#228b22, green:#00ff00
-    " abbrev: royalblue:#4169e1
-    " zenei: gold:#ffd700
-    let g:eskk#cursor_color = {
-    \   'ascii': ['#8b8b83', '#bebebe'],
-    \   'hira': ['#8b3e2f', '#ffc0cb'],
-    \   'kata': ['#228b22', '#00ff00'],
-    \   'abbrev': '#4169e1',
-    \   'zenei': '#ffd700',
-    \}
-endif
-
-" Misc.
-if !exists("g:eskk#egg_like_newline")
-    let g:eskk#egg_like_newline = 0
-endif
-
-if !exists("g:eskk#keep_state")
-    let g:eskk#keep_state = 0
-endif
-
-if !exists('g:eskk#keep_state_beyond_buffer')
-    let g:eskk#keep_state_beyond_buffer = 0
-endif
-
-if !exists("g:eskk#revert_henkan_style")
-    let g:eskk#revert_henkan_style = 'okuri'
-endif
-
-if !exists("g:eskk#delete_implies_kakutei")
-    let g:eskk#delete_implies_kakutei = 0
-endif
-
-if !exists("g:eskk#rom_input_style")
-    let g:eskk#rom_input_style = 'skk'
-endif
-
-if !exists("g:eskk#auto_henkan_at_okuri_match")
-    let g:eskk#auto_henkan_at_okuri_match = 1
-endif
-
-if !exists("g:eskk#set_undo_point")
-    let g:eskk#set_undo_point = {
-    \   'sticky': 1,
-    \   'kakutei': 1,
-    \}
-endif
-
-if !exists("g:eskk#fix_extra_okuri")
-    let g:eskk#fix_extra_okuri = 1
-endif
-
-if !exists('g:eskk#ignore_continuous_sticky')
-    let g:eskk#ignore_continuous_sticky = 1
-endif
-
-if !exists('g:eskk#convert_at_exact_match')
-    let g:eskk#convert_at_exact_match = 0
-endif
-
-" }}}
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 7))
 
 
 function! s:SID() "{{{
@@ -308,7 +60,7 @@ let s:event_hook_fn = {}
 let s:saved_im_options = []
 " Global values of &backspace.
 let s:saved_backspace = -1
-" Flag for `s:initialize()`.
+" Flag for `eskk#_initialize()`.
 let s:is_initialized = 0
 " SKK Dictionary (singleton)
 let s:skk_dict = {}
@@ -843,7 +595,230 @@ endfunction "}}}
 " }}}
 
 " Initialization
-function! s:initialize() "{{{
+function! eskk#_initialize() "{{{
+    if s:is_initialized
+        return
+    endif
+
+    " Global Variables {{{
+
+    " Debug
+    if !exists('g:eskk#debug')
+        let g:eskk#debug = 0
+    endif
+
+    if !exists('g:eskk#debug_wait_ms')
+        let g:eskk#debug_wait_ms = 0
+    endif
+
+    if !exists('g:eskk#debug_stdout')
+        let g:eskk#debug_stdout = "file"
+    endif
+
+    if !exists('g:eskk#directory')
+        let g:eskk#directory = '~/.eskk'
+    endif
+
+    " Dictionary
+    for [s:varname, s:default] in [
+    \   ['g:eskk#dictionary', {
+    \       'path': "~/.skk-jisyo",
+    \       'sorted': 0,
+    \       'encoding': 'utf-8',
+    \   }],
+    \   ['g:eskk#large_dictionary', {
+    \       'path': "/usr/local/share/skk/SKK-JISYO.L",
+    \       'sorted': 1,
+    \       'encoding': 'euc-jp',
+    \   }],
+    \]
+        if exists(s:varname)
+            if type({s:varname}) == type("")
+                let s:default.path = {s:varname}
+                unlet {s:varname}
+                let {s:varname} = s:default
+            elseif type({s:varname}) == type({})
+                call extend({s:varname}, s:default, "keep")
+            else
+                call eskk#util#warn(
+                \   s:varname . "'s type is either String or Dictionary."
+                \)
+            endif
+        else
+            let {s:varname} = s:default
+        endif
+    endfor
+    unlet! s:varname s:default
+
+    if !exists("g:eskk#backup_dictionary")
+        let g:eskk#backup_dictionary = g:eskk#dictionary.path . ".BAK"
+    endif
+
+    if !exists("g:eskk#auto_save_dictionary_at_exit")
+        let g:eskk#auto_save_dictionary_at_exit = 1
+    endif
+
+    " Henkan
+    if !exists("g:eskk#select_cand_keys")
+      let g:eskk#select_cand_keys = "asdfjkl"
+    endif
+
+    if !exists("g:eskk#show_candidates_count")
+      let g:eskk#show_candidates_count = 4
+    endif
+
+    if !exists("g:eskk#kata_convert_to_hira_at_henkan")
+      let g:eskk#kata_convert_to_hira_at_henkan = 1
+    endif
+
+    if !exists("g:eskk#kata_convert_to_hira_at_completion")
+      let g:eskk#kata_convert_to_hira_at_completion = 1
+    endif
+
+    if !exists("g:eskk#show_annotation")
+      let g:eskk#show_annotation = 0
+    endif
+
+    " Mappings
+    if !exists('g:eskk#mapped_keys')
+        let g:eskk#mapped_keys = eskk#get_default_mapped_keys()
+    endif
+
+    " Mode
+    if !exists('g:eskk#initial_mode')
+        let g:eskk#initial_mode = 'hira'
+    endif
+
+    if !exists('g:eskk#statusline_mode_strings')
+        let g:eskk#statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
+    endif
+
+    function! s:set_up_mode_use_tables() "{{{
+        " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
+        let default = {
+        \   'hira': eskk#table#new_from_file('rom_to_hira'),
+        \   'kata': eskk#table#new_from_file('rom_to_kata'),
+        \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
+        \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
+        \}
+
+        if !exists('g:eskk#mode_use_tables')
+            let g:eskk#mode_use_tables =  default
+        else
+            call extend(g:eskk#mode_use_tables, default, 'keep')
+        endif
+    endfunction "}}}
+    call s:set_up_mode_use_tables()
+
+    " Table
+    if !exists('g:eskk#cache_table_map')
+        let g:eskk#cache_table_map = 1
+    endif
+
+    if !exists('g:eskk#cache_table_candidates')
+        let g:eskk#cache_table_candidates = 1
+    endif
+
+    " Markers
+    if !exists("g:eskk#marker_henkan")
+        let g:eskk#marker_henkan = '▽'
+    endif
+
+    if !exists("g:eskk#marker_okuri")
+        let g:eskk#marker_okuri = '*'
+    endif
+
+    if !exists("g:eskk#marker_henkan_select")
+        let g:eskk#marker_henkan_select = '▼'
+    endif
+
+    if !exists("g:eskk#marker_jisyo_touroku")
+        let g:eskk#marker_jisyo_touroku = '?'
+    endif
+
+    if !exists("g:eskk#marker_popup")
+        let g:eskk#marker_popup = '#'
+    endif
+
+    " Completion
+    if !exists('g:eskk#enable_completion')
+        let g:eskk#enable_completion = 1
+    endif
+
+    if !exists('g:eskk#max_candidates')
+        let g:eskk#max_candidates = 30
+    endif
+
+    " Cursor color
+    if !exists('g:eskk#use_color_cursor')
+        let g:eskk#use_color_cursor = 1
+    endif
+
+    if !exists('g:eskk#cursor_color')
+        " ascii: ivory4:#8b8b83, gray:#bebebe
+        " hira: coral4:#8b3e2f, pink:#ffc0cb
+        " kata: forestgreen:#228b22, green:#00ff00
+        " abbrev: royalblue:#4169e1
+        " zenei: gold:#ffd700
+        let g:eskk#cursor_color = {
+        \   'ascii': ['#8b8b83', '#bebebe'],
+        \   'hira': ['#8b3e2f', '#ffc0cb'],
+        \   'kata': ['#228b22', '#00ff00'],
+        \   'abbrev': '#4169e1',
+        \   'zenei': '#ffd700',
+        \}
+    endif
+
+    " Misc.
+    if !exists("g:eskk#egg_like_newline")
+        let g:eskk#egg_like_newline = 0
+    endif
+
+    if !exists("g:eskk#keep_state")
+        let g:eskk#keep_state = 0
+    endif
+
+    if !exists('g:eskk#keep_state_beyond_buffer')
+        let g:eskk#keep_state_beyond_buffer = 0
+    endif
+
+    if !exists("g:eskk#revert_henkan_style")
+        let g:eskk#revert_henkan_style = 'okuri'
+    endif
+
+    if !exists("g:eskk#delete_implies_kakutei")
+        let g:eskk#delete_implies_kakutei = 0
+    endif
+
+    if !exists("g:eskk#rom_input_style")
+        let g:eskk#rom_input_style = 'skk'
+    endif
+
+    if !exists("g:eskk#auto_henkan_at_okuri_match")
+        let g:eskk#auto_henkan_at_okuri_match = 1
+    endif
+
+    if !exists("g:eskk#set_undo_point")
+        let g:eskk#set_undo_point = {
+        \   'sticky': 1,
+        \   'kakutei': 1,
+        \}
+    endif
+
+    if !exists("g:eskk#fix_extra_okuri")
+        let g:eskk#fix_extra_okuri = 1
+    endif
+
+    if !exists('g:eskk#ignore_continuous_sticky')
+        let g:eskk#ignore_continuous_sticky = 1
+    endif
+
+    if !exists('g:eskk#convert_at_exact_match')
+        let g:eskk#convert_at_exact_match = 0
+    endif
+
+    " }}}
+
     " Set up g:eskk#directory. {{{
     function! s:initialize_set_up_eskk_directory()
         let dir = expand(g:eskk#directory)
@@ -1365,16 +1340,51 @@ function! s:initialize() "{{{
 
     " Throw eskk-initialize event.
     doautocmd User eskk-initialize
+
+    let s:is_initialized = 1
 endfunction "}}}
 function! eskk#is_initialized() "{{{
     return s:is_initialized
 endfunction "}}}
+
+" Global variables
+    function! eskk#get_default_mapped_keys() "{{{
+        return split(
+        \   'abcdefghijklmnopqrstuvwxyz'
+        \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        \  .'1234567890'
+        \  .'!"#$%&''()'
+        \  .',./;:]@[-^\'
+        \  .'>?_+*}`{=~'
+        \   ,
+        \   '\zs'
+        \) + [
+        \   "<lt>",
+        \   "<Bar>",
+        \   "<Tab>",
+        \   "<BS>",
+        \   "<C-h>",
+        \   "<CR>",
+        \   "<Space>",
+        \   "<C-q>",
+        \   "<C-y>",
+        \   "<C-e>",
+        \   "<PageUp>",
+        \   "<PageDown>",
+        \   "<Up>",
+        \   "<Down>",
+        \   "<C-n>",
+        \   "<C-p>",
+        \]
+    endfunction "}}}
 
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
     return eskk#get_current_instance().enabled
 endfunction "}}}
 function! eskk#enable(...) "{{{
+    call eskk#_initialize()
+
     let self = eskk#get_current_instance()
     let do_map = a:0 != 0 ? a:1 : 1
 
@@ -1384,11 +1394,6 @@ function! eskk#enable(...) "{{{
 
     if mode() ==# 'c'
         let &l:iminsert = 1
-    endif
-
-    if !s:is_initialized
-        call s:initialize()
-        let s:is_initialized = 1
     endif
 
     call eskk#throw_event('enable-im')
@@ -1425,6 +1430,8 @@ function! eskk#enable(...) "{{{
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
+    call eskk#_initialize()
+
     let self = eskk#get_current_instance()
     let do_unmap = a:0 != 0 ? a:1 : 0
 
@@ -1460,6 +1467,7 @@ function! eskk#disable() "{{{
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
+    call eskk#_initialize()
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
 function! eskk#enable_im() "{{{
