@@ -23,7 +23,7 @@ function! s:run()
     " endfor
 
     for name in eskk#get_all_registered_tables()
-        Ok eskk#table#has_table(name), printf('%s must be registered', name)
+        Ok eskk#has_table(name), printf('%s must be registered', name)
     endfor
 endfunction
 

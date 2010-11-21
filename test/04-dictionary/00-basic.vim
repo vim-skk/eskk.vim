@@ -9,6 +9,7 @@ set cpo&vim
 
 
 function! s:run()
+    Skip
 endfunction
 
 call s:run()
