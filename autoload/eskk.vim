@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 5))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 6))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -242,10 +242,6 @@ if !exists("g:eskk#set_undo_point")
     \   'sticky': 1,
     \   'kakutei': 1,
     \}
-endif
-
-if !exists("g:eskk#context_control")
-    let g:eskk#context_control = []
 endif
 
 if !exists("g:eskk#fix_extra_okuri")
@@ -2002,15 +1998,6 @@ function! s:write_error_log_file(char) "{{{
     finally
         let &cmdheight = save_cmdheight
     endtry
-endfunction "}}}
-
-" g:eskk#context_control
-function! eskk#handle_context() "{{{
-    for control in g:eskk#context_control
-        if eval(control.rule)
-            call call(control.fn, [])
-        endif
-    endfor
 endfunction "}}}
 
 " g:eskk#use_color_cursor
