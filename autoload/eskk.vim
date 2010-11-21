@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 1))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 2))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -1710,10 +1710,6 @@ function! eskk#register_table(table) "{{{
     if !has_key(s:table_defs, name)
         let s:table_defs[name] = a:table
     endif
-endfunction "}}}
-
-function! eskk#_get_table_defs() "{{{
-    return s:table_defs
 endfunction "}}}
 
 " Statusline

@@ -139,8 +139,7 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     if !a:table.is_base()
         " Search base tables.
         let not_found = {}
-        let table_defs = eskk#_get_table_defs()
-        for base in table_defs[table_name]._bases
+        for base in a:table._bases
             let r = s:get_candidates(
             \   base,
             \   a:lhs_head,
