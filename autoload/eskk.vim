@@ -135,10 +135,10 @@ endif
 function! s:set_up_mode_use_tables() "{{{
     " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
     let default = {
-    \   'hira': eskk#table#create_from_file('rom_to_hira'),
-    \   'kata': eskk#table#create_from_file('rom_to_kata'),
-    \   'zenei': eskk#table#create_from_file('rom_to_zenei'),
-    \   'hankata': eskk#table#create_from_file('rom_to_hankata'),
+    \   'hira': eskk#table#new_from_file('rom_to_hira'),
+    \   'kata': eskk#table#new_from_file('rom_to_kata'),
+    \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
+    \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
     \}
 
     if !exists('g:eskk#mode_use_tables')
@@ -327,10 +327,6 @@ let s:skk_dict = {}
 " Cached table instances.
 " Tables are created by eskk#create_table().
 let s:cached_tables = {}
-" Cached table mappings.
-" See eskk#_get_cached_maps() and `autoload/eskk/table.vim`.
-let s:cached_maps = {}
-let s:cached_candidates = {}
 " All tables structures.
 let s:table_defs = {}
 " `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()`
@@ -504,9 +500,9 @@ endfunction "}}}
 " s:asym_filter {{{
 let s:asym_filter = {'table': {}}
 
-function! eskk#create_asym_filter(table_name) "{{{
+function! eskk#create_asym_filter(table) "{{{
     let obj = deepcopy(s:asym_filter)
-    let obj.table = eskk#create_table(a:table_name)
+    let obj.table = a:table
     return obj
 endfunction "}}}
 
@@ -1109,8 +1105,7 @@ function! s:initialize() "{{{
 
                 if eskk#has_mode_table('ascii')
                     if !has_key(this.sandbox, 'table')
-                        let this.sandbox.table =
-                        \   s:table_defs[eskk#get_mode_table('ascii')]
+                        let this.sandbox.table = eskk#get_mode_table('ascii')
                     endif
                     let a:stash.return = this.sandbox.table.get_map(
                     \   a:stash.char, a:stash.char
@@ -1136,8 +1131,7 @@ function! s:initialize() "{{{
                 call eskk#set_mode('hira')
             else
                 if !has_key(this.sandbox, 'table')
-                    let this.sandbox.table =
-                    \   s:table_defs[eskk#get_mode_table('zenei')]
+                    let this.sandbox.table = eskk#get_mode_table('zenei')
                 endif
                 let a:stash.return = this.sandbox.table.get_map(
                 \   a:stash.char, a:stash.char
@@ -1292,17 +1286,12 @@ function! s:initialize() "{{{
     " }}}
 
     " Register builtin-tables. {{{
-    function! s:initialize_use_tables()
-        let tabletmpl = {}    " dummy object
-        function! tabletmpl.init()
-            call self.add_from_dict(eskk#table#{self.name}#load())
-        endfunction
+    function! s:initialize_register_using_tables()
         for table in values(g:eskk#mode_use_tables)
-            let table.init = tabletmpl.init
-            let s:table_defs[table.name] = table
+            call eskk#register_table(table)
         endfor
     endfunction
-    call s:initialize_use_tables()
+    call s:initialize_register_using_tables()
     " }}}
 
     " BufEnter: Map keys if enabled. {{{
@@ -1687,24 +1676,44 @@ function! eskk#get_current_mode_table() "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
-    return g:eskk#mode_use_tables[a:mode].name
+    return g:eskk#mode_use_tables[a:mode]
 endfunction "}}}
-function! eskk#create_table(table_name) "{{{
+function! eskk#create_table(...) "{{{
+    " XXX: temporarily disable caching tables.
+    return call('eskk#table#new', a:000)
+
+
     if has_key(s:cached_tables, a:table_name)
         return s:cached_tables[a:table_name]
     endif
 
     " Cache under s:cached_tables.
-    let s:cached_tables[a:table_name] = eskk#table#new(a:table_name)
+    let s:cached_tables[a:table_name] = return call('eskk#table#new', a:000)
     return s:cached_tables[a:table_name]
 endfunction "}}}
+function! eskk#has_table(table_name) "{{{
+    return has_key(s:table_defs, a:table_name)
+endfunction "}}}
+function! eskk#get_all_registered_tables() "{{{
+    return keys(s:table_defs)
+endfunction "}}}
+function! eskk#get_table(name) "{{{
+    return s:table_defs[a:name]
+endfunction "}}}
+function! eskk#register_table(table) "{{{
+    for base in a:table.get_base_tables()
+        call eskk#register_table(base)
+    endfor
+    " eskk#register_table() MUST NOT allow to overwrite
+    " already registered tables.
+    " because it is harmful to be able to
+    " rewrite base (derived) tables. (what will happen? I don't know)
+    let name = a:table.get_name()
+    if !has_key(s:table_defs, name)
+        let s:table_defs[name] = a:table
+    endif
+endfunction "}}}
 
-function! eskk#_get_cached_maps() "{{{
-    return s:cached_maps
-endfunction "}}}
-function! eskk#_get_cached_candidates() "{{{
-    return s:cached_candidates
-endfunction "}}}
 function! eskk#_get_table_defs() "{{{
     return s:table_defs
 endfunction "}}}

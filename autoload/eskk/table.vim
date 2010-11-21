@@ -7,200 +7,128 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+" NOTE: s:table_defs is in autoload/eskk.vim
+"
 " s:table_defs = {
-"   'table_name': eskk#table#create(),
-"   'table_name2': eskk#table#create(),
+"   'table_name': eskk#table#new(),
+"   'table_name2': eskk#table#new(),
 "   ...
 " }
 "
-" BASE TABLE:
-" eskk#table#create() = {
-"   'name': 'table_name',
-"   'data': {
+" Base Table:
+" {
+"   '_name': 'table_name',
+"   '_data': {
 "       'lhs': ['map', 'rest'],
 "       'lhs2': ['map2', 'rest2'],
 "       ...
 "   },
 " }
 "
-" DERIVED TABLE:
-" eskk#table#create() = {
-"   'name': 'table_name',
-"   'data': {
+" Child Table:
+" {
+"   '_name': 'table_name',
+"   '_data': {
 "       'lhs': {'method': 'add', 'data': ['map', 'rest']},
 "       'lhs2': {'method': 'remove'},
 "       ...
 "   },
-"   'bases': [
-"       eskk#table#create(),
-"       eskk#table#create(),
+"   '_bases': [
+"       eskk#table#new(),
+"       eskk#table#new(),
 "       ...
 "   ],
 " }
 
-" Constants {{{
-let s:MAP_TO_INDEX = 0
-let s:REST_INDEX = 1
-" }}}
 
-" Functions {{{
-
-" Primitive table functions {{{
-
-function! s:load_table(table_name) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if !has_key(table_defs, a:table_name)
-        let msg = printf('%s is not registered.', a:table_name)
-        throw eskk#internal_error(['eskk', 'table'], msg)
-    endif
-    let def = table_defs[a:table_name]
-
-    if def._loaded
-        return
-    endif
-
-    if has_key(def, 'bases')
-        for base in def.bases
-            call s:load_table(base.name)
-        endfor
-    endif
-
-    if has_key(def, 'init')
-        call def.init()
-    endif
-
-    let def._loaded = 1
+function! eskk#table#get_all_tables() "{{{
+    return map(
+    \   eskk#util#globpath('autoload/eskk/table/*.vim'),
+    \   'fnamemodify(v:val, ":t:r")'
+    \)
 endfunction "}}}
 
-function! s:get_table_data(table_name, ...) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if table_defs[a:table_name]._loaded
-        return table_defs[a:table_name].data
-    endif
+" s:table_obj {{{
+let s:table_obj = {'_data': {}, '_cached_maps': {}, '_cached_candidates': {}}
 
-    " Lazy loading.
-    if !table_defs[a:table_name]._loaded
-        call s:load_table(a:table_name)
-    endif
-    return table_defs[a:table_name].data
-endfunction "}}}
-
-function! s:has_table(table_name) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if !table_defs[a:table_name]._loaded
-        call s:load_table(a:table_name)
-    endif
-    return has_key(table_defs, a:table_name)
-endfunction "}}}
-
-function! s:is_base_table(table_name) "{{{
-    let table_defs = eskk#_get_table_defs()
-    if !table_defs[a:table_name]._loaded
-        call s:load_table(a:table_name)
-    endif
-    return !has_key(table_defs[a:table_name], 'bases')
-endfunction "}}}
-
-function! s:get_map(table_name, lhs, index, ...) "{{{
-    let data = s:get_table_data(a:table_name)
-    let cached_maps = eskk#_get_cached_maps()
-
-    if g:eskk#cache_table_map
-    \   && eskk#util#has_key_f(cached_maps, [a:table_name, a:lhs])
-        if cached_maps[a:table_name][a:lhs][a:index] != ''
-            return cached_maps[a:table_name][a:lhs][a:index]
-        else
-            " No lhs in `eskk#_get_table_defs()`.
-            if a:0
-                return a:1
-            else
-                throw eskk#internal_error(['eskk', 'table'])
-            endif
-        endif
-    endif
-
-    if s:is_base_table(a:table_name)
-        if eskk#util#has_key_f(data, [a:lhs, a:index])
-        \   && data[a:lhs][a:index] != ''
-            if g:eskk#cache_table_map
-                call eskk#util#let_f(
-                \   cached_maps,
-                \   [a:table_name, a:lhs],
-                \   data[a:lhs]
-                \)
-            endif
-            return data[a:lhs][a:index]
-        endif
-    else
-        if has_key(data, a:lhs)
-            if data[a:lhs].method ==# 'add'
-            \   && data[a:lhs].data[a:index] != ''
-                if g:eskk#cache_table_map
-                    call eskk#util#let_f(
-                    \   cached_maps,
-                    \   [a:table_name, a:lhs],
-                    \   data[a:lhs].data
-                    \)
-                endif
-                return data[a:lhs].data[a:index]
-            elseif data[a:lhs].method ==# 'remove'
-                " No lhs in `eskk#_get_table_defs()`.
-                if a:0
-                    return a:1
-                else
-                    throw eskk#internal_error(['eskk', 'table'])
-                endif
-            endif
-        endif
-
-        let not_found = {}
-        let table_defs = eskk#_get_table_defs()
-        for parent in table_defs[a:table_name].bases
-            let r = s:get_map(parent.name, a:lhs, a:index, not_found)
-            if r isnot not_found
-                return r
-            endif
-        endfor
-    endif
-
-    " No lhs in `eskk#_get_table_defs()`.
+function! eskk#table#new(table_name, ...) "{{{
     if a:0
-        return a:1
+        let obj = deepcopy(s:child_table)
+        let obj._name = a:table_name
+        let obj._bases = []
+        for base in type(a:1) == type([]) ? a:1 : [a:1]
+            if type(base) == type("")
+                " Assume it's installed table name.
+                call add(obj._bases, eskk#table#new_from_file(base))
+            elseif type(base) == type({})
+                " Assume it's s:table_obj object.
+                call add(obj._bases, base)
+            else
+                throw s:table_invalid_arguments_error(a:table_name)
+            endif
+            call s:validate_base_tables(obj)
+        endfor
     else
-        throw eskk#internal_error(
-        \   ['eskk', 'table'],
-        \   eskk#util#formatstrf(
-        \       'table name = %s, lhs = %s, index = %d',
-        \       a:table_name, a:lhs, a:index
-        \   )
-        \)
+        let obj = deepcopy(s:base_table)
+        let obj._name = a:table_name
     endif
+
+    return obj
+endfunction "}}}
+function! s:validate_base_tables(this) "{{{
+    for base in get(a:this, '_bases', [])
+        if base._name ==# a:this._name
+            throw s:table_extending_myself_error(a:this._name)
+        endif
+    endfor
+endfunction "}}}
+function! s:table_extending_myself_error(table_name) "{{{
+    " TODO: add function to build own error in autoload/eskk.vim.
+    let file = 'autoload/' . join(['eskk', 'table'], '/') . '.vim'
+    return "eskk: table '" . a:table_name . "' derived from itself: at " . file
+endfunction "}}}
+function! s:table_invalid_arguments_error(table_name) "{{{
+    " TODO: add function to build own error in autoload/eskk.vim.
+    let file = 'autoload/' . join(['eskk', 'table'], '/') . '.vim'
+    return "eskk: eskk#table#new() received invalid arguments "
+    \       . "(table name: " . a:table_name . ") : at " . file
 endfunction "}}}
 
-function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
+function! eskk#table#new_from_file(table_name) "{{{
+    let obj = eskk#table#new(a:table_name)
+    function obj.initialize()
+        call self.add_from_dict(eskk#table#{self._name}#load())
+    endfunction
+    return obj
+endfunction "}}}
+
+
+function! s:table_obj.has_candidates(lhs_head) "{{{
+    let not_found = {}
+    return self.get_candidates(a:lhs_head, 1, not_found) isnot not_found
+endfunction "}}}
+function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) "{{{
+    return call(
+    \   's:get_candidates',
+    \   [self, a:lhs_head, a:max_candidates] + a:000
+    \)
+endfunction "}}}
+function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
+    let table_name = a:table._name
     call eskk#util#assert(
     \   a:max_candidates !=# 0,
     \   "a:max_candidates must be negative or positive."
     \)
 
-    let cached_candidates = eskk#_get_cached_candidates()
     if g:eskk#cache_table_candidates
-    \   && eskk#util#has_key_f(
-    \           cached_candidates,
-    \           [a:table_name, a:lhs_head]
-    \       )
-        let candidates = cached_candidates[a:table_name][a:lhs_head]
+    \   && has_key(a:table._cached_candidates, a:lhs_head)
+        let candidates = a:table._cached_candidates[a:lhs_head]
     else
-        let data = s:get_table_data(a:table_name)
         let candidates = filter(
-        \   copy(data), 'stridx(v:key, a:lhs_head) == 0'
+        \   copy(a:table.load()), 'stridx(v:key, a:lhs_head) == 0'
         \)
         if g:eskk#cache_table_candidates
-            call eskk#util#let_f(
-            \   cached_candidates,
-            \   [a:table_name, a:lhs_head],
-            \   candidates
-            \)
+            let a:table._cached_candidates[a:lhs_head] = candidates
         endif
     endif
 
@@ -208,13 +136,13 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         return candidates
     endif
 
-    if !s:is_base_table(a:table_name)
-        " Search parent tables.
+    if !a:table.is_base()
+        " Search base tables.
         let not_found = {}
         let table_defs = eskk#_get_table_defs()
-        for parent in table_defs[a:table_name].bases
+        for base in table_defs[table_name]._bases
             let r = s:get_candidates(
-            \   parent.name,
+            \   base,
             \   a:lhs_head,
             \   a:max_candidates,
             \   not_found
@@ -225,7 +153,7 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
         endfor
     endif
 
-    " No lhs_head in `eskk#_get_table_defs()`.
+    " No lhs_head in a:table and its base tables.
     if a:0
         return a:1
     else
@@ -233,134 +161,161 @@ function! s:get_candidates(table_name, lhs_head, max_candidates, ...) "{{{
     endif
 endfunction "}}}
 
-" }}}
-
-
-" s:register_skeleton {{{
-let s:register_skeleton = {'data': {}, '_loaded': 0}
-
-function! eskk#table#create(name, ...) "{{{
-    let obj = deepcopy(s:register_skeleton, 1)
-    let obj.name = a:name
-    if a:0
-        let names = type(a:1) == type([]) ? a:1 : [a:1]
-        let obj.bases = map(names, 'eskk#table#create(v:val)')
-    endif
-    return obj
-endfunction "}}}
-
-function! eskk#table#create_from_file(name) "{{{
-    let table = eskk#table#create(a:name)
-    let def = eskk#table#{a:name}#load()
-    for lhs in keys(def)
-        let [map_to, rest] = def[lhs]
-        call table.add(lhs, map_to, rest)
-    endfor
-    return table
-endfunction "}}}
-
-function! s:register_skeleton.is_base() "{{{
-    return !has_key(self, 'bases')
-endfunction "}}}
-
-function! s:register_skeleton.add(lhs, map, ...) "{{{
-    let pair = [a:map, (a:0 ? a:1 : '')]
-    if self.is_base()
-        let self.data[a:lhs] = pair
-    else
-        let self.data[a:lhs] = {'method': 'add', 'data': pair}
-    endif
-    return self
-endfunction "}}}
-
-function! s:register_skeleton.remove(lhs) "{{{
-    if self.is_base()
-        throw eskk#user_error(
-        \   ['eskk', 'table'],
-        \   "Must not remove base class map."
-        \)
-    else
-        let self.data[a:lhs] = {'method': 'remove'}
-    endif
-    return self
-endfunction "}}}
-
-function! s:register_skeleton.add_from_dict(dict) "{{{
-    let self.data = a:dict
-    return self
-endfunction "}}}
-" }}}
-
-
-" Autoload functions {{{
-
-function! eskk#table#get_all_tables() "{{{
-    return map(
-    \   eskk#util#globpath('autoload/eskk/table/*.vim'),
-    \   'fnamemodify(v:val, ":t:r")'
-    \)
-endfunction "}}}
-
-function! eskk#table#get_all_registered_tables() "{{{
-    return keys(eskk#_get_table_defs())
-endfunction "}}}
-
-function! eskk#table#has_table(table_name) "{{{
-    return has_key(eskk#_get_table_defs(), a:table_name)
-endfunction "}}}
-
-" }}}
-
-" s:table_obj {{{
-let s:table_obj = {}
-
-function! eskk#table#new(table_name) "{{{
-    let obj = deepcopy(s:table_obj)
-    let obj.table_name = a:table_name
-
-    return obj
-endfunction "}}}
-
-
-function! s:table_obj.has_candidates(lhs_head) "{{{
-    let not_found = {}
-    return self.get_candidates(a:lhs_head, 1, not_found) isnot not_found
-endfunction "}}}
-
-function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) "{{{
-    return call(
-    \   's:get_candidates',
-    \   [self.table_name, a:lhs_head, a:max_candidates] + a:000
-    \)
-endfunction "}}}
-
 function! s:table_obj.has_map(lhs) "{{{
     let not_found = {}
     return self.get_map(a:lhs, not_found) isnot not_found
 endfunction "}}}
-
 function! s:table_obj.get_map(lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self.table_name, a:lhs, s:MAP_TO_INDEX] + a:000
+    \   [self, a:lhs, 0] + a:000
     \)
 endfunction "}}}
-
 function! s:table_obj.has_rest(lhs) "{{{
     let not_found = {}
     return self.get_rest(a:lhs, not_found) isnot not_found
 endfunction "}}}
-
 function! s:table_obj.get_rest(lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self.table_name, a:lhs, s:REST_INDEX] + a:000
+    \   [self, a:lhs, 1] + a:000
     \)
+endfunction "}}}
+function! s:get_map(table, lhs, index, ...) "{{{
+    let table_name = a:table._name
+    let data = a:table.load()
+
+    if g:eskk#cache_table_map
+    \   && has_key(a:table._cached_maps, a:lhs)
+        if a:table._cached_maps[a:lhs][a:index] != ''
+            return a:table._cached_maps[a:lhs][a:index]
+        else
+            return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
+        endif
+    endif
+
+    if a:table.is_base()
+        if eskk#util#has_key_f(data, [a:lhs, a:index])
+        \   && data[a:lhs][a:index] != ''
+            if g:eskk#cache_table_map
+                let a:table._cached_maps[a:lhs] = data[a:lhs]
+            endif
+            return data[a:lhs][a:index]
+        endif
+    else
+        if has_key(data, a:lhs)
+            if data[a:lhs].method ==# 'add'
+            \   && data[a:lhs].data[a:index] != ''
+                if g:eskk#cache_table_map
+                    let a:table._cached_maps[a:lhs] = data[a:lhs].data
+                endif
+                return data[a:lhs].data[a:index]
+            elseif data[a:lhs].method ==# 'remove'
+                return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
+            endif
+        endif
+
+        let not_found = {}
+        for base in a:table._bases
+            let r = s:get_map(base, a:lhs, a:index, not_found)
+            if r isnot not_found
+                " TODO: cache here
+                return r
+            endif
+        endfor
+    endif
+
+    return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
+endfunction "}}}
+function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
+    " No lhs in a:table.
+    if !empty(a:rest_args)
+        return a:rest_args[0]
+    else
+        throw eskk#internal_error(
+        \   ['eskk', 'table'],
+        \   eskk#util#formatstrf(
+        \       'table name = %s, lhs = %s, index = %d',
+        \       a:table._name, a:lhs, a:index
+        \   )
+        \)
+    endif
+endfunction "}}}
+
+function! s:table_obj.load() "{{{
+    if has_key(self, '_bases')
+        " TODO: after initializing base tables,
+        " this object has no need to have base references.
+        " because they can ("should", curerntly) be
+        " obtained from s:table_defs in autoload/eskk.vim
+        " (it can be considered as flyweight object for all tables)
+        for base in self._bases
+            call s:do_initialize(base)
+        endfor
+    endif
+    call s:do_initialize(self)
+    return self._data
+endfunction "}}}
+function! s:table_obj.get_mappings() "{{{
+    return self._data
+endfunction "}}}
+function! s:do_initialize(table) "{{{
+    if has_key(a:table, 'initialize')
+        call a:table.initialize()
+        unlet a:table.initialize
+        let a:table.load = s:table_obj.get_mappings
+    endif
+endfunction "}}}
+
+function! s:table_obj.is_base() "{{{
+    return !has_key(self, '_bases')
+endfunction "}}}
+
+function! s:table_obj.get_name() "{{{
+    return self._name
+endfunction "}}}
+function! s:table_obj.get_base_tables() "{{{
+    return self.is_base() ? [] : self._bases
 endfunction "}}}
 
 " }}}
 
+" s:base_table {{{
+let s:base_table = deepcopy(s:table_obj)
+
+function! s:base_table.add_from_dict(dict) "{{{
+    let self._data = a:dict
+endfunction "}}}
+
+function! s:base_table.add_map(lhs, map, ...) "{{{
+    let pair = [a:map, (a:0 ? a:1 : '')]
+    let self._data[a:lhs] = pair
+endfunction "}}}
 " }}}
+
+" s:child_table {{{
+let s:child_table = deepcopy(s:table_obj)
+
+function! s:child_table.add_map(lhs, map, ...) "{{{
+    let pair = [a:map, (a:0 ? a:1 : '')]
+    let self._data[a:lhs] = {'method': 'add', 'data': pair}
+endfunction "}}}
+
+function! s:child_table.remove_map(lhs) "{{{
+    if has_key(self._data, a:lhs)
+        unlet self._data[a:lhs]
+    else
+        " Assumpiton: It must be a lhs of bases.
+        " One of base tables must have this lhs.
+        " No way to check if this lhs is base one,
+        " because .load() is called lazily
+        " for saving memory.
+        let self._data[a:lhs] = {'method': 'remove'}
+    endif
+endfunction "}}}
+
+" }}}
+
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo

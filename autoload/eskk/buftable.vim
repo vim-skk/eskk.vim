@@ -881,21 +881,19 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     endtry
 endfunction "}}}
 function! s:buftable.do_ctrl_q_key() "{{{
-    let table_name = eskk#get_mode() ==# 'hira' ?
-    \                   eskk#get_mode_table('hankata') :
-    \                   eskk#get_mode_table('hira')
     return s:convert_again_with_table(
     \   self,
-    \   eskk#create_table(table_name)
+    \   (eskk#get_mode() ==# 'hira' ?
+    \       eskk#get_mode_table('hankata') :
+    \       eskk#get_mode_table('hira'))
     \)
 endfunction "}}}
 function! s:buftable.do_q_key() "{{{
-    let table_name = eskk#get_mode() ==# 'hira' ?
-    \                   eskk#get_mode_table('kata') :
-    \                   eskk#get_mode_table('hira')
     return s:convert_again_with_table(
     \   self,
-    \   eskk#create_table(table_name)
+    \   (eskk#get_mode() ==# 'hira' ?
+    \       eskk#get_mode_table('kata') :
+    \       eskk#get_mode_table('hira'))
     \)
 endfunction "}}}
 function! s:buftable.do_l_key() "{{{
@@ -919,9 +917,9 @@ function! s:buftable.convert_rom_str(phases) "{{{
     if eskk#has_current_mode_table()
         if g:eskk#kata_convert_to_hira_at_henkan
         \   && eskk#get_mode() ==# 'kata'
-            let table = eskk#create_table(eskk#get_mode_table('hira'))
+            let table = eskk#get_mode_table('hira')
         else
-            let table = eskk#create_table(eskk#get_current_mode_table())
+            let table = eskk#get_current_mode_table()
         endif
         for buf_str in map(a:phases, 'self.get_buf_str(v:val)')
             let rom_str = buf_str.get_rom_str()
@@ -935,9 +933,8 @@ function! s:buftable.convert_rom_str(phases) "{{{
         endfor
     endif
 endfunction "}}}
-function! s:buftable.filter_rom_inplace(phase, table_name) "{{{
+function! s:buftable.filter_rom_inplace(phase, table) "{{{
     let phase = a:phase
-    let table = eskk#create_table(a:table_name)
     let buf_str = self.get_buf_str(phase)
 
     let matched = buf_str.get_matched()
@@ -945,7 +942,7 @@ function! s:buftable.filter_rom_inplace(phase, table_name) "{{{
     for [rom_str, filter_str] in matched
         call buf_str.push_matched(
         \   rom_str,
-        \   table.get_map(rom_str, rom_str)
+        \   a:table.get_map(rom_str, rom_str)
         \)
     endfor
     return buf_str
