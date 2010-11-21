@@ -64,6 +64,7 @@ function! eskk#table#new(table_name, ...) "{{{
                 " Assume it's s:table_obj object.
                 call add(obj._bases, base)
             endif
+            call s:validate_base_tables(obj)
         endfor
     else
         let obj = deepcopy(s:base_table)
@@ -71,6 +72,18 @@ function! eskk#table#new(table_name, ...) "{{{
     endif
 
     return obj
+endfunction "}}}
+function! s:validate_base_tables(this) "{{{
+    for base in get(a:this, '_bases', [])
+        if base._name ==# a:this._name
+            throw s:table_extending_myself_error(a:this._name)
+        endif
+    endfor
+endfunction "}}}
+function! s:table_extending_myself_error(table_name) "{{{
+    " TODO: add function to build own error in autoload/eskk.vim.
+    let file = 'autoload/' . join(['eskk', 'table'], '/') . '.vim'
+    return "eskk: table '" . a:table_name . "' derived from itself: at " . file
 endfunction "}}}
 
 function! eskk#table#new_from_file(table_name) "{{{
