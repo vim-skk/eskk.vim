@@ -63,6 +63,8 @@ function! eskk#table#new(table_name, ...) "{{{
             elseif type(base) == type({})
                 " Assume it's s:table_obj object.
                 call add(obj._bases, base)
+            else
+                throw s:table_invalid_arguments_error(a:table_name)
             endif
             call s:validate_base_tables(obj)
         endfor
@@ -84,6 +86,12 @@ function! s:table_extending_myself_error(table_name) "{{{
     " TODO: add function to build own error in autoload/eskk.vim.
     let file = 'autoload/' . join(['eskk', 'table'], '/') . '.vim'
     return "eskk: table '" . a:table_name . "' derived from itself: at " . file
+endfunction "}}}
+function! s:table_invalid_arguments_error(table_name) "{{{
+    " TODO: add function to build own error in autoload/eskk.vim.
+    let file = 'autoload/' . join(['eskk', 'table'], '/') . '.vim'
+    return "eskk: eskk#table#new() received invalid arguments "
+    \       . "(table name: " . a:table_name . ") : at " . file
 endfunction "}}}
 
 function! eskk#table#new_from_file(table_name) "{{{
