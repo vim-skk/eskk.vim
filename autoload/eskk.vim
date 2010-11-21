@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 4))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 5))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -308,8 +308,6 @@ let s:eskk = {
 let s:available_modes = {}
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
-" For eskk#register_map(), eskk#unregister_map().
-let s:key_handler = {}
 " Global values of &iminsert, &imsearch.
 let s:saved_im_options = []
 " Global values of &backspace.
@@ -1744,21 +1742,6 @@ function! eskk#has_event(event_name) "{{{
     \   || !empty(get(self.temp_event_hook_fn, a:event_name, []))
 endfunction "}}}
 
-" Key handler
-function! eskk#register_map(map, Fn, args, force) "{{{
-    let map = eskk#util#key2char(a:map)
-    if has_key(s:key_handler, map) && !a:force
-        return
-    endif
-    let s:key_handler[map] = [a:Fn, a:args]
-endfunction "}}}
-function! eskk#unregister_map(map, Fn, args) "{{{
-    let map = eskk#util#key2char(a:map)
-    if has_key(s:key_handler, map)
-        unlet s:key_handler[map]
-    endif
-endfunction "}}}
-
 " Locking diff old string
 function! eskk#lock_old_str() "{{{
     let self = eskk#get_current_instance()
@@ -1812,7 +1795,7 @@ function! eskk#filter(char) "{{{
         endif
 
         if do_filter
-            call s:call_filter_fn(stash)
+            call eskk#call_mode_func('filter', [stash], 1)
         endif
         return s:rewrite_string(stash.return)
 
@@ -1823,18 +1806,6 @@ function! eskk#filter(char) "{{{
     finally
         call eskk#throw_event('filter-finalize')
     endtry
-endfunction "}}}
-function! s:call_filter_fn(stash) "{{{
-    let filter_args = [a:stash]
-    let cur_buf_str = a:stash.buftable.get_current_buf_str()
-    let rom = cur_buf_str.get_input_rom() . a:stash.char
-    if has_key(s:key_handler, rom)
-        " Call eskk#register_map()'s handlers.
-        let [Fn, args] = s:key_handler[rom]
-        call call(Fn, filter_args + args)
-    else
-        call eskk#call_mode_func('filter', filter_args, 1)
-    endif
 endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
