@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 3))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 4))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -316,9 +316,6 @@ let s:saved_im_options = []
 let s:saved_backspace = -1
 " Flag for `s:initialize()`.
 let s:is_initialized = 0
-" Last command's string. See eskk#jump_one_char().
-let s:last_jump_cmd = -1
-let s:last_jump_char = -1
 " SKK Dictionary (singleton)
 let s:skk_dict = {}
 " Cached table instances.
@@ -2064,60 +2061,6 @@ function! eskk#set_cursor_color() "{{{
     elseif type(color) == type("") && color != ''
         execute 'highlight lCursor guibg=' . color
     endif
-endfunction "}}}
-
-" <Plug>(eskk:alpha-t), <Plug>(eskk:alpha-f), ...
-function! eskk#jump_one_char(cmd, ...) "{{{
-    if a:cmd !=? 't' && a:cmd !=? 'f'
-        return
-    endif
-    let is_t = a:cmd ==? 't'
-    let is_forward = eskk#util#is_lower(a:cmd)
-    let s:last_jump_cmd = a:cmd
-
-    if a:0 == 0
-        let char = eskk#util#getchar()
-        let s:last_jump_char = char
-    else
-        let char = a:1
-    endif
-
-    if is_forward
-        if col('.') == col('$')
-            return
-        endif
-        let rest_line = getline('.')[col('.') :]
-        let idx = stridx(rest_line, char)
-        if idx != -1
-            call cursor(line('.'), col('.') + idx + 1 - is_t)
-        endif
-    else
-        if col('.') == 1
-            return
-        endif
-        let rest_line = getline('.')[: col('.') - 2]
-        let idx = strridx(rest_line, char)
-        if idx != -1
-            call cursor(line('.'), idx + 1 + is_t)
-        endif
-    endif
-endfunction "}}}
-function! eskk#repeat_last_jump(cmd) "{{{
-    if a:cmd !=# ',' && a:cmd !=# ';'
-        return
-    endif
-    if type(s:last_jump_cmd) == type("")
-    \   && type(s:last_jump_char) == type("")
-        return
-    endif
-
-    if a:cmd ==# ','
-        let s:last_jump_char = s:invert_direction(s:last_jump_char)
-    endif
-    call eskk#jump_one_char(s:last_jump_cmd, s:last_jump_char)
-endfunction "}}}
-function! s:invert_direction(cmd) "{{{
-    return eskk#util#is_lower(a:cmd) ? toupper(a:cmd) : tolower(a:cmd)
 endfunction "}}}
 
 " Mapping

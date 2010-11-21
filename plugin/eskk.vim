@@ -49,13 +49,6 @@ lnoremap <expr> <Plug>(eskk:toggle)     eskk#toggle()
 
 nnoremap        <Plug>(eskk:save-dictionary) :<C-u>EskkUpdateDictionary<CR>
 
-nnoremap <silent> <Plug>(eskk:alpha-t) :<C-u>call eskk#jump_one_char('t')<CR>
-nnoremap <silent> <Plug>(eskk:alpha-f) :<C-u>call eskk#jump_one_char('f')<CR>
-nnoremap <silent> <Plug>(eskk:alpha-T) :<C-u>call eskk#jump_one_char('T')<CR>
-nnoremap <silent> <Plug>(eskk:alpha-F) :<C-u>call eskk#jump_one_char('F')<CR>
-nnoremap <silent> <Plug>(eskk:alpha-,) :<C-u>call eskk#repeat_last_jump(',')<CR>
-nnoremap <silent> <Plug>(eskk:alpha-;) :<C-u>call eskk#repeat_last_jump(';')<CR>
-
 noremap! <expr> <Plug>(eskk:_set_begin_pos) [eskk#get_buftable().set_begin_pos('.'), ''][1]
 
 
