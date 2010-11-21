@@ -1680,9 +1680,9 @@ endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
     return g:eskk#mode_use_tables[a:mode].get_name()
 endfunction "}}}
-function! eskk#create_table(table_name) "{{{
+function! eskk#create_table(...) "{{{
     " XXX: temporarily disable caching tables.
-    return eskk#table#new(a:table_name)
+    return call('eskk#table#new', a:000)
 
 
     if has_key(s:cached_tables, a:table_name)
@@ -1690,7 +1690,7 @@ function! eskk#create_table(table_name) "{{{
     endif
 
     " Cache under s:cached_tables.
-    let s:cached_tables[a:table_name] = eskk#table#new(a:table_name)
+    let s:cached_tables[a:table_name] = return call('eskk#table#new', a:000)
     return s:cached_tables[a:table_name]
 endfunction "}}}
 function! eskk#has_table(table_name) "{{{
