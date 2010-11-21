@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 2))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 3))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -285,8 +285,6 @@ delfunc s:SID
 "   True if s:eskk.enable() is called.
 " enabled_mode:
 "   Vim's mode() return value when calling eskk#enable().
-" mutable_stash:
-"   Stash for instance-local variables. See `s:mutable_stash`.
 " has_started_completion:
 "   completion has been started from eskk.
 let s:eskk = {
@@ -295,7 +293,6 @@ let s:eskk = {
 \   'is_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
-\   'mutable_stash': {},
 \   'has_started_completion': 0,
 \   'prev_im_options': {},
 \   'prev_normal_keys': {},
@@ -432,69 +429,6 @@ function! eskk#destroy_current_instance() "{{{
     call remove(ns.eskk_instances, ns.eskk_instance_id)
     let ns.eskk_instance_id -= 1
 endfunction "}}}
-
-" s:mutable_stash "{{{
-let s:mutable_stash = {}
-
-" Same structure as `s:eskk.mutable_stash`,
-" but this is set by `s:mutable_stash.init()`.
-let s:stash_prototype = {}
-
-
-" Constructor
-function! eskk#get_mutable_stash(namespace) "{{{
-    let obj = deepcopy(s:mutable_stash, 1)
-    let obj.namespace = join(a:namespace, '-')
-    return obj
-endfunction "}}}
-
-
-" This a:value will be set when new eskk instances are created.
-function! s:mutable_stash.init(varname, value) "{{{
-    if !has_key(s:stash_prototype, self.namespace)
-        let s:stash_prototype[self.namespace] = {}
-    endif
-
-    if !has_key(s:stash_prototype[self.namespace], a:varname)
-        let s:stash_prototype[self.namespace][a:varname] = a:value
-    else
-        throw eskk#internal_error(['eskk'])
-    endif
-endfunction "}}}
-
-function! s:mutable_stash.get(varname) "{{{
-    let inst = eskk#get_current_instance()
-    if !has_key(inst.mutable_stash, self.namespace)
-        let inst.mutable_stash[self.namespace] = {}
-    endif
-
-    if has_key(inst.mutable_stash[self.namespace], a:varname)
-        return inst.mutable_stash[self.namespace][a:varname]
-    else
-        " Find prototype for this variable.
-        " These prototypes are set by `s:mutable_stash.init()`.
-        if !has_key(s:stash_prototype, self.namespace)
-            let s:stash_prototype[self.namespace] = {}
-        endif
-
-        if has_key(s:stash_prototype[self.namespace], a:varname)
-            return s:stash_prototype[self.namespace][a:varname]
-        else
-            " No more stash.
-            throw eskk#internal_error(['eskk'])
-        endif
-    endif
-endfunction "}}}
-
-function! s:mutable_stash.set(varname, value) "{{{
-    let inst = eskk#get_current_instance()
-    if !has_key(inst.mutable_stash, self.namespace)
-        let inst.mutable_stash[self.namespace] = {}
-    endif
-
-    let inst.mutable_stash[self.namespace][a:varname] = a:value
-endfunction "}}}
-" }}}
 
 " Filter
 " s:asym_filter {{{
