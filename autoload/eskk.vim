@@ -500,9 +500,9 @@ endfunction "}}}
 " s:asym_filter {{{
 let s:asym_filter = {'table': {}}
 
-function! eskk#create_asym_filter(table_name) "{{{
+function! eskk#create_asym_filter(table) "{{{
     let obj = deepcopy(s:asym_filter)
-    let obj.table = eskk#create_table(a:table_name)
+    let obj.table = a:table
     return obj
 endfunction "}}}
 
@@ -1105,8 +1105,7 @@ function! s:initialize() "{{{
 
                 if eskk#has_mode_table('ascii')
                     if !has_key(this.sandbox, 'table')
-                        let this.sandbox.table =
-                        \   eskk#get_table(eskk#get_mode_table('ascii'))
+                        let this.sandbox.table = eskk#get_mode_table('ascii')
                     endif
                     let a:stash.return = this.sandbox.table.get_map(
                     \   a:stash.char, a:stash.char
@@ -1132,8 +1131,7 @@ function! s:initialize() "{{{
                 call eskk#set_mode('hira')
             else
                 if !has_key(this.sandbox, 'table')
-                    let this.sandbox.table =
-                    \   eskk#get_table(eskk#get_mode_table('zenei'))
+                    let this.sandbox.table = eskk#get_mode_table('zenei')
                 endif
                 let a:stash.return = this.sandbox.table.get_map(
                 \   a:stash.char, a:stash.char
@@ -1678,7 +1676,7 @@ function! eskk#get_current_mode_table() "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
-    return g:eskk#mode_use_tables[a:mode].get_name()
+    return g:eskk#mode_use_tables[a:mode]
 endfunction "}}}
 function! eskk#create_table(...) "{{{
     " XXX: temporarily disable caching tables.
