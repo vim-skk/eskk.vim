@@ -1679,10 +1679,6 @@ function! eskk#get_mode_table(mode) "{{{
     return g:eskk#mode_use_tables[a:mode]
 endfunction "}}}
 function! eskk#create_table(...) "{{{
-    " XXX: temporarily disable caching tables.
-    return call('eskk#table#new', a:000)
-
-
     if has_key(s:cached_tables, a:table_name)
         return s:cached_tables[a:table_name]
     endif
