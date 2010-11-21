@@ -10,7 +10,7 @@ set cpo&vim
 
 " Global Variables {{{
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 0))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 1))
 
 " Debug
 if !exists('g:eskk#debug')
@@ -1678,6 +1678,8 @@ endfunction "}}}
 function! eskk#get_mode_table(mode) "{{{
     return g:eskk#mode_use_tables[a:mode]
 endfunction "}}}
+
+" Table
 function! eskk#create_table(...) "{{{
     if has_key(s:cached_tables, a:table_name)
         return s:cached_tables[a:table_name]
