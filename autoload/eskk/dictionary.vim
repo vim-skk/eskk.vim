@@ -611,8 +611,8 @@ function! s:henkan_result_select_candidates(
                 \)
                 return [
                 \   (input != '' ?
-                \       input : henkan_buf_str.get_matched_filter()),
-                \   okuri_buf_str.get_matched_filter()
+                \       input : henkan_buf_str.rom_pairs.get_filter()),
+                \   okuri_buf_str.rom_pairs.get_filter()
                 \]
             endif
         elseif eskk#mappings#is_special_lhs(

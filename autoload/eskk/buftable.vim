@@ -290,8 +290,8 @@ function! s:get_normal_display_str(this) "{{{
     \   g:eskk#buftable#HENKAN_PHASE_NORMAL
     \)
     return
-    \   buf_str.get_matched_filter()
-    \   . buf_str.get_rom_str()
+    \   buf_str.rom_pairs.get_filter()
+    \   . buf_str.rom_str.get()
 endfunction "}}}
 function! s:get_henkan_display_str(this, with_marker) "{{{
     let buf_str = a:this.get_buf_str(
@@ -301,8 +301,8 @@ function! s:get_henkan_display_str(this, with_marker) "{{{
     \   (a:with_marker ?
     \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     \       : '')
-    \   . buf_str.get_matched_filter()
-    \   . buf_str.get_rom_str()
+    \   . buf_str.rom_pairs.get_filter()
+    \   . buf_str.rom_str.get()
 endfunction "}}}
 function! s:get_okuri_display_str(this, with_marker) "{{{
     let buf_str = a:this.get_buf_str(
@@ -313,8 +313,8 @@ function! s:get_okuri_display_str(this, with_marker) "{{{
     \   . (a:with_marker ?
     \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_OKURI)
     \       : '')
-    \   . buf_str.get_matched_filter()
-    \   . buf_str.get_rom_str()
+    \   . buf_str.rom_pairs.get_filter()
+    \   . buf_str.rom_str.get()
 endfunction "}}}
 function! s:get_henkan_select_display_str(this, with_marker) "{{{
     let buf_str = a:this.get_buf_str(
@@ -324,8 +324,8 @@ function! s:get_henkan_select_display_str(this, with_marker) "{{{
     \   (a:with_marker ?
     \       a:this.get_marker(g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT)
     \       : '')
-    \   . buf_str.get_matched_filter()
-    \   . buf_str.get_rom_str()
+    \   . buf_str.rom_pairs.get_filter()
+    \   . buf_str.rom_str.get()
 endfunction "}}}
 
 
@@ -527,10 +527,10 @@ function! s:buftable.do_backspace(stash, ...) "{{{
             let buf_str = self.get_buf_str(
             \   g:eskk#buftable#HENKAN_PHASE_HENKAN
             \)
-            if filter_str ==# buf_str.get_matched_filter()
+            if filter_str ==# buf_str.rom_pairs.get_filter()
                 " Fall through.
             else
-                call buf_str.set_multiple_matched(p)
+                call buf_str.rom_pairs.set(p)
                 return
             endif
         endif
@@ -539,24 +539,24 @@ function! s:buftable.do_backspace(stash, ...) "{{{
     " Build backspaces to delete previous characters.
     for phase in self.get_lower_phases()
         let buf_str = self.get_buf_str(phase)
-        if buf_str.get_rom_str() != ''
-            call buf_str.pop_rom_str()
+        if buf_str.rom_str.get() != ''
+            call buf_str.rom_str.chop()
             break
-        elseif !empty(buf_str.get_matched())
+        elseif !empty(buf_str.rom_pairs.get())
             if done_for_group
-                let p = buf_str.pop_matched()
+                let p = buf_str.rom_pairs.pop()
                 if empty(p)
                     continue
                 endif
                 " ["tyo", "ちょ"] => ["tyo", "ち"]
                 if eskk#util#mb_strlen(p[1]) !=# 1
-                    call buf_str.push_matched(p[0], eskk#util#mb_chop(p[1]))
+                    call buf_str.rom_pairs.push_one_pair(p[0], eskk#util#mb_chop(p[1]))
                 endif
             else
-                let m = buf_str.get_matched()
+                let m = buf_str.rom_pairs.get()
                 call eskk#util#assert(len(m) == 1)
                 let [rom, filter] = m[0]
-                call buf_str.set_matched(rom, eskk#util#mb_chop(filter))
+                call buf_str.rom_pairs.set_one_pair(rom, eskk#util#mb_chop(filter))
 
                 " `rom` is empty string,
                 " Because currently this is called only by
@@ -587,7 +587,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
     let prev_buftable = henkan_result.buftable
-    let rom_str = cur_buf_str.get_matched_rom()
+    let rom_str = cur_buf_str.rom_pairs.get_rom()
 
     call eskk#util#assert(
     \   self.get_henkan_phase()
@@ -603,7 +603,7 @@ function! s:get_next_candidate(self, stash, next) "{{{
         " Do not set with `rom_str`.
         " Get henkan_result's buftable
         " and get matched rom str(s).
-        call cur_buf_str.set_matched(rom_str, candidate)
+        call cur_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
     else
         " No more candidates.
         if a:next
@@ -627,12 +627,12 @@ function! s:get_next_candidate(self, stash, next) "{{{
             let okuri_buf_str = prev_buftable.get_buf_str(
             \   g:eskk#buftable#HENKAN_PHASE_OKURI
             \)
-            let okuri_rom_str = okuri_buf_str.get_matched_rom()
+            let okuri_rom_str = okuri_buf_str.rom_pairs.get_rom()
             if g:eskk#revert_henkan_style ==# 'okuri-one'
                 " "▼書く" => "▽か*k"
                 if okuri_rom_str != ''
-                    call okuri_buf_str.set_rom_str(okuri_rom_str[0])
-                    call okuri_buf_str.clear_matched()
+                    call okuri_buf_str.rom_str.set(okuri_rom_str[0])
+                    call okuri_buf_str.rom_pairs.clear()
                 endif
             elseif g:eskk#revert_henkan_style ==# 'okuri'
                 " "▼書く" => "▽か*く"
@@ -649,8 +649,8 @@ function! s:get_next_candidate(self, stash, next) "{{{
                 " "▼書く" => "▽かく"
                 if okuri_rom_str != ''
                     " Copy roms of `okuri_buf_str` to `henkan_buf_str`.
-                    for okuri_matched in okuri_buf_str.get_matched()
-                        call henkan_buf_str.push_matched(
+                    for okuri_matched in okuri_buf_str.rom_pairs.get()
+                        call henkan_buf_str.rom_pairs.push_one_pair(
                         \   okuri_matched[0],
                         \   okuri_matched[1]
                         \)
@@ -678,8 +678,8 @@ function! s:buftable.do_sticky(stash) "{{{
     let buf_str = self.get_current_buf_str()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        if buf_str.get_rom_str() != ''
-        \   || buf_str.get_matched_filter() != ''
+        if buf_str.rom_str.get() != ''
+        \   || buf_str.rom_pairs.get_filter() != ''
             call self.convert_rom_str([phase])
             call self.push_kakutei_str(self.get_display_str(0))
             call buf_str.clear()
@@ -699,10 +699,10 @@ function! s:buftable.do_sticky(stash) "{{{
         let step = 1
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         if g:eskk#ignore_continuous_sticky
-        \   && empty(buf_str.get_matched())
+        \   && empty(buf_str.rom_pairs.get())
             let step = 0
-        elseif buf_str.get_rom_str() != ''
-        \   || buf_str.get_matched_filter() != ''
+        elseif buf_str.rom_str.get() != ''
+        \   || buf_str.rom_pairs.get_filter() != ''
             call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
             let step = 1
         else
@@ -731,7 +731,7 @@ function! s:buftable.step_back_henkan_phase() "{{{
         \   g:eskk#buftable#HENKAN_PHASE_OKURI
         \)
         call self.set_henkan_phase(
-        \   !empty(okuri_buf_str.get_matched()) ?
+        \   !empty(okuri_buf_str.rom_pairs.get()) ?
         \       g:eskk#buftable#HENKAN_PHASE_OKURI
         \       : g:eskk#buftable#HENKAN_PHASE_HENKAN
         \)
@@ -782,7 +782,7 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) "{{{
     \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
     \)
 
-    let rom_str = henkan_buf_str.get_rom_str()
+    let rom_str = henkan_buf_str.rom_str.get()
     let dict = eskk#get_skk_dict()
     call dict.refer(self, rom_str, '', '')
 
@@ -792,9 +792,9 @@ function! s:buftable.do_henkan_abbrev(stash, convert_at_exact_match) "{{{
 
         call self.clear_all()
         if a:convert_at_exact_match
-            call henkan_buf_str.set_matched(rom_str, candidate)
+            call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
         else
-            call henkan_select_buf_str.set_matched(rom_str, candidate)
+            call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
             call self.set_henkan_phase(
             \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
             \)
@@ -845,25 +845,25 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
     \])
 
     if g:eskk#fix_extra_okuri
-    \   && henkan_buf_str.get_rom_str() != ''
+    \   && henkan_buf_str.rom_str.get() != ''
     \   && phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call okuri_buf_str.set_rom_str(henkan_buf_str.get_rom_str())
-        call henkan_buf_str.clear_rom_str()
+        call okuri_buf_str.rom_str.set(henkan_buf_str.rom_str.get())
+        call henkan_buf_str.rom_str.clear()
         call self.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_OKURI)
         return
     endif
 
-    let hira = henkan_buf_str.get_matched_filter()
-    let okuri = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
+    let hira = henkan_buf_str.rom_pairs.get_filter()
+    let okuri = okuri_buf_str.rom_pairs.get_filter()
+    let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
     let dict = eskk#get_skk_dict()
     call dict.refer(self, hira, okuri, okuri_rom)
 
     " Clear phase henkan/okuri buffer string.
     " NOTE: I assume that `dict.refer()`
     " saves necessary strings even if I clear these.
-    let henkan_matched_rom = henkan_buf_str.get_matched_rom()
-    let okuri_matched_rom = okuri_buf_str.get_matched_rom()
+    let henkan_matched_rom = henkan_buf_str.rom_pairs.get_rom()
+    let okuri_matched_rom = okuri_buf_str.rom_pairs.get_rom()
     let rom_str = henkan_matched_rom . okuri_matched_rom
     try
         let candidate = dict.get_henkan_result().get_candidate()
@@ -871,9 +871,9 @@ function! s:buftable.do_henkan_other(stash, convert_at_exact_match) "{{{
 
         call self.clear_all()
         if a:convert_at_exact_match
-            call henkan_buf_str.set_matched(rom_str, candidate)
+            call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
         else
-            call henkan_select_buf_str.set_matched(rom_str, candidate)
+            call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
             call self.set_henkan_phase(
             \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
             \)
@@ -921,7 +921,7 @@ function! s:buftable.do_escape(stash) "{{{
     let a:stash.return = kakutei_str . eskk#util#key2char(esc)
 endfunction "}}}
 function! s:buftable.do_tab(stash) "{{{
-    call a:stash.buf_str.push_rom_str(eskk#util#get_tab_raw_str())
+    call a:stash.buf_str.rom_str.append(eskk#util#get_tab_raw_str())
 endfunction "}}}
 
 " TODO: These functions are very similar. Refactoring them.
@@ -934,13 +934,13 @@ function! s:buftable.convert_rom_str(phases) "{{{
             let table = eskk#get_current_mode_table()
         endif
         for buf_str in map(a:phases, 'self.get_buf_str(v:val)')
-            let rom_str = buf_str.get_rom_str()
+            let rom_str = buf_str.rom_str.get()
             if table.has_map(rom_str)
-                call buf_str.push_matched(
+                call buf_str.rom_pairs.push_one_pair(
                 \   rom_str,
                 \   table.get_map(rom_str)
                 \)
-                call buf_str.clear_rom_str()
+                call buf_str.rom_str.clear()
             endif
         endfor
     endif
@@ -949,10 +949,10 @@ function! s:buftable.filter_rom_inplace(phase, table) "{{{
     let phase = a:phase
     let buf_str = self.get_buf_str(phase)
 
-    let matched = buf_str.get_matched()
-    call buf_str.clear_matched()
+    let matched = buf_str.rom_pairs.get()
+    call buf_str.rom_pairs.clear()
     for [rom_str, filter_str] in matched
-        call buf_str.push_matched(
+        call buf_str.rom_pairs.push_one_pair(
         \   rom_str,
         \   a:table.get_map(rom_str, rom_str)
         \)
@@ -963,10 +963,10 @@ function! s:buftable.filter_rom(phase, table) "{{{
     let phase = a:phase
     let buf_str = deepcopy(self.get_buf_str(phase), 1)
 
-    let matched = buf_str.get_matched()
-    call buf_str.clear_matched()
+    let matched = buf_str.rom_pairs.get()
+    call buf_str.rom_pairs.clear()
     for [rom_str, filter_str] in matched
-        call buf_str.push_matched(
+        call buf_str.rom_pairs.push_one_pair(
         \   rom_str,
         \   a:table.get_map(rom_str, rom_str)
         \)
@@ -995,8 +995,8 @@ function! s:convert_again_with_table(self, table) "{{{
     \)
 
     for cur_buf_str in [henkan_buf_str, okuri_buf_str]
-        for m in cur_buf_str.get_matched()
-            call normal_buf_str.push_matched(
+        for m in cur_buf_str.rom_pairs.get()
+            call normal_buf_str.rom_pairs.push_one_pair(
             \   m[0],
             \   (empty(a:table) ?
             \       m[0] : a:table.get_map(m[0], m[1]))
@@ -1013,7 +1013,7 @@ function! s:convert_again_with_table(self, table) "{{{
         let self = eskk#get_buftable()
         if self.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
             let cur_buf_str = self.get_current_buf_str()
-            call cur_buf_str.clear_matched()
+            call cur_buf_str.rom_pairs.clear()
         endif
     endfunction
 
@@ -1088,8 +1088,8 @@ function! s:buftable.dump() "{{{
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call add(lines, 'phase: ' . phase)
-        call add(lines, 'rom_str: ' . string(buf_str.get_rom_str()))
-        call add(lines, 'matched pairs: ' . string(buf_str.get_matched()))
+        call add(lines, 'rom_str: ' . string(buf_str.rom_str.get()))
+        call add(lines, 'matched pairs: ' . string(buf_str.rom_pairs.get()))
     endfor
     return lines
 endfunction "}}}

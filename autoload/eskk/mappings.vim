@@ -46,7 +46,7 @@ function! s:handle_l_key(stash) "{{{
 endfunction "}}}
 function! s:handle_to_ascii(stash) "{{{
     if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.get_rom_str() == ''
+    \   && a:stash.buf_str.rom_str.get() == ''
         call eskk#set_mode('ascii')
         return 1
     endif
@@ -54,7 +54,7 @@ function! s:handle_to_ascii(stash) "{{{
 endfunction "}}}
 function! s:handle_to_zenei(stash) "{{{
     if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.get_rom_str() == ''
+    \   && a:stash.buf_str.rom_str.get() == ''
         call eskk#set_mode('zenei')
         return 1
     endif
@@ -62,7 +62,7 @@ function! s:handle_to_zenei(stash) "{{{
 endfunction "}}}
 function! s:handle_to_abbrev(stash) "{{{
     if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.get_rom_str() == ''
+    \   && a:stash.buf_str.rom_str.get() == ''
         call eskk#set_mode('abbrev')
         return 1
     endif

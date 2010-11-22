@@ -314,7 +314,7 @@ function! s:filter_rom(stash, table) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
-    let rom_str = buf_str.get_rom_str() . char
+    let rom_str = buf_str.rom_str.get() . char
     let match_exactly  = a:table.has_map(rom_str)
     let candidates     = a:table.get_candidates(rom_str, 2, [])
 
@@ -339,14 +339,14 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
-    let rom_str = buf_str.get_rom_str() . char
+    let rom_str = buf_str.rom_str.get() . char
     let phase = a:stash.phase
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
         " Set filtered string.
-        call buf_str.push_matched(rom_str, a:table.get_map(rom_str))
-        call buf_str.clear_rom_str()
+        call buf_str.rom_pairs.push_one_pair(rom_str, a:table.get_map(rom_str))
+        call buf_str.rom_str.clear()
 
 
         " Set rest string.
@@ -385,12 +385,12 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             \)
             if has_key(st.sandbox, 'real_matched_pairs')
                 " Restore previous hiragana & push current to the tail.
-                let p = henkan_buf_str.pop_matched()
-                call henkan_buf_str.set_multiple_matched(
+                let p = henkan_buf_str.rom_pairs.pop()
+                call henkan_buf_str.rom_pairs.set(
                 \   st.sandbox.real_matched_pairs + [p]
                 \)
             endif
-            let st.sandbox.real_matched_pairs = henkan_buf_str.get_matched()
+            let st.sandbox.real_matched_pairs = henkan_buf_str.rom_pairs.get()
 
             call buftable.do_henkan(a:stash, 1)
         endif
@@ -424,34 +424,34 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         let henkan_select_buf_str = buftable.get_buf_str(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
         \)
-        let henkan_rom = henkan_buf_str.get_rom_str()
-        let okuri_rom  = okuri_buf_str.get_rom_str()
+        let henkan_rom = henkan_buf_str.rom_str.get()
+        let okuri_rom  = okuri_buf_str.rom_str.get()
         if henkan_rom != '' && a:table.has_map(henkan_rom . okuri_rom[0])
             " Push "っ".
             let match_rom = henkan_rom . okuri_rom[0]
-            call henkan_buf_str.push_matched(
+            call henkan_buf_str.rom_pairs.push_one_pair(
             \   match_rom,
             \   a:table.get_map(match_rom)
             \)
             " Push "s" to rom str.
             let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
             if rest !=# -1
-                call okuri_buf_str.set_rom_str(
+                call okuri_buf_str.rom_str.set(
                 \   rest . okuri_rom[1:]
                 \)
             endif
         endif
 
         call eskk#util#assert(char != '')
-        call okuri_buf_str.push_rom_str(char)
+        call okuri_buf_str.rom_str.append(char)
 
         let has_rest = 0
-        if a:table.has_map(okuri_buf_str.get_rom_str())
-            call okuri_buf_str.push_matched(
-            \   okuri_buf_str.get_rom_str(),
-            \   a:table.get_map(okuri_buf_str.get_rom_str())
+        if a:table.has_map(okuri_buf_str.rom_str.get())
+            call okuri_buf_str.rom_pairs.push_one_pair(
+            \   okuri_buf_str.rom_str.get(),
+            \   a:table.get_map(okuri_buf_str.rom_str.get())
             \)
-            let rest = a:table.get_rest(okuri_buf_str.get_rom_str(), -1)
+            let rest = a:table.get_rest(okuri_buf_str.rom_str.get(), -1)
             if rest !=# -1
                 " XXX:
                 "     eskk#mappings#get_filter_map(char)
@@ -468,9 +468,9 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endif
         endif
 
-        call okuri_buf_str.clear_rom_str()
+        call okuri_buf_str.rom_str.clear()
 
-        let matched = okuri_buf_str.get_matched()
+        let matched = okuri_buf_str.rom_pairs.get()
         call eskk#util#assert(!empty(matched))
         " TODO `len(matched) == 1`: Do henkan at only the first time.
 
@@ -481,13 +481,13 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 endfunction "}}}
 function! s:filter_rom_has_candidates(stash) "{{{
     " NOTE: This will be run in all phases.
-    call a:stash.buf_str.push_rom_str(a:stash.char)
+    call a:stash.buf_str.rom_str.append(a:stash.char)
 endfunction "}}}
 function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
-    let rom_str_without_char = buf_str.get_rom_str()
+    let rom_str_without_char = buf_str.rom_str.get()
     let rom_str = rom_str_without_char . char
 
     let [matched_map_list, rest] =
@@ -498,16 +498,16 @@ function! s:filter_rom_no_match(stash, table) "{{{
                 let a:stash.return = char
             else
                 let rest = strpart(rest, 0, strlen(rest) - 2) . char
-                call buf_str.set_rom_str(rest)
+                call buf_str.rom_str.set(rest)
             endif
         else
             let [matched_map_list, head_no_match] =
             \   s:get_matched_and_rest(a:table, rom_str, 0)
             if empty(matched_map_list)
-                call buf_str.set_rom_str(head_no_match)
+                call buf_str.rom_str.set(head_no_match)
             else
                 for char in split(head_no_match, '\zs')
-                    call buf_str.push_matched(char, char)
+                    call buf_str.rom_pairs.push_one_pair(char, char)
                 endfor
                 for matched in matched_map_list
                     if a:table.has_rest(matched)
@@ -519,18 +519,18 @@ function! s:filter_rom_no_match(stash, table) "{{{
                         \   )]
                         \)
                     endif
-                    call buf_str.push_matched(
+                    call buf_str.rom_pairs.push_one_pair(
                     \   matched, a:table.get_map(matched)
                     \)
                 endfor
-                call buf_str.clear_rom_str()
+                call buf_str.rom_str.clear()
             endif
         endif
     else
         for matched in matched_map_list
-            call buf_str.push_matched(matched, a:table.get_map(matched))
+            call buf_str.rom_pairs.push_one_pair(matched, a:table.get_map(matched))
         endfor
-        call buf_str.set_rom_str(rest)
+        call buf_str.rom_str.set(rest)
     endif
 endfunction "}}}
 
@@ -587,7 +587,7 @@ function! s:clear_buffer_string(phase) "{{{
     let buftable = eskk#get_buftable()
     if buftable.get_henkan_phase() ==# a:phase
         let buf_str = buftable.get_current_buf_str()
-        call buf_str.clear_matched()
+        call buf_str.rom_pairs.clear()
     endif
 endfunction "}}}
 
@@ -1096,7 +1096,7 @@ function! eskk#_initialize() "{{{
             " Handle special characters.
             " These characters are handled regardless of current phase.
             if eskk#mappings#is_special_lhs(char, 'backspace-key')
-                if buf_str.get_rom_str() == ''
+                if buf_str.rom_str.get() == ''
                     " If backspace-key was pressed at empty string,
                     " leave abbrev mode.
                     " TODO: Back to previous mode?
@@ -1120,7 +1120,7 @@ function! eskk#_initialize() "{{{
                 \)
                     call buftable.do_henkan(a:stash)
                 else
-                    call buf_str.push_rom_str(char)
+                    call buf_str.rom_str.append(char)
                 endif
             elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
                 if eskk#mappings#is_special_lhs(
