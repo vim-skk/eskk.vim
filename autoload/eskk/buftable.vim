@@ -25,95 +25,107 @@ let eskk#buftable#HENKAN_PHASE_HENKAN_SELECT = 3
 " }}}
 
 " Functions {{{
-" s:buffer_string {{{
-let s:buffer_string = {'_rom_str': '', '_matched_pairs': []}
-
-function! s:buffer_string_new() "{{{
-    return deepcopy(s:buffer_string)
-endfunction "}}}
+let s:VICE_OPTIONS = {'fn_property': 0, 'generate_stub': 1}
+" s:BufferString {{{
+let s:BufferString = vice#class('BufferString', s:SID_PREFIX, s:VICE_OPTIONS)
 
 
-function! s:buffer_string.reset() "{{{
-    for k in keys(s:buffer_string)
-        if has_key(self, k)
-            let self[k] = deepcopy(s:buffer_string[k])
-        endif
+function! {s:BufferString.method('reset')}(this) "{{{
+    let obj = a:this.clone()
+    for k in keys(obj)
+        let a:this[k] = obj[k]
     endfor
 endfunction "}}}
 
 
-function! s:buffer_string.get_rom_str() "{{{
-    return self._rom_str
+let s:RomStr = vice#class('RomStr', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:RomStr.property('_str', '')
+function! {s:RomStr.method('get')}(this) "{{{
+    return a:this._str.get()
 endfunction "}}}
-function! s:buffer_string.set_rom_str(str) "{{{
-    let self._rom_str = a:str
+function! {s:RomStr.method('set')}(this, str) "{{{
+    return a:this._str.set(a:str)
 endfunction "}}}
-function! s:buffer_string.push_rom_str(str) "{{{
-    call self.set_rom_str(self.get_rom_str() . a:str)
+function! {s:RomStr.method('append')}(this, str) "{{{
+    return a:this._str.set(a:this._str.get() . a:str)
 endfunction "}}}
-function! s:buffer_string.pop_rom_str() "{{{
-    let s = self.get_rom_str()
-    call self.set_rom_str(strpart(s, 0, strlen(s) - 1))
+function! {s:RomStr.method('chop')}(this) "{{{
+    let s = a:this._str.get()
+    return a:this._str.set(strpart(s, 0, strlen(s) - 1))
 endfunction "}}}
-function! s:buffer_string.clear_rom_str() "{{{
-    let self._rom_str = ''
+function! {s:RomStr.method('clear')}(this) "{{{
+    return a:this._str.set('')
 endfunction "}}}
 
+call s:BufferString.attribute('rom_str', s:RomStr.new())
+unlet s:RomStr
 
-function! s:buffer_string.get_matched() "{{{
-    return self._matched_pairs
+
+let s:RomPairs = vice#class('RomPairs', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:RomPairs.property('_pairs', [])
+function! {s:RomPairs.method('get')}(this) "{{{
+    return a:this._pairs.get()
 endfunction "}}}
-function! s:buffer_string.get_matched_rom() "{{{
-    return join(map(copy(self._matched_pairs), 'v:val[0]'), '')
+function! {s:RomPairs.method('get_rom')}(this) "{{{
+    return join(map(copy(a:this._pairs.get()), 'v:val[0]'), '')
 endfunction "}}}
-function! s:buffer_string.get_matched_filter() "{{{
-    return join(map(copy(self._matched_pairs), 'v:val[1]'), '')
+function! {s:RomPairs.method('get_filter')}(this) "{{{
+    return join(map(copy(a:this._pairs.get()), 'v:val[1]'), '')
 endfunction "}}}
-function! s:buffer_string.set_matched(rom_str, filter_str) "{{{
-    let self._matched_pairs = [[a:rom_str, a:filter_str]]
+function! {s:RomPairs.method('set')}(this, list_pairs) "{{{
+    return a:this._pairs.set(a:list_pairs)
 endfunction "}}}
-function! s:buffer_string.set_multiple_matched(m) "{{{
-    let self._matched_pairs = a:m
+function! {s:RomPairs.method('set_one_pair')}(this, rom_str, filter_str) "{{{
+    let pair = [a:rom_str, a:filter_str]
+    return a:this._pairs.set([pair])
 endfunction "}}}
-function! s:buffer_string.push_matched(rom_str, filter_str) "{{{
-    call add(self._matched_pairs, [a:rom_str, a:filter_str])
+function! {s:RomPairs.method('push_one_pair')}(this, rom_str, filter_str) "{{{
+    let pair = [a:rom_str, a:filter_str]
+    return a:this._pairs.set(a:this._pairs.get() + [pair])
 endfunction "}}}
-function! s:buffer_string.pop_matched() "{{{
-    if empty(self._matched_pairs)
+function! {s:RomPairs.method('pop')}(this) "{{{
+    let p = a:this._pairs.get()
+    if empty(p)
         return []
+    else
+        let r = remove(p, -1)
+        call a:this._pairs.set(p)
+        return r
     endif
-    return remove(self._matched_pairs, -1)
 endfunction "}}}
-function! s:buffer_string.clear_matched() "{{{
-    let self._matched_pairs = []
-endfunction "}}}
-
-
-function! s:buffer_string.get_input_rom() "{{{
-    return self.get_matched_rom() . self.get_rom_str()
+function! {s:RomPairs.method('clear')}(this) "{{{
+    call a:this._pairs.set([])
 endfunction "}}}
 
+call s:BufferString.attribute('rom_pairs', s:RomPairs.new())
+unlet s:RomPairs
 
-function! s:buffer_string.empty() "{{{
-    return self.get_rom_str() == ''
-    \   && empty(self.get_matched())
+
+function! {s:BufferString.method('get_input_rom')}(this) "{{{
+    return a:this.rom_pairs.get_rom() . a:this.rom_str.get()
 endfunction "}}}
 
-
-function! s:buffer_string.clear() "{{{
-    call self.clear_rom_str()
-    call self.clear_matched()
+function! {s:BufferString.method('empty')}(this) "{{{
+    return a:this.rom_str.get() == ''
+    \   && empty(a:this.rom_pairs.get())
 endfunction "}}}
 
+function! {s:BufferString.method('clear')}(this) "{{{
+    call a:this.rom_str.clear()
+    call a:this.rom_pairs.clear()
+endfunction "}}}
+
+" for memory, store object instead of object factory (class).
+let s:BufferString = s:BufferString.new()
 " }}}
 " s:buftable {{{
 let s:buftable = {
 \   '_table': [
-\       s:buffer_string_new(),
-\       s:buffer_string_new(),
-\       s:buffer_string_new(),
-\       s:buffer_string_new(),
-\       s:buffer_string_new(),
+\       s:BufferString.clone(),
+\       s:BufferString.clone(),
+\       s:BufferString.clone(),
+\       s:BufferString.clone(),
+\       s:BufferString.clone(),
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
