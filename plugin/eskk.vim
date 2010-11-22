@@ -85,35 +85,7 @@ endif
 " }}}
 
 " Commands {{{
-
-command!
-\   -nargs=+
-\   EskkMap
-\   call eskk#mappings#_cmd_eskk_map(<q-args>)
-
-
-command!
-\   -bar
-\   EskkForgetRegisteredWords
-\   call s:cmd_forget_registered_words()
-
-function! s:cmd_forget_registered_words()
-    call eskk#get_skk_dict().forget_all_words()
-endfunction
-
-
-command!
-\   -bar -bang
-\   EskkUpdateDictionary
-\   call s:cmd_update_dictionary(<bang>0)
-
-function! s:cmd_update_dictionary(silent)
-    call eskk#_initialize()
-    let silent = a:0 ? a:1 : 0
-    let dict = eskk#get_skk_dict()
-    execute (silent ? 'silent' : '') 'call dict.update_dictionary()'
-endfunction
-
+call eskk#commands#define()
 " }}}
 
 

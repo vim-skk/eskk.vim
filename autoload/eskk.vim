@@ -883,6 +883,7 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
+    call eskk#commands#define()
     " Default mappings - :EskkMap {{{
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=backspace-key -unique <C-h>
