@@ -26,16 +26,19 @@ let eskk#buftable#HENKAN_PHASE_HENKAN_SELECT = 3
 
 " Functions {{{
 let s:VICE_OPTIONS = {'fn_property': 0, 'generate_stub': 1}
-" s:BufferString {{{
-let s:BufferString = vice#class('BufferString', s:SID_PREFIX, s:VICE_OPTIONS)
+" s:Resettable {{{
+let s:Resettable = vice#class('Resettable', s:SID_PREFIX, s:VICE_OPTIONS)
 
-
-function! {s:BufferString.method('reset')}(this) "{{{
+function! {s:Resettable.method('reset')}(this) "{{{
     let obj = a:this.clone()
     for k in keys(obj)
         let a:this[k] = obj[k]
     endfor
 endfunction "}}}
+" }}}
+" s:BufferString {{{
+let s:BufferString = vice#class('BufferString', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:BufferString.extends(s:Resettable)
 
 
 let s:RomStr = vice#class('RomStr', s:SID_PREFIX, s:VICE_OPTIONS)
@@ -120,6 +123,7 @@ let s:BufferString = s:BufferString.new()
 " }}}
 " s:Buftable {{{
 let s:Buftable = vice#class('Buftable', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:Buftable.extends(s:Resettable)
 
 call s:Buftable.attribute(
 \   '_table',
@@ -155,14 +159,6 @@ call s:Buftable.attribute(
 
 function! eskk#buftable#new() "{{{
     return s:Buftable.clone()
-endfunction "}}}
-
-
-function! {s:Buftable.method('reset')}(this) "{{{
-    let obj = a:this.clone()
-    for k in keys(obj)
-        let a:this[k] = obj[k]
-    endfor
 endfunction "}}}
 
 
