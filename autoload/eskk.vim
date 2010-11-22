@@ -883,6 +883,7 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
+    call eskk#commands#define()
     " Default mappings - :EskkMap {{{
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=backspace-key -unique <C-h>
@@ -1370,8 +1371,6 @@ function! eskk#is_enabled() "{{{
     return eskk#get_current_instance().enabled
 endfunction "}}}
 function! eskk#enable(...) "{{{
-    call eskk#_initialize()
-
     let self = eskk#get_current_instance()
     let do_map = a:0 != 0 ? a:1 : 1
 
@@ -1417,8 +1416,6 @@ function! eskk#enable(...) "{{{
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
-    call eskk#_initialize()
-
     let self = eskk#get_current_instance()
     let do_unmap = a:0 != 0 ? a:1 : 0
 
@@ -1454,7 +1451,6 @@ function! eskk#disable() "{{{
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
-    call eskk#_initialize()
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
 function! eskk#enable_im() "{{{
@@ -2064,6 +2060,8 @@ function! eskk#user_error(from, msg) "{{{
     " TODO Omit a:from to simplify message?
     return printf('%s: %s', join(a:from, ': '), a:msg)
 endfunction "}}}
+
+call eskk#_initialize()
 
 
 
