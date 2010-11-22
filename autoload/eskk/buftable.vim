@@ -1113,6 +1113,11 @@ endfunction "}}}
 " for memory, store object instead of object factory (class).
 let s:Buftable = s:Buftable.new()
 " }}}
+
+" :unlet for memory.
+" Those classes' methods/properties are copied already.
+unlet s:Resettable
+unlet s:BufferString
 " }}}
 
 " Restore 'cpoptions' {{{
