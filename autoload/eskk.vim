@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 13))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 10))
 
 
 function! s:SID() "{{{
@@ -1600,6 +1600,15 @@ function! eskk#get_mode_table(mode) "{{{
 endfunction "}}}
 
 " Table
+function! eskk#create_table(...) "{{{
+    if has_key(s:cached_tables, a:table_name)
+        return s:cached_tables[a:table_name]
+    endif
+
+    " Cache under s:cached_tables.
+    let s:cached_tables[a:table_name] = call('eskk#table#new', a:000)
+    return s:cached_tables[a:table_name]
+endfunction "}}}
 function! eskk#has_table(table_name) "{{{
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
