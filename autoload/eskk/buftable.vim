@@ -25,7 +25,7 @@ let eskk#buftable#HENKAN_PHASE_HENKAN_SELECT = 3
 " }}}
 
 " Functions {{{
-let s:VICE_OPTIONS = {'fn_property': 0, 'generate_stub': 1}
+let s:VICE_OPTIONS = {'generate_stub': 1}
 " s:Resettable {{{
 let s:Resettable = vice#class('Resettable', s:SID_PREFIX, s:VICE_OPTIONS)
 
