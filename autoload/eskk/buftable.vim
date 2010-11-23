@@ -27,7 +27,11 @@ let eskk#buftable#HENKAN_PHASE_HENKAN_SELECT = 3
 " Functions {{{
 let s:VICE_OPTIONS = {'generate_stub': 1}
 " s:Resettable {{{
-let s:Resettable = vice#class('Resettable', s:SID_PREFIX, s:VICE_OPTIONS)
+let s:Resettable = vice#trait('Resettable', s:SID_PREFIX, s:VICE_OPTIONS)
+
+function! s:Resettable.requires() "{{{
+    return ['clone']
+endfunction "}}}
 
 function! {s:Resettable.method('reset')}(this) "{{{
     let obj = a:this.clone()
@@ -38,7 +42,7 @@ endfunction "}}}
 " }}}
 " s:BufferString {{{
 let s:BufferString = vice#class('BufferString', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:BufferString.extends(s:Resettable)
+call s:BufferString.with(s:Resettable)
 
 
 let s:RomStr = vice#class('RomStr', s:SID_PREFIX, s:VICE_OPTIONS)
@@ -123,7 +127,7 @@ let s:BufferString = s:BufferString.new()
 " }}}
 " s:Buftable {{{
 let s:Buftable = vice#class('Buftable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:Buftable.extends(s:Resettable)
+call s:Buftable.with(s:Resettable)
 
 call s:Buftable.attribute(
 \   '_table',
