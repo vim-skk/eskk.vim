@@ -19,7 +19,8 @@ function! eskk#util#warnf(msg, ...) "{{{
 endfunction "}}}
 
 " Logging
-function! s:write_to_log_file(msg) "{{{
+let s:debug_logs = []
+function! eskk#util#write_to_log_file() "{{{
     execute 'redir >>' expand(
     \   eskk#util#join_path(
     \       g:eskk#directory,
@@ -27,7 +28,9 @@ function! s:write_to_log_file(msg) "{{{
     \       'debug' . strftime('-%Y-%m-%d') . '.log'
     \   )
     \)
-    silent echo a:msg
+    for msg in s:debug_logs
+        silent echo msg
+    endfor
     redir END
 endfunction "}}}
 function! eskk#util#log(msg) "{{{
@@ -47,9 +50,7 @@ function! eskk#util#log(msg) "{{{
 
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
     if g:eskk#debug_stdout ==# 'file'
-        execute
-        \   'autocmd eskk VimLeavePre *'
-        \   'call s:write_to_log_file(' . string(msg) . ')'
+        call add(s:debug_logs, msg)
     else
         call eskk#util#warn(msg)
     endif

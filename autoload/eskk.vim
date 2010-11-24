@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 16))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 17))
 
 
 function! s:SID() "{{{
@@ -1320,6 +1320,12 @@ function! eskk#_initialize() "{{{
     call s:initialize_completion()
     " }}}
 
+    " Logging event {{{
+    if g:eskk#debug
+        " Should I create autoload/eskk/log.vim ?
+        autocmd eskk VimLeavePre * call eskk#util#write_to_log_file()
+    endif
+    " }}}
 
     " Create "eskk-initialize" autocmd event.
     " If no "User eskk-initialize" events,
