@@ -410,7 +410,7 @@ function! eskk#mappings#save_normal_keys() "{{{
     endfunction
     return keys
 endfunction "}}}
-function! eskk#mappings#restore_normal_keys(keys) "{{{
+function! s:restore_normal_keys(keys) "{{{
     if has_key(a:keys, 'restore')
         call a:keys.restore()
     endif
@@ -431,7 +431,7 @@ endfunction "}}}
 function! eskk#mappings#do_insert_leave() "{{{
     let inst = eskk#get_current_instance()
     if !empty(inst.prev_normal_keys)
-        call eskk#mappings#restore_normal_keys(inst.prev_normal_keys)
+        call s:restore_normal_keys(inst.prev_normal_keys)
         let inst.prev_normal_keys = {}
     endif
     call eskk#mappings#map_normal_keys()
