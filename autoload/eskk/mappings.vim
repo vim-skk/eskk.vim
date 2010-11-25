@@ -129,7 +129,7 @@ let s:MODE_LOCAL_KEYS = {
 
 
 " Utilities
-function! eskk#mappings#create_default_mapopt() "{{{
+function! s:create_default_mapopt() "{{{
     return {
     \   'buffer': 0,
     \   'expr': 0,
@@ -147,7 +147,7 @@ function! eskk#mappings#mapopt_chars2dict(options) "{{{
     \   'u': 'unique',
     \   'r': 'remap',
     \}
-    let opt = eskk#mappings#create_default_mapopt()
+    let opt = s:create_default_mapopt()
     for c in split(a:options, '\zs')
         let opt[table[c]] = 1
     endfor
@@ -635,7 +635,7 @@ endfunction "}}}
 function! s:parse_options(args) "{{{
     let args = a:args
     let type = 'general'
-    let opt = eskk#mappings#create_default_mapopt()
+    let opt = s:create_default_mapopt()
 
     while args != ''
         let [optname, value, args] = s:parse_options_get_optargs(args)
