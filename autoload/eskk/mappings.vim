@@ -69,7 +69,6 @@ function! s:handle_to_abbrev(stash) "{{{
     return 0
 endfunction "}}}
 
-" TODO s:eskk_mapings should contain this info.
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
 \   'hira': [
@@ -372,6 +371,7 @@ function! eskk#mappings#map_mode_local_keys() "{{{
     endif
 endfunction "}}}
 
+
 " g:eskk#keep_state
 function! eskk#mappings#save_state() "{{{
     let inst = eskk#get_current_instance()
@@ -442,7 +442,7 @@ function! s:restore_normal_keys(keys) "{{{
 endfunction "}}}
 
 
-" Functions using s:eskk_mapings
+" Functions using s:eskk_mappings
 function! eskk#mappings#map_all_keys(...) "{{{
     let mapped_bufnr = eskk#_get_mapped_bufnr()
     if has_key(mapped_bufnr, bufnr('%'))
@@ -495,7 +495,6 @@ function! eskk#mappings#unmap_all_keys() "{{{
 
     unlet mapped_bufnr[bufnr('%')]
 endfunction "}}}
-
 function! eskk#mappings#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error
     " when `eskk_mappings[a:type]` does not exist.
@@ -537,7 +536,6 @@ function! eskk#mappings#handle_special_lhs(char, type, stash) "{{{
     \   && has_key(eskk_mappings, a:type)
     \   && call(eskk_mappings[a:type].fn, [a:stash])
 endfunction "}}}
-
 function! s:create_map(self, type, options, lhs, rhs, from) "{{{
     let self = a:self
     let lhs = a:lhs
@@ -579,7 +577,6 @@ function! s:create_map(self, type, options, lhs, rhs, from) "{{{
         let type_st.lhs = lhs
     endif
 endfunction "}}}
-
 
 
 " :EskkMap - Ex command for s:create_map()
