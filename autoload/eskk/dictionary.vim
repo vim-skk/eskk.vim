@@ -424,7 +424,7 @@ function! {s:HenkanResult.method('_advance')}(this, advance) "{{{
             return 0
         endif
         return 0
-    catch /^eskk: dictionary look up error:/
+    catch /^eskk: dictionary look up error/
         " Shut up error. This function does not throw exception.
         call eskk#error#log_exception('s:HenkanResult._get_candidates()')
         return 0

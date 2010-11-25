@@ -813,7 +813,7 @@ function! {s:Buftable.method('do_henkan_abbrev')}(this, stash, convert_at_exact_
             \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
             \)
         endif
-    catch /^eskk: dictionary look up error:/
+    catch /^eskk: dictionary look up error/
         " No candidates.
         let [input, hira, okuri] = dict.register_word(
         \   dict.get_henkan_result()
@@ -892,7 +892,7 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
             \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
             \)
         endif
-    catch /^eskk: dictionary look up error:/
+    catch /^eskk: dictionary look up error/
         " No candidates.
         let [input, hira, okuri] = dict.register_word(
         \   dict.get_henkan_result()
