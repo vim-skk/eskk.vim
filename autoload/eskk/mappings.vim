@@ -346,7 +346,7 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
     let saved_rhs = maparg(temp_key, 'l')
 
     if saved_rhs != ''
-        call eskk#mappings#unmap(temp_key, 'l', 'b')
+        call eskk#mappings#unmap('b', temp_key, 'l')
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
     else
         call eskk#error#logf(
