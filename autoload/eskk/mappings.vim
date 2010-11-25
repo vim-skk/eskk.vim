@@ -633,7 +633,7 @@ function! s:parse_options_get_optargs(args) "{{{
     endif
     let a = a[1:]
     if a !~# '^'.OPT_CHARS.'\+'
-        throw s:excmd_eskk_map_parse_error(
+        throw eskk#mappings#cmd_eskk_map_invalid_args(
         \   "':EskkMap' argument's key must be word."
         \)
     endif
@@ -665,7 +665,7 @@ function! s:parse_options(args) "{{{
         elseif has_key(opt, optname)
             let opt[optname] = value
         else
-            throw s:excmd_eskk_map_parse_error(
+            throw eskk#mappings#cmd_eskk_map_invalid_args(
             \   printf("unknown option '%s'.", optname)
             \)
         endif
@@ -673,7 +673,7 @@ function! s:parse_options(args) "{{{
 
     return [opt, type, args]
 endfunction "}}}
-function! s:excmd_eskk_map_parse_error(...) "{{{
+function! eskk#mappings#cmd_eskk_map_invalid_args(...) "{{{
     return eskk#error#build_error(
     \   ['eskk', 'mappings'],
     \   [':EskkMap argument parse error'] + a:000

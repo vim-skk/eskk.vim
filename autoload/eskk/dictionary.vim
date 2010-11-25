@@ -449,7 +449,7 @@ function! {s:HenkanResult.method('_get_candidates')}(this) "{{{
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
             let a:this._status = g:eskk#dictionary#HR_NO_RESULT
-            throw s:dictionary_look_up_error(
+            throw eskk#dictionary#look_up_error(
             \   "Can't look up '"
             \   . g:eskk#marker_henkan
             \   . a:this._key
@@ -543,10 +543,10 @@ function! {s:HenkanResult.method('_get_candidates')}(this) "{{{
     endif
 endfunction "}}}
 
-function! s:dictionary_look_up_error(...) "{{{
+function! eskk#dictionary#look_up_error(msg) "{{{
     return eskk#error#build_error(
     \   ['eskk', 'dictionary'],
-    \   ['dictionary look up error'] + a:000
+    \   ['dictionary look up error', a:msg]
     \)
 endfunction "}}}
 
@@ -918,7 +918,7 @@ function! {s:PhysicalDict.method('_parse_lines')}(this, lines) "{{{
     \   ';; okuri-ari entries.'
     \)
     if a:this.okuri_ari_idx ==# -1
-        throw s:dictionary_parse_error(
+        throw eskk#dictionary#parse_error(
         \   "invalid a:this.okuri_ari_idx value"
         \)
     endif
@@ -927,21 +927,21 @@ function! {s:PhysicalDict.method('_parse_lines')}(this, lines) "{{{
     \   ';; okuri-nasi entries.'
     \)
     if a:this.okuri_nasi_idx ==# -1
-        throw s:dictionary_parse_error(
+        throw eskk#dictionary#parse_error(
         \   "invalid a:this.okuri_nasi_idx value"
         \)
     endif
     if a:this.okuri_ari_idx >= a:this.okuri_nasi_idx
-        throw s:dictionary_parse_error(
+        throw eskk#dictionary#parse_error(
         \   "okuri-ari entries must be before okuri-nasi entries."
         \)
     endif
 endfunction "}}}
 
-function! s:dictionary_parse_error(...) "{{{
+function! eskk#dictionary#parse_error(msg) "{{{
     return eskk#error#build_error(
     \   ['eskk', 'dictionary'],
-    \   ["SKK dictionary parse error"] + a:000
+    \   ["SKK dictionary parse error", a:msg]
     \)
 endfunction "}}}
 

@@ -1109,10 +1109,10 @@ endfunction "}}}
 
 function! s:validate_table_idx(table, henkan_phase) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
-        throw s:invalid_henkan_phase_value_error(a:henkan_phase)
+        throw eskk#buftable#invalid_henkan_phase_value_error(a:henkan_phase)
     endif
 endfunction "}}}
-function! s:invalid_henkan_phase_value_error(henkan_phase) "{{{
+function! eskk#buftable#invalid_henkan_phase_value_error(henkan_phase) "{{{
     return eskk#error#build_error(
     \   ["eskk", "buftable"],
     \   ["invalid henkan phase value '" . a:henkan_phase . "'"]
