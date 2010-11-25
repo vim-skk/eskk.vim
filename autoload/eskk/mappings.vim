@@ -387,7 +387,9 @@ endfunction "}}}
 function! eskk#mappings#save_state() "{{{
     let inst = eskk#get_current_instance()
     let inst.prev_normal_keys = s:save_normal_keys()
+
     call s:unmap_normal_keys()
+
     " Restore previous im options.
     let nr = bufnr('%')
     let prev_im_options = eskk#get_current_instance().prev_im_options
@@ -398,11 +400,14 @@ function! eskk#mappings#save_state() "{{{
 endfunction "}}}
 function! eskk#mappings#restore_state() "{{{
     let inst = eskk#get_current_instance()
-    if !empty(inst.prev_normal_keys)
-        call s:restore_normal_keys(inst.prev_normal_keys)
-        let inst.prev_normal_keys = {}
+    if empty(inst.prev_normal_keys)
+        return
     endif
+    call s:restore_normal_keys(inst.prev_normal_keys)
+    let inst.prev_normal_keys = {}
+
     call s:map_normal_keys()
+
     " Save im options.
     let prev_im_options = eskk#get_current_instance().prev_im_options
     let prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
@@ -425,7 +430,9 @@ function! s:map_normal_keys() "{{{
 endfunction "}}}
 function! s:unmap_normal_keys() "{{{
     for key in s:get_normal_keys()
-        call eskk#mappings#unmap('b', key, 'n')
+        if eskk#mappings#map_exists('n', 'b', key)
+            call eskk#mappings#unmap('b', key, 'n')
+        endif
     endfor
 endfunction "}}}
 function! s:save_normal_keys() "{{{
