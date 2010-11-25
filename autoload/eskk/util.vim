@@ -130,6 +130,22 @@ function! eskk#util#list_any(elem, list) "{{{
 endfunction "}}}
 
 
+" Dict function
+function! eskk#util#dict_add(dict, ...) "{{{
+    if a:0 % 2
+        return a:dict
+    endif
+    let dict = copy(a:dict)
+    let kv = copy(a:000)
+    while !empty(kv)
+        let [key, Value] = remove(kv, 0, 1)
+        if !has_key(dict, key)
+            let dict[key] = Value
+        endif
+    endwhile
+    return dict
+endfunction "}}}
+
 " Various structure function
 function! eskk#util#get_f(dict, keys, ...) "{{{
     if empty(a:keys)
