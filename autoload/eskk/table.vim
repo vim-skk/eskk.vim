@@ -334,7 +334,7 @@ endfunction "}}}
 " }}}
 
 " for memory, store object instead of object factory (class).
-let s:TableObj = s:TableObj.new()
+unlet s:TableObj
 let s:BaseTable = s:BaseTable.new()
 let s:ChildTable = s:ChildTable.new()
 
