@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 64))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 65))
 
 
 function! s:SID() "{{{
@@ -599,6 +599,21 @@ function! eskk#_initialize() "{{{
         return
     endif
 
+    " Create eskk augroup. {{{
+    augroup eskk
+        autocmd!
+    augroup END
+    " }}}
+
+    " Create "eskk-initialize-pre" autocmd event. {{{
+    " If no "User eskk-initialize-pre" events,
+    " Vim complains like "No matching autocommands".
+    autocmd eskk User eskk-initialize-pre :
+
+    " Throw eskk-initialize-pre event.
+    doautocmd User eskk-initialize-pre
+    " }}}
+
     " Global Variables {{{
 
     " Debug
@@ -823,12 +838,6 @@ function! eskk#_initialize() "{{{
         endfor
     endfunction
     call s:initialize_set_up_eskk_directory()
-    " }}}
-
-    " Create eskk augroup. {{{
-    augroup eskk
-        autocmd!
-    augroup END
     " }}}
 
     " Egg-like-newline {{{
@@ -1328,13 +1337,14 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
-    " Create "eskk-initialize" autocmd event.
-    " If no "User eskk-initialize" events,
+    " Create "eskk-initialize-post" autocmd event. {{{
+    " If no "User eskk-initialize-post" events,
     " Vim complains like "No matching autocommands".
-    autocmd eskk User eskk-initialize :
+    autocmd eskk User eskk-initialize-post :
 
-    " Throw eskk-initialize event.
-    doautocmd User eskk-initialize
+    " Throw eskk-initialize-post event.
+    doautocmd User eskk-initialize-post
+    " }}}
 
     let s:is_initialized = 1
 endfunction "}}}
