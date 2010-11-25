@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 32))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 33))
 
 
 function! s:SID() "{{{
@@ -874,10 +874,10 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
-    " InsertLeave: g:eskk#keep_state {{{
+    " g:eskk#keep_state {{{
     if g:eskk#keep_state
-        autocmd eskk InsertEnter * call eskk#mappings#do_insert_enter()
-        autocmd eskk InsertLeave * call eskk#mappings#do_insert_leave()
+        autocmd eskk InsertEnter * call eskk#mappings#save_state()
+        autocmd eskk InsertLeave * call eskk#mappings#restore_state()
     else
         autocmd eskk InsertLeave * call eskk#disable()
     endif

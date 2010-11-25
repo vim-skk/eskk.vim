@@ -416,7 +416,8 @@ function! s:restore_normal_keys(keys) "{{{
     endif
 endfunction "}}}
 
-function! eskk#mappings#do_insert_enter() "{{{
+" g:eskk#keep_state
+function! eskk#mappings#save_state() "{{{
     let inst = eskk#get_current_instance()
     let inst.prev_normal_keys = eskk#mappings#save_normal_keys()
     call eskk#mappings#unmap_normal_keys()
@@ -428,7 +429,7 @@ function! eskk#mappings#do_insert_enter() "{{{
         unlet prev_im_options[nr]
     endif
 endfunction "}}}
-function! eskk#mappings#do_insert_leave() "{{{
+function! eskk#mappings#restore_state() "{{{
     let inst = eskk#get_current_instance()
     if !empty(inst.prev_normal_keys)
         call s:restore_normal_keys(inst.prev_normal_keys)
