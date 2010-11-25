@@ -353,9 +353,6 @@ function! {s:Buftable.method('get_henkan_phase')}(this) "{{{
 endfunction "}}}
 function! {s:Buftable.method('set_henkan_phase')}(this, henkan_phase) "{{{
     if a:henkan_phase ==# a:this._henkan_phase
-        call eskk#error#log(
-        \   'tried to change into same phase (' . a:henkan_phase . ').'
-        \)
         return
     endif
 
