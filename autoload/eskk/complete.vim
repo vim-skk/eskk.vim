@@ -33,7 +33,6 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         if g:eskk#debug_out ==# 'file'
             call eskk#error#warn('s:eskkcomplete(): ' . v:exception)
         endif
-        sleep 200m
 
         if a:findstart
             return -1
