@@ -833,31 +833,31 @@ function! {s:HenkanResult.method('update_candidate')}(this) "{{{
 endfunction "}}}
 " }}}
 
-" s:physical_dict {{{
+" s:PhysicalDict {{{
 "
 " Database for physical file dictionary.
-" `s:physical_dict` manipulates only one file.
+" `s:PhysicalDict` manipulates only one file.
 " But `s:dict` may manipulate multiple dictionaries.
 "
 " `get_lines()` does
 " - Lazy file read
 " - Memoization for getting file content
 
-let s:physical_dict = {
-\   '_content_lines': [],
-\   '_ftime_at_read': 0,
-\   '_loaded': 0,
-\   'okuri_ari_idx': -1,
-\   'okuri_nasi_idx': -1,
-\   'path': '',
-\   'sorted': 0,
-\   'encoding': '',
-\   '_is_modified': 0,
-\}
+let s:PhysicalDict = vice#class('PhysicalDict', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:PhysicalDict.attribute('_content_lines', [])
+call s:PhysicalDict.attribute('_ftime_at_read', 0)
+call s:PhysicalDict.attribute('_loaded', 0)
+call s:PhysicalDict.attribute('okuri_ari_idx', -1)
+call s:PhysicalDict.attribute('okuri_nasi_idx', -1)
+call s:PhysicalDict.attribute('path', '')
+call s:PhysicalDict.attribute('sorted', 0)
+call s:PhysicalDict.attribute('encoding', '')
+call s:PhysicalDict.attribute('_is_modified', 0)
 
-function! s:physical_dict_new(path, sorted, encoding) "{{{
-    return extend(
-    \   deepcopy(s:physical_dict, 1),
+
+function! {s:PhysicalDict.constructor()}(this, path, sorted, encoding) "{{{
+    call extend(
+    \   a:this,
     \   {
     \       'path': expand(a:path),
     \       'sorted': a:sorted,
@@ -870,49 +870,49 @@ endfunction "}}}
 
 
 " Get List of whole lines of dictionary.
-function! s:physical_dict.get_lines(...) "{{{
+function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
     let force = a:0 ? a:1 : 0
 
-    let same_timestamp = self._ftime_at_read ==# getftime(self.path)
-    if self._loaded && same_timestamp && !force
-        return self._content_lines
+    let same_timestamp = a:this._ftime_at_read ==# getftime(a:this.path)
+    if a:this._loaded && same_timestamp && !force
+        return a:this._content_lines
     endif
 
-    let path = self.path
+    let path = a:this.path
     try
-        let self._content_lines  = readfile(path)
-        call s:physical_dict_parse_lines(self, self._content_lines)
+        let a:this._content_lines  = readfile(path)
+        call a:this._parse_lines(a:this._content_lines)
 
-        let self._ftime_at_read = getftime(path)
-        let self._loaded = 1
+        let a:this._ftime_at_read = getftime(path)
+        let a:this._loaded = 1
     catch /E484:/    " Can't open file
         call eskk#error#logf("Can't read '%s'!", path)
     catch /^eskk: parse error/
         call eskk#error#log_exception('s:physical_dict.get_lines()')
-        let self.okuri_ari_idx = -1
-        let self.okuri_nasi_idx = -1
+        let a:this.okuri_ari_idx = -1
+        let a:this.okuri_nasi_idx = -1
     endtry
 
-    return self._content_lines
+    return a:this._content_lines
 endfunction "}}}
 
 " Set List of whole lines of dictionary.
-function! s:physical_dict.set_lines(lines) "{{{
+function! {s:PhysicalDict.method('set_lines')}(this, lines) "{{{
     try
-        let self._content_lines  = a:lines
-        call s:physical_dict_parse_lines(self, a:lines)
-        let self._loaded = 1
-        let self._is_modified = 1
+        let a:this._content_lines  = a:lines
+        call a:this._parse_lines(a:lines)
+        let a:this._loaded = 1
+        let a:this._is_modified = 1
     catch /^eskk: parse error/
         call eskk#error#log_exception('s:physical_dict.set_lines()')
-        let self.okuri_ari_idx = -1
-        let self.okuri_nasi_idx = -1
+        let a:this.okuri_ari_idx = -1
+        let a:this.okuri_nasi_idx = -1
     endtry
 endfunction "}}}
 
 " - Validate List of whole lines of dictionary.
 " - Set self.okuri_ari_idx, self.okuri_nasi_idx.
-function! s:physical_dict_parse_lines(self, lines) "{{{
+function! {s:PhysicalDict.method('_parse_lines')}(self, lines) "{{{
     let self = a:self
 
     let self.okuri_ari_idx  = index(
@@ -949,15 +949,16 @@ endfunction "}}}
 
 " Returns true value if "self.okuri_ari_idx" and
 " "self.okuri_nasi_idx" is valid range.
-function! s:physical_dict.is_valid() "{{{
+function! {s:PhysicalDict.method('is_valid')}(this) "{{{
     " Succeeded to parse SKK dictionary.
-    return self.okuri_ari_idx >= 0 && self.okuri_nasi_idx >= 0
+    return a:this.okuri_ari_idx >= 0
+    \   && a:this.okuri_nasi_idx >= 0
 endfunction "}}}
 
 " Get self._ftime_at_read.
 " See self._ftime_at_read description at "s:physical_dict".
-function! s:physical_dict.get_ftime_at_read() "{{{
-    return self._ftime_at_read
+function! {s:PhysicalDict.method('get_ftime_at_read')}(this) "{{{
+    return a:this._ftime_at_read
 endfunction "}}}
 
 " }}}
@@ -997,12 +998,12 @@ function! eskk#dictionary#new(...) "{{{
     return extend(
     \   deepcopy(s:dict, 1),
     \   {
-    \       '_user_dict': s:physical_dict_new(
+    \       '_user_dict': s:PhysicalDict.new(
     \           user_dict.path,
     \           user_dict.sorted,
     \           user_dict.encoding,
     \       ),
-    \       '_system_dict': s:physical_dict_new(
+    \       '_system_dict': s:PhysicalDict.new(
     \           system_dict.path,
     \           system_dict.sorted,
     \           system_dict.encoding,
@@ -1129,7 +1130,7 @@ endfunction "}}}
 
 " Returns true value if new registered is added
 " or user dictionary's lines are
-" modified by "s:physical_dict_new.set_lines()".
+" modified by "s:physical_dict.set_lines()".
 " If this value is false, s:dict.update_dictionary() does nothing.
 function! s:dict.is_modified() "{{{
     " No need to check system dictionary.
@@ -1141,7 +1142,7 @@ endfunction "}}}
 
 " After calling this function,
 " s:dict.is_modified() will returns false.
-" but after calling "s:physical_dict_new.set_lines()",
+" but after calling "s:physical_dict.set_lines()",
 " s:dict.is_modified() will returns true.
 function! s:dict_clear_modified_flags(this) "{{{
     let a:this._registered_words_modified = 0
