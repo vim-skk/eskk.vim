@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 63))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 64))
 
 
 function! s:SID() "{{{
@@ -883,8 +883,9 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
-    call eskk#commands#define()
     " Default mappings - :EskkMap {{{
+    call eskk#commands#define()
+
     silent! EskkMap -type=sticky -unique ;
     silent! EskkMap -type=backspace-key -unique <C-h>
     silent! EskkMap -type=enter-key -unique <CR>
