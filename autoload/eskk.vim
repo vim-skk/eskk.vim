@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 47))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 48))
 
 
 function! s:SID() "{{{
@@ -610,8 +610,8 @@ function! eskk#_initialize() "{{{
         let g:eskk#debug_wait_ms = 0
     endif
 
-    if !exists('g:eskk#debug_stdout')
-        let g:eskk#debug_stdout = "file"
+    if !exists('g:eskk#debug_out')
+        let g:eskk#debug_out = "file"
     endif
 
     if !exists('g:eskk#directory')

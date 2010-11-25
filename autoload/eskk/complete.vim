@@ -30,7 +30,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
     catch
         redraw
         call eskk#error#log_exception('s:eskkcomplete()')
-        if g:eskk#debug_stdout ==# 'file'
+        if g:eskk#debug_out ==# 'file'
             call eskk#error#warn('s:eskkcomplete(): ' . v:exception)
         endif
         sleep 200m
