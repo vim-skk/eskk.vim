@@ -372,6 +372,31 @@ function! eskk#mappings#map_mode_local_keys() "{{{
     endif
 endfunction "}}}
 
+" g:eskk#keep_state
+function! eskk#mappings#save_state() "{{{
+    let inst = eskk#get_current_instance()
+    let inst.prev_normal_keys = s:save_normal_keys()
+    call s:unmap_normal_keys()
+    " Restore previous im options.
+    let nr = bufnr('%')
+    let prev_im_options = eskk#get_current_instance().prev_im_options
+    if has_key(prev_im_options, nr)
+        let [&l:iminsert, &l:imsearch] = prev_im_options[nr]
+        unlet prev_im_options[nr]
+    endif
+endfunction "}}}
+function! eskk#mappings#restore_state() "{{{
+    let inst = eskk#get_current_instance()
+    if !empty(inst.prev_normal_keys)
+        call s:restore_normal_keys(inst.prev_normal_keys)
+        let inst.prev_normal_keys = {}
+    endif
+    call s:map_normal_keys()
+    " Save im options.
+    let prev_im_options = eskk#get_current_instance().prev_im_options
+    let prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
+    let [&l:iminsert, &l:imsearch] = [0, 0]
+endfunction "}}}
 function! s:get_normal_keys() "{{{
     return split('iIaAoOcCsSR', '\zs')
 endfunction "}}}
@@ -414,32 +439,6 @@ function! s:restore_normal_keys(keys) "{{{
     if has_key(a:keys, 'restore')
         call a:keys.restore()
     endif
-endfunction "}}}
-
-" g:eskk#keep_state
-function! eskk#mappings#save_state() "{{{
-    let inst = eskk#get_current_instance()
-    let inst.prev_normal_keys = s:save_normal_keys()
-    call s:unmap_normal_keys()
-    " Restore previous im options.
-    let nr = bufnr('%')
-    let prev_im_options = eskk#get_current_instance().prev_im_options
-    if has_key(prev_im_options, nr)
-        let [&l:iminsert, &l:imsearch] = prev_im_options[nr]
-        unlet prev_im_options[nr]
-    endif
-endfunction "}}}
-function! eskk#mappings#restore_state() "{{{
-    let inst = eskk#get_current_instance()
-    if !empty(inst.prev_normal_keys)
-        call s:restore_normal_keys(inst.prev_normal_keys)
-        let inst.prev_normal_keys = {}
-    endif
-    call s:map_normal_keys()
-    " Save im options.
-    let prev_im_options = eskk#get_current_instance().prev_im_options
-    let prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
-    let [&l:iminsert, &l:imsearch] = [0, 0]
 endfunction "}}}
 
 
