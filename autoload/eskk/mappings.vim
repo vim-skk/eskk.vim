@@ -308,6 +308,13 @@ function! eskk#mappings#map_from_maparg_dict(dict) "{{{
     let modes = a:dict.mode
     return eskk#mappings#map(options, lhs, rhs, modes)
 endfunction "}}}
+function! eskk#mappings#map_exists(mode, ...) "{{{
+    let [options, lhs] = [get(a:000, 0, ''), get(a:000, 1, '')]
+    let options = eskk#mappings#mapopt_chars2raw(options)
+    let excmd = join([a:mode . 'map', options] + (lhs != '' ? [lhs] : []))
+    let out = eskk#util#redir_english(excmd)
+    return eskk#util#list_has(split(out, '\n'), 'No mapping found')
+endfunction "}}}
 
 function! eskk#mappings#set_up_key(key, ...) "{{{
     call eskk#mappings#map(
