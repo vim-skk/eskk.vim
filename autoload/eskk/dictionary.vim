@@ -521,7 +521,7 @@ function! s:henkan_result_get_candidates(this) "{{{
     else
         return []
 
-        " This routine makes error when using completion.
+        " FIXME: This routine makes error when using completion.
     "elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
         "throw eskk#dictionary_look_up_error(
         "\   ['eskk', 'dictionary'],
