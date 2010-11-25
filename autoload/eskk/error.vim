@@ -39,9 +39,10 @@ function! eskk#error#log(msg) "{{{
     redraw
 
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    if g:eskk#debug_out ==# 'file'
+    if g:eskk#debug_out =~# 'file\|both'
         call add(s:warning_messages, msg)
-    elseif g:eskk#debug_out ==# 'cmdline'
+    endif
+    if g:eskk#debug_out =~# 'cmdline\|both'
         call eskk#util#warn(msg)
     endif
 
