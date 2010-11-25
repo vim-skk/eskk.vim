@@ -66,7 +66,7 @@ endfunction "}}}
 
 function! eskk#error#build_error(from, msg_list) "{{{
     let file = 'autoload/' . join(a:from, '/') . '.vim'
-    return 'eskk: ' . join(a:msg_list, ': ') . ' at ' . file
+    return 'eskk: ' . join(a:msg_list, ': ') . ' (at ' . file . ')'
 endfunction "}}}
 
 function! eskk#error#assert(cond, ...) "{{{
