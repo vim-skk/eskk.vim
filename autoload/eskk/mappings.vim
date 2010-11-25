@@ -526,7 +526,7 @@ function! eskk#mappings#get_special_key(type) "{{{
         return eskk_mappings[a:type].lhs
     else
         throw eskk#internal_error(
-        \   ['eskk'],
+        \   ['eskk', 'buftable'],
         \   "Unknown map type: " . a:type
         \)
     endif
@@ -542,7 +542,7 @@ function! eskk#mappings#get_special_map(type) "{{{
         return map
     else
         throw eskk#internal_error(
-        \   ['eskk'],
+        \   ['eskk', 'buftable'],
         \   "Unknown map type: " . a:type
         \)
     endif

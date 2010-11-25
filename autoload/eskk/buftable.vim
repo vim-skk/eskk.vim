@@ -486,7 +486,7 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
 
         call a:this.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     else
-        throw eskk#internal_error(['eskk'])
+        throw eskk#internal_error(['eskk', 'buftable'])
     endif
 endfunction "}}}
 function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
@@ -584,7 +584,7 @@ function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
                 let msg = "Normal phase's marker is empty, "
                 \       . "and other phases *should* be able to change "
                 \       . "current henkan phase."
-                throw eskk#internal_error(['eskk'], msg)
+                throw eskk#internal_error(['eskk', 'buftable'], msg)
             endif
             break
         endif
@@ -677,7 +677,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
                 endif
             else
                 throw eskk#internal_error(
-                \   ['eskk', 'mode', 'builtin'],
+                \   ['eskk', 'buftable'],
                 \   "This will never be reached"
                 \)
             endif
@@ -730,7 +730,7 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
 
         let step = 1
     else
-        throw eskk#internal_error(['eskk'])
+        throw eskk#internal_error(['eskk', 'buftable'])
     endif
 
     return step ? a:this.get_current_marker() : ''
@@ -761,7 +761,7 @@ function! {s:Buftable.method('step_back_henkan_phase')}(this) "{{{
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         return 0    " failed.
     else
-        throw eskk#internal_error(['eskk'])
+        throw eskk#internal_error(['eskk', 'buftable'])
     endif
 endfunction "}}}
 function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
