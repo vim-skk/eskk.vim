@@ -129,6 +129,8 @@ let s:MODE_LOCAL_KEYS = {
 
 
 " Utilities
+
+" FIXME: Make a class for these functions.
 function! s:create_default_mapopt() "{{{
     return {
     \   'buffer': 0,
@@ -285,6 +287,8 @@ function! eskk#mappings#unmap(modes, options, lhs) "{{{
     endfor
 endfunction "}}}
 function! eskk#mappings#map_from_maparg_dict(dict) "{{{
+    " FIXME: mapopt dict should follow maparg()'s dict.
+
     if empty(a:dict)
         " The mapping does not exist.
         return
