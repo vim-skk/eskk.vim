@@ -184,8 +184,8 @@ function! s:search_linear(
     let min = get(a:000, 0, a:ph_dict[min_which])
     let max = get(a:000, 1, len(a:whole_lines) - 1)
 
-    call eskk#error#assert(min <=# max, 'min <=# max')
-    call eskk#error#assert(min >= 0, "min is not invalid (negative) number.")
+    call eskk#error#assert(min <=# max, min.' <=# '.max)
+    call eskk#error#assert(min >= 0, "min is not invalid (negative) number:" . min)
 
     while min <=# max
         if stridx(a:whole_lines[min], a:needle) == 0
