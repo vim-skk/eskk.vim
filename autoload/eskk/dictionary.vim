@@ -40,7 +40,7 @@ function! eskk#dictionary#search_all_candidates(
         return []
     endif
 
-    let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
+    let converted = eskk#util#iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         let [line, idx] = s:search_binary(
         \   a:physical_dict,
@@ -70,7 +70,7 @@ function! eskk#dictionary#search_all_candidates(
 
         let s:search_all_candidate_memoize[cache_key] = map(
         \   whole_lines[begin : end],
-        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+        \   'eskk#util#iconv(v:val, a:physical_dict.encoding, &l:encoding)'
         \)
     else
         let lines = []
@@ -94,7 +94,7 @@ function! eskk#dictionary#search_all_candidates(
 
         let s:search_all_candidate_memoize[cache_key] = map(
         \   lines,
-        \   's:iconv(v:val, a:physical_dict.encoding, &l:encoding)'
+        \   'eskk#util#iconv(v:val, a:physical_dict.encoding, &l:encoding)'
         \)
     endif
 
@@ -114,7 +114,7 @@ function! eskk#dictionary#search_candidate(
         return ['', -1]
     endif
 
-    let converted = s:iconv(needle, &l:encoding, a:physical_dict.encoding)
+    let converted = eskk#util#iconv(needle, &l:encoding, a:physical_dict.encoding)
     if a:physical_dict.sorted
         let [line, idx] = s:search_binary(
         \   a:physical_dict, whole_lines, converted, has_okuri, 100
@@ -126,7 +126,7 @@ function! eskk#dictionary#search_candidate(
     endif
     if idx !=# -1
         return [
-        \   s:iconv(line, a:physical_dict.encoding, &l:encoding),
+        \   eskk#util#iconv(line, a:physical_dict.encoding, &l:encoding),
         \   idx
         \]
     else
@@ -865,14 +865,6 @@ function! s:physical_dict_new(path, sorted, encoding) "{{{
     \   },
     \   'force'
     \)
-endfunction "}}}
-
-function! s:iconv(expr, from, to) "{{{
-    if a:from == '' || a:to == '' || a:from ==? a:to
-        return a:expr
-    endif
-    let result = iconv(a:expr, a:from, a:to)
-    return result != '' ? result : a:expr
 endfunction "}}}
 
 

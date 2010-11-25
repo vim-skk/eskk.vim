@@ -19,12 +19,19 @@ function! eskk#util#warnf(msg, ...) "{{{
 endfunction "}}}
 
 
-" Multibyte
+" Encoding
 function! eskk#util#mb_strlen(str) "{{{
     return strlen(substitute(copy(a:str), '.', 'x', 'g'))
 endfunction "}}}
 function! eskk#util#mb_chop(str) "{{{
     return substitute(a:str, '.$', '', '')
+endfunction "}}}
+function! eskk#util#iconv(expr, from, to) "{{{
+    if a:from == '' || a:to == '' || a:from ==? a:to
+        return a:expr
+    endif
+    let result = iconv(a:expr, a:from, a:to)
+    return result != '' ? result : a:expr
 endfunction "}}}
 
 
