@@ -41,7 +41,7 @@ function! eskk#error#log(msg) "{{{
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
     if g:eskk#debug_out ==# 'file'
         call add(s:warning_messages, msg)
-    else
+    elseif g:eskk#debug_out ==# 'cmdline'
         call eskk#util#warn(msg)
     endif
 
