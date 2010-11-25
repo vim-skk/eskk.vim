@@ -69,10 +69,6 @@ function! eskk#util#logstrf(fmt, ...) "{{{
     \)
 endfunction "}}}
 function! eskk#util#log_exception(what) "{{{
-    if !g:eskk#debug
-        return
-    endif
-
     call eskk#util#log("'" . a:what . "' throwed exception")
     call eskk#util#log('v:exception = ' . string(v:exception))
     call eskk#util#log('v:throwpoint = ' . string(v:throwpoint))
