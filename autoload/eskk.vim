@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 43))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 44))
 
 
 function! s:SID() "{{{
@@ -1418,7 +1418,7 @@ function! eskk#enable(...) "{{{
     if self.enabled_mode =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
-        return eskk#enable_im()
+        return s:enable_im()
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
@@ -1453,19 +1453,19 @@ function! eskk#disable() "{{{
         let buftable = eskk#get_buftable()
         return buftable.generate_kakutei_str() . "\<C-^>"
     else
-        return eskk#disable_im()
+        return s:disable_im()
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
-function! eskk#enable_im() "{{{
+function! s:enable_im() "{{{
     let &l:iminsert = eskk#mappings#map_exists('l') ? 1 : 2
     let &l:imsearch = &l:iminsert
     
     return ''
 endfunction "}}}
-function! eskk#disable_im() "{{{
+function! s:disable_im() "{{{
     let &l:iminsert = 0
     let &l:imsearch = 0
     
