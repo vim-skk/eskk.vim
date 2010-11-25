@@ -74,7 +74,7 @@ function! eskk#error#assert(cond, ...) "{{{
         throw call('eskk#error#assertion_failure_error', a:000)
     endif
 endfunction "}}}
-function! eskk#error#assertion_failure_error(from, ...) "{{{
+function! eskk#error#assertion_failure_error(...) "{{{
     " This is only used from eskk#error#assert().
     return eskk#error#build_error(
     \   ['eskk', 'error'],
