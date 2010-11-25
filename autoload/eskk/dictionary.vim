@@ -331,7 +331,15 @@ endfunction "}}}
 
 
 
-" s:henkan_result {{{
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
+let s:VICE_OPTIONS = {'generate_stub': 1}
+
+" s:HenkanResult {{{
 
 " Interface for henkan result.
 " This provides a method `get_next()`
@@ -351,26 +359,25 @@ let [
 "   Candidates looked up by self._key, self._okuri_rom, self._okuri
 "   NOTE:
 "   Do not access directly.
-"   Getter is s:henkan_result_get_candidates().
+"   Getter is s:HenkanResult._get_candidates().
 " self._candidates_index:
 "   Current index of List self._candidates
 " self._user_dict_found_index:
 "   The lnum of found the candidate in user dictionary.
-"   Used by s:henkan_result.delete_from_dict()
-let s:henkan_result = {
-\   'buftable': {},
-\   '_key': '',
-\   '_okuri_rom': '',
-\   '_okuri': '',
-\   '_status': -1,
-\   '_candidates': {},
-\   '_candidates_index': -1,
-\   '_user_dict_found_index': -1,
-\}
+"   Used by s:HenkanResult.delete_from_dict()
+let s:HenkanResult = vice#class('HenkanResult', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:HenkanResult.attribute('buftable', {})
+call s:HenkanResult.attribute('_key', '')
+call s:HenkanResult.attribute('_okuri_rom', '')
+call s:HenkanResult.attribute('_okuri', '')
+call s:HenkanResult.attribute('_status', -1)
+call s:HenkanResult.attribute('_candidates', {})
+call s:HenkanResult.attribute('_candidates_index', -1)
+call s:HenkanResult.attribute('_user_dict_found_index', -1)
 
-function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
-    let obj = extend(
-    \   deepcopy(s:henkan_result, 1),
+function! {s:HenkanResult.constructor()}(this, key, okuri_rom, okuri, buftable) "{{{
+    call extend(
+    \   a:this,
     \   {
     \       'buftable': a:buftable,
     \       '_key': a:key,
@@ -379,14 +386,13 @@ function! s:henkan_result_new(key, okuri_rom, okuri, buftable) "{{{
     \   },
     \   'force'
     \)
-    call s:henkan_result_reset(obj)
-    return obj
+    call a:this.reset()
 endfunction "}}}
 
 " Reset candidates.
 " After calling this function,
-" s:henkan_result_get_candidates() will look up dictionary again.
-function! s:henkan_result_reset(this) "{{{
+" s:HenkanResult._get_candidates() will look up dictionary again.
+function! {s:HenkanResult.method('reset')}(this) "{{{
     call extend(
     \   a:this,
     \   {
@@ -398,19 +404,19 @@ function! s:henkan_result_reset(this) "{{{
     \   },
     \   'force'
     \)
-    call s:henkan_result_remove_cache(a:this)
+    call a:this.remove_cache()
 endfunction "}}}
 
 " Forward/Back self._candidates_index safely
 " Returns true value when succeeded / false value when failed
-function! s:henkan_result_advance(this, advance) "{{{
-    call s:henkan_result_remove_cache(a:this)
+function! {s:HenkanResult.method('_advance')}(this, advance) "{{{
+    call a:this.remove_cache()
 
     try
-        let candidates = s:henkan_result_get_candidates(a:this)
+        let candidates = a:this._get_candidates()
         let idx = a:this._candidates_index
         if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
-            " Next time to call s:henkan_result_get_candidates(),
+            " Next time to call s:HenkanResult._get_candidates(),
             " eskk will getchar() if `idx >= g:eskk#show_candidates_count`
             let a:this._candidates_index +=  (a:advance ? 1 : -1)
             return 1
@@ -420,13 +426,13 @@ function! s:henkan_result_advance(this, advance) "{{{
         return 0
     catch /^eskk: dictionary look up error:/
         " Shut up error. This function does not throw exception.
-        call eskk#error#log_exception('s:henkan_result_get_candidates()')
+        call eskk#error#log_exception('s:HenkanResult._get_candidates()')
         return 0
     endtry
 endfunction "}}}
 
 " Returns List of candidates.
-function! s:henkan_result_get_candidates(this) "{{{
+function! {s:HenkanResult.method('_get_candidates')}(this) "{{{
     if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
         return a:this._candidates.to_list()
 
@@ -545,8 +551,8 @@ function! s:dictionary_look_up_error(...) "{{{
 endfunction "}}}
 
 " Select candidate from command-line.
-" s:henkan_result_select_candidates() {{{
-function! s:henkan_result_select_candidates(
+" s:HenkanResult._select_candidates() {{{
+function! {s:HenkanResult.method('_select_candidates')}(
 \   this, with_okuri, skip_num, functor
 \)
     if eskk#is_neocomplcache_locked()
@@ -554,7 +560,7 @@ function! s:henkan_result_select_candidates(
     endif
 
     " Select candidates by getchar()'s character.
-    let words = copy(s:henkan_result_get_candidates(a:this))
+    let words = copy(a:this._get_candidates())
     let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
     let page_index = 0
     let pages = []
@@ -654,7 +660,7 @@ function! s:henkan_result_select_candidates(
 endfunction "}}}
 
 " Clear cache of current candidate.
-function! s:henkan_result_remove_cache(this) "{{{
+function! {s:HenkanResult.method('remove_cache')}(this) "{{{
     if has_key(a:this, '_candidate')
         unlet a:this._candidate
     endif
@@ -664,70 +670,70 @@ endfunction "}}}
 " Returns candidate String.
 " if optional {with_okuri} arguments are supplied,
 " returns candidate String with okuri.
-function! s:henkan_result.get_candidate(...) "{{{
+function! {s:HenkanResult.method('get_candidate')}(this, ...) "{{{
     let with_okuri = a:0 ? a:1 : 1
 
-    if has_key(self, '_candidate')
-        return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
+    if has_key(a:this, '_candidate')
+        return a:this._candidate[0] . (with_okuri ? a:this._candidate[1] : '')
     endif
 
     let max_count = g:eskk#show_candidates_count >= 0 ?
     \                   g:eskk#show_candidates_count : 0
-    let candidates = s:henkan_result_get_candidates(self)
+    let candidates = a:this._get_candidates()
 
-    if self._candidates_index >= max_count
+    if a:this._candidates_index >= max_count
         let functor = {
         \   'candidates': candidates,
-        \   'this': self,
+        \   'this': a:this,
         \   'with_okuri': with_okuri,
         \}
         function functor.funcall()
-            if self.this._candidates_index > 0
-                " This changes self.this._candidates_index.
-                call self.this.back()
+            if a:this.this._candidates_index > 0
+                " This changes a:this.this._candidates_index.
+                call a:this.this.back()
             endif
             return [
-            \   self.candidates[self.this._candidates_index].input,
-            \   (self.with_okuri ? self.this._okuri : '')
+            \   a:this.candidates[a:this.this._candidates_index].input,
+            \   (a:this.with_okuri ? a:this.this._okuri : '')
             \]
         endfunction
 
-        let self._candidate = s:henkan_result_select_candidates(
-        \   self, with_okuri, max_count, functor
+        let a:this._candidate = a:this._select_candidates(
+        \   with_okuri, max_count, functor
         \)
     else
-        let self._candidate = [
-        \   candidates[self._candidates_index].input,
-        \   (with_okuri ? self._okuri : '')
+        let a:this._candidate = [
+        \   candidates[a:this._candidates_index].input,
+        \   (with_okuri ? a:this._okuri : '')
         \]
     endif
 
-    return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
+    return a:this._candidate[0] . (with_okuri ? a:this._candidate[1] : '')
 endfunction "}}}
 " Getter for self._key
-function! s:henkan_result.get_key() "{{{
-    return self._key
+function! {s:HenkanResult.method('get_key')}(this) "{{{
+    return a:this._key
 endfunction "}}}
 " Getter for self._okuri
-function! s:henkan_result.get_okuri() "{{{
-    return self._okuri
+function! {s:HenkanResult.method('get_okuri')}(this) "{{{
+    return a:this._okuri
 endfunction "}}}
 " Getter for self._okuri_rom
-function! s:henkan_result.get_okuri_rom() "{{{
-    return self._okuri_rom
+function! {s:HenkanResult.method('get_okuri_rom')}(this) "{{{
+    return a:this._okuri_rom
 endfunction "}}}
 " Getter for self._status
-function! s:henkan_result.get_status() "{{{
-    return self._status
+function! {s:HenkanResult.method('get_status')}(this) "{{{
+    return a:this._status
 endfunction "}}}
 
 " Forward current candidate index number (self._candidates_index)
-function! s:henkan_result.forward() "{{{
-    return s:henkan_result_advance(self, 1)
+function! {s:HenkanResult.method('forward')}(this) "{{{
+    return a:this._advance(1)
 endfunction "}}}
 " Back current candidate index number (self._candidates_index)
-function! s:henkan_result.back() "{{{
-    return s:henkan_result_advance(self, 0)
+function! {s:HenkanResult.method('back')}(this) "{{{
+    return a:this._advance(0)
 endfunction "}}}
 
 " Delete current candidate from all places.
@@ -737,16 +743,16 @@ endfunction "}}}
 " - SKK dictionary
 " -- User dictionary
 " -- TODO: System dictionary (skk-ignore-dic-word) (Issue #86)
-function! s:henkan_result.delete_from_dict() "{{{
+function! {s:HenkanResult.method('delete_from_dict')}(this) "{{{
     try
-        return s:henkan_result_delete_from_dict(self)
+        return a:this._do_delete_from_dict()
     finally
         let dict = eskk#get_skk_dict()
         call dict.clear_henkan_result()
     endtry
 endfunction "}}}
-function! s:henkan_result_delete_from_dict(this) "{{{
-    let candidates = s:henkan_result_get_candidates(a:this)
+function! {s:HenkanResult.method('_do_delete_from_dict')}(this) "{{{
+    let candidates = a:this._get_candidates()
     let candidates_index = a:this._candidates_index
     let user_dict_idx = a:this._user_dict_found_index
 
@@ -799,25 +805,25 @@ function! s:henkan_result_delete_from_dict(this) "{{{
         return
     endtry
 
-    call s:henkan_result_reset(a:this)
+    call a:this.reset()
 
     redraw
     call dict.update_dictionary()
 endfunction "}}}
 
 " TODO doc
-function! s:henkan_result.update_candidate() "{{{
-    let candidates = s:henkan_result_get_candidates(self)
-    let candidates_index = self._candidates_index
+function! {s:HenkanResult.method('update_candidate')}(this) "{{{
+    let candidates = a:this._get_candidates()
+    let candidates_index = a:this._candidates_index
 
     if !eskk#util#has_idx(candidates, candidates_index)
         return
     endif
     let rw = s:candidate2registered_word(
     \   candidates[candidates_index],
-    \   self._key,
-    \   self._okuri,
-    \   self._okuri_rom,
+    \   a:this._key,
+    \   a:this._okuri,
+    \   a:this._okuri_rom,
     \)
 
     " Move current candidate to the first.
@@ -825,7 +831,6 @@ function! s:henkan_result.update_candidate() "{{{
     call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
     call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
 endfunction "}}}
-
 " }}}
 
 " s:physical_dict {{{
@@ -1023,10 +1028,10 @@ endfunction "}}}
 " Find matching candidates from all places.
 "
 " This actually just sets "self._current_henkan_result"
-" which is "s:henkan_result"'s instance.
-" This is interface so s:henkan_result is implementation.
+" which is "s:HenkanResult"'s instance.
+" This is interface so s:HenkanResult is implementation.
 function! s:dict.refer(buftable, key, okuri, okuri_rom) "{{{
-    let hr = s:henkan_result_new(
+    let hr = s:HenkanResult.new(
     \   a:key,
     \   a:okuri_rom,
     \   a:okuri,
@@ -1099,7 +1104,7 @@ function! s:dict.forget_word(input, key, okuri, okuri_rom) "{{{
     let self._registered_words_modified = 1
 
     if !empty(self._current_henkan_result)
-        call s:henkan_result_reset(self._current_henkan_result)
+        call self._current_henkan_result.reset()
     endif
 endfunction "}}}
 
@@ -1114,7 +1119,7 @@ function! s:dict.remember_word(input, key, okuri, okuri_rom) "{{{
     let self._registered_words_modified = 1
 
     if !empty(self._current_henkan_result)
-        call s:henkan_result_reset(self._current_henkan_result)
+        call self._current_henkan_result.reset()
     endif
 endfunction "}}}
 
