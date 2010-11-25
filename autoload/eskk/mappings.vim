@@ -270,7 +270,7 @@ function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
         endtry
     endfor
 endfunction "}}}
-function! eskk#mappings#unmap(modes, options, lhs) "{{{
+function! eskk#mappings#unmap(options, lhs, modes) "{{{
     if a:lhs == ''
         call eskk#error#logstrf('lhs is empty: lhs = %s', a:lhs)
         return
@@ -339,7 +339,7 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
     let saved_rhs = maparg(temp_key, 'l')
 
     if saved_rhs != ''
-        call eskk#mappings#unmap('l', 'b', temp_key)
+        call eskk#mappings#unmap(temp_key, 'l', 'b')
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
     else
         call eskk#error#logf(
@@ -418,7 +418,7 @@ function! s:map_normal_keys() "{{{
 endfunction "}}}
 function! s:unmap_normal_keys() "{{{
     for key in s:get_normal_keys()
-        call eskk#mappings#unmap('n', 'b', key)
+        call eskk#mappings#unmap('b', key, 'n')
     endfor
 endfunction "}}}
 function! s:save_normal_keys() "{{{
@@ -494,7 +494,7 @@ function! eskk#mappings#unmap_all_keys() "{{{
     endif
 
     for key in g:eskk#mapped_keys
-        call eskk#mappings#unmap('l', 'b', key)
+        call eskk#mappings#unmap('b', key, 'l')
     endfor
 
     unlet mapped_bufnr[bufnr('%')]
