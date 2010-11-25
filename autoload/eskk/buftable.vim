@@ -353,7 +353,7 @@ function! {s:Buftable.method('get_henkan_phase')}(this) "{{{
 endfunction "}}}
 function! {s:Buftable.method('set_henkan_phase')}(this, henkan_phase) "{{{
     if a:henkan_phase ==# a:this._henkan_phase
-        call eskk#util#log(
+        call eskk#error#log(
         \   'tried to change into same phase (' . a:henkan_phase . ').'
         \)
         return
@@ -572,14 +572,14 @@ function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
                 endif
             else
                 let m = buf_str.rom_pairs.get()
-                call eskk#util#assert(len(m) == 1)
+                call eskk#error#assert(len(m) == 1)
                 let [rom, filter] = m[0]
                 call buf_str.rom_pairs.set_one_pair(rom, eskk#util#mb_chop(filter))
 
                 " `rom` is empty string,
                 " Because currently this is called only by
                 " `s:do_backspace()` in `autoload/eskk/complete.vim`.
-                call eskk#util#assert(rom == '')
+                call eskk#error#assert(rom == '')
             endif
             break
         elseif a:this.get_marker(phase) != ''
@@ -606,7 +606,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
     let prev_buftable = henkan_result.buftable
     let rom_str = cur_buf_str.rom_pairs.get_rom()
 
-    call eskk#util#assert(
+    call eskk#error#assert(
     \   a:this.get_henkan_phase()
     \       ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
     \   "current phase is henkan select phase."
@@ -933,7 +933,7 @@ function! {s:Buftable.method('do_escape')}(this, stash) "{{{
 
     " NOTE: This function return value is not remapped.
     let esc = eskk#mappings#get_special_key('escape-key')
-    call eskk#util#assert(esc != '')
+    call eskk#error#assert(esc != '')
 
     let a:stash.return = kakutei_str . eskk#util#key2char(esc)
 endfunction "}}}
@@ -1058,7 +1058,7 @@ function! {s:Buftable.method('remove_display_str')}(this) "{{{
 
     " NOTE: This function return value is not remapped.
     let bs = eskk#mappings#get_special_key('backspace-key')
-    call eskk#util#assert(bs != '')
+    call eskk#error#assert(bs != '')
 
     return repeat(
     \   eskk#util#key2char(bs),
@@ -1078,7 +1078,7 @@ function! {s:Buftable.method('set_begin_pos')}(this, expr) "{{{
     elseif mode() ==# 'c'
         let a:this._begin_pos = ['c', getcmdpos()]
     else
-        call eskk#util#logf("called eskk from mode '%s'.", mode())
+        call eskk#error#logf("called eskk from mode '%s'.", mode())
     endif
 endfunction "}}}
 
@@ -1112,8 +1112,14 @@ endfunction "}}}
 
 function! s:validate_table_idx(table, henkan_phase) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
-        throw eskk#out_of_idx_error(["eskk", "buftable"])
+        throw s:invalid_henkan_phase_value_error(a:henkan_phase)
     endif
+endfunction "}}}
+function! s:invalid_henkan_phase_value_error(henkan_phase) "{{{
+    return eskk#error#build_error(
+    \   ["eskk", "buftable"],
+    \   ["invalid henkan phase value '" . a:henkan_phase . "'"]
+    \)
 endfunction "}}}
 
 " for memory, store object instead of object factory (class).

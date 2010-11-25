@@ -130,7 +130,7 @@ function! {s:TableObj.method('get_candidates')}(this, lhs_head, max_candidates, 
 endfunction "}}}
 function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     let table_name = a:table._name
-    call eskk#util#assert(
+    call eskk#error#assert(
     \   a:max_candidates !=# 0,
     \   "a:max_candidates must be negative or positive."
     \)

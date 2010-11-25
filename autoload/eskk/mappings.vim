@@ -249,7 +249,7 @@ endfunction "}}}
 
 function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
-        call eskk#util#logstrf(
+        call eskk#error#logstrf(
         \   'lhs or rhs is empty: lhs = %s, rhs = %s',
         \   a:lhs,
         \   a:rhs
@@ -265,13 +265,13 @@ function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
         try
             execute mapcmd
         catch
-            call eskk#util#log_exception(mapcmd)
+            call eskk#error#log_exception(mapcmd)
         endtry
     endfor
 endfunction "}}}
 function! eskk#mappings#unmap(modes, options, lhs) "{{{
     if a:lhs == ''
-        call eskk#util#logstrf('lhs is empty: lhs = %s', a:lhs)
+        call eskk#error#logstrf('lhs is empty: lhs = %s', a:lhs)
         return
     endif
 
@@ -281,7 +281,7 @@ function! eskk#mappings#unmap(modes, options, lhs) "{{{
         try
             execute mapcmd
         catch
-            call eskk#util#log_exception(mapcmd)
+            call eskk#error#log_exception(mapcmd)
         endtry
     endfor
 endfunction "}}}
@@ -339,7 +339,7 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
         call eskk#mappings#unmap('l', 'b', temp_key)
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
     else
-        call eskk#util#logf(
+        call eskk#error#logf(
         \   "called eskk#mappings#set_up_temp_key_restore()"
         \       . " but no '%s' key is stashed.",
         \   a:lhs
@@ -480,7 +480,7 @@ function! eskk#mappings#map_all_keys(...) "{{{
         endif
     endfor
 
-    call eskk#util#assert(!has_key(mapped_bufnr, bufnr('%')))
+    call eskk#error#assert(!has_key(mapped_bufnr, bufnr('%')))
     let mapped_bufnr[bufnr('%')] = 1
 endfunction "}}}
 function! eskk#mappings#unmap_all_keys() "{{{
@@ -618,8 +618,7 @@ function! s:parse_options_get_optargs(args) "{{{
     endif
     let a = a[1:]
     if a !~# '^'.OPT_CHARS.'\+'
-        throw eskk#parse_error(
-        \   ['eskk'],
+        throw s:excmd_eskk_map_parse_error(
         \   "':EskkMap' argument's key must be word."
         \)
     endif
@@ -651,14 +650,19 @@ function! s:parse_options(args) "{{{
         elseif has_key(opt, optname)
             let opt[optname] = value
         else
-            throw eskk#parse_error(
-            \   ['eskk'],
+            throw s:excmd_eskk_map_parse_error(
             \   printf("unknown option '%s'.", optname)
             \)
         endif
     endwhile
 
     return [opt, type, args]
+endfunction "}}}
+function! s:excmd_eskk_map_parse_error(...) "{{{
+    return eskk#error#build_error(
+    \   ['eskk', 'mappings'],
+    \   [':EskkMap argument parse error'] + a:000
+    \)
 endfunction "}}}
 function! eskk#mappings#_cmd_eskk_map(args) "{{{
     let [options, type, args] = s:parse_options(a:args)

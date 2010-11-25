@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 30))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 31))
 
 
 function! s:SID() "{{{
@@ -319,7 +319,7 @@ function! s:filter_rom(stash, table) "{{{
     let candidates     = a:table.get_candidates(rom_str, 2, [])
 
     if match_exactly
-        call eskk#util#assert(!empty(candidates))
+        call eskk#error#assert(!empty(candidates))
     endif
 
     if match_exactly && len(candidates) == 1
@@ -442,7 +442,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endif
         endif
 
-        call eskk#util#assert(char != '')
+        call eskk#error#assert(char != '')
         call okuri_buf_str.rom_str.append(char)
 
         let has_rest = 0
@@ -471,7 +471,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call okuri_buf_str.rom_str.clear()
 
         let matched = okuri_buf_str.rom_pairs.get()
-        call eskk#util#assert(!empty(matched))
+        call eskk#error#assert(!empty(matched))
         " TODO `len(matched) == 1`: Do henkan at only the first time.
 
         if !has_rest && g:eskk#auto_henkan_at_okuri_match
@@ -818,7 +818,7 @@ function! eskk#_initialize() "{{{
         let dir = expand(g:eskk#directory)
         for d in [dir, eskk#util#join_path(dir, 'log')]
             if !isdirectory(d) && !eskk#util#mkdir_nothrow(d)
-                call eskk#util#logf("can't create directory '%s'.", d)
+                call eskk#error#logf("can't create directory '%s'.", d)
             endif
         endfor
     endfunction
@@ -1221,7 +1221,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " s:saved_im_options {{{
-    call eskk#util#assert(empty(s:saved_im_options))
+    call eskk#error#assert(empty(s:saved_im_options))
     let s:saved_im_options = [&g:iminsert, &g:imsearch]
     " }}}
 
@@ -1323,7 +1323,7 @@ function! eskk#_initialize() "{{{
     " Logging event {{{
     if g:eskk#debug
         " Should I create autoload/eskk/log.vim ?
-        autocmd eskk VimLeavePre * call eskk#util#write_to_log_file()
+        autocmd eskk VimLeavePre * call eskk#error#write_to_log_file()
     endif
     " }}}
 
@@ -1499,10 +1499,10 @@ endfunction "}}}
 function! eskk#set_mode(next_mode) "{{{
     let self = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:next_mode)
-        call eskk#util#log(
+        call eskk#error#log(
         \   "mode '" . a:next_mode . "' is not supported."
         \)
-        call eskk#util#log(
+        call eskk#error#log(
         \   's:available_modes = ' . string(s:available_modes)
         \)
         return
@@ -1753,7 +1753,7 @@ function! eskk#filter(char) "{{{
 
     " Check irregular circumstance.
     if !eskk#is_supported_mode(self.mode)
-        call eskk#util#log('current mode is not supported: ' . self.mode)
+        call eskk#error#log('current mode is not supported: ' . self.mode)
         sleep 1
     endif
 
@@ -1781,7 +1781,7 @@ function! eskk#filter(char) "{{{
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
-                call eskk#util#log_exception(
+                call eskk#error#log_exception(
                 \   'eskk#complete#handle_special_key()'
                 \)
             endtry
@@ -1983,7 +1983,7 @@ function! s:write_error_log_file(char) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        call eskk#util#logf("Cannot write to log file '%s'.", log_file)
+        call eskk#error#logf("Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight
@@ -2038,26 +2038,8 @@ function! eskk#is_neocomplcache_locked() "{{{
 endfunction "}}}
 
 " Exceptions
-function! s:build_error(from, msg) "{{{
-    let file = 'autoload/' . join(a:from, '/') . '.vim'
-    return 'eskk: ' . join(a:msg, ': ') . ' at ' . file
-endfunction "}}}
-
 function! eskk#internal_error(from, ...) "{{{
-    return s:build_error(a:from, ['internal error'] + a:000)
-endfunction "}}}
-function! eskk#dictionary_look_up_error(from, ...) "{{{
-    return s:build_error(a:from, ['dictionary look up error'] + a:000)
-endfunction "}}}
-function! eskk#out_of_idx_error(from, ...) "{{{
-    return s:build_error(a:from, ['out of index'] + a:000)
-endfunction "}}}
-function! eskk#parse_error(from, ...) "{{{
-    return s:build_error(a:from, ['parse error'] + a:000)
-endfunction "}}}
-function! eskk#assertion_failure_error(from, ...) "{{{
-    " This is only used from eskk#util#assert().
-    return s:build_error(a:from, ['assertion failed'] + a:000)
+    return eskk#error#build_error(a:from, ['internal error'] + a:000)
 endfunction "}}}
 
 call eskk#_initialize()

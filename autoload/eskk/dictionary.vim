@@ -63,7 +63,7 @@ function! eskk#dictionary#search_all_candidates(
             let i += 1
         endwhile
         let end = i - 1
-        call eskk#util#assert(begin <= end)
+        call eskk#error#assert(begin <= end)
         if limit >= 0 && begin + limit < end
             let end = begin + limit
         endif
@@ -184,8 +184,8 @@ function! s:search_linear(
     let min = get(a:000, 0, a:ph_dict[min_which])
     let max = get(a:000, 1, len(a:whole_lines) - 1)
 
-    call eskk#util#assert(min <=# max, 'min <=# max')
-    call eskk#util#assert(min >= 0, "min is not invalid (negative) number.")
+    call eskk#error#assert(min <=# max, 'min <=# max')
+    call eskk#error#assert(min >= 0, "min is not invalid (negative) number.")
 
     while min <=# max
         if stridx(a:whole_lines[min], a:needle) == 0
@@ -199,7 +199,7 @@ endfunction "}}}
 " Returns [key, okuri_rom, candidates] which line contains.
 function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     let list = split(a:line, '/')
-    call eskk#util#assert(!empty(list))
+    call eskk#error#assert(!empty(list))
     let key = matchstr(list[0], '^[^a-z ]\+')
     let okuri_rom = matchstr(list[0], '[a-z]\+')
     let has_okuri = okuri_rom != ''
@@ -420,7 +420,7 @@ function! s:henkan_result_advance(this, advance) "{{{
         return 0
     catch /^eskk: dictionary look up error:/
         " Shut up error. This function does not throw exception.
-        call eskk#util#log_exception('s:henkan_result_get_candidates()')
+        call eskk#error#log_exception('s:henkan_result_get_candidates()')
         return 0
     endtry
 endfunction "}}}
@@ -443,8 +443,7 @@ function! s:henkan_result_get_candidates(this) "{{{
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
             let a:this._status = g:eskk#dictionary#HR_NO_RESULT
-            throw eskk#dictionary_look_up_error(
-            \   ['eskk', 'dictionary'],
+            throw s:dictionary_look_up_error(
             \   "Can't look up '"
             \   . g:eskk#marker_henkan
             \   . a:this._key
@@ -480,11 +479,11 @@ function! s:henkan_result_get_candidates(this) "{{{
             \       user_dict_result[0],
             \       s:CANDIDATE_FROM_USER_DICT
             \   )
-            call eskk#util#assert(
+            call eskk#error#assert(
             \   key ==# a:this._key,
             \   "user dict:".string(key)." ==# ".string(a:this._key)
             \)
-            call eskk#util#assert(
+            call eskk#error#assert(
             \   okuri_rom ==# a:this._okuri_rom[0],
             \   "user dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom)
             \)
@@ -501,11 +500,11 @@ function! s:henkan_result_get_candidates(this) "{{{
             \       system_dict_result[0],
             \       s:CANDIDATE_FROM_SYSTEM_DICT
             \   )
-            call eskk#util#assert(
+            call eskk#error#assert(
             \   key ==# a:this._key,
             \   "system dict:".string(key)." ==# ".string(a:this._key)
             \)
-            call eskk#util#assert(
+            call eskk#error#assert(
             \   okuri_rom ==# a:this._okuri_rom[0],
             \   "system dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom)
             \)
@@ -538,6 +537,13 @@ function! s:henkan_result_get_candidates(this) "{{{
     endif
 endfunction "}}}
 
+function! s:dictionary_look_up_error(...) "{{{
+    return eskk#error#build_error(
+    \   ['eskk', 'dictionary'],
+    \   ['dictionary look up error'] + a:000
+    \)
+endfunction "}}}
+
 " Select candidate from command-line.
 " s:henkan_result_select_candidates() {{{
 function! s:henkan_result_select_candidates(
@@ -553,7 +559,7 @@ function! s:henkan_result_select_candidates(
     let page_index = 0
     let pages = []
 
-    call eskk#util#assert(
+    call eskk#error#assert(
     \   len(words) > a:skip_num,
     \   "words has more than skip_num words."
     \)
@@ -883,9 +889,9 @@ function! s:physical_dict.get_lines(...) "{{{
         let self._ftime_at_read = getftime(path)
         let self._loaded = 1
     catch /E484:/    " Can't open file
-        call eskk#util#logf("Can't read '%s'!", path)
+        call eskk#error#logf("Can't read '%s'!", path)
     catch /^eskk: parse error/
-        call eskk#util#log_exception('s:physical_dict.get_lines()')
+        call eskk#error#log_exception('s:physical_dict.get_lines()')
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
@@ -901,7 +907,7 @@ function! s:physical_dict.set_lines(lines) "{{{
         let self._loaded = 1
         let self._is_modified = 1
     catch /^eskk: parse error/
-        call eskk#util#log_exception('s:physical_dict.set_lines()')
+        call eskk#error#log_exception('s:physical_dict.set_lines()')
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
@@ -917,9 +923,8 @@ function! s:physical_dict_parse_lines(self, lines) "{{{
     \   ';; okuri-ari entries.'
     \)
     if self.okuri_ari_idx ==# -1
-        throw eskk#parse_error(
-        \   ['eskk', 'dictionary'],
-        \   "SKK dictionary parse error"
+        throw s:dictionary_parse_error(
+        \   "invalid self.okuri_ari_idx value"
         \)
     endif
     let self.okuri_nasi_idx = index(
@@ -927,18 +932,22 @@ function! s:physical_dict_parse_lines(self, lines) "{{{
     \   ';; okuri-nasi entries.'
     \)
     if self.okuri_nasi_idx ==# -1
-        throw eskk#parse_error(
-        \   ['eskk', 'dictionary'],
-        \   "SKK dictionary parse error"
+        throw s:dictionary_parse_error(
+        \   "invalid self.okuri_nasi_idx value"
         \)
     endif
     if self.okuri_ari_idx >= self.okuri_nasi_idx
-        throw eskk#parse_error(
-        \   ['eskk', 'dictionary'],
-        \   "SKK dictionary parse error: "
-        \   .   "okuri-ari entries must be before okuri-nasi entries."
+        throw s:dictionary_parse_error(
+        \   "okuri-ari entries must be before okuri-nasi entries."
         \)
     endif
+endfunction "}}}
+
+function! s:dictionary_parse_error(...) "{{{
+    return eskk#error#build_error(
+    \   ['eskk', 'dictionary'],
+    \   ["SKK dictionary parse error"] + a:000
+    \)
 endfunction "}}}
 
 " Returns true value if "self.okuri_ari_idx" and
@@ -1196,7 +1205,7 @@ function! s:dict_write_to_file(this) "{{{
         " Delete old entry.
         if index !=# -1
             call remove(user_dict_lines, index)
-            call eskk#util#assert(line != '')
+            call eskk#error#assert(line != '')
         elseif w.okuri_rom != ''
             let nasi_idx += 1
         endif

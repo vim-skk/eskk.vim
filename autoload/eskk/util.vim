@@ -18,69 +18,6 @@ function! eskk#util#warnf(msg, ...) "{{{
     call eskk#util#warn(call('printf', [a:msg] + a:000))
 endfunction "}}}
 
-" Logging
-let s:debug_logs = []
-function! eskk#util#write_to_log_file() "{{{
-    execute 'redir >>' expand(
-    \   eskk#util#join_path(
-    \       g:eskk#directory,
-    \       'log',
-    \       'debug' . strftime('-%Y-%m-%d') . '.log'
-    \   )
-    \)
-    for msg in s:debug_logs
-        silent echo msg
-    endfor
-    redir END
-endfunction "}}}
-function! eskk#util#log(msg) "{{{
-    if !g:eskk#debug
-        return
-    endif
-    if !eskk#is_initialized()
-        call eskk#register_temp_event(
-        \   'enable-im',
-        \   'eskk#util#log',
-        \   [a:msg]
-        \)
-        return
-    endif
-
-    redraw
-
-    let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    if g:eskk#debug_stdout ==# 'file'
-        call add(s:debug_logs, msg)
-    else
-        call eskk#util#warn(msg)
-    endif
-
-    if g:eskk#debug_wait_ms !=# 0
-        execute printf('sleep %dm', g:eskk#debug_wait_ms)
-    endif
-endfunction "}}}
-function! eskk#util#logf(fmt, ...) "{{{
-    call eskk#util#log(call('printf', [a:fmt] + a:000))
-endfunction "}}}
-function! eskk#util#logstrf(fmt, ...) "{{{
-    return call(
-    \   'eskk#util#logf',
-    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
-    \)
-endfunction "}}}
-function! eskk#util#log_exception(what) "{{{
-    call eskk#util#log("'" . a:what . "' throwed exception")
-    call eskk#util#log('v:exception = ' . string(v:exception))
-    call eskk#util#log('v:throwpoint = ' . string(v:throwpoint))
-endfunction "}}}
-
-function! eskk#util#formatstrf(fmt, ...) "{{{
-    return call(
-    \   'printf',
-    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
-    \)
-endfunction "}}}
-
 
 " Multibyte
 function! eskk#util#mb_strlen(str) "{{{
@@ -264,6 +201,12 @@ endfunction "}}}
 function! eskk#util#is_upper(char) "{{{
     return a:char =~ '^\a$' && a:char ==# toupper(a:char)
 endfunction "}}}
+function! eskk#util#formatstrf(fmt, ...) "{{{
+    return call(
+    \   'printf',
+    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
+    \)
+endfunction "}}}
 
 
 " Mappings
@@ -321,15 +264,6 @@ endfunction "}}}
 
 
 " Misc.
-function! eskk#util#assert(cond, ...) "{{{
-    if !a:cond
-        throw call(
-        \   'eskk#assertion_failure_error',
-        \   [['eskk', 'util']] + a:000
-        \)
-    endif
-endfunction "}}}
-
 function! eskk#util#identity(value) "{{{
     return a:value
 endfunction "}}}
@@ -356,27 +290,27 @@ endfunction "}}}
 function! eskk#util#getchar(...) "{{{
     let success = 0
     if inputsave() !=# success
-        call eskk#util#log("inputsave() failed")
+        call eskk#error#log("inputsave() failed")
     endif
     try
         let c = call('getchar', a:000)
         return type(c) == type("") ? c : nr2char(c)
     finally
         if inputrestore() !=# success
-            call eskk#util#log("inputrestore() failed")
+            call eskk#error#log("inputrestore() failed")
         endif
     endtry
 endfunction "}}}
 function! eskk#util#input(...) "{{{
     let success = 0
     if inputsave() !=# success
-        call eskk#util#log("inputsave() failed")
+        call eskk#error#log("inputsave() failed")
     endif
     try
         return call('input', a:000)
     finally
         if inputrestore() !=# success
-            call eskk#util#log("inputrestore() failed")
+            call eskk#error#log("inputrestore() failed")
         endif
     endtry
 endfunction "}}}

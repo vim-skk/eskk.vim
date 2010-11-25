@@ -15,14 +15,6 @@ function! s:run()
     \   "throw eskk#internal_error(['eskk', 'foo'])",
     \   '^eskk: internal error at autoload/eskk/foo\.vim$'
     \)
-    call simpletap#throws_ok(
-    \   "throw eskk#out_of_idx_error(['eskk'])",
-    \   '^eskk: out of index at autoload/eskk\.vim$'
-    \)
-    call simpletap#throws_ok(
-    \   "throw eskk#out_of_idx_error(['eskk', 'foo'])",
-    \   '^eskk: out of index at autoload/eskk/foo\.vim$'
-    \)
 endfunction
 
 
