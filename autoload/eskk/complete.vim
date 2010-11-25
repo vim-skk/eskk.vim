@@ -31,7 +31,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         redraw
         call eskk#error#log_exception('s:eskkcomplete()')
         if g:eskk#debug_out ==# 'file'
-            call eskk#error#warn('s:eskkcomplete(): ' . v:exception)
+            call eskk#util#warn('s:eskkcomplete(): ' . v:exception)
         endif
 
         if a:findstart
