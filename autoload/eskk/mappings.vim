@@ -71,7 +71,7 @@ endfunction "}}}
 
 " TODO s:eskk_mapings should contain this info.
 " Keys used by only its mode.
-let s:mode_local_keys = {
+let s:MODE_LOCAL_KEYS = {
 \   'hira': [
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
@@ -359,8 +359,8 @@ endfunction "}}}
 function! eskk#mappings#map_mode_local_keys() "{{{
     let mode = eskk#get_mode()
 
-    if has_key(s:mode_local_keys, mode)
-        for key in s:mode_local_keys[mode]
+    if has_key(s:MODE_LOCAL_KEYS, mode)
+        for key in s:MODE_LOCAL_KEYS[mode]
             let real_key = eskk#mappings#get_special_key(key)
             call eskk#mappings#set_up_temp_key(real_key)
             call eskk#register_temp_event(
