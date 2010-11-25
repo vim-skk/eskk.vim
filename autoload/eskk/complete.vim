@@ -132,9 +132,9 @@ function! s:complete(mode, base) "{{{
         \   g:eskk#buftable#HENKAN_PHASE_OKURI
         \)
     endif
-    let key       = henkan_buf_str.get_matched_filter()
-    let okuri     = okuri_buf_str.get_matched_filter()
-    let okuri_rom = okuri_buf_str.get_matched_rom()
+    let key       = henkan_buf_str.rom_pairs.get_filter()
+    let okuri     = okuri_buf_str.rom_pairs.get_filter()
+    let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
 
     let filter_str = s:get_buftable_str(0, a:base)
     let marker = g:eskk#marker_popup . g:eskk#marker_henkan
@@ -379,14 +379,14 @@ function! s:set_selected_item() "{{{
     \)
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
-        call henkan_buf_str.push_matched('', char)
+        call henkan_buf_str.rom_pairs.push_one_pair('', char)
     endfor
 
     let okuri_buf_str = buftable.get_buf_str(
     \   g:eskk#buftable#HENKAN_PHASE_OKURI
     \)
     call okuri_buf_str.clear()
-    call okuri_buf_str.set_rom_str(rom_str)
+    call okuri_buf_str.rom_str.set(rom_str)
 
     call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
     " Do not rewrite anything.

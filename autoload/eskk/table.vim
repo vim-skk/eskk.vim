@@ -48,12 +48,27 @@ function! eskk#table#get_all_tables() "{{{
     \)
 endfunction "}}}
 
-" s:table_obj {{{
-let s:table_obj = {'_data': {}, '_cached_maps': {}, '_cached_candidates': {}}
 
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
+let s:VICE_OPTIONS = {'generate_stub': 1}
+
+" s:TableObj {{{
+let s:TableObj = vice#class('TableObj', s:SID_PREFIX, s:VICE_OPTIONS)
+
+call s:TableObj.attribute('_name', '')
+call s:TableObj.attribute('_data', {})
+call s:TableObj.attribute('_cached_maps', {})
+call s:TableObj.attribute('_cached_candidates', {})
+
+" Constructor of s:ParentTable, s:ChildTable
 function! eskk#table#new(table_name, ...) "{{{
     if a:0
-        let obj = deepcopy(s:child_table)
+        let obj = s:ChildTable.clone()
         let obj._name = a:table_name
         let obj._bases = []
         for base in type(a:1) == type([]) ? a:1 : [a:1]
@@ -61,7 +76,7 @@ function! eskk#table#new(table_name, ...) "{{{
                 " Assume it's installed table name.
                 call add(obj._bases, eskk#table#new_from_file(base))
             elseif type(base) == type({})
-                " Assume it's s:table_obj object.
+                " Assume it's s:TableObj object.
                 call add(obj._bases, base)
             else
                 throw s:table_invalid_arguments_error(a:table_name)
@@ -69,7 +84,7 @@ function! eskk#table#new(table_name, ...) "{{{
             call s:validate_base_tables(obj)
         endfor
     else
-        let obj = deepcopy(s:base_table)
+        let obj = s:BaseTable.clone()
         let obj._name = a:table_name
     endif
 
@@ -103,14 +118,14 @@ function! eskk#table#new_from_file(table_name) "{{{
 endfunction "}}}
 
 
-function! s:table_obj.has_candidates(lhs_head) "{{{
+function! {s:TableObj.method('has_candidates')}(this, lhs_head) "{{{
     let not_found = {}
-    return self.get_candidates(a:lhs_head, 1, not_found) isnot not_found
+    return a:this.get_candidates(a:lhs_head, 1, not_found) isnot not_found
 endfunction "}}}
-function! s:table_obj.get_candidates(lhs_head, max_candidates, ...) "{{{
+function! {s:TableObj.method('get_candidates')}(this, lhs_head, max_candidates, ...) "{{{
     return call(
     \   's:get_candidates',
-    \   [self, a:lhs_head, a:max_candidates] + a:000
+    \   [a:this, a:lhs_head, a:max_candidates] + a:000
     \)
 endfunction "}}}
 function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
@@ -160,24 +175,24 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     endif
 endfunction "}}}
 
-function! s:table_obj.has_map(lhs) "{{{
+function! {s:TableObj.method('has_map')}(this, lhs) "{{{
     let not_found = {}
-    return self.get_map(a:lhs, not_found) isnot not_found
+    return a:this.get_map(a:lhs, not_found) isnot not_found
 endfunction "}}}
-function! s:table_obj.get_map(lhs, ...) "{{{
+function! {s:TableObj.method('get_map')}(this, lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self, a:lhs, 0] + a:000
+    \   [a:this, a:lhs, 0] + a:000
     \)
 endfunction "}}}
-function! s:table_obj.has_rest(lhs) "{{{
+function! {s:TableObj.method('has_rest')}(this, lhs) "{{{
     let not_found = {}
-    return self.get_rest(a:lhs, not_found) isnot not_found
+    return a:this.get_rest(a:lhs, not_found) isnot not_found
 endfunction "}}}
-function! s:table_obj.get_rest(lhs, ...) "{{{
+function! {s:TableObj.method('get_rest')}(this, lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [self, a:lhs, 1] + a:000
+    \   [a:this, a:lhs, 1] + a:000
     \)
 endfunction "}}}
 function! s:get_map(table, lhs, index, ...) "{{{
@@ -241,79 +256,87 @@ function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
     endif
 endfunction "}}}
 
-function! s:table_obj.load() "{{{
-    if has_key(self, '_bases')
+function! {s:TableObj.method('load')}(this) "{{{
+    if has_key(a:this, '_bases')
         " TODO: after initializing base tables,
         " this object has no need to have base references.
         " because they can ("should", curerntly) be
         " obtained from s:table_defs in autoload/eskk.vim
         " (it can be considered as flyweight object for all tables)
-        for base in self._bases
+        for base in a:this._bases
             call s:do_initialize(base)
         endfor
     endif
-    call s:do_initialize(self)
-    return self._data
+    call s:do_initialize(a:this)
+    return a:this._data
 endfunction "}}}
-function! s:table_obj.get_mappings() "{{{
+function! s:TableObj_get_mappings() dict "{{{
     return self._data
 endfunction "}}}
 function! s:do_initialize(table) "{{{
     if has_key(a:table, 'initialize')
         call a:table.initialize()
         unlet a:table.initialize
-        let a:table.load = s:table_obj.get_mappings
+
+        " TODO: You can't this if using vice.vim!
+        " let a:table.load = eskk#util#get_local_func(
+        " \                       'TableObj_get_mappings', s:SID_PREFIX)
     endif
 endfunction "}}}
 
-function! s:table_obj.is_base() "{{{
-    return !has_key(self, '_bases')
+function! {s:TableObj.method('is_base')}(this) "{{{
+    return !has_key(a:this, '_bases')
 endfunction "}}}
 
-function! s:table_obj.get_name() "{{{
-    return self._name
+function! {s:TableObj.method('get_name')}(this) "{{{
+    return a:this._name
 endfunction "}}}
-function! s:table_obj.get_base_tables() "{{{
-    return self.is_base() ? [] : self._bases
-endfunction "}}}
-
-" }}}
-
-" s:base_table {{{
-let s:base_table = deepcopy(s:table_obj)
-
-function! s:base_table.add_from_dict(dict) "{{{
-    let self._data = a:dict
-endfunction "}}}
-
-function! s:base_table.add_map(lhs, map, ...) "{{{
-    let pair = [a:map, (a:0 ? a:1 : '')]
-    let self._data[a:lhs] = pair
+function! {s:TableObj.method('get_base_tables')}(this) "{{{
+    return a:this.is_base() ? [] : a:this._bases
 endfunction "}}}
 " }}}
 
-" s:child_table {{{
-let s:child_table = deepcopy(s:table_obj)
+" s:BaseTable {{{
+let s:BaseTable = vice#class('BaseTable', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:BaseTable.extends(s:TableObj)
 
-function! s:child_table.add_map(lhs, map, ...) "{{{
-    let pair = [a:map, (a:0 ? a:1 : '')]
-    let self._data[a:lhs] = {'method': 'add', 'data': pair}
+function! {s:BaseTable.method('add_from_dict')}(this, dict) "{{{
+    let a:this._data = a:dict
 endfunction "}}}
 
-function! s:child_table.remove_map(lhs) "{{{
-    if has_key(self._data, a:lhs)
-        unlet self._data[a:lhs]
+function! {s:BaseTable.method('add_map')}(this, lhs, map, ...) "{{{
+    let pair = [a:map, (a:0 ? a:1 : '')]
+    let a:this._data[a:lhs] = pair
+endfunction "}}}
+" }}}
+
+" s:ChildTable {{{
+let s:ChildTable = vice#class('ChildTable', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:ChildTable.extends(s:TableObj)
+
+function! {s:ChildTable.method('add_map')}(this, lhs, map, ...) "{{{
+    let pair = [a:map, (a:0 ? a:1 : '')]
+    let a:this._data[a:lhs] = {'method': 'add', 'data': pair}
+endfunction "}}}
+
+function! {s:ChildTable.method('remove_map')}(this, lhs) "{{{
+    if has_key(a:this._data, a:lhs)
+        unlet a:this._data[a:lhs]
     else
         " Assumpiton: It must be a lhs of bases.
         " One of base tables must have this lhs.
         " No way to check if this lhs is base one,
         " because .load() is called lazily
         " for saving memory.
-        let self._data[a:lhs] = {'method': 'remove'}
+        let a:this._data[a:lhs] = {'method': 'remove'}
     endif
 endfunction "}}}
-
 " }}}
+
+" for memory, store object instead of object factory (class).
+let s:TableObj = s:TableObj.new()
+let s:BaseTable = s:BaseTable.new()
+let s:ChildTable = s:ChildTable.new()
 
 
 " Restore 'cpoptions' {{{
