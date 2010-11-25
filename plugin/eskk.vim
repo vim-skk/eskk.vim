@@ -26,6 +26,10 @@ function! s:check_if_prereq_libs_are_installed()
             echomsg 'autoload/savemap.vim is not installed.'
             return 0
         endif
+        if globpath(&rtp, 'autoload/vice.vim') == ''
+            echomsg 'autoload/vice.vim is not installed.'
+            return 0
+        endif
 
         return 1    " All libs are installed!
     finally
