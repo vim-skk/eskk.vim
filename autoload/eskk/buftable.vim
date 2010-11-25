@@ -27,7 +27,7 @@ let [
 " }}}
 
 " Functions {{{
-let s:VICE_OPTIONS = {'generate_stub': 1}
+let s:VICE_OPTIONS = {'generate_stub': 1, 'auto_clone_method': 1}
 " s:Resettable {{{
 let s:Resettable = vice#trait('Resettable', s:SID_PREFIX, s:VICE_OPTIONS)
 

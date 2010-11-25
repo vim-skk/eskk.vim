@@ -55,7 +55,7 @@ endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
-let s:VICE_OPTIONS = {'generate_stub': 1}
+let s:VICE_OPTIONS = {'generate_stub': 1, 'auto_clone_method': 1}
 
 " s:TableObj {{{
 let s:TableObj = vice#class('TableObj', s:SID_PREFIX, s:VICE_OPTIONS)
