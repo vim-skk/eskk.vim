@@ -273,9 +273,11 @@ endfunction "}}}
 
 " s:candidate: s:candidate_new() {{{
 
-let s:CANDIDATE_FROM_USER_DICT = 0
-let s:CANDIDATE_FROM_SYSTEM_DICT = 1
-let s:CANDIDATE_FROM_REGISTERED_WORDS = 2
+let [
+\   s:CANDIDATE_FROM_USER_DICT,
+\   s:CANDIDATE_FROM_SYSTEM_DICT,
+\   s:CANDIDATE_FROM_REGISTERED_WORDS
+\] = range(3)
 
 function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
     let obj = {
@@ -335,9 +337,11 @@ endfunction "}}}
 " This provides a method `get_next()`
 " to get next candidate string.
 
-let g:eskk#dictionary#HR_NO_RESULT = 0
-let g:eskk#dictionary#HR_LOOK_UP_DICTIONARY = 1
-let g:eskk#dictionary#HR_GOT_RESULT = 2
+let [
+\   g:eskk#dictionary#HR_NO_RESULT,
+\   g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
+\   g:eskk#dictionary#HR_GOT_RESULT
+\] = range(3)
 
 " self._key, self._okuri_rom, self._okuri:
 "   Query for this henkan result.

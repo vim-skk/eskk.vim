@@ -14,14 +14,16 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 " Constants {{{
-" Normal
-let eskk#buftable#HENKAN_PHASE_NORMAL = 0
-" Choosing henkan candidates.
-let eskk#buftable#HENKAN_PHASE_HENKAN = 1
-" Waiting for okurigana.
-let eskk#buftable#HENKAN_PHASE_OKURI = 2
-" Choosing henkan candidates.
-let eskk#buftable#HENKAN_PHASE_HENKAN_SELECT = 3
+" 0: Normal
+" 1: Choosing henkan candidates.
+" 2: Waiting for okurigana.
+" 3: Choosing henkan candidates.
+let [
+\   eskk#buftable#HENKAN_PHASE_NORMAL,
+\   eskk#buftable#HENKAN_PHASE_HENKAN,
+\   eskk#buftable#HENKAN_PHASE_OKURI,
+\   eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+\] = range(4)
 " }}}
 
 " Functions {{{
