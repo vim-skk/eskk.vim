@@ -328,6 +328,18 @@ function! eskk#util#join_path(dir, ...) "{{{
     return join([a:dir] + a:000, s:path_sep)
 endfunction "}}}
 
+function! eskk#util#redir_english(excmd) "{{{
+    let save_lang = v:lang
+    lang messages C
+    try
+        redir => output
+        silent execute a:excmd
+        redir END
+    finally
+        execute 'lang messages' save_lang
+    endtry
+endfunction "}}}
+
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
