@@ -375,7 +375,7 @@ endfunction "}}}
 function! s:get_normal_keys() "{{{
     return split('iIaAoOcCsSR', '\zs')
 endfunction "}}}
-function! eskk#mappings#map_normal_keys() "{{{
+function! s:map_normal_keys() "{{{
     " From s:SkkMapNormal() in plugin/skk.vim
 
     let restore_commands =
@@ -387,12 +387,12 @@ function! eskk#mappings#map_normal_keys() "{{{
         call eskk#mappings#map('sb', key, restore_commands . key, 'n')
     endfor
 endfunction "}}}
-function! eskk#mappings#unmap_normal_keys() "{{{
+function! s:unmap_normal_keys() "{{{
     for key in s:get_normal_keys()
         call eskk#mappings#unmap('n', 'b', key)
     endfor
 endfunction "}}}
-function! eskk#mappings#save_normal_keys() "{{{
+function! s:save_normal_keys() "{{{
     if !savemap#supported_version()
         return {}
     endif
@@ -419,8 +419,8 @@ endfunction "}}}
 " g:eskk#keep_state
 function! eskk#mappings#save_state() "{{{
     let inst = eskk#get_current_instance()
-    let inst.prev_normal_keys = eskk#mappings#save_normal_keys()
-    call eskk#mappings#unmap_normal_keys()
+    let inst.prev_normal_keys = s:save_normal_keys()
+    call s:unmap_normal_keys()
     " Restore previous im options.
     let nr = bufnr('%')
     let prev_im_options = eskk#get_current_instance().prev_im_options
@@ -435,7 +435,7 @@ function! eskk#mappings#restore_state() "{{{
         call s:restore_normal_keys(inst.prev_normal_keys)
         let inst.prev_normal_keys = {}
     endif
-    call eskk#mappings#map_normal_keys()
+    call s:map_normal_keys()
     " Save im options.
     let prev_im_options = eskk#get_current_instance().prev_im_options
     let prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
