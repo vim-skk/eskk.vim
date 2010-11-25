@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 29))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 30))
 
 
 function! s:SID() "{{{
@@ -1544,8 +1544,7 @@ function! eskk#validate_mode_structure(mode) "{{{
 
     for key in ['filter', 'sandbox']
         if !has_key(st, key)
-            throw eskk#user_error(
-            \   ['eskk'],
+            call eskk#util#warn(
             \   "eskk#register_mode(" . string(a:mode) . "): "
             \       . string(key) . " is not present in structure"
             \)
@@ -1558,8 +1557,7 @@ endfunction "}}}
 function! eskk#get_mode_structure(mode) "{{{
     let self = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:mode)
-        throw eskk#user_error(
-        \   ['eskk'],
+        call eskk#util#warn(
         \   "mode '" . a:mode . "' is not available."
         \)
     endif
@@ -2060,11 +2058,6 @@ endfunction "}}}
 function! eskk#assertion_failure_error(from, ...) "{{{
     " This is only used from eskk#util#assert().
     return s:build_error(a:from, ['assertion failed'] + a:000)
-endfunction "}}}
-function! eskk#user_error(from, msg) "{{{
-    " Return simple message.
-    " TODO Omit a:from to simplify message?
-    return printf('%s: %s', join(a:from, ': '), a:msg)
 endfunction "}}}
 
 call eskk#_initialize()
