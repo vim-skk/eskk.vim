@@ -738,7 +738,7 @@ endfunction "}}}
 
 " Delete current candidate from all places.
 " e.g.:
-" - s:dict._registered_words
+" - s:Dictionary._registered_words
 " - self._candidates
 " - SKK dictionary
 " -- User dictionary
@@ -837,7 +837,7 @@ endfunction "}}}
 "
 " Database for physical file dictionary.
 " `s:PhysicalDict` manipulates only one file.
-" But `s:dict` may manipulate multiple dictionaries.
+" But `s:Dictionary` may manipulate multiple dictionaries.
 "
 " `get_lines()` does
 " - Lazy file read
@@ -912,28 +912,26 @@ endfunction "}}}
 
 " - Validate List of whole lines of dictionary.
 " - Set self.okuri_ari_idx, self.okuri_nasi_idx.
-function! {s:PhysicalDict.method('_parse_lines')}(self, lines) "{{{
-    let self = a:self
-
-    let self.okuri_ari_idx  = index(
-    \   self._content_lines,
+function! {s:PhysicalDict.method('_parse_lines')}(this, lines) "{{{
+    let a:this.okuri_ari_idx  = index(
+    \   a:this._content_lines,
     \   ';; okuri-ari entries.'
     \)
-    if self.okuri_ari_idx ==# -1
+    if a:this.okuri_ari_idx ==# -1
         throw s:dictionary_parse_error(
-        \   "invalid self.okuri_ari_idx value"
+        \   "invalid a:this.okuri_ari_idx value"
         \)
     endif
-    let self.okuri_nasi_idx = index(
-    \   self._content_lines,
+    let a:this.okuri_nasi_idx = index(
+    \   a:this._content_lines,
     \   ';; okuri-nasi entries.'
     \)
-    if self.okuri_nasi_idx ==# -1
+    if a:this.okuri_nasi_idx ==# -1
         throw s:dictionary_parse_error(
-        \   "invalid self.okuri_nasi_idx value"
+        \   "invalid a:this.okuri_nasi_idx value"
         \)
     endif
-    if self.okuri_ari_idx >= self.okuri_nasi_idx
+    if a:this.okuri_ari_idx >= a:this.okuri_nasi_idx
         throw s:dictionary_parse_error(
         \   "okuri-ari entries must be before okuri-nasi entries."
         \)
@@ -963,7 +961,7 @@ endfunction "}}}
 
 " }}}
 
-" s:dict {{{
+" s:Dictionary {{{
 "
 " Interface for multiple dictionary.
 " This behaves like one file dictionary.
@@ -984,19 +982,22 @@ endfunction "}}}
 " _current_henkan_result:
 "   Current henkan result.
 
-let s:dict = {
-\   '_user_dict': {},
-\   '_system_dict': {},
-\   '_registered_words': {},
-\   '_registered_words_modified': 0,
-\   '_current_henkan_result': {},
-\}
+let s:Dictionary = vice#class('Dictionary', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:Dictionary.attribute('_user_dict', {})
+call s:Dictionary.attribute('_system_dict', {})
+call s:Dictionary.attribute('_registered_words', {})
+call s:Dictionary.attribute('_registered_words_modified', 0)
+call s:Dictionary.attribute('_current_henkan_result', {})
 
 function! eskk#dictionary#new(...) "{{{
+    return call(s:Dictionary.new, a:000, s:Dictionary)
+endfunction "}}}
+
+function! {s:Dictionary.constructor()}(this, ...) "{{{
     let user_dict = get(a:000, 0, g:eskk#directory)
     let system_dict = get(a:000, 1, g:eskk#large_dictionary)
     return extend(
-    \   deepcopy(s:dict, 1),
+    \   a:this,
     \   {
     \       '_user_dict': s:PhysicalDict.new(
     \           user_dict.path,
@@ -1023,19 +1024,19 @@ endfunction "}}}
 " This actually just sets "self._current_henkan_result"
 " which is "s:HenkanResult"'s instance.
 " This is interface so s:HenkanResult is implementation.
-function! s:dict.refer(buftable, key, okuri, okuri_rom) "{{{
+function! {s:Dictionary.method('refer')}(this, buftable, key, okuri, okuri_rom) "{{{
     let hr = s:HenkanResult.new(
     \   a:key,
     \   a:okuri_rom,
     \   a:okuri,
     \   deepcopy(a:buftable, 1),
     \)
-    let self._current_henkan_result = hr
+    let a:this._current_henkan_result = hr
     return hr
 endfunction "}}}
 
 " Register new word (registered word) at command-line.
-function! s:dict.register_word(henkan_result) "{{{
+function! {s:Dictionary.method('register_word')}(this, henkan_result) "{{{
     let key       = a:henkan_result.get_key()
     let okuri     = a:henkan_result.get_okuri()
     let okuri_rom = a:henkan_result.get_okuri_rom()
@@ -1076,54 +1077,54 @@ function! s:dict.register_word(henkan_result) "{{{
 
 
     if input != ''
-        call self.remember_word(input, key, okuri, okuri_rom)
+        call a:this.remember_word(input, key, okuri, okuri_rom)
     endif
     return [input, key, okuri]
 endfunction "}}}
 
 " Clear all registered words.
-function! s:dict.forget_all_words() "{{{
-    call self._registered_words.clear()
+function! {s:Dictionary.method('forget_all_words')}(this) "{{{
+    call a:this._registered_words.clear()
 endfunction "}}}
 
 " Clear given registered word.
-function! s:dict.forget_word(input, key, okuri, okuri_rom) "{{{
+function! {s:Dictionary.method('forget_word')}(this, input, key, okuri, okuri_rom) "{{{
     let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom)
-    if !self._registered_words.has(rw)
+    if !a:this._registered_words.has(rw)
         return
     endif
 
-    call self._registered_words.remove(rw)
-    let self._registered_words_modified = 1
+    call a:this._registered_words.remove(rw)
+    let a:this._registered_words_modified = 1
 
-    if !empty(self._current_henkan_result)
-        call self._current_henkan_result.reset()
+    if !empty(a:this._current_henkan_result)
+        call a:this._current_henkan_result.reset()
     endif
 endfunction "}}}
 
 " Add registered word.
-function! s:dict.remember_word(input, key, okuri, okuri_rom) "{{{
+function! {s:Dictionary.method('remember_word')}(this, input, key, okuri, okuri_rom) "{{{
     let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom)
-    if self._registered_words.has(rw)
+    if a:this._registered_words.has(rw)
         return
     endif
 
-    call self._registered_words.unshift(rw)
-    let self._registered_words_modified = 1
+    call a:this._registered_words.unshift(rw)
+    let a:this._registered_words_modified = 1
 
-    if !empty(self._current_henkan_result)
-        call self._current_henkan_result.reset()
+    if !empty(a:this._current_henkan_result)
+        call a:this._current_henkan_result.reset()
     endif
 endfunction "}}}
 
 " Get List of registered words.
-function! s:dict.get_registered_words() "{{{
-    return self._registered_words.to_list()
+function! {s:Dictionary.method('get_registered_words')}(this) "{{{
+    return a:this._registered_words.to_list()
 endfunction "}}}
 
 " Remove registered word matching with arguments values.
-function! s:dict.remove_registered_word(input, key, okuri, okuri_rom) "{{{
-    call self._registered_words.remove(
+function! {s:Dictionary.method('remove_registered_word')}(this, input, key, okuri, okuri_rom) "{{{
+    call a:this._registered_words.remove(
     \   s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom)
     \)
 endfunction "}}}
@@ -1132,32 +1133,32 @@ endfunction "}}}
 " or user dictionary's lines are
 " modified by "s:physical_dict.set_lines()".
 " If this value is false, s:dict.update_dictionary() does nothing.
-function! s:dict.is_modified() "{{{
+function! {s:Dictionary.method('is_modified')}(this) "{{{
     " No need to check system dictionary.
     " Because it is immutable.
     return
-    \   self._registered_words_modified
-    \   || self._user_dict._is_modified
+    \   a:this._registered_words_modified
+    \   || a:this._user_dict._is_modified
 endfunction "}}}
 
 " After calling this function,
 " s:dict.is_modified() will returns false.
 " but after calling "s:physical_dict.set_lines()",
 " s:dict.is_modified() will returns true.
-function! s:dict_clear_modified_flags(this) "{{{
+function! {s:Dictionary.method('_clear_modified_flags')}(this) "{{{
     let a:this._registered_words_modified = 0
     let a:this._user_dict._is_modified = 0
 endfunction "}}}
 
 " Write to user dictionary.
 " By default, This function is executed at VimLeavePre.
-function! s:dict.update_dictionary() "{{{
-    if !self.is_modified()
+function! {s:Dictionary.method('update_dictionary')}(this) "{{{
+    if !a:this.is_modified()
         return
     endif
 
-    let user_dict_exists = filereadable(self._user_dict.path)
-    let user_dict_lines = self._user_dict.get_lines()
+    let user_dict_exists = filereadable(a:this._user_dict.path)
+    let user_dict_lines = a:this._user_dict.get_lines()
     if user_dict_exists
         if empty(user_dict_lines)
             " user dictionary exists but
@@ -1176,16 +1177,16 @@ function! s:dict.update_dictionary() "{{{
         \   ';; okuri-ari entries.',
         \   ';; okuri-nasi entries.'
         \]
-        call self._user_dict.set_lines(user_dict_lines)
+        call a:this._user_dict.set_lines(user_dict_lines)
         " NOTE: .set_lines() does not write to dictionary.
         " Because at this time dictionary file does not exist.
     endif
 
-    call s:dict_write_to_file(self)
-    call self.forget_all_words()
-    call s:dict_clear_modified_flags(self)
+    call a:this._write_to_file()
+    call a:this.forget_all_words()
+    call a:this._clear_modified_flags()
 endfunction "}}}
-function! s:dict_write_to_file(this) "{{{
+function! {s:Dictionary.method('_write_to_file')}(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this._user_dict really does not have registered words.
@@ -1248,7 +1249,7 @@ let s:dict_search_candidates = cul#ordered_set#new(
 \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
 \)
 " Search candidates matching with arguments.
-function! s:dict.search(key, okuri, okuri_rom) "{{{
+function! {s:Dictionary.method('search')}(this, key, okuri, okuri_rom) "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom
@@ -1262,8 +1263,8 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
     call candidates.clear()
     let max_count = g:eskk#max_candidates
 
-    " self._registered_words
-    for w in self._registered_words.to_list()
+    " a:this._registered_words
+    for w in a:this._registered_words.to_list()
         if w.key ==# key && w.okuri_rom[0] ==# okuri_rom[0]
             call candidates.push(
             \   s:candidate_new(
@@ -1282,8 +1283,8 @@ function! s:dict.search(key, okuri, okuri_rom) "{{{
         " User dictionary, System dictionary
         try
             for [dict, from_type] in [
-            \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
-            \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
+            \   [a:this._user_dict, s:CANDIDATE_FROM_USER_DICT],
+            \   [a:this._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
             \]
                 for line in eskk#dictionary#search_all_candidates(
                 \   dict, key, okuri_rom, max_count - candidates.size()
@@ -1313,21 +1314,21 @@ endfunction "}}}
 
 
 " Getter for self._current_henkan_result
-function! s:dict.get_henkan_result() "{{{
-    return self._current_henkan_result
+function! {s:Dictionary.method('get_henkan_result')}(this) "{{{
+    return a:this._current_henkan_result
 endfunction "}}}
 " Getter for self._user_dict
-function! s:dict.get_user_dict() "{{{
-    return self._user_dict
+function! {s:Dictionary.method('get_user_dict')}(this) "{{{
+    return a:this._user_dict
 endfunction "}}}
 " Getter for self._system_dict
-function! s:dict.get_system_dict() "{{{
-    return self._system_dict
+function! {s:Dictionary.method('get_system_dict')}(this) "{{{
+    return a:this._system_dict
 endfunction "}}}
 
 " Clear self._current_henkan_result
-function! s:dict.clear_henkan_result() "{{{
-    let self._current_henkan_result = {}
+function! {s:Dictionary.method('clear_henkan_result')}(this) "{{{
+    let a:this._current_henkan_result = {}
 endfunction "}}}
 
 " }}}
