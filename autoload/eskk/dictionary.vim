@@ -330,7 +330,6 @@ endfunction "}}}
 " }}}
 
 
-
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
@@ -338,6 +337,7 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 let s:VICE_OPTIONS = {'generate_stub': 1}
+
 
 " s:HenkanResult {{{
 
