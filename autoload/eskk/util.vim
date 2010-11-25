@@ -53,7 +53,7 @@ function! eskk#util#flatten(list) "{{{
     endfor
     return ret
 endfunction "}}}
-function! eskk#util#list_any(elem, list) "{{{
+function! eskk#util#list_has(list, elem) "{{{
     for _ in a:list
         if _ ==# a:elem
             return 1

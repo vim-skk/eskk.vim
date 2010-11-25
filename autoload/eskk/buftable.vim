@@ -769,10 +769,10 @@ function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
     let phase = a:stash.phase
     let eskk_mode = a:stash.mode
 
-    if !eskk#util#list_any(
-    \   phase,
+    if !eskk#util#list_has(
     \   [g:eskk#buftable#HENKAN_PHASE_HENKAN,
-    \       g:eskk#buftable#HENKAN_PHASE_OKURI]
+    \       g:eskk#buftable#HENKAN_PHASE_OKURI],
+    \   phase,
     \)
         " TODO Add an error id like Vim
         call eskk#util#warnf(
