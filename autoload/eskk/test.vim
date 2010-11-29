@@ -52,8 +52,6 @@ function! s:emulate_char(c, ret) "{{{
     let r = substitute(r, '(eskk:_set_begin_pos)', '', 'g')
 
     " Expand some <expr> <Plug> mappings.
-    Diag string(r)
-    Diag maparg(r, eskk#mappings#get_map_modes())
     let r = substitute(
     \   r,
     \   '(eskk:expr:[^()]\+)',
