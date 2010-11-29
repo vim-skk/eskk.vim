@@ -55,7 +55,7 @@ function! s:emulate_char(c, ret) "{{{
     let r = substitute(
     \   r,
     \   '(eskk:expr:[^()]\+)',
-    \   '\=eval(eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode)))',
+    \   '\=eval(s:get_raw_map("<Plug>".submatch(0), mapmode))',
     \   'g'
     \)
 
@@ -63,7 +63,7 @@ function! s:emulate_char(c, ret) "{{{
     let r = substitute(
     \   r,
     \   '(eskk:[^()]\+)',
-    \   '\=eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode))',
+    \   '\=s:get_raw_map("<Plug>".submatch(0), mapmode)',
     \   'g'
     \)
 
@@ -77,7 +77,7 @@ function! s:emulate_char(c, ret) "{{{
         let _ = substitute(
         \   _,
         \   '(eskk:[^()]\+)',
-        \   '\=eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode))',
+        \   '\=s:get_raw_map("<Plug>".submatch(0), mapmode)',
         \   'g'
         \)
         let ret .= _
@@ -95,7 +95,7 @@ function! s:emulate_char(c, ret) "{{{
         let _ = substitute(
         \   _,
         \   '(eskk:[^()]\+)',
-        \   '\=eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode))',
+        \   '\=s:get_raw_map("<Plug>".submatch(0), mapmode)',
         \   'g'
         \)
         let ret .= _
@@ -147,6 +147,9 @@ function! s:emulate_filter_char(r, ret) "{{{
     return [r, ret]
 endfunction "}}}
 
+function! s:get_raw_map(...) "{{{
+    return eskk#util#key2char(call('maparg', a:000))
+endfunction "}}}
 function! s:remove_all_ctrl_chars(s, ctrl_char) "{{{
     let s = a:s
     while 1
