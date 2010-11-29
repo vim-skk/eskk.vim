@@ -688,13 +688,13 @@ function! {s:HenkanResult.method('get_candidate')}(this, ...) "{{{
         \   'with_okuri': with_okuri,
         \}
         function functor.funcall()
-            if a:this.this._candidates_index > 0
-                " This changes a:this.this._candidates_index.
-                call a:this.this.back()
+            if self.this._candidates_index > 0
+                " This changes self.this._candidates_index.
+                call self.this.back()
             endif
             return [
-            \   a:this.candidates[a:this.this._candidates_index].input,
-            \   (a:this.with_okuri ? a:this.this._okuri : '')
+            \   self.candidates[self.this._candidates_index].input,
+            \   (self.with_okuri ? self.this._okuri : '')
             \]
         endfunction
 
