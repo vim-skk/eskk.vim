@@ -65,7 +65,7 @@ function! s:emulate_char(c, ret) "{{{
     let r = substitute(
     \   r,
     \   '(eskk:[^()]\+)',
-    \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
+    \   '\=eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode))',
     \   'g'
     \)
 
@@ -79,11 +79,11 @@ function! s:emulate_char(c, ret) "{{{
         let _ = substitute(
         \   _,
         \   '(eskk:[^()]\+)',
-        \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
+        \   '\=eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode))',
         \   'g'
         \)
         let ret .= _
-        let ret .= s:do_remap(eval(pre), mapmode)
+        let ret .= maparg(eval(pre), mapmode)
     endif
 
     " Handle rewritten text.
@@ -97,17 +97,13 @@ function! s:emulate_char(c, ret) "{{{
         let _ = substitute(
         \   _,
         \   '(eskk:[^()]\+)',
-        \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
+        \   '\=eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode))',
         \   'g'
         \)
         let ret .= _
     endif
 
     return ret
-endfunction "}}}
-function! s:do_remap(map, modes) "{{{
-    let m = maparg(a:map, a:modes)
-    return m != '' ? m : a:map
 endfunction "}}}
 function! s:emulate_backspace(str, cur_ret) "{{{
     let r = a:str
