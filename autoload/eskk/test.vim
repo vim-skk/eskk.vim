@@ -148,7 +148,7 @@ function! s:emulate_filter_char(r, ret) "{{{
 endfunction "}}}
 
 function! s:get_raw_map(...) "{{{
-    return eskk#util#key2char(call('maparg', a:000))
+    return eskk#mappings#key2char(call('maparg', a:000))
 endfunction "}}}
 function! s:remove_all_ctrl_chars(s, ctrl_char) "{{{
     let s = a:s

@@ -10,78 +10,78 @@ set cpo&vim
 
 function! s:run()
     call simpletap#is(
-    \   eskk#util#key2char('<CR>'),
+    \   eskk#mappings#key2char('<CR>'),
     \   "\<CR>"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('a<CR>'),
+    \   eskk#mappings#key2char('a<CR>'),
     \   "a\<CR>"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('<CR>b'),
+    \   eskk#mappings#key2char('<CR>b'),
     \   "\<CR>b"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('a<CR>b'),
+    \   eskk#mappings#key2char('a<CR>b'),
     \   "a\<CR>b"
     \)
 
     call simpletap#is(
-    \   eskk#util#key2char('<lt>CR>'),
+    \   eskk#mappings#key2char('<lt>CR>'),
     \   "<CR>"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('a<lt>CR>'),
+    \   eskk#mappings#key2char('a<lt>CR>'),
     \   "a<CR>"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('<lt>CR>b'),
+    \   eskk#mappings#key2char('<lt>CR>b'),
     \   "<CR>b"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('a<lt>CR>b'),
+    \   eskk#mappings#key2char('a<lt>CR>b'),
     \   "a<CR>b"
     \)
 
     call simpletap#is(
-    \   eskk#util#key2char('<Plug>(eskk:enable)'),
+    \   eskk#mappings#key2char('<Plug>(eskk:enable)'),
     \   "\<Plug>(eskk:enable)"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('a<Plug>(eskk:enable)'),
+    \   eskk#mappings#key2char('a<Plug>(eskk:enable)'),
     \   "a\<Plug>(eskk:enable)"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('<Plug>(eskk:enable)b'),
+    \   eskk#mappings#key2char('<Plug>(eskk:enable)b'),
     \   "\<Plug>(eskk:enable)b"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('a<Plug>(eskk:enable)b'),
+    \   eskk#mappings#key2char('a<Plug>(eskk:enable)b'),
     \   "a\<Plug>(eskk:enable)b"
     \)
 
     call simpletap#is(
-    \   eskk#util#key2char('abc'),
+    \   eskk#mappings#key2char('abc'),
     \   "abc"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('<'),
+    \   eskk#mappings#key2char('<'),
     \   "<"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('<>'),
+    \   eskk#mappings#key2char('<>'),
     \   "<>"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('<tes'),
+    \   eskk#mappings#key2char('<tes'),
     \   "<tes"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('tes>'),
+    \   eskk#mappings#key2char('tes>'),
     \   "tes>"
     \)
     call simpletap#is(
-    \   eskk#util#key2char('<tes>'),
+    \   eskk#mappings#key2char('<tes>'),
     \   "<tes>"
     \)
 endfunction

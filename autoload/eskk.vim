@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 85))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 86))
 
 
 function! s:SID() "{{{
@@ -237,7 +237,7 @@ function! s:asym_filter.filter(stash) "{{{
                 call buftable.do_sticky(a:stash)
                 call eskk#register_temp_event(
                 \   'filter-redispatch-post',
-                \   'eskk#util#key2char',
+                \   'eskk#mappings#key2char',
                 \   [eskk#mappings#get_filter_map(tolower(char))]
                 \)
                 return
@@ -298,7 +298,7 @@ function! s:asym_filter.filter(stash) "{{{
             call buftable.do_enter(a:stash)
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
-            \   'eskk#util#key2char',
+            \   'eskk#mappings#key2char',
             \   [eskk#mappings#get_filter_map(a:stash.char)]
             \)
         endif
@@ -364,7 +364,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             for rest_char in split(rest, '\zs')
                 call eskk#register_temp_event(
                 \   'filter-redispatch-post',
-                \   'eskk#util#key2char',
+                \   'eskk#mappings#key2char',
                 \   [eskk#mappings#get_filter_map(rest_char)]
                 \)
             endfor
@@ -460,7 +460,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
                 for rest_char in split(rest, '\zs')
                     call eskk#register_temp_event(
                     \   'filter-redispatch-post',
-                    \   'eskk#util#key2char',
+                    \   'eskk#mappings#key2char',
                     \   [eskk#mappings#get_filter_map(rest_char)]
                     \)
                 endfor
@@ -513,7 +513,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
                     if a:table.has_rest(matched)
                         call eskk#register_temp_event(
                         \   'filter-redispatch-post',
-                        \   'eskk#util#key2char',
+                        \   'eskk#mappings#key2char',
                         \   [eskk#mappings#get_filter_map(
                         \       a:table.get_rest(matched)
                         \   )]
@@ -1150,7 +1150,7 @@ function! eskk#_initialize() "{{{
                     call buftable.clear_all()
                     call eskk#register_temp_event(
                     \   'filter-redispatch-post',
-                    \   'eskk#util#key2char',
+                    \   'eskk#mappings#key2char',
                     \   [eskk#mappings#get_filter_map(a:stash.char)]
                     \)
 

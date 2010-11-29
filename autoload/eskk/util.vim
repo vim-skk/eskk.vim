@@ -197,38 +197,6 @@ endfunction "}}}
 
 
 " Mappings
-function! s:split_to_keys(lhs)  "{{{
-    " From arpeggio.vim
-    "
-    " Assumption: Special keys such as <C-u>
-    " are escaped with < and >, i.e.,
-    " a:lhs doesn't directly contain any escape sequences.
-    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
-endfunction "}}}
-function! eskk#util#key2char(key) "{{{
-    " From arpeggio.vim
-
-    return join(
-    \   map(
-    \       s:split_to_keys(a:key),
-    \       'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
-    \   ),
-    \   ''
-    \)
-endfunction "}}}
-function! eskk#util#str2map(str) "{{{
-    let s = a:str
-    for key in [
-    \   '<lt>',
-    \   '<Space>',
-    \   '<Esc>',
-    \   '<Tab>',
-    \   '<Bar>',
-    \]
-        let s = substitute(s, eskk#util#key2char(key), key, 'g')
-    endfor
-    return s != '' ? s : '<Nop>'
-endfunction "}}}
 function! eskk#util#get_tab_raw_str() "{{{
     return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
 endfunction "}}}

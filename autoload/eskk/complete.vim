@@ -204,14 +204,14 @@ function! eskk#complete#handle_special_key(stash) "{{{
     " Close pum.
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_nore_map('<C-y>')]
     \)
     " Do kakutei and postpone a:char process.
     for key in ['<CR>', char]
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#key2char',
+        \   'eskk#mappings#key2char',
         \   [eskk#mappings#get_filter_map(key)]
         \)
     endfor
@@ -228,7 +228,7 @@ function! s:close_pum_pre(stash) "{{{
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#key2char',
+        \   'eskk#mappings#key2char',
         \   [eskk#mappings#get_filter_map('<C-y>')]
         \)
         let inst.completion_selected = 0
@@ -241,7 +241,7 @@ function! s:close_pum(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_nore_map('<C-y>')]
     \)
 endfunction "}}}
@@ -253,7 +253,7 @@ function! s:do_enter_pre(stash) "{{{
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#key2char',
+        \   'eskk#mappings#key2char',
         \   [eskk#mappings#get_filter_map('<CR>')]
         \)
         let inst.completion_selected = 0
@@ -266,12 +266,12 @@ function! s:do_enter(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_nore_map('<C-y>')]
     \)
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_filter_map('<CR>')]
     \)
 endfunction "}}}
@@ -283,7 +283,7 @@ endfunction "}}}
 function! s:do_tab(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_nore_map('<C-n>')]
     \)
 endfunction "}}}
@@ -298,20 +298,20 @@ function! s:do_space(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_nore_map('<C-y>')]
     \)
 
     if s:check_yomigana()
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#key2char',
+        \   'eskk#mappings#key2char',
         \   [eskk#mappings#get_filter_map('<Space>')]
         \)
     else
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#util#key2char',
+        \   'eskk#mappings#key2char',
         \   [eskk#mappings#get_filter_map('<CR>')]
         \)
     endif
@@ -332,12 +332,12 @@ function! s:do_escape(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_nore_map('<C-y>')]
     \)
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#util#key2char',
+    \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_filter_map('<Esc>')]
     \)
 endfunction "}}}

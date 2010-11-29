@@ -130,6 +130,39 @@ let s:MODE_LOCAL_KEYS = {
 
 " Utilities
 
+function! s:split_to_keys(lhs)  "{{{
+    " From arpeggio.vim
+    "
+    " Assumption: Special keys such as <C-u>
+    " are escaped with < and >, i.e.,
+    " a:lhs doesn't directly contain any escape sequences.
+    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
+endfunction "}}}
+function! eskk#mappings#key2char(key) "{{{
+    " From arpeggio.vim
+
+    return join(
+    \   map(
+    \       s:split_to_keys(a:key),
+    \       'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
+    \   ),
+    \   ''
+    \)
+endfunction "}}}
+function! eskk#mappings#str2map(str) "{{{
+    let s = a:str
+    for key in [
+    \   '<lt>',
+    \   '<Space>',
+    \   '<Esc>',
+    \   '<Tab>',
+    \   '<Bar>',
+    \]
+        let s = substitute(s, eskk#mappings#key2char(key), key, 'g')
+    endfor
+    return s != '' ? s : '<Nop>'
+endfunction "}}}
+
 " FIXME: Make a class for these functions.
 function! s:create_default_mapopt() "{{{
     return {
@@ -231,7 +264,7 @@ function! eskk#mappings#get_nore_map(key, ...) "{{{
     "   `<Plug>(eskk:filter:^A)` (^A is control character)
 
     let [rhs, key] = [a:key, a:key]
-    let key = eskk#util#str2map(key)
+    let key = eskk#mappings#str2map(key)
 
     let lhs = printf('<Plug>(eskk:noremap:%s)', key)
     if maparg(lhs, 'icl') != ''
@@ -514,7 +547,7 @@ function! eskk#mappings#is_special_lhs(char, type) "{{{
     " when `eskk_mappings[a:type]` does not exist.
     let eskk_mappings = eskk#_get_eskk_mappings()
     return has_key(eskk_mappings, a:type)
-    \   && eskk#util#key2char(eskk_mappings[a:type].lhs) ==# a:char
+    \   && eskk#mappings#key2char(eskk_mappings[a:type].lhs) ==# a:char
 endfunction "}}}
 function! eskk#mappings#get_special_key(type) "{{{
     let eskk_mappings = eskk#_get_eskk_mappings()

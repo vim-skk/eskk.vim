@@ -238,7 +238,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
             " When inserted_str == "foo", old == "foobar"
             " Insert Remove "bar"
             return repeat(
-            \   eskk#util#key2char(
+            \   eskk#mappings#key2char(
             \       eskk#mappings#get_special_map("backspace-key")
             \   ),
             \   eskk#util#mb_strlen(old)
@@ -266,7 +266,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
 endfunction "}}}
 function! {s:Buftable.method('make_remove_bs')}(this) "{{{
     return repeat(
-    \   eskk#util#key2char(eskk#mappings#get_special_map("backspace-key")),
+    \   eskk#mappings#key2char(eskk#mappings#get_special_map("backspace-key")),
     \   eskk#util#mb_strlen(a:this._old_str),
     \)
 endfunction "}}}
@@ -415,9 +415,9 @@ endfunction "}}}
 function! {s:Buftable.method('do_enter')}(this, stash) "{{{
     let phase = a:stash.phase
     let enter_char =
-    \   eskk#util#key2char(eskk#mappings#get_special_map('enter-key'))
+    \   eskk#mappings#key2char(eskk#mappings#get_special_map('enter-key'))
     let undo_char  =
-    \   eskk#util#key2char(eskk#mappings#get_special_map('undo-key'))
+    \   eskk#mappings#key2char(eskk#mappings#get_special_map('undo-key'))
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
 
@@ -492,7 +492,7 @@ function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
     let done_for_group = a:0 ? a:1 : 1
 
     if a:this.get_old_str() == ''
-        let a:stash.return = eskk#util#key2char(
+        let a:stash.return = eskk#mappings#key2char(
         \   eskk#mappings#get_special_key('backspace-key')
         \)
         return
@@ -698,7 +698,7 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
             call buf_str.clear()
         endif
         if get(g:eskk#set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            let undo_char = eskk#util#key2char(
+            let undo_char = eskk#mappings#key2char(
             \   eskk#mappings#get_special_map('undo-key')
             \)
             call eskk#register_temp_event(
@@ -931,7 +931,7 @@ function! {s:Buftable.method('do_escape')}(this, stash) "{{{
     let esc = eskk#mappings#get_special_key('escape-key')
     call eskk#error#assert(esc != '')
 
-    let a:stash.return = kakutei_str . eskk#util#key2char(esc)
+    let a:stash.return = kakutei_str . eskk#mappings#key2char(esc)
 endfunction "}}}
 function! {s:Buftable.method('do_tab')}(this, stash) "{{{
     call a:stash.buf_str.rom_str.append(eskk#util#get_tab_raw_str())
@@ -1057,7 +1057,7 @@ function! {s:Buftable.method('remove_display_str')}(this) "{{{
     call eskk#error#assert(bs != '')
 
     return repeat(
-    \   eskk#util#key2char(bs),
+    \   eskk#mappings#key2char(bs),
     \   eskk#util#mb_strlen(current_str)
     \)
 endfunction "}}}
