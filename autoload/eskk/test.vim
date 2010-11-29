@@ -26,6 +26,7 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
 
     return ret
 endfunction "}}}
+
 function! s:emulate_char(c, ret) "{{{
     let mapmode = eskk#mappings#get_map_modes()
     let c = a:c
@@ -157,6 +158,7 @@ function! s:remove_all_ctrl_chars(s, ctrl_char) "{{{
     endwhile
     return s
 endfunction "}}}
+
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
