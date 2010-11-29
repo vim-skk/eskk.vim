@@ -103,9 +103,9 @@ function! s:emulate_char(c, ret) "{{{
 
     return ret
 endfunction "}}}
-function! s:emulate_backspace(str, cur_ret) "{{{
-    let r = a:str
-    let ret = a:cur_ret
+function! s:emulate_backspace(r, ret) "{{{
+    let r = a:r
+    let ret = a:ret
     for bs in ["\<BS>", "\<C-h>"]
         while 1
             let [r, pos] = s:remove_ctrl_char(r, bs)
@@ -129,9 +129,9 @@ function! s:emulate_backspace(str, cur_ret) "{{{
     endfor
     return [r, ret]
 endfunction "}}}
-function! s:emulate_filter_char(str, cur_ret) "{{{
-    let r = a:str
-    let ret = a:cur_ret
+function! s:emulate_filter_char(r, ret) "{{{
+    let r = a:r
+    let ret = a:ret
     while 1
         let pat = '(eskk:filter:\([^()]*\))'.'\C'
         let m = matchlist(r, pat)
