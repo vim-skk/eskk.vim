@@ -210,24 +210,24 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
 
         if kakutei != ''
             call eskk#mappings#map(
-            \   'b',
-            \   '<Plug>(eskk:_inserted_kakutei)',
-            \   eskk#util#str2map(kakutei)
+            \   'be',
+            \   '<Plug>(eskk:expr:_inserted_kakutei)',
+            \   string(kakutei)
             \)
         endif
         if new != ''
             call eskk#mappings#map(
-            \   'b',
-            \   '<Plug>(eskk:_inserted_new)',
-            \   eskk#util#str2map(new)
+            \   'be',
+            \   '<Plug>(eskk:expr:_inserted_new)',
+            \   string(new)
             \)
         endif
 
         return
         \   a:this.make_remove_bs()
-        \   . (kakutei != '' ? "\<Plug>(eskk:_inserted_kakutei)" : '')
+        \   . (kakutei != '' ? "\<Plug>(eskk:expr:_inserted_kakutei)" : '')
         \   . "\<Plug>(eskk:_set_begin_pos)"
-        \   . (new != '' ? "\<Plug>(eskk:_inserted_new)" : '')
+        \   . (new != '' ? "\<Plug>(eskk:expr:_inserted_new)" : '')
     else
         let inserted_str = kakutei . new
         if old ==# inserted_str
@@ -248,20 +248,19 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
             call eskk#mappings#map(
-            \   'b',
-            \   '<Plug>(eskk:_inserted)',
-            \   eskk#util#str2map(strpart(inserted_str, strlen(old)))
+            \   'be',
+            \   '<Plug>(eskk:expr:_inserted)',
+            \   string(strpart(inserted_str, strlen(old)))
             \)
-            return "\<Plug>(eskk:_inserted)"
+            return "\<Plug>(eskk:expr:_inserted)"
         else
-            " Simplest algorithm.
             " Delete current string, and insert new string.
             call eskk#mappings#map(
-            \   'b',
-            \   '<Plug>(eskk:_inserted)',
-            \   eskk#util#str2map(inserted_str)
+            \   'be',
+            \   '<Plug>(eskk:expr:_inserted)',
+            \   string(inserted_str)
             \)
-            return a:this.make_remove_bs() . "\<Plug>(eskk:_inserted)"
+            return a:this.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
         endif
     endif
 endfunction "}}}

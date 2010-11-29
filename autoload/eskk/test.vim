@@ -37,6 +37,16 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
         " it is <expr> and does not effect to result string.
         let r = substitute(r, '(eskk:_set_begin_pos)', '', 'g')
 
+        " Expand some <expr> <Plug> mappings.
+        Diag string(r)
+        Diag maparg(r, eskk#mappings#get_map_modes())
+        let r = substitute(
+        \   r,
+        \   '(eskk:expr:[^()]\+)',
+        \   '\=eval(maparg("<Plug>".submatch(0), mapmode))',
+        \   'g'
+        \)
+
         " Expand normal <Plug> mappings.
         let r = substitute(
         \   r,
