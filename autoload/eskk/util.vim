@@ -182,16 +182,6 @@ function! eskk#util#escape_regex(regex) "{{{
     let s = substitute(s, '\$', "\\$", 'g')
     return s
 endfunction "}}}
-function! eskk#util#remove_ctrl_char(s, ctrl_char) "{{{
-    let s = a:s
-    let pos = stridx(s, a:ctrl_char)
-    if pos != -1
-        let before = strpart(s, 0, pos)
-        let after  = strpart(s, pos + strlen(a:ctrl_char))
-        let s = before . after
-    endif
-    return [s, pos]
-endfunction "}}}
 function! eskk#util#is_lower(char) "{{{
     return a:char =~ '^\a$' && a:char ==# tolower(a:char)
 endfunction "}}}

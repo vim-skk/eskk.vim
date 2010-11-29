@@ -109,7 +109,7 @@ function! s:emulate_backspace(str, cur_ret) "{{{
     let ret = a:cur_ret
     for bs in ["\<BS>", "\<C-h>"]
         while 1
-            let [r, pos] = eskk#util#remove_ctrl_char(r, bs)
+            let [r, pos] = s:remove_ctrl_char(r, bs)
             if pos ==# -1
                 break
             endif
@@ -151,12 +151,22 @@ endfunction "}}}
 function! s:remove_all_ctrl_chars(s, ctrl_char) "{{{
     let s = a:s
     while 1
-        let [s, pos] = eskk#util#remove_ctrl_char(s, a:ctrl_char)
+        let [s, pos] = s:remove_ctrl_char(s, a:ctrl_char)
         if pos == -1
             break
         endif
     endwhile
     return s
+endfunction "}}}
+function! s:remove_ctrl_char(s, ctrl_char) "{{{
+    let s = a:s
+    let pos = stridx(s, a:ctrl_char)
+    if pos != -1
+        let before = strpart(s, 0, pos)
+        let after  = strpart(s, pos + strlen(a:ctrl_char))
+        let s = before . after
+    endif
+    return [s, pos]
 endfunction "}}}
 
 
