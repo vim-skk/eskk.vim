@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 82))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 83))
 
 
 function! s:SID() "{{{
@@ -1821,11 +1821,11 @@ function! s:rewrite_string(return_string) "{{{
 
     if type(a:return_string) == type("")
         call eskk#mappings#map(
-        \   'b',
-        \   '<Plug>(eskk:_return_string)',
-        \   eskk#util#str2map(a:return_string)
+        \   'be',
+        \   '<Plug>(eskk:expr:_return_string)',
+        \   string(a:return_string)
         \)
-        let string = "\<Plug>(eskk:_return_string)"
+        let string = "\<Plug>(eskk:expr:_return_string)"
     else
         let string = eskk#get_buftable().rewrite()
     endif
