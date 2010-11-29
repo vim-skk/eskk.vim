@@ -12,88 +12,95 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
     " But maybe this is useful
     " when someone (not me) tries to emulate keys? :)
 
-    let clear_buftable = a:0 ? a:1 : 1
     let ret = ''
-    let mapmode = eskk#mappings#get_map_modes()
     for c in split(a:chars, '\zs')
-        let r = eskk#filter(c)
-        let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
+        let ret = s:emulate_char(c, ret)
+    endfor
 
-        " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
-        let pre = ''
-        if r =~# '(eskk:_filter_redispatch_pre)'
-            let pre = maparg('<Plug>(eskk:_filter_redispatch_pre)', mapmode)
-            let r = substitute(r, '(eskk:_filter_redispatch_pre)', '', '')
-        endif
+    " For convenience.
+    let clear_buftable = a:0 ? a:1 : 1
+    if clear_buftable
+        let buftable = eskk#get_buftable()
+        call buftable.clear_all()
+    endif
 
-        " Remove `<Plug>(eskk:_filter_redispatch_post)` beforehand.
-        let post = ''
-        if r =~# '(eskk:_filter_redispatch_post)'
-            let post = maparg('<Plug>(eskk:_filter_redispatch_post)', mapmode)
-            let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
-        endif
+    return ret
+endfunction "}}}
+function! s:emulate_char(c, ret) "{{{
+    let mapmode = eskk#mappings#get_map_modes()
+    let c = a:c
+    let ret = a:ret
+    let r = eskk#filter(c)
+    let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
 
-        " Remove `<Plug>(eskk:_set_begin_pos)`.
-        " it is <expr> and does not effect to result string.
-        let r = substitute(r, '(eskk:_set_begin_pos)', '', 'g')
+    " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
+    let pre = ''
+    if r =~# '(eskk:_filter_redispatch_pre)'
+        let pre = maparg('<Plug>(eskk:_filter_redispatch_pre)', mapmode)
+        let r = substitute(r, '(eskk:_filter_redispatch_pre)', '', '')
+    endif
 
-        " Expand some <expr> <Plug> mappings.
-        Diag string(r)
-        Diag maparg(r, eskk#mappings#get_map_modes())
-        let r = substitute(
-        \   r,
-        \   '(eskk:expr:[^()]\+)',
-        \   '\=eval(maparg("<Plug>".submatch(0), mapmode))',
-        \   'g'
-        \)
+    " Remove `<Plug>(eskk:_filter_redispatch_post)` beforehand.
+    let post = ''
+    if r =~# '(eskk:_filter_redispatch_post)'
+        let post = maparg('<Plug>(eskk:_filter_redispatch_post)', mapmode)
+        let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
+    endif
 
-        " Expand normal <Plug> mappings.
-        let r = substitute(
-        \   r,
+    " Remove `<Plug>(eskk:_set_begin_pos)`.
+    " it is <expr> and does not effect to result string.
+    let r = substitute(r, '(eskk:_set_begin_pos)', '', 'g')
+
+    " Expand some <expr> <Plug> mappings.
+    Diag string(r)
+    Diag maparg(r, eskk#mappings#get_map_modes())
+    let r = substitute(
+    \   r,
+    \   '(eskk:expr:[^()]\+)',
+    \   '\=eval(maparg("<Plug>".submatch(0), mapmode))',
+    \   'g'
+    \)
+
+    " Expand normal <Plug> mappings.
+    let r = substitute(
+    \   r,
+    \   '(eskk:[^()]\+)',
+    \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
+    \   'g'
+    \)
+
+    let [r, ret] = s:emulate_backspace(r, ret)
+
+    " Handle `<Plug>(eskk:_filter_redispatch_pre)`.
+    if pre != ''
+        let _ = eval(pre)
+        let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
+        let [_, ret] = s:emulate_filter_char(_, ret)
+        let _ = substitute(
+        \   _,
         \   '(eskk:[^()]\+)',
         \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
         \   'g'
         \)
+        let ret .= _
+        let ret .= s:do_remap(eval(pre), mapmode)
+    endif
 
-        let [r, ret] = s:emulate_backspace(r, ret)
+    " Handle rewritten text.
+    let ret .= r
 
-        " Handle `<Plug>(eskk:_filter_redispatch_pre)`.
-        if pre != ''
-            let _ = eval(pre)
-            let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
-            let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(
-            \   _,
-            \   '(eskk:[^()]\+)',
-            \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
-            \   'g'
-            \)
-            let ret .= _
-            let ret .= s:do_remap(eval(pre), mapmode)
-        endif
-
-        " Handle rewritten text.
-        let ret .= r
-
-        " Handle `<Plug>(eskk:_filter_redispatch_post)`.
-        if post != ''
-            let _ = eval(post)
-            let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
-            let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(
-            \   _,
-            \   '(eskk:[^()]\+)',
-            \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
-            \   'g'
-            \)
-            let ret .= _
-        endif
-    endfor
-
-    " For convenience.
-    if clear_buftable
-        let buftable = eskk#get_buftable()
-        call buftable.clear_all()
+    " Handle `<Plug>(eskk:_filter_redispatch_post)`.
+    if post != ''
+        let _ = eval(post)
+        let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
+        let [_, ret] = s:emulate_filter_char(_, ret)
+        let _ = substitute(
+        \   _,
+        \   '(eskk:[^()]\+)',
+        \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
+        \   'g'
+        \)
+        let ret .= _
     endif
 
     return ret
