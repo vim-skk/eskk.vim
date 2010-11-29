@@ -243,10 +243,6 @@ function! eskk#mappings#get_nore_map(key, ...) "{{{
 
     return lhs
 endfunction "}}}
-function! eskk#mappings#do_remap(map, modes) "{{{
-    let m = maparg(a:map, a:modes)
-    return m != '' ? m : a:map
-endfunction "}}}
 
 function! eskk#mappings#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''

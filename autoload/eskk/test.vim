@@ -41,7 +41,7 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
         let r = substitute(
         \   r,
         \   '(eskk:[^()]\+)',
-        \   '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))',
+        \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
         \   'g'
         \)
 
@@ -55,11 +55,11 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
             let _ = substitute(
             \   _,
             \   '(eskk:[^()]\+)',
-            \   '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))',
+            \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
             \   'g'
             \)
             let ret .= _
-            let ret .= eskk#mappings#do_remap(eval(pre), mapmode)
+            let ret .= s:do_remap(eval(pre), mapmode)
         endif
 
         " Handle rewritten text.
@@ -73,7 +73,7 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
             let _ = substitute(
             \   _,
             \   '(eskk:[^()]\+)',
-            \   '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))',
+            \   '\=eskk#util#key2char(s:do_remap("<Plug>".submatch(0), mapmode))',
             \   'g'
             \)
             let ret .= _
@@ -87,6 +87,10 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
     endif
 
     return ret
+endfunction "}}}
+function! s:do_remap(map, modes) "{{{
+    let m = maparg(a:map, a:modes)
+    return m != '' ? m : a:map
 endfunction "}}}
 function! s:emulate_backspace(str, cur_ret) "{{{
     let r = a:str
