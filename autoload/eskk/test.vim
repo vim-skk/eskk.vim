@@ -37,8 +37,13 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
         " it is <expr> and does not effect to result string.
         let r = substitute(r, '(eskk:_set_begin_pos)', '', 'g')
 
-        " Expand <Plug> mappings.
-        let r = substitute(r, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+        " Expand normal <Plug> mappings.
+        let r = substitute(
+        \   r,
+        \   '(eskk:[^()]\+)',
+        \   '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))',
+        \   'g'
+        \)
 
         let [r, ret] = s:emulate_backspace(r, ret)
 
@@ -47,7 +52,12 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
             let _ = eval(pre)
             let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
             let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+            let _ = substitute(
+            \   _,
+            \   '(eskk:[^()]\+)',
+            \   '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))',
+            \   'g'
+            \)
             let ret .= _
             let ret .= eskk#mappings#do_remap(eval(pre), mapmode)
         endif
@@ -60,7 +70,12 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
             let _ = eval(post)
             let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
             let [_, ret] = s:emulate_filter_char(_, ret)
-            let _ = substitute(_, '(eskk:[^()]\+)', '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))', 'g')
+            let _ = substitute(
+            \   _,
+            \   '(eskk:[^()]\+)',
+            \   '\=eskk#util#key2char(eskk#mappings#do_remap("<Plug>".submatch(0), mapmode))',
+            \   'g'
+            \)
             let ret .= _
         endif
     endfor
