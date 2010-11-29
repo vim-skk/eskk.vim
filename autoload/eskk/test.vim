@@ -31,7 +31,7 @@ function! s:emulate_char(c, ret) "{{{
     let c = a:c
     let ret = a:ret
     let r = eskk#filter(c)
-    let r = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
+    let r = s:remove_all_ctrl_chars(r, "\<Plug>")
 
     " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
     let pre = ''
@@ -72,7 +72,7 @@ function! s:emulate_char(c, ret) "{{{
     " Handle `<Plug>(eskk:_filter_redispatch_pre)`.
     if pre != ''
         let _ = eval(pre)
-        let _ = eskk#util#remove_all_ctrl_chars(r, "\<Plug>")
+        let _ = s:remove_all_ctrl_chars(r, "\<Plug>")
         let [_, ret] = s:emulate_filter_char(_, ret)
         let _ = substitute(
         \   _,
@@ -90,7 +90,7 @@ function! s:emulate_char(c, ret) "{{{
     " Handle `<Plug>(eskk:_filter_redispatch_post)`.
     if post != ''
         let _ = eval(post)
-        let _ = eskk#util#remove_all_ctrl_chars(_, "\<Plug>")
+        let _ = s:remove_all_ctrl_chars(_, "\<Plug>")
         let [_, ret] = s:emulate_filter_char(_, ret)
         let _ = substitute(
         \   _,
@@ -147,6 +147,16 @@ function! s:emulate_filter_char(str, cur_ret) "{{{
     return [r, ret]
 endfunction "}}}
 
+function! s:remove_all_ctrl_chars(s, ctrl_char) "{{{
+    let s = a:s
+    while 1
+        let [s, pos] = eskk#util#remove_ctrl_char(s, a:ctrl_char)
+        if pos == -1
+            break
+        endif
+    endwhile
+    return s
+endfunction "}}}
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo

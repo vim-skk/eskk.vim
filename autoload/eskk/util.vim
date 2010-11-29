@@ -192,16 +192,6 @@ function! eskk#util#remove_ctrl_char(s, ctrl_char) "{{{
     endif
     return [s, pos]
 endfunction "}}}
-function! eskk#util#remove_all_ctrl_chars(s, ctrl_char) "{{{
-    let s = a:s
-    while 1
-        let [s, pos] = eskk#util#remove_ctrl_char(s, a:ctrl_char)
-        if pos == -1
-            break
-        endif
-    endwhile
-    return s
-endfunction "}}}
 function! eskk#util#is_lower(char) "{{{
     return a:char =~ '^\a$' && a:char ==# tolower(a:char)
 endfunction "}}}
