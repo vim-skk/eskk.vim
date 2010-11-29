@@ -8,9 +8,7 @@ set cpo&vim
 
 
 function! eskk#test#emulate_filter_keys(chars, ...) "{{{
-    " This function is written almost for the tests.
-    " But maybe this is useful
-    " when someone (not me) tries to emulate keys? :)
+    " Assumption: test case (a:chars) does not contain "(eskk:" string.
 
     let ret = ''
     for c in split(a:chars, '\zs')
@@ -32,6 +30,7 @@ function! s:emulate_char(c, ret) "{{{
     let c = a:c
     let ret = a:ret
     let r = eskk#filter(c)
+    " NOTE: "\<Plug>" cannot be substituted by substitute().
     let r = s:remove_all_ctrl_chars(r, "\<Plug>")
 
     " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
