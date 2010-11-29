@@ -55,7 +55,7 @@ function! s:emulate_char(c, ret) "{{{
     let r = substitute(
     \   r,
     \   '(eskk:expr:[^()]\+)',
-    \   '\=eval(maparg("<Plug>".submatch(0), mapmode))',
+    \   '\=eval(eskk#util#key2char(maparg("<Plug>".submatch(0), mapmode)))',
     \   'g'
     \)
 
