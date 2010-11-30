@@ -527,17 +527,15 @@ function! {s:HenkanResult.method('_get_candidates')}(this) "{{{
     else
         return []
 
-        " FIXME: This routine makes error when using completion.
-    "elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
-        "throw eskk#dictionary_look_up_error(
-        "\   ['eskk', 'dictionary'],
-        "\   "Can't look up '"
-        "\   . g:eskk#marker_henkan
-        "\   . a:this._key
-        "\   . g:eskk#marker_okuri
-        "\   . a:this._okuri_rom
-        "\   . "' in dictionaries."
-        "\)
+    elseif a:this._status ==# g:eskk#dictionary#HR_NO_RESULT
+        throw eskk#dictionary#look_up_error(
+        \   "Can't look up '"
+        \   . g:eskk#marker_henkan
+        \   . a:this._key
+        \   . g:eskk#marker_okuri
+        \   . a:this._okuri_rom
+        \   . "' in dictionaries."
+        \)
     "else
         "throw eskk#internal_error(['eskk', 'dictionary'])
     endif
