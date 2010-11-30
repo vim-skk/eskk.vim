@@ -149,19 +149,6 @@ function! eskk#mappings#key2char(key) "{{{
     \   ''
     \)
 endfunction "}}}
-function! eskk#mappings#str2map(str) "{{{
-    let s = a:str
-    for key in [
-    \   '<lt>',
-    \   '<Space>',
-    \   '<Esc>',
-    \   '<Tab>',
-    \   '<Bar>',
-    \]
-        let s = substitute(s, eskk#mappings#key2char(key), key, 'g')
-    endfor
-    return s != '' ? s : '<Nop>'
-endfunction "}}}
 
 " FIXME: Make a class for these functions.
 function! s:create_default_mapopt() "{{{
