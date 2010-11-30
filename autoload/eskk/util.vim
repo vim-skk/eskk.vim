@@ -225,6 +225,23 @@ function! eskk#util#make_random_number(n) "{{{
     let rand = reltimestr(reltime())[match_end : ] % (a:n)
     return rand
 endfunction "}}}
+function! eskk#util#make_random_string(length) "{{{
+    let ret = ''
+    let i = 0
+    let str =
+    \   "abcdefghijklmnopqrstuvwxyz"
+    \   . "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    \   . "123456789"
+    let len = strlen(str)
+
+    while i < a:length
+        let rand = eskk#util#make_random_number(len)
+        let ret .= str[rand]
+        let i += 1
+    endwhile
+
+    return ret
+endfunction "}}}
 
 
 " Misc.
