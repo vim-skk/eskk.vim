@@ -242,6 +242,22 @@ function! eskk#util#make_random_string(length) "{{{
 
     return ret
 endfunction "}}}
+function! eskk#util#make_ascii_expr(...) "{{{
+    while 1
+        let varname =
+        \   "make_ascii_expr_"
+        \   . eskk#util#make_random_string(10)
+        if !exists(varname)
+            break
+        endif
+    endwhile
+
+    if a:0
+        let g:__eskk[varname] = a:1
+    endif
+
+    return 'g:__eskk[' . string(varname) . ']'
+endfunction "}}}
 
 
 " Misc.

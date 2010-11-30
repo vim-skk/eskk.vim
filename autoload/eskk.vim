@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 90))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 91))
 
 
 function! s:SID() "{{{
@@ -1335,6 +1335,10 @@ function! eskk#_initialize() "{{{
         " Should I create autoload/eskk/log.vim ?
         autocmd eskk VimLeavePre * call eskk#error#write_to_log_file()
     endif
+    " }}}
+
+    " Create g:__eskk: for internal use only. {{{
+    let g:__eskk = {}
     " }}}
 
     " Create "eskk-initialize-post" autocmd event. {{{
