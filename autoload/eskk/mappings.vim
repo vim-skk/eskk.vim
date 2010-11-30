@@ -264,7 +264,6 @@ function! eskk#mappings#get_nore_map(key, ...) "{{{
     "   `<Plug>(eskk:filter:^A)` (^A is control character)
 
     let [rhs, key] = [a:key, a:key]
-    let key = eskk#mappings#str2map(key)
 
     let lhs = printf('<Plug>(eskk:noremap:%s)', key)
     if maparg(lhs, 'icl') != ''
