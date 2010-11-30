@@ -15,7 +15,7 @@ set cpo&vim
 " }}}
 
 " Check if prereq libs are installed.
-function! s:check_if_prereq_libs_are_installed()
+function! s:check_if_prereq_libs_are_installed() "{{{
     echohl ErrorMsg
     try
         if globpath(&rtp, 'autoload/cul/ordered_set.vim') == ''
