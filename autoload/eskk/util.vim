@@ -216,6 +216,15 @@ function! eskk#util#get_sid_from_source(regex) "{{{
         endif
     endfor
 endfunction "}}}
+function! eskk#util#make_random_number(n) "{{{
+    " http://vim-users.jp/2009/11/hack98/
+    if a:n < 1
+        return -1
+    endif
+    let match_end = matchend(reltimestr(reltime()), '\d\+\.') + 1
+    let rand = reltimestr(reltime())[match_end : ] % (a:n)
+    return rand
+endfunction "}}}
 
 
 " Misc.
