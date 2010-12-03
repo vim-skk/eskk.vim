@@ -223,63 +223,6 @@ function! eskk#util#get_sid_from_source(regex) "{{{
         endif
     endfor
 endfunction "}}}
-function! eskk#util#make_random_number(n) "{{{
-    " http://vim-users.jp/2009/11/hack98/
-    if a:n < 1
-        return -1
-    endif
-    let match_end = matchend(reltimestr(reltime()), '\d\+\.') + 1
-    let rand = reltimestr(reltime())[match_end : ] % (a:n)
-    return rand
-endfunction "}}}
-function! eskk#util#make_random_string(length) "{{{
-    let ret = ''
-    let i = 0
-    let str =
-    \   "abcdefghijklmnopqrstuvwxyz"
-    \   . "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    \   . "123456789"
-    let len = strlen(str)
-
-    while i < a:length
-        let rand = eskk#util#make_random_number(len)
-        let ret .= str[rand]
-        let i += 1
-    endwhile
-
-    return ret
-endfunction "}}}
-function! eskk#util#make_ascii_expr(...) "{{{
-    if !exists('b:__eskk')
-        let b:__eskk = {}
-    endif
-
-    while 1
-        let varname =
-        \   "make_ascii_expr_"
-        \   . eskk#util#make_random_string(10)
-        if !has_key(b:__eskk, varname)
-            break
-        endif
-    endwhile
-
-    if a:0
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func(
-        \       'finalize_make_ascii_expr',
-        \       s:SID_PREFIX,
-        \   ),
-        \   [varname]
-        \)
-        let b:__eskk[varname] = a:1
-    endif
-
-    return 'b:__eskk[' . string(varname) . ']'
-endfunction "}}}
-function! s:finalize_make_ascii_expr(varname) "{{{
-    unlet b:__eskk[a:varname]
-endfunction "}}}
 
 
 " Misc.
@@ -357,6 +300,64 @@ function! eskk#util#redir_english(excmd) "{{{
     finally
         execute 'lang messages' save_lang
     endtry
+endfunction "}}}
+
+function! eskk#util#make_random_number(n) "{{{
+    " http://vim-users.jp/2009/11/hack98/
+    if a:n < 1
+        return -1
+    endif
+    let match_end = matchend(reltimestr(reltime()), '\d\+\.') + 1
+    let rand = reltimestr(reltime())[match_end : ] % (a:n)
+    return rand
+endfunction "}}}
+function! eskk#util#make_random_string(length) "{{{
+    let ret = ''
+    let i = 0
+    let str =
+    \   "abcdefghijklmnopqrstuvwxyz"
+    \   . "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    \   . "123456789"
+    let len = strlen(str)
+
+    while i < a:length
+        let rand = eskk#util#make_random_number(len)
+        let ret .= str[rand]
+        let i += 1
+    endwhile
+
+    return ret
+endfunction "}}}
+function! eskk#util#make_ascii_expr(...) "{{{
+    if !exists('b:__eskk')
+        let b:__eskk = {}
+    endif
+
+    while 1
+        let varname =
+        \   "make_ascii_expr_"
+        \   . eskk#util#make_random_string(10)
+        if !has_key(b:__eskk, varname)
+            break
+        endif
+    endwhile
+
+    if a:0
+        call eskk#register_temp_event(
+        \   'filter-begin',
+        \   eskk#util#get_local_func(
+        \       'finalize_make_ascii_expr',
+        \       s:SID_PREFIX,
+        \   ),
+        \   [varname]
+        \)
+        let b:__eskk[varname] = a:1
+    endif
+
+    return 'b:__eskk[' . string(varname) . ']'
+endfunction "}}}
+function! s:finalize_make_ascii_expr(varname) "{{{
+    unlet b:__eskk[a:varname]
 endfunction "}}}
 
 
