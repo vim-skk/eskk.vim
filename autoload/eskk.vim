@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 111))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 112))
 
 
 function! s:SID() "{{{
@@ -1725,13 +1725,7 @@ function! eskk#throw_event(event_name) "{{{
     endif
 
     while !empty(all_events)
-        let call_args = remove(all_events, 0)
-        if g:eskk#debug
-            redir => output
-            silent execute 'function' call_args[0]
-            redir END
-        endif
-        call add(ret, call('call', call_args))
+        call add(ret, call('call', remove(all_events, 0)))
     endwhile
 
     " Clear temporary hooks.
