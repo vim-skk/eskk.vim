@@ -8,6 +8,13 @@ set cpo&vim
 " }}}
 
 
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
+
 " Message
 function! eskk#util#warn(msg) "{{{
     echohl WarningMsg
@@ -243,31 +250,35 @@ function! eskk#util#make_random_string(length) "{{{
     return ret
 endfunction "}}}
 function! eskk#util#make_ascii_expr(...) "{{{
+    if !exists('b:__eskk')
+        let b:__eskk = {}
+    endif
+
     while 1
         let varname =
         \   "make_ascii_expr_"
         \   . eskk#util#make_random_string(10)
-        if !exists(varname)
+        if !has_key(b:__eskk, varname)
             break
         endif
     endwhile
 
     if a:0
         call eskk#register_temp_event(
-        \   'filter-finalize',
+        \   'filter-begin',
         \   eskk#util#get_local_func(
         \       'finalize_make_ascii_expr',
         \       s:SID_PREFIX,
         \   ),
         \   [varname]
         \)
-        let g:__eskk[varname] = a:1
+        let b:__eskk[varname] = a:1
     endif
 
-    return 'g:__eskk[' . string(varname) . ']'
+    return 'b:__eskk[' . string(varname) . ']'
 endfunction "}}}
 function! s:finalize_make_ascii_expr(varname) "{{{
-    unlet g:__eskk[a:varname]
+    unlet b:__eskk[a:varname]
 endfunction "}}}
 
 
