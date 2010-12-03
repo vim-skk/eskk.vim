@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 101))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 102))
 
 
 function! s:SID() "{{{
@@ -1805,7 +1805,8 @@ function! s:rewrite_string(return_string) "{{{
         \   '<Plug>(eskk:_filter_redispatch_pre)',
         \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
         \)
-        let redispatch_pre = "\<Plug>(eskk:_filter_redispatch_pre)"
+        let redispatch_pre =
+        \   "\<Plug>(eskk:_filter_redispatch_pre)"
     endif
 
     let redispatch_post = ''
@@ -1815,7 +1816,8 @@ function! s:rewrite_string(return_string) "{{{
         \   '<Plug>(eskk:_filter_redispatch_post)',
         \   'join(eskk#throw_event("filter-redispatch-post"), "")'
         \)
-        let redispatch_post = "\<Plug>(eskk:_filter_redispatch_post)"
+        let redispatch_post =
+        \   "\<Plug>(eskk:_filter_redispatch_post)"
     endif
 
     let completion_enabled =
