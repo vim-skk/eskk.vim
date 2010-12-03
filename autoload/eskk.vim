@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 110))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 111))
 
 
 function! s:SID() "{{{
@@ -1710,7 +1710,7 @@ function! s:register_event(st, event_names, Fn, head_args, self) "{{{
         call add(
         \   a:st[name],
         \   [a:Fn, a:head_args]
-        \       + (a:self !=# -1 ? [a:self] : [])
+        \       + (type(a:self) == type({}) ? [a:self] : [])
         \)
     endfor
 endfunction "}}}
