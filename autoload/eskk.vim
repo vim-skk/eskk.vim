@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 98))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 99))
 
 
 function! s:SID() "{{{
@@ -1333,7 +1333,7 @@ function! eskk#_initialize() "{{{
     " Logging event {{{
     if g:eskk#debug
         " Should I create autoload/eskk/log.vim ?
-        autocmd eskk VimLeavePre * call eskk#error#write_to_log_file()
+        autocmd eskk VimLeavePre * call eskk#error#write_debug_log_file()
     endif
     " }}}
 

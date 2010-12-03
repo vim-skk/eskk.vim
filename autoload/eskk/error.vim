@@ -9,7 +9,7 @@ set cpo&vim
 
 let s:warning_messages = []
 
-function! eskk#error#write_to_log_file() "{{{
+function! eskk#error#write_debug_log_file() "{{{
     execute 'redir >>' expand(
     \   eskk#util#join_path(
     \       g:eskk#directory,
