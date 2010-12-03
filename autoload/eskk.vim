@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 112))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 113))
 
 
 function! s:SID() "{{{
@@ -1373,36 +1373,36 @@ function! eskk#is_initialized() "{{{
     return s:is_initialized
 endfunction "}}}
 
-" Global variables
-    function! eskk#get_default_mapped_keys() "{{{
-        return split(
-        \   'abcdefghijklmnopqrstuvwxyz'
-        \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        \  .'1234567890'
-        \  .'!"#$%&''()'
-        \  .',./;:]@[-^\'
-        \  .'>?_+*}`{=~'
-        \   ,
-        \   '\zs'
-        \) + [
-        \   "<lt>",
-        \   "<Bar>",
-        \   "<Tab>",
-        \   "<BS>",
-        \   "<C-h>",
-        \   "<CR>",
-        \   "<Space>",
-        \   "<C-q>",
-        \   "<C-y>",
-        \   "<C-e>",
-        \   "<PageUp>",
-        \   "<PageDown>",
-        \   "<Up>",
-        \   "<Down>",
-        \   "<C-n>",
-        \   "<C-p>",
-        \]
-    endfunction "}}}
+" Global variable function
+function! eskk#get_default_mapped_keys() "{{{
+    return split(
+    \   'abcdefghijklmnopqrstuvwxyz'
+    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    \  .'1234567890'
+    \  .'!"#$%&''()'
+    \  .',./;:]@[-^\'
+    \  .'>?_+*}`{=~'
+    \   ,
+    \   '\zs'
+    \) + [
+    \   "<lt>",
+    \   "<Bar>",
+    \   "<Tab>",
+    \   "<BS>",
+    \   "<C-h>",
+    \   "<CR>",
+    \   "<Space>",
+    \   "<C-q>",
+    \   "<C-y>",
+    \   "<C-e>",
+    \   "<PageUp>",
+    \   "<PageDown>",
+    \   "<Up>",
+    \   "<Down>",
+    \   "<C-n>",
+    \   "<C-p>",
+    \]
+endfunction "}}}
 
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
