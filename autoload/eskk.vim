@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 108))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 109))
 
 
 function! s:SID() "{{{
@@ -143,6 +143,10 @@ call s:Eskk.attribute('bv', {})
 " Instance
 function! eskk#get_current_instance() "{{{
     return s:eskk_instances[s:eskk_instance_id]
+endfunction "}}}
+function! eskk#initialize_instance() "{{{
+    let s:eskk_instances = [s:Eskk.new()]
+    let s:eskk_instance_id = 0
 endfunction "}}}
 function! eskk#create_new_instance() "{{{
     " TODO: CoW
@@ -613,8 +617,7 @@ function! eskk#_initialize() "{{{
     endif
 
     " Create the first eskk instance. {{{
-    let s:eskk_instances = [s:Eskk.new()]
-    let s:eskk_instance_id = 0
+    call eskk#initialize_instance()
     " }}}
 
     " Create eskk augroup. {{{
