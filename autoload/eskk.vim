@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 102))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 103))
 
 
 function! s:SID() "{{{
@@ -68,7 +68,8 @@ let s:skk_dict = {}
 let s:mode_vs_table = {}
 " All tables structures.
 let s:table_defs = {}
-" `eskk#mappings#map_all_keys()` and `eskk#mappings#unmap_all_keys()`
+" `eskk#mappings#map_all_keys()`
+" and `eskk#mappings#unmap_all_keys()`
 " toggle this value.
 let s:mapped_bufnr = {}
 " All special mappings eskk knows.
