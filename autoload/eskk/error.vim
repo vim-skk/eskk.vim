@@ -22,7 +22,9 @@ function! eskk#error#write_debug_log_file() "{{{
     endfor
     redir END
 endfunction "}}}
-function! eskk#error#write_error_log_file(char) "{{{
+function! eskk#error#write_error_log_file(char, ...) "{{{
+    let v_exception = a:0 ? a:1 : v:exception
+
     let lines = []
     call add(lines, '--- g:eskk#version ---')
     call add(lines, printf('g:eskk#version = %s', string(g:eskk#version)))
@@ -36,12 +38,12 @@ function! eskk#error#write_error_log_file(char) "{{{
     call add(lines, '')
 
     call add(lines, '--- exception ---')
-    if v:exception =~# '^eskk:'
+    if v_exception =~# '^eskk:'
         call add(lines, 'exception type: eskk exception')
-        call add(lines, printf('v:exception: %s', v:exception))
+        call add(lines, printf('v:exception: %s', v_exception))
     else
         call add(lines, 'exception type: Vim internal error')
-        call add(lines, printf('v:exception: %s', v:exception))
+        call add(lines, printf('v:exception: %s', v_exception))
     endif
     call add(lines, printf('v:throwpoint: %s', v:throwpoint))
 

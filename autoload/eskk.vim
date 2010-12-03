@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 100))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 101))
 
 
 function! s:SID() "{{{
@@ -1741,8 +1741,15 @@ function! eskk#filter(char) "{{{
 
     " Check irregular circumstance.
     if !eskk#is_supported_mode(self.mode)
-        call eskk#error#log('current mode is not supported: ' . self.mode)
-        sleep 1
+        call eskk#error#write_error_log_file(
+        \   a:char,
+        \   eskk#error#build_error(
+        \       ['eskk'],
+        \       ['current mode is not supported: '
+        \           . string(self.mode)]
+        \   )
+        \)
+        return a:char
     endif
 
 
