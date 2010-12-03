@@ -253,10 +253,21 @@ function! eskk#util#make_ascii_expr(...) "{{{
     endwhile
 
     if a:0
+        call eskk#register_temp_event(
+        \   'filter-finalize',
+        \   eskk#util#get_local_func(
+        \       'finalize_make_ascii_expr',
+        \       s:SID_PREFIX,
+        \   ),
+        \   [varname]
+        \)
         let g:__eskk[varname] = a:1
     endif
 
     return 'g:__eskk[' . string(varname) . ']'
+endfunction "}}}
+function! s:finalize_make_ascii_expr(varname) "{{{
+    unlet g:__eskk[a:varname]
 endfunction "}}}
 
 
