@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 106))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 107))
 
 
 function! s:SID() "{{{
@@ -23,6 +23,10 @@ delfunc s:SID
 
 " NOTE: Following variables are non-local (global) between instances.
 
+" s:Eskk instances.
+let s:eskk_instances = []
+" Index number for current instance.
+let s:eskk_instance_id = 0
 " Supported modes and their structures.
 let s:available_modes = {}
 " Event handler functions/arguments.
@@ -137,15 +141,7 @@ call s:Eskk.attribute('bv', {})
 
 
 " Instance
-function! s:exists_instance() "{{{
-    return exists('s:eskk_instances')
-endfunction "}}}
 function! eskk#get_current_instance() "{{{
-    if !s:exists_instance()
-        let s:eskk_instances = [s:Eskk.new()]
-        " Index number for current instance.
-        let s:eskk_instance_id = 0
-    endif
     return s:eskk_instances[s:eskk_instance_id]
 endfunction "}}}
 function! eskk#create_new_instance() "{{{
@@ -618,6 +614,11 @@ function! eskk#_initialize() "{{{
     if s:is_initialized
         return
     endif
+
+    " Create the first eskk instance. {{{
+    let s:eskk_instances = [s:Eskk.new()]
+    let s:eskk_instance_id = 0
+    " }}}
 
     " Create eskk augroup. {{{
     augroup eskk
