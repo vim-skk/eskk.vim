@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 109))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 110))
 
 
 function! s:SID() "{{{
@@ -174,19 +174,19 @@ endfunction "}}}
 " SHIT: fxck
 function! eskk#_bv_has(name) "{{{
     let bv = eskk#get_current_instance().bv
-    return has_key(bv, a:name)
+    return eskk#util#has_key_f(bv, [bufnr('%'), a:name])
 endfunction "}}}
 function! eskk#_bv_remove(name) "{{{
     let bv = eskk#get_current_instance().bv
-    unlet bv[a:name]
+    unlet bv[bufnr('%')][a:name]
 endfunction "}}}
 function! eskk#_bv_get(name) "{{{
     let bv = eskk#get_current_instance().bv
-    return bv[a:name]
+    return bv[bufnr('%')][a:name]
 endfunction "}}}
 function! eskk#_bv_put(name, Value) "{{{
     let bv = eskk#get_current_instance().bv
-    let bv[a:name] = a:Value
+    call eskk#util#let_f(bv, [bufnr('%'), a:name], a:Value)
 endfunction "}}}
 
 " Filter
