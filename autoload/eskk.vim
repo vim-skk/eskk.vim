@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 103))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 104))
 
 
 function! s:SID() "{{{
@@ -132,29 +132,24 @@ endfunction "}}}
 function! s:eskk_new() "{{{
     return deepcopy(s:eskk, 1)
 endfunction "}}}
-function! s:get_inst_namespace() "{{{
-    return g:eskk#keep_state_beyond_buffer ? s: : b:
-endfunction "}}}
 function! s:exists_instance() "{{{
-    return has_key(s:get_inst_namespace(), 'eskk_instances')
+    return exists('s:eskk_instances')
 endfunction "}}}
 function! eskk#get_current_instance() "{{{
-    let ns = s:get_inst_namespace()
     if !s:exists_instance()
-        let ns.eskk_instances = [s:eskk_new()]
+        let s:eskk_instances = [s:eskk_new()]
         " Index number for current instance.
-        let ns.eskk_instance_id = 0
+        let s:eskk_instance_id = 0
     endif
-    return ns.eskk_instances[ns.eskk_instance_id]
+    return s:eskk_instances[s:eskk_instance_id]
 endfunction "}}}
 function! eskk#create_new_instance() "{{{
     " TODO: CoW
 
     " Create instance.
     let inst = s:eskk_new()
-    let ns = s:get_inst_namespace()
-    call add(ns.eskk_instances, inst)
-    let ns.eskk_instance_id += 1
+    call add(s:eskk_instances, inst)
+    let s:eskk_instance_id += 1
 
     " Initialize instance.
     call eskk#enable(0)
@@ -162,15 +157,13 @@ function! eskk#create_new_instance() "{{{
     return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
-    let ns = s:get_inst_namespace()
-
-    if ns.eskk_instance_id == 0
+    if s:eskk_instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
 
     " Destroy current instance.
-    call remove(ns.eskk_instances, ns.eskk_instance_id)
-    let ns.eskk_instance_id -= 1
+    call remove(s:eskk_instances, s:eskk_instance_id)
+    let s:eskk_instance_id -= 1
 endfunction "}}}
 
 " Filter
