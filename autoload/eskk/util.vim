@@ -329,15 +329,11 @@ function! eskk#util#make_random_string(length) "{{{
     return ret
 endfunction "}}}
 function! eskk#util#make_ascii_expr(...) "{{{
-    if !exists('b:__eskk')
-        let b:__eskk = {}
-    endif
-
     while 1
         let varname =
         \   "make_ascii_expr_"
         \   . eskk#util#make_random_string(10)
-        if !has_key(b:__eskk, varname)
+        if !eskk#_bv_has(varname)
             break
         endif
     endwhile
@@ -345,19 +341,13 @@ function! eskk#util#make_ascii_expr(...) "{{{
     if a:0
         call eskk#register_temp_event(
         \   'filter-begin',
-        \   eskk#util#get_local_func(
-        \       'finalize_make_ascii_expr',
-        \       s:SID_PREFIX,
-        \   ),
+        \   'eskk#_bv_remove',
         \   [varname]
         \)
-        let b:__eskk[varname] = a:1
+        call eskk#_bv_put(varname, a:1)
     endif
 
-    return 'b:__eskk[' . string(varname) . ']'
-endfunction "}}}
-function! s:finalize_make_ascii_expr(varname) "{{{
-    unlet b:__eskk[a:varname]
+    return 'eskk#_bv_get(' . string(varname) . ')'
 endfunction "}}}
 
 
