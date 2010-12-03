@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 107))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 108))
 
 
 function! s:SID() "{{{
@@ -147,15 +147,12 @@ endfunction "}}}
 function! eskk#create_new_instance() "{{{
     " TODO: CoW
 
-    " Create instance.
-    let inst = s:Eskk.new()
-    call add(s:eskk_instances, inst)
+    " Create and push the instance.
+    call add(s:eskk_instances, s:Eskk.new())
     let s:eskk_instance_id += 1
 
     " Initialize instance.
     call eskk#enable(0)
-
-    return inst
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
     if s:eskk_instance_id == 0
