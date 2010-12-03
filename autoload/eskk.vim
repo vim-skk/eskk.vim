@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 105))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 106))
 
 
 function! s:SID() "{{{
@@ -20,36 +20,6 @@ delfunc s:SID
 
 
 " Variables {{{
-
-" mode:
-"   Current mode.
-" buftable:
-"   Buffer strings for inserted, filtered and so on.
-" is_locked_old_str:
-"   Lock current diff old string?
-" temp_event_hook_fn:
-"   Temporary event handler functions/arguments.
-" enabled:
-"   True if s:eskk.enable() is called.
-" enabled_mode:
-"   Vim's mode() return value when calling eskk#enable().
-" has_started_completion:
-"   completion has been started from eskk.
-let s:eskk = {
-\   'mode': '',
-\   'buftable': {},
-\   'is_locked_old_str': 0,
-\   'temp_event_hook_fn': {},
-\   'enabled': 0,
-\   'has_started_completion': 0,
-\   'prev_im_options': {},
-\   'prev_normal_keys': {},
-\   'completion_selected': 0,
-\   'completion_inserted': 0,
-\   'bv': {},
-\}
-
-
 
 " NOTE: Following variables are non-local (global) between instances.
 
@@ -128,17 +98,51 @@ function! eskk#load() "{{{
 endfunction "}}}
 
 
+" s:Eskk {{{
+
+let s:Eskk = vice#class(
+\   'Eskk',
+\   s:SID_PREFIX,
+\   {'generate_stub': 1}
+\)
+
+" mode:
+"   Current mode.
+" buftable:
+"   Buffer strings for inserted, filtered and so on.
+" is_locked_old_str:
+"   Lock current diff old string?
+" temp_event_hook_fn:
+"   Temporary event handler functions/arguments.
+" enabled:
+"   True if s:eskk.enable() is called.
+" enabled_mode:
+"   Vim's mode() return value when calling eskk#enable().
+" has_started_completion:
+"   completion has been started from eskk.
+
+call s:Eskk.attribute('mode', '')
+call s:Eskk.attribute('buftable', {})
+call s:Eskk.attribute('is_locked_old_str', 0)
+call s:Eskk.attribute('temp_event_hook_fn', {})
+call s:Eskk.attribute('enabled', 0)
+call s:Eskk.attribute('has_started_completion', 0)
+call s:Eskk.attribute('prev_im_options', {})
+call s:Eskk.attribute('prev_normal_keys', {})
+call s:Eskk.attribute('completion_selected', 0)
+call s:Eskk.attribute('completion_inserted', 0)
+call s:Eskk.attribute('bv', {})
+
+" }}}
+
 
 " Instance
-function! s:eskk_new() "{{{
-    return deepcopy(s:eskk, 1)
-endfunction "}}}
 function! s:exists_instance() "{{{
     return exists('s:eskk_instances')
 endfunction "}}}
 function! eskk#get_current_instance() "{{{
     if !s:exists_instance()
-        let s:eskk_instances = [s:eskk_new()]
+        let s:eskk_instances = [s:Eskk.new()]
         " Index number for current instance.
         let s:eskk_instance_id = 0
     endif
@@ -148,7 +152,7 @@ function! eskk#create_new_instance() "{{{
     " TODO: CoW
 
     " Create instance.
-    let inst = s:eskk_new()
+    let inst = s:Eskk.new()
     call add(s:eskk_instances, inst)
     let s:eskk_instance_id += 1
 
