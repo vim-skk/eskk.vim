@@ -42,20 +42,8 @@ function! s:run()
         Is strlen(varname), 10, "varname length is 10"
     endfunction
 
-    let make_ascii_expr = {}
-    function! make_ascii_expr.call()
-        let ascii_expr = eskk#util#make_ascii_expr()
-        Ok !exists(ascii_expr), 'ascii_expr does not exist'
-
-        let n = eskk#util#make_random_number(9999)
-        let ascii_expr = eskk#util#make_ascii_expr(n)
-        Ok exists(ascii_expr), 'ascii_expr exists'
-        Is eval(ascii_expr), n, 'eval(ascii_expr) is n'
-    endfunction
-
     call s:foreach(0, 50, make_random_number)
     call s:foreach(0, 50, make_random_string)
-    call s:foreach(0, 50, make_ascii_expr)
 endfunction
 
 call s:run()
