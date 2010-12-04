@@ -333,7 +333,7 @@ function! eskk#util#make_ascii_expr(...) "{{{
         let varname =
         \   "make_ascii_expr_"
         \   . eskk#util#make_random_string(10)
-        if !eskk#_bv_has(varname)
+        if !eskk#buffer_value_has(varname)
             break
         endif
     endwhile
@@ -341,13 +341,13 @@ function! eskk#util#make_ascii_expr(...) "{{{
     if a:0
         call eskk#register_temp_event(
         \   'filter-begin',
-        \   'eskk#_bv_remove',
+        \   'eskk#buffer_value_remove',
         \   [varname]
         \)
-        call eskk#_bv_put(varname, a:1)
+        call eskk#buffer_value_put(varname, a:1)
     endif
 
-    return 'eskk#_bv_get(' . string(varname) . ')'
+    return 'eskk#buffer_value_get(' . string(varname) . ')'
 endfunction "}}}
 
 

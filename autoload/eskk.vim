@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 117))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 118))
 
 
 function! s:SID() "{{{
@@ -165,22 +165,19 @@ function! eskk#destroy_current_instance() "{{{
 endfunction "}}}
 
 " buffer-local value.
-" FIXME: too ad-hoc
-" XXX: ugly
-" SHIT: fxck
-function! eskk#_bv_has(name) "{{{
+function! eskk#buffer_value_has(name) "{{{
     let bv = eskk#get_current_instance().bv
     return eskk#util#has_key_f(bv, [bufnr('%'), a:name])
 endfunction "}}}
-function! eskk#_bv_remove(name) "{{{
+function! eskk#buffer_value_remove(name) "{{{
     let bv = eskk#get_current_instance().bv
     unlet bv[bufnr('%')][a:name]
 endfunction "}}}
-function! eskk#_bv_get(name) "{{{
+function! eskk#buffer_value_get(name) "{{{
     let bv = eskk#get_current_instance().bv
     return bv[bufnr('%')][a:name]
 endfunction "}}}
-function! eskk#_bv_put(name, Value) "{{{
+function! eskk#buffer_value_put(name, Value) "{{{
     let bv = eskk#get_current_instance().bv
     call eskk#util#let_f(bv, [bufnr('%'), a:name], a:Value)
 endfunction "}}}
