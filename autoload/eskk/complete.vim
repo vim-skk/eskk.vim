@@ -141,10 +141,14 @@ function! s:complete(mode, base) "{{{
     let filter_str = s:get_buftable_str(0, a:base)
     let marker = g:eskk#marker_popup . g:eskk#marker_henkan
 
-    let s = dict.search(key, okuri, okuri_rom)
-    if empty(s)
+    try
+        let s = dict.search(key, okuri, okuri_rom)
+        if empty(s)
+            return []
+        endif
+    catch /^eskk: dictionary look up error:/
         return []
-    endif
+    endtry
 
     let [yomigana, _, candidates] = s
     " call add(list, {
