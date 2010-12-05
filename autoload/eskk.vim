@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 118))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 119))
 
 
 function! s:SID() "{{{
@@ -1295,8 +1295,8 @@ function! eskk#_initialize() "{{{
         setlocal backspace+=eol
         autocmd eskk InsertEnter * setlocal backspace+=eol
         autocmd eskk InsertLeave * if type(s:saved_backspace) == type("")
-        \                       ||      let &l:backspace = s:saved_backspace
-        \                       || endif
+        \                       |      let &l:backspace = s:saved_backspace
+        \                       | endif
     endif
     " }}}
 
