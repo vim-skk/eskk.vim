@@ -401,11 +401,14 @@ function! eskk#mappings#map_mode_local_keys() "{{{
 
     call eskk#register_temp_event(
     \   'leave-mode-' . mode,
-    \   'eskk#mappings#_unmap_mode_local_keys',
+    \   eskk#util#get_local_func(
+    \       'unmap_mode_local_keys',
+    \       s:SID_PREFIX
+    \   ),
     \   [real_keys]
     \)
 endfunction "}}}
-function! eskk#mappings#_unmap_mode_local_keys(real_keys) "{{{
+function! s:unmap_mode_local_keys(real_keys) "{{{
     let inst = eskk#get_current_instance()
     for key in a:real_keys
         call eskk#mappings#set_up_temp_key_restore(
