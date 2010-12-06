@@ -68,52 +68,6 @@ eskkは拡張された、そしてさらなる拡張性を秘めたマルチバ�
 	ユーザ辞書に保存する。
 	|:EskkUpdateDictionary| や |eskk#update_dictionary()| のキーマッピング版。
 
-<Plug>(eskk:alpha-t) (n)		*<Plug>(eskk:alpha-t)*
-<Plug>(eskk:alpha-f) (n)		*<Plug>(eskk:alpha-f)*
-<Plug>(eskk:alpha-T) (n)		*<Plug>(eskk:alpha-T)*
-<Plug>(eskk:alpha-F) (n)		*<Plug>(eskk:alpha-F)*
-<Plug>(eskk:alpha-,) (n)		*<Plug>(eskk:alpha-,)*
-<Plug>(eskk:alpha-;) (n)		*<Plug>(eskk:alpha-;)*
-
-	|t|, |f|, |T|, |F|, |,|, |;| コマンドのVimスクリプト実装。
-	これを実装した理由は、lang-mode (|i_CTRL-^| 参照) がオンの時に
-	上のコマンドの引数において|language-mapping| が有効になるから。
-
-	もし|Normal-mode|での上のコマンドの動作を望んでいるなら有用なはず。
-	 >
-    function! ToggleEskkMap(enable)
-        if a:enable
-            nmap <buffer> t <Plug>(eskk:alpha-t)
-            nmap <buffer> f <Plug>(eskk:alpha-f)
-            nmap <buffer> T <Plug>(eskk:alpha-T)
-            nmap <buffer> F <Plug>(eskk:alpha-F)
-            nmap <buffer> , <Plug>(eskk:alpha-,)
-            nmap <buffer> ; <Plug>(eskk:alpha-;)
-        else
-            nunmap <buffer> t
-            nunmap <buffer> f
-            nunmap <buffer> T
-            nunmap <buffer> F
-            nunmap <buffer> ,
-            nunmap <buffer> ;
-        endif
-    endfunction
-
-    call eskk#register_event(
-    \   'enable-im',
-    \   'ToggleEskkMap',
-    \   [1],
-    \)
-    call eskk#register_event(
-    \   'disable-im',
-    \   'ToggleEskkMap',
-    \   [0],
-    \)
-<
-	上のコードを.vimrcに貼り付けると、
-	eskkが有効になった時のみ<buffer>なキーマッピングを用意し、
-	無効になった時にキーマッピングを削除するようになる。
-
 
 デフォルトキーマッピング				*eskk-default-keymappings*
 ----------------------

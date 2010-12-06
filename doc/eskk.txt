@@ -66,53 +66,6 @@ KEYMAPPINGS					*eskk-keymappings* {{{
 	(one or more new words are registered)
 	This is keymapping version of|:EskkUpdateDictionary|,  |eskk#update_dictionary()|.
 
-<Plug>(eskk:alpha-t) (n)		*<Plug>(eskk:alpha-t)*
-<Plug>(eskk:alpha-f) (n)		*<Plug>(eskk:alpha-f)*
-<Plug>(eskk:alpha-T) (n)		*<Plug>(eskk:alpha-T)*
-<Plug>(eskk:alpha-F) (n)		*<Plug>(eskk:alpha-F)*
-<Plug>(eskk:alpha-,) (n)		*<Plug>(eskk:alpha-,)*
-<Plug>(eskk:alpha-;) (n)		*<Plug>(eskk:alpha-;)*
-
-	Vim script implementation of |t|, |f|, |T|, |F|, |,|, |;|.
-	Why I implemented this in Vim script
-	is that |language-mapping| is enabled for above commands' arguments
-	when lang-mode (see |i_CTRL-^|) is on.
-
-	If you want those behaviors in |Normal-mode|, you can use them.
-	 >
-    function! ToggleEskkMap(enable)
-        if a:enable
-            nmap <buffer> t <Plug>(eskk:alpha-t)
-            nmap <buffer> f <Plug>(eskk:alpha-f)
-            nmap <buffer> T <Plug>(eskk:alpha-T)
-            nmap <buffer> F <Plug>(eskk:alpha-F)
-            nmap <buffer> , <Plug>(eskk:alpha-,)
-            nmap <buffer> ; <Plug>(eskk:alpha-;)
-        else
-            nunmap <buffer> t
-            nunmap <buffer> f
-            nunmap <buffer> T
-            nunmap <buffer> F
-            nunmap <buffer> ,
-            nunmap <buffer> ;
-        endif
-    endfunction
-
-    call eskk#register_event(
-    \   'enable-im',
-    \   'ToggleEskkMap',
-    \   [1],
-    \)
-    call eskk#register_event(
-    \   'disable-im',
-    \   'ToggleEskkMap',
-    \   [0],
-    \)
-<
-	Paste above code in your .vimrc.
-	That will create <buffer> keymappings only when eskk is enabled,
-	and delete those keymappings when eskk is disabled.
-
 
 Default keymappings				*eskk-default-keymappings*
 ----------------------
