@@ -384,17 +384,15 @@ endfunction "}}}
 function! eskk#mappings#map_mode_local_keys() "{{{
     let mode = eskk#get_mode()
 
-    if has_key(s:MODE_LOCAL_KEYS, mode)
-        for key in s:MODE_LOCAL_KEYS[mode]
-            let real_key = eskk#mappings#get_special_key(key)
-            call eskk#mappings#set_up_temp_key(real_key)
-            call eskk#register_temp_event(
-            \   'leave-mode-' . mode,
-            \   'eskk#mappings#set_up_temp_key_restore',
-            \   [real_key]
-            \)
-        endfor
-    endif
+    for key in get(s:MODE_LOCAL_KEYS, mode, [])
+        let real_key = eskk#mappings#get_special_key(key)
+        call eskk#mappings#set_up_temp_key(real_key)
+        call eskk#register_temp_event(
+        \   'leave-mode-' . mode,
+        \   'eskk#mappings#set_up_temp_key_restore',
+        \   [real_key]
+        \)
+    endfor
 endfunction "}}}
 
 
