@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 122))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 123))
 
 
 function! s:SID() "{{{
@@ -858,46 +858,11 @@ function! eskk#_initialize() "{{{
     call s:initialize_set_up_eskk_directory()
     " }}}
 
-    " Egg-like-newline {{{
-    function! s:do_lmap_non_egg_like_newline(do_map) "{{{
-        if a:do_map
-            if !eskk#mappings#has_temp_key('<CR>')
-                call eskk#mappings#set_up_temp_key(
-                \   '<CR>',
-                \   '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)'
-                \)
-            endif
-        else
-            call eskk#register_temp_event(
-            \   'filter-begin',
-            \   'eskk#mappings#set_up_temp_key_restore',
-            \   ['<CR>']
-            \)
-        endif
-    endfunction "}}}
+    " Egg like newline {{{
     if !g:eskk#egg_like_newline
         " Default behavior is `egg like newline`.
         " Turns it to `Non egg like newline` during henkan phase.
-        call eskk#register_event(
-        \   [
-        \       'enter-phase-henkan',
-        \       'enter-phase-okuri',
-        \       'enter-phase-henkan-select'
-        \   ],
-        \   eskk#util#get_local_func(
-        \       'do_lmap_non_egg_like_newline',
-        \       s:SID_PREFIX
-        \   ),
-        \   [1]
-        \)
-        call eskk#register_event(
-        \   'enter-phase-normal',
-        \   eskk#util#get_local_func(
-        \       'do_lmap_non_egg_like_newline',
-        \       s:SID_PREFIX
-        \   ),
-        \   [0]
-        \)
+        call eskk#mappings#disable_egg_like_newilne()
     endif
     " }}}
 

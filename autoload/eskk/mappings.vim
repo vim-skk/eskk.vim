@@ -6,6 +6,14 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
+
+function! s:SID() "{{{
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfunction "}}}
+let s:SID_PREFIX = s:SID()
+delfunc s:SID
+
+
 function! s:handle_toggle_hankata(stash) "{{{
     if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
@@ -480,6 +488,51 @@ endfunction "}}}
 function! s:restore_normal_keys(keys) "{{{
     if has_key(a:keys, 'restore')
         call a:keys.restore()
+    endif
+endfunction "}}}
+
+
+" Egg like newline
+function! eskk#mappings#disable_egg_like_newilne() "{{{
+    call eskk#register_event(
+    \   [
+    \       'enter-phase-henkan',
+    \       'enter-phase-okuri',
+    \       'enter-phase-henkan-select'
+    \   ],
+    \   eskk#util#get_local_func(
+    \       'do_lmap_non_egg_like_newline',
+    \       s:SID_PREFIX
+    \   ),
+    \   [1]
+    \)
+    call eskk#register_event(
+    \   'enter-phase-normal',
+    \   eskk#util#get_local_func(
+    \       'do_lmap_non_egg_like_newline',
+    \       s:SID_PREFIX
+    \   ),
+    \   [0]
+    \)
+endfunction "}}}
+function! s:do_lmap_non_egg_like_newline(enable) "{{{
+    if a:enable
+        " Enable
+        if !eskk#mappings#has_temp_key('<CR>')
+            call eskk#mappings#set_up_temp_key(
+            \   '<CR>',
+            \   '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)'
+            \)
+        endif
+    else
+        " Disable
+        let inst = eskk#get_current_instance()
+        call eskk#register_temp_event(
+        \   'filter-begin',
+        \   'eskk#mappings#set_up_temp_key_restore',
+        \   ['<CR>', inst.first_setup_for_mode_local_keys]
+        \)
+        " FIXME: let inst.first_setup_for_mode_local_keys = 0
     endif
 endfunction "}}}
 
