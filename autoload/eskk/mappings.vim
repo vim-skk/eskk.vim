@@ -356,14 +356,14 @@ function! eskk#mappings#set_up_temp_key(lhs, ...) "{{{
         call eskk#mappings#set_up_key(a:lhs)
     endif
 endfunction "}}}
-function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
+function! eskk#mappings#set_up_temp_key_restore(lhs, show_error) "{{{
     let temp_key = s:temp_key_map(a:lhs)
     let saved_rhs = maparg(temp_key, 'l')
 
     if saved_rhs != ''
         call eskk#mappings#unmap('b', temp_key, 'l')
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
-    else
+    elseif a:show_error
         call eskk#error#logf(
         \   "called eskk#mappings#set_up_temp_key_restore()"
         \       . " but no '%s' key is stashed.",
@@ -384,15 +384,26 @@ endfunction "}}}
 function! eskk#mappings#map_mode_local_keys() "{{{
     let mode = eskk#get_mode()
 
+    let real_keys = []
     for key in get(s:MODE_LOCAL_KEYS, mode, [])
-        let real_key = eskk#mappings#get_special_key(key)
-        call eskk#mappings#set_up_temp_key(real_key)
-        call eskk#register_temp_event(
-        \   'leave-mode-' . mode,
-        \   'eskk#mappings#set_up_temp_key_restore',
-        \   [real_key]
-        \)
+        let sp_key = eskk#mappings#get_special_key(key)
+        call eskk#mappings#set_up_temp_key(sp_key)
+        call add(real_keys, sp_key)
     endfor
+
+    call eskk#register_temp_event(
+    \   'leave-mode-' . mode,
+    \   'eskk#mappings#_unmap_mode_local_keys',
+    \   [real_keys]
+    \)
+endfunction "}}}
+function! eskk#mappings#_unmap_mode_local_keys(real_keys) "{{{
+    let inst = eskk#get_current_instance()
+    for key in a:real_keys
+        call eskk#mappings#set_up_temp_key_restore(
+        \   key, inst.first_setup_for_mode_local_keys)
+    endfor
+    let inst.first_setup_for_mode_local_keys = 0
 endfunction "}}}
 
 
