@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 119))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 120))
 
 
 function! s:SID() "{{{
@@ -171,7 +171,10 @@ function! eskk#buffer_value_has(name) "{{{
 endfunction "}}}
 function! eskk#buffer_value_remove(name) "{{{
     let bv = eskk#get_current_instance().bv
-    unlet bv[bufnr('%')][a:name]
+    let nr = bufnr('%')
+    if has_key(bv, nr) && has_key(bv[nr], a:name)
+        unlet bv[nr][a:name]
+    endif
 endfunction "}}}
 function! eskk#buffer_value_get(name) "{{{
     let bv = eskk#get_current_instance().bv
