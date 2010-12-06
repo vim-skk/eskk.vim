@@ -3,7 +3,19 @@
 Author:
   tyru <tyru.exe@gmail.com>
 Version: X.Y.Z
-License: Under the same license as Vim itself (see :help license)
+License:
+" NEW BSD LICENSE {{{
+"   Copyright (c) 2009, tyru
+"   All rights reserved.
+"
+"   Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+"
+"       * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+"       * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+"       * Neither the name of the tyru nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+"
+"   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+" }}}
 
 ==============================================================================
 CONTENTS						*eskk-contents*
@@ -54,53 +66,6 @@ KEYMAPPINGS					*eskk-keymappings* {{{
 	(one or more new words are registered)
 	This is keymapping version of|:EskkUpdateDictionary|,  |eskk#update_dictionary()|.
 
-<Plug>(eskk:alpha-t) (n)		*<Plug>(eskk:alpha-t)*
-<Plug>(eskk:alpha-f) (n)		*<Plug>(eskk:alpha-f)*
-<Plug>(eskk:alpha-T) (n)		*<Plug>(eskk:alpha-T)*
-<Plug>(eskk:alpha-F) (n)		*<Plug>(eskk:alpha-F)*
-<Plug>(eskk:alpha-,) (n)		*<Plug>(eskk:alpha-,)*
-<Plug>(eskk:alpha-;) (n)		*<Plug>(eskk:alpha-;)*
-
-	Vim script implementation of |t|, |f|, |T|, |F|, |,|, |;|.
-	Why I implemented this in Vim script
-	is that |language-mapping| is enabled for above commands' arguments
-	when lang-mode (see |i_CTRL-^|) is on.
-
-	If you want those behaviors in |Normal-mode|, you can use them.
-	 >
-    function! ToggleEskkMap(enable)
-        if a:enable
-            nmap <buffer> t <Plug>(eskk:alpha-t)
-            nmap <buffer> f <Plug>(eskk:alpha-f)
-            nmap <buffer> T <Plug>(eskk:alpha-T)
-            nmap <buffer> F <Plug>(eskk:alpha-F)
-            nmap <buffer> , <Plug>(eskk:alpha-,)
-            nmap <buffer> ; <Plug>(eskk:alpha-;)
-        else
-            nunmap <buffer> t
-            nunmap <buffer> f
-            nunmap <buffer> T
-            nunmap <buffer> F
-            nunmap <buffer> ,
-            nunmap <buffer> ;
-        endif
-    endfunction
-
-    call eskk#register_event(
-    \   'enable-im',
-    \   'ToggleEskkMap',
-    \   [1],
-    \)
-    call eskk#register_event(
-    \   'disable-im',
-    \   'ToggleEskkMap',
-    \   [0],
-    \)
-<
-	Paste above code in your .vimrc.
-	That will create <buffer> keymappings only when eskk is enabled,
-	and delete those keymappings when eskk is disabled.
-
 
 Default keymappings				*eskk-default-keymappings*
 ----------------------
@@ -114,7 +79,7 @@ VARIABLES					*eskk-variables* {{{
 Directory that eskk creates
 ------------------------------
 
-g:eskk_directory			*g:eskk_directory*
+g:eskk#directory			*g:eskk#directory*
 							(Default: "~/.eskk")
 	Under this directory,
 	misc. directories/files about eskk
@@ -123,14 +88,14 @@ g:eskk_directory			*g:eskk_directory*
 SKK dicitionary
 ------------------
 
-g:eskk_dictionary			*g:eskk_dictionary*
+g:eskk#dictionary			*g:eskk#dictionary*
 							(Default: See below)
 	User SKK dictionary's information.
 
 	This variable value is:
 		If user defined:
 			String: >
-				let g:eskk_dictionary = {
+				let g:eskk#dictionary = {
 				\	'path': {value},
 				\	'sorted': 0,
 				\	'encoding': 'utf-8',
@@ -140,21 +105,21 @@ g:eskk_dictionary			*g:eskk_dictionary*
 				and extend missing keys of {value}
 				by "not defined" value.
 		not defined: >
-				let g:eskk_dictionary = {
+				let g:eskk#dictionary = {
 				\	'path': "~/.skk-jisyo",
 				\	'sorted': 0,
 				\	'encoding': 'utf-8',
 				\}
 <
 
-g:eskk_large_dictionary		*g:eskk_large_dictionary*
+g:eskk#large_dictionary		*g:eskk#large_dictionary*
 							(Default: See below)
 	System SKK dictionary's information.
 
 	This variable value is:
 		If user defined:
 			String: >
-				let g:eskk_large_dictionary = {
+				let g:eskk#large_dictionary = {
 				\	'path': {value},
 				\	'sorted': 0,
 				\	'encoding': 'euc-jp',
@@ -164,39 +129,39 @@ g:eskk_large_dictionary		*g:eskk_large_dictionary*
 				and extend missing keys of {value}
 				by "not defined" value.
 		not defined: >
-				let g:eskk_large_dictionary = {
+				let g:eskk#large_dictionary = {
 				\	'path': "/usr/local/share/SKK/SKK-JISYO",
 				\	'sorted': 0,
 				\	'encoding': 'euc-jp',
 				\}
 
-g:eskk_backup_dictionary	*g:eskk_backup_dictionary*
-							(Default: g:eskk_dictionary.path . ".BAK")
+g:eskk#backup_dictionary	*g:eskk#backup_dictionary*
+							(Default: g:eskk#dictionary.path . ".BAK")
 	(TODO)
 
-g:eskk_auto_save_dictionary_at_exit		*g:eskk_auto_save_dictionary_at_exit*
+g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
 							(Default: 1)
 	If true and one or more words are registered in SKK dictionary,
-	Automatically save its modification to |g:eskk_dictionary|
+	Automatically save its modification to |g:eskk#dictionary|
 	when Vim exits (|VimLeave|).
 
 
 Some kanji conversion keys, Annotation
 -----------------------------------------
 
-g:eskk_select_cand_keys		*g:eskk_select_cand_keys*
+g:eskk#select_cand_keys		*g:eskk#select_cand_keys*
 							(Default: "asdfjkl")
 	Keys to select candidates at |eskk-select-candidates|.
 	This value is String consisted of each character of keys.
 
-g:eskk_show_candidates_count	*g:eskk_show_candidates_count*
+g:eskk#show_candidates_count	*g:eskk#show_candidates_count*
 							(Default: 4)
 	At |eskk-henkan-select-phase|,
 	If the number user typed the henkan key exceeded
 	this number,
 	Switch to |eskk-select-candidates|.
 
-g:eskk_show_annotation			*g:eskk_show_annotation*
+g:eskk#show_annotation			*g:eskk#show_annotation*
 							(Default: 0)
 	If true, show annotation at |eskk-select-candidates|.
 
@@ -204,15 +169,15 @@ g:eskk_show_annotation			*g:eskk_show_annotation*
 Keymappings
 -----------
 
-g:eskk_no_default_mappings		*g:eskk_no_default_mappings*
+g:eskk#no_default_mappings		*g:eskk#no_default_mappings*
 							(Default: 0)
 	If true, eskk does not prepare any |eskk-default-keymappings| for user.
 
-g:eskk_dont_map_default_if_already_mapped	*g:eskk_dont_map_default_if_already_mapped*
+g:eskk#dont_map_default_if_already_mapped	*g:eskk#dont_map_default_if_already_mapped*
 							(Default: 1)
 	If true and keys are already mapped, do not map default keys.
 
-g:eskk_mapped_keys				*g:eskk_mapped_keys*
+g:eskk#mapped_keys				*g:eskk#mapped_keys*
 							(Default: EskkDefaultMappedKeys())
 	List of String consisted of |key-notation| (not keycode).
 	See |EskkDefaultMappedKeys()|'s value.
@@ -222,19 +187,19 @@ g:eskk_mapped_keys				*g:eskk_mapped_keys*
 Mode
 -------
 
-g:eskk_initial_mode			*g:eskk_initial_mode*
+g:eskk#initial_mode			*g:eskk#initial_mode*
 							(Default: "hira")
 	When |eskk#enable()| is called,
 	eskk sets this mode to initial value.
 
-g:eskk_statusline_mode_strings	*g:eskk_statusline_mode_strings*
+g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
 							(Default: See below)
 	Current mode's strings at |'statusline'|.
 	Statusline string of modes.
 	This changes |eskk#get_stl()|'s return value.
 
 	Default value is: >
-	let g:eskk_statusline_mode_strings = {
+	let g:eskk#statusline_mode_strings = {
 	\	'hira': 'あ',
 	\	'kata': 'ア',
 	\	'ascii': 'aA',
@@ -243,14 +208,14 @@ g:eskk_statusline_mode_strings	*g:eskk_statusline_mode_strings*
 	\	'abbrev': 'aあ'
 	\}
 <
-g:eskk_mode_use_tables			*g:eskk_mode_use_tables*
+g:eskk#mode_use_tables			*g:eskk#mode_use_tables*
 							(Default: See below)
 	Keys are modes.
 	Values are table names.
 	See |eskk-table| to create own table.
 
 	Default value is: >
-	let g:eskk_mode_use_tables = {
+	let g:eskk#mode_use_tables = {
 	\	'hira': 'rom_to_hira',
 	\	'kata': 'rom_to_kata',
 	\	'zenei': 'rom_to_zenei',
@@ -261,53 +226,53 @@ g:eskk_mode_use_tables			*g:eskk_mode_use_tables*
 Table
 --------
 
-g:eskk_cache_table_map			*g:eskk_cache_table_map*
+g:eskk#cache_table_map			*g:eskk#cache_table_map*
 							(Default: 1)
 
-g:eskk_cache_table_candidates			*g:eskk_cache_table_candidates*
+g:eskk#cache_table_candidates			*g:eskk#cache_table_candidates*
 							(Default: 1)
 
 
 Markers
 ----------
 
-g:eskk_marker_henkan			*g:eskk_marker_henkan*
+g:eskk#marker_henkan			*g:eskk#marker_henkan*
 							(Default: "▽")
 
-g:eskk_marker_okuri			*g:eskk_marker_okuri*
+g:eskk#marker_okuri			*g:eskk#marker_okuri*
 							(Default: "*")
 
-g:eskk_marker_henkan_select			*g:eskk_marker_henkan_select*
+g:eskk#marker_henkan_select			*g:eskk#marker_henkan_select*
 							(Default: "▼")
 
-g:eskk_marker_jisyo_touroku			*g:eskk_marker_jisyo_touroku*
+g:eskk#marker_jisyo_touroku			*g:eskk#marker_jisyo_touroku*
 							(Default: "?")
 	(TODO)
 
-g:eskk_marker_popup			*g:eskk_marker_popup*
+g:eskk#marker_popup			*g:eskk#marker_popup*
 							(Default: "#")
 
 
 Completion
 -------------
 
-g:eskk_enable_completion		*g:eskk_enable_completion*
+g:eskk#enable_completion		*g:eskk#enable_completion*
 							(Default: 0)
 
-g:eskk_max_candidates			*g:eskk_max_candidates*
+g:eskk#max_candidates			*g:eskk#max_candidates*
 							(Default: 10)
 
-g:eskk_compl_enter_send_keys			*g:eskk_compl_enter_send_keys*
+g:eskk#compl_enter_send_keys			*g:eskk#compl_enter_send_keys*
 							(Default: ["<CR>"])
 
 
 Cursor color
 ---------------
 
-g:eskk_use_color_cursor			*g:eskk_use_color_cursor*
+g:eskk#use_color_cursor			*g:eskk#use_color_cursor*
 							(Default: 1)
 
-g:eskk_cursor_color			*g:eskk_cursor_color*
+g:eskk#cursor_color			*g:eskk#cursor_color*
 							(Default: See below)
 	Default value is: >
     " ascii: ivory4:#8b8b83, gray:#bebebe
@@ -315,7 +280,7 @@ g:eskk_cursor_color			*g:eskk_cursor_color*
     " kata: forestgreen:#228b22, green:#00ff00
     " abbrev: royalblue:#4169e1
     " zenei: gold:#ffd700
-    let g:eskk_cursor_color = {
+    let g:eskk#cursor_color = {
     \   'ascii': ['#8b8b83', '#bebebe'],
     \   'hira': ['#8b3e2f', '#ffc0cb'],
     \   'kata': ['#228b22', '#00ff00'],
@@ -327,39 +292,39 @@ g:eskk_cursor_color			*g:eskk_cursor_color*
 Misc.
 --------
 
-g:eskk_egg_like_newline			*g:eskk_egg_like_newline*
+g:eskk#egg_like_newline			*g:eskk#egg_like_newline*
 							(Default: 0)
 
-g:eskk_keep_state			*g:eskk_keep_state*
+g:eskk#keep_state			*g:eskk#keep_state*
 							(Default: 0)
 
-g:eskk_keep_state_beyond_buffer		*g:eskk_keep_state_beyond_buffer*
+g:eskk#keep_state_beyond_buffer		*g:eskk#keep_state_beyond_buffer*
 							(Default: 0)
 
-g:eskk_revert_henkan_style			*g:eskk_revert_henkan_style*
+g:eskk#revert_henkan_style			*g:eskk#revert_henkan_style*
 							(Default: "okuri")
 
-g:eskk_delete_implies_kakutei			*g:eskk_delete_implies_kakutei*
+g:eskk#delete_implies_kakutei			*g:eskk#delete_implies_kakutei*
 							(Default: 0)
 
-g:eskk_rom_input_style			*g:eskk_rom_input_style*
+g:eskk#rom_input_style			*g:eskk#rom_input_style*
 							(Default: "skk")
 
-g:eskk_auto_henkan_at_okuri_match			*g:eskk_auto_henkan_at_okuri_match*
+g:eskk#auto_henkan_at_okuri_match			*g:eskk#auto_henkan_at_okuri_match*
 							(Default: 1)
 
-g:eskk_set_undo_point				*g:eskk_set_undo_point*
+g:eskk#set_undo_point				*g:eskk#set_undo_point*
 							(Default: See below)
 	Default value is: >
-	let g:eskk_set_undo_point = {
+	let g:eskk#set_undo_point = {
 	\	'sticky': 1,
 	\	'kakutei': 1,
 	\}
 <
-g:eskk_context_control				*g:eskk_context_control*
+g:eskk#context_control				*g:eskk#context_control*
 							(Default: [])
 
-g:eskk_fix_extra_okuri				*g:eskk_fix_extra_okuri*
+g:eskk#fix_extra_okuri				*g:eskk#fix_extra_okuri*
 							(Default: 1)
 	 >
 	▽おくr {henkan-key}
@@ -367,22 +332,22 @@ g:eskk_fix_extra_okuri				*g:eskk_fix_extra_okuri*
 	 >
 	▽おく*r
 <
-g:eskk_ignore_continuous_sticky		*g:eskk_ignore_continuous_sticky*
+g:eskk#ignore_continuous_sticky		*g:eskk#ignore_continuous_sticky*
 							(Default: 1)
 
-g:eskk_convert_at_exact_match		*g:eskk_convert_at_exact_match*
+g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 							(Default: 0)
 
-g:eskk_kata_convert_to_hira_at_henkan	*g:eskk_kata_convert_to_hira_at_henkan*
+g:eskk#kata_convert_to_hira_at_henkan	*g:eskk#kata_convert_to_hira_at_henkan*
 							(Default: 1)
 	In |eskk-kata-mode|, Convert hiragana to katakana
 	before looking up SKK dictionary.
 	Therefore, eskk will find the candidates in SKK dictionary.
 	(Because SKK dictionary only contains pairs of hiragana and candidates)
 
-g:eskk_kata_convert_to_hira_at_completion	*g:eskk_kata_convert_to_hira_at_completion*
+g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_completion*
 							(Default: 1)
-	Same as |g:eskk_kata_convert_to_hira_at_henkan|,
+	Same as |g:eskk#kata_convert_to_hira_at_henkan|,
 	But this works at |eskk-completion|.
 
 
@@ -392,25 +357,25 @@ g:eskk_kata_convert_to_hira_at_completion	*g:eskk_kata_convert_to_hira_at_comple
 Debugging variables
 ----------------------
 
-g:eskk_debug			*g:eskk_debug*
+g:eskk#debug			*g:eskk#debug*
 						(Default: 0)
 	If true, output debugging messages to command-line or file.
-	|g:eskk_debug_stdout| changes which to output.
+	|g:eskk#debug_out| changes which to output.
 
-g:eskk_debug_wait_ms	*g:eskk_debug_wait_ms*
+g:eskk#debug_wait_ms	*g:eskk#debug_wait_ms*
 						(Default: 0)
 	If this variable is greater than 0,
 	Do |:sleep| for this value (millisecond).
 
-g:eskk_debug_stdout		*g:eskk_debug_stdout*
+g:eskk#debug_out		*g:eskk#debug_out*
 						(Default: "file")
 	The value is "file" or "cmdline".
 	If "file", log file is created at: >
-	{g:eskk_directory}/log/debug.log
+	{g:eskk#directory}/log/debug.log
 <
 	If "cmdline", output to command-line.
 
-g:eskk_version			*g:eskk_version*
+g:eskk#version			*g:eskk#version*
 	Current version number string.
 
 }}}
@@ -442,7 +407,7 @@ eskk#update_dictionary()		*eskk#update_dictionary()*
 	See |:EskkUpdateDictionary|.
 
 EskkDefaultMappedKeys()			*EskkDefaultMappedKeys()*
-	Default value of |g:eskk_mapped_keys|.
+	Default value of |g:eskk#mapped_keys|.
 
 }}}
 }}}
