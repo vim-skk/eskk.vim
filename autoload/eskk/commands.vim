@@ -30,6 +30,7 @@ function! s:cmd_forget_registered_words() "{{{
 endfunction "}}}
 
 function! s:cmd_update_dictionary(silent) "{{{
+    call eskk#_initialize()
     let silent = a:0 ? a:1 : 0
     let dict = eskk#get_skk_dict()
     execute (silent ? 'silent' : '') 'call dict.update_dictionary()'
