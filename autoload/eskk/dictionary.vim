@@ -230,7 +230,7 @@ endfunction "}}}
 " Returns String of the created entry from arguments values.
 " eskk#dictionary#create_new_entry() {{{
 function! eskk#dictionary#create_new_entry(
-\   new_word, key, okuri, okuri_rom, existing_line
+\   existing_line, key, okuri_rom, new_word
 \)
     " XXX:
     " TODO:
@@ -1215,7 +1215,7 @@ function! {s:Dictionary.method('get_updated_lines')}(this) "{{{
         call insert(
         \   user_dict_lines,
         \   eskk#dictionary#create_new_entry(
-        \       w.input, w.key, w.okuri, w.okuri_rom, line
+        \       line, w.key, w.okuri_rom, w.input
         \   ),
         \   lnum
         \)
