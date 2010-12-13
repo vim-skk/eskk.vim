@@ -249,6 +249,28 @@ function! eskk#util#get_sid_from_source(regex) "{{{
 endfunction "}}}
 
 
+" System
+function! eskk#util#move_file(src, dest, ...) "{{{
+    let show_error = a:0 ? a:1 : 1
+    if executable('mv')
+        silent execute '!mv' shellescape(a:src) shellescape(a:dest)
+        if show_error && v:shell_error
+            call eskk#util#warn("'mv' returned failure value: " . v:shell_error)
+            sleep 1
+            return 0
+        endif
+    else
+        let ret = writefile(readfile(a:src, "b"), a:dest, "b")
+        if show_error && ret == -1
+            call eskk#util#warn("can't copy '" . a:src . "' to '" . a:dest . "'.")
+            sleep 1
+            return 0
+        endif
+    endif
+    return 1
+endfunction "}}}
+
+
 " Misc.
 function! eskk#util#identity(value) "{{{
     return a:value
