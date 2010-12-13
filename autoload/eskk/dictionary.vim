@@ -359,7 +359,7 @@ let [
 "   Candidates looked up by self._key, self._okuri_rom, self._okuri
 "   NOTE:
 "   Do not access directly.
-"   Getter is s:HenkanResult._get_candidates().
+"   Getter is s:HenkanResult.get_candidates().
 " self._candidates_index:
 "   Current index of List self._candidates
 " self._user_dict_found_index:
@@ -391,7 +391,7 @@ endfunction "}}}
 
 " Reset candidates.
 " After calling this function,
-" s:HenkanResult._get_candidates() will look up dictionary again.
+" s:HenkanResult.get_candidates() will look up dictionary again.
 function! {s:HenkanResult.method('reset')}(this) "{{{
     call extend(
     \   a:this,
@@ -409,14 +409,14 @@ endfunction "}}}
 
 " Forward/Back self._candidates_index safely
 " Returns true value when succeeded / false value when failed
-function! {s:HenkanResult.method('_advance')}(this, advance) "{{{
+function! {s:HenkanResult.method('advance')}(this, advance) "{{{
     call a:this.remove_cache()
 
     try
-        let candidates = a:this._get_candidates()
+        let candidates = a:this.get_candidates()
         let idx = a:this._candidates_index
         if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
-            " Next time to call s:HenkanResult._get_candidates(),
+            " Next time to call s:HenkanResult.get_candidates(),
             " eskk will getchar() if `idx >= g:eskk#show_candidates_count`
             let a:this._candidates_index +=  (a:advance ? 1 : -1)
             return 1
@@ -426,13 +426,13 @@ function! {s:HenkanResult.method('_advance')}(this, advance) "{{{
         return 0
     catch /^eskk: dictionary look up error/
         " Shut up error. This function does not throw exception.
-        call eskk#error#log_exception('s:HenkanResult._get_candidates()')
+        call eskk#error#log_exception('s:HenkanResult.get_candidates()')
         return 0
     endtry
 endfunction "}}}
 
 " Returns List of candidates.
-function! {s:HenkanResult.method('_get_candidates')}(this) "{{{
+function! {s:HenkanResult.method('get_candidates')}(this) "{{{
     if a:this._status ==# g:eskk#dictionary#HR_GOT_RESULT
         return a:this._candidates.to_list()
 
@@ -549,8 +549,8 @@ function! eskk#dictionary#look_up_error(msg) "{{{
 endfunction "}}}
 
 " Select candidate from command-line.
-" s:HenkanResult._select_candidates() {{{
-function! {s:HenkanResult.method('_select_candidates')}(
+" s:HenkanResult.select_candidates() {{{
+function! {s:HenkanResult.method('select_candidates')}(
 \   this, with_okuri, skip_num, functor
 \)
     if eskk#is_neocomplcache_locked()
@@ -558,7 +558,7 @@ function! {s:HenkanResult.method('_select_candidates')}(
     endif
 
     " Select candidates by getchar()'s character.
-    let words = copy(a:this._get_candidates())
+    let words = copy(a:this.get_candidates())
     let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
     let page_index = 0
     let pages = []
@@ -677,7 +677,7 @@ function! {s:HenkanResult.method('get_candidate')}(this, ...) "{{{
 
     let max_count = g:eskk#show_candidates_count >= 0 ?
     \                   g:eskk#show_candidates_count : 0
-    let candidates = a:this._get_candidates()
+    let candidates = a:this.get_candidates()
 
     if a:this._candidates_index >= max_count
         let functor = {
@@ -696,7 +696,7 @@ function! {s:HenkanResult.method('get_candidate')}(this, ...) "{{{
             \]
         endfunction
 
-        let a:this._candidate = a:this._select_candidates(
+        let a:this._candidate = a:this.select_candidates(
         \   with_okuri, max_count, functor
         \)
     else
@@ -727,11 +727,11 @@ endfunction "}}}
 
 " Forward current candidate index number (self._candidates_index)
 function! {s:HenkanResult.method('forward')}(this) "{{{
-    return a:this._advance(1)
+    return a:this.advance(1)
 endfunction "}}}
 " Back current candidate index number (self._candidates_index)
 function! {s:HenkanResult.method('back')}(this) "{{{
-    return a:this._advance(0)
+    return a:this.advance(0)
 endfunction "}}}
 
 " Delete current candidate from all places.
@@ -743,14 +743,14 @@ endfunction "}}}
 " -- TODO: System dictionary (skk-ignore-dic-word) (Issue #86)
 function! {s:HenkanResult.method('delete_from_dict')}(this) "{{{
     try
-        return a:this._do_delete_from_dict()
+        return a:this.do_delete_from_dict()
     finally
         let dict = eskk#get_skk_dict()
         call dict.clear_henkan_result()
     endtry
 endfunction "}}}
-function! {s:HenkanResult.method('_do_delete_from_dict')}(this) "{{{
-    let candidates = a:this._get_candidates()
+function! {s:HenkanResult.method('do_delete_from_dict')}(this) "{{{
+    let candidates = a:this.get_candidates()
     let candidates_index = a:this._candidates_index
     let user_dict_idx = a:this._user_dict_found_index
 
@@ -811,7 +811,7 @@ endfunction "}}}
 
 " TODO doc
 function! {s:HenkanResult.method('update_candidate')}(this) "{{{
-    let candidates = a:this._get_candidates()
+    let candidates = a:this.get_candidates()
     let candidates_index = a:this._candidates_index
 
     if !eskk#util#has_idx(candidates, candidates_index)
@@ -879,7 +879,7 @@ function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
     let path = a:this.path
     try
         let a:this._content_lines  = readfile(path)
-        call a:this._parse_lines(a:this._content_lines)
+        call a:this.parse_lines(a:this._content_lines)
 
         let a:this._ftime_at_read = getftime(path)
         let a:this._loaded = 1
@@ -898,7 +898,7 @@ endfunction "}}}
 function! {s:PhysicalDict.method('set_lines')}(this, lines) "{{{
     try
         let a:this._content_lines  = a:lines
-        call a:this._parse_lines(a:lines)
+        call a:this.parse_lines(a:lines)
         let a:this._loaded = 1
         let a:this._is_modified = 1
     catch /^eskk: parse error/
@@ -910,7 +910,7 @@ endfunction "}}}
 
 " - Validate List of whole lines of dictionary.
 " - Set self.okuri_ari_idx, self.okuri_nasi_idx.
-function! {s:PhysicalDict.method('_parse_lines')}(this, lines) "{{{
+function! {s:PhysicalDict.method('parse_lines')}(this, lines) "{{{
     let a:this.okuri_ari_idx  = index(
     \   a:this._content_lines,
     \   ';; okuri-ari entries.'
@@ -1171,7 +1171,7 @@ endfunction "}}}
 " s:Dictionary.is_modified() will returns false.
 " but after calling "s:physical_dict.set_lines()",
 " s:Dictionary.is_modified() will returns true.
-function! {s:Dictionary.method('_clear_modified_flags')}(this) "{{{
+function! {s:Dictionary.method('clear_modified_flags')}(this) "{{{
     let a:this._registered_words_modified = 0
     let a:this._user_dict._is_modified = 0
 endfunction "}}}
@@ -1211,7 +1211,7 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
 
     call a:this.write_lines(a:this.get_updated_lines(), verbose)
     call a:this.forget_all_words()
-    call a:this._clear_modified_flags()
+    call a:this.clear_modified_flags()
 endfunction "}}}
 function! {s:Dictionary.method('get_updated_lines')}(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
