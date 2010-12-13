@@ -202,6 +202,30 @@ function! eskk#util#formatstrf(fmt, ...) "{{{
     \)
 endfunction "}}}
 
+function! eskk#util#regexp_new(pattern) "{{{
+    return s:Regexp.new(a:pattern)
+endfunction "}}}
+" s:Regexp {{{
+let s:Regexp = vice#class('Regexp', s:SID_PREFIX, {'generate_stub': 1})
+
+call s:Regexp.attribute('_pattern', '')
+call s:Regexp.attribute('_matchlist', [])
+
+function! {s:Regexp.constructor()}(this, pattern) "{{{
+    let a:this._pattern = a:pattern
+endfunction "}}}
+function! {s:Regexp.method('match')}(this, str) "{{{
+    let a:this._matchlist = matchlist(a:str, a:this._pattern)
+    return !empty(a:this._matchlist)
+endfunction "}}}
+function! {s:Regexp.method('group')}(nr, ...) "{{{
+    return get(a:this._matchlist, a:nr, a:0 ? a:1 : 0)
+endfunction "}}}
+function! {s:Regexp.method('grouplist')}(...) "{{{
+    return a:this._matchlist[1 : a:0 ? a:1 : -1]
+endfunction "}}}
+" }}}
+
 
 " Mappings
 function! eskk#util#get_tab_raw_str() "{{{
