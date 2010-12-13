@@ -456,11 +456,6 @@ COMPLETION				*eskk-completion* {{{
 }}}
 ==============================================================================
 FAQ					*eskk-faq* {{{
-
-									*eskk-tfTF*
-Q. I can't use |t|, |f|, |T|, |F| commands when eskk is enabled.
-A. See |<Plug>(eskk:alpha-t)| and similar keymappings.
-
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
