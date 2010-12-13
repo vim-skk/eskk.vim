@@ -1185,11 +1185,11 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
         " Because at this time dictionary file does not exist.
     endif
 
-    call a:this._write_to_file(verbose)
+    call a:this._write_to_file(a:this._get_updated_lines(), verbose)
     call a:this.forget_all_words()
     call a:this._clear_modified_flags()
 endfunction "}}}
-function! {s:Dictionary.method('_write_to_file')}(this, verbose) "{{{
+function! {s:Dictionary.method('_get_updated_lines')}(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this._user_dict really does not have registered words.
@@ -1220,6 +1220,11 @@ function! {s:Dictionary.method('_write_to_file')}(this, verbose) "{{{
         \   lnum
         \)
     endfor
+
+    return user_dict_lines
+endfunction "}}}
+function! {s:Dictionary.method('_write_to_file')}(this, lines, verbose) "{{{
+    let user_dict_lines = a:lines
 
     let save_msg = printf("Saving to '%s'...", a:this._user_dict.path)
     if a:verbose
