@@ -271,7 +271,9 @@ endfunction "}}}
 " }}}
 
 
-" s:candidate: s:candidate_new() {{{
+" s:Candidate: s:candidate_new() {{{
+" One s:Candidate corresponds to SKK dictionary's one line.
+" It is the pair of filtered string and its converted string.
 
 let [
 \   s:CANDIDATE_FROM_USER_DICT,
@@ -311,7 +313,8 @@ endfunction "}}}
 
 " }}}
 
-" s:registered_word: s:registered_word_new() {{{
+" s:RegisteredWord: s:registered_word_new() {{{
+" s:RegisteredWord is the word registered by s:Dictionary.register_word().
 
 function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
     return {
