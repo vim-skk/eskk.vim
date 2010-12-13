@@ -145,6 +145,11 @@ g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
 	Automatically save its modification to |g:eskk#dictionary|
 	when Vim exits (|VimLeave|).
 
+g:eskk#dictionary_save_count		*g:eskk#dictionary_save_count*
+							(Default: -1)
+	If the number of registered words exceed this count,
+	eskk writes it to user dictionary.
+
 
 Some kanji conversion keys, Annotation
 -----------------------------------------

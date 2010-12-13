@@ -1110,6 +1110,10 @@ function! {s:Dictionary.method('remember_word')}(this, input, key, okuri, okuri_
     call a:this._registered_words.unshift(rw)
     let a:this._registered_words_modified = 1
 
+    if a:this._registered_words.size() >= g:eskk#dictionary_save_count
+        call a:this.update_dictionary(0)
+    endif
+
     if !empty(a:this._current_henkan_result)
         call a:this._current_henkan_result.reset()
     endif
@@ -1150,7 +1154,8 @@ endfunction "}}}
 
 " Write to user dictionary.
 " By default, This function is executed at VimLeavePre.
-function! {s:Dictionary.method('update_dictionary')}(this) "{{{
+function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
+    let verbose = a:0 ? a:1 : 1
     if !a:this.is_modified()
         return
     endif
@@ -1180,11 +1185,11 @@ function! {s:Dictionary.method('update_dictionary')}(this) "{{{
         " Because at this time dictionary file does not exist.
     endif
 
-    call a:this._write_to_file()
+    call a:this._write_to_file(verbose)
     call a:this.forget_all_words()
     call a:this._clear_modified_flags()
 endfunction "}}}
-function! {s:Dictionary.method('_write_to_file')}(this) "{{{
+function! {s:Dictionary.method('_write_to_file')}(this, verbose) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this._user_dict really does not have registered words.
@@ -1217,14 +1222,18 @@ function! {s:Dictionary.method('_write_to_file')}(this) "{{{
     endfor
 
     let save_msg = printf("Saving to '%s'...", a:this._user_dict.path)
-    echo save_msg
+    if a:verbose
+        echo save_msg
+    endif
 
     let ret_success = 0
     try
         let ret = writefile(user_dict_lines, a:this._user_dict.path)
         if ret ==# ret_success
-            redraw
-            echo save_msg . 'Done.'
+            if a:verbose
+                redraw
+                echo save_msg . 'Done.'
+            endif
         else
             let msg = printf("can't write to '%s'.", a:this._user_dict.path)
             throw eskk#internal_error(['eskk', 'dictionary'], msg)

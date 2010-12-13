@@ -147,6 +147,12 @@ g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
 	もし真なら1つ以上の単語が登録されていたら、
 	Vimの終了時 (|VimLeave|) に自動的にユーザ辞書へ保存する。
 
+g:eskk#dictionary_save_count		*g:eskk#dictionary_save_count*
+							(デフォルト値: -1)
+	もし辞書登録された単語がこの個数を超えたら
+	自動的にユーザ辞書に書き込む。(|:EskkUpdateDictionary|)
+	負数にすると書き込まれない。
+
 
 漢字変換、アノテーションに関する変数
 -----------------------------------------

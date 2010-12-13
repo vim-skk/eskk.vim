@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 127))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 128))
 
 
 function! s:SID() "{{{
@@ -689,6 +689,10 @@ function! eskk#_initialize() "{{{
 
     if !exists("g:eskk#auto_save_dictionary_at_exit")
         let g:eskk#auto_save_dictionary_at_exit = 1
+    endif
+
+    if !exists('g:eskk#dictionary_save_count')
+        let g:eskk#dictionary_save_count = -1
     endif
 
     " Henkan
