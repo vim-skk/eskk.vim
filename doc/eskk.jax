@@ -145,7 +145,7 @@ g:eskk#backup_dictionary	*g:eskk#backup_dictionary*
 g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
 							(デフォルト値: 1)
 	もし真なら1つ以上の単語が登録されていたら、
-	Vimの終了時 (|VimLeave|) に自動的にユーザ辞書 (|g:eskk#dictionary|) へ保存する。
+	Vimの終了時 (|VimLeave|) に自動的にユーザ辞書へ保存する。
 
 
 漢字変換、アノテーションに関する変数

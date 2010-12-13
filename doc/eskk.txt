@@ -90,7 +90,7 @@ SKK dicitionary
 
 g:eskk#dictionary			*g:eskk#dictionary*
 							(Default: See below)
-	User SKK dictionary's information.
+	User dictionary's information.
 
 	This variable value is:
 		If user defined:
@@ -114,7 +114,7 @@ g:eskk#dictionary			*g:eskk#dictionary*
 
 g:eskk#large_dictionary		*g:eskk#large_dictionary*
 							(Default: See below)
-	System SKK dictionary's information.
+	System dictionary's information.
 
 	This variable value is:
 		If user defined:
@@ -141,7 +141,7 @@ g:eskk#backup_dictionary	*g:eskk#backup_dictionary*
 
 g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
 							(Default: 1)
-	If true and one or more words are registered in SKK dictionary,
+	If true and one or more words are registered in user dictionary,
 	Automatically save its modification to |g:eskk#dictionary|
 	when Vim exits (|VimLeave|).
 
