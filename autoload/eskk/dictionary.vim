@@ -1185,11 +1185,11 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
         " Because at this time dictionary file does not exist.
     endif
 
-    call a:this.write_lines(a:this._get_updated_lines(), verbose)
+    call a:this.write_lines(a:this.get_updated_lines(), verbose)
     call a:this.forget_all_words()
     call a:this._clear_modified_flags()
 endfunction "}}}
-function! {s:Dictionary.method('_get_updated_lines')}(this) "{{{
+function! {s:Dictionary.method('get_updated_lines')}(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
 
     " Check if a:this._user_dict really does not have registered words.
