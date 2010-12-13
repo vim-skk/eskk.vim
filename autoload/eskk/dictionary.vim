@@ -1134,7 +1134,7 @@ endfunction "}}}
 " Returns true value if new registered is added
 " or user dictionary's lines are
 " modified by "s:physical_dict.set_lines()".
-" If this value is false, s:dict.update_dictionary() does nothing.
+" If this value is false, s:Dictionary.update_dictionary() does nothing.
 function! {s:Dictionary.method('is_modified')}(this) "{{{
     " No need to check system dictionary.
     " Because it is immutable.
@@ -1144,9 +1144,9 @@ function! {s:Dictionary.method('is_modified')}(this) "{{{
 endfunction "}}}
 
 " After calling this function,
-" s:dict.is_modified() will returns false.
+" s:Dictionary.is_modified() will returns false.
 " but after calling "s:physical_dict.set_lines()",
-" s:dict.is_modified() will returns true.
+" s:Dictionary.is_modified() will returns true.
 function! {s:Dictionary.method('_clear_modified_flags')}(this) "{{{
     let a:this._registered_words_modified = 0
     let a:this._user_dict._is_modified = 0
