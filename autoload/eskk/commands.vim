@@ -23,6 +23,11 @@ function! eskk#commands#define() "{{{
   \   -bar -bang
   \   EskkUpdateDictionary
   \   call s:cmd_update_dictionary(<bang>0)
+
+  command!
+  \   -bar -bang
+  \   EskkFixDicionary
+  \   call s:cmd_fix_dictionary(<bang>0)
 endfunction "}}}
 
 function! s:cmd_forget_registered_words() "{{{
@@ -33,6 +38,20 @@ function! s:cmd_update_dictionary(silent) "{{{
     call eskk#_initialize()
     let dict = eskk#get_skk_dict()
     execute (a:silent ? 'silent' : '') 'call dict.update_dictionary()'
+endfunction "}}}
+
+function! s:cmd_fix_dictionary(show_prompt) "{{{
+    call eskk#_initialize()
+    let dict = eskk#get_skk_dict()
+
+    " Backup current dictionary.
+    call eskk#util#move_file(dict.get_user_dict().path, dict.get_user_dict().path . '.bak')
+
+    let path = fnamemodify(dict.get_user_dict().path, ':~')
+    let msg = "May I fix the dictionary '" . path . "'? [y/n]:"
+    if !a:show_prompt || a:show_prompt && input(msg) =~? '^y'
+        call dict.fix_dictionary(1)
+    endif
 endfunction "}}}
 
 
