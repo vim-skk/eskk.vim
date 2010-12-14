@@ -44,12 +44,21 @@ function! s:cmd_fix_dictionary(skip_prompt) "{{{
     call eskk#_initialize()
     let dict = eskk#get_skk_dict()
 
-    " Backup current dictionary.
-    call eskk#util#move_file(dict.get_user_dict().path, dict.get_user_dict().path . '.bak')
-
     let path = fnamemodify(dict.get_user_dict().path, ':~')
     let msg = "May I fix the dictionary '" . path . "'? [y/n]:"
     if a:skip_prompt || !a:skip_prompt && input(msg) =~? '^y'
+        " Backup current dictionary.
+        let src = dict.get_user_dict().path
+        if eskk#util#move_file(src, src . '.bak')
+            echom "original file was moved to '" . src . ".bak'."
+        else
+            call eskk#util#warn(
+            \   "Could not back up dictionary '" . src . "'."
+            \   . " skip fixing the dictionary."
+            \)
+            return
+        endif
+
         call dict.fix_dictionary(1)
     endif
 endfunction "}}}
