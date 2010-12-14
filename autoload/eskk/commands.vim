@@ -25,9 +25,9 @@ function! eskk#commands#define() "{{{
   \   call s:cmd_update_dictionary(<bang>0)
 
   command!
-  \   -bar -bang
+  \   -bar -bang -nargs=* -complete=file
   \   EskkFixDictionary
-  \   call s:cmd_fix_dictionary(<bang>0)
+  \   call s:cmd_fix_dictionary(<q-args>, <bang>0)
 endfunction "}}}
 
 function! s:cmd_forget_registered_words() "{{{
@@ -40,26 +40,58 @@ function! s:cmd_update_dictionary(silent) "{{{
     execute (a:silent ? 'silent' : '') 'call dict.update_dictionary()'
 endfunction "}}}
 
-function! s:cmd_fix_dictionary(skip_prompt) "{{{
-    call eskk#_initialize()
-    let dict = eskk#get_skk_dict()
+function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
+    let path = a:path != '' ? a:path :
+    \          exists('g:eskk#dictionary.path') ? g:eskk#dictionary.path : ''
+    if !filereadable(path)
+        return
+    endif
 
-    let path = fnamemodify(dict.get_user_dict().path, ':~')
-    let msg = "May I fix the dictionary '" . path . "'? [y/n]:"
+    let msg = "May I fix the dictionary '" . fnamemodify(path, ':~') . "'? [y/n]:"
     if a:skip_prompt || !a:skip_prompt && input(msg) =~? '^y'
         " Backup current dictionary.
-        let src = dict.get_user_dict().path
-        if eskk#util#move_file(src, src . '.bak')
-            echom "original file was moved to '" . src . ".bak'."
+        if eskk#util#copy_file(path, path . '.bak')
+            echom "original file was moved to '" . path . ".bak'."
         else
             call eskk#util#warn(
-            \   "Could not back up dictionary '" . src . "'."
+            \   "Could not back up dictionary '" . path . "'."
             \   . " skip fixing the dictionary."
             \)
             return
         endif
 
-        call dict.fix_dictionary(1)
+        " Fix dictionary lines.
+        let dup = {}
+        let ari = []
+        let nasi = []
+        for line in readfile(path)
+            if has_key(dup, line)
+                continue
+            endif
+            let dup[line] = 1
+
+            if line =~ '^\s*;'
+                " comment
+            elseif line =~ '^\S\+\w '
+                " okuri-ari entry
+                call add(ari, line)
+            elseif line =~ '^\S\+\W '
+                " okuri-nasi entry
+                call add(nasi, line)
+            endif
+        endfor
+        let lines =
+        \   [';; okuri-ari entries.'] + ari
+        \   + [';; okuri-nasi entries.']  + nasi
+
+        if writefile(lines, path) == -1
+            call eskk#util#warn(
+            \   ':EskkFixDictionary - '
+            \   . "Could not write to '"
+            \   . fnamemodify(path, ':~')
+            \   . "'."
+            \)
+        endif
     endif
 endfunction "}}}
 
