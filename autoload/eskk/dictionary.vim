@@ -1152,15 +1152,16 @@ function! {s:Dictionary.method('fix_dictionary')}(this, verbose) "{{{
 endfunction "}}}
 function! {s:Dictionary.method('fix_dictionary_lines')}(this, lines) "{{{
     " Pick up all valid candidates line.
-    let r = eskk#util#regexp_new('^\([^ \ta-z]\+\)\([a-z]\=\)[ \t]\+\(.\+\)$')
     let okuri_ari_lines = []
     let okuri_nasi_lines = []
     for l in a:lines
-        if r.match(l)
-            let [key, okuri_rom, candidate] = r.grouplist(3)
+        let l = substitute(l, ';.*', '', '')
+        let m = matchlist(l, '^[^ \ta-z]\+\([a-z]\=\)[ \t]\+\/.\+\/$')
+        if !empty(m)
+            let okuri_rom = m[1]
             call add(
             \   (okuri_rom != '' ? okuri_ari_lines : okuri_nasi_lines),
-            \   eskk#dictionary#create_new_entry(l, key, okuri_rom, candidate)
+            \   l
             \)
         endif
     endfor
