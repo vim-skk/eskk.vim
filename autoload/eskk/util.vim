@@ -236,14 +236,22 @@ function! eskk#util#move_file(src, dest, ...) "{{{
             return 0
         endif
     else
-        let ret = writefile(readfile(a:src, "b"), a:dest, "b")
-        if show_error && ret == -1
-            call eskk#util#warn("can't copy '" . a:src . "' to '" . a:dest . "'.")
-            sleep 1
-            return 0
-        endif
+        return s:move_file_vimscript(a:src, a:dest, show_error)
     endif
     return 1
+endfunction "}}}
+function! s:move_file_vimscript(src, dest, show_error) "{{{
+    let copy_success = eskk#util#copy_file(a:src, a:dest, a:show_error)
+    let remove_success = delete(a:src) == 0
+
+    if copy_success && remove_success
+        return 1
+    else
+        if a:show_error
+            call eskk#util#warn("can't move '" . a:src . "' to '" . a:dest . "'.")
+        endif
+        return 0
+    endif
 endfunction "}}}
 function! eskk#util#copy_file(src, dest, ...) "{{{
     let show_error = a:0 ? a:1 : 1
