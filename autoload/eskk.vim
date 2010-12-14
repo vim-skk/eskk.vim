@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 145))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 146))
 
 
 function! s:SID() "{{{

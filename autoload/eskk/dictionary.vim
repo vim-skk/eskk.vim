@@ -1219,6 +1219,9 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
 endfunction "}}}
 function! {s:Dictionary.method('get_updated_lines')}(this) "{{{
     let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
+    if a:this._registered_words.empty()
+        return user_dict_lines
+    endif
 
     " Check if a:this._user_dict really does not have registered words.
     let ari_idx = a:this._user_dict.okuri_ari_idx + 1
