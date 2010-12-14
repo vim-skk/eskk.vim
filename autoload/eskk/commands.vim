@@ -40,7 +40,7 @@ function! s:cmd_update_dictionary(silent) "{{{
     execute (a:silent ? 'silent' : '') 'call dict.update_dictionary()'
 endfunction "}}}
 
-function! s:cmd_fix_dictionary(show_prompt) "{{{
+function! s:cmd_fix_dictionary(skip_prompt) "{{{
     call eskk#_initialize()
     let dict = eskk#get_skk_dict()
 
@@ -49,7 +49,7 @@ function! s:cmd_fix_dictionary(show_prompt) "{{{
 
     let path = fnamemodify(dict.get_user_dict().path, ':~')
     let msg = "May I fix the dictionary '" . path . "'? [y/n]:"
-    if !a:show_prompt || a:show_prompt && input(msg) =~? '^y'
+    if a:skip_prompt || !a:skip_prompt && input(msg) =~? '^y'
         call dict.fix_dictionary(1)
     endif
 endfunction "}}}
