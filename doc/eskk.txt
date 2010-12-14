@@ -465,6 +465,21 @@ COMPLETION				*eskk-completion* {{{
 }}}
 ==============================================================================
 FAQ					*eskk-faq* {{{
+
+					*eskk-faq-broken-dict*
+Q. My SKK dictionary gets broken! What should I do?
+A. |:EskkFixDictionary| may help you.
+
+Or skkdic-expr2 in skktools also may help you:
+>
+	# Even if just concatenated by cat
+	$ cat skk-dict >>skk-dict.new
+	# skkdic-expr2 can format like this
+	$ skkdic-expr2 skk-dict.new >skk-dict
+
+And, if it was caused by eskk,
+I'm pleased if you report the bug.
+
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
