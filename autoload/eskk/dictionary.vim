@@ -897,6 +897,44 @@ function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
     return a:this._content_lines
 endfunction "}}}
 
+function! {s:PhysicalDict.method('get_updated_lines')}(this, registered_words) "{{{
+    let user_dict_lines = deepcopy(a:this.get_lines())
+    if a:registered_words.empty()
+        return user_dict_lines
+    endif
+
+    " Check if a:this._user_dict really does not have registered words.
+    let ari_lnum = a:this.okuri_ari_idx + 1
+    let nasi_lnum = a:this.okuri_nasi_idx + 1
+    for w in reverse(a:registered_words.to_list())
+        let [line, index] = eskk#dictionary#search_candidate(
+        \   a:this, w.key, w.okuri_rom
+        \)
+        if w.okuri_rom != ''
+            let lnum = ari_lnum
+        else
+            let lnum = nasi_lnum
+        endif
+        " Delete old entry.
+        if index !=# -1
+            call remove(user_dict_lines, index)
+            call eskk#error#assert(line != '')
+        elseif w.okuri_rom != ''
+            let nasi_lnum += 1
+        endif
+        " Merge old one and create new entry.
+        call insert(
+        \   user_dict_lines,
+        \   eskk#dictionary#create_new_entry(
+        \       line, w.key, w.okuri_rom, w.input
+        \   ),
+        \   lnum
+        \)
+    endfor
+
+    return user_dict_lines
+endfunction "}}}
+
 " Set List of whole lines of dictionary.
 function! {s:PhysicalDict.method('set_lines')}(this, lines) "{{{
     try
@@ -1147,7 +1185,9 @@ function! {s:Dictionary.method('is_modified')}(this) "{{{
 endfunction "}}}
 
 function! {s:Dictionary.method('fix_dictionary')}(this, verbose) "{{{
-    let lines = a:this.fix_dictionary_lines(a:this.get_updated_lines())
+    let lines = a:this._user_dict.get_updated_lines(
+    \                   a:this._registered_words)
+    let lines = a:this.fix_dictionary_lines(lines)
     call a:this.write_lines(lines, a:verbose)
 endfunction "}}}
 function! {s:Dictionary.method('fix_dictionary_lines')}(this, lines) "{{{
@@ -1213,46 +1253,9 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
         " Because at this time dictionary file does not exist.
     endif
 
-    call a:this.write_lines(a:this.get_updated_lines(), verbose)
+    call a:this.write_lines(a:this._user_dict.get_updated_lines(a:this._registered_words), verbose)
     call a:this.forget_all_words()
     call a:this.clear_modified_flags()
-endfunction "}}}
-function! {s:Dictionary.method('get_updated_lines')}(this) "{{{
-    let user_dict_lines = deepcopy(a:this._user_dict.get_lines())
-    if a:this._registered_words.empty()
-        return user_dict_lines
-    endif
-
-    " Check if a:this._user_dict really does not have registered words.
-    let ari_lnum = a:this._user_dict.okuri_ari_idx + 1
-    let nasi_lnum = a:this._user_dict.okuri_nasi_idx + 1
-    for w in reverse(a:this._registered_words.to_list())
-        let [line, index] = eskk#dictionary#search_candidate(
-        \   a:this._user_dict, w.key, w.okuri_rom
-        \)
-        if w.okuri_rom != ''
-            let lnum = ari_lnum
-        else
-            let lnum = nasi_lnum
-        endif
-        " Delete old entry.
-        if index !=# -1
-            call remove(user_dict_lines, index)
-            call eskk#error#assert(line != '')
-        elseif w.okuri_rom != ''
-            let nasi_lnum += 1
-        endif
-        " Merge old one and create new entry.
-        call insert(
-        \   user_dict_lines,
-        \   eskk#dictionary#create_new_entry(
-        \       line, w.key, w.okuri_rom, w.input
-        \   ),
-        \   lnum
-        \)
-    endfor
-
-    return user_dict_lines
 endfunction "}}}
 function! {s:Dictionary.method('write_lines')}(this, lines, verbose) "{{{
     let user_dict_lines = a:lines
