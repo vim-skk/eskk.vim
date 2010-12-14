@@ -1168,7 +1168,9 @@ endfunction "}}}
 " Remove registered word matching with arguments values.
 function! {s:Dictionary.method('remove_registered_word')}(this, input, key, okuri, okuri_rom) "{{{
     call a:this._registered_words.remove(
-    \   s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom)
+    \   s:registered_word_new(
+    \       a:input, a:key, a:okuri, a:okuri_rom
+    \   )
     \)
 endfunction "}}}
 
@@ -1194,13 +1196,16 @@ function! {s:Dictionary.method('fix_dictionary_lines')}(this, lines) "{{{
     " Pick up all valid candidates line.
     let okuri_ari_lines = []
     let okuri_nasi_lines = []
+    let r = '^[^ \ta-z]\+\([a-z]\=\)[ \t]\+\/.\+\/$'
     for l in a:lines
         let l = substitute(l, ';.*', '', '')
-        let m = matchlist(l, '^[^ \ta-z]\+\([a-z]\=\)[ \t]\+\/.\+\/$')
+        let m = matchlist(l, r)
         if !empty(m)
             let okuri_rom = m[1]
             call add(
-            \   (okuri_rom != '' ? okuri_ari_lines : okuri_nasi_lines),
+            \   (okuri_rom != '' ?
+            \       okuri_ari_lines :
+            \       okuri_nasi_lines),
             \   l
             \)
         endif
@@ -1253,35 +1258,50 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
         " Because at this time dictionary file does not exist.
     endif
 
-    call a:this.write_lines(a:this._user_dict.get_updated_lines(a:this._registered_words), verbose)
+    call a:this.write_lines(
+    \   a:this._user_dict.get_updated_lines(
+    \       a:this._registered_words
+    \   ),
+    \   verbose
+    \)
     call a:this.forget_all_words()
     call a:this.clear_modified_flags()
 endfunction "}}}
 function! {s:Dictionary.method('write_lines')}(this, lines, verbose) "{{{
     let user_dict_lines = a:lines
 
-    let save_msg = printf("Saving to '%s'...", a:this._user_dict.path)
+    let save_msg =
+    \   "Saving to '"
+    \   . a:this._user_dict.path
+    \   . "'..."
+
     if a:verbose
         echo save_msg
     endif
 
     let ret_success = 0
     try
-        let ret = writefile(user_dict_lines, a:this._user_dict.path)
+        let ret = writefile(
+        \   user_dict_lines, a:this._user_dict.path)
         if ret ==# ret_success
             if a:verbose
                 redraw
                 echo save_msg . 'Done.'
             endif
         else
-            let msg = printf("can't write to '%s'.", a:this._user_dict.path)
-            throw eskk#internal_error(['eskk', 'dictionary'], msg)
+            throw eskk#internal_error(
+            \   ['eskk', 'dictionary'],
+            \   "can't write to '"
+            \       . a:this._user_dict.path
+            \       . "'."
+            \)
         endif
     catch
         redraw
         echohl WarningMsg
-        echomsg save_msg . "Error. Please check permission of"
-        \    "'" . a:this._user_dict.path . "' - " . v:exception
+        echomsg save_msg . "Error. - " . v:exception
+        echomsg " Please check permission of '"
+        \   . a:this._user_dict.path . "'."
         echohl None
     endtry
 endfunction "}}}
