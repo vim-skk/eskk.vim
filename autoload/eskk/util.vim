@@ -257,9 +257,10 @@ function! eskk#util#copy_file(src, dest, ...) "{{{
     let show_error = a:0 ? a:1 : 1
     if executable('cp')
         silent execute '!cp' shellescape(a:src) shellescape(a:dest)
-        if show_error && v:shell_error
-            call eskk#util#warn("'cp' returned failure value: " . v:shell_error)
-            sleep 1
+        if v:shell_error
+            if show_error
+                call eskk#util#warn("'cp' returned failure value: " . v:shell_error)
+            endif
             return 0
         endif
     else
