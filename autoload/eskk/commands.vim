@@ -26,7 +26,7 @@ function! eskk#commands#define() "{{{
 
   command!
   \   -bar -bang
-  \   EskkFixDicionary
+  \   EskkFixDictionary
   \   call s:cmd_fix_dictionary(<bang>0)
 endfunction "}}}
 
