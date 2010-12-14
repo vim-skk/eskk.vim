@@ -1186,36 +1186,6 @@ function! {s:Dictionary.method('is_modified')}(this) "{{{
     \   || a:this._user_dict._is_modified
 endfunction "}}}
 
-function! {s:Dictionary.method('fix_dictionary')}(this, verbose) "{{{
-    let lines = a:this._user_dict.get_updated_lines(
-    \                   a:this._registered_words)
-    let lines = a:this.fix_dictionary_lines(lines)
-    call a:this.write_lines(lines, a:verbose)
-endfunction "}}}
-function! {s:Dictionary.method('fix_dictionary_lines')}(this, lines) "{{{
-    " Pick up all valid candidates line.
-    let okuri_ari_lines = []
-    let okuri_nasi_lines = []
-    let r = '^[^ \ta-z]\+\([a-z]\=\)[ \t]\+\/.\+\/$'
-    for l in a:lines
-        let l = substitute(l, ';.*', '', '')
-        let m = matchlist(l, r)
-        if !empty(m)
-            let okuri_rom = m[1]
-            call add(
-            \   (okuri_rom != '' ?
-            \       okuri_ari_lines :
-            \       okuri_nasi_lines),
-            \   l
-            \)
-        endif
-    endfor
-    return [';; okuri-ari entries.']
-    \   + okuri_ari_lines
-    \   + [';; okuri-nasi entries.']
-    \   + okuri_nasi_lines
-endfunction "}}}
-
 " After calling this function,
 " s:Dictionary.is_modified() will returns false.
 " but after calling "s:physical_dict.set_lines()",
