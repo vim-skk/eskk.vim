@@ -245,6 +245,28 @@ function! eskk#util#move_file(src, dest, ...) "{{{
     endif
     return 1
 endfunction "}}}
+function! eskk#util#copy_file(src, dest, ...) "{{{
+    let show_error = a:0 ? a:1 : 1
+    if executable('cp')
+        silent execute '!cp' shellescape(a:src) shellescape(a:dest)
+        if show_error && v:shell_error
+            call eskk#util#warn("'cp' returned failure value: " . v:shell_error)
+            sleep 1
+            return 0
+        endif
+    else
+        return s:copy_file_vimscript(a:src, a:dest, show_error)
+    endif
+    return 1
+endfunction "}}}
+function! s:copy_file_vimscript(src, dest, show_error) "{{{
+    let ret = writefile(readfile(a:src, "b"), a:dest, "b")
+    if a:show_error && ret == -1
+        call eskk#util#warn("can't copy '" . a:src . "' to '" . a:dest . "'.")
+        sleep 1
+        return 0
+    endif
+endfunction "}}}
 
 
 " Misc.
