@@ -1224,23 +1224,23 @@ function! {s:Dictionary.method('get_updated_lines')}(this) "{{{
     endif
 
     " Check if a:this._user_dict really does not have registered words.
-    let ari_idx = a:this._user_dict.okuri_ari_idx + 1
-    let nasi_idx = a:this._user_dict.okuri_nasi_idx + 1
+    let ari_lnum = a:this._user_dict.okuri_ari_idx + 1
+    let nasi_lnum = a:this._user_dict.okuri_nasi_idx + 1
     for w in reverse(a:this._registered_words.to_list())
         let [line, index] = eskk#dictionary#search_candidate(
         \   a:this._user_dict, w.key, w.okuri_rom
         \)
         if w.okuri_rom != ''
-            let lnum = ari_idx
+            let lnum = ari_lnum
         else
-            let lnum = nasi_idx
+            let lnum = nasi_lnum
         endif
         " Delete old entry.
         if index !=# -1
             call remove(user_dict_lines, index)
             call eskk#error#assert(line != '')
         elseif w.okuri_rom != ''
-            let nasi_idx += 1
+            let nasi_lnum += 1
         endif
         " Merge old one and create new entry.
         call insert(
