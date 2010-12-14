@@ -392,6 +392,11 @@ g:eskk#version			*g:eskk#version*
 :EskkMap						*:EskkMap*
 :EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
 :EskkUpdateDictionary			*:EskkUpdateDictionary*
+:EskkFixDictionary[!] [{path}]			*:EskkFixDictionary*
+	壊れたSKK辞書を修正します。
+	[!]をつけると確認のプロンプトを出しません。
+	{path}が省略された場合はユーザ辞書を修正します。
+
 
 }}}
 ------------------------------------------------------------------------------

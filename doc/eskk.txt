@@ -390,6 +390,10 @@ COMMANDS					*eskk-commands* {{{
 :EskkMap						*:EskkMap*
 :EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
 :EskkUpdateDictionary			*:EskkUpdateDictionary*
+:EskkFixDictionary[!] [{path}]			*:EskkFixDictionary*
+	Fix broken SKK dictionary.
+	If [!] was given, do not show the prompt as confirmation.
+	If {path} is omitted, user dictionary is fixed.
 
 }}}
 ------------------------------------------------------------------------------
