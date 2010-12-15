@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 162))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 163))
 
 
 function! s:SID() "{{{
@@ -47,7 +47,6 @@ let s:eskk = {
 \   'completion_selected': 0,
 \   'completion_inserted': 0,
 \   'first_setup_for_mode_local_keys': 1,
-\   'bv': {},
 \}
 
 
@@ -120,6 +119,8 @@ let s:eskk_mappings = {
 \   'mode:zenei:to-hira': {'fn': 's:handle_toggle_hankata'},
 \   'mode:abbrev:henkan-key': {},
 \}
+" buffer-local values.
+let s:buffer_value = {}
 " }}}
 
 
@@ -163,23 +164,19 @@ endfunction "}}}
 
 " buffer-local value.
 function! eskk#buffer_value_has(name) "{{{
-    let bv = eskk#get_current_instance().bv
-    return eskk#util#has_key_f(bv, [bufnr('%'), a:name])
+    return eskk#util#has_key_f(s:buffer_value, [bufnr('%'), a:name])
 endfunction "}}}
 function! eskk#buffer_value_remove(name) "{{{
-    let bv = eskk#get_current_instance().bv
     let nr = bufnr('%')
-    if has_key(bv, nr) && has_key(bv[nr], a:name)
-        unlet bv[nr][a:name]
+    if has_key(s:buffer_value, nr) && has_key(s:buffer_value[nr], a:name)
+        unlet s:buffer_value[nr][a:name]
     endif
 endfunction "}}}
 function! eskk#buffer_value_get(name, ...) "{{{
-    let bv = eskk#get_current_instance().bv
-    return call('eskk#util#get_f', [bv, [bufnr('%'), a:name]] + a:000)
+    return call('eskk#util#get_f', [s:buffer_value, [bufnr('%'), a:name]] + a:000)
 endfunction "}}}
 function! eskk#buffer_value_put(name, Value) "{{{
-    let bv = eskk#get_current_instance().bv
-    call eskk#util#let_f(bv, [bufnr('%'), a:name], a:Value)
+    call eskk#util#let_f(s:buffer_value, [bufnr('%'), a:name], a:Value)
 endfunction "}}}
 
 " Filter
