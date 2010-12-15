@@ -389,7 +389,11 @@ COMMANDS					*eskk-commands* {{{
 
 :EskkMap						*:EskkMap*
 :EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
+	Forget all registered words.
+
 :EskkUpdateDictionary			*:EskkUpdateDictionary*
+	Write registered words to user dictionary.
+
 :EskkFixDictionary[!] [{path}]			*:EskkFixDictionary*
 	Fix broken SKK dictionary.
 	If [!] was given, do not show the prompt as confirmation.

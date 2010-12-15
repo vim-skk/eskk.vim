@@ -391,7 +391,11 @@ g:eskk#version			*g:eskk#version*
 
 :EskkMap						*:EskkMap*
 :EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
+	辞書登録した単語を全て消去する。
+
 :EskkUpdateDictionary			*:EskkUpdateDictionary*
+	辞書登録した単語などを辞書に書き込む。
+
 :EskkFixDictionary[!] [{path}]			*:EskkFixDictionary*
 	壊れたSKK辞書を修正します。
 	[!]をつけると確認のプロンプトを出しません。
