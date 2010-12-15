@@ -275,6 +275,7 @@ function! s:copy_file_vimscript(src, dest, show_error) "{{{
         sleep 1
         return 0
     endif
+    return 1
 endfunction "}}}
 
 
