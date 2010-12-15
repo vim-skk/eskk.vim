@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 160))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 161))
 
 
 function! s:SID() "{{{
@@ -53,7 +53,7 @@ let s:eskk = {
 
 
 
-" NOTE: Following variables are non-local (global) between instances.
+" NOTE: Following variables have global values between instances.
 
 " s:Eskk instances.
 let s:eskk_instances = []
