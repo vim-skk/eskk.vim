@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 156))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 157))
 
 
 function! s:SID() "{{{
@@ -613,6 +613,46 @@ function! eskk#_initialize() "{{{
     if s:is_initialized
         return
     endif
+
+    " Check if prereq libs' versions {{{
+    function! s:version_pack(x, y, z)
+        " All using libraries use this format.
+        return str2nr(printf('%02d%02d%03d', a:x, a:y, a:z))
+    endfunction
+    function! s:version_unpack(version)
+        " Padding missing leading zeros.
+        let s = printf('%07d', a:version)
+        " str2nr() ignores leading zeros.
+        return [str2nr(s[:1]), str2nr(s[2:3]), str2nr(s[4:])]
+    endfunction
+    function! s:validate_lib_version(plugin_name, namespace, x, y, z)
+        call {a:namespace}#load()
+        let varname = 'g:' . a:namespace . '#version'
+        if !exists(varname)
+        \   || {varname} < s:version_pack(a:x, a:y, a:z)
+            let current_version = exists(varname) ?
+            \   join(s:version_unpack({varname}), '.') :
+            \   'unknown'
+            echohl ErrorMsg
+            echomsg "Your installed" a:plugin_name "is old."
+            \       "(required version is"
+            \       join([a:x, a:y, a:z], '.')
+            \       "or later, but current version is"
+            \       current_version . ")"
+            echohl None
+        endif
+    endfunction
+
+    call s:validate_lib_version(
+    \   'cul.vim', 'cul#ordered_set', 0, 0, 14
+    \)
+    call s:validate_lib_version(
+    \   'savemap.vim', 'savemap', 0, 0, 18
+    \)
+    call s:validate_lib_version(
+    \   'vice.vim', 'vice', 0, 1, 1
+    \)
+    " }}}
 
     " Create the first eskk instance. {{{
     call eskk#initialize_instance()
