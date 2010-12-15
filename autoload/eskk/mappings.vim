@@ -426,11 +426,9 @@ function! eskk#mappings#save_state() "{{{
     call s:unmap_normal_keys()
 
     " Restore previous im options.
-    let nr = bufnr('%')
-    let prev_im_options = eskk#get_current_instance().prev_im_options
-    if has_key(prev_im_options, nr)
-        let [&l:iminsert, &l:imsearch] = prev_im_options[nr]
-        unlet prev_im_options[nr]
+    if eskk#buffer_value_has('prev_im_options')
+        let [&l:iminsert, &l:imsearch] = eskk#buffer_value_get('prev_im_options')
+        call eskk#buffer_value_remove('prev_im_options')
     endif
 endfunction "}}}
 function! eskk#mappings#restore_state() "{{{
@@ -444,8 +442,7 @@ function! eskk#mappings#restore_state() "{{{
     call s:map_normal_keys()
 
     " Save im options.
-    let prev_im_options = eskk#get_current_instance().prev_im_options
-    let prev_im_options[bufnr('%')] = [&l:iminsert, &l:imsearch]
+    call eskk#buffer_value_put('prev_im_options', [&l:iminsert, &l:imsearch])
     let [&l:iminsert, &l:imsearch] = [0, 0]
 endfunction "}}}
 function! s:get_normal_keys() "{{{
