@@ -689,6 +689,10 @@ function! {s:HenkanResult.method('get_candidate')}(this, ...) "{{{
         \   'with_okuri': with_okuri,
         \}
         function functor.funcall()
+            " Clear command-line.
+            redraw
+            echo ''
+
             if self.this._candidates_index > 0
                 " This changes self.this._candidates_index.
                 call self.this.back()
