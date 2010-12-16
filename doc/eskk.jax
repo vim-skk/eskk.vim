@@ -26,6 +26,7 @@ CONTENTS						*eskk-contents*
   変数			|eskk-variables|
   コマンド			|eskk-commands|
   関数			|eskk-functions|
+アルファベットテーブル			|eskk-alphabet-table|
 モード				|eskk-modes|
 フェーズ				|eskk-phases|
 補完			|eskk-completion|
@@ -426,6 +427,38 @@ EskkDefaultMappedKeys()			*EskkDefaultMappedKeys()*
 	Default value of |g:eskk#mapped_keys|.
 
 }}}
+}}}
+==============================================================================
+アルファベットテーブル					*eskk-alphabet-table* {{{
+
+次のようにしてアルファベット変換テーブルを定義することができる。
+
+>
+    autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
+    function! s:eskk_initial_pre()
+        " User can be allowed to modify
+        " eskk global variables (`g:eskk#...`)
+        " until `User eskk-initialize-pre` event.
+        " So user can do something heavy process here.
+        " (I'm a paranoia, eskk#table#new() is not so heavy.
+        " But it loads autoload/vice.vim recursively)
+        let t = eskk#table#new('rom_to_hira*', 'rom_to_hira')
+        call t.add_map('~', '～')
+        call t.add_map('zc', '(c)')
+        call t.add_map('zr', '?')
+        call t.add_map('vh', '?')
+        call t.add_map('vj', '?')
+        call t.add_map('vk', '?')
+        call t.add_map('vl', '?')
+        call t.add_map('jva', '?ぁ')
+        call t.add_map('jvi', '?ぃ')
+        call t.add_map('jvu', '?')
+        call t.add_map('jve', '?ぇ')
+        call t.add_map('jvo', '?ぉ')
+        call t.add_map('z ', '　')
+        call eskk#register_mode_table('hira', t)
+    endfunction
+
 }}}
 ==============================================================================
 モード					*eskk-modes* {{{
