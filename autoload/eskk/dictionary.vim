@@ -1218,15 +1218,7 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
     let user_dict_exists = filereadable(a:this._user_dict.path)
     let user_dict_lines = a:this._user_dict.get_lines()
     if user_dict_exists
-        if empty(user_dict_lines)
-            " user dictionary exists but
-            " .get_lines() returned empty list.
-            " It means format is invalid.
-
-            " TODO:
-            " Echo "user dictionary format is invalid.
-            " overwrite with new words?",
-            " and do not read, just overwrite it with new words.
+        if !a:this._user_dict.is_valid()
             return
         endif
     else
