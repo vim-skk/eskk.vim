@@ -816,7 +816,7 @@ function! {s:HenkanResult.method('do_delete_from_dict')}(this) "{{{
     call dict.update_dictionary()
 endfunction "}}}
 
-" TODO doc
+" Move this henkan result to the first of a:this._registered_words.
 function! {s:HenkanResult.method('update_candidate')}(this) "{{{
     let candidates = a:this.get_candidates()
     let candidates_index = a:this._candidates_index
@@ -831,7 +831,7 @@ function! {s:HenkanResult.method('update_candidate')}(this) "{{{
     \   a:this._okuri_rom,
     \)
 
-    " Move current candidate to the first.
+    " Move a:this to the first.
     let dict = eskk#get_skk_dict()
     call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
     call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
@@ -878,6 +878,9 @@ endfunction "}}}
 function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
     let force = a:0 ? a:1 : 0
 
+    " FIXME: Separate this to another method
+    " and control dictionary read timing.
+    " (when it should be read?)
     let same_timestamp = a:this._ftime_at_read ==# getftime(a:this.path)
     if a:this._loaded && same_timestamp && !force
         return a:this._content_lines
@@ -966,6 +969,7 @@ function! {s:PhysicalDict.method('parse_lines')}(this, lines) "{{{
         \   "invalid a:this.okuri_ari_idx value"
         \)
     endif
+
     let a:this.okuri_nasi_idx = index(
     \   a:this._content_lines,
     \   ';; okuri-nasi entries.'
@@ -975,6 +979,7 @@ function! {s:PhysicalDict.method('parse_lines')}(this, lines) "{{{
         \   "invalid a:this.okuri_nasi_idx value"
         \)
     endif
+
     if a:this.okuri_ari_idx >= a:this.okuri_nasi_idx
         throw eskk#dictionary#parse_error(
         \   "okuri-ari entries must be before okuri-nasi entries."
@@ -1214,7 +1219,7 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
         if empty(user_dict_lines)
             " user dictionary exists but
             " .get_lines() returned empty list.
-            " format is invalid.
+            " It means format is invalid.
 
             " TODO:
             " Echo "user dictionary format is invalid.
@@ -1230,7 +1235,7 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
         \]
         call a:this._user_dict.set_lines(user_dict_lines)
         " NOTE: .set_lines() does not write to dictionary.
-        " Because at this time dictionary file does not exist.
+        " At this time, dictionary file does not exist.
     endif
 
     call a:this.write_lines(
@@ -1304,7 +1309,6 @@ function! {s:Dictionary.method('search')}(this, key, okuri, okuri_rom) "{{{
     call candidates.clear()
     let max_count = g:eskk#max_candidates
 
-    " a:this._registered_words
     for w in a:this._registered_words.to_list()
         if w.key ==# key && w.okuri_rom[0] ==# okuri_rom[0]
             call candidates.push(

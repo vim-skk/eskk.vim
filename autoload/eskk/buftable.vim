@@ -879,8 +879,8 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     let okuri_matched_rom = okuri_buf_str.rom_pairs.get_rom()
     let rom_str = henkan_matched_rom . okuri_matched_rom
     try
+        " .get_candidate() may throw dictionary look up exception.
         let candidate = dict.get_henkan_result().get_candidate()
-        " No exception throwed. continue...
 
         call a:this.clear_all()
         if a:convert_at_exact_match
