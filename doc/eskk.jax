@@ -173,6 +173,9 @@ g:eskk#show_annotation			*g:eskk#show_annotation*
 							(デフォルト値: 0)
 	もし真なら、|eskk-select-candidates| の時にアノテーションを表示する。
 
+g:eskk#kakutei_when_unique_candidate	*g:eskk#kakutei_when_unique_candidate*
+							(デフォルト値: 0)
+	もし真なら、漢字変換した時に候補が1つの場合自動的に確定する。
 
 キーマッピングに関する変数
 -----------

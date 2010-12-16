@@ -739,6 +739,17 @@ endfunction "}}}
 function! {s:HenkanResult.method('back')}(this) "{{{
     return a:this.advance(0)
 endfunction "}}}
+function! {s:HenkanResult.method('has_next')}(this) "{{{
+    try
+        let candidates = a:this.get_candidates()
+        let idx = a:this._candidates_index
+        return eskk#util#has_idx(candidates, idx + 1)
+    catch /^eskk: dictionary look up error/
+        " Shut up error. This function does not throw exception.
+        call eskk#error#log_exception('s:HenkanResult.get_candidates()')
+        return 0
+    endtry
+endfunction "}}}
 
 " Delete current candidate from all places.
 " e.g.:

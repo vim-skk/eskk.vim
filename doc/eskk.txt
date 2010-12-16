@@ -171,6 +171,11 @@ g:eskk#show_annotation			*g:eskk#show_annotation*
 							(Default: 0)
 	If true, show annotation at |eskk-select-candidates|.
 
+g:eskk#kakutei_when_unique_candidate	*g:eskk#kakutei_when_unique_candidate*
+							(Default: 0)
+	If true, at kanji-conversion, if the candidate is only one,
+	automatically do kakutei.
+
 
 Keymappings
 -----------

@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 171))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 172))
 
 
 function! s:SID() "{{{
@@ -746,6 +746,10 @@ function! eskk#_initialize() "{{{
 
     if !exists("g:eskk#show_annotation")
         let g:eskk#show_annotation = 0
+    endif
+
+    if !exists("g:eskk#kakutei_when_unique_candidate")
+        let g:eskk#kakutei_when_unique_candidate = 0
     endif
 
     " Mappings

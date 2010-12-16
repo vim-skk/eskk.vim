@@ -880,7 +880,8 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     let rom_str = henkan_matched_rom . okuri_matched_rom
     try
         " .get_candidate() may throw dictionary look up exception.
-        let candidate = dict.get_henkan_result().get_candidate()
+        let hr = dict.get_henkan_result()
+        let candidate = hr.get_candidate()
 
         call a:this.clear_all()
         if a:convert_at_exact_match
@@ -890,6 +891,15 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
             call a:this.set_henkan_phase(
             \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
             \)
+            if g:eskk#kakutei_when_unique_candidate && !hr.has_next()
+                call a:this.push_kakutei_str(
+                \   a:this.get_display_str(0)
+                \)
+                call a:this.clear_all()
+                call a:this.set_henkan_phase(
+                \   g:eskk#buftable#HENKAN_PHASE_NORMAL
+                \)
+            endif
         endif
     catch /^eskk: dictionary look up error/
         " No candidates.
