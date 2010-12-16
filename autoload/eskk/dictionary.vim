@@ -902,10 +902,11 @@ function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
 endfunction "}}}
 
 function! {s:PhysicalDict.method('get_updated_lines')}(this, registered_words) "{{{
-    let user_dict_lines = deepcopy(a:this.get_lines())
+    let user_dict_lines = a:this.get_lines()
     if a:registered_words.empty()
         return user_dict_lines
     endif
+    let user_dict_lines = copy(user_dict_lines)
 
     " Check if a:this._user_dict really does not have registered words.
     let ari_lnum = a:this.okuri_ari_idx + 1
