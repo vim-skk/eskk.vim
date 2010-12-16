@@ -690,8 +690,7 @@ function! {s:HenkanResult.method('get_candidate')}(this, ...) "{{{
         \}
         function functor.funcall()
             " Clear command-line.
-            redraw
-            echo ''
+            call eskk#util#clear_command_line()
 
             if self.this._candidates_index > 0
                 " This changes self.this._candidates_index.
@@ -1128,6 +1127,8 @@ function! {s:Dictionary.method('register_word')}(this, henkan_result) "{{{
     if input != ''
         call a:this.remember_word(input, key, okuri, okuri_rom)
     endif
+
+    call eskk#util#clear_command_line()
     return [input, key, okuri]
 endfunction "}}}
 

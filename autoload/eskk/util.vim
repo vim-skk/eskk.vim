@@ -330,6 +330,10 @@ function! eskk#util#input(...) "{{{
         endif
     endtry
 endfunction "}}}
+function! eskk#util#clear_command_line() "{{{
+    redraw
+    echo ''
+endfunction "}}}
 function! eskk#util#mkdir_nothrow(...) "{{{
     try
         call call('mkdir', a:000)
