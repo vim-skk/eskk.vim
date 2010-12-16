@@ -1144,7 +1144,9 @@ function! {s:Dictionary.method('forget_word')}(this, input, key, okuri, okuri_ro
     endif
 
     call a:this._registered_words.remove(rw)
-    let a:this._registered_words_modified = 1
+    if a:this._registered_words.empty()
+        let a:this._registered_words_modified = 0
+    endif
 
     if !empty(a:this._current_henkan_result)
         call a:this._current_henkan_result.reset()
