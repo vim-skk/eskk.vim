@@ -43,6 +43,7 @@ endfunction "}}}
 function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
     let path = a:path != '' ? a:path :
     \          exists('g:eskk#dictionary.path') ? g:eskk#dictionary.path : ''
+    let path = expand(path)
     if !filereadable(path)
         return
     endif
