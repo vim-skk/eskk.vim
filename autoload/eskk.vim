@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 170))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 171))
 
 
 function! s:SID() "{{{
@@ -729,23 +729,23 @@ function! eskk#_initialize() "{{{
 
     " Henkan
     if !exists("g:eskk#select_cand_keys")
-      let g:eskk#select_cand_keys = "asdfjkl"
+        let g:eskk#select_cand_keys = "asdfjkl"
     endif
 
     if !exists("g:eskk#show_candidates_count")
-      let g:eskk#show_candidates_count = 4
+        let g:eskk#show_candidates_count = 4
     endif
 
     if !exists("g:eskk#kata_convert_to_hira_at_henkan")
-      let g:eskk#kata_convert_to_hira_at_henkan = 1
+        let g:eskk#kata_convert_to_hira_at_henkan = 1
     endif
 
     if !exists("g:eskk#kata_convert_to_hira_at_completion")
-      let g:eskk#kata_convert_to_hira_at_completion = 1
+        let g:eskk#kata_convert_to_hira_at_completion = 1
     endif
 
     if !exists("g:eskk#show_annotation")
-      let g:eskk#show_annotation = 0
+        let g:eskk#show_annotation = 0
     endif
 
     " Mappings
