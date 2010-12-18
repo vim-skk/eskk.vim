@@ -438,14 +438,17 @@ endfunction "}}}
 function! s:map_normal_keys() "{{{
     " From s:SkkMapNormal() in plugin/skk.vim
 
-    let restore_commands =
-    \   ':<C-u>'
-    \   . 'let [&l:iminsert, &l:imsearch] = '
-    \       . string([&l:iminsert, &l:imsearch])
-    \   . '<CR>'
+    let calling_hook_fn =
+    \   eskk#util#get_local_func('do_normal_key', s:SID_PREFIX)
+    \   . '(%s,' . &l:iminsert . ',' . &l:imsearch . ')'
     for key in s:get_normal_keys()
-        call eskk#mappings#map('sb', key, restore_commands . key, 'n')
+        call eskk#mappings#map('seb', key, printf(calling_hook_fn, string(key)), 'n')
     endfor
+endfunction "}}}
+function! s:do_normal_key(key, iminsert, imsearch) "{{{
+    let &l:iminsert = a:iminsert
+    let &l:imsearch = a:imsearch
+    return a:key
 endfunction "}}}
 function! s:unmap_normal_keys() "{{{
     for key in s:get_normal_keys()
