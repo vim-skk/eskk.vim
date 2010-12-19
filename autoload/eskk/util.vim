@@ -358,6 +358,7 @@ function! eskk#util#redir_english(excmd) "{{{
         redir END
         execute 'lang messages' save_lang
     endtry
+    return output
 endfunction "}}}
 
 function! eskk#util#make_random_number(n) "{{{
