@@ -356,6 +356,7 @@ function! eskk#util#redir_english(excmd) "{{{
         silent execute a:excmd
         redir END
     finally
+        redir END
         execute 'lang messages' save_lang
     endtry
 endfunction "}}}
