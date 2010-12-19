@@ -211,17 +211,18 @@ function! eskk#util#get_local_func(funcname, sid) "{{{
     " :help <SID>
     return printf('<SNR>%d_%s', a:sid, a:funcname)
 endfunction "}}}
-function! eskk#util#get_sid_from_source(regex) "{{{
-    redir => output
-    silent scriptnames
-    redir END
-
+function! eskk#util#get_loaded_scripts(regex) "{{{
+    let output = eskk#util#redir_english('scriptnames')
+    let scripts = []
     for line in split(output, '\n')
         if line =~# a:regex
-            let sid = matchstr(line, '\C'.'\s*\zs\d\+')
-            return sid != '' ? str2nr(sid) : -1
+            let _ = matchstr(line, '\C'.'^\s*\d\+:\s\+\zs.\+$')
+            if _ != ''
+                call add(scripts, _)
+            endif
         endif
     endfor
+    return scripts
 endfunction "}}}
 
 
