@@ -9,25 +9,25 @@ set cpo&vim
 
 
 function! eskk#commands#define() "{{{
-  command!
-  \   -nargs=+
-  \   EskkMap
-  \   call eskk#mappings#_cmd_eskk_map(<q-args>)
+    command!
+    \   -nargs=+
+    \   EskkMap
+    \   call eskk#mappings#_cmd_eskk_map(<q-args>)
 
-  command!
-  \   -bar
-  \   EskkForgetRegisteredWords
-  \   call s:cmd_forget_registered_words()
+    command!
+    \   -bar
+    \   EskkForgetRegisteredWords
+    \   call s:cmd_forget_registered_words()
 
-  command!
-  \   -bar -bang
-  \   EskkUpdateDictionary
-  \   call s:cmd_update_dictionary(<bang>0)
+    command!
+    \   -bar -bang
+    \   EskkUpdateDictionary
+    \   call s:cmd_update_dictionary(<bang>0)
 
-  command!
-  \   -bar -bang -nargs=* -complete=file
-  \   EskkFixDictionary
-  \   call s:cmd_fix_dictionary(<q-args>, <bang>0)
+    command!
+    \   -bar -bang -nargs=* -complete=file
+    \   EskkFixDictionary
+    \   call s:cmd_fix_dictionary(<q-args>, <bang>0)
 endfunction "}}}
 
 function! s:cmd_forget_registered_words() "{{{
