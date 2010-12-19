@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 177))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 178))
 
 
 function! s:SID() "{{{
@@ -127,6 +127,18 @@ let s:buffer_value = {}
 
 function! eskk#load() "{{{
     runtime! plugin/eskk.vim
+endfunction "}}}
+function! eskk#reload() "{{{
+    let scripts = []
+    let scripts += eskk#util#get_loaded_scripts('\C'.'/autoload/eskk/\S\+\.vim$')
+    let scripts += eskk#util#get_loaded_scripts('\C'.'/autoload/eskk\.vim$')
+    for script in sort(scripts)    " Make :source order consistent
+        try
+            source `=script`
+        catch
+            call eskk#util#warnf('[%s] at [%s]', v:exception, v:throwpoint)
+        endtry
+    endfor
 endfunction "}}}
 
 

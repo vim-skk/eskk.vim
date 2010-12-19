@@ -215,11 +215,9 @@ function! eskk#util#get_loaded_scripts(regex) "{{{
     let output = eskk#util#redir_english('scriptnames')
     let scripts = []
     for line in split(output, '\n')
-        if line =~# a:regex
-            let _ = matchstr(line, '\C'.'^\s*\d\+:\s\+\zs.\+$')
-            if _ != ''
-                call add(scripts, _)
-            endif
+        let path = matchstr(line, '^ *\d\+: \+\zs.\+$')
+        if path != '' && path =~# a:regex
+            call add(scripts, path)
         endif
     endfor
     return scripts

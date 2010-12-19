@@ -405,6 +405,11 @@ g:eskk#version			*g:eskk#version*
 	[!]をつけると確認のプロンプトを出しません。
 	{path}が省略された場合はユーザ辞書を修正します。
 
+:EskkReload						*:EskkReload*
+	読み込まれた全てのautoloadスクリプトを再読み込みする。
+	まだ読み込まれていないautoloadスクリプトには何もしない。
+	例: autoload/eskk.vim, autoload/eskk/table.vim
+
 
 }}}
 ------------------------------------------------------------------------------

@@ -405,6 +405,11 @@ COMMANDS					*eskk-commands* {{{
 	If [!] was given, do not show the prompt as confirmation.
 	If {path} is omitted, user dictionary is fixed.
 
+:EskkReload						*:EskkReload*
+	Reload all autoload scripts of eskk.
+	Do nothing for autoload scripts which have been not loaded yet.
+	e.g.: autoload/eskk.vim, autoload/eskk/table.vim
+
 }}}
 ------------------------------------------------------------------------------
 FUNCTIONS					*eskk-functions* {{{
