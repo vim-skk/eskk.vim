@@ -10,17 +10,20 @@ set cpo&vim
 let s:warning_messages = []
 
 function! eskk#error#write_debug_log_file() "{{{
-    execute 'redir >>' expand(
-    \   eskk#util#join_path(
-    \       g:eskk#directory,
-    \       'log',
-    \       'debug' . strftime('-%Y-%m-%d') . '.log'
-    \   )
-    \)
-    for msg in s:warning_messages
-        silent echo msg
-    endfor
-    redir END
+    try
+        execute 'redir >>' expand(
+        \   eskk#util#join_path(
+        \       g:eskk#directory,
+        \       'log',
+        \       'debug' . strftime('-%Y-%m-%d') . '.log'
+        \   )
+        \)
+        for msg in s:warning_messages
+            silent echo msg
+        endfor
+    finally
+        redir END
+    endtry
 endfunction "}}}
 function! eskk#error#write_error_log_file(char, ...) "{{{
     let v_exception = a:0 ? a:1 : v:exception
@@ -78,10 +81,7 @@ function! eskk#error#write_error_log_file(char, ...) "{{{
     endfunction
 
     function o['d'](arg)
-        redir => output
-        silent execute 'function' a:arg.funcname
-        redir END
-
+        let output = eskk#util#redir_english('function ' . a:arg.funcname)
         let a:arg.lines += split(output, '\n')
     endfunction
 
