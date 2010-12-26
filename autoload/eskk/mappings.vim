@@ -336,7 +336,7 @@ function! eskk#mappings#map_exists(mode, ...) "{{{
     let options = eskk#mappings#mapopt_chars2raw(options)
     let excmd = join([a:mode . 'map', options] + (lhs != '' ? [lhs] : []))
     let out = eskk#util#redir_english(excmd)
-    return eskk#util#list_has(split(out, '\n'), 'No mapping found')
+    return !eskk#util#list_has(split(out, '\n'), 'No mapping found')
 endfunction "}}}
 
 function! eskk#mappings#set_up_key(key, ...) "{{{
