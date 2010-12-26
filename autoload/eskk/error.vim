@@ -29,6 +29,13 @@ function! eskk#error#write_error_log_file(char, ...) "{{{
     let v_exception = a:0 ? a:1 : v:exception
 
     let lines = []
+
+    call add(lines, "Please report this error to author.")
+    call add(lines, "`:help eskk` to see author's e-mail address.")
+    call add(lines, '')
+    call add(lines, strftime('%c'))
+    call add(lines, '')
+
     call add(lines, '--- g:eskk#version ---')
     call add(lines, printf('g:eskk#version = %s', string(g:eskk#version)))
     call add(lines, '--- g:eskk#version ---')
@@ -135,12 +142,6 @@ function! eskk#error#write_error_log_file(char, ...) "{{{
     call add(lines, 'qnx = '.has('qnx'))
     call add(lines, 'vms = '.has('vms'))
     call add(lines, '--- feature-list ---')
-
-    call add(lines, '')
-    call add(lines, '')
-
-    call add(lines, "Please report this error to author.")
-    call add(lines, "`:help eskk` to see author's e-mail address.")
 
 
 
