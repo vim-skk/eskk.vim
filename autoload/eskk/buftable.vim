@@ -28,23 +28,8 @@ let [
 
 " Functions {{{
 let s:VICE_OPTIONS = {'generate_stub': 1, 'auto_clone_method': 1}
-" s:Resettable {{{
-let s:Resettable = vice#trait('Resettable', s:SID_PREFIX, s:VICE_OPTIONS)
-
-function! s:Resettable.requires() "{{{
-    return ['clone']
-endfunction "}}}
-
-function! {s:Resettable.method('reset')}(this) "{{{
-    let obj = a:this.clone()
-    for k in keys(obj)
-        let a:this[k] = obj[k]
-    endfor
-endfunction "}}}
-" }}}
 " s:BufferString {{{
 let s:BufferString = vice#class('BufferString', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:BufferString.with(s:Resettable)
 
 
 let s:RomStr = vice#class('RomStr', s:SID_PREFIX, s:VICE_OPTIONS)
@@ -129,7 +114,6 @@ let s:BufferString = s:BufferString.new()
 " }}}
 " s:Buftable {{{
 let s:Buftable = vice#class('Buftable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:Buftable.with(s:Resettable)
 
 call s:Buftable.attribute(
 \   '_table',
@@ -167,6 +151,12 @@ function! eskk#buftable#new() "{{{
     return s:Buftable.clone()
 endfunction "}}}
 
+function! {s:Buftable.method('reset')}(this) "{{{
+    let obj = s:Buftable.clone()
+    for k in keys(obj)
+        let a:this[k] = obj[k]
+    endfor
+endfunction "}}}
 
 function! {s:Buftable.method('get_buf_str')}(this, henkan_phase) "{{{
     call s:validate_table_idx(a:this._table, a:henkan_phase)
@@ -1138,7 +1128,6 @@ let s:Buftable = s:Buftable.new()
 
 " :unlet for memory.
 " Those classes' methods/properties are copied already.
-unlet s:Resettable
 unlet s:BufferString
 " }}}
 
