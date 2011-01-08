@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 185))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 186))
 
 
 function! s:SID() "{{{
@@ -997,7 +997,7 @@ function! eskk#_initialize() "{{{
     silent! EskkMap -remap <BS> <Plug>(eskk:filter:<C-h>)
 
     silent! EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
-    silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
+    " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
     " Map temporary key to keys to use in that mode {{{
