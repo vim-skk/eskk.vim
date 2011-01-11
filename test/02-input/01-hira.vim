@@ -9,26 +9,31 @@ set cpo&vim
 
 
 function! s:run()
-    Is eskk#test#emulate_filter_keys(''), ''
-    Is eskk#test#emulate_filter_keys('a'), 'あ'
-    Is eskk#test#emulate_filter_keys("s"), "s"
-    Is eskk#test#emulate_filter_keys('sa'), 'さ'
-    Is eskk#test#emulate_filter_keys('cha'), 'ちゃ'
-    Is eskk#test#emulate_filter_keys('kanji'), 'かんじ'
-    Is eskk#test#emulate_filter_keys('kannji'), 'かんじ'
-    Is eskk#test#emulate_filter_keys('kannnji'), 'かんんじ'
-    Is eskk#test#emulate_filter_keys("kanjin\<CR>"), "かんじん\<CR>"
-    Is eskk#test#emulate_filter_keys("kannjin\<CR>"), "かんじん\<CR>"
-    Is eskk#test#emulate_filter_keys('kanjinn'), 'かんじん'
-    Is eskk#test#emulate_filter_keys('kannjinn'), 'かんじん'
-    " Is eskk#test#emulate_filter_keys("hoge\<BS>"), 'ほ'
-    Is eskk#test#emulate_filter_keys("hoge\<C-h>"), 'ほ'
-    " Is eskk#test#emulate_filter_keys("hoge\<BS>fuga"), 'ほふが'
-    Is eskk#test#emulate_filter_keys("hoge\<C-h>fuga"), 'ほふが'
-    Is eskk#test#emulate_filter_keys("a\<C-h>"), ""
-    Is eskk#test#emulate_filter_keys("a\<C-h>\<C-h>"), "\<C-h>"
-    Is eskk#test#emulate_filter_keys(" \<C-h>"), ""
-    Is eskk#test#emulate_filter_keys(" \<C-h>\<C-h>"), "\<C-h>"
+    for [l, r] in [
+    \   ['', ''],
+    \   ['a', 'あ'],
+    \   ['s', 's'],
+    \   ['sa', 'さ'],
+    \   ['cha', 'ちゃ'],
+    \   ['kanji', 'かんじ'],
+    \   ['kannji', 'かんじ'],
+    \   ['kannnji', 'かんんじ'],
+    \   ["kanjin\<CR>", "かんじん\<CR>"],
+    \   ["kannjin\<CR>", "かんじん\<CR>"],
+    \   ['kanjinn', "かんじん"],
+    \   ['kannjinn', "かんじん"],
+    \   ["hoge\<BS>", "ほ"],
+    \   ["hoge\<C-h>", "ほ"],
+    \   ["hoge\<BS>fuga", "ほふが"],
+    \   ["hoge\<C-h>fuga", "ほふが"],
+    \   ["a\<C-h>", ""],
+    \   ["a\<C-h>\<C-h>", "\<C-h>"],
+    \   [" \<C-h>", ""],
+    \   [" \<C-h>\<C-h>", "\<C-h>"],
+    \]
+        Is eskk#test#emulate_filter_keys(l), r,
+        \   string(l).' => '.string(r)
+    endfor
 endfunction
 
 call s:run()
