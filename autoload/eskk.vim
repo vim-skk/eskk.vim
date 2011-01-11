@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 188))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 189))
 
 
 function! s:SID() "{{{
@@ -341,21 +341,13 @@ function! s:filter_rom(stash, table) "{{{
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
     let rom_str = buf_str.rom_str.get() . char
-    let match_exactly  = a:table.has_map(rom_str)
-    let candidates     = a:table.get_candidates(rom_str, 2, [])
 
-    if match_exactly
-        call eskk#error#assert(!empty(candidates))
-    endif
-
-    if match_exactly && len(candidates) == 1
-        " Match!
-        return s:filter_rom_exact_match(a:stash, a:table)
-
-    elseif !empty(candidates)
+    if a:table.has_n_candidates(rom_str, 2)
         " Has candidates but not match.
         return s:filter_rom_has_candidates(a:stash)
-
+    elseif a:table.has_map(rom_str)
+        " Match!
+        return s:filter_rom_exact_match(a:stash, a:table)
     else
         " No candidates.
         return s:filter_rom_no_match(a:stash, a:table)

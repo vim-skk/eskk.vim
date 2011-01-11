@@ -124,6 +124,12 @@ function! {s:TableObj.method('has_candidates')}(this, lhs_head) "{{{
     let not_found = {}
     return a:this.get_candidates(a:lhs_head, 1, not_found) isnot not_found
 endfunction "}}}
+function! {s:TableObj.method('has_n_candidates')}(this, lhs_head, n) "{{{
+    " Has n candidates at least.
+    let not_found = {}
+    let c = a:this.get_candidates(a:lhs_head, a:n, not_found)
+    return c isnot not_found && len(c) >= a:n
+endfunction "}}}
 function! {s:TableObj.method('get_candidates')}(this, lhs_head, max_candidates, ...) "{{{
     return call(
     \   's:get_candidates',
