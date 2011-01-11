@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 186))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 187))
 
 
 function! s:SID() "{{{
@@ -513,8 +513,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
     let buftable = a:stash.buftable
     let buf_str = a:stash.buf_str
-    let rom_str_without_char = buf_str.rom_str.get()
-    let rom_str = rom_str_without_char . char
+    let rom_str = buf_str.rom_str.get() . char
 
     let [matched_map_list, rest] =
     \   s:get_matched_and_rest(a:table, rom_str, 1)
@@ -560,22 +559,14 @@ function! s:filter_rom_no_match(stash, table) "{{{
     endif
 endfunction "}}}
 
-function! s:generate_map_list(str, tail, ...) "{{{
+function! s:generate_map_list(str, tail) "{{{
     let str = a:str
-    let result = a:0 != 0 ? a:1 : []
-    " NOTE: `str` must come to empty string.
-    if str == ''
-        return result
-    else
+    let result = []
+    while str != ''
         call add(result, str)
-        " a:tail is true, Delete tail one character.
-        " a:tail is false, Delete first one character.
-        return s:generate_map_list(
-        \   (a:tail ? strpart(str, 0, strlen(str) - 1) : strpart(str, 1)),
-        \   a:tail,
-        \   result
-        \)
-    endif
+        let str = a:tail ? str[:-2] : str[1:]
+    endwhile
+    return result
 endfunction "}}}
 function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     " For e.g., if table has map "n" to "ん" and "j" to none.
@@ -585,11 +576,8 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
     let matched = []
     let rest = a:rom_str
     while 1
-        let counter = 0
         let has_map_str = -1
-        let list = s:generate_map_list(rest, a:tail)
-        for str in list
-            let counter += 1
+        for str in s:generate_map_list(rest, a:tail)
             if a:table.has_map(str)
                 let has_map_str = str
                 break
@@ -600,11 +588,9 @@ function! s:get_matched_and_rest(table, rom_str, tail) "{{{
         endif
         call add(matched, has_map_str)
         if a:tail
-            " Delete first `has_map_str` bytes.
-            let rest = strpart(rest, strlen(has_map_str))
+            let rest = rest[strlen(has_map_str):]
         else
-            " Delete last `has_map_str` bytes.
-            let rest = strpart(rest, 0, strlen(rest) - strlen(has_map_str))
+            let rest = rest[:-strlen(has_map_str) - 1]
         endif
     endwhile
 endfunction "}}}

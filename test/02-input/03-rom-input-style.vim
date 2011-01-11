@@ -9,13 +9,18 @@ set cpo&vim
 
 
 function! s:do_general_test()
-    Is eskk#test#emulate_filter_keys('a'), 'あ', '"a" => "あ"'
-    Is eskk#test#emulate_filter_keys('sa'), 'さ', '"sa" => "さ"'
-    Is eskk#test#emulate_filter_keys(' sa'), ' さ', '" sa" => " さ"'
-    Is eskk#test#emulate_filter_keys('sa '), 'さ ', '"sa " => "さ "'
-    Is eskk#test#emulate_filter_keys('tty'), 'っty', '"tty" => "っty"'
-    Is eskk#test#emulate_filter_keys(' ka'), ' か', '" ka" => " か"'
-    Is eskk#test#emulate_filter_keys('&ka'), '&か', '"&ka" => "&か"'
+    for [l, r] in [
+    \   ['a', 'あ'],
+    \   ['sa', 'さ'],
+    \   [' sa', ' さ'],
+    \   ['sa ', 'さ '],
+    \   ['tty', 'っty'],
+    \   [' ka', ' か'],
+    \   ['&ka', '&か'],
+    \]
+        Is eskk#test#emulate_filter_keys(l), r,
+        \   string(l).' => '.string(r)
+    endfor
 endfunction
 
 function! s:do_test_skk()
@@ -23,9 +28,14 @@ function! s:do_test_skk()
     Diag 'let g:eskk#rom_input_style = "skk"'
 
     call s:do_general_test()
-    Is eskk#test#emulate_filter_keys('jka'), 'か', '"jka" => "か"'
-    Is eskk#test#emulate_filter_keys('jkjka'), 'か', '"jkjka" => "か"'
-    Is eskk#test#emulate_filter_keys('jkjkka'), 'っか', '"jkjkka" => "っか"'
+    for [l, r] in [
+    \   ['jka', 'か'],
+    \   ['jkjka', 'か'],
+    \   ['jkjkka', 'っか'],
+    \]
+        Is eskk#test#emulate_filter_keys(l), r,
+        \   string(l).' => '.string(r)
+    endfor
 endfunction
 
 function! s:do_test_msime()
@@ -33,9 +43,14 @@ function! s:do_test_msime()
     Diag 'let g:eskk#rom_input_style = "msime"'
 
     call s:do_general_test()
-    Is eskk#test#emulate_filter_keys('jka'), 'jか', '"jka" => "jか"'
-    Is eskk#test#emulate_filter_keys('jkjka'), 'jkjか', '"jkjka" => "jkjか"'
-    Is eskk#test#emulate_filter_keys('jkjkka'), 'jkjっか', '"jkjkka" => "jkjっか"'
+    for [l, r] in [
+    \   ['jka', 'jか'],
+    \   ['jkjka', 'jkjか'],
+    \   ['jkjkka', 'jkjっか'],
+    \]
+        Is eskk#test#emulate_filter_keys(l), r,
+        \   string(l).' => '.string(r)
+    endfor
 endfunction
 
 function! s:do_test_quickmatch()
