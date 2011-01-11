@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 187))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 188))
 
 
 function! s:SID() "{{{
@@ -560,6 +560,8 @@ function! s:filter_rom_no_match(stash, table) "{{{
 endfunction "}}}
 
 function! s:generate_map_list(str, tail) "{{{
+    " a:tail is true: "abc" => ["abc", "ab", "a"]
+    " a:tail is false: "abc" => ["abc", "bc", "c"]
     let str = a:str
     let result = []
     while str != ''
