@@ -8,14 +8,14 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 189))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 190))
 
 
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 let s:SID_PREFIX = s:SID()
-delfunc s:SID
+delfunction s:SID
 
 
 " See eskk#_initialize() for global variables.
