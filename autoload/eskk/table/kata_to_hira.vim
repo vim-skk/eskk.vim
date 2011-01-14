@@ -6,7 +6,6 @@ scriptencoding utf-8
 let s:save_cpo = &cpo
 set cpo&vim
 " }}}
-runtime! plugin/eskk.vim
 
 
 function! eskk#table#kata_to_hira#load()
