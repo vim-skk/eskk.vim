@@ -558,14 +558,14 @@ function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
                 endif
             else
                 let m = buf_str.rom_pairs.get()
-                call eskk#error#assert(len(m) == 1)
+                call eskk#error#assert(len(m) == 1, 'len(m) must be 1')
                 let [rom, filter] = m[0]
                 call buf_str.rom_pairs.set_one_pair(rom, eskk#util#mb_chop(filter))
 
                 " `rom` is empty string,
                 " Because currently this is called only by
                 " `s:do_backspace()` in `autoload/eskk/complete.vim`.
-                call eskk#error#assert(rom == '')
+                call eskk#error#assert(rom == '', 'rom must be empty string')
             endif
             break
         elseif a:this.get_marker(phase) != ''
@@ -933,7 +933,7 @@ function! {s:Buftable.method('do_escape')}(this, stash) "{{{
 
     " NOTE: This function return value is not remapped.
     let esc = eskk#mappings#get_special_key('escape-key')
-    call eskk#error#assert(esc != '')
+    call eskk#error#assert(esc != '', 'esc must not be empty string')
 
     let a:stash.return = kakutei_str . eskk#mappings#key2char(esc)
 endfunction "}}}
@@ -1058,7 +1058,7 @@ function! {s:Buftable.method('remove_display_str')}(this) "{{{
 
     " NOTE: This function return value is not remapped.
     let bs = eskk#mappings#get_special_key('backspace-key')
-    call eskk#error#assert(bs != '')
+    call eskk#error#assert(bs != '', 'bs must not be empty string')
 
     return repeat(
     \   eskk#mappings#key2char(bs),

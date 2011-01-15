@@ -63,7 +63,7 @@ function! eskk#dictionary#search_all_candidates(
             let i += 1
         endwhile
         let end = i - 1
-        call eskk#error#assert(begin <= end)
+        call eskk#error#assert(begin <= end, 'begin <= end')
         if limit >= 0 && begin + limit < end
             let end = begin + limit
         endif
@@ -199,7 +199,7 @@ endfunction "}}}
 " Returns [key, okuri_rom, candidates] which line contains.
 function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     let list = split(a:line, '/')
-    call eskk#error#assert(!empty(list))
+    call eskk#error#assert(!empty(list), 'list must not be empty')
     let key = matchstr(list[0], '^[^a-z ]\+')
     let okuri_rom = matchstr(list[0], '[a-z]\+')
     let has_okuri = okuri_rom != ''
@@ -936,7 +936,7 @@ function! {s:PhysicalDict.method('get_updated_lines')}(this, registered_words) "
         " Delete old entry.
         if index !=# -1
             call remove(user_dict_lines, index)
-            call eskk#error#assert(line != '')
+            call eskk#error#assert(line != '', 'line must not be empty string')
         elseif w.okuri_rom != ''
             let nasi_lnum += 1
         endif

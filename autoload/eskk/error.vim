@@ -219,16 +219,16 @@ function! eskk#error#build_error(from, msg_list) "{{{
     return 'eskk: ' . join(a:msg_list, ': ') . ' (at ' . file . ')'
 endfunction "}}}
 
-function! eskk#error#assert(cond, ...) "{{{
+function! eskk#error#assert(cond, msg) "{{{
     if !a:cond
-        throw call('eskk#error#assertion_failure_error', a:000)
+        throw eskk#error#assertion_failure_error(a:msg)
     endif
 endfunction "}}}
-function! eskk#error#assertion_failure_error(...) "{{{
+function! eskk#error#assertion_failure_error(msg) "{{{
     " This is only used from eskk#error#assert().
     return eskk#error#build_error(
     \   ['eskk', 'error'],
-    \   ['assertion failed'] + a:000
+    \   ['assertion failed', a:msg]
     \)
 endfunction "}}}
 

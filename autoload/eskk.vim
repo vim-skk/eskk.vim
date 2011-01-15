@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 191))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 192))
 
 
 function! s:SID() "{{{
@@ -460,7 +460,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endif
         endif
 
-        call eskk#error#assert(char != '')
+        call eskk#error#assert(char != '', 'char must not be empty')
         call okuri_buf_str.rom_str.append(char)
 
         let has_rest = 0
@@ -489,7 +489,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call okuri_buf_str.rom_str.clear()
 
         let matched = okuri_buf_str.rom_pairs.get()
-        call eskk#error#assert(!empty(matched))
+        call eskk#error#assert(!empty(matched), 'matched must not be empty.')
         " TODO `len(matched) == 1`: Do henkan at only the first time.
 
         if !has_rest && g:eskk#auto_henkan_at_okuri_match
@@ -1254,7 +1254,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " s:saved_im_options {{{
-    call eskk#error#assert(empty(s:saved_im_options))
+    call eskk#error#assert(empty(s:saved_im_options), "s:saved_im_options must be empty.")
     let s:saved_im_options = [&g:iminsert, &g:imsearch]
     " }}}
 
