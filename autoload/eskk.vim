@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 192))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 193))
 
 
 function! s:SID() "{{{
@@ -604,6 +604,7 @@ function! eskk#_initialize() "{{{
     if s:is_initialized
         return
     endif
+    let s:is_initialized = 1
 
     " Check if prereq libs' versions {{{
     function! s:version_pack(x, y, z)
@@ -1368,8 +1369,6 @@ function! eskk#_initialize() "{{{
     " Throw eskk-initialize-post event.
     doautocmd User eskk-initialize-post
     " }}}
-
-    let s:is_initialized = 1
 endfunction "}}}
 function! eskk#is_initialized() "{{{
     return s:is_initialized
