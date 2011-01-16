@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 193))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 194))
 
 
 function! s:SID() "{{{
@@ -514,8 +514,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
             if rest ==# char
                 let a:stash.return = char
             else
-                let rest = strpart(rest, 0, strlen(rest) - 2) . char
-                call buf_str.rom_str.set(rest)
+                call buf_str.rom_str.set(char)
             endif
         else
             let [matched_map_list, head_no_match] =
