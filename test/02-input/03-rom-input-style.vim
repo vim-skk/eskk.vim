@@ -36,6 +36,8 @@ function! s:do_test_skk()
     \   ['jka', 'か'],
     \   ['jkjka', 'か'],
     \   ['jkjkka', 'っか'],
+    \   ['kj', 'j'],
+    \   ['tyk', 'k'],
     \]
         Is eskk#test#emulate_filter_keys(l), r,
         \   string(l).' => '.string(r)
