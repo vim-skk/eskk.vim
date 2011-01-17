@@ -66,49 +66,48 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         endif
 
         " Fix dictionary lines.
-        let okuri_ari = {}
-        let okuri_nasi = {}
+        let lambda = {'candidates': {}}
+        function lambda.match_and_add(line, pattern)
+            let m = matchlist(a:line, a:pattern)
+            if !empty(m)
+                let [hira, kanji] = m[1:2]
+                let kanji_list = split(kanji, '/')
+                if has_key(self.candidates, hira)
+                    let self.candidates[hira] += kanji_list
+                else
+                    let self.candidates[hira] = kanji_list
+                endif
+                return 1
+            else
+                return 0
+            endif
+        endfunction
+        function lambda.get_candidates()
+            return values(map(
+            \   self.candidates,
+            \   'v:key . " /" . join(v:val, "/") . "/"'
+            \))
+        endfunction
+
+        let okuri_ari = deepcopy(lambda)
+        let okuri_nasi = deepcopy(lambda)
         for line in readfile(path)
             if line =~ '^\s*;'
                 " comment
                 continue
             endif
-
-            let ari_match =
-            \   matchlist(line, '^\(\S\+[a-z]\)[ \t]\+\(.\+\)')
-            if !empty(ari_match)
-                " okuri-ari entry
-                let [hira, kanji] = ari_match[1:2]
-                let kanji_list = split(kanji, '/')
-                if has_key(okuri_ari, hira)
-                    let okuri_ari[hira] += kanji_list
-                else
-                    let okuri_ari[hira] = kanji_list
-                endif
+            if okuri_ari.match_and_add(line, '^\(\S\+[a-z]\)[ \t]\+\(.\+\)')
                 continue
             endif
 
-            let nasi_match =
-            \   matchlist(line, '^\(\S\+[^a-z]\)[ \t]\+\(.\+\)')
-            if !empty(nasi_match)
-                " okuri-nasi entry
-                let [hira, kanji] = nasi_match[1:2]
-                let kanji_list = split(kanji, '/')
-                if has_key(okuri_nasi, hira)
-                    let okuri_nasi[hira] += kanji_list
-                else
-                    let okuri_nasi[hira] = kanji_list
-                endif
-            endif
+            call okuri_nasi.match_and_add(line, '^\(\S\+[^a-z]\)[ \t]\+\(.\+\)')
         endfor
 
-        let build_line =
-        \   'v:key . " /" . join(v:val, "/") . "/"'
         let r = writefile(
         \   [';; okuri-ari entries.']
-        \       + values(map(okuri_ari, build_line))
+        \       + okuri_ari.get_candidates()
         \       + [';; okuri-nasi entries.']
-        \       + values(map(okuri_nasi, build_line)),
+        \       + okuri_nasi.get_candidates(),
         \   path
         \)
         if r == -1
