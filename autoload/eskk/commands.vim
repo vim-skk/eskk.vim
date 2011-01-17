@@ -66,30 +66,52 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         endif
 
         " Fix dictionary lines.
-        let dup = {}
-        let ari = []
-        let nasi = []
+        let okuri_ari = {}
+        let okuri_nasi = {}
         for line in readfile(path)
-            if has_key(dup, line)
-                continue
-            endif
-            let dup[line] = 1
-
             if line =~ '^\s*;'
                 " comment
-            elseif line =~ '^\S\+\w '
+                continue
+            endif
+
+            let ari_match =
+            \   matchlist(line, '^\(\S\+[a-z]\)[ \t]\+\(.\+\)')
+            if !empty(ari_match)
                 " okuri-ari entry
-                call add(ari, line)
-            elseif line =~ '^\S\+\W '
+                let [hira, kanji] = ari_match[1:2]
+                let kanji_list = split(kanji, '/')
+                if has_key(okuri_ari, hira)
+                    let okuri_ari[hira] += kanji_list
+                else
+                    let okuri_ari[hira] = kanji_list
+                endif
+                continue
+            endif
+
+            let nasi_match =
+            \   matchlist(line, '^\(\S\+[^a-z]\)[ \t]\+\(.\+\)')
+            if !empty(nasi_match)
                 " okuri-nasi entry
-                call add(nasi, line)
+                let [hira, kanji] = nasi_match[1:2]
+                let kanji_list = split(kanji, '/')
+                if has_key(okuri_nasi, hira)
+                    let okuri_nasi[hira] += kanji_list
+                else
+                    let okuri_nasi[hira] = kanji_list
+                endif
             endif
         endfor
-        let lines =
-        \   [';; okuri-ari entries.'] + ari
-        \   + [';; okuri-nasi entries.']  + nasi
 
-        if writefile(lines, path) == -1
+        let build_line =
+        \   'v:key . " /" . join(v:val, "/") . "/"'
+        let r = writefile(
+        \   [';; okuri-ari entries.']
+        \       + values(map(okuri_ari, build_line))
+        \       + [';; okuri-nasi entries.']
+        \       + values(map(okuri_nasi, build_line)),
+        \   path
+        \)
+        if r == -1
             call eskk#util#warn(
             \   ':EskkFixDictionary - '
             \   . "Could not write to '"
