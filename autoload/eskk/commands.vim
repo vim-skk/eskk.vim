@@ -71,12 +71,11 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             let m = matchlist(a:line, a:pattern)
             if !empty(m)
                 let [hira, kanji] = m[1:2]
-                let kanji_list = split(kanji, '/')
-                if has_key(self.candidates, hira)
-                    let self.candidates[hira] += kanji_list
-                else
-                    let self.candidates[hira] = kanji_list
-                endif
+                let candidates = {}
+                for i in split(kanji, '/') + get(self.candidates, hira, [])
+                    let candidates[i] = 1
+                endfor
+                let self.candidates[hira] = keys(candidates)
                 return 1
             else
                 return 0
