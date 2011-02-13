@@ -273,6 +273,14 @@ g:eskk#enable_completion		*g:eskk#enable_completion*
 g:eskk#max_candidates			*g:eskk#max_candidates*
 							(Default: 10)
 
+						*g:eskk#start_completion_length*
+g:eskk#start_completion_length
+							(Default: 3)
+	Skip completion until input characters' (not bytes)
+	length becomes larger than the option value.
+
+
+
 
 Cursor color
 ---------------
