@@ -273,9 +273,6 @@ g:eskk#enable_completion		*g:eskk#enable_completion*
 g:eskk#max_candidates			*g:eskk#max_candidates*
 							(Default: 10)
 
-g:eskk#compl_enter_send_keys			*g:eskk#compl_enter_send_keys*
-							(Default: ["<CR>"])
-
 
 Cursor color
 ---------------
