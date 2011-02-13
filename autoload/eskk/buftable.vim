@@ -165,6 +165,10 @@ endfunction "}}}
 function! {s:Buftable.method('get_current_buf_str')}(this) "{{{
     return a:this.get_buf_str(a:this._henkan_phase)
 endfunction "}}}
+function! {s:Buftable.method('set_buf_str')}(this, henkan_phase, buf_str) "{{{
+    call s:validate_table_idx(a:this._table, a:henkan_phase)
+    let a:this._table[a:henkan_phase] = a:buf_str
+endfunction "}}}
 
 
 function! {s:Buftable.method('set_old_str')}(this, str) "{{{
@@ -963,22 +967,12 @@ function! {s:Buftable.method('convert_rom_str')}(this, phases) "{{{
     endif
 endfunction "}}}
 function! {s:Buftable.method('filter_rom_inplace')}(this, phase, table) "{{{
-    let phase = a:phase
-    let buf_str = a:this.get_buf_str(phase)
-
-    let matched = buf_str.rom_pairs.get()
-    call buf_str.rom_pairs.clear()
-    for [rom_str, filter_str] in matched
-        call buf_str.rom_pairs.push_one_pair(
-        \   rom_str,
-        \   a:table.get_map(rom_str, rom_str)
-        \)
-    endfor
+    let buf_str = a:this.filter_rom(a:phase, a:table)
+    call a:this.set_buf_str(a:phase, buf_str)
     return buf_str
 endfunction "}}}
 function! {s:Buftable.method('filter_rom')}(this, phase, table) "{{{
-    let phase = a:phase
-    let buf_str = deepcopy(a:this.get_buf_str(phase), 1)
+    let buf_str = deepcopy(a:this.get_buf_str(a:phase), 1)
 
     let matched = buf_str.rom_pairs.get()
     call buf_str.rom_pairs.clear()
