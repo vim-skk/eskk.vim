@@ -332,13 +332,6 @@ function! eskk#mappings#map_from_maparg_dict(dict) "{{{
     let modes = a:dict.mode
     return eskk#mappings#map(options, lhs, rhs, modes)
 endfunction "}}}
-function! eskk#mappings#map_exists(mode, ...) "{{{
-    let [options, lhs] = [get(a:000, 0, ''), get(a:000, 1, '')]
-    let options = eskk#mappings#mapopt_chars2raw(options)
-    let excmd = join([a:mode . 'map', options] + (lhs != '' ? [lhs] : []))
-    let out = eskk#util#redir_english(excmd)
-    return !eskk#util#list_has(split(out, '\n'), 'No mapping found')
-endfunction "}}}
 
 function! eskk#mappings#set_up_key(key, ...) "{{{
     call eskk#mappings#map(
@@ -453,7 +446,8 @@ function! s:do_normal_key(key, iminsert, imsearch) "{{{
 endfunction "}}}
 function! s:unmap_normal_keys() "{{{
     for key in s:get_normal_keys()
-        if eskk#mappings#map_exists('n', 'b', key)
+        " Exists <buffer> mapping.
+        if get(maparg(key, 'n', 0, 1), 'buffer')
             call eskk#mappings#unmap('b', key, 'n')
         endif
     endfor

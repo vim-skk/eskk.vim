@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 203))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 204))
 
 
 function! s:SID() "{{{
@@ -1497,10 +1497,14 @@ function! eskk#toggle() "{{{
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
 function! s:enable_im() "{{{
-    let &l:iminsert = eskk#mappings#map_exists('l') ? 1 : 2
+    let &l:iminsert = s:map_exists_mode_of('l') ? 1 : 2
     let &l:imsearch = &l:iminsert
     
     return ''
+endfunction "}}}
+function! s:map_exists_mode_of(mode) "{{{
+    let out = eskk#util#redir_english(a:mode . 'map')
+    return !eskk#util#list_has(split(out, '\n'), 'No mapping found')
 endfunction "}}}
 function! s:disable_im() "{{{
     let &l:iminsert = 0
