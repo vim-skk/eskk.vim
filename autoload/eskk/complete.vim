@@ -80,7 +80,12 @@ function! eskk#complete#can_find_start() "{{{
     return 1
 endfunction "}}}
 function! eskk#complete#do_complete(base) "{{{
-    return s:mode_func_table[eskk#get_mode()](a:base)
+    let mode = eskk#get_mode()
+    if has_key(s:mode_func_table, mode)
+        return s:mode_func_table[mode](a:base)
+    else
+        return s:skip_complete()
+    endif
 endfunction "}}}
 function! s:skip_complete() "{{{
     " TODO: Return previously completed candidates.
