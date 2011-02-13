@@ -98,6 +98,13 @@ function! s:mode_func_table.hira(base) "{{{
     if a:base =~ '\a$'
         return s:skip_complete()
     endif
+    let mb_str = eskk#get_buftable().get_buf_str(
+    \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \).rom_pairs.get_filter()
+    let length = eskk#util#mb_strlen(mb_str)
+    if length < g:eskk#start_completion_length
+        return s:skip_complete()
+    endif
 
     return s:complete(eskk#get_mode(), a:base)
 endfunction "}}}

@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 201))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 202))
 
 
 function! s:SID() "{{{
@@ -814,6 +814,10 @@ function! eskk#_initialize() "{{{
 
     if !exists('g:eskk#max_candidates')
         let g:eskk#max_candidates = 30
+    endif
+
+    if !exists('g:eskk#start_completion_length')
+        let g:eskk#start_completion_length = 3
     endif
 
     " Cursor color
