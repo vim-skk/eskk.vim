@@ -37,7 +37,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         if a:findstart
             return -1
         else
-            return []
+            return s:skip_complete()
         endif
     endtry
 endfunction "}}}
@@ -82,12 +82,16 @@ endfunction "}}}
 function! eskk#complete#do_complete(base) "{{{
     return s:mode_func_table[eskk#get_mode()](a:base)
 endfunction "}}}
+function! s:skip_complete() "{{{
+    " TODO: Return previously completed candidates.
+    return []
+endfunction "}}}
 
 " s:mode_func_table
 function! s:mode_func_table.hira(base) "{{{
     " Do not complete while inputting rom string.
     if a:base =~ '\a$'
-        return []
+        return s:skip_complete()
     endif
 
     return s:complete(eskk#get_mode(), a:base)
@@ -144,10 +148,10 @@ function! s:complete(mode, base) "{{{
     try
         let s = dict.search(key, okuri, okuri_rom)
         if empty(s)
-            return []
+            return s:skip_complete()
         endif
     catch /^eskk: dictionary look up error:/
-        return []
+        return s:skip_complete()
     endtry
 
     let [yomigana, _, candidates] = s
