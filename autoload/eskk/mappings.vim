@@ -524,7 +524,7 @@ endfunction "}}}
 
 " Functions using s:eskk_mappings
 function! eskk#mappings#map_all_keys(...) "{{{
-    if eskk#buffer_value_get('mapped_bufnr', 0)
+    if exists('b:__eskk_mapped_bufnr')
         return
     endif
 
@@ -559,10 +559,10 @@ function! eskk#mappings#map_all_keys(...) "{{{
         endif
     endfor
 
-    call eskk#buffer_value_put('mapped_bufnr', 1)
+    let b:__eskk_mapped_bufnr = 1
 endfunction "}}}
 function! eskk#mappings#unmap_all_keys() "{{{
-    if !eskk#buffer_value_get('mapped_bufnr', 0)
+    if !exists('b:__eskk_mapped_bufnr')
         return
     endif
 
@@ -570,7 +570,7 @@ function! eskk#mappings#unmap_all_keys() "{{{
         call eskk#mappings#unmap('b', key, 'l')
     endfor
 
-    call eskk#buffer_value_remove('mapped_bufnr')
+    unlet b:__eskk_mapped_bufnr
 endfunction "}}}
 function! eskk#mappings#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error

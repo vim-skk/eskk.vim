@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 204))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 205))
 
 
 function! s:SID() "{{{
@@ -119,8 +119,6 @@ let s:eskk_mappings = {
 \   'mode:zenei:to-hira': {'fn': 's:handle_toggle_hankata'},
 \   'mode:abbrev:henkan-key': {},
 \}
-" buffer-local values.
-let s:buffer_value = {}
 " }}}
 
 
@@ -179,23 +177,6 @@ function! eskk#destroy_current_instance() "{{{
     " Destroy current instance.
     call remove(s:eskk_instances, s:eskk_instance_id)
     let s:eskk_instance_id -= 1
-endfunction "}}}
-
-" buffer-local value.
-function! eskk#buffer_value_has(name) "{{{
-    return eskk#util#has_key_f(s:buffer_value, [bufnr('%'), a:name])
-endfunction "}}}
-function! eskk#buffer_value_remove(name) "{{{
-    let nr = bufnr('%')
-    if has_key(s:buffer_value, nr) && has_key(s:buffer_value[nr], a:name)
-        unlet s:buffer_value[nr][a:name]
-    endif
-endfunction "}}}
-function! eskk#buffer_value_get(name, ...) "{{{
-    return call('eskk#util#get_f', [s:buffer_value, [bufnr('%'), a:name]] + a:000)
-endfunction "}}}
-function! eskk#buffer_value_put(name, Value) "{{{
-    call eskk#util#let_f(s:buffer_value, [bufnr('%'), a:name], a:Value)
 endfunction "}}}
 
 " Filter

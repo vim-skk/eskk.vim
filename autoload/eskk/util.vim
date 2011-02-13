@@ -390,9 +390,9 @@ endfunction "}}}
 function! eskk#util#make_ascii_expr(...) "{{{
     while 1
         let varname =
-        \   "make_ascii_expr_"
+        \   "__eskk_make_ascii_expr_"
         \   . eskk#util#make_random_string(10)
-        if !eskk#buffer_value_has(varname)
+        if !exists('b:' . varname)
             break
         endif
     endwhile
@@ -400,13 +400,13 @@ function! eskk#util#make_ascii_expr(...) "{{{
     if a:0
         call eskk#register_temp_event(
         \   'filter-begin',
-        \   'eskk#buffer_value_remove',
-        \   [varname]
+        \   'remove',
+        \   [b:, varname]
         \)
-        call eskk#buffer_value_put(varname, a:1)
+        let b:[varname] = a:1
     endif
 
-    return 'eskk#buffer_value_get(' . string(varname) . ')'
+    return 'b:' . varname
 endfunction "}}}
 
 
