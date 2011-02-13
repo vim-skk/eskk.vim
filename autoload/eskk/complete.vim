@@ -134,11 +134,11 @@ function! s:complete(mode, base) "{{{
 
     if is_katakana
         let hira_table = eskk#get_mode_table('hira')
-        let henkan_buf_str = buftable.filter_rom(
+        let henkan_buf_str = buftable.convert_rom_pairs(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
         \   hira_table
         \)
-        let okuri_buf_str = buftable.filter_rom(
+        let okuri_buf_str = buftable.convert_rom_pairs(
         \   g:eskk#buftable#HENKAN_PHASE_OKURI,
         \   hira_table
         \)

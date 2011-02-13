@@ -838,11 +838,11 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     if g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
         let hira_table = eskk#get_mode_table('hira')
-        call a:this.filter_rom_inplace(
+        call a:this.convert_rom_pairs_inplace(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
         \   hira_table
         \)
-        call a:this.filter_rom_inplace(
+        call a:this.convert_rom_pairs_inplace(
         \   g:eskk#buftable#HENKAN_PHASE_OKURI,
         \   hira_table
         \)
@@ -966,12 +966,12 @@ function! {s:Buftable.method('convert_rom_str')}(this, phases) "{{{
         endfor
     endif
 endfunction "}}}
-function! {s:Buftable.method('filter_rom_inplace')}(this, phase, table) "{{{
-    let buf_str = a:this.filter_rom(a:phase, a:table)
+function! {s:Buftable.method('convert_rom_pairs_inplace')}(this, phase, table) "{{{
+    let buf_str = a:this.convert_rom_pairs(a:phase, a:table)
     call a:this.set_buf_str(a:phase, buf_str)
     return buf_str
 endfunction "}}}
-function! {s:Buftable.method('filter_rom')}(this, phase, table) "{{{
+function! {s:Buftable.method('convert_rom_pairs')}(this, phase, table) "{{{
     let buf_str = deepcopy(a:this.get_buf_str(a:phase), 1)
 
     let matched = buf_str.rom_pairs.get()
