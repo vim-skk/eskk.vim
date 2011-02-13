@@ -403,7 +403,7 @@ function! {s:Buftable.method('push_kakutei_str')}(this, str) "{{{
 endfunction "}}}
 
 function! {s:Buftable.method('do_enter')}(this, stash) "{{{
-    let phase = a:stash.phase
+    let phase = a:this.get_henkan_phase()
     let enter_char =
     \   eskk#mappings#key2char(eskk#mappings#get_special_map('enter-key'))
     let undo_char  =
@@ -755,10 +755,9 @@ function! {s:Buftable.method('step_back_henkan_phase')}(this) "{{{
 endfunction "}}}
 function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
     let convert_at_exact_match = a:0 ? a:1 : 0
-    let phase = a:stash.phase
-    let eskk_mode = a:stash.mode
+    let phase = a:this.get_henkan_phase()
 
-    if a:stash.buf_str.empty()
+    if a:this.get_current_buf_str().empty()
         return
     endif
 
@@ -775,7 +774,7 @@ function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
         return
     endif
 
-    if eskk_mode ==# 'abbrev'
+    if eskk#get_mode() ==# 'abbrev'
         call a:this.do_henkan_abbrev(a:stash, convert_at_exact_match)
     else
         call a:this.do_henkan_other(a:stash, convert_at_exact_match)
@@ -821,8 +820,7 @@ function! {s:Buftable.method('do_henkan_abbrev')}(this, stash, convert_at_exact_
     endtry
 endfunction "}}}
 function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_match) "{{{
-    let phase = a:stash.phase
-    let eskk_mode = a:stash.mode
+    let phase = a:this.get_henkan_phase()
     let henkan_buf_str = a:this.get_buf_str(
     \   g:eskk#buftable#HENKAN_PHASE_HENKAN
     \)
@@ -833,7 +831,8 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
     \)
 
-    if g:eskk#kata_convert_to_hira_at_henkan && eskk_mode ==# 'kata'
+    if g:eskk#kata_convert_to_hira_at_henkan
+    \   && eskk#get_mode() ==# 'kata'
         let hira_table = eskk#get_mode_table('hira')
         call a:this.filter_rom_inplace(
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
@@ -938,7 +937,8 @@ function! {s:Buftable.method('do_escape')}(this, stash) "{{{
     let a:stash.return = kakutei_str . eskk#mappings#key2char(esc)
 endfunction "}}}
 function! {s:Buftable.method('do_tab')}(this, stash) "{{{
-    call a:stash.buf_str.rom_str.append(eskk#util#get_tab_raw_str())
+    let buf_str = a:this.get_current_buf_str()
+    call buf_str.rom_str.append(eskk#util#get_tab_raw_str())
 endfunction "}}}
 
 " TODO: These functions are very similar. Refactoring them.

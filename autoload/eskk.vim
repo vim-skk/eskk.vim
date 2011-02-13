@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 205))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 206))
 
 
 function! s:SID() "{{{
@@ -191,8 +191,8 @@ endfunction "}}}
 
 function! s:asym_filter.filter(stash) "{{{
     let char = a:stash.char
-    let buftable = a:stash.buftable
-    let phase = a:stash.phase
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
 
 
     " Handle special mode-local mapping.
@@ -319,8 +319,8 @@ endfunction "}}}
 
 function! s:filter_rom(stash, table) "{{{
     let char = a:stash.char
-    let buftable = a:stash.buftable
-    let buf_str = a:stash.buf_str
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
 
     if a:table.has_n_candidates(rom_str, 2)
@@ -336,10 +336,10 @@ function! s:filter_rom(stash, table) "{{{
 endfunction "}}}
 function! s:filter_rom_exact_match(stash, table) "{{{
     let char = a:stash.char
-    let buftable = a:stash.buftable
-    let buf_str = a:stash.buf_str
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
-    let phase = a:stash.phase
+    let phase = buftable.get_henkan_phase()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
@@ -480,12 +480,14 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 endfunction "}}}
 function! s:filter_rom_has_candidates(stash) "{{{
     " NOTE: This will be run in all phases.
-    call a:stash.buf_str.rom_str.append(a:stash.char)
+    let buftable = eskk#get_buftable()
+    let buf_str  = buftable.get_current_buf_str()
+    call buf_str.rom_str.append(a:stash.char)
 endfunction "}}}
 function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
-    let buftable = a:stash.buftable
-    let buf_str = a:stash.buf_str
+    let buftable = eskk#get_buftable()
+    let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
 
     let [matched_map_list, rest] =
@@ -1764,11 +1766,6 @@ function! eskk#filter(char) "{{{
     let stash = {
     \   'char': a:char,
     \   'return': 0,
-    \
-    \   'buftable': buftable,
-    \   'phase': buftable.get_henkan_phase(),
-    \   'buf_str': buftable.get_current_buf_str(),
-    \   'mode': eskk#get_mode(),
     \}
 
     if !self.is_locked_old_str

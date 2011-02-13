@@ -15,62 +15,76 @@ delfunc s:SID
 
 
 function! s:handle_toggle_hankata(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
         return 1
     endif
     return 0
 endfunction "}}}
 function! s:handle_toggle_kata(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
         return 1
     endif
     return 0
 endfunction "}}}
 function! s:handle_ctrl_q_key(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call a:stash.buftable.do_ctrl_q_key()
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call eskk#get_buftable().do_ctrl_q_key()
         return 1
     endif
     return 0
 endfunction "}}}
 function! s:handle_q_key(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call a:stash.buftable.do_q_key()
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call eskk#get_buftable().do_q_key()
         return 1
     endif
     return 0
 endfunction "}}}
 function! s:handle_l_key(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
-        call a:stash.buftable.do_l_key()
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+        call eskk#get_buftable().do_l_key()
         return 1
     endif
     return 0
 endfunction "}}}
 function! s:handle_to_ascii(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.rom_str.get() == ''
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+    let buf_str = buftable.get_current_buf_str()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buf_str.rom_str.get() == ''
         call eskk#set_mode('ascii')
         return 1
     endif
     return 0
 endfunction "}}}
 function! s:handle_to_zenei(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.rom_str.get() == ''
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+    let buf_str = buftable.get_current_buf_str()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buf_str.rom_str.get() == ''
         call eskk#set_mode('zenei')
         return 1
     endif
     return 0
 endfunction "}}}
 function! s:handle_to_abbrev(stash) "{{{
-    if a:stash.phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   && a:stash.buf_str.rom_str.get() == ''
+    let buftable = eskk#get_buftable()
+    let phase = eskk#get_buftable().get_henkan_phase()
+    let buf_str = buftable.get_current_buf_str()
+    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    \   && buf_str.rom_str.get() == ''
         call eskk#set_mode('abbrev')
         return 1
     endif
