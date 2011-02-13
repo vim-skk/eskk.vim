@@ -147,8 +147,9 @@ function! s:split_to_keys(lhs)  "{{{
     return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
 endfunction "}}}
 function! eskk#mappings#key2char(key) "{{{
-    " From arpeggio.vim
-
+    if stridx(a:key, '<') ==# -1    " optimization
+        return a:key
+    endif
     return join(
     \   map(
     \       s:split_to_keys(a:key),
