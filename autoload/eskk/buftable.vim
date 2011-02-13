@@ -838,14 +838,14 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     if g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
         let hira_table = eskk#get_mode_table('hira')
-        call a:this.convert_rom_pairs_inplace(
+        for phase in [
         \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
-        \   hira_table
-        \)
-        call a:this.convert_rom_pairs_inplace(
         \   g:eskk#buftable#HENKAN_PHASE_OKURI,
-        \   hira_table
-        \)
+        \]
+            call a:this.convert_rom_pairs_inplace(
+            \   phse, hira_table
+            \)
+        endfor
     endif
 
     " Convert rom_str if possible.
