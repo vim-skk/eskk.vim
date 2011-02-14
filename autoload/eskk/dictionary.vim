@@ -230,7 +230,7 @@ endfunction "}}}
 " Returns String of the created entry from arguments values.
 " eskk#dictionary#create_new_entry() {{{
 function! eskk#dictionary#create_new_entry(
-\   existing_line, key, okuri_rom, new_word
+\   existing_line, key, okuri_rom, new_word, annotation
 \)
     " XXX:
     " TODO:
@@ -241,7 +241,7 @@ function! eskk#dictionary#create_new_entry(
     " Modify them to make the same input to
     " the original s:SkkMakeNewEntry()'s arguments.
     let key = a:key . (a:okuri_rom == '' ? '' : a:okuri_rom[0]) . ' '
-    let cand = a:new_word
+    let cand = a:new_word . ";" . a:annotation
     let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
 
 
@@ -307,7 +307,8 @@ function! s:candidate2registered_word(candidate, key, okuri, okuri_rom) "{{{
     \   a:candidate.input,
     \   a:key,
     \   a:okuri,
-    \   a:okuri_rom
+    \   a:okuri_rom,
+    \   ''
     \)
 endfunction "}}}
 
@@ -317,12 +318,13 @@ endfunction "}}}
 " s:RegisteredWord is the word registered by
 " s:Dictionary.remember_word_prompt().
 
-function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
+function! s:registered_word_new(input, key, okuri, okuri_rom, annotation) "{{{
     return {
     \   'input': a:input,
     \   'key': a:key,
     \   'okuri': a:okuri,
     \   'okuri_rom': a:okuri_rom,
+    \   'annotation': a:annotation,
     \}
 endfunction "}}}
 
@@ -807,7 +809,8 @@ function! {s:HenkanResult.method('do_delete_from_dict')}(this) "{{{
                 \   words[i].input,
                 \   words[i].key,
                 \   words[i].okuri,
-                \   words[i].okuri_rom
+                \   words[i].okuri_rom,
+                \   words[i].annotation
                 \)
             endif
         endfor
@@ -844,7 +847,7 @@ function! {s:HenkanResult.method('update_candidate')}(this) "{{{
 
     " Move a:this to the first.
     let dict = eskk#get_skk_dict()
-    call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
+    call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom, rw.annotation)
     call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
 endfunction "}}}
 " }}}
@@ -945,7 +948,8 @@ function! {s:PhysicalDict.method('get_updated_lines')}(this, registered_words) "
         call insert(
         \   user_dict_lines,
         \   eskk#dictionary#create_new_entry(
-        \       line, w.key, w.okuri_rom, w.input
+        \       line, w.key, w.okuri_rom,
+        \       w.input, w.annotation
         \   ),
         \   lnum
         \)
@@ -1137,7 +1141,9 @@ function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{
 
 
     if input != ''
-        call a:this.remember_word(input, key, okuri, okuri_rom)
+        let [input; _] = split(input, ';')
+        let annotation = join(_, ';')
+        call a:this.remember_word(input, key, okuri, okuri_rom, annotation)
     endif
 
     call eskk#util#clear_command_line()
@@ -1150,8 +1156,8 @@ function! {s:Dictionary.method('forget_all_words')}(this) "{{{
 endfunction "}}}
 
 " Clear given registered word.
-function! {s:Dictionary.method('forget_word')}(this, input, key, okuri, okuri_rom) "{{{
-    let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom)
+function! {s:Dictionary.method('forget_word')}(this, input, key, okuri, okuri_rom, annotation) "{{{
+    let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom, a:annotation)
     if !a:this._registered_words.has(rw)
         return
     endif
@@ -1167,8 +1173,8 @@ function! {s:Dictionary.method('forget_word')}(this, input, key, okuri, okuri_ro
 endfunction "}}}
 
 " Add registered word.
-function! {s:Dictionary.method('remember_word')}(this, input, key, okuri, okuri_rom) "{{{
-    let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom)
+function! {s:Dictionary.method('remember_word')}(this, input, key, okuri, okuri_rom, annotation) "{{{
+    let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom, a:annotation)
     if a:this._registered_words.has(rw)
         return
     endif
@@ -1191,10 +1197,11 @@ function! {s:Dictionary.method('get_registered_words')}(this) "{{{
 endfunction "}}}
 
 " Remove registered word matching with arguments values.
-function! {s:Dictionary.method('remove_registered_word')}(this, input, key, okuri, okuri_rom) "{{{
+function! {s:Dictionary.method('remove_registered_word')}(this, input, key, okuri, okuri_rom, annotation) "{{{
     call a:this._registered_words.remove(
     \   s:registered_word_new(
-    \       a:input, a:key, a:okuri, a:okuri_rom
+    \       a:input, a:key, a:okuri,
+    \       a:okuri_rom, a:annotation
     \   )
     \)
 endfunction "}}}
