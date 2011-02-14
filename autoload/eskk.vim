@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 212))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 213))
 
 
 function! s:SID() "{{{
@@ -607,8 +607,9 @@ function! eskk#_initialize() "{{{
             let current_version = exists(varname) ?
             \   join(s:version_unpack({varname}), '.') :
             \   'unknown'
-            echohl ErrorMsg
-            echomsg "Your installed" a:plugin_name "is old."
+            echohl WarningMsg
+            echomsg "eskk.vim: warning:"
+            \       "Your installed" a:plugin_name "is old."
             \       "(required version is"
             \       join([a:x, a:y, a:z], '.')
             \       "or later, but current version is"
@@ -616,6 +617,17 @@ function! eskk#_initialize() "{{{
             echohl None
         endif
     endfunction
+    function! s:validate_vim_version() "{{{
+        let ok =
+        \   v:version > 703
+        \   || v:version == 703 && has('patch32')
+        if !ok
+            echohl WarningMsg
+            echomsg "eskk.vim: warning: Your Vim is too old."
+            \       "Please use 7.3.32 at least."
+            echohl None
+        endif
+    endfunction "}}}
 
     call s:validate_lib_version(
     \   'cul.vim', 'cul#ordered_set', 0, 0, 14
@@ -626,6 +638,7 @@ function! eskk#_initialize() "{{{
     call s:validate_lib_version(
     \   'vice.vim', 'vice', 0, 1, 1
     \)
+    call s:validate_vim_version()
     " }}}
 
     " Create the first eskk instance. {{{
