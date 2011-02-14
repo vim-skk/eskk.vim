@@ -616,9 +616,10 @@ function! s:get_next_candidate(this, stash, next) "{{{
         if a:next
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
-            let [input, hira, okuri] = dict.register_word(
-            \   dict.get_henkan_result()
-            \)
+            let [input, hira, okuri] =
+            \   dict.remember_word_prompt(
+            \      dict.get_henkan_result()
+            \   )
             if input != ''
                 call a:this.clear_all()
                 call a:this.push_kakutei_str(input . okuri)
@@ -811,9 +812,10 @@ function! {s:Buftable.method('do_henkan_abbrev')}(this, stash, convert_at_exact_
         endif
     catch /^eskk: dictionary look up error/
         " No candidates.
-        let [input, hira, okuri] = dict.register_word(
-        \   dict.get_henkan_result()
-        \)
+        let [input, hira, okuri] =
+        \   dict.remember_word_prompt(
+        \      dict.get_henkan_result()
+        \   )
         if input != ''
             call a:this.clear_all()
             call a:this.push_kakutei_str(input . okuri)
@@ -898,9 +900,10 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
         endif
     catch /^eskk: dictionary look up error/
         " No candidates.
-        let [input, hira, okuri] = dict.register_word(
-        \   dict.get_henkan_result()
-        \)
+        let [input, hira, okuri] =
+        \   dict.remember_word_prompt(
+        \      dict.get_henkan_result()
+        \   )
         if input != ''
             call a:this.clear_all()
             call a:this.push_kakutei_str(input . okuri)

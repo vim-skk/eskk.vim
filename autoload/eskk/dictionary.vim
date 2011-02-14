@@ -314,7 +314,8 @@ endfunction "}}}
 " }}}
 
 " s:RegisteredWord: s:registered_word_new() {{{
-" s:RegisteredWord is the word registered by s:Dictionary.register_word().
+" s:RegisteredWord is the word registered by
+" s:Dictionary.remember_word_prompt().
 
 function! s:registered_word_new(input, key, okuri, okuri_rom) "{{{
     return {
@@ -619,7 +620,7 @@ function! {s:HenkanResult.method('select_candidates')}(
             else
                 " No more pages. Register new word.
                 let dict = eskk#get_skk_dict()
-                let input = dict.register_word(a:this)[0]
+                let input = dict.remember_word_prompt(a:this)[0]
                 let henkan_buf_str = a:this.buftable.get_buf_str(
                 \   g:eskk#buftable#PHASE_HENKAN
                 \)
@@ -1095,7 +1096,7 @@ function! {s:Dictionary.method('refer')}(this, buftable, key, okuri, okuri_rom) 
 endfunction "}}}
 
 " Register new word (registered word) at command-line.
-function! {s:Dictionary.method('register_word')}(this, henkan_result) "{{{
+function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{{
     let key       = a:henkan_result.get_key()
     let okuri     = a:henkan_result.get_okuri()
     let okuri_rom = a:henkan_result.get_okuri_rom()
