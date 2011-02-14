@@ -72,7 +72,7 @@ function! eskk#complete#can_find_start() "{{{
 
     let buftable = eskk#get_buftable()
     let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    if buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_HENKAN
     \   && buf_str.empty()
         return 0
     endif
@@ -99,7 +99,7 @@ function! s:mode_func_table.hira(base) "{{{
         return s:skip_complete()
     endif
     let mb_str = eskk#get_buftable().get_buf_str(
-    \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   g:eskk#buftable#PHASE_HENKAN
     \).rom_pairs.get_filter()
     let length = eskk#util#mb_strlen(mb_str)
     if length < g:eskk#start_completion_length
@@ -136,17 +136,17 @@ function! s:complete(mode, base) "{{{
         let [henkan_buf_str, okuri_buf_str] =
         \   buftable.convert_rom_pairs(
         \       [
-        \           g:eskk#buftable#HENKAN_PHASE_HENKAN,
-        \           g:eskk#buftable#HENKAN_PHASE_OKURI,
+        \           g:eskk#buftable#PHASE_HENKAN,
+        \           g:eskk#buftable#PHASE_OKURI,
         \       ],
         \       eskk#get_mode_table('hira')
         \   )
     else
         let henkan_buf_str = buftable.get_buf_str(
-        \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \   g:eskk#buftable#PHASE_HENKAN
         \)
         let okuri_buf_str = buftable.get_buf_str(
-        \   g:eskk#buftable#HENKAN_PHASE_OKURI
+        \   g:eskk#buftable#PHASE_OKURI
         \)
     endif
     let key       = henkan_buf_str.rom_pairs.get_filter()
@@ -173,7 +173,7 @@ function! s:complete(mode, base) "{{{
     " \})
 
     let do_list_okuri_candidates =
-    \   buftable.get_henkan_phase() ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    \   buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_OKURI
     for c in candidates
         if do_list_okuri_candidates
             if c.has_okuri
@@ -396,7 +396,7 @@ function! s:set_selected_item() "{{{
     endif
 
     let henkan_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+    \   g:eskk#buftable#PHASE_HENKAN
     \)
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
@@ -404,12 +404,12 @@ function! s:set_selected_item() "{{{
     endfor
 
     let okuri_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#HENKAN_PHASE_OKURI
+    \   g:eskk#buftable#PHASE_OKURI
     \)
     call okuri_buf_str.clear()
     call okuri_buf_str.rom_str.set(rom_str)
 
-    call buftable.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_HENKAN)
+    call buftable.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
     " Do not rewrite anything.
     call buftable.set_old_str(s:get_buftable_str(1))
 
@@ -486,8 +486,8 @@ function! s:has_marker() "{{{
     \   eskk#get_mode() =~# 'hira\|kata'
     \   && eskk#util#list_has(
     \       [
-    \           g:eskk#buftable#HENKAN_PHASE_HENKAN,
-    \           g:eskk#buftable#HENKAN_PHASE_OKURI,
+    \           g:eskk#buftable#PHASE_HENKAN,
+    \           g:eskk#buftable#PHASE_OKURI,
     \       ],
     \       eskk#get_buftable().get_henkan_phase(),
     \   )

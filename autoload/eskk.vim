@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 213))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 214))
 
 
 function! s:SID() "{{{
@@ -264,21 +264,21 @@ function! s:asym_filter.filter(stash) "{{{
 
 
     " Handle other characters.
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
         return s:filter_rom(a:stash, self.table)
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         if eskk#mappings#is_special_lhs(char, 'phase:henkan:henkan-key')
             call buftable.do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, self.table)
         endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    elseif phase ==# g:eskk#buftable#PHASE_OKURI
         if eskk#mappings#is_special_lhs(char, 'phase:okuri:henkan-key')
             call buftable.do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, self.table)
         endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+    elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         if eskk#mappings#is_special_lhs(
         \   char, 'phase:henkan-select:choose-next'
         \)
@@ -298,7 +298,7 @@ function! s:asym_filter.filter(stash) "{{{
 
                 call buftable.push_kakutei_str(buftable.get_display_str(0))
                 call buftable.set_henkan_phase(
-                \   g:eskk#buftable#HENKAN_PHASE_NORMAL
+                \   g:eskk#buftable#PHASE_NORMAL
                 \)
             endif
         else
@@ -341,8 +341,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     let rom_str = buf_str.rom_str.get() . char
     let phase = buftable.get_henkan_phase()
 
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+    \   || phase ==# g:eskk#buftable#PHASE_HENKAN
         " Set filtered string.
         call buf_str.rom_pairs.push_one_pair(rom_str, a:table.get_map(rom_str))
         call buf_str.rom_str.clear()
@@ -373,14 +373,14 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call eskk#register_temp_event(
         \   'filter-begin',
         \   eskk#util#get_local_func('clear_buffer_string', s:SID_PREFIX),
-        \   [g:eskk#buftable#HENKAN_PHASE_NORMAL]
+        \   [g:eskk#buftable#PHASE_NORMAL]
         \)
 
         if g:eskk#convert_at_exact_match
-        \   && phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \   && phase ==# g:eskk#buftable#PHASE_HENKAN
             let st = eskk#get_current_mode_structure()
             let henkan_buf_str = buftable.get_buf_str(
-            \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+            \   g:eskk#buftable#PHASE_HENKAN
             \)
             if has_key(st.sandbox, 'real_matched_pairs')
                 " Restore previous hiragana & push current to the tail.
@@ -393,7 +393,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
             call buftable.do_henkan(a:stash, 1)
         endif
-    elseif phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    elseif phase ==# g:eskk#buftable#PHASE_OKURI
         " Enter phase henkan select with henkan.
 
         " XXX Write test and refactoring.
@@ -415,13 +415,13 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         "     rom str   : "si"
         " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
         let henkan_buf_str = buftable.get_buf_str(
-        \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+        \   g:eskk#buftable#PHASE_HENKAN
         \)
         let okuri_buf_str = buftable.get_buf_str(
-        \   g:eskk#buftable#HENKAN_PHASE_OKURI
+        \   g:eskk#buftable#PHASE_OKURI
         \)
         let henkan_select_buf_str = buftable.get_buf_str(
-        \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+        \   g:eskk#buftable#PHASE_HENKAN_SELECT
         \)
         let henkan_rom = henkan_buf_str.rom_str.get()
         let okuri_rom  = okuri_buf_str.rom_str.get()
@@ -1147,7 +1147,7 @@ function! eskk#_initialize() "{{{
             endif
 
             " Handle other characters.
-            if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
+            if phase ==# g:eskk#buftable#PHASE_HENKAN
                 if eskk#mappings#is_special_lhs(
                 \   char, 'phase:henkan:henkan-key'
                 \)
@@ -1155,7 +1155,7 @@ function! eskk#_initialize() "{{{
                 else
                     call buf_str.rom_str.append(char)
                 endif
-            elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
+            elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
                 if eskk#mappings#is_special_lhs(
                 \   char, 'phase:henkan-select:choose-next'
                 \)
@@ -1189,12 +1189,12 @@ function! eskk#_initialize() "{{{
             endif
         endfunction "}}}
         function! dict.get_init_phase() "{{{
-            return g:eskk#buftable#HENKAN_PHASE_HENKAN
+            return g:eskk#buftable#PHASE_HENKAN
         endfunction "}}}
         function! dict.get_supported_phases() "{{{
             return [
-            \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
-            \   g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT,
+            \   g:eskk#buftable#PHASE_HENKAN,
+            \   g:eskk#buftable#PHASE_HENKAN_SELECT,
             \]
         endfunction "}}}
 
@@ -1283,7 +1283,7 @@ function! eskk#_initialize() "{{{
         call buftable.set_henkan_phase(
         \   (eskk#has_mode_func('get_init_phase') ?
         \       eskk#call_mode_func('get_init_phase', [], 0)
-        \       : g:eskk#buftable#HENKAN_PHASE_NORMAL)
+        \       : g:eskk#buftable#PHASE_NORMAL)
         \)
     endfunction
     call eskk#register_event(

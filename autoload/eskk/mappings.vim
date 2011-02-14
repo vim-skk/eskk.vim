@@ -16,7 +16,7 @@ delfunc s:SID
 
 function! s:handle_toggle_hankata(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
         return 1
     endif
@@ -24,7 +24,7 @@ function! s:handle_toggle_hankata(stash) "{{{
 endfunction "}}}
 function! s:handle_toggle_kata(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
         return 1
     endif
@@ -32,8 +32,8 @@ function! s:handle_toggle_kata(stash) "{{{
 endfunction "}}}
 function! s:handle_ctrl_q_key(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
         call eskk#get_buftable().do_ctrl_q_key()
         return 1
     endif
@@ -41,8 +41,8 @@ function! s:handle_ctrl_q_key(stash) "{{{
 endfunction "}}}
 function! s:handle_q_key(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
         call eskk#get_buftable().do_q_key()
         return 1
     endif
@@ -50,8 +50,8 @@ function! s:handle_q_key(stash) "{{{
 endfunction "}}}
 function! s:handle_l_key(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-    \   || phase ==# g:eskk#buftable#HENKAN_PHASE_OKURI
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
         call eskk#get_buftable().do_l_key()
         return 1
     endif
@@ -61,7 +61,7 @@ function! s:handle_to_ascii(stash) "{{{
     let buftable = eskk#get_buftable()
     let phase = buftable.get_henkan_phase()
     let buf_str = buftable.get_current_buf_str()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
     \   && buf_str.rom_str.get() == ''
         call eskk#set_mode('ascii')
         return 1
@@ -72,7 +72,7 @@ function! s:handle_to_zenei(stash) "{{{
     let buftable = eskk#get_buftable()
     let phase = buftable.get_henkan_phase()
     let buf_str = buftable.get_current_buf_str()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
     \   && buf_str.rom_str.get() == ''
         call eskk#set_mode('zenei')
         return 1
@@ -83,7 +83,7 @@ function! s:handle_to_abbrev(stash) "{{{
     let buftable = eskk#get_buftable()
     let phase = eskk#get_buftable().get_henkan_phase()
     let buf_str = buftable.get_current_buf_str()
-    if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
     \   && buf_str.rom_str.get() == ''
         call eskk#set_mode('abbrev')
         return 1

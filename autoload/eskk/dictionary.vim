@@ -621,10 +621,10 @@ function! {s:HenkanResult.method('select_candidates')}(
                 let dict = eskk#get_skk_dict()
                 let input = dict.register_word(a:this)[0]
                 let henkan_buf_str = a:this.buftable.get_buf_str(
-                \   g:eskk#buftable#HENKAN_PHASE_HENKAN
+                \   g:eskk#buftable#PHASE_HENKAN
                 \)
                 let okuri_buf_str = a:this.buftable.get_buf_str(
-                \   g:eskk#buftable#HENKAN_PHASE_OKURI
+                \   g:eskk#buftable#PHASE_OKURI
                 \)
                 return [
                 \   (input != '' ?
