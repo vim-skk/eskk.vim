@@ -843,7 +843,7 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
         \   g:eskk#buftable#HENKAN_PHASE_OKURI,
         \]
             call a:this.convert_rom_pairs_inplace(
-            \   phse, hira_table
+            \   phase, hira_table
             \)
         endfor
     endif
