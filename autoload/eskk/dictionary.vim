@@ -848,7 +848,7 @@ function! {s:HenkanResult.method('update_candidate')}(this) "{{{
     " Move a:this to the first.
     let dict = eskk#get_skk_dict()
     call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom, rw.annotation)
-    call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom)
+    call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom, rw.annotation)
 endfunction "}}}
 " }}}
 
