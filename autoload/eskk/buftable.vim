@@ -416,14 +416,14 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
     let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
-        call a:this.convert_rom_str_inplace([phase])
+        call a:this.convert_rom_str_inplace(phase)
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
         \   'eskk#util#identity',
         \   [enter_char]
         \)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN
-        call a:this.convert_rom_str_inplace([phase])
+        call a:this.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
@@ -461,7 +461,7 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
 
         call a:this.set_henkan_phase(g:eskk#buftable#HENKAN_PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#HENKAN_PHASE_HENKAN_SELECT
-        call a:this.convert_rom_str_inplace([phase])
+        call a:this.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
@@ -687,7 +687,7 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
     if phase ==# g:eskk#buftable#HENKAN_PHASE_NORMAL
         if buf_str.rom_str.get() != ''
         \   || buf_str.rom_pairs.get_filter() != ''
-            call a:this.convert_rom_str_inplace([phase])
+            call a:this.convert_rom_str_inplace(phase)
             call a:this.push_kakutei_str(a:this.get_display_str(0))
             call buf_str.clear()
         endif
@@ -837,15 +837,13 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
 
     if g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
-        let hira_table = eskk#get_mode_table('hira')
-        for phase in [
-        \   g:eskk#buftable#HENKAN_PHASE_HENKAN,
-        \   g:eskk#buftable#HENKAN_PHASE_OKURI,
-        \]
-            call a:this.convert_rom_pairs_inplace(
-            \   phase, hira_table
-            \)
-        endfor
+        call a:this.convert_rom_pairs_inplace(
+        \   [
+        \       g:eskk#buftable#HENKAN_PHASE_HENKAN,
+        \       g:eskk#buftable#HENKAN_PHASE_OKURI,
+        \   ],
+        \   eskk#get_mode_table('hira')
+        \)
     endif
 
     " Convert rom_str if possible.
@@ -945,44 +943,56 @@ function! {s:Buftable.method('do_tab')}(this, stash) "{{{
     call buf_str.rom_str.append(eskk#util#get_tab_raw_str())
 endfunction "}}}
 
-" TODO: These functions are very similar. Refactoring them.
-function! {s:Buftable.method('convert_rom_str_inplace')}(this, phases) "{{{
-    if eskk#has_current_mode_table()
-        if g:eskk#kata_convert_to_hira_at_henkan
-        \   && eskk#get_mode() ==# 'kata'
-            let table = eskk#get_mode_table('hira')
-        else
-            let table = eskk#get_current_mode_table()
+function! {s:Buftable.method('convert_rom_str_inplace')}(this, phases, ...) "{{{
+    let table = a:0 ? a:1 : s:get_current_table()
+    let phases = type(a:phases) == type([]) ?
+    \               a:phases : [a:phases]
+    for buf_str in map(phases, 'a:this.get_buf_str(v:val)')
+        let rom_str = buf_str.rom_str.get()
+        if table.has_map(rom_str)
+            call buf_str.rom_pairs.push_one_pair(
+            \   rom_str,
+            \   table.get_map(rom_str)
+            \)
+            call buf_str.rom_str.clear()
         endif
-        for buf_str in map(a:phases, 'a:this.get_buf_str(v:val)')
-            let rom_str = buf_str.rom_str.get()
-            if table.has_map(rom_str)
-                call buf_str.rom_pairs.push_one_pair(
-                \   rom_str,
-                \   table.get_map(rom_str)
-                \)
-                call buf_str.rom_str.clear()
-            endif
-        endfor
-    endif
-endfunction "}}}
-function! {s:Buftable.method('convert_rom_pairs_inplace')}(this, phase, table) "{{{
-    let buf_str = a:this.convert_rom_pairs(a:phase, a:table)
-    call a:this.set_buf_str(a:phase, buf_str)
-    return buf_str
-endfunction "}}}
-function! {s:Buftable.method('convert_rom_pairs')}(this, phase, table) "{{{
-    let buf_str = deepcopy(a:this.get_buf_str(a:phase), 1)
-
-    let matched = buf_str.rom_pairs.get()
-    call buf_str.rom_pairs.clear()
-    for [rom_str, filter_str] in matched
-        call buf_str.rom_pairs.push_one_pair(
-        \   rom_str,
-        \   a:table.get_map(rom_str, rom_str)
-        \)
     endfor
-    return buf_str
+endfunction "}}}
+function! {s:Buftable.method('convert_rom_pairs_inplace')}(this, phases, ...) "{{{
+    let table = a:0 ? a:1 : s:get_current_table()
+    let phases = type(a:phases) == type([]) ?
+    \               a:phases : [a:phases]
+    for p in phases
+        let buf_str = a:this.convert_rom_pairs(p, table)
+        call a:this.set_buf_str(p, buf_str)
+    endfor
+endfunction "}}}
+function! {s:Buftable.method('convert_rom_pairs')}(this, phase, ...) "{{{
+    let table = a:0 ? a:1 : s:get_current_table()
+    let phases = type(a:phases) == type([]) ?
+    \               a:phases : [a:phases]
+    let r = []
+    for p in phases
+        let buf_str = deepcopy(a:this.get_buf_str(a:phase), 1)
+        let matched = buf_str.rom_pairs.get()
+        call buf_str.rom_pairs.clear()
+        for [rom_str, filter_str] in matched
+            call buf_str.rom_pairs.push_one_pair(
+            \   rom_str,
+            \   table.get_map(rom_str, rom_str)
+            \)
+        endfor
+        call add(r, buf_str)
+    endfor
+    return type(a:phases) == type([]) ? r : r[0]
+endfunction "}}}
+function! s:get_current_table() "{{{
+    if g:eskk#kata_convert_to_hira_at_henkan
+    \   && eskk#get_mode() ==# 'kata'
+        return eskk#get_mode_table('hira')
+    else
+        return eskk#get_current_mode_table()
+    endif
 endfunction "}}}
 function! s:convert_again_with_table(this, table) "{{{
     " Convert rom_str if possible.
