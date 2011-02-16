@@ -13,7 +13,7 @@ function! s:run()
     " Currently eskk#table#create() does not throw exception.
     " (But table.register() does)
     "
-    " for name in eskk#get_all_registered_tables()
+    " for name in eskk#get_registered_tables()
     "     try
     "         call eskk#table#create(name)
     "         Ok 0, 'eskk#table#create() must throw exception for registered table'
@@ -22,7 +22,7 @@ function! s:run()
     "     endtry
     " endfor
 
-    for name in eskk#get_all_registered_tables()
+    for name in eskk#get_registered_tables()
         Ok eskk#has_table(name), printf('%s must be registered', name)
     endfor
 endfunction

@@ -1504,7 +1504,7 @@ endfunction "}}}
 function! eskk#has_table(table_name) "{{{
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
-function! eskk#get_all_registered_tables() "{{{
+function! eskk#get_registered_tables() "{{{
     return keys(s:table_defs)
 endfunction "}}}
 function! eskk#get_table(name) "{{{
