@@ -25,6 +25,13 @@ function! eskk#util#warnf(msg, ...) "{{{
     call eskk#util#warn(call('printf', [a:msg] + a:000))
 endfunction "}}}
 
+" Options
+function! eskk#util#set_default(var, val) "{{{
+    if !exists(a:var) || type({a:var}) != type(a:val)
+        let {a:var} = a:val
+    endif
+endfunction "}}}
+
 
 " Encoding
 " eskk#util#mb_strlen(str) {{{

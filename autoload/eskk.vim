@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 229))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 230))
 
 
 function! s:SID() "{{{
@@ -662,21 +662,10 @@ function! eskk#_initialize() "{{{
     " Global Variables {{{
 
     " Debug
-    if !exists('g:eskk#debug')
-        let g:eskk#debug = 0
-    endif
-
-    if !exists('g:eskk#debug_wait_ms')
-        let g:eskk#debug_wait_ms = 0
-    endif
-
-    if !exists('g:eskk#debug_out')
-        let g:eskk#debug_out = "both"
-    endif
-
-    if !exists('g:eskk#directory')
-        let g:eskk#directory = '~/.eskk'
-    endif
+    call eskk#util#set_default('g:eskk#debug', 0)
+    call eskk#util#set_default('g:eskk#debug_wait_ms', 0)
+    call eskk#util#set_default('g:eskk#debug_out', 'both')
+    call eskk#util#set_default('g:eskk#directory', '~/.eskk')
 
     " Dictionary
     for [s:varname, s:default] in [
@@ -709,52 +698,24 @@ function! eskk#_initialize() "{{{
     endfor
     unlet! s:varname s:default
 
-    if !exists("g:eskk#backup_dictionary")
-        let g:eskk#backup_dictionary = g:eskk#dictionary.path . ".BAK"
-    endif
+    call eskk#util#set_default('g:eskk#backup_dictionary', g:eskk#dictionary.path . '.BAK')
+    call eskk#util#set_default('g:eskk#auto_save_dictionary_at_exit', 1)
 
-    if !exists("g:eskk#auto_save_dictionary_at_exit")
-        let g:eskk#auto_save_dictionary_at_exit = 1
-    endif
-
-    if !exists('g:eskk#dictionary_save_count')
-        let g:eskk#dictionary_save_count = -1
-    endif
+    call eskk#util#set_default('g:eskk#dictionary_save_count', -1)
 
     " Henkan
-    if !exists("g:eskk#select_cand_keys")
-        let g:eskk#select_cand_keys = "asdfjkl"
-    endif
-
-    if !exists("g:eskk#show_candidates_count")
-        let g:eskk#show_candidates_count = 4
-    endif
-
-    if !exists("g:eskk#kata_convert_to_hira_at_henkan")
-        let g:eskk#kata_convert_to_hira_at_henkan = 1
-    endif
-
-    if !exists("g:eskk#kata_convert_to_hira_at_completion")
-        let g:eskk#kata_convert_to_hira_at_completion = 1
-    endif
-
-    if !exists("g:eskk#show_annotation")
-        let g:eskk#show_annotation = 0
-    endif
-
-    if !exists("g:eskk#kakutei_when_unique_candidate")
-        let g:eskk#kakutei_when_unique_candidate = 0
-    endif
+    call eskk#util#set_default('g:eskk#select_cand_keys', "asdfjkl")
+    call eskk#util#set_default('g:eskk#show_candidates_count', 4)
+    call eskk#util#set_default('g:eskk#kata_convert_to_hira_at_henkan', 1)
+    call eskk#util#set_default('g:eskk#kata_convert_to_hira_at_completion', 1)
+    call eskk#util#set_default('g:eskk#show_annotation', 0)
+    call eskk#util#set_default('g:eskk#kakutei_when_unique_candidate', 0)
 
     " Mappings
-    if !exists('g:eskk#mapped_keys')
-        let g:eskk#mapped_keys = eskk#get_default_mapped_keys()
-    endif
+    call eskk#util#set_default('g:eskk#mapped_keys', eskk#get_default_mapped_keys())
 
     " Mode
-    if !exists('g:eskk#initial_mode')
-        let g:eskk#initial_mode = 'hira'
-    endif
+    call eskk#util#set_default('g:eskk#initial_mode', 'hira')
 
     if !exists('g:eskk#statusline_mode_strings')
         let g:eskk#statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
@@ -773,52 +734,23 @@ function! eskk#_initialize() "{{{
     call s:set_up_mode_use_tables()
 
     " Table
-    if !exists('g:eskk#cache_table_map')
-        let g:eskk#cache_table_map = 1
-    endif
-
-    if !exists('g:eskk#cache_table_candidates')
-        let g:eskk#cache_table_candidates = 1
-    endif
+    call eskk#util#set_default('g:eskk#cache_table_map', 1)
+    call eskk#util#set_default('g:eskk#cache_table_candidates', 1)
 
     " Markers
-    if !exists("g:eskk#marker_henkan")
-        let g:eskk#marker_henkan = '▽'
-    endif
-
-    if !exists("g:eskk#marker_okuri")
-        let g:eskk#marker_okuri = '*'
-    endif
-
-    if !exists("g:eskk#marker_henkan_select")
-        let g:eskk#marker_henkan_select = '▼'
-    endif
-
-    if !exists("g:eskk#marker_jisyo_touroku")
-        let g:eskk#marker_jisyo_touroku = '?'
-    endif
-
-    if !exists("g:eskk#marker_popup")
-        let g:eskk#marker_popup = '#'
-    endif
+    call eskk#util#set_default('g:eskk#marker_henkan', '▽')
+    call eskk#util#set_default('g:eskk#marker_okuri', '*')
+    call eskk#util#set_default('g:eskk#marker_henkan_select', '▼')
+    call eskk#util#set_default('g:eskk#marker_jisyo_touroku', '?')
+    call eskk#util#set_default('g:eskk#marker_popup', '#')
 
     " Completion
-    if !exists('g:eskk#enable_completion')
-        let g:eskk#enable_completion = 1
-    endif
-
-    if !exists('g:eskk#max_candidates')
-        let g:eskk#max_candidates = 30
-    endif
-
-    if !exists('g:eskk#start_completion_length')
-        let g:eskk#start_completion_length = 3
-    endif
+    call eskk#util#set_default('g:eskk#enable_completion', 1)
+    call eskk#util#set_default('g:eskk#max_candidates', 30)
+    call eskk#util#set_default('g:eskk#start_completion_length', 3)
 
     " Cursor color
-    if !exists('g:eskk#use_color_cursor')
-        let g:eskk#use_color_cursor = 1
-    endif
+    call eskk#util#set_default('g:eskk#use_color_cursor', 1)
 
     if !exists('g:eskk#cursor_color')
         " ascii: ivory4:#8b8b83, gray:#bebebe
@@ -836,33 +768,13 @@ function! eskk#_initialize() "{{{
     endif
 
     " Misc.
-    if !exists("g:eskk#egg_like_newline")
-        let g:eskk#egg_like_newline = 0
-    endif
-
-    if !exists("g:eskk#keep_state")
-        let g:eskk#keep_state = 0
-    endif
-
-    if !exists('g:eskk#keep_state_beyond_buffer')
-        let g:eskk#keep_state_beyond_buffer = 0
-    endif
-
-    if !exists("g:eskk#revert_henkan_style")
-        let g:eskk#revert_henkan_style = 'okuri'
-    endif
-
-    if !exists("g:eskk#delete_implies_kakutei")
-        let g:eskk#delete_implies_kakutei = 0
-    endif
-
-    if !exists("g:eskk#rom_input_style")
-        let g:eskk#rom_input_style = 'skk'
-    endif
-
-    if !exists("g:eskk#auto_henkan_at_okuri_match")
-        let g:eskk#auto_henkan_at_okuri_match = 1
-    endif
+    call eskk#util#set_default('g:eskk#egg_like_newline', 0)
+    call eskk#util#set_default('g:eskk#keep_state', 0)
+    call eskk#util#set_default('g:eskk#keep_state_beyond_buffer', 0)
+    call eskk#util#set_default('g:eskk#revert_henkan_style', 'okuri')
+    call eskk#util#set_default('g:eskk#delete_implies_kakutei', 0)
+    call eskk#util#set_default('g:eskk#rom_input_style', 'skk')
+    call eskk#util#set_default('g:eskk#auto_henkan_at_okuri_match', 1)
 
     if !exists("g:eskk#set_undo_point")
         let g:eskk#set_undo_point = {
@@ -871,18 +783,9 @@ function! eskk#_initialize() "{{{
         \}
     endif
 
-    if !exists("g:eskk#fix_extra_okuri")
-        let g:eskk#fix_extra_okuri = 1
-    endif
-
-    if !exists('g:eskk#ignore_continuous_sticky')
-        let g:eskk#ignore_continuous_sticky = 1
-    endif
-
-    if !exists('g:eskk#convert_at_exact_match')
-        let g:eskk#convert_at_exact_match = 0
-    endif
-
+    call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
+    call eskk#util#set_default('g:eskk#ignore_continuous_sticky', 1)
+    call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
     " }}}
 
     " Set up g:eskk#directory. {{{
