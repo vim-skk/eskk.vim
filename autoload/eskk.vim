@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 221))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 222))
 
 
 function! s:SID() "{{{
@@ -1321,27 +1321,6 @@ function! eskk#_initialize() "{{{
     call s:initialize_check_variables()
     " }}}
 
-    " neocomplcache {{{
-    function! s:initialize_neocomplcache()
-        function! s:initialize_neocomplcache_unlock()
-            if eskk#is_neocomplcache_locked()
-                NeoComplCacheUnlock
-            endif
-            return ''
-        endfunction
-        call eskk#mappings#map(
-        \   'e',
-        \   '<Plug>(eskk:_neocomplcache_unlock)',
-        \   eskk#util#get_local_func(
-        \       'initialize_neocomplcache_unlock',
-        \       s:SID_PREFIX
-        \   ) . '()',
-        \   eskk#mappings#get_map_modes() . 'n'
-        \)
-    endfunction
-    call s:initialize_neocomplcache()
-    " }}}
-
     " Completion {{{
     function! s:initialize_completion()
         call eskk#mappings#map(
@@ -1834,14 +1813,6 @@ function! s:rewrite_string(return_string) "{{{
         \   "\<Plug>(eskk:_filter_redispatch_post)"
     endif
 
-    let completion_enabled =
-    \   g:eskk#enable_completion
-    \   && exists('g:loaded_neocomplcache')
-    \   && !neocomplcache#is_locked()
-    if completion_enabled
-        NeoComplCacheLock
-    endif
-
     if type(a:return_string) == type("")
         call eskk#mappings#map(
         \   'be',
@@ -1856,12 +1827,6 @@ function! s:rewrite_string(return_string) "{{{
     \   redispatch_pre
     \   . string
     \   . redispatch_post
-    \   . (completion_enabled ?
-    \       "\<Plug>(eskk:_neocomplcache_unlock)" .
-    \           (eskk#complete#can_find_start() ?
-    \               "\<Plug>(eskk:_do_complete)" :
-    \               '') :
-    \       '')
 endfunction "}}}
 
 " g:eskk#use_color_cursor
