@@ -203,11 +203,6 @@ endfunction "}}}
 " s:asym_filter {{{
 let s:asym_filter = {'table': {}}
 
-function! eskk#create_asym_filter(table) "{{{
-    let obj = deepcopy(s:asym_filter)
-    let obj.table = a:table
-    return obj
-endfunction "}}}
 
 function! s:asym_filter.filter(stash) "{{{
     let char = a:stash.char
@@ -938,10 +933,9 @@ function! eskk#_initialize() "{{{
         call eskk#register_mode('hira')
         let dict = eskk#get_mode_structure('hira')
 
-        call extend(
-        \   dict,
-        \   eskk#create_asym_filter(eskk#get_mode_table('hira'))
-        \)
+        let filter = deepcopy(s:asym_filter)
+        let filter.table = eskk#get_mode_table('hira')
+        call extend(dict, filter, "force")
 
         call eskk#validate_mode_structure('hira')
         " }}}
@@ -950,10 +944,9 @@ function! eskk#_initialize() "{{{
         call eskk#register_mode('kata')
         let dict = eskk#get_mode_structure('kata')
 
-        call extend(
-        \   dict,
-        \   eskk#create_asym_filter(eskk#get_mode_table('kata'))
-        \)
+        let filter = deepcopy(s:asym_filter)
+        let filter.table = eskk#get_mode_table('kata')
+        call extend(dict, filter, "force")
 
         call eskk#validate_mode_structure('kata')
         " }}}
@@ -962,10 +955,9 @@ function! eskk#_initialize() "{{{
         call eskk#register_mode('hankata')
         let dict = eskk#get_mode_structure('hankata')
 
-        call extend(
-        \   dict,
-        \   eskk#create_asym_filter(eskk#get_mode_table('hankata'))
-        \)
+        let filter = deepcopy(s:asym_filter)
+        let filter.table = eskk#get_mode_table('hankata')
+        call extend(dict, filter, "force")
 
         call eskk#validate_mode_structure('hankata')
         " }}}
