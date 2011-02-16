@@ -106,6 +106,14 @@ function! s:handle_sticky(stash) "{{{
         call eskk#unlock_old_str()
     endtry
 endfunction "}}}
+function! s:handle_escape(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_escape(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
 
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
