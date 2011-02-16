@@ -937,6 +937,48 @@ function! eskk#_initialize() "{{{
     " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
+    " Initialize s:asym_filter.key_table. {{{
+    function! s:initialize_key_table()
+        let s:asym_filter.key_table = s:KeyTable.new()
+        let key_table = s:asym_filter.key_table
+
+        " Register special keys.
+        for sp_key in eskk#mappings#get_special_keys()
+            let key = eskk#mappings#get_special_key(sp_key)
+            let handler = eskk#mappings#get_special_key_handler(sp_key)
+            if key != ''
+            \   && (type(handler) == type('')
+            \       || type(handler) == type(function('tr')))
+                call key_table.register(key, handler)
+            endif
+        endfor
+
+        " Register sticky keys.
+        let handler =
+        \   eskk#util#get_local_func(
+        \       'handle_sticky_and_redispatch',
+        \       s:SID_PREFIX
+        \   )
+        for key in map(
+        \   range(char2nr('A'), char2nr('Z')),
+        \   'nr2char(v:val)'
+        \)
+            call key_table.register(
+            \   key, handler
+            \)
+        endfor
+
+        " Unregister phase:henkan-select:delete-from-dict key (default: "X")
+        let key = eskk#mappings#get_special_key('phase:henkan-select:delete-from-dict')
+        if key != ''
+            call key_table.unregister(
+            \   key, handler
+            \)
+        endif
+    endfunction
+    call s:initialize_key_table()
+    " }}}
+
     " Map temporary key to keys to use in that mode {{{
     call eskk#register_event(
     \   'enter-mode',
@@ -1536,6 +1578,9 @@ function! eskk#call_mode_func(func_key, args, required) "{{{
         return
     endif
     return call(st[a:func_key], a:args, st)
+endfunction "}}}
+function! eskk#get_available_modes() "{{{
+    return sort(keys(s:available_modes))
 endfunction "}}}
 
 " Mode/Table
