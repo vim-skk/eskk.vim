@@ -427,13 +427,13 @@ endfunction "}}}
 
 
 " g:eskk#keep_state
-function! eskk#mappings#save_state() "{{{
+function! eskk#mappings#save_normal_keys() "{{{
     let inst = eskk#get_current_instance()
     let inst.prev_normal_keys = s:save_normal_keys()
 
     call s:unmap_normal_keys()
 endfunction "}}}
-function! eskk#mappings#restore_state() "{{{
+function! eskk#mappings#restore_normal_keys() "{{{
     let inst = eskk#get_current_instance()
     call s:restore_normal_keys(inst.prev_normal_keys)
     let inst.prev_normal_keys = {}
