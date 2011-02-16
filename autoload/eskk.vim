@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 222))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 223))
 
 
 function! s:SID() "{{{
@@ -1319,17 +1319,6 @@ function! eskk#_initialize() "{{{
         endif
     endfunction
     call s:initialize_check_variables()
-    " }}}
-
-    " Completion {{{
-    function! s:initialize_completion()
-        call eskk#mappings#map(
-        \   'e',
-        \   '<Plug>(eskk:_do_complete)',
-        \   'pumvisible() ? "" : "\<C-x>\<C-o>\<C-p>"'
-        \)
-    endfunction
-    call s:initialize_completion()
     " }}}
 
     " Logging event {{{
