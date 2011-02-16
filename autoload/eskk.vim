@@ -199,6 +199,61 @@ function! eskk#get_buffer_instance() "{{{
     return b:eskk
 endfunction "}}}
 
+" s:KeyTable {{{
+let s:KeyTable = vice#class('KeyTable', s:SID_PREFIX)
+
+function! {s:KeyTable.constructor()}() dict "{{{
+    let self.__table = {}
+endfunction "}}}
+
+" Push a:key's handler a:Fn .
+function! {s:KeyTable.method('register')}(key, Fn) dict "{{{
+    if !has_key(self.__table, a:key)
+        let self.__table[a:key] = []
+    endif
+    " Check if a:Fn exists in self.__table[a:key] .
+    for Fn in self.__table[a:key]
+        if Fn ==# a:Fn
+            return
+        endif
+    endfor
+    call add(self.__table[a:key], a:Fn)
+endfunction "}}}
+
+" Remove a:key's handler a:Fn .
+function! {s:KeyTable.method('unregister')}(key, Fn) dict "{{{
+    if !has_key(self.__table, a:key)
+        return
+    endif
+    " Check if a:Fn exists in self.__table[a:key] .
+    for i in range(len(self.__table[a:key]))
+        let Fn = self.__table[a:key][i]
+        if Fn ==# a:Fn
+            unlet self.__table[a:key][i]
+            return
+        endif
+    endfor
+endfunction "}}}
+
+" Dispatch a:key and invoke a:key's handler(s).
+function! {s:KeyTable.method('dispatch')}(key, args, ...) dict "{{{
+    if !has_key(self.__table, a:key)
+    \   || empty(self.__table[a:key])
+        if a:0    " has fallback handler.
+            call call(a:1, a:args)
+            return 1
+        else
+            return 0
+        endif
+    endif
+
+    for Fn in self.__table[a:key]
+        call call(Fn, a:args)
+    endfor
+    return 1
+endfunction "}}}
+
+" }}}
 " Filter
 " s:asym_filter {{{
 let s:asym_filter = {'table': {}}
