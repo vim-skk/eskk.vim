@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 223))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 224))
 
 
 function! s:SID() "{{{
@@ -1374,7 +1374,6 @@ endfunction "}}}
 
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
-    call eskk#_initialize()
     return eskk#get_current_instance().enabled
 endfunction "}}}
 function! eskk#enable(...) "{{{
