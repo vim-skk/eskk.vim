@@ -348,14 +348,12 @@ function! eskk#mappings#map_from_maparg_dict(dict) "{{{
 endfunction "}}}
 
 function! eskk#mappings#set_up_key(key, ...) "{{{
-    if maparg(a:key, 'l', 0) == ''
-        call eskk#mappings#map(
-        \   'rb' . (a:0 ? a:1 : ''),
-        \   a:key,
-        \   eskk#mappings#get_filter_map(a:key),
-        \   'l'
-        \)
-    endif
+    call eskk#mappings#map(
+    \   'rb' . (a:0 ? a:1 : ''),
+    \   a:key,
+    \   eskk#mappings#get_filter_map(a:key),
+    \   'l'
+    \)
 endfunction "}}}
 function! eskk#mappings#set_up_temp_key(lhs, ...) "{{{
     " Assumption: a:lhs must be '<Bar>' not '|'.
