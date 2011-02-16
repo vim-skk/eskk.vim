@@ -75,8 +75,8 @@ let s:mode_vs_table = {}
 let s:table_defs = {}
 " All special mappings eskk knows.
 " `special` means "they don't have something to do with mappings Vim knows."
+let s:eskk_general_mappings = {}
 let s:eskk_mappings = {
-\   'general': {},
 \   'sticky': {},
 \   'backspace-key': {},
 \   'escape-key': {},
@@ -1765,6 +1765,9 @@ endfunction "}}}
 " Mapping
 function! eskk#_get_eskk_mappings() "{{{
     return s:eskk_mappings
+endfunction "}}}
+function! eskk#_get_eskk_general_mappings() "{{{
+    return s:eskk_general_mappings
 endfunction "}}}
 
 " Misc.
