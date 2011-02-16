@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 228))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 229))
 
 
 function! s:SID() "{{{
@@ -1327,6 +1327,25 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
+    " Create internal mappings. {{{
+    call eskk#mappings#map(
+    \   'e',
+    \   '<Plug>(eskk:_set_begin_pos)',
+    \   '[eskk#get_buftable().set_begin_pos("."), ""][1]',
+    \   'ic'
+    \)
+    call eskk#mappings#map(
+    \   're',
+    \   '<Plug>(eskk:_filter_redispatch_pre)',
+    \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
+    \)
+    call eskk#mappings#map(
+    \   're',
+    \   '<Plug>(eskk:_filter_redispatch_post)',
+    \   'join(eskk#throw_event("filter-redispatch-post"), "")'
+    \)
+    " }}}
+
     " Create "eskk-initialize-post" autocmd event. {{{
     " If no "User eskk-initialize-post" events,
     " Vim complains like "No matching autocommands".
@@ -1780,22 +1799,12 @@ endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
     if eskk#has_event('filter-redispatch-pre')
-        call eskk#mappings#map(
-        \   'rbe',
-        \   '<Plug>(eskk:_filter_redispatch_pre)',
-        \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
-        \)
         let redispatch_pre =
         \   "\<Plug>(eskk:_filter_redispatch_pre)"
     endif
 
     let redispatch_post = ''
     if eskk#has_event('filter-redispatch-post')
-        call eskk#mappings#map(
-        \   'rbe',
-        \   '<Plug>(eskk:_filter_redispatch_post)',
-        \   'join(eskk#throw_event("filter-redispatch-post"), "")'
-        \)
         let redispatch_post =
         \   "\<Plug>(eskk:_filter_redispatch_post)"
     endif

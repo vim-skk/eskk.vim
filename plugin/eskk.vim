@@ -53,8 +53,6 @@ lnoremap <expr> <Plug>(eskk:toggle)     eskk#toggle()
 
 nnoremap        <Plug>(eskk:save-dictionary) :<C-u>EskkUpdateDictionary<CR>
 
-noremap! <expr> <Plug>(eskk:_set_begin_pos) [eskk#get_buftable().set_begin_pos('.'), ''][1]
-
 
 " Global variables
 if !exists('g:eskk#no_default_mappings')
