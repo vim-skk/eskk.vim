@@ -134,6 +134,14 @@ function! s:handle_tab(stash) "{{{
         call eskk#unlock_old_str()
     endtry
 endfunction "}}}
+function! s:handle_sticky_and_redispatch(stash) "{{{
+    call eskk#get_buftable().do_sticky(a:stash)
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#map#key2char',
+    \   [eskk#map#get_filter_map(tolower(a:stash.char))]
+    \)
+endfunction "}}}
 
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
