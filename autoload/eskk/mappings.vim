@@ -90,6 +90,14 @@ function! s:handle_to_abbrev(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! s:handle_sticky(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_sticky(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
 
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
