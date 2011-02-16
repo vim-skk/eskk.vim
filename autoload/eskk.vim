@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 220))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 221))
 
 
 function! s:SID() "{{{
@@ -902,7 +902,7 @@ function! eskk#_initialize() "{{{
     if !g:eskk#egg_like_newline
         " Default behavior is `egg like newline`.
         " Turns it to `Non egg like newline` during henkan phase.
-        call eskk#mappings#disable_egg_like_newilne()
+        call eskk#mappings#disable_egg_like_newline()
     endif
     " }}}
 

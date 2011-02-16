@@ -492,7 +492,7 @@ endfunction "}}}
 
 
 " Egg like newline
-function! eskk#mappings#disable_egg_like_newilne() "{{{
+function! eskk#mappings#disable_egg_like_newline() "{{{
     call eskk#register_event(
     \   [
     \       'enter-phase-henkan',
