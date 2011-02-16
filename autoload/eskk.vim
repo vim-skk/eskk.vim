@@ -81,7 +81,7 @@ let s:eskk_mappings = {
 \   'backspace-key': {'fn': 's:handle_backspace'},
 \   'escape-key': {'fn': 's:handle_escape'},
 \   'enter-key': {'fn': 's:handle_enter'},
-\   'tab': {},
+\   'tab': {'fn': 's:handle_tab'},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
