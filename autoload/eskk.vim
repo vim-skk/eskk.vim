@@ -77,11 +77,11 @@ let s:table_defs = {}
 " `special` means "they don't have something to do with mappings Vim knows."
 let s:eskk_general_mappings = {}
 let s:eskk_mappings = {
-\   'sticky': {'fn': 's:handle_sticky'},
-\   'backspace-key': {'fn': 's:handle_backspace'},
-\   'escape-key': {'fn': 's:handle_escape'},
-\   'enter-key': {'fn': 's:handle_enter'},
-\   'tab': {'fn': 's:handle_tab'},
+\   'sticky': {'fn': eskk#util#get_local_func('handle_sticky', s:SID_PREFIX)},
+\   'backspace-key': {'fn': eskk#util#get_local_func('handle_backspace', s:SID_PREFIX)},
+\   'escape-key': {'fn': eskk#util#get_local_func('handle_escape', s:SID_PREFIX)},
+\   'enter-key': {'fn': eskk#util#get_local_func('handle_enter', s:SID_PREFIX)},
+\   'tab': {'fn': eskk#util#get_local_func('handle_tab', s:SID_PREFIX)},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -90,32 +90,32 @@ let s:eskk_mappings = {
 \   'phase:henkan-select:prev-page': {},
 \   'phase:henkan-select:escape': {},
 \   'phase:henkan-select:delete-from-dict': {},
-\   'mode:hira:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
-\   'mode:hira:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
-\   'mode:hira:toggle-kata': {'fn': 's:handle_toggle_kata'},
-\   'mode:hira:q-key': {'fn': 's:handle_q_key'},
-\   'mode:hira:l-key': {'fn': 's:handle_l_key'},
-\   'mode:hira:to-ascii': {'fn': 's:handle_to_ascii'},
-\   'mode:hira:to-zenei': {'fn': 's:handle_to_zenei'},
-\   'mode:hira:to-abbrev': {'fn': 's:handle_to_abbrev'},
-\   'mode:kata:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
-\   'mode:kata:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
-\   'mode:kata:toggle-kata': {'fn': 's:handle_toggle_kata'},
-\   'mode:kata:q-key': {'fn': 's:handle_q_key'},
-\   'mode:kata:l-key': {'fn': 's:handle_l_key'},
-\   'mode:kata:to-ascii': {'fn': 's:handle_to_ascii'},
-\   'mode:kata:to-zenei': {'fn': 's:handle_to_zenei'},
-\   'mode:kata:to-abbrev': {'fn': 's:handle_to_abbrev'},
-\   'mode:hankata:toggle-hankata': {'fn': 's:handle_toggle_hankata'},
-\   'mode:hankata:ctrl-q-key': {'fn': 's:handle_ctrl_q_key'},
-\   'mode:hankata:toggle-kata': {'fn': 's:handle_toggle_kata'},
-\   'mode:hankata:q-key': {'fn': 's:handle_q_key'},
-\   'mode:hankata:l-key': {'fn': 's:handle_l_key'},
-\   'mode:hankata:to-ascii': {'fn': 's:handle_to_ascii'},
-\   'mode:hankata:to-zenei': {'fn': 's:handle_to_zenei'},
-\   'mode:hankata:to-abbrev': {'fn': 's:handle_to_abbrev'},
-\   'mode:ascii:to-hira': {'fn': 's:handle_toggle_hankata'},
-\   'mode:zenei:to-hira': {'fn': 's:handle_toggle_hankata'},
+\   'mode:hira:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+\   'mode:hira:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
+\   'mode:hira:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
+\   'mode:hira:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
+\   'mode:hira:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
+\   'mode:hira:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
+\   'mode:hira:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
+\   'mode:hira:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
+\   'mode:kata:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+\   'mode:kata:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
+\   'mode:kata:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
+\   'mode:kata:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
+\   'mode:kata:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
+\   'mode:kata:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
+\   'mode:kata:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
+\   'mode:kata:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
+\   'mode:hankata:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+\   'mode:hankata:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
+\   'mode:hankata:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
+\   'mode:hankata:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
+\   'mode:hankata:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
+\   'mode:hankata:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
+\   'mode:hankata:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
+\   'mode:hankata:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
+\   'mode:ascii:to-hira': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+\   'mode:zenei:to-hira': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
 \   'mode:abbrev:henkan-key': {},
 \}
 " }}}
@@ -233,6 +233,194 @@ function! {s:KeyTable.method('dispatch')}(key, args, ...) dict "{{{
 endfunction "}}}
 
 " }}}
+" Handlers for s:KeyTable {{{
+function! s:handle_toggle_hankata(stash) "{{{
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+        call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_toggle_kata(stash) "{{{
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+        call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_ctrl_q_key(stash) "{{{
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
+        call eskk#get_buftable().do_ctrl_q_key()
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_q_key(stash) "{{{
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
+        call eskk#get_buftable().do_q_key()
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_l_key(stash) "{{{
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
+        call eskk#get_buftable().do_l_key()
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_to_ascii(stash) "{{{
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+    let buf_str = buftable.get_current_buf_str()
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+    \   && buf_str.rom_str.get() == ''
+        call eskk#set_mode('ascii')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_to_zenei(stash) "{{{
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+    let buf_str = buftable.get_current_buf_str()
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+    \   && buf_str.rom_str.get() == ''
+        call eskk#set_mode('zenei')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_to_abbrev(stash) "{{{
+    let buftable = eskk#get_buftable()
+    let phase = eskk#get_buftable().get_henkan_phase()
+    let buf_str = buftable.get_current_buf_str()
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+    \   && buf_str.rom_str.get() == ''
+        call eskk#set_mode('abbrev')
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_backspace(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_backspace(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
+function! s:handle_enter(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_enter(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
+function! s:handle_sticky(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_sticky(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
+function! s:handle_escape(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_escape(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
+function! s:handle_tab(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_tab(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
+function! s:handle_sticky_and_redispatch(stash) "{{{
+    call eskk#get_buftable().do_sticky(a:stash)
+    call eskk#register_temp_event(
+    \   'filter-redispatch-post',
+    \   'eskk#mappings#key2char',
+    \   [eskk#mappings#get_filter_map(tolower(a:stash.char))]
+    \)
+endfunction "}}}
+function! s:handle_fallback(stash, table) "{{{
+    let char = a:stash.char
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+
+    " TODO: Also switch fallback handler
+    " when switching henkan phase.
+
+    " Handle other characters.
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+        return s:filter_rom(a:stash, a:table)
+    elseif phase ==# g:eskk#buftable#PHASE_HENKAN
+        if eskk#mappings#is_special_lhs(char, 'phase:henkan:henkan-key')
+            call buftable.do_henkan(a:stash)
+        else
+            return s:filter_rom(a:stash, a:table)
+        endif
+    elseif phase ==# g:eskk#buftable#PHASE_OKURI
+        if eskk#mappings#is_special_lhs(char, 'phase:okuri:henkan-key')
+            call buftable.do_henkan(a:stash)
+        else
+            return s:filter_rom(a:stash, a:table)
+        endif
+    elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
+        if eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:choose-next'
+        \)
+            call buftable.choose_next_candidate(a:stash)
+            return
+        elseif eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:choose-prev'
+        \)
+            call buftable.choose_prev_candidate(a:stash)
+            return
+        elseif eskk#mappings#is_special_lhs(
+        \   char, 'phase:henkan-select:delete-from-dict'
+        \)
+            let henkan_result = eskk#get_skk_dict().get_henkan_result()
+            if !empty(henkan_result)
+                call henkan_result.delete_from_dict()
+
+                call buftable.push_kakutei_str(buftable.get_display_str(0))
+                call buftable.set_henkan_phase(
+                \   g:eskk#buftable#PHASE_NORMAL
+                \)
+            endif
+        else
+            call buftable.do_enter(a:stash)
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#mappings#key2char',
+            \   [eskk#mappings#get_filter_map(a:stash.char)]
+            \)
+        endif
+    else
+        throw eskk#internal_error(
+        \   ['eskk'],
+        \   "s:asym_filter.filter() does not support phase " . phase . "."
+        \)
+    endif
+endfunction "}}}
+" }}}
+
 " Filter
 " s:asym_filter {{{
 
