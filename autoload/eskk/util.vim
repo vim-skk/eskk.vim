@@ -28,7 +28,9 @@ endfunction "}}}
 
 " Encoding
 function! eskk#util#mb_strlen(str) "{{{
-    return strlen(substitute(copy(a:str), '.', 'x', 'g'))
+    return exists('*strchars') ?
+    \   strchars(a:str) :
+    \   strlen(substitute(copy(a:str), '.', 'x', 'g'))
 endfunction "}}}
 function! eskk#util#mb_chop(str) "{{{
     return substitute(a:str, '.$', '', '')
