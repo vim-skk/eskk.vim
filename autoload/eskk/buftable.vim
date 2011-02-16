@@ -410,8 +410,6 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
     let phase = a:this.get_henkan_phase()
     let enter_char =
     \   eskk#mappings#key2char(eskk#mappings#get_special_map('enter-key'))
-    let undo_char  =
-    \   eskk#mappings#key2char(eskk#mappings#get_special_map('undo-key'))
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
 
@@ -428,7 +426,7 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
             \   'eskk#util#identity',
-            \   [undo_char]
+            \   ["\<C-g>u"]
             \)
         endif
 
@@ -448,7 +446,7 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
             \   'eskk#util#identity',
-            \   [undo_char]
+            \   ["\<C-g>u"]
             \)
         endif
 
@@ -466,7 +464,7 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
             \   'eskk#util#identity',
-            \   [undo_char]
+            \   ["\<C-g>u"]
             \)
         endif
 
@@ -693,13 +691,10 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
             call buf_str.clear()
         endif
         if get(g:eskk#set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            let undo_char = eskk#mappings#key2char(
-            \   eskk#mappings#get_special_map('undo-key')
-            \)
             call eskk#register_temp_event(
             \   'filter-redispatch-pre',
             \   'eskk#util#identity',
-            \   [undo_char]
+            \   ["\<C-g>u"]
             \)
         endif
         let a:this._set_begin_pos_at_rewrite = 1
