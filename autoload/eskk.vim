@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 218))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 219))
 
 
 function! s:SID() "{{{
@@ -1587,7 +1587,6 @@ function! eskk#call_mode_func(func_key, args, required) "{{{
     let st = eskk#get_mode_structure(self.mode)
     if !has_key(st, a:func_key)
         if a:required
-            let msg = printf()
             throw eskk#internal_error(
             \   ['eskk'],
             \   "Mode '" . self.mode . "' does not have"
