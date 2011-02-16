@@ -80,7 +80,7 @@ let s:eskk_mappings = {
 \   'sticky': {'fn': 's:handle_sticky'},
 \   'backspace-key': {'fn': 's:handle_backspace'},
 \   'escape-key': {'fn': 's:handle_escape'},
-\   'enter-key': {},
+\   'enter-key': {'fn': 's:handle_enter'},
 \   'tab': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
