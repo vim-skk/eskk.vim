@@ -142,6 +142,67 @@ function! s:handle_sticky_and_redispatch(stash) "{{{
     \   [eskk#map#get_filter_map(tolower(a:stash.char))]
     \)
 endfunction "}}}
+function! s:handle_fallback(stash) "{{{
+    let char = a:stash.char
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+
+    " TODO: Also switch fallback handler
+    " when switching henkan phase.
+
+    " Handle other characters.
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+        return s:filter_rom(a:stash, self.table)
+    elseif phase ==# g:eskk#buftable#PHASE_HENKAN
+        if eskk#map#is_special_lhs(char, 'phase:henkan:henkan-key')
+            call buftable.do_henkan(a:stash)
+        else
+            return s:filter_rom(a:stash, self.table)
+        endif
+    elseif phase ==# g:eskk#buftable#PHASE_OKURI
+        if eskk#map#is_special_lhs(char, 'phase:okuri:henkan-key')
+            call buftable.do_henkan(a:stash)
+        else
+            return s:filter_rom(a:stash, self.table)
+        endif
+    elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
+        if eskk#map#is_special_lhs(
+        \   char, 'phase:henkan-select:choose-next'
+        \)
+            call buftable.choose_next_candidate(a:stash)
+            return
+        elseif eskk#map#is_special_lhs(
+        \   char, 'phase:henkan-select:choose-prev'
+        \)
+            call buftable.choose_prev_candidate(a:stash)
+            return
+        elseif eskk#map#is_special_lhs(
+        \   char, 'phase:henkan-select:delete-from-dict'
+        \)
+            let henkan_result = eskk#get_skk_dict().get_henkan_result()
+            if !empty(henkan_result)
+                call henkan_result.delete_from_dict()
+
+                call buftable.push_kakutei_str(buftable.get_display_str(0))
+                call buftable.set_henkan_phase(
+                \   g:eskk#buftable#PHASE_NORMAL
+                \)
+            endif
+        else
+            call buftable.do_enter(a:stash)
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#map#key2char',
+            \   [eskk#map#get_filter_map(a:stash.char)]
+            \)
+        endif
+    else
+        throw eskk#internal_error(
+        \   ['eskk'],
+        \   "s:asym_filter.filter() does not support phase " . phase . "."
+        \)
+    endif
+endfunction "}}}
 
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
