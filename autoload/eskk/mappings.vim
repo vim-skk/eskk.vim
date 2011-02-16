@@ -593,10 +593,20 @@ function! eskk#mappings#is_special_lhs(char, type) "{{{
     return has_key(eskk_mappings, a:type)
     \   && eskk#mappings#key2char(eskk_mappings[a:type].lhs) ==# a:char
 endfunction "}}}
+function! eskk#mappings#get_special_keys() "{{{
+    let eskk_mappings = eskk#_get_eskk_mappings()
+    return sort(keys(eskk_mappings))
+endfunction "}}}
+function! eskk#mappings#get_special_key_handler(type) "{{{
+    return get(s:get_special_key(a:type), 'fn', -1)
+endfunction "}}}
 function! eskk#mappings#get_special_key(type) "{{{
+    return get(s:get_special_key(a:type), 'lhs', -1)
+endfunction "}}}
+function! s:get_special_key(type) "{{{
     let eskk_mappings = eskk#_get_eskk_mappings()
     if has_key(eskk_mappings, a:type)
-        return eskk_mappings[a:type].lhs
+        return eskk_mappings[a:type]
     else
         throw eskk#internal_error(
         \   ['eskk', 'buftable'],
