@@ -53,7 +53,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
     endif
 
     let msg = "May I fix the dictionary '" . fnamemodify(path, ':~') . "'? [y/n]:"
-    if a:skip_prompt || !a:skip_prompt && input(msg) =~? '^y'
+    if a:skip_prompt || input(msg) =~? '^y'
         " Backup current dictionary.
         if eskk#util#copy_file(path, path . '.bak')
             echom "original file was moved to '" . path . ".bak'."
