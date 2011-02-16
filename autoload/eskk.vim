@@ -235,8 +235,14 @@ endfunction "}}}
 " }}}
 " Filter
 " s:asym_filter {{{
-let s:asym_filter = {'table': {}}
 
+" table:
+"   rom string is converted
+"   with this table definition.
+" key_table:
+"   key: key char
+"   value: List of process functions
+let s:asym_filter = {'table': {}, 'key_table': {}}
 
 function! s:asym_filter.filter(stash) "{{{
     let char = a:stash.char
