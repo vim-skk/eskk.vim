@@ -78,7 +78,7 @@ let s:table_defs = {}
 let s:eskk_general_mappings = {}
 let s:eskk_mappings = {
 \   'sticky': {'fn': 's:handle_sticky'},
-\   'backspace-key': {},
+\   'backspace-key': {'fn': 's:handle_backspace'},
 \   'escape-key': {},
 \   'enter-key': {},
 \   'tab': {},

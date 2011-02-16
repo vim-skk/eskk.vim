@@ -90,6 +90,14 @@ function! s:handle_to_abbrev(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! s:handle_backspace(stash) "{{{
+    call eskk#lock_old_str()
+    try
+        call eskk#get_buftable().do_backspace(a:stash)
+    finally
+        call eskk#unlock_old_str()
+    endtry
+endfunction "}}}
 function! s:handle_sticky(stash) "{{{
     call eskk#lock_old_str()
     try
