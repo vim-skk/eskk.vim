@@ -755,28 +755,18 @@ endfunction "}}}
 function! eskk#mappings#_cmd_eskk_map(args) "{{{
     let [options, type, args] = s:parse_options(a:args)
 
+    " Get lhs.
     let args = s:skip_white(args)
     let [lhs, args] = s:parse_one_arg_from_q_args(args)
-
-    let args = s:skip_white(args)
-    if args == ''
-        call s:create_map(
-        \   eskk#get_current_instance(),
-        \   type,
-        \   options,
-        \   lhs,
-        \   '',
-        \   'EskkMap'
-        \)
-        return
-    endif
+    " Get rhs.
+    let rhs = s:skip_white(args)
 
     call s:create_map(
     \   eskk#get_current_instance(),
     \   type,
     \   options,
     \   lhs,
-    \   args,
+    \   rhs,
     \   'EskkMap'
     \)
 endfunction "}}}
