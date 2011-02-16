@@ -77,7 +77,7 @@ let s:table_defs = {}
 " `special` means "they don't have something to do with mappings Vim knows."
 let s:eskk_general_mappings = {}
 let s:eskk_mappings = {
-\   'sticky': {},
+\   'sticky': {'fn': 's:handle_sticky'},
 \   'backspace-key': {},
 \   'escape-key': {},
 \   'enter-key': {},
