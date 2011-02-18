@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 231))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 232))
 
 
 function! s:SID() "{{{
@@ -824,7 +824,6 @@ function! eskk#_initialize() "{{{
     silent! EskkMap -type=backspace-key -unique <C-h>
     silent! EskkMap -type=enter-key -unique <CR>
     silent! EskkMap -type=escape-key -unique <Esc>
-    silent! EskkMap -type=undo-key -unique <C-g>u
     silent! EskkMap -type=tab -unique <Tab>
 
     silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
