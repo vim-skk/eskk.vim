@@ -1044,6 +1044,8 @@ function! eskk#_initialize() "{{{
             \   key, handler
             \)
         endif
+
+        PP! key_table.__table
     endfunction
     call s:initialize_key_table()
     " }}}
