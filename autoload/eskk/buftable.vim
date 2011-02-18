@@ -969,7 +969,7 @@ function! {s:Buftable.method('convert_rom_pairs_inplace')}(this, phases, ...) "{
         call a:this.set_buf_str(p, buf_str)
     endfor
 endfunction "}}}
-function! {s:Buftable.method('convert_rom_pairs')}(this, phase, ...) "{{{
+function! {s:Buftable.method('convert_rom_pairs')}(this, phases, ...) "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
