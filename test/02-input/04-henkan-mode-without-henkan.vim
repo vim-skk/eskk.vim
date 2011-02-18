@@ -42,8 +42,15 @@ function! s:run() "{{{
         Skip "you must install savemap.vim to run this test."
     endif
 
+    let script = '04-henkan-mode-without-henkan'
+    Diag script . ' - This test must NOT show prompt. '
+    \   . 'please report if you met a prompt message '
+    \   . 'during this test.'
+
     call s:create_map_and_test('<C-g>', 'foo')
     call s:create_map_and_test('<C-g>u', 'bar')
+
+    Diag script . ' - done.'
 endfunction "}}}
 
 call s:run()
