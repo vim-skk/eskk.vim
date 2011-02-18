@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 232))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 233))
 
 
 function! s:SID() "{{{
@@ -820,64 +820,64 @@ function! eskk#_initialize() "{{{
     " Default mappings - :EskkMap {{{
     call eskk#commands#define()
 
-    silent! EskkMap -type=sticky -unique ;
-    silent! EskkMap -type=backspace-key -unique <C-h>
-    silent! EskkMap -type=enter-key -unique <CR>
-    silent! EskkMap -type=escape-key -unique <Esc>
-    silent! EskkMap -type=tab -unique <Tab>
+    EskkMap -type=sticky -unique ;
+    EskkMap -type=backspace-key -unique <C-h>
+    EskkMap -type=enter-key -unique <CR>
+    EskkMap -type=escape-key -unique <Esc>
+    EskkMap -type=tab -unique <Tab>
 
-    silent! EskkMap -type=phase:henkan:henkan-key -unique <Space>
+    EskkMap -type=phase:henkan:henkan-key -unique <Space>
 
-    silent! EskkMap -type=phase:okuri:henkan-key -unique <Space>
+    EskkMap -type=phase:okuri:henkan-key -unique <Space>
 
-    silent! EskkMap -type=phase:henkan-select:choose-next -unique <Space>
-    silent! EskkMap -type=phase:henkan-select:choose-prev -unique x
+    EskkMap -type=phase:henkan-select:choose-next -unique <Space>
+    EskkMap -type=phase:henkan-select:choose-prev -unique x
 
-    silent! EskkMap -type=phase:henkan-select:next-page -unique <Space>
-    silent! EskkMap -type=phase:henkan-select:prev-page -unique x
+    EskkMap -type=phase:henkan-select:next-page -unique <Space>
+    EskkMap -type=phase:henkan-select:prev-page -unique x
 
-    silent! EskkMap -type=phase:henkan-select:escape -unique <C-g>
+    EskkMap -type=phase:henkan-select:escape -unique <C-g>
 
-    silent! EskkMap -type=phase:henkan-select:delete-from-dict -unique X
+    EskkMap -type=phase:henkan-select:delete-from-dict -unique X
 
-    silent! EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
-    silent! EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
-    silent! EskkMap -type=mode:hira:toggle-kata -unique q
-    silent! EskkMap -type=mode:hira:q-key -unique q
-    silent! EskkMap -type=mode:hira:l-key -unique l
-    silent! EskkMap -type=mode:hira:to-ascii -unique l
-    silent! EskkMap -type=mode:hira:to-zenei -unique L
-    silent! EskkMap -type=mode:hira:to-abbrev -unique /
+    EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
+    EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
+    EskkMap -type=mode:hira:toggle-kata -unique q
+    EskkMap -type=mode:hira:q-key -unique q
+    EskkMap -type=mode:hira:l-key -unique l
+    EskkMap -type=mode:hira:to-ascii -unique l
+    EskkMap -type=mode:hira:to-zenei -unique L
+    EskkMap -type=mode:hira:to-abbrev -unique /
 
-    silent! EskkMap -type=mode:kata:toggle-hankata -unique <C-q>
-    silent! EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
-    silent! EskkMap -type=mode:kata:toggle-kata -unique q
-    silent! EskkMap -type=mode:kata:q-key -unique q
-    silent! EskkMap -type=mode:kata:l-key -unique l
-    silent! EskkMap -type=mode:kata:to-ascii -unique l
-    silent! EskkMap -type=mode:kata:to-zenei -unique L
-    silent! EskkMap -type=mode:kata:to-abbrev -unique /
+    EskkMap -type=mode:kata:toggle-hankata -unique <C-q>
+    EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
+    EskkMap -type=mode:kata:toggle-kata -unique q
+    EskkMap -type=mode:kata:q-key -unique q
+    EskkMap -type=mode:kata:l-key -unique l
+    EskkMap -type=mode:kata:to-ascii -unique l
+    EskkMap -type=mode:kata:to-zenei -unique L
+    EskkMap -type=mode:kata:to-abbrev -unique /
 
-    silent! EskkMap -type=mode:hankata:toggle-hankata -unique <C-q>
-    silent! EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
-    silent! EskkMap -type=mode:hankata:toggle-kata -unique q
-    silent! EskkMap -type=mode:hankata:q-key -unique q
-    silent! EskkMap -type=mode:hankata:l-key -unique l
-    silent! EskkMap -type=mode:hankata:to-ascii -unique l
-    silent! EskkMap -type=mode:hankata:to-zenei -unique L
-    silent! EskkMap -type=mode:hankata:to-abbrev -unique /
+    EskkMap -type=mode:hankata:toggle-hankata -unique <C-q>
+    EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
+    EskkMap -type=mode:hankata:toggle-kata -unique q
+    EskkMap -type=mode:hankata:q-key -unique q
+    EskkMap -type=mode:hankata:l-key -unique l
+    EskkMap -type=mode:hankata:to-ascii -unique l
+    EskkMap -type=mode:hankata:to-zenei -unique L
+    EskkMap -type=mode:hankata:to-abbrev -unique /
 
-    silent! EskkMap -type=mode:ascii:to-hira -unique <C-j>
+    EskkMap -type=mode:ascii:to-hira -unique <C-j>
 
-    silent! EskkMap -type=mode:zenei:to-hira -unique <C-j>
+    EskkMap -type=mode:zenei:to-hira -unique <C-j>
 
-    silent! EskkMap -type=mode:abbrev:henkan-key -unique <Space>
+    EskkMap -type=mode:abbrev:henkan-key -unique <Space>
 
-    silent! EskkMap -remap -unique <C-^> <Plug>(eskk:toggle)
+    EskkMap -remap -unique <C-^> <Plug>(eskk:toggle)
 
-    silent! EskkMap -remap <BS> <Plug>(eskk:filter:<C-h>)
+    EskkMap -remap <BS> <Plug>(eskk:filter:<C-h>)
 
-    silent! EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
+    EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
     " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
