@@ -15,6 +15,20 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 
+" Environment
+" function! eskk#util#is_mswin() {{{
+if has('win16') || has('win32') || has('win64') || has('win95')
+    function! eskk#util#is_mswin()
+        return 1
+    endfunction
+else
+    function! eskk#util#is_mswin()
+        return 0
+    endfunction
+endif
+" }}}
+
+
 " Message
 function! eskk#util#warn(msg) "{{{
     echohl WarningMsg
@@ -179,7 +193,7 @@ endfunction "}}}
 
 
 " Path
-let s:path_sep = has('win32') ? "\\" : '/'
+let s:path_sep = eskk#util#is_mswin() ? "\\" : '/'
 function! eskk#util#join_path(dir, ...) "{{{
     return join([a:dir] + a:000, s:path_sep)
 endfunction "}}}
