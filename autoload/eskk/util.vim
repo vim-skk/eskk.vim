@@ -194,8 +194,9 @@ endfunction "}}}
 
 " Path
 let s:path_sep = eskk#util#is_mswin() ? "\\" : '/'
-function! eskk#util#join_path(dir, ...) "{{{
-    return join([a:dir] + a:000, s:path_sep)
+function! eskk#util#join_path(...) "{{{
+    let dirs = eskk#util#flatten_list(a:000)
+    return join(dirs, s:path_sep)
 endfunction "}}}
 
 
