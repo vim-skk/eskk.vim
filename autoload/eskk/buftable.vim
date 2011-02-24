@@ -197,23 +197,26 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
     \   && a:this._henkan_phase ==# g:eskk#buftable#PHASE_HENKAN
     let a:this._set_begin_pos_at_rewrite = 0
 
+    let inst = eskk#get_buffer_instance()
     if set_begin_pos
         " 1. Delete current string
         " 2. Set begin pos
         " 3. Insert new string
 
         if kakutei != ''
+            let inst.inserted_kakutei = kakutei
             call eskk#mappings#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted_kakutei)',
-            \   eskk#util#make_ascii_expr(kakutei)
+            \   'eskk#get_buffer_instance().inserted_kakutei'
             \)
         endif
         if new != ''
+            let inst.inserted_new = new
             call eskk#mappings#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted_new)',
-            \   eskk#util#make_ascii_expr(new)
+            \   'eskk#get_buffer_instance().inserted_new'
             \)
         endif
 
@@ -241,18 +244,22 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
         elseif old != '' && stridx(inserted_str, old) == 0
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
+            let inst.inserted =
+            \   strpart(inserted_str, strlen(old))
             call eskk#mappings#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted)',
-            \   eskk#util#make_ascii_expr(strpart(inserted_str, strlen(old)))
+            \   'eskk#get_buffer_instance().inserted'
             \)
             return "\<Plug>(eskk:expr:_inserted)"
         else
             " Delete current string, and insert new string.
+            let inst = eskk#get_buffer_instance()
+            let inst.inserted = inserted_str
             call eskk#mappings#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted)',
-            \   eskk#util#make_ascii_expr(inserted_str)
+            \   'eskk#get_buffer_instance().inserted'
             \)
             return a:this.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
         endif

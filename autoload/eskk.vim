@@ -180,6 +180,12 @@ function! eskk#destroy_current_instance() "{{{
     call remove(s:eskk_instances, s:eskk_instance_id)
     let s:eskk_instance_id -= 1
 endfunction "}}}
+function! eskk#get_buffer_instance() "{{{
+    if !exists('b:eskk')
+        let b:eskk = {}
+    endif
+    return b:eskk
+endfunction "}}}
 
 " Filter
 " s:asym_filter {{{
@@ -1748,10 +1754,12 @@ function! s:rewrite_string(return_string) "{{{
     endif
 
     if type(a:return_string) == type("")
+        let inst = eskk#get_buffer_instance()
+        let inst.return_string = a:return_string
         call eskk#mappings#map(
         \   'be',
         \   '<Plug>(eskk:expr:_return_string)',
-        \   eskk#util#make_ascii_expr(a:return_string)
+        \   'eskk#get_buffer_instance().return_string'
         \)
         let string = "\<Plug>(eskk:expr:_return_string)"
     else
