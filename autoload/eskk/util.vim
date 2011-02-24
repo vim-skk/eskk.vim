@@ -117,15 +117,17 @@ function! eskk#util#move_file(src, dest, ...) "{{{
     let show_error = a:0 ? a:1 : 1
     if executable('mv')
         silent execute '!mv' shellescape(a:src) shellescape(a:dest)
-        if show_error && v:shell_error
-            call eskk#util#warn("'mv' returned failure value: " . v:shell_error)
-            sleep 1
+        if v:shell_error
+            if show_error
+                call eskk#util#warn("'mv' returned failure value: " . v:shell_error)
+                sleep 1
+            endif
             return 0
         endif
+        return 1
     else
         return s:move_file_vimscript(a:src, a:dest, show_error)
     endif
-    return 1
 endfunction "}}}
 function! s:move_file_vimscript(src, dest, show_error) "{{{
     let copy_success = eskk#util#copy_file(a:src, a:dest, a:show_error)
@@ -150,16 +152,18 @@ function! eskk#util#copy_file(src, dest, ...) "{{{
             endif
             return 0
         endif
+        return 1
     else
         return s:copy_file_vimscript(a:src, a:dest, show_error)
     endif
-    return 1
 endfunction "}}}
 function! s:copy_file_vimscript(src, dest, show_error) "{{{
     let ret = writefile(readfile(a:src, "b"), a:dest, "b")
-    if a:show_error && ret == -1
-        call eskk#util#warn("can't copy '" . a:src . "' to '" . a:dest . "'.")
-        sleep 1
+    if ret == -1
+        if a:show_error
+            call eskk#util#warn("can't copy '" . a:src . "' to '" . a:dest . "'.")
+            sleep 1
+        endif
         return 0
     endif
     return 1
