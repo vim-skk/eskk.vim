@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 234))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 235))
 
 
 function! s:SID() "{{{
@@ -66,7 +66,10 @@ let s:saved_im_options = []
 " Global values of &backspace.
 let s:saved_backspace = -1
 " Flag for `eskk#_initialize()`.
-let s:is_initialized = 0
+let s:INIT_YET   = 0
+let s:INIT_DONE  = 1
+let s:INIT_ABORT = 2
+let s:initialization_state = s:INIT_YET
 " SKK Dictionary (singleton)
 let s:skk_dict = {}
 " Mode and its table.
@@ -582,10 +585,10 @@ endfunction "}}}
 
 " Initialization
 function! eskk#_initialize() "{{{
-    if s:is_initialized
+    if s:initialization_state ==# s:INIT_DONE
+    \   || s:initialization_state ==# s:INIT_ABORT
         return
     endif
-    let s:is_initialized = 1
 
     " Check if prereq libs' versions {{{
     function! s:version_pack(x, y, z)
@@ -614,6 +617,8 @@ function! eskk#_initialize() "{{{
             \       "or later, but current version is"
             \       current_version . ")"
             echohl None
+
+            throw 'FINISH'
         endif
     endfunction
     function! s:validate_vim_version() "{{{
@@ -625,19 +630,27 @@ function! eskk#_initialize() "{{{
             echomsg "eskk.vim: warning: Your Vim is too old."
             \       "Please use 7.3.32 at least."
             echohl None
+
+            throw 'FINISH'
         endif
     endfunction "}}}
 
-    call s:validate_lib_version(
-    \   'cul.vim', 'cul#ordered_set', 0, 0, 14
-    \)
-    call s:validate_lib_version(
-    \   'savemap.vim', 'savemap', 0, 0, 18
-    \)
-    call s:validate_lib_version(
-    \   'vice.vim', 'vice', 0, 1, 1
-    \)
-    call s:validate_vim_version()
+    try
+        call s:validate_lib_version(
+        \   'cul.vim', 'cul#ordered_set', 0, 0, 14
+        \)
+        call s:validate_lib_version(
+        \   'savemap.vim', 'savemap', 0, 0, 18
+        \)
+        call s:validate_lib_version(
+        \   'vice.vim', 'vice', 0, 1, 1
+        \)
+        call s:validate_vim_version()
+    catch /^FINISH\C$/
+        " do not initialize eskk
+        " even if user doesn't fill requirements!
+        return
+    endtry
     " }}}
 
     " Create the first eskk instance. {{{
@@ -1256,9 +1269,11 @@ function! eskk#_initialize() "{{{
     " Throw eskk-initialize-post event.
     doautocmd User eskk-initialize-post
     " }}}
+
+    let s:initialization_state = s:INIT_DONE
 endfunction "}}}
 function! eskk#is_initialized() "{{{
-    return s:is_initialized
+    return s:initialization_state ==# s:INIT_DONE
 endfunction "}}}
 
 " Global variable function
@@ -1294,7 +1309,8 @@ endfunction "}}}
 
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
-    return eskk#get_current_instance().enabled
+    return eskk#is_initialized()
+    \   && eskk#get_current_instance().enabled
 endfunction "}}}
 function! eskk#enable(...) "{{{
     let self = eskk#get_current_instance()
