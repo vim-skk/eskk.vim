@@ -949,7 +949,10 @@ function! {s:Buftable.method('do_escape')}(this, stash) "{{{
 endfunction "}}}
 function! {s:Buftable.method('do_tab')}(this, stash) "{{{
     let buf_str = a:this.get_current_buf_str()
-    call buf_str.rom_str.append(eskk#util#get_tab_raw_str())
+    call buf_str.rom_str.append(s:get_tab_raw_str())
+endfunction "}}}
+function! s:get_tab_raw_str() "{{{
+    return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
 endfunction "}}}
 
 function! {s:Buftable.method('convert_rom_str_inplace')}(this, phases, ...) "{{{

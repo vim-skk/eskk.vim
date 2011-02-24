@@ -217,7 +217,8 @@ function! s:get_map(table, lhs, index, ...) "{{{
     endif
 
     if a:table.is_base()
-        if eskk#util#has_key_f(data, [a:lhs, a:index])
+        if has_key(data, a:lhs)
+        \   && eskk#util#has_idx(data[a:lhs], a:index)
         \   && data[a:lhs][a:index] != ''
             if g:eskk#cache_table_map
                 let a:table._cached_maps[a:lhs] = data[a:lhs]

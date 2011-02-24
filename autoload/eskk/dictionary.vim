@@ -8,7 +8,7 @@ set cpo&vim
 
 
 
-" Utility autoload functions {{{
+" Utility functions {{{
 
 " Returns all lines matching the candidate.
 "
@@ -266,6 +266,12 @@ function! eskk#dictionary#create_new_entry(
         let entry = entry . s . '/'
     endwhile
     return entry
+endfunction "}}}
+
+
+function! s:clear_command_line() "{{{
+    redraw
+    echo ''
 endfunction "}}}
 
 " }}}
@@ -693,7 +699,7 @@ function! {s:HenkanResult.method('get_candidate')}(this, ...) "{{{
         \}
         function functor.funcall()
             " Clear command-line.
-            call eskk#util#clear_command_line()
+            call s:clear_command_line()
 
             if self.this._candidates_index > 0
                 " This changes self.this._candidates_index.
@@ -1146,7 +1152,7 @@ function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{
         call a:this.remember_word(input, key, okuri, okuri_rom, annotation)
     endif
 
-    call eskk#util#clear_command_line()
+    call s:clear_command_line()
     return [input, key, okuri]
 endfunction "}}}
 
