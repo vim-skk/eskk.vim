@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 235))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 236))
 
 
 function! s:SID() "{{{
@@ -1313,6 +1313,13 @@ function! eskk#is_enabled() "{{{
     \   && eskk#get_current_instance().enabled
 endfunction "}}}
 function! eskk#enable(...) "{{{
+    if !eskk#is_initialized()
+        echohl WarningMsg
+        echomsg 'eskk is not initialized.'
+        echohl None
+        return ''
+    endif
+
     let self = eskk#get_current_instance()
     let do_map = a:0 != 0 ? a:1 : 1
 
@@ -1358,6 +1365,13 @@ function! eskk#enable(...) "{{{
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
+    if !eskk#is_initialized()
+        echohl WarningMsg
+        echomsg 'eskk is not initialized.'
+        echohl None
+        return ''
+    endif
+
     let self = eskk#get_current_instance()
     let do_unmap = a:0 != 0 ? a:1 : 0
 
@@ -1393,6 +1407,12 @@ function! eskk#disable() "{{{
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
+    if !eskk#is_initialized()
+        echohl WarningMsg
+        echomsg 'eskk is not initialized.'
+        echohl None
+        return ''
+    endif
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
 function! s:enable_im() "{{{
