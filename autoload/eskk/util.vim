@@ -74,7 +74,7 @@ endfunction "}}}
 " List function
 function! eskk#util#flatten_list(list) "{{{
     let ret = []
-    for _ in a:list
+    for _ in type(a:list) == type([]) ? a:list : [a:list]
         if type(_) == type([])
             let ret += eskk#util#flatten_list(_)
         else
