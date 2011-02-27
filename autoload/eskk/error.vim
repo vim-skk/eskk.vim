@@ -163,10 +163,9 @@ function! eskk#error#write_error_log_file(char, ...) "{{{
     setlocal cmdheight=3
     try
         call eskk#util#warnf(
-        \   "Error!! See %s and report to author.",
+        \   "Error!! See %s for details.",
         \   (write_success ? string(log_file) : ':messages')
         \)
-        sleep 500m
     finally
         let &cmdheight = save_cmdheight
     endtry
