@@ -1405,9 +1405,7 @@ function! eskk#disable() "{{{
         let &l:omnifunc = self.omnifunc_save
     endif
 
-    if eskk#is_neocomplcache_locked()
-        NeoComplCacheUnlock
-    endif
+    call eskk#unlock_neocomplcache()
 
     let self.enabled = 0
 
@@ -1802,6 +1800,11 @@ function! eskk#_get_eskk_mappings() "{{{
 endfunction "}}}
 
 " Misc.
+function! eskk#unlock_neocomplcache() "{{{
+    if eskk#is_neocomplcache_locked()
+        NeoComplCacheUnlock
+    endif
+endfunction "}}}
 function! eskk#is_neocomplcache_locked() "{{{
     return
     \   g:eskk#enable_completion
