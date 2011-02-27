@@ -247,9 +247,8 @@ endfunction "}}}
 
 " Handler for the key while popup displayed.
 function! eskk#complete#handle_special_key(stash) "{{{
-    let char = a:stash.char
-    if has_key(s:POPUP_FUNC_TABLE, char)
-        call call(s:POPUP_FUNC_TABLE[char], [a:stash])
+    if has_key(s:POPUP_FUNC_TABLE, a:stash.char)
+        call call(s:POPUP_FUNC_TABLE[a:stash.char], [a:stash])
         return 0
     else
         return 1
