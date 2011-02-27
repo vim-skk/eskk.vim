@@ -26,8 +26,6 @@ let s:MODE_FUNC_TABLE = {}
 let s:completed_candidates = {}
 " The flag whether a candidate is selected.
 let s:completion_selected = 0
-" The flag whether a candidate is inserted.
-let s:completion_inserted = 0
 
 
 
@@ -160,7 +158,6 @@ endfunction "}}}
 
 function! s:initialize_variables() "{{{
     let s:completion_selected = 0
-    let s:completion_inserted = 0
 endfunction "}}}
 function! s:complete(mode, base) "{{{
     let buftable = eskk#get_buftable()
@@ -257,7 +254,7 @@ endfunction "}}}
 
 " s:POPUP_FUNC_TABLE (:help popupmenu-keys)
 function! s:close_pum_pre(stash) "{{{
-    if s:completion_selected && !s:completion_inserted
+    if s:need_to_adjust_candidate()
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -281,7 +278,7 @@ function! s:close_pum(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
-    if s:completion_selected && !s:completion_inserted
+    if s:need_to_adjust_candidate()
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -341,6 +338,10 @@ function! s:do_escape(stash) "{{{
     \   [eskk#mappings#get_filter_map('<Esc>')]
     \)
 endfunction "}}}
+function! s:select_item(stash) "{{{
+    let s:completion_selected = 1
+    let a:stash.return = a:stash.char
+endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
@@ -365,9 +366,9 @@ let s:POPUP_FUNC_TABLE = {
 \   "\<PageDown>" : function(has('gui_running') ?
 \                       's:nop' : 's:cant_override'),
 \   "\<Up>" : function(has('gui_running') ?
-\                       's:nop' : 's:cant_override'),
+\                       's:select_item' : 's:cant_override'),
 \   "\<Down>" : function(has('gui_running') ?
-\                       's:nop' : 's:cant_override'),
+\                       's:select_item' : 's:cant_override'),
 \   "\<Tab>" : function('s:do_tab'),
 \   "\<C-n>" : function('s:cant_override'),
 \   "\<C-p>" : function('s:cant_override'),
@@ -376,6 +377,9 @@ let s:POPUP_FUNC_TABLE = {
 \   "\<Esc>" : function('s:do_escape'),
 \}
 
+function! s:need_to_adjust_candidate() "{{{
+    return s:completion_selected
+endfunction "}}}
 function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
