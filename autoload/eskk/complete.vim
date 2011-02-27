@@ -131,11 +131,9 @@ function! s:complete(mode, base) "{{{
     let list = []
     let dict = eskk#get_skk_dict()
     let buftable = eskk#get_buftable()
-    let is_katakana =
-    \   g:eskk#kata_convert_to_hira_at_completion
-    \   && a:mode ==# 'kata'
 
-    if is_katakana
+    if g:eskk#kata_convert_to_hira_at_completion
+    \   && a:mode ==# 'kata'
         let [henkan_buf_str, okuri_buf_str] =
         \   buftable.convert_rom_pairs(
         \       [
