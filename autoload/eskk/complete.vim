@@ -377,6 +377,12 @@ endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
+function! s:cant_override(stash) "{{{
+    throw eskk#internal_error(
+    \   ['eskk', 'complete'],
+    \   "This key should be overriden so never reach here."
+    \)
+endfunction "}}}
 let s:POPUP_FUNC_TABLE = {
 \   "\<CR>" : function('s:do_enter_pre'),
 \   "\<C-y>" : function('s:close_pum_pre'),
