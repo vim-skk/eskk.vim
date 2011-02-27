@@ -24,8 +24,6 @@ let s:POPUP_FUNC_TABLE = {}
 let s:MODE_FUNC_TABLE = {}
 " The previously completed candidates in each mode.
 let s:completed_candidates = {}
-" The flag whether completion has been started from eskk.
-let s:started_completion = 0
 " The flag whether a candidate is selected.
 let s:completion_selected = 0
 " The flag whether a candidate is inserted.
@@ -240,7 +238,6 @@ function! s:complete(mode, base) "{{{
     endfor
 
     if !empty(list)
-        call eskk#complete#set_started_completion(1)
         call s:set_completed_candidates(disp, list)
     endif
     return list
@@ -531,18 +528,6 @@ function! s:has_marker() "{{{
     \       ],
     \       eskk#get_buftable().get_henkan_phase(),
     \   )
-endfunction "}}}
-
-
-
-function! eskk#complete#completing() "{{{
-    return
-    \   g:eskk#enable_completion
-    \   && pumvisible()
-    \   && s:started_completion
-endfunction "}}}
-function! eskk#complete#set_started_completion(bool) "{{{
-    let s:started_completion = a:bool
 endfunction "}}}
 
 

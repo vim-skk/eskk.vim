@@ -1721,7 +1721,7 @@ function! eskk#filter(char) "{{{
 
     try
         let do_filter = 1
-        if eskk#complete#completing()
+        if g:eskk#enable_completion && pumvisible()
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
@@ -1729,8 +1729,6 @@ function! eskk#filter(char) "{{{
                 \   'eskk#complete#handle_special_key()'
                 \)
             endtry
-        else
-            call eskk#complete#set_started_completion(0)
         endif
 
         if do_filter
