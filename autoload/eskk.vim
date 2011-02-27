@@ -40,10 +40,7 @@ let s:eskk = {
 \   'is_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
-\   'has_started_completion': 0,
 \   'prev_normal_keys': {},
-\   'completion_selected': 0,
-\   'completion_inserted': 0,
 \   'first_setup_for_mode_local_keys': 1,
 \}
 
@@ -1733,7 +1730,7 @@ function! eskk#filter(char) "{{{
                 \)
             endtry
         else
-            let self.has_started_completion = 0
+            call eskk#complete#set_started_completion(0)
         endif
 
         if do_filter

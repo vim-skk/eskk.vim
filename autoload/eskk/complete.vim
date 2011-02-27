@@ -24,6 +24,12 @@ let s:POPUP_FUNC_TABLE = {}
 let s:MODE_FUNC_TABLE = {}
 " The previously completed candidates in each mode.
 let s:completed_candidates = {}
+" The flag whether completion has been started from eskk.
+let s:started_completion = 0
+" The flag whether a candidate is selected.
+let s:completion_selected = 0
+" The flag whether a candidate is inserted.
+let s:completion_inserted = 0
 
 
 
@@ -155,9 +161,8 @@ function! s:MODE_FUNC_TABLE.abbrev(base) "{{{
 endfunction "}}}
 
 function! s:initialize_variables() "{{{
-    let inst = eskk#get_current_instance()
-    let inst.completion_selected = 0
-    let inst.completion_inserted = 0
+    let s:completion_selected = 0
+    let s:completion_inserted = 0
 endfunction "}}}
 function! s:complete(mode, base) "{{{
     let buftable = eskk#get_buftable()
@@ -235,8 +240,7 @@ function! s:complete(mode, base) "{{{
     endfor
 
     if !empty(list)
-        let inst = eskk#get_current_instance()
-        let inst.has_started_completion = 1
+        call eskk#complete#set_started_completion(1)
         call s:set_completed_candidates(disp, list)
     endif
     return list
@@ -280,8 +284,7 @@ endfunction "}}}
 
 " s:POPUP_FUNC_TABLE
 function! s:close_pum_pre(stash) "{{{
-    let inst = eskk#get_current_instance()
-    if inst.completion_selected && !inst.completion_inserted
+    if s:completion_selected && !s:completion_inserted
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -290,7 +293,7 @@ function! s:close_pum_pre(stash) "{{{
         \   'eskk#mappings#key2char',
         \   [eskk#mappings#get_filter_map('<C-y>')]
         \)
-        let inst.completion_selected = 0
+        let s:completion_selected = 0
     else
         call s:close_pum(a:stash)
     endif
@@ -305,8 +308,7 @@ function! s:close_pum(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
-    let inst = eskk#get_current_instance()
-    if inst.completion_selected && !inst.completion_inserted
+    if s:completion_selected && !s:completion_inserted
         " Insert selected item.
         let a:stash.return = "\<C-n>\<C-p>"
         " Call `s:close_pum()` at next time.
@@ -315,7 +317,7 @@ function! s:do_enter_pre(stash) "{{{
         \   'eskk#mappings#key2char',
         \   [eskk#mappings#get_filter_map('<CR>')]
         \)
-        let inst.completion_selected = 0
+        let s:completion_selected = 0
     else
         call s:do_enter(a:stash)
     endif
@@ -335,8 +337,7 @@ function! s:do_enter(stash) "{{{
     \)
 endfunction "}}}
 function! s:select_item(stash) "{{{
-    let inst = eskk#get_current_instance()
-    let inst.completion_selected = 1
+    let s:completion_selected = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:do_tab(stash) "{{{
@@ -347,9 +348,8 @@ function! s:do_tab(stash) "{{{
     \)
 endfunction "}}}
 function! s:select_insert_item(stash) "{{{
-    let inst = eskk#get_current_instance()
-    let inst.completion_selected = 1
-    let inst.completion_inserted = 1
+    let s:completion_selected = 1
+    let s:completion_inserted = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:do_space(stash) "{{{
@@ -539,7 +539,10 @@ function! eskk#complete#completing() "{{{
     return
     \   g:eskk#enable_completion
     \   && pumvisible()
-    \   && eskk#get_current_instance().has_started_completion
+    \   && s:started_completion
+endfunction "}}}
+function! eskk#complete#set_started_completion(bool) "{{{
+    let s:started_completion = a:bool
 endfunction "}}}
 
 
