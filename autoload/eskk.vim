@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 245))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 246))
 
 
 function! s:SID() "{{{
@@ -161,6 +161,9 @@ function! eskk#initialize_instance() "{{{
 endfunction "}}}
 function! eskk#create_new_instance() "{{{
     " TODO: CoW
+    if s:eskk_instance_id != len(s:eskk_instances) - 1
+        throw eskk#internal_error(['eskk'], "mismatch values between s:eskk_instance_id and s:eskk_instances")
+    endif
 
     " Create and push the instance.
     call add(s:eskk_instances, s:eskk_new())
@@ -172,6 +175,9 @@ endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
     if s:eskk_instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
+    endif
+    if s:eskk_instance_id != len(s:eskk_instances) - 1
+        throw eskk#internal_error(['eskk'], "mismatch values between s:eskk_instance_id and s:eskk_instances")
     endif
 
     " Destroy current instance.
