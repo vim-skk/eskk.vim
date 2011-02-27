@@ -358,7 +358,7 @@ endfunction "}}}
 let s:POPUP_FUNC_TABLE = {
 \   "\<CR>" : function('s:do_enter_pre'),
 \   "\<C-y>" : function('s:close_pum_pre'),
-\   "\<C-l>" : function('s:identity'),
+\   "\<C-l>" : function('s:cant_override'),
 \   "\<C-e>" : function('s:identity'),
 \   "\<PageUp>" : function('s:identity'),
 \   "\<PageDown>" : function('s:identity'),
