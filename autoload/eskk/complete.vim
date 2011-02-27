@@ -248,38 +248,15 @@ endfunction "}}}
 " Handler for the key while popup displayed.
 function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
-
-    " Check popupmenu-keys
     if has_key(s:POPUP_FUNC_TABLE, char)
         call call(s:POPUP_FUNC_TABLE[char], [a:stash])
         return 0
-    endif
-
-    if s:check_yomigana()
+    else
         return 1
     endif
-
-    " Select item.
-    call s:set_selected_item()
-    " Close pum.
-    call eskk#register_temp_event(
-    \   'filter-redispatch-pre',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-y>')]
-    \)
-    " Do kakutei and postpone a:char process.
-    for key in ['<CR>', char]
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map(key)]
-        \)
-    endfor
-
-    return 0
 endfunction "}}}
 
-" s:POPUP_FUNC_TABLE
+" s:POPUP_FUNC_TABLE (:help popupmenu-keys)
 function! s:close_pum_pre(stash) "{{{
     if s:completion_selected && !s:completion_inserted
         " Insert selected item.
