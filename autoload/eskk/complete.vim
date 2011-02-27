@@ -345,7 +345,6 @@ function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
 function! s:nop(stash) "{{{
-    let a:stash.return = ''
 endfunction "}}}
 function! s:cant_override(stash) "{{{
     throw eskk#internal_error(
