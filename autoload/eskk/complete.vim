@@ -354,6 +354,9 @@ function! s:cant_override(stash) "{{{
     \   "This key should be overriden so never reach here."
     \)
 endfunction "}}}
+
+" CUI, GUI can't supersede: <C-n>, <C-p>, <C-l>
+" only CUI can't supersede: <PageUp>, <PageDown>, <Up>, <down>
 let s:POPUP_FUNC_TABLE = {
 \   "\<CR>" : function('s:do_enter_pre'),
 \   "\<C-y>" : function('s:close_pum_pre'),
