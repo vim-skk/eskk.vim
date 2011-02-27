@@ -326,29 +326,6 @@ function! s:select_insert_item(stash) "{{{
     let s:completion_inserted = 1
     let a:stash.return = a:stash.char
 endfunction "}}}
-function! s:do_space(stash) "{{{
-    call s:set_selected_item()
-
-    call eskk#register_temp_event(
-    \   'filter-redispatch-pre',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-y>')]
-    \)
-
-    if s:check_yomigana()
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<Space>')]
-        \)
-    else
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<CR>')]
-        \)
-    endif
-endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let [success, _, pos] = s:get_buftable_pos()
     if !success
@@ -392,7 +369,6 @@ let s:POPUP_FUNC_TABLE = {
 \   "\<PageDown>" : function('s:identity'),
 \   "\<Up>" : function('s:select_item'),
 \   "\<Down>" : function('s:select_item'),
-\   "\<Space>" : function('s:do_space'),
 \   "\<Tab>" : function('s:do_tab'),
 \   "\<C-n>" : function('s:select_insert_item'),
 \   "\<C-p>" : function('s:select_insert_item'),
@@ -434,20 +410,6 @@ function! s:set_selected_item() "{{{
     call buftable.set_old_str(s:get_buftable_str(1))
 
     call s:initialize_variables()
-endfunction "}}}
-function! s:check_yomigana() "{{{
-    let filter_str = s:get_buftable_str(0)
-
-    if eskk#get_mode() ==# 'ascii'
-        " ASCII mode.
-        return filter_str =~ '^[[:alnum:]-]\+$'
-    elseif eskk#get_mode() ==# 'abbrev'
-        " abbrev mode.
-        return filter_str =~ '^[[:alnum:]-]\+$'
-    else
-        " Kanji mode.
-        return filter_str =~ '^[ア-ンあ-んぁ-ぉァ-ォー。！？*]\+$'
-    endif
 endfunction "}}}
 function! s:get_buftable_pos() "{{{
     let buftable = eskk#get_buftable()
