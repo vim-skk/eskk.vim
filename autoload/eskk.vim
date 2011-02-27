@@ -40,10 +40,7 @@ let s:eskk = {
 \   'is_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
-\   'has_started_completion': 0,
 \   'prev_normal_keys': {},
-\   'completion_selected': 0,
-\   'completion_inserted': 0,
 \   'first_setup_for_mode_local_keys': 1,
 \}
 
@@ -1280,6 +1277,13 @@ function! eskk#_initialize() "{{{
     doautocmd User eskk-initialize-post
     " }}}
 
+    " Reset s:completed_candidates in autoload/eskk/complete.vim {{{
+    " s:completed_candidates should have non-empty value
+    " only during insert-mode.
+    autocmd eskk InsertLeave *
+    \   call eskk#complete#_reset_completed_candidates()
+    " }}}
+
     let s:initialization_state = s:INIT_DONE
 endfunction "}}}
 function! eskk#is_initialized() "{{{
@@ -1401,9 +1405,7 @@ function! eskk#disable() "{{{
         let &l:omnifunc = self.omnifunc_save
     endif
 
-    if eskk#is_neocomplcache_locked()
-        NeoComplCacheUnlock
-    endif
+    call eskk#unlock_neocomplcache()
 
     let self.enabled = 0
 
@@ -1717,7 +1719,7 @@ function! eskk#filter(char) "{{{
 
     try
         let do_filter = 1
-        if eskk#complete#completing()
+        if g:eskk#enable_completion && pumvisible()
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
@@ -1725,8 +1727,6 @@ function! eskk#filter(char) "{{{
                 \   'eskk#complete#handle_special_key()'
                 \)
             endtry
-        else
-            let self.has_started_completion = 0
         endif
 
         if do_filter
@@ -1800,6 +1800,11 @@ function! eskk#_get_eskk_mappings() "{{{
 endfunction "}}}
 
 " Misc.
+function! eskk#unlock_neocomplcache() "{{{
+    if eskk#is_neocomplcache_locked()
+        NeoComplCacheUnlock
+    endif
+endfunction "}}}
 function! eskk#is_neocomplcache_locked() "{{{
     return
     \   g:eskk#enable_completion

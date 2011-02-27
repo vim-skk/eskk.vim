@@ -22,6 +22,10 @@ let s:POPUP_FUNC_TABLE = {}
 " The handlers for all keys in each mode.
 " used by eskk#complete#eskkcomplete().
 let s:MODE_FUNC_TABLE = {}
+" The previously completed candidates in each mode.
+let s:completed_candidates = {}
+" The flag whether a candidate is selected.
+let s:completion_selected = 0
 
 
 
@@ -90,9 +94,40 @@ function! eskk#complete#do_complete(base) "{{{
         return s:skip_complete()
     endif
 endfunction "}}}
+
+function! eskk#complete#_reset_completed_candidates() "{{{
+    let s:completed_candidates = {}
+endfunction "}}}
 function! s:skip_complete() "{{{
-    " TODO: Return previously completed candidates.
-    return []
+    return s:get_completed_candidates(
+    \   eskk#get_buftable().get_display_str(1, 0),
+    \   []
+    \)
+endfunction "}}}
+function! s:has_completed_candidates(display_str) "{{{
+    let NOTFOUND = {}
+    return s:get_completed_candidates(a:display_str, NOTFOUND) isnot NOTFOUND
+endfunction "}}}
+function! s:get_completed_candidates(display_str, else) "{{{
+    let mode = eskk#get_mode()
+    if !has_key(s:completed_candidates, mode)
+        return a:else
+    endif
+    return get(
+    \   s:completed_candidates[mode],
+    \   a:display_str,
+    \   a:else
+    \)
+endfunction "}}}
+function! s:set_completed_candidates(display_str, candidates) "{{{
+    if a:display_str == ''    " empty string cannot be a key of dictionary.
+        return
+    endif
+    let mode = eskk#get_mode()
+    if !has_key(s:completed_candidates, mode)
+        let s:completed_candidates[mode] = {}
+    endif
+    let s:completed_candidates[mode][a:display_str] = a:candidates
 endfunction "}}}
 
 " s:MODE_FUNC_TABLE
@@ -122,15 +157,18 @@ function! s:MODE_FUNC_TABLE.abbrev(base) "{{{
 endfunction "}}}
 
 function! s:initialize_variables() "{{{
-    let inst = eskk#get_current_instance()
-    let inst.completion_selected = 0
-    let inst.completion_inserted = 0
+    let s:completion_selected = 0
 endfunction "}}}
 function! s:complete(mode, base) "{{{
+    let buftable = eskk#get_buftable()
+    let disp = buftable.get_display_str(1, 0)    " with marker, no rom_str.
+    if s:has_completed_candidates(disp)
+        return s:skip_complete()
+    endif
+
     " Get candidates.
     let list = []
     let dict = eskk#get_skk_dict()
-    let buftable = eskk#get_buftable()
 
     if g:eskk#kata_convert_to_hira_at_completion
     \   && a:mode ==# 'kata'
@@ -197,8 +235,7 @@ function! s:complete(mode, base) "{{{
     endfor
 
     if !empty(list)
-        let inst = eskk#get_current_instance()
-        let inst.has_started_completion = 1
+        call s:set_completed_candidates(disp, list)
     endif
     return list
 endfunction "}}}
@@ -207,52 +244,18 @@ endfunction "}}}
 
 " Handler for the key while popup displayed.
 function! eskk#complete#handle_special_key(stash) "{{{
-    let char = a:stash.char
-
-    " Check popupmenu-keys
-    if has_key(s:POPUP_FUNC_TABLE, char)
-        call call(s:POPUP_FUNC_TABLE[char], [a:stash])
+    if has_key(s:POPUP_FUNC_TABLE, a:stash.char)
+        call call(s:POPUP_FUNC_TABLE[a:stash.char], [a:stash])
         return 0
-    endif
-
-    if s:check_yomigana()
+    else
         return 1
     endif
-
-    " Select item.
-    call s:set_selected_item()
-    " Close pum.
-    call eskk#register_temp_event(
-    \   'filter-redispatch-pre',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-y>')]
-    \)
-    " Do kakutei and postpone a:char process.
-    for key in ['<CR>', char]
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map(key)]
-        \)
-    endfor
-
-    return 0
 endfunction "}}}
 
-" s:POPUP_FUNC_TABLE
+" s:POPUP_FUNC_TABLE (:help popupmenu-keys)
 function! s:close_pum_pre(stash) "{{{
-    let inst = eskk#get_current_instance()
-    if inst.completion_selected && !inst.completion_inserted
-        " Insert selected item.
-        let a:stash.return = "\<C-n>\<C-p>"
-        " Call `s:close_pum()` at next time.
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<C-y>')]
-        \)
-        let inst.completion_selected = 0
-    else
+    let adjusted = s:adjust_candidate(a:stash, '<C-y>')
+    if !adjusted
         call s:close_pum(a:stash)
     endif
 endfunction "}}}
@@ -266,18 +269,8 @@ function! s:close_pum(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
-    let inst = eskk#get_current_instance()
-    if inst.completion_selected && !inst.completion_inserted
-        " Insert selected item.
-        let a:stash.return = "\<C-n>\<C-p>"
-        " Call `s:close_pum()` at next time.
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<CR>')]
-        \)
-        let inst.completion_selected = 0
-    else
+    let adjusted = s:adjust_candidate(a:stash, '<CR>')
+    if !adjusted
         call s:do_enter(a:stash)
     endif
 endfunction "}}}
@@ -295,46 +288,12 @@ function! s:do_enter(stash) "{{{
     \   [eskk#mappings#get_filter_map('<CR>')]
     \)
 endfunction "}}}
-function! s:select_item(stash) "{{{
-    let inst = eskk#get_current_instance()
-    let inst.completion_selected = 1
-    let a:stash.return = a:stash.char
-endfunction "}}}
 function! s:do_tab(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
     \   'eskk#mappings#key2char',
     \   [eskk#mappings#get_nore_map('<C-n>')]
     \)
-endfunction "}}}
-function! s:select_insert_item(stash) "{{{
-    let inst = eskk#get_current_instance()
-    let inst.completion_selected = 1
-    let inst.completion_inserted = 1
-    let a:stash.return = a:stash.char
-endfunction "}}}
-function! s:do_space(stash) "{{{
-    call s:set_selected_item()
-
-    call eskk#register_temp_event(
-    \   'filter-redispatch-pre',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-y>')]
-    \)
-
-    if s:check_yomigana()
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<Space>')]
-        \)
-    else
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<CR>')]
-        \)
-    endif
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let [success, _, pos] = s:get_buftable_pos()
@@ -361,27 +320,61 @@ function! s:do_escape(stash) "{{{
     \   [eskk#mappings#get_filter_map('<Esc>')]
     \)
 endfunction "}}}
+function! s:select_item(stash) "{{{
+    let s:completion_selected = 1
+    let a:stash.return = a:stash.char
+endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
+function! s:nop(stash) "{{{
+endfunction "}}}
+function! s:cant_override(stash) "{{{
+    throw eskk#internal_error(
+    \   ['eskk', 'complete'],
+    \   "This key should be overriden so never reach here."
+    \)
+endfunction "}}}
+
+" CUI, GUI can't supersede: <C-n>, <C-p>, <C-l>
+" only CUI can't supersede: <PageUp>, <PageDown>, <Up>, <down>
 let s:POPUP_FUNC_TABLE = {
 \   "\<CR>" : function('s:do_enter_pre'),
 \   "\<C-y>" : function('s:close_pum_pre'),
-\   "\<C-l>" : function('s:identity'),
+\   "\<C-l>" : function('s:cant_override'),
 \   "\<C-e>" : function('s:identity'),
-\   "\<PageUp>" : function('s:identity'),
-\   "\<PageDown>" : function('s:identity'),
-\   "\<Up>" : function('s:select_item'),
-\   "\<Down>" : function('s:select_item'),
-\   "\<Space>" : function('s:do_space'),
+\   "\<PageUp>" : function(has('gui_running') ?
+\                       's:nop' : 's:cant_override'),
+\   "\<PageDown>" : function(has('gui_running') ?
+\                       's:nop' : 's:cant_override'),
+\   "\<Up>" : function(has('gui_running') ?
+\                       's:select_item' : 's:cant_override'),
+\   "\<Down>" : function(has('gui_running') ?
+\                       's:select_item' : 's:cant_override'),
 \   "\<Tab>" : function('s:do_tab'),
-\   "\<C-n>" : function('s:select_insert_item'),
-\   "\<C-p>" : function('s:select_insert_item'),
+\   "\<C-n>" : function('s:cant_override'),
+\   "\<C-p>" : function('s:cant_override'),
 \   "\<C-h>" : function('s:do_backspace'),
 \   "\<BS>" : function('s:do_backspace'),
 \   "\<Esc>" : function('s:do_escape'),
 \}
 
+function! s:adjust_candidate(stash, recall_key) "{{{
+    if s:completion_selected
+        let s:completion_selected = 0
+        " Insert selected item.
+        let a:stash.return = "\<C-n>\<C-p>"
+        " Call `s:close_pum()` at next time.
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   'eskk#mappings#key2char',
+        \   [eskk#mappings#get_filter_map(a:recall_key)]
+        \)
+        return 1
+    else
+        return 0
+    endif
+endfunction "}}}
 function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
 
@@ -415,20 +408,6 @@ function! s:set_selected_item() "{{{
     call buftable.set_old_str(s:get_buftable_str(1))
 
     call s:initialize_variables()
-endfunction "}}}
-function! s:check_yomigana() "{{{
-    let filter_str = s:get_buftable_str(0)
-
-    if eskk#get_mode() ==# 'ascii'
-        " ASCII mode.
-        return filter_str =~ '^[[:alnum:]-]\+$'
-    elseif eskk#get_mode() ==# 'abbrev'
-        " abbrev mode.
-        return filter_str =~ '^[[:alnum:]-]\+$'
-    else
-        " Kanji mode.
-        return filter_str =~ '^[ア-ンあ-んぁ-ぉァ-ォー。！？*]\+$'
-    endif
 endfunction "}}}
 function! s:get_buftable_pos() "{{{
     let buftable = eskk#get_buftable()
@@ -492,15 +471,6 @@ function! s:has_marker() "{{{
     \       ],
     \       eskk#get_buftable().get_henkan_phase(),
     \   )
-endfunction "}}}
-
-
-
-function! eskk#complete#completing() "{{{
-    return
-    \   g:eskk#enable_completion
-    \   && pumvisible()
-    \   && eskk#get_current_instance().has_started_completion
 endfunction "}}}
 
 

@@ -565,10 +565,6 @@ endfunction "}}}
 function! {s:HenkanResult.method('select_candidates')}(
 \   this, with_okuri, skip_num, functor
 \)
-    if eskk#is_neocomplcache_locked()
-        NeoComplCacheUnlock
-    endif
-
     " Select candidates by getchar()'s character.
     let words = copy(a:this.get_candidates())
     let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
