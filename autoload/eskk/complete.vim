@@ -15,10 +15,13 @@ delfunc s:SID
 
 
 
-" Constants {{{
-let s:popup_func_table = {}
-let s:mode_func_table = {}
-" }}}
+" Variables
+"
+" The handlers for popup-menu's keys. (:help popupmenu-keys)
+let s:POPUP_FUNC_TABLE = {}
+" The handlers for all keys in each mode.
+" used by eskk#complete#eskkcomplete().
+let s:MODE_FUNC_TABLE = {}
 
 
 
@@ -54,10 +57,10 @@ function! s:eskkcomplete(findstart, base) "{{{
         return pos[2] - 1
     endif
 
-    return s:mode_func_table[eskk#get_mode()](a:base)
+    return s:MODE_FUNC_TABLE[eskk#get_mode()](a:base)
 endfunction "}}}
 function! eskk#complete#can_find_start() "{{{
-    if !has_key(s:mode_func_table, eskk#get_mode())
+    if !has_key(s:MODE_FUNC_TABLE, eskk#get_mode())
         return 0
     endif
 
@@ -81,8 +84,8 @@ function! eskk#complete#can_find_start() "{{{
 endfunction "}}}
 function! eskk#complete#do_complete(base) "{{{
     let mode = eskk#get_mode()
-    if has_key(s:mode_func_table, mode)
-        return s:mode_func_table[mode](a:base)
+    if has_key(s:MODE_FUNC_TABLE, mode)
+        return s:MODE_FUNC_TABLE[mode](a:base)
     else
         return s:skip_complete()
     endif
@@ -92,8 +95,8 @@ function! s:skip_complete() "{{{
     return []
 endfunction "}}}
 
-" s:mode_func_table
-function! s:mode_func_table.hira(base) "{{{
+" s:MODE_FUNC_TABLE
+function! s:MODE_FUNC_TABLE.hira(base) "{{{
     " Do not complete while inputting rom string.
     if a:base =~ '\a$'
         return s:skip_complete()
@@ -108,12 +111,12 @@ function! s:mode_func_table.hira(base) "{{{
 
     return s:complete(eskk#get_mode(), a:base)
 endfunction "}}}
-let s:mode_func_table.kata = s:mode_func_table.hira
-function! s:mode_func_table.ascii(base) "{{{
+let s:MODE_FUNC_TABLE.kata = s:MODE_FUNC_TABLE.hira
+function! s:MODE_FUNC_TABLE.ascii(base) "{{{
     " ASCII mode.
     return s:complete("ascii", a:base)
 endfunction "}}}
-function! s:mode_func_table.abbrev(base) "{{{
+function! s:MODE_FUNC_TABLE.abbrev(base) "{{{
     " abbrev mode.
     return s:complete("abbrev", a:base)
 endfunction "}}}
@@ -209,8 +212,8 @@ function! eskk#complete#handle_special_key(stash) "{{{
     let char = a:stash.char
 
     " Check popupmenu-keys
-    if has_key(s:popup_func_table, char)
-        call call(s:popup_func_table[char], [a:stash])
+    if has_key(s:POPUP_FUNC_TABLE, char)
+        call call(s:POPUP_FUNC_TABLE[char], [a:stash])
         return 0
     endif
 
@@ -238,7 +241,7 @@ function! eskk#complete#handle_special_key(stash) "{{{
     return 0
 endfunction "}}}
 
-" s:popup_func_table
+" s:POPUP_FUNC_TABLE
 function! s:close_pum_pre(stash) "{{{
     let inst = eskk#get_current_instance()
     if inst.completion_selected && !inst.completion_inserted
@@ -363,7 +366,7 @@ endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
-let s:popup_func_table = {
+let s:POPUP_FUNC_TABLE = {
 \   "\<CR>" : function('s:do_enter_pre'),
 \   "\<C-y>" : function('s:close_pum_pre'),
 \   "\<C-l>" : function('s:identity'),
