@@ -254,17 +254,8 @@ endfunction "}}}
 
 " s:POPUP_FUNC_TABLE (:help popupmenu-keys)
 function! s:close_pum_pre(stash) "{{{
-    if s:need_to_adjust_candidate()
-        " Insert selected item.
-        let a:stash.return = "\<C-n>\<C-p>"
-        " Call `s:close_pum()` at next time.
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<C-y>')]
-        \)
-        let s:completion_selected = 0
-    else
+    let adjusted = s:adjust_candidate(a:stash, '<C-y>')
+    if !adjusted
         call s:close_pum(a:stash)
     endif
 endfunction "}}}
@@ -278,17 +269,8 @@ function! s:close_pum(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
-    if s:need_to_adjust_candidate()
-        " Insert selected item.
-        let a:stash.return = "\<C-n>\<C-p>"
-        " Call `s:close_pum()` at next time.
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map('<CR>')]
-        \)
-        let s:completion_selected = 0
-    else
+    let adjusted = s:adjust_candidate(a:stash, '<CR>')
+    if !adjusted
         call s:do_enter(a:stash)
     endif
 endfunction "}}}
@@ -377,8 +359,21 @@ let s:POPUP_FUNC_TABLE = {
 \   "\<Esc>" : function('s:do_escape'),
 \}
 
-function! s:need_to_adjust_candidate() "{{{
-    return s:completion_selected
+function! s:adjust_candidate(stash, recall_key) "{{{
+    if s:completion_selected
+        let s:completion_selected = 0
+        " Insert selected item.
+        let a:stash.return = "\<C-n>\<C-p>"
+        " Call `s:close_pum()` at next time.
+        call eskk#register_temp_event(
+        \   'filter-redispatch-post',
+        \   'eskk#mappings#key2char',
+        \   [eskk#mappings#get_filter_map(a:recall_key)]
+        \)
+        return 1
+    else
+        return 0
+    endif
 endfunction "}}}
 function! s:set_selected_item() "{{{
     " Set selected item by pum to buftable.
