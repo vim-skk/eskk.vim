@@ -321,11 +321,6 @@ function! s:do_tab(stash) "{{{
     \   [eskk#mappings#get_nore_map('<C-n>')]
     \)
 endfunction "}}}
-function! s:select_insert_item(stash) "{{{
-    let s:completion_selected = 1
-    let s:completion_inserted = 1
-    let a:stash.return = a:stash.char
-endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let [success, _, pos] = s:get_buftable_pos()
     if !success
@@ -370,8 +365,8 @@ let s:POPUP_FUNC_TABLE = {
 \   "\<Up>" : function('s:select_item'),
 \   "\<Down>" : function('s:select_item'),
 \   "\<Tab>" : function('s:do_tab'),
-\   "\<C-n>" : function('s:select_insert_item'),
-\   "\<C-p>" : function('s:select_insert_item'),
+\   "\<C-n>" : function('s:cant_override'),
+\   "\<C-p>" : function('s:cant_override'),
 \   "\<C-h>" : function('s:do_backspace'),
 \   "\<BS>" : function('s:do_backspace'),
 \   "\<Esc>" : function('s:do_escape'),
