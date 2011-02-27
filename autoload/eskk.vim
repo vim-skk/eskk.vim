@@ -32,8 +32,6 @@ delfunction s:SID
 "   Temporary event handler functions/arguments.
 " enabled:
 "   True if s:eskk.enable() is called.
-" enabled_mode:
-"   Vim's mode() return value when calling eskk#enable().
 " has_started_completion:
 "   completion has been started from eskk.
 let s:eskk = {
@@ -1362,9 +1360,7 @@ function! eskk#enable(...) "{{{
     endif
 
     let self.enabled = 1
-    let self.enabled_mode = mode()
-
-    if self.enabled_mode =~# '^[ic]$'
+    if mode() =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
         return s:enable_im()
