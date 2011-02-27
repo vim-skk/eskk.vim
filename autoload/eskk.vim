@@ -1280,6 +1280,13 @@ function! eskk#_initialize() "{{{
     doautocmd User eskk-initialize-post
     " }}}
 
+    " Reset s:completed_candidates in autoload/eskk/complete.vim {{{
+    " s:completed_candidates should have non-empty value
+    " only during insert-mode.
+    autocmd eskk InsertLeave *
+    \   call eskk#complete#_reset_completed_candidates()
+    " }}}
+
     let s:initialization_state = s:INIT_DONE
 endfunction "}}}
 function! eskk#is_initialized() "{{{

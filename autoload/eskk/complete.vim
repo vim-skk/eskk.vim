@@ -22,6 +22,8 @@ let s:POPUP_FUNC_TABLE = {}
 " The handlers for all keys in each mode.
 " used by eskk#complete#eskkcomplete().
 let s:MODE_FUNC_TABLE = {}
+" The previously completed candidates in each mode.
+let s:completed_candidates = {}
 
 
 
@@ -90,9 +92,40 @@ function! eskk#complete#do_complete(base) "{{{
         return s:skip_complete()
     endif
 endfunction "}}}
+
+function! eskk#complete#_reset_completed_candidates() "{{{
+    let s:completed_candidates = {}
+endfunction "}}}
 function! s:skip_complete() "{{{
-    " TODO: Return previously completed candidates.
-    return []
+    return s:get_completed_candidates(
+    \   eskk#get_buftable().get_display_str(1, 0),
+    \   []
+    \)
+endfunction "}}}
+function! s:has_completed_candidates(display_str) "{{{
+    let NOTFOUND = {}
+    return s:get_completed_candidates(a:display_str, NOTFOUND) isnot NOTFOUND
+endfunction "}}}
+function! s:get_completed_candidates(display_str, else) "{{{
+    let mode = eskk#get_mode()
+    if !has_key(s:completed_candidates, mode)
+        return a:else
+    endif
+    return get(
+    \   s:completed_candidates[mode],
+    \   a:display_str,
+    \   a:else
+    \)
+endfunction "}}}
+function! s:set_completed_candidates(display_str, candidates) "{{{
+    if a:display_str == ''    " empty string cannot be a key of dictionary.
+        return
+    endif
+    let mode = eskk#get_mode()
+    if !has_key(s:completed_candidates, mode)
+        let s:completed_candidates[mode] = {}
+    endif
+    let s:completed_candidates[mode][a:display_str] = a:candidates
 endfunction "}}}
 
 " s:MODE_FUNC_TABLE
@@ -127,10 +160,15 @@ function! s:initialize_variables() "{{{
     let inst.completion_inserted = 0
 endfunction "}}}
 function! s:complete(mode, base) "{{{
+    let buftable = eskk#get_buftable()
+    let disp = buftable.get_display_str(1, 0)    " with marker, no rom_str.
+    if s:has_completed_candidates(disp)
+        return s:skip_complete()
+    endif
+
     " Get candidates.
     let list = []
     let dict = eskk#get_skk_dict()
-    let buftable = eskk#get_buftable()
 
     if g:eskk#kata_convert_to_hira_at_completion
     \   && a:mode ==# 'kata'
@@ -199,6 +237,7 @@ function! s:complete(mode, base) "{{{
     if !empty(list)
         let inst = eskk#get_current_instance()
         let inst.has_started_completion = 1
+        call s:set_completed_candidates(disp, list)
     endif
     return list
 endfunction "}}}
