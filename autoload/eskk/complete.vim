@@ -309,10 +309,6 @@ function! s:do_enter(stash) "{{{
     \   [eskk#mappings#get_filter_map('<CR>')]
     \)
 endfunction "}}}
-function! s:select_item(stash) "{{{
-    let s:completion_selected = 1
-    let a:stash.return = a:stash.char
-endfunction "}}}
 function! s:do_tab(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
@@ -348,6 +344,9 @@ endfunction "}}}
 function! s:identity(stash) "{{{
     let a:stash.return = a:stash.char
 endfunction "}}}
+function! s:nop(stash) "{{{
+    let a:stash.return = ''
+endfunction "}}}
 function! s:cant_override(stash) "{{{
     throw eskk#internal_error(
     \   ['eskk', 'complete'],
@@ -362,10 +361,14 @@ let s:POPUP_FUNC_TABLE = {
 \   "\<C-y>" : function('s:close_pum_pre'),
 \   "\<C-l>" : function('s:cant_override'),
 \   "\<C-e>" : function('s:identity'),
-\   "\<PageUp>" : function('s:identity'),
-\   "\<PageDown>" : function('s:identity'),
-\   "\<Up>" : function('s:select_item'),
-\   "\<Down>" : function('s:select_item'),
+\   "\<PageUp>" : function(has('gui_running') ?
+\                       's:nop' : 's:cant_override'),
+\   "\<PageDown>" : function(has('gui_running') ?
+\                       's:nop' : 's:cant_override'),
+\   "\<Up>" : function(has('gui_running') ?
+\                       's:nop' : 's:cant_override'),
+\   "\<Down>" : function(has('gui_running') ?
+\                       's:nop' : 's:cant_override'),
 \   "\<Tab>" : function('s:do_tab'),
 \   "\<C-n>" : function('s:cant_override'),
 \   "\<C-p>" : function('s:cant_override'),
