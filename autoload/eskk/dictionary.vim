@@ -1024,6 +1024,11 @@ function! {s:PhysicalDict.method('get_ftime_at_read')}(this) "{{{
     return a:this._ftime_at_read
 endfunction "}}}
 
+" Set false to `a:this._is_modified`.
+function! {s:PhysicalDict.method('clear_modified_flags')}(this) "{{{
+    let a:this._is_modified = 0
+endfunction "}}}
+
 " }}}
 
 " s:Dictionary {{{
@@ -1195,7 +1200,6 @@ function! {s:Dictionary.method('remember_word')}(this, input, key, okuri, okuri_
     endif
 
     call a:this._registered_words.unshift(rw)
-    let a:this._registered_words_modified = 1
 
     if a:this._registered_words.size() >= g:eskk#dictionary_save_count
         call a:this.update_dictionary(0)
@@ -1229,17 +1233,8 @@ function! {s:Dictionary.method('is_modified')}(this) "{{{
     " No need to check system dictionary.
     " Because it is immutable.
     return
-    \   a:this._registered_words_modified
+    \   !a:this._registered_words.empty()
     \   || a:this._user_dict._is_modified
-endfunction "}}}
-
-" After calling this function,
-" s:Dictionary.is_modified() will returns false.
-" but after calling "s:physical_dict.set_lines()",
-" s:Dictionary.is_modified() will returns true.
-function! {s:Dictionary.method('clear_modified_flags')}(this) "{{{
-    let a:this._registered_words_modified = 0
-    let a:this._user_dict._is_modified = 0
 endfunction "}}}
 
 " Write to user dictionary.
@@ -1273,7 +1268,7 @@ function! {s:Dictionary.method('update_dictionary')}(this, ...) "{{{
     \   verbose
     \)
     call a:this.forget_all_words()
-    call a:this.clear_modified_flags()
+    call a:this._user_dict.clear_modified_flags()
 endfunction "}}}
 function! {s:Dictionary.method('write_lines')}(this, lines, verbose) "{{{
     let user_dict_lines = a:lines
