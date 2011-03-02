@@ -1156,8 +1156,9 @@ function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{
 
 
     if input != ''
-        let [input; _] = split(input, ';')
-        let annotation = join(_, ';')
+        let [input, annotation] =
+        \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
+        let annotation = substitute(annotation, '^;', '', '')
         call a:this.remember_word(input, key, okuri, okuri_rom, annotation)
     endif
 
