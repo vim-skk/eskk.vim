@@ -72,8 +72,14 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             if !empty(m)
                 let [hira, kanji] = m[1:2]
                 let candidates = {}
-                for i in split(kanji, '/') + get(self.candidates, hira, [])
-                    let candidates[i] = 1
+                for c in split(kanji, '/') + get(self.candidates, hira, [])
+                    " Remove the empty annotation.
+                    let c = substitute(c, ';$', '', '')
+                    " Skip the empty candidate.
+                    if c == ''
+                        continue
+                    endif
+                    let candidates[c] = 1
                 endfor
                 let self.candidates[hira] = keys(candidates)
                 return 1
