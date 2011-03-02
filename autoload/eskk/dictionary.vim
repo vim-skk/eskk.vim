@@ -548,8 +548,8 @@ function! {s:HenkanResult.method('get_candidates')}(this) "{{{
         \   . a:this._okuri_rom
         \   . "' in dictionaries."
         \)
-    "else
-        "throw eskk#internal_error(['eskk', 'dictionary'])
+    else
+        throw eskk#internal_error(['eskk', 'dictionary'])
     endif
 endfunction "}}}
 
