@@ -1117,11 +1117,11 @@ function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{
 
     " Create temporary mappings.
     let mappings = []
-    call add(mappings, savemap#save_map('c', '<BS>'))
-    call add(mappings, savemap#save_map('c', '<C-h>'))
-    cnoremap <buffer><expr> <BS>
+    call add(mappings, savemap#save_map('l', '<BS>'))
+    call add(mappings, savemap#save_map('l', '<C-h>'))
+    lnoremap <buffer><expr> <BS>
     \   getcmdline() == '' ? "\<Esc>" : "\<BS>"
-    cnoremap <buffer><expr> <C-h>
+    lnoremap <buffer><expr> <C-h>
     \   getcmdline() == '' ? "\<Esc>" : "\<C-h>"
 
     if okuri == ''
