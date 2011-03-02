@@ -241,7 +241,10 @@ function! eskk#dictionary#create_new_entry(
     " Modify them to make the same input to
     " the original s:SkkMakeNewEntry()'s arguments.
     let key = a:key . (a:okuri_rom == '' ? '' : a:okuri_rom[0]) . ' '
-    let cand = a:new_word . ";" . a:annotation
+    let cand = a:new_word
+    if a:annotation != ''
+        let cand .= ';' . a:annotation
+    endif
     let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
 
 
