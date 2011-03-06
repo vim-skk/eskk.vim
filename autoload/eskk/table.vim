@@ -136,6 +136,14 @@ function! {s:TableObj.method('get_all_base_tables')}(this) "{{{
     endwhile
     return set.to_list()
 endfunction "}}}
+function! {s:TableObj.method('derived_from')}(this, base) "{{{
+    for table in a:this.get_all_base_tables()
+        if table ==# a:base
+            return 1
+        endif
+    endfor
+    return 0
+endfunction "}}}
 
 function! {s:TableObj.method('has_candidates')}(this, lhs_head) "{{{
     let not_found = {}
