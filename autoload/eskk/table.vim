@@ -91,11 +91,18 @@ function! eskk#table#new(table_name, ...) "{{{
     return obj
 endfunction "}}}
 function! s:validate_base_tables(this) "{{{
-    for base in get(a:this, '_bases', [])
-        if base._name ==# a:this._name
-            throw s:table_extending_myself_error(a:this._name)
+    let all_bases = {}
+    let table_stack = [a:this]
+    while !empty(table_stack)
+        let table = remove(table_stack, -1)
+        if has_key(all_bases, table._name)
+            throw eskk#table#extending_myself_error(table._name)
         endif
-    endfor
+        let all_bases[table._name] = 1
+        if table.is_child()
+            let table_stack += table._bases
+        endif
+    endwhile
 endfunction "}}}
 function! eskk#table#extending_myself_error(table_name) "{{{
     return eskk#error#build_error(
