@@ -75,34 +75,33 @@ function! s:remove_base_map() "{{{
     \   "table does not have a map 'a'."
 endfunction "}}}
 
-function! s:do_test_empty_string() "{{{
+function! s:ignore_empty_map() "{{{
     let name = s:tempstr()
-    let table = eskk#table#create(name)
+    let table = eskk#table#new(name)
     let maps = {}
 
     let lhs = s:tempstr()
-    call table.add(lhs, '', '')
+    call table.add_map(lhs, '', '')
     let maps[lhs] = ['', '']
 
     let lhs = s:tempstr()
-    call table.add(lhs, 'vim', '')
+    call table.add_map(lhs, 'vim', '')
     let maps[lhs] = ['vim', '']
 
     let lhs = s:tempstr()
-    call table.add(lhs, '', 'is')
+    call table.add_map(lhs, '', 'is')
     let maps[lhs] = ['', 'is']
 
     let lhs = s:tempstr()
-    call table.add(lhs, 'awesome', 'editor')
+    call table.add_map(lhs, 'awesome', 'editor')
     let maps[lhs] = ['awesome', 'editor']
 
-    call table.register()
 
-
-    let table = eskk#table#new(name)
     for lhs in keys(maps)
         let [map, rest] = maps[lhs]
 
+        " Empty maps are treated as like
+        " those are not registered.
         if map != ''
             Ok table.has_map(lhs)
             Is table.get_map(lhs, -1), map
@@ -125,7 +124,7 @@ function! s:run() "{{{
     call s:register_and_recheck()
     call s:overwrite_check()
     call s:remove_base_map()
-    " call s:do_test_empty_string()
+    call s:ignore_empty_map()
 endfunction "}}}
 
 call s:run()
