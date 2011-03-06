@@ -91,18 +91,13 @@ function! eskk#table#new(table_name, ...) "{{{
     return obj
 endfunction "}}}
 function! s:validate_base_tables(this) "{{{
-    let all_bases = {}
-    let table_stack = [a:this]
-    while !empty(table_stack)
-        let table = remove(table_stack, -1)
-        if has_key(all_bases, table._name)
-            throw eskk#table#extending_myself_error(table._name)
-        endif
-        let all_bases[table._name] = 1
-        if table.is_child()
-            let table_stack += table._bases
-        endif
-    endwhile
+    " a:this.get_all_base_tables() will throw
+    " an exception when duplicated tables
+    " in ancestors.
+    " s:validate_base_tables()'s job is to throw
+    " an exception when duplicated tables
+    " in ancestors.
+    call a:this.get_all_base_tables()
 endfunction "}}}
 function! eskk#table#extending_myself_error(table_name) "{{{
     return eskk#error#build_error(
@@ -126,6 +121,21 @@ function! eskk#table#new_from_file(table_name) "{{{
     return obj
 endfunction "}}}
 
+function! {s:TableObj.method('get_all_base_tables')}(this) "{{{
+    let set = cul#ordered_set#new()
+    let table_stack = [a:this]
+    while !empty(table_stack)
+        let table = remove(table_stack, -1)
+        if set.has(table._name)
+            throw eskk#table#extending_myself_error(table._name)
+        endif
+        call set.push(table._name)
+        if table.is_child()
+            let table_stack += table._bases
+        endif
+    endwhile
+    return set.to_list()
+endfunction "}}}
 
 function! {s:TableObj.method('has_candidates')}(this, lhs_head) "{{{
     let not_found = {}
