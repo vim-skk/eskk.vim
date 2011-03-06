@@ -48,6 +48,23 @@ function! eskk#table#get_all_tables() "{{{
     \)
 endfunction "}}}
 
+function! s:get_table_obj(table) "{{{
+    return type(a:table) ==# type({}) ?
+    \       a:table :
+    \       type(a:table) ==# type('') ?
+    \       eskk#get_table(a:table) :
+    \       s:must_not_reach_here(a:table)
+endfunction "}}}
+function! s:must_not_reach_here(table) "{{{
+    " Handle cyclic reference.
+    let dump = type(a:table) ==# type([]) ? '[Array]' : string(a:table)
+    throw eskk#error#build_error(
+    \   ['eskk', 'build'],
+    \   ["s:get_table_obj() received invalid arguments: "
+    \   . dump]
+    \)
+endfunction "}}}
+
 
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
