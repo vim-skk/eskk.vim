@@ -159,7 +159,7 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
         return candidates
     endif
 
-    if !a:table.is_base()
+    if a:table.is_child()
         " Search base tables.
         let not_found = {}
         for base in a:table._bases
@@ -296,12 +296,15 @@ endfunction "}}}
 function! {s:TableObj.method('is_base')}(this) "{{{
     return !has_key(a:this, '_bases')
 endfunction "}}}
+function! {s:TableObj.method('is_child')}(this) "{{{
+    return !a:this.is_base()
+endfunction "}}}
 
 function! {s:TableObj.method('get_name')}(this) "{{{
     return a:this._name
 endfunction "}}}
 function! {s:TableObj.method('get_base_tables')}(this) "{{{
-    return a:this.is_base() ? [] : a:this._bases
+    return a:this.is_child() ? a:this._bases : []
 endfunction "}}}
 " }}}
 
