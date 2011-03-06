@@ -67,14 +67,12 @@ function! s:overwrite_check() "{{{
     endfor
 endfunction "}}}
 
-function! s:do_test_remove_base_map() "{{{
+function! s:remove_base_map() "{{{
     let name = s:tempstr()
-    let table = eskk#table#create(name, 'rom_to_hira')
-    call table.remove('a')
-    call table.register()
-
-    let table = eskk#table#new(name)
-    OK !table.has_map('a')
+    let table = eskk#table#new(name, 'rom_to_hira')
+    call table.remove_map('a')
+    OK !table.has_map('a'),
+    \   "table does not have a map 'a'."
 endfunction "}}}
 
 function! s:do_test_empty_string() "{{{
@@ -126,7 +124,7 @@ endfunction "}}}
 function! s:run() "{{{
     call s:register_and_recheck()
     call s:overwrite_check()
-    " call s:do_test_remove_base_map()
+    call s:remove_base_map()
     " call s:do_test_empty_string()
 endfunction "}}}
 
