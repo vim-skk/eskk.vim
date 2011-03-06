@@ -372,20 +372,23 @@ function! eskk#mappings#set_up_temp_key(lhs, ...) "{{{
         call eskk#mappings#set_up_key(a:lhs)
     endif
 endfunction "}}}
-function! eskk#mappings#set_up_temp_key_restore(lhs, show_error) "{{{
-    let temp_key = s:temp_key_map(a:lhs)
-    let saved_rhs = maparg(temp_key, 'l')
+function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
+    let temp_key   = s:temp_key_map(a:lhs)
+    let saved_rhs  = maparg(temp_key, 'l')
+    let inst       = eskk#get_current_instance()
 
     if saved_rhs != ''
         call eskk#mappings#unmap('b', temp_key, 'l')
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
-    elseif a:show_error
+    elseif inst.first_setup_for_mode_local_keys
+        " Show error only first time.
         call eskk#error#logf(
         \   "called eskk#mappings#set_up_temp_key_restore()"
         \       . " but no '%s' key is stashed.",
         \   a:lhs
         \)
         call eskk#mappings#set_up_key(a:lhs)
+        let inst.first_setup_for_mode_local_keys = 0
     endif
 endfunction "}}}
 function! eskk#mappings#has_temp_key(lhs) "{{{
@@ -419,10 +422,9 @@ endfunction "}}}
 function! s:unmap_mode_local_keys(real_keys) "{{{
     let inst = eskk#get_current_instance()
     for key in a:real_keys
-        call eskk#mappings#set_up_temp_key_restore(
-        \   key, inst.first_setup_for_mode_local_keys)
+        call eskk#mappings#set_up_temp_key_restore(key)
     endfor
-    let inst.first_setup_for_mode_local_keys = 0
+    let inst.first_setup_for_mode_local_keys = 1
 endfunction "}}}
 
 
@@ -529,9 +531,8 @@ function! s:do_lmap_non_egg_like_newline(enable) "{{{
         call eskk#register_temp_event(
         \   'filter-begin',
         \   'eskk#mappings#set_up_temp_key_restore',
-        \   ['<CR>', inst.first_setup_for_mode_local_keys]
+        \   ['<CR>']
         \)
-        " FIXME: let inst.first_setup_for_mode_local_keys = 0
     endif
 endfunction "}}}
 

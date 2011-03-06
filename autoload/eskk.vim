@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 280))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 281))
 
 
 function! s:SID() "{{{
@@ -41,7 +41,7 @@ let s:eskk = {
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'prev_normal_keys': {},
-\   'first_setup_for_mode_local_keys': 1,
+\   'first_setup_for_mode_local_keys': 0,
 \}
 
 
