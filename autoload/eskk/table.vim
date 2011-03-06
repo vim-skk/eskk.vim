@@ -81,8 +81,8 @@ function! eskk#table#new(table_name, ...) "{{{
             else
                 throw eskk#table#invalid_arguments_error(a:table_name)
             endif
-            call s:validate_base_tables(obj)
         endfor
+        call s:validate_base_tables(obj)
     else
         let obj = s:BaseTable.clone()
         let obj._name = a:table_name
