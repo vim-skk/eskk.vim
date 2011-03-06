@@ -52,19 +52,19 @@ function! s:register_and_recheck() "{{{
     endfor
 endfunction "}}}
 
-function! s:do_test_add_overwrite() "{{{
-    let name = s:tempstr()
-    let table = eskk#table#create(name)
+function! s:overwrite_check() "{{{
+    for base in eskk#table#get_all_tables()
+        let name = s:tempstr()
+        let table = eskk#table#new(name, base)
+        call table.add_map('lhs', 'map', 'rest')
+        call table.add_map('lhs', 'foo', 'bar')
 
-    call table.add('lhs', 'map', 'rest')
-    call table.add('lhs', 'foo', 'bar')
-
-    call table.register()
-
-    " Currently overwrite lhs if it exists.
-    let table = eskk#table#new(name)
-    Is table.get_map('lhs'), 'foo'
-    Is table.get_rest('lhs'), 'bar'
+        " table.add_map() will overwrite maps.
+        Is table.get_map('lhs'), 'foo',
+        \   'table.get_map("lhs") ==# "foo"'
+        Is table.get_rest('lhs'), 'bar',
+        \   'table.get_map("lhs") ==# "bar"'
+    endfor
 endfunction "}}}
 
 function! s:do_test_remove_base_map() "{{{
@@ -125,7 +125,7 @@ endfunction "}}}
 
 function! s:run() "{{{
     call s:register_and_recheck()
-    " call s:do_test_add_overwrite()
+    call s:overwrite_check()
     " call s:do_test_remove_base_map()
     " call s:do_test_empty_string()
 endfunction "}}}
