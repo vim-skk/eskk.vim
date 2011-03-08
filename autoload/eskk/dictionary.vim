@@ -1122,15 +1122,6 @@ function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{
     " Create new eskk instance.
     call eskk#create_new_instance()
 
-    " Create temporary mappings.
-    let mappings = []
-    call add(mappings, savemap#save_map('l', '<BS>'))
-    call add(mappings, savemap#save_map('l', '<C-h>'))
-    lnoremap <buffer><expr> <BS>
-    \   getcmdline() == '' ? "\<Esc>" : "\<BS>"
-    lnoremap <buffer><expr> <C-h>
-    \   getcmdline() == '' ? "\<Esc>" : "\<C-h>"
-
     if okuri == ''
         let prompt = printf('%s ', key)
     else
@@ -1143,10 +1134,6 @@ function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{
     catch /^Vim:Interrupt$/
         let input = ''
     finally
-        for _ in mappings
-            call _.restore()
-        endfor
-
         " Destroy current eskk instance.
         try
             call eskk#destroy_current_instance()
