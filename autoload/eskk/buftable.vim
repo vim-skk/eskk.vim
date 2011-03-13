@@ -692,6 +692,12 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
     let phase   = a:this.get_henkan_phase()
     let buf_str = a:this.get_current_buf_str()
 
+    " Convert rom_str if possible.
+    call a:this.convert_rom_str_inplace([
+    \   g:eskk#buftable#PHASE_HENKAN,
+    \   g:eskk#buftable#PHASE_OKURI
+    \])
+
     if phase ==# g:eskk#buftable#PHASE_NORMAL
         if buf_str.rom_str.get() != ''
         \   || buf_str.rom_pairs.get_filter() != ''
