@@ -719,9 +719,6 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
             call okuri_buf_str.rom_str.set(buf_str.rom_str.get())
             call buf_str.rom_str.clear()
             call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
-        elseif g:eskk#ignore_continuous_sticky
-        \   && empty(buf_str.rom_pairs.get())
-            " ignore.
         elseif buf_str.rom_str.get() != ''
         \   || buf_str.rom_pairs.get_filter() != ''
             call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)

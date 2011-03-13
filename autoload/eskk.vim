@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 283))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 284))
 
 
 function! s:SID() "{{{
@@ -804,7 +804,6 @@ function! eskk#_initialize() "{{{
     endif
 
     call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
-    call eskk#util#set_default('g:eskk#ignore_continuous_sticky', 1)
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
     " }}}
 
