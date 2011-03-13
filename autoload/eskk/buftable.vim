@@ -689,7 +689,6 @@ function! s:get_next_candidate(this, stash, next) "{{{
     endif
 endfunction "}}}
 function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
-    let step    = 0
     let phase   = a:this.get_henkan_phase()
     let buf_str = a:this.get_current_buf_str()
 
@@ -711,30 +710,22 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
         endif
         let a:this._set_begin_pos_at_rewrite = 1
         call a:this.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
-        let step = 1
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         if g:eskk#ignore_continuous_sticky
         \   && empty(buf_str.rom_pairs.get())
-            let step = 0
+            " ignore.
         elseif buf_str.rom_str.get() != ''
         \   || buf_str.rom_pairs.get_filter() != ''
             call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
-            let step = 1
-        else
-            let step = 0
         endif
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
-        let step = 0
+        " nop
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         call a:this.do_enter(a:stash)
         call a:this.do_sticky(a:stash)
-
-        let step = 1
     else
         throw eskk#internal_error(['eskk', 'buftable'])
     endif
-
-    return step ? a:this.get_current_marker() : ''
 endfunction "}}}
 function! {s:Buftable.method('step_back_henkan_phase')}(this) "{{{
     let phase   = a:this.get_henkan_phase()
