@@ -717,15 +717,7 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
         let a:this._set_begin_pos_at_rewrite = 1
         call a:this.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
-        if g:eskk#fix_extra_okuri
-        \   && buf_str.rom_str.get() != ''
-            let okuri_buf_str = a:this.get_buf_str(
-            \   g:eskk#buftable#PHASE_OKURI
-            \)
-            call okuri_buf_str.rom_str.set(buf_str.rom_str.get())
-            call buf_str.rom_str.clear()
-            call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
-        elseif buf_str.rom_str.get() != ''
+        if buf_str.rom_str.get() != ''
         \   || buf_str.rom_pairs.get_filter() != ''
             call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
         endif
