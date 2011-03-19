@@ -50,6 +50,9 @@ endfunction "}}}
 function! {s:RomStr.method('clear')}(this) "{{{
     return a:this._str.set('')
 endfunction "}}}
+function! {s:RomStr.method('empty')}(this) "{{{
+    return a:this._str.get() ==# ''
+endfunction "}}}
 
 call s:BufferString.attribute('rom_str', s:RomStr.new())
 unlet s:RomStr
@@ -90,6 +93,9 @@ endfunction "}}}
 function! {s:RomPairs.method('clear')}(this) "{{{
     call a:this._pairs.set([])
 endfunction "}}}
+function! {s:RomPairs.method('empty')}(this) "{{{
+    return empty(a:this._pairs.get())
+endfunction "}}}
 
 call s:BufferString.attribute('rom_pairs', s:RomPairs.new())
 unlet s:RomPairs
@@ -100,8 +106,8 @@ function! {s:BufferString.method('get_input_rom')}(this) "{{{
 endfunction "}}}
 
 function! {s:BufferString.method('empty')}(this) "{{{
-    return a:this.rom_str.get() == ''
-    \   && empty(a:this.rom_pairs.get())
+    return a:this.rom_str.empty()
+    \   && a:this.rom_pairs.empty()
 endfunction "}}}
 
 function! {s:BufferString.method('clear')}(this) "{{{
@@ -555,7 +561,7 @@ function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
     " Build backspaces to delete previous characters.
     for phase in a:this.get_lower_phases()
         let buf_str = a:this.get_buf_str(phase)
-        if buf_str.rom_str.get() != ''
+        if !buf_str.rom_str.empty()
             call buf_str.rom_str.chop()
             break
         elseif !empty(buf_str.rom_pairs.get())
@@ -699,8 +705,8 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
     \])
 
     if phase ==# g:eskk#buftable#PHASE_NORMAL
-        if buf_str.rom_str.get() != ''
-        \   || buf_str.rom_pairs.get_filter() != ''
+        if !buf_str.rom_str.empty()
+        \   || !buf_str.rom_pairs.empty()
             call a:this.convert_rom_str_inplace(phase)
             call a:this.push_kakutei_str(a:this.get_display_str(0))
             call buf_str.clear()
@@ -717,8 +723,8 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
         let a:this._set_begin_pos_at_rewrite = 1
         call a:this.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
-        if buf_str.rom_str.get() != ''
-        \   || buf_str.rom_pairs.get_filter() != ''
+        if !buf_str.rom_str.empty()
+        \   || !buf_str.rom_pairs.empty()
             call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
         endif
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
@@ -856,7 +862,7 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     \])
 
     if g:eskk#fix_extra_okuri
-    \   && henkan_buf_str.rom_str.get() != ''
+    \   && !henkan_buf_str.rom_str.empty()
     \   && phase ==# g:eskk#buftable#PHASE_HENKAN
         call okuri_buf_str.rom_str.set(henkan_buf_str.rom_str.get())
         call henkan_buf_str.rom_str.clear()
