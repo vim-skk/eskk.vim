@@ -646,9 +646,6 @@ function! eskk#_initialize() "{{{
 
     try
         call s:validate_lib_version(
-        \   'cul.vim', 'cul#ordered_set', 0, 0, 14
-        \)
-        call s:validate_lib_version(
         \   'savemap.vim', 'savemap', 0, 0, 18
         \)
         call s:validate_lib_version(

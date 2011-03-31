@@ -18,10 +18,6 @@ set cpo&vim
 function! s:check_if_prereq_libs_are_installed() "{{{
     echohl ErrorMsg
     try
-        if globpath(&rtp, 'autoload/cul/ordered_set.vim') == ''
-            echomsg 'autoload/cul/ordered_set.vim is not installed.'
-            return 0
-        endif
         if globpath(&rtp, 'autoload/savemap.vim') == ''
             echomsg 'autoload/savemap.vim is not installed.'
             return 0
