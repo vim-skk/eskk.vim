@@ -71,17 +71,19 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             let m = matchlist(a:line, a:pattern)
             if !empty(m)
                 let [hira, kanji] = m[1:2]
-                let candidates = {}
-                for c in split(kanji, '/') + get(self.hira_vs_candidates, hira, [])
+                if !has_key(self.hira_vs_candidates, hira)
+                    let self.hira_vs_candidates[hira] = cul#ordered_set#new()
+                endif
+                for c in split(kanji, '/')
                     " Remove the empty annotation.
                     let c = substitute(c, ';$', '', '')
                     " Skip the empty candidate.
                     if c == ''
                         continue
                     endif
-                    let candidates[c] = 1
+                    " Add a candidate to self.hira_vs_candidates[hira].
+                    call self.hira_vs_candidates[hira].push(c)
                 endfor
-                let self.hira_vs_candidates[hira] = keys(candidates)
                 return 1
             else
                 return 0
@@ -90,7 +92,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         function lambda.get_candidates()
             return values(map(
             \   self.hira_vs_candidates,
-            \   'v:key . " /" . join(v:val, "/") . "/"'
+            \   'v:key . " /" . join(v:val.to_list(), "/") . "/"'
             \))
         endfunction
 
