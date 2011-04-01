@@ -66,13 +66,13 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         endif
 
         " Fix dictionary lines.
-        let lambda = {'candidates': {}}
+        let lambda = {'hira_vs_candidates': {}}
         function lambda.match_and_add(line, pattern)
             let m = matchlist(a:line, a:pattern)
             if !empty(m)
                 let [hira, kanji] = m[1:2]
                 let candidates = {}
-                for c in split(kanji, '/') + get(self.candidates, hira, [])
+                for c in split(kanji, '/') + get(self.hira_vs_candidates, hira, [])
                     " Remove the empty annotation.
                     let c = substitute(c, ';$', '', '')
                     " Skip the empty candidate.
@@ -81,7 +81,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
                     endif
                     let candidates[c] = 1
                 endfor
-                let self.candidates[hira] = keys(candidates)
+                let self.hira_vs_candidates[hira] = keys(candidates)
                 return 1
             else
                 return 0
@@ -89,7 +89,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         endfunction
         function lambda.get_candidates()
             return values(map(
-            \   self.candidates,
+            \   self.hira_vs_candidates,
             \   'v:key . " /" . join(v:val, "/") . "/"'
             \))
         endfunction
