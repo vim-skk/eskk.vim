@@ -66,13 +66,17 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         endif
 
         " Fix dictionary lines.
-        let lambda = {'hira_vs_candidates': {}}
+        let lambda = {
+        \   'hira_vs_candidates': {},
+        \   'key_order' : [],
+        \}
         function lambda.match_and_add(line, pattern)
             let m = matchlist(a:line, a:pattern)
             if !empty(m)
                 let [hira, kanji] = m[1:2]
                 if !has_key(self.hira_vs_candidates, hira)
                     let self.hira_vs_candidates[hira] = cul#ordered_set#new()
+                    call add(self.key_order, hira)
                 endif
                 for c in split(kanji, '/')
                     " Remove the empty annotation.
@@ -90,10 +94,14 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             endif
         endfunction
         function lambda.get_candidates()
-            return values(map(
-            \   self.hira_vs_candidates,
-            \   'v:key . " /" . join(v:val.to_list(), "/") . "/"'
-            \))
+            return
+            \   map(
+            \       map(
+            \           copy(self.key_order),
+            \           '[v:val, self.hira_vs_candidates[v:val]]'
+            \       ),
+            \       'v:val[0] . " /" . join(v:val[1].to_list(), "/") . "/"'
+            \   )
         endfunction
 
         let okuri_ari = deepcopy(lambda)
