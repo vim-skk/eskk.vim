@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 296))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 297))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -605,9 +605,9 @@ function! eskk#_initialize() "{{{
         return str2nr(printf('%02d%02d%03d', a:x, a:y, a:z))
     endfunction
     function! s:version_unpack(version)
-        " Padding missing leading zeros.
+        " Padding missing leading zeroes.
         let s = printf('%07d', a:version)
-        " str2nr() ignores leading zeros.
+        " str2nr() ignores leading zeroes.
         return [str2nr(s[:1]), str2nr(s[2:3]), str2nr(s[4:])]
     endfunction
     function! s:validate_lib_version(plugin_name, namespace, x, y, z)
