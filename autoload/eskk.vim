@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 290))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 294))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
