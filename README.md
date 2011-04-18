@@ -1,6 +1,5 @@
 
 # REQUIREMENTS
-- [cul.vim](git://github.com/tyru/cul.vim)
 - [savemap.vim](git://github.com/tyru/savemap.vim)
 - [vice.vim](git://github.com/tyru/vice.vim)
 
