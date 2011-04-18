@@ -139,7 +139,7 @@ function! eskk#table#new_from_file(table_name) "{{{
 endfunction "}}}
 
 function! {s:TableObj.method('get_all_base_tables')}(this) "{{{
-    let set = cul#ordered_set#new()
+    let set = g:eskk#V.Data.OrderedSet.new()
     let table_stack = [a:this]
     while !empty(table_stack)
         let table = remove(table_stack, -1)

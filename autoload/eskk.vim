@@ -10,6 +10,8 @@ set cpo&vim
 
 let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 290))
 
+let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
+
 
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
@@ -643,9 +645,6 @@ function! eskk#_initialize() "{{{
     endfunction "}}}
 
     try
-        call s:validate_lib_version(
-        \   'cul.vim', 'cul#ordered_set', 0, 0, 14
-        \)
         call s:validate_lib_version(
         \   'savemap.vim', 'savemap', 0, 0, 18
         \)
