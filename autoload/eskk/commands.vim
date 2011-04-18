@@ -75,7 +75,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             if !empty(m)
                 let [hira, kanji] = m[1:2]
                 if !has_key(self.hira_vs_candidates, hira)
-                    let self.hira_vs_candidates[hira] = cul#ordered_set#new()
+                    let self.hira_vs_candidates[hira] = g:eskk#V.Data.OrdredSet.new()
                     call add(self.key_order, hira)
                 endif
                 for c in split(kanji, '/')
