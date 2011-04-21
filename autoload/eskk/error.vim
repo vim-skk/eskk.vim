@@ -26,6 +26,7 @@ function! eskk#error#write_debug_log_file() "{{{
         endfor
     finally
         redir END
+        let s:warning_messages = []
     endtry
 endfunction "}}}
 function! eskk#error#write_error_log_file(char, ...) "{{{

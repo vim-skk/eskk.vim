@@ -1243,7 +1243,8 @@ function! eskk#_initialize() "{{{
     " Logging event {{{
     if g:eskk#debug
         " Should I create autoload/eskk/log.vim ?
-        autocmd eskk VimLeavePre * call eskk#error#write_debug_log_file()
+        autocmd eskk CursorHold,VimLeavePre *
+        \            call eskk#error#write_debug_log_file()
     endif
     " }}}
 
