@@ -10,6 +10,9 @@ set cpo&vim
 let s:warning_messages = []
 
 function! eskk#error#write_debug_log_file() "{{{
+    if empty(s:warning_messages)
+        return
+    endif
     try
         execute 'redir >>' expand(
         \   eskk#util#join_path(
