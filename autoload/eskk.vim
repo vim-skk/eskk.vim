@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 298))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 299))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -342,7 +342,7 @@ function! s:filter_rom(stash, table) "{{{
         return s:filter_rom_exact_match(a:stash, a:table)
     else
         " No candidates.
-        return s:filter_rom_no_match_{g:eskk#rom_input_style}(a:stash, a:table)
+        return s:filter_rom_no_match(a:stash, a:table)
     endif
 endfunction "}}}
 function! s:filter_rom_exact_match(stash, table) "{{{
@@ -494,7 +494,7 @@ function! s:filter_rom_has_candidates(stash) "{{{
     let buf_str  = buftable.get_current_buf_str()
     call buf_str.rom_str.append(a:stash.char)
 endfunction "}}}
-function! s:filter_rom_no_match_skk(stash, table) "{{{
+function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
     let buf_str = eskk#get_buftable().get_current_buf_str()
     let rom_str_without_char = buf_str.rom_str.get()
@@ -515,87 +515,19 @@ function! s:filter_rom_no_match_skk(stash, table) "{{{
         " e.g.: rom_str is " ", "&"
         call buf_str.rom_pairs.push_one_pair(char, char)
     else
-        " `rom_str_without_char` has the candidate(s) but fail with `char`.
-        " e.g.: rom_str is "zyk" => "k"
-        call buf_str.rom_str.set(char)
-    endif
-endfunction "}}}
-function! s:filter_rom_no_match_msime(stash, table) "{{{
-    let char = a:stash.char
-    let buf_str = eskk#get_buftable().get_current_buf_str()
-    let rom_str = buf_str.rom_str.get() . char
-
-    let [matched_map_list, rest] =
-    \   s:get_matched_and_rest(a:table, rom_str, 1)
-    if !empty(matched_map_list)
-        for matched in matched_map_list
-            call buf_str.rom_pairs.push_one_pair(matched, a:table.get_map(matched))
-        endfor
-        call buf_str.rom_str.set(rest)
-    else
-        let [matched_map_list, head_no_match] =
-        \   s:get_matched_and_rest(a:table, rom_str, 0)
-        if empty(matched_map_list)
-            call buf_str.rom_str.set(head_no_match)
-        else
-            for char in split(head_no_match, '\zs')
-                call buf_str.rom_pairs.push_one_pair(char, char)
-            endfor
-            for matched in matched_map_list
-                if a:table.has_rest(matched)
-                    call eskk#register_temp_event(
-                    \   'filter-redispatch-post',
-                    \   'eskk#mappings#key2char',
-                    \   [eskk#mappings#get_filter_map(
-                    \       a:table.get_rest(matched)
-                    \   )]
-                    \)
-                endif
-                call buf_str.rom_pairs.push_one_pair(
-                \   matched, a:table.get_map(matched)
-                \)
-            endfor
-            call buf_str.rom_str.clear()
+        if g:eskk#rom_input_style ==# 'skk'
+            " `rom_str_without_char` has the candidate(s) but fail with `char`.
+            " e.g.: rom_str is "zyk" => "k"
+            call buf_str.rom_str.set(char)
+        elseif g:eskk#rom_input_style ==# 'msime'
+            " `rom_str_without_char` has the candidate(s) but fail with `char`.
+            " e.g.: rom_str is "zyk" => "zyk"
+            call buf_str.rom_pairs.push_one_pair(
+            \   rom_str_without_char, rom_str_without_char
+            \)
+            call buf_str.rom_str.set(char)
         endif
     endif
-endfunction "}}}
-
-function! s:generate_map_list(str, tail) "{{{
-    " a:tail is true: "abc" => ["abc", "ab", "a"]
-    " a:tail is false: "abc" => ["abc", "bc", "c"]
-    let str = a:str
-    let result = []
-    while str != ''
-        call add(result, str)
-        let str = a:tail ? str[:-2] : str[1:]
-    endwhile
-    return result
-endfunction "}}}
-function! s:get_matched_and_rest(table, rom_str, tail) "{{{
-    " For e.g., if table has map "n" to "ん" and "j" to none.
-    " rom_str(a:tail is true): "nj" => [["ん"], "j"]
-    " rom_str(a:tail is false): "nj" => [[], "nj"]
-
-    let matched = []
-    let rest = a:rom_str
-    while 1
-        let has_map_str = -1
-        for str in s:generate_map_list(rest, a:tail)
-            if a:table.has_map(str)
-                let has_map_str = str
-                break
-            endif
-        endfor
-        if has_map_str ==# -1
-            return [matched, rest]
-        endif
-        call add(matched, has_map_str)
-        if a:tail
-            let rest = rest[strlen(has_map_str):]
-        else
-            let rest = rest[:-strlen(has_map_str) - 1]
-        endif
-    endwhile
 endfunction "}}}
 " Clear filtered string when eskk#filter()'s finalizing.
 function! s:clear_buffer_string(phase) "{{{
