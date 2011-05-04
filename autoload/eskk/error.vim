@@ -212,7 +212,7 @@ function! eskk#error#logstrf(fmt, ...) "{{{
     \)
 endfunction "}}}
 function! eskk#error#log_exception(what) "{{{
-    call eskk#error#log("'" . a:what . "' throwed exception")
+    call eskk#error#log("'" . a:what . "' threw exception")
     call eskk#error#log('v:exception = ' . string(v:exception))
     call eskk#error#log('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
