@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 300))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 301))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -508,7 +508,16 @@ function! s:filter_rom_no_match(stash, table) "{{{
         " `rom_str_without_char` has the map but fail with `char`.
         " e.g.: rom_str is "nj" => "んj"
         call buf_str.rom_pairs.push_one_pair(rom_str_without_char, map)
-        call buf_str.rom_str.set(char)
+
+        " TODO: Can do it recursively?
+        unlet map
+        let map = a:table.get_map(char, NO_MAP)
+        if map isnot NO_MAP
+            call buf_str.rom_pairs.push_one_pair(char, map)
+            call buf_str.rom_str.clear()
+        else
+            call buf_str.rom_str.set(char)
+        endif
     elseif empty(rom_str_without_char)
         " No candidates started with such a character `char`.
         " e.g.: rom_str is " ", "&"
