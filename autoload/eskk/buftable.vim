@@ -806,7 +806,7 @@ function! {s:Buftable.method('do_henkan_abbrev')}(this, stash, convert_at_exact_
 
     try
         let candidate = dict.get_henkan_result().get_candidate()
-        " No exception throwed. continue...
+        " No thrown exception. continue...
 
         call a:this.clear_all()
         if a:convert_at_exact_match

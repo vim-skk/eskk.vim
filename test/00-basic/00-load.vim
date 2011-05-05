@@ -15,9 +15,9 @@ function! s:run()
     for s in s:glob('plugin/eskk**/*.vim') + s:glob('autoload/eskk**/*.vim')
         try
             source `=s`
-            Ok 1, s . ' - not throwed exception'
+            Ok 1, s . ' - no exception was thrown'
         catch
-            Ok 0, s . ' - throwed exception'
+            Ok 0, s . ' - exception was thrown'
             Diag v:exception
             Diag v:throwpoint
         endtry
