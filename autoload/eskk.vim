@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 299))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 300))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -498,7 +498,6 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
     let buf_str = eskk#get_buftable().get_current_buf_str()
     let rom_str_without_char = buf_str.rom_str.get()
-    let rom_str = rom_str_without_char . char
 
     " TODO: Save previous (or more?) searched result
     " with map/candidates of rom_str.
@@ -511,17 +510,16 @@ function! s:filter_rom_no_match(stash, table) "{{{
         call buf_str.rom_pairs.push_one_pair(rom_str_without_char, map)
         call buf_str.rom_str.set(char)
     elseif empty(rom_str_without_char)
-        " No candidates started with such a character.
+        " No candidates started with such a character `char`.
         " e.g.: rom_str is " ", "&"
         call buf_str.rom_pairs.push_one_pair(char, char)
     else
+        " `rom_str_without_char` has the candidate(s) but fail with `char`.
         if g:eskk#rom_input_style ==# 'skk'
-            " `rom_str_without_char` has the candidate(s) but fail with `char`.
-            " e.g.: rom_str is "zyk" => "k"
+            " rom_str is "zyk" => "k"
             call buf_str.rom_str.set(char)
         elseif g:eskk#rom_input_style ==# 'msime'
-            " `rom_str_without_char` has the candidate(s) but fail with `char`.
-            " e.g.: rom_str is "zyk" => "zyk"
+            " rom_str is "zyk" => "zyk"
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str_without_char, rom_str_without_char
             \)
