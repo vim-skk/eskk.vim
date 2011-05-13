@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 303))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 304))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -252,13 +252,20 @@ function! s:asym_filter.filter(stash) "{{{
         \   && !eskk#mappings#is_special_lhs(
         \          char, 'phase:henkan-select:delete-from-dict'
         \       )
-            call buftable.do_sticky(a:stash)
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#mappings#key2char',
-            \   [eskk#mappings#get_filter_map(tolower(char))]
-            \)
-            return
+            if buftable.get_current_buf_str().rom_str.empty()
+                call buftable.do_sticky(a:stash)
+                call eskk#register_temp_event(
+                \   'filter-redispatch-post',
+                \   'eskk#mappings#key2char',
+                \   [eskk#mappings#get_filter_map(tolower(char))]
+                \)
+                return
+            else
+                " NOTE: Assume "SAkujo" as "Sakujo".
+                let stash = deepcopy(a:stash)
+                let stash.char = tolower(stash.char)
+                return self.filter(stash)
+            endif
         elseif eskk#mappings#is_special_lhs(char, 'escape-key')
             call buftable.do_escape(a:stash)
             return
