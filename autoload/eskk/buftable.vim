@@ -986,7 +986,7 @@ function! {s:Buftable.method('convert_rom_pairs')}(this, phases, ...) "{{{
     \               a:phases : [a:phases]
     let r = []
     for p in phases
-        let buf_str = deepcopy(a:this.get_buf_str(a:phase), 1)
+        let buf_str = deepcopy(a:this.get_buf_str(p), 1)
         let matched = buf_str.rom_pairs.get()
         call buf_str.rom_pairs.clear()
         for [rom_str, filter_str] in matched
