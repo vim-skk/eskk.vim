@@ -176,34 +176,30 @@ function! {s:AbstractTable.method('get_candidates')}(this, lhs_head, max_candida
     \)
 endfunction "}}}
 function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
-    let table_name = a:table._name
+    " TODO: Implement a:max_candidates
+
     call eskk#error#assert(
     \   a:max_candidates !=# 0,
     \   "a:max_candidates must be negative or positive."
     \)
 
     let candidates = filter(
-    \   copy(a:table.load()), 'stridx(v:key, a:lhs_head) == 0'
+    \   keys(a:table.load()), 'stridx(v:val, a:lhs_head) == 0'
     \)
-
-    if !empty(candidates)
-        return candidates
-    endif
-
     if a:table.is_child()
         " Search base tables.
-        let not_found = {}
         for base in a:table._bases
-            let r = s:get_candidates(
+            let candidates += s:get_candidates(
             \   base,
             \   a:lhs_head,
             \   a:max_candidates,
-            \   not_found
+            \   []
             \)
-            if r isnot not_found
-                return r
-            endif
         endfor
+    endif
+
+    if !empty(candidates)
+        return candidates
     endif
 
     " No lhs_head in a:table and its base tables.
