@@ -246,9 +246,11 @@ function! {s:TableObj.method('get_rest')}(this, lhs, ...) "{{{
     \)
 endfunction "}}}
 function! s:get_map(table, lhs, index, ...) "{{{
-    let table_name = a:table._name
-    let data = a:table.load()
+    if a:lhs ==# ''
+        return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
+    endif
 
+    let data = a:table.load()
     if g:eskk#cache_table_map
     \   && has_key(a:table._cached_maps, a:lhs)
         if a:table._cached_maps[a:lhs][a:index] != ''
