@@ -74,13 +74,13 @@ delfunc s:SID
 
 let s:VICE_OPTIONS = {'generate_stub': 1, 'auto_clone_method': 1}
 
-" s:TableObj {{{
-let s:TableObj = vice#class('TableObj', s:SID_PREFIX, s:VICE_OPTIONS)
+" s:AbstractTable {{{
+let s:AbstractTable = vice#class('AbstractTable', s:SID_PREFIX, s:VICE_OPTIONS)
 
-call s:TableObj.attribute('_name', '')
-call s:TableObj.attribute('_data', {})
-call s:TableObj.attribute('_cached_maps', {})
-call s:TableObj.attribute('_cached_candidates', {})
+call s:AbstractTable.attribute('_name', '')
+call s:AbstractTable.attribute('_data', {})
+call s:AbstractTable.attribute('_cached_maps', {})
+call s:AbstractTable.attribute('_cached_candidates', {})
 
 " Constructor of s:ParentTable, s:ChildTable
 function! eskk#table#new(table_name, ...) "{{{
@@ -93,7 +93,7 @@ function! eskk#table#new(table_name, ...) "{{{
                 " Assume it's installed table name.
                 call add(obj._bases, eskk#table#new_from_file(base))
             elseif type(base) == type({})
-                " Assume it's s:TableObj object.
+                " Assume it's s:AbstractTable object.
                 call add(obj._bases, base)
             else
                 throw eskk#table#invalid_arguments_error(a:table_name)
@@ -138,7 +138,7 @@ function! eskk#table#new_from_file(table_name) "{{{
     return obj
 endfunction "}}}
 
-function! {s:TableObj.method('get_all_base_tables')}(this) "{{{
+function! {s:AbstractTable.method('get_all_base_tables')}(this) "{{{
     let set = g:eskk#V.Data.OrderedSet.new()
     let table_stack = [a:this]
     while !empty(table_stack)
@@ -153,7 +153,7 @@ function! {s:TableObj.method('get_all_base_tables')}(this) "{{{
     endwhile
     return set.to_list()
 endfunction "}}}
-function! {s:TableObj.method('derived_from')}(this, base) "{{{
+function! {s:AbstractTable.method('derived_from')}(this, base) "{{{
     for table in a:this.get_all_base_tables()
         if table ==# a:base
             return 1
@@ -162,17 +162,17 @@ function! {s:TableObj.method('derived_from')}(this, base) "{{{
     return 0
 endfunction "}}}
 
-function! {s:TableObj.method('has_candidates')}(this, lhs_head) "{{{
+function! {s:AbstractTable.method('has_candidates')}(this, lhs_head) "{{{
     let not_found = {}
     return a:this.get_candidates(a:lhs_head, 1, not_found) isnot not_found
 endfunction "}}}
-function! {s:TableObj.method('has_n_candidates')}(this, lhs_head, n) "{{{
+function! {s:AbstractTable.method('has_n_candidates')}(this, lhs_head, n) "{{{
     " Has n candidates at least.
     let not_found = {}
     let c = a:this.get_candidates(a:lhs_head, a:n, not_found)
     return c isnot not_found && len(c) >= a:n
 endfunction "}}}
-function! {s:TableObj.method('get_candidates')}(this, lhs_head, max_candidates, ...) "{{{
+function! {s:AbstractTable.method('get_candidates')}(this, lhs_head, max_candidates, ...) "{{{
     return call(
     \   's:get_candidates',
     \   [a:this, a:lhs_head, a:max_candidates] + a:000
@@ -231,21 +231,21 @@ let [
 \   s:REST_INDEX
 \] = range(2)
 
-function! {s:TableObj.method('has_map')}(this, lhs) "{{{
+function! {s:AbstractTable.method('has_map')}(this, lhs) "{{{
     let not_found = {}
     return a:this.get_map(a:lhs, not_found) isnot not_found
 endfunction "}}}
-function! {s:TableObj.method('get_map')}(this, lhs, ...) "{{{
+function! {s:AbstractTable.method('get_map')}(this, lhs, ...) "{{{
     return call(
     \   's:get_map',
     \   [a:this, a:lhs, s:MAP_INDEX] + a:000
     \)
 endfunction "}}}
-function! {s:TableObj.method('has_rest')}(this, lhs) "{{{
+function! {s:AbstractTable.method('has_rest')}(this, lhs) "{{{
     let not_found = {}
     return a:this.get_rest(a:lhs, not_found) isnot not_found
 endfunction "}}}
-function! {s:TableObj.method('get_rest')}(this, lhs, ...) "{{{
+function! {s:AbstractTable.method('get_rest')}(this, lhs, ...) "{{{
     return call(
     \   's:get_map',
     \   [a:this, a:lhs, s:REST_INDEX] + a:000
@@ -315,7 +315,7 @@ function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
     endif
 endfunction "}}}
 
-function! {s:TableObj.method('load')}(this) "{{{
+function! {s:AbstractTable.method('load')}(this) "{{{
     if has_key(a:this, '_bases')
         " TODO: after initializing base tables,
         " this object has no need to have base references.
@@ -329,7 +329,7 @@ function! {s:TableObj.method('load')}(this) "{{{
     call s:do_initialize(a:this)
     return a:this._data
 endfunction "}}}
-function! s:TableObj_get_mappings() dict "{{{
+function! s:AbstractTable_get_mappings() dict "{{{
     return self._data
 endfunction "}}}
 function! s:do_initialize(table) "{{{
@@ -339,28 +339,28 @@ function! s:do_initialize(table) "{{{
 
         " TODO: You can't this if using vice.vim!
         " let a:table.load = eskk#util#get_local_func(
-        " \                       'TableObj_get_mappings', s:SID_PREFIX)
+        " \                       'AbstractTable_get_mappings', s:SID_PREFIX)
     endif
 endfunction "}}}
 
-function! {s:TableObj.method('is_base')}(this) "{{{
+function! {s:AbstractTable.method('is_base')}(this) "{{{
     return !has_key(a:this, '_bases')
 endfunction "}}}
-function! {s:TableObj.method('is_child')}(this) "{{{
+function! {s:AbstractTable.method('is_child')}(this) "{{{
     return !a:this.is_base()
 endfunction "}}}
 
-function! {s:TableObj.method('get_name')}(this) "{{{
+function! {s:AbstractTable.method('get_name')}(this) "{{{
     return a:this._name
 endfunction "}}}
-function! {s:TableObj.method('get_base_tables')}(this) "{{{
+function! {s:AbstractTable.method('get_base_tables')}(this) "{{{
     return a:this.is_child() ? a:this._bases : []
 endfunction "}}}
 " }}}
 
 " s:BaseTable {{{
 let s:BaseTable = vice#class('BaseTable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:BaseTable.extends(s:TableObj)
+call s:BaseTable.extends(s:AbstractTable)
 
 function! {s:BaseTable.method('add_from_dict')}(this, dict) "{{{
     let a:this._data = a:dict
@@ -374,7 +374,7 @@ endfunction "}}}
 
 " s:ChildTable {{{
 let s:ChildTable = vice#class('ChildTable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:ChildTable.extends(s:TableObj)
+call s:ChildTable.extends(s:AbstractTable)
 
 function! {s:ChildTable.method('add_map')}(this, lhs, map, ...) "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
@@ -396,7 +396,7 @@ endfunction "}}}
 " }}}
 
 " for memory, store object instead of object factory (class).
-unlet s:TableObj
+unlet s:AbstractTable
 let s:BaseTable = s:BaseTable.new()
 let s:ChildTable = s:ChildTable.new()
 
