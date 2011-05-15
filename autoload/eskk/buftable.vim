@@ -940,12 +940,14 @@ function! {s:Buftable.method('do_l_key')}(this) "{{{
     return s:convert_again_with_table(a:this, {})
 endfunction "}}}
 function! {s:Buftable.method('do_escape')}(this, stash) "{{{
-    let kakutei_str = a:this.generate_kakutei_str()
+    call a:this.convert_rom_str_inplace(
+    \   a:this.get_henkan_phase()
+    \)
 
+    let kakutei_str = a:this.generate_kakutei_str()
     " NOTE: This function return value is not remapped.
     let esc = eskk#mappings#get_special_key('escape-key')
     call eskk#error#assert(esc != '', 'esc must not be empty string')
-
     let a:stash.return = kakutei_str . eskk#mappings#key2char(esc)
 endfunction "}}}
 function! {s:Buftable.method('do_tab')}(this, stash) "{{{
