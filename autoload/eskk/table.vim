@@ -78,7 +78,6 @@ let s:AbstractTable = vice#class('AbstractTable', s:SID_PREFIX, s:VICE_OPTIONS)
 call s:AbstractTable.attribute('_name', '')
 call s:AbstractTable.attribute('_data', {})
 call s:AbstractTable.attribute('_cached_maps', {})
-call s:AbstractTable.attribute('_cached_candidates', {})
 
 " Constructor of s:DataTable, s:DiffTable
 function! eskk#table#new(table_name, ...) "{{{
@@ -183,14 +182,9 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     \   "a:max_candidates must be negative or positive."
     \)
 
-    if has_key(a:table._cached_candidates, a:lhs_head)
-        let candidates = a:table._cached_candidates[a:lhs_head]
-    else
-        let candidates = filter(
-        \   copy(a:table.load()), 'stridx(v:key, a:lhs_head) == 0'
-        \)
-        let a:table._cached_candidates[a:lhs_head] = candidates
-    endif
+    let candidates = filter(
+    \   copy(a:table.load()), 'stridx(v:key, a:lhs_head) == 0'
+    \)
 
     if !empty(candidates)
         return candidates
