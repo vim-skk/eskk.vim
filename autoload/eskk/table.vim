@@ -15,8 +15,7 @@ set cpo&vim
 "   ...
 " }
 "
-" Base Table:
-" {
+" s:DataTable = {
 "   '_name': 'table_name',
 "   '_data': {
 "       'lhs': ['map', 'rest'],
@@ -25,8 +24,7 @@ set cpo&vim
 "   },
 " }
 "
-" Child Table:
-" {
+" s:DiffTable = {
 "   '_name': 'table_name',
 "   '_data': {
 "       'lhs': {'method': 'add', 'data': ['map', 'rest']},
@@ -82,10 +80,10 @@ call s:AbstractTable.attribute('_data', {})
 call s:AbstractTable.attribute('_cached_maps', {})
 call s:AbstractTable.attribute('_cached_candidates', {})
 
-" Constructor of s:ParentTable, s:ChildTable
+" Constructor of s:DataTable, s:DiffTable
 function! eskk#table#new(table_name, ...) "{{{
     if a:0
-        let obj = s:ChildTable.clone()
+        let obj = s:DiffTable.clone()
         let obj._name = a:table_name
         let obj._bases = []
         for base in type(a:1) == type([]) ? a:1 : [a:1]
@@ -101,7 +99,7 @@ function! eskk#table#new(table_name, ...) "{{{
         endfor
         call s:validate_base_tables(obj)
     else
-        let obj = s:BaseTable.clone()
+        let obj = s:DataTable.clone()
         let obj._name = a:table_name
     endif
 
@@ -358,30 +356,30 @@ function! {s:AbstractTable.method('get_base_tables')}(this) "{{{
 endfunction "}}}
 " }}}
 
-" s:BaseTable {{{
-let s:BaseTable = vice#class('BaseTable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:BaseTable.extends(s:AbstractTable)
+" s:DataTable {{{
+let s:DataTable = vice#class('DataTable', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:DataTable.extends(s:AbstractTable)
 
-function! {s:BaseTable.method('add_from_dict')}(this, dict) "{{{
+function! {s:DataTable.method('add_from_dict')}(this, dict) "{{{
     let a:this._data = a:dict
 endfunction "}}}
 
-function! {s:BaseTable.method('add_map')}(this, lhs, map, ...) "{{{
+function! {s:DataTable.method('add_map')}(this, lhs, map, ...) "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
     let a:this._data[a:lhs] = pair
 endfunction "}}}
 " }}}
 
-" s:ChildTable {{{
-let s:ChildTable = vice#class('ChildTable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:ChildTable.extends(s:AbstractTable)
+" s:DiffTable {{{
+let s:DiffTable = vice#class('DiffTable', s:SID_PREFIX, s:VICE_OPTIONS)
+call s:DiffTable.extends(s:AbstractTable)
 
-function! {s:ChildTable.method('add_map')}(this, lhs, map, ...) "{{{
+function! {s:DiffTable.method('add_map')}(this, lhs, map, ...) "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
     let a:this._data[a:lhs] = {'method': 'add', 'data': pair}
 endfunction "}}}
 
-function! {s:ChildTable.method('remove_map')}(this, lhs) "{{{
+function! {s:DiffTable.method('remove_map')}(this, lhs) "{{{
     if has_key(a:this._data, a:lhs)
         unlet a:this._data[a:lhs]
     else
@@ -397,8 +395,8 @@ endfunction "}}}
 
 " for memory, store object instead of object factory (class).
 unlet s:AbstractTable
-let s:BaseTable = s:BaseTable.new()
-let s:ChildTable = s:ChildTable.new()
+let s:DataTable = s:DataTable.new()
+let s:DiffTable = s:DiffTable.new()
 
 
 " Restore 'cpoptions' {{{
