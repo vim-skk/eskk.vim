@@ -183,15 +183,13 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     \   "a:max_candidates must be negative or positive."
     \)
 
-    if g:eskk#cache_table_candidates
-        if has_key(a:table._cached_candidates, a:lhs_head)
-            let candidates = a:table._cached_candidates[a:lhs_head]
-        else
-            let candidates = filter(
-            \   copy(a:table.load()), 'stridx(v:key, a:lhs_head) == 0'
-            \)
-            let a:table._cached_candidates[a:lhs_head] = candidates
-        endif
+    if has_key(a:table._cached_candidates, a:lhs_head)
+        let candidates = a:table._cached_candidates[a:lhs_head]
+    else
+        let candidates = filter(
+        \   copy(a:table.load()), 'stridx(v:key, a:lhs_head) == 0'
+        \)
+        let a:table._cached_candidates[a:lhs_head] = candidates
     endif
 
     if !empty(candidates)

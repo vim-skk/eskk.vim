@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 311))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 312))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -715,7 +715,6 @@ function! eskk#_initialize() "{{{
 
     " Table
     call eskk#util#set_default('g:eskk#cache_table_map', 1)
-    call eskk#util#set_default('g:eskk#cache_table_candidates', 1)
 
     " Markers
     call eskk#util#set_default('g:eskk#marker_henkan', '▽')
