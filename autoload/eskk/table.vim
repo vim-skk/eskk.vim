@@ -225,6 +225,12 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     endif
 endfunction "}}}
 
+
+let [
+\   s:MAP_INDEX,
+\   s:REST_INDEX
+\] = range(2)
+
 function! {s:TableObj.method('has_map')}(this, lhs) "{{{
     let not_found = {}
     return a:this.get_map(a:lhs, not_found) isnot not_found
@@ -232,7 +238,7 @@ endfunction "}}}
 function! {s:TableObj.method('get_map')}(this, lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [a:this, a:lhs, 0] + a:000
+    \   [a:this, a:lhs, s:MAP_INDEX] + a:000
     \)
 endfunction "}}}
 function! {s:TableObj.method('has_rest')}(this, lhs) "{{{
@@ -242,7 +248,7 @@ endfunction "}}}
 function! {s:TableObj.method('get_rest')}(this, lhs, ...) "{{{
     return call(
     \   's:get_map',
-    \   [a:this, a:lhs, 1] + a:000
+    \   [a:this, a:lhs, s:REST_INDEX] + a:000
     \)
 endfunction "}}}
 function! s:get_map(table, lhs, index, ...) "{{{
