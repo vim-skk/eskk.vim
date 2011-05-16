@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 314))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 315))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -1770,6 +1770,9 @@ endfunction "}}}
 
 call eskk#_initialize()
 
+" To indicate that eskk has been loaded.
+" Avoid many many autoload bugs, use plain global variable here.
+let g:loaded_autoload_eskk = 1
 
 
 " Restore 'cpoptions' {{{
