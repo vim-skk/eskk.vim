@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 315))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 316))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -559,6 +559,7 @@ function! eskk#_initialize() "{{{
     \   || s:initialization_state ==# s:INIT_ABORT
         return
     endif
+    let s:initialization_state = s:INIT_ABORT
 
     " Check if prereq libs' versions {{{
     function! s:version_pack(x, y, z)
