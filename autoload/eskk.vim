@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 316))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 317))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -514,32 +514,34 @@ function! s:filter_rom_no_match(stash, table) "{{{
         " `rom_str_without_char` has the map but fail with `char`.
         " e.g.: rom_str is "nj" => "んj"
         call buf_str.rom_pairs.push_one_pair(rom_str_without_char, map)
-
-        " TODO: Can do it recursively?
-        unlet map
-        let map = a:table.get_map(char, NO_MAP)
-        if map isnot NO_MAP
-            call buf_str.rom_pairs.push_one_pair(char, map)
-            call buf_str.rom_str.clear()
-        else
-            call buf_str.rom_str.set(char)
-        endif
+        " *** FALLTHROUGH ***
     elseif empty(rom_str_without_char)
         " No candidates started with such a character `char`.
         " e.g.: rom_str is " ", "&"
         call buf_str.rom_pairs.push_one_pair(char, char)
+        return
     else
         " `rom_str_without_char` has the candidate(s) but fail with `char`.
         if g:eskk#rom_input_style ==# 'skk'
             " rom_str is "zyk" => "k"
-            call buf_str.rom_str.set(char)
         elseif g:eskk#rom_input_style ==# 'msime'
             " rom_str is "zyk" => "zyk"
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str_without_char, rom_str_without_char
             \)
-            call buf_str.rom_str.set(char)
         endif
+        " *** FALLTHROUGH ***
+    endif
+
+    " Handle `char`.
+    " TODO: Can do it recursively?
+    unlet map
+    let map = a:table.get_map(char, NO_MAP)
+    if map isnot NO_MAP
+        call buf_str.rom_pairs.push_one_pair(char, map)
+        call buf_str.rom_str.clear()
+    else
+        call buf_str.rom_str.set(char)
     endif
 endfunction "}}}
 " Clear filtered string when eskk#filter()'s finalizing.
