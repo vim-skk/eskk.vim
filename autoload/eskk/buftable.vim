@@ -496,9 +496,7 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
         throw eskk#internal_error(['eskk', 'buftable'])
     endif
 endfunction "}}}
-function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
-    let done_for_group = a:0 ? a:1 : 1
-
+function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
     if a:this.get_old_str() == ''
         let a:stash.return = eskk#mappings#key2char(
         \   eskk#mappings#get_special_key('backspace-key')
@@ -565,25 +563,13 @@ function! {s:Buftable.method('do_backspace')}(this, stash, ...) "{{{
             call buf_str.rom_str.chop()
             break
         elseif !empty(buf_str.rom_pairs.get())
-            if done_for_group
-                let p = buf_str.rom_pairs.pop()
-                if empty(p)
-                    continue
-                endif
-                " ["tyo", "ちょ"] => ["tyo", "ち"]
-                if eskk#util#mb_strlen(p[1]) !=# 1
-                    call buf_str.rom_pairs.push_one_pair(p[0], eskk#util#mb_chop(p[1]))
-                endif
-            else
-                let m = buf_str.rom_pairs.get()
-                call eskk#error#assert(len(m) == 1, 'len(m) must be 1')
-                let [rom, filter] = m[0]
-                call buf_str.rom_pairs.set_one_pair(rom, eskk#util#mb_chop(filter))
-
-                " `rom` is empty string,
-                " Because currently this is called only by
-                " `s:do_backspace()` in `autoload/eskk/complete.vim`.
-                call eskk#error#assert(rom == '', 'rom must be empty string')
+            let p = buf_str.rom_pairs.pop()
+            if empty(p)
+                continue
+            endif
+            " ["tyo", "ちょ"] => ["tyo", "ち"]
+            if eskk#util#mb_strlen(p[1]) !=# 1
+                call buf_str.rom_pairs.push_one_pair(p[0], eskk#util#mb_chop(p[1]))
             endif
             break
         elseif a:this.get_marker(phase) != ''
