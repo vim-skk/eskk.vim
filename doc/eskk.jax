@@ -191,9 +191,9 @@ g:eskk#dont_map_default_if_already_mapped	*g:eskk#dont_map_default_if_already_ma
 	マッピングしない。
 
 g:eskk#mapped_keys				*g:eskk#mapped_keys*
-							(デフォルト値: EskkDefaultMappedKeys())
+							(デフォルト値: eskk#get_default_mapped_keys())
 	(keycodeではなく) |key-notation| の文字列を含むリスト。
-	|EskkDefaultMappedKeys()| の値参照。
+	|eskk#get_default_mapped_keys()| の値参照。
 	"|"を含めたい場合、"<Bar>"と書く必要があることに気を付けること。
 
 
@@ -431,7 +431,7 @@ eskk#get_mode()			*eskk#get_mode()*
 eskk#update_dictionary()		*eskk#update_dictionary()*
 	See |:EskkUpdateDictionary|.
 
-EskkDefaultMappedKeys()			*EskkDefaultMappedKeys()*
+eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
 	Default value of |g:eskk#mapped_keys|.
 
 }}}

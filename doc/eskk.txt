@@ -189,9 +189,9 @@ g:eskk#dont_map_default_if_already_mapped	*g:eskk#dont_map_default_if_already_ma
 	If true and keys are already mapped, do not map default keys.
 
 g:eskk#mapped_keys				*g:eskk#mapped_keys*
-							(Default: EskkDefaultMappedKeys())
+							(Default: eskk#get_default_mapped_keys())
 	List of String consisted of |key-notation| (not keycode).
-	See |EskkDefaultMappedKeys()|'s value.
+	See |eskk#get_default_mapped_keys()|'s value.
 	Note that you have to write "<Bar>" when you write "|".
 
 
@@ -435,7 +435,7 @@ eskk#get_mode()			*eskk#get_mode()*
 eskk#update_dictionary()		*eskk#update_dictionary()*
 	See |:EskkUpdateDictionary|.
 
-EskkDefaultMappedKeys()			*EskkDefaultMappedKeys()*
+eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
 	Default value of |g:eskk#mapped_keys|.
 
 }}}
