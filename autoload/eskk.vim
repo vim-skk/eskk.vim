@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 324))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 325))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -28,7 +28,7 @@ delfunction s:SID
 "   Current mode.
 " buftable:
 "   Buffer strings for inserted, filtered and so on.
-" is_locked_old_str:
+" has_locked_old_str:
 "   Lock current diff old string?
 " temp_event_hook_fn:
 "   Temporary event handler functions/arguments.
@@ -37,7 +37,7 @@ delfunction s:SID
 let s:eskk = {
 \   'mode': '',
 \   'buftable': {},
-\   'is_locked_old_str': 0,
+\   'has_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \}
@@ -1578,11 +1578,11 @@ endfunction "}}}
 " Locking diff old string
 function! eskk#lock_old_str() "{{{
     let self = eskk#get_current_instance()
-    let self.is_locked_old_str = 1
+    let self.has_locked_old_str = 1
 endfunction "}}}
 function! eskk#unlock_old_str() "{{{
     let self = eskk#get_current_instance()
-    let self.is_locked_old_str = 0
+    let self.has_locked_old_str = 0
 endfunction "}}}
 
 " Filter
@@ -1611,7 +1611,7 @@ function! eskk#filter(char) "{{{
     \   'return': 0,
     \}
 
-    if !self.is_locked_old_str
+    if !self.has_locked_old_str
         call buftable.set_old_str(buftable.get_display_str())
     endif
 
