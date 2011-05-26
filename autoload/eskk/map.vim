@@ -538,7 +538,8 @@ endfunction "}}}
 
 " Functions using s:eskk_mappings
 function! eskk#map#map_all_keys(...) "{{{
-    if exists('b:__eskk_mapped_bufnr')
+    let inst = eskk#get_buffer_instance()
+    if has_key(inst, 'has_mapped')
         return
     endif
 
@@ -573,10 +574,11 @@ function! eskk#map#map_all_keys(...) "{{{
         endif
     endfor
 
-    let b:__eskk_mapped_bufnr = 1
+    let inst.has_mapped = 1
 endfunction "}}}
 function! eskk#map#unmap_all_keys() "{{{
-    if !exists('b:__eskk_mapped_bufnr')
+    let inst = eskk#get_buffer_instance()
+    if !has_key(inst, 'has_mapped')
         return
     endif
 
@@ -584,7 +586,7 @@ function! eskk#map#unmap_all_keys() "{{{
         call eskk#map#unmap('b', key, 'l')
     endfor
 
-    unlet b:__eskk_mapped_bufnr
+    unlet inst.has_mapped
 endfunction "}}}
 function! eskk#map#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error
