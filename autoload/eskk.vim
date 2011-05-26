@@ -236,15 +236,10 @@ function! {s:KeyTable.method('unregister')}(key, Fn) dict "{{{
 endfunction "}}}
 
 " Dispatch a:key and invoke a:key's handler(s).
-function! {s:KeyTable.method('dispatch')}(key, args, ...) dict "{{{
+function! {s:KeyTable.method('dispatch')}(key, args) dict "{{{
     if !has_key(self.__table, a:key)
     \   || empty(self.__table[a:key])
-        if a:0    " has fallback handler.
-            call call(a:1, a:args)
-            return 1
-        else
-            return 0
-        endif
+        return 0
     endif
 
     for Fn in self.__table[a:key]
