@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 333))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 334))
 
 
 function! s:SID() "{{{
@@ -201,15 +201,7 @@ endfunction "}}}
 
 " Filter
 " s:asym_filter {{{
-let s:asym_filter = {'table': {}}
-
-function! eskk#create_asym_filter(table) "{{{
-    let obj = deepcopy(s:asym_filter)
-    let obj.table = a:table
-    return obj
-endfunction "}}}
-
-function! s:asym_filter.filter(stash) "{{{
+function! s:asym_filter(stash) dict "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let phase = buftable.get_henkan_phase()
@@ -273,7 +265,7 @@ function! s:asym_filter.filter(stash) "{{{
                 " NOTE: Assume "SAkujo" as "Sakujo".
                 let stash = deepcopy(a:stash)
                 let stash.char = tolower(stash.char)
-                return self.filter(stash)
+                return s:asym_filter(stash)
             endif
         elseif eskk#map#is_special_lhs(char, 'escape-key')
             call buftable.do_escape(a:stash)
@@ -291,18 +283,18 @@ function! s:asym_filter.filter(stash) "{{{
 
     " Handle other characters.
     if phase ==# g:eskk#buftable#PHASE_NORMAL
-        return s:filter_rom(a:stash, self.table)
+        return s:filter_rom(a:stash, eskk#get_current_mode_table())
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         if eskk#map#is_special_lhs(char, 'phase:henkan:henkan-key')
             call buftable.do_henkan(a:stash)
         else
-            return s:filter_rom(a:stash, self.table)
+            return s:filter_rom(a:stash, eskk#get_current_mode_table())
         endif
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
         if eskk#map#is_special_lhs(char, 'phase:okuri:henkan-key')
             call buftable.do_henkan(a:stash)
         else
-            return s:filter_rom(a:stash, self.table)
+            return s:filter_rom(a:stash, eskk#get_current_mode_table())
         endif
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         if eskk#map#is_special_lhs(
@@ -338,7 +330,7 @@ function! s:asym_filter.filter(stash) "{{{
     else
         throw eskk#internal_error(
         \   ['eskk'],
-        \   "s:asym_filter.filter() does not support phase " . phase . "."
+        \   "s:asym_filter() does not support phase " . phase . "."
         \)
     endif
 endfunction "}}}
@@ -933,23 +925,23 @@ function! eskk#_initialize() "{{{
         " }}}
 
         " 'hira' mode {{{
-        call eskk#register_mode_structure(
+        call eskk#register_mode_handler(
         \   'hira',
-        \   eskk#create_asym_filter(eskk#get_mode_table('hira'))
+        \   eskk#util#get_local_func('asym_filter', s:SID_PREFIX)
         \)
         " }}}
 
         " 'kata' mode {{{
-        call eskk#register_mode_structure(
+        call eskk#register_mode_handler(
         \   'kata',
-        \   eskk#create_asym_filter(eskk#get_mode_table('kata'))
+        \   eskk#util#get_local_func('asym_filter', s:SID_PREFIX)
         \)
         " }}}
 
         " 'hankata' mode {{{
-        call eskk#register_mode_structure(
+        call eskk#register_mode_handler(
         \   'hankata',
-        \   eskk#create_asym_filter(eskk#get_mode_table('hankata'))
+        \   eskk#util#get_local_func('asym_filter', s:SID_PREFIX)
         \)
         " }}}
 
@@ -1386,6 +1378,13 @@ function! eskk#register_mode_structure(mode, st) "{{{
         let s:available_modes[a:mode] = a:st
         let s:available_modes[a:mode].temp = {}
     endif
+endfunction "}}}
+function! eskk#register_mode_handler(mode, handler) "{{{
+    " even if a:handler does not have "dict" attribute,
+    " Vim does not complain with calling a:handler
+    " with dict like `call(a:handler, [], {})`.
+    " cf. eskk#call_mode_func()
+    return eskk#register_mode_structure(a:mode, {'filter': a:handler})
 endfunction "}}}
 function! s:check_mode_structure(st) "{{{
     " 'temp' will be added by eskk#register_mode_structure().
