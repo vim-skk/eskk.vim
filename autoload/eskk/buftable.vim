@@ -211,7 +211,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
 
         if kakutei != ''
             let inst.inserted_kakutei = kakutei
-            call eskk#mappings#map(
+            call eskk#map#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted_kakutei)',
             \   'eskk#get_buffer_instance().inserted_kakutei'
@@ -219,7 +219,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
         endif
         if new != ''
             let inst.inserted_new = new
-            call eskk#mappings#map(
+            call eskk#map#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted_new)',
             \   'eskk#get_buffer_instance().inserted_new'
@@ -241,8 +241,8 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
             " When inserted_str == "foo", old == "foobar"
             " Insert Remove "bar"
             return repeat(
-            \   eskk#mappings#key2char(
-            \       eskk#mappings#get_special_map("backspace-key")
+            \   eskk#map#key2char(
+            \       eskk#map#get_special_map("backspace-key")
             \   ),
             \   eskk#util#mb_strlen(old)
             \       - eskk#util#mb_strlen(inserted_str)
@@ -252,7 +252,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
             " Insert "bar".
             let inst.inserted =
             \   strpart(inserted_str, strlen(old))
-            call eskk#mappings#map(
+            call eskk#map#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted)',
             \   'eskk#get_buffer_instance().inserted'
@@ -262,7 +262,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
             " Delete current string, and insert new string.
             let inst = eskk#get_buffer_instance()
             let inst.inserted = inserted_str
-            call eskk#mappings#map(
+            call eskk#map#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted)',
             \   'eskk#get_buffer_instance().inserted'
@@ -273,7 +273,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
 endfunction "}}}
 function! {s:Buftable.method('make_remove_bs')}(this) "{{{
     return repeat(
-    \   eskk#mappings#key2char(eskk#mappings#get_special_map("backspace-key")),
+    \   eskk#map#key2char(eskk#map#get_special_map("backspace-key")),
     \   eskk#util#mb_strlen(a:this._old_str),
     \)
 endfunction "}}}
@@ -423,9 +423,9 @@ endfunction "}}}
 function! {s:Buftable.method('do_enter')}(this, stash) "{{{
     let phase = a:this.get_henkan_phase()
     let enter_char =
-    \   eskk#mappings#key2char(eskk#mappings#get_special_map('enter-key'))
+    \   eskk#map#key2char(eskk#map#get_special_map('enter-key'))
     let undo_char  =
-    \   eskk#mappings#key2char(eskk#mappings#key2char(eskk#mappings#get_nore_map('<C-g>u')))
+    \   eskk#map#key2char(eskk#map#key2char(eskk#map#get_nore_map('<C-g>u')))
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
 
@@ -498,8 +498,8 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
 endfunction "}}}
 function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
     if a:this.get_old_str() == ''
-        let a:stash.return = eskk#mappings#key2char(
-        \   eskk#mappings#get_special_key('backspace-key')
+        let a:stash.return = eskk#map#key2char(
+        \   eskk#map#get_special_key('backspace-key')
         \)
         return
     endif
@@ -701,8 +701,8 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
             call eskk#register_temp_event(
             \   'filter-redispatch-pre',
             \   'eskk#util#identity',
-            \   [eskk#mappings#key2char(
-            \       eskk#mappings#get_nore_map('<C-g>u')
+            \   [eskk#map#key2char(
+            \       eskk#map#get_nore_map('<C-g>u')
             \   )]
             \)
         endif
@@ -932,9 +932,9 @@ function! {s:Buftable.method('do_escape')}(this, stash) "{{{
 
     let kakutei_str = a:this.generate_kakutei_str()
     " NOTE: This function return value is not remapped.
-    let esc = eskk#mappings#get_special_key('escape-key')
+    let esc = eskk#map#get_special_key('escape-key')
     call eskk#error#assert(esc != '', 'esc must not be empty string')
-    let a:stash.return = kakutei_str . eskk#mappings#key2char(esc)
+    let a:stash.return = kakutei_str . eskk#map#key2char(esc)
 endfunction "}}}
 function! {s:Buftable.method('do_tab')}(this, stash) "{{{
     let buf_str = a:this.get_current_buf_str()
@@ -1062,11 +1062,11 @@ function! {s:Buftable.method('remove_display_str')}(this) "{{{
     let current_str = a:this.get_display_str()
 
     " NOTE: This function return value is not remapped.
-    let bs = eskk#mappings#get_special_key('backspace-key')
+    let bs = eskk#map#get_special_key('backspace-key')
     call eskk#error#assert(bs != '', 'bs must not be empty string')
 
     return repeat(
-    \   eskk#mappings#key2char(bs),
+    \   eskk#map#key2char(bs),
     \   eskk#util#mb_strlen(current_str)
     \)
 endfunction "}}}

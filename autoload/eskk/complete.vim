@@ -264,8 +264,8 @@ function! s:close_pum(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-y>')]
+    \   'eskk#map#key2char',
+    \   [eskk#map#get_nore_map('<C-y>')]
     \)
 endfunction "}}}
 function! s:do_enter_pre(stash) "{{{
@@ -279,20 +279,20 @@ function! s:do_enter(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-y>')]
+    \   'eskk#map#key2char',
+    \   [eskk#map#get_nore_map('<C-y>')]
     \)
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_filter_map('<CR>')]
+    \   'eskk#map#key2char',
+    \   [eskk#map#get_filter_map('<CR>')]
     \)
 endfunction "}}}
 function! s:do_tab(stash) "{{{
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-n>')]
+    \   'eskk#map#key2char',
+    \   [eskk#map#get_nore_map('<C-n>')]
     \)
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
@@ -311,13 +311,13 @@ function! s:do_escape(stash) "{{{
 
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_nore_map('<C-y>')]
+    \   'eskk#map#key2char',
+    \   [eskk#map#get_nore_map('<C-y>')]
     \)
     call eskk#register_temp_event(
     \   'filter-redispatch-post',
-    \   'eskk#mappings#key2char',
-    \   [eskk#mappings#get_filter_map('<Esc>')]
+    \   'eskk#map#key2char',
+    \   [eskk#map#get_filter_map('<Esc>')]
     \)
 endfunction "}}}
 function! s:select_item(stash) "{{{
@@ -367,8 +367,8 @@ function! s:adjust_candidate(stash, recall_key) "{{{
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
-        \   'eskk#mappings#key2char',
-        \   [eskk#mappings#get_filter_map(a:recall_key)]
+        \   'eskk#map#key2char',
+        \   [eskk#map#get_filter_map(a:recall_key)]
         \)
         return 1
     else

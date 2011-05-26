@@ -26,7 +26,7 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
 endfunction "}}}
 
 function! s:emulate_char(c, ret) "{{{
-    let mapmode = eskk#mappings#get_map_modes()
+    let mapmode = eskk#map#get_map_modes()
     let c = a:c
     let ret = a:ret
     let r = eskk#filter(c)
@@ -148,7 +148,7 @@ function! s:emulate_filter_char(r, ret) "{{{
 endfunction "}}}
 
 function! s:get_raw_map(...) "{{{
-    return eskk#mappings#key2char(call('maparg', a:000))
+    return eskk#map#key2char(call('maparg', a:000))
 endfunction "}}}
 function! s:remove_all_ctrl_chars(s, ctrl_char) "{{{
     let s = a:s

@@ -12,7 +12,7 @@ function! eskk#commands#define() "{{{
     command!
     \   -nargs=+
     \   EskkMap
-    \   call eskk#mappings#_cmd_eskk_map(<q-args>)
+    \   call eskk#map#_cmd_eskk_map(<q-args>)
 
     command!
     \   -bar

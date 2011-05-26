@@ -19,7 +19,7 @@ function! s:run()
     \   ['eskk#dictionary#parse_error',
     \       ['duplicated candidates'],
     \       '^eskk: SKK dictionary parse error: duplicated candidates'],
-    \   ['eskk#mappings#cmd_eskk_map_invalid_args',
+    \   ['eskk#map#cmd_eskk_map_invalid_args',
     \       ['unknown option --foo'],
     \       '^eskk: :EskkMap argument parse error: unknown option --foo'],
     \   ['eskk#table#invalid_arguments_error',

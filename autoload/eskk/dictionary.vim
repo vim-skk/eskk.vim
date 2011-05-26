@@ -614,11 +614,11 @@ function! {s:HenkanResult.method('select_candidates')}(
         endtry
 
 
-        if eskk#mappings#is_special_lhs(
+        if eskk#map#is_special_lhs(
         \   char, 'phase:henkan-select:escape'
         \)
             return a:functor.funcall()
-        elseif eskk#mappings#is_special_lhs(
+        elseif eskk#map#is_special_lhs(
         \   char, 'phase:henkan-select:next-page'
         \)
             if eskk#util#has_idx(pages, page_index + 1)
@@ -639,7 +639,7 @@ function! {s:HenkanResult.method('select_candidates')}(
                 \   okuri_buf_str.rom_pairs.get_filter()
                 \]
             endif
-        elseif eskk#mappings#is_special_lhs(
+        elseif eskk#map#is_special_lhs(
         \   char, 'phase:henkan-select:prev-page'
         \)
             if eskk#util#has_idx(pages, page_index - 1)
@@ -1142,7 +1142,7 @@ function! {s:Dictionary.method('remember_word_prompt')}(this, henkan_result) "{{
         endtry
 
         " Enable eskk mapping if it has been disabled.
-        call eskk#mappings#map_all_keys()
+        call eskk#map#map_all_keys()
 
         " Restore `&imsearch`.
         let &l:imsearch = save_imsearch
