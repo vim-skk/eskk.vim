@@ -526,10 +526,10 @@ function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
 
     let mode_st = eskk#get_current_mode_structure()
     if g:eskk#convert_at_exact_match
-    \   && has_key(mode_st.sandbox, 'real_matched_pairs')
+    \   && has_key(mode_st.temp, 'real_matched_pairs')
 
-        let p = mode_st.sandbox.real_matched_pairs
-        unlet mode_st.sandbox.real_matched_pairs
+        let p = mode_st.temp.real_matched_pairs
+        unlet mode_st.temp.real_matched_pairs
 
         if g:eskk#delete_implies_kakutei
             " Enter normal phase and delete one character.

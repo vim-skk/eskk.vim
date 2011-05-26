@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 332))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 333))
 
 
 function! s:SID() "{{{
@@ -408,14 +408,14 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             let henkan_buf_str = buftable.get_buf_str(
             \   g:eskk#buftable#PHASE_HENKAN
             \)
-            if has_key(st.sandbox, 'real_matched_pairs')
+            if has_key(st.temp, 'real_matched_pairs')
                 " Restore previous hiragana & push current to the tail.
                 let p = henkan_buf_str.rom_pairs.pop()
                 call henkan_buf_str.rom_pairs.set(
-                \   st.sandbox.real_matched_pairs + [p]
+                \   st.temp.real_matched_pairs + [p]
                 \)
             endif
-            let st.sandbox.real_matched_pairs = henkan_buf_str.rom_pairs.get()
+            let st.temp.real_matched_pairs = henkan_buf_str.rom_pairs.get()
 
             call buftable.do_henkan(a:stash, 1)
         endif
@@ -870,26 +870,26 @@ function! eskk#_initialize() "{{{
                 \   && a:stash.char !=# "\<C-h>"
                     if a:stash.char =~# '\w'
                         if !has_key(
-                        \   this.sandbox, 'already_set_for_this_word'
+                        \   this.temp, 'already_set_for_this_word'
                         \)
                             " Set start col of word.
                             call s:set_current_to_begin_pos()
-                            let this.sandbox.already_set_for_this_word = 1
+                            let this.temp.already_set_for_this_word = 1
                         endif
                     else
                         if has_key(
-                        \   this.sandbox, 'already_set_for_this_word'
+                        \   this.temp, 'already_set_for_this_word'
                         \)
-                            unlet this.sandbox.already_set_for_this_word
+                            unlet this.temp.already_set_for_this_word
                         endif
                     endif
                 endif
 
                 if eskk#has_mode_table('ascii')
-                    if !has_key(this.sandbox, 'table')
-                        let this.sandbox.table = eskk#get_mode_table('ascii')
+                    if !has_key(this.temp, 'table')
+                        let this.temp.table = eskk#get_mode_table('ascii')
                     endif
-                    let a:stash.return = this.sandbox.table.get_map(
+                    let a:stash.return = this.temp.table.get_map(
                     \   a:stash.char, a:stash.char
                     \)
                 else
@@ -911,10 +911,10 @@ function! eskk#_initialize() "{{{
             \)
                 call eskk#set_mode('hira')
             else
-                if !has_key(this.sandbox, 'table')
-                    let this.sandbox.table = eskk#get_mode_table('zenei')
+                if !has_key(this.temp, 'table')
+                    let this.temp.table = eskk#get_mode_table('zenei')
                 endif
-                let a:stash.return = this.sandbox.table.get_map(
+                let a:stash.return = this.temp.table.get_map(
                 \   a:stash.char, a:stash.char
                 \)
             endif
@@ -1078,8 +1078,8 @@ function! eskk#_initialize() "{{{
         endif
 
         let st = eskk#get_current_mode_structure()
-        if has_key(st.sandbox, 'real_matched_pairs')
-            unlet st.sandbox.real_matched_pairs
+        if has_key(st.temp, 'real_matched_pairs')
+            unlet st.temp.real_matched_pairs
         endif
     endfunction "}}}
     autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
@@ -1384,12 +1384,12 @@ endfunction "}}}
 function! eskk#register_mode_structure(mode, st) "{{{
     if s:check_mode_structure(a:st)
         let s:available_modes[a:mode] = a:st
-        let s:available_modes[a:mode].sandbox = {}
+        let s:available_modes[a:mode].temp = {}
     endif
 endfunction "}}}
 function! s:check_mode_structure(st) "{{{
-    " 'sandbox' will be added by eskk#register_mode_structure().
-    for key in ['filter'] " + ['sandbox']
+    " 'temp' will be added by eskk#register_mode_structure().
+    for key in ['filter'] " + ['temp']
         if !has_key(a:st, key)
             call eskk#util#warn(
             \   "s:check_mode_structure(" . string(a:mode) . "): "
