@@ -15,6 +15,7 @@ delfunc s:SID
 
 
 let s:prev_normal_keys = {}
+let s:has_setup_mode_local_keys = 0
 
 
 function! s:handle_toggle_hankata(stash) "{{{
@@ -383,7 +384,7 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
     if saved_rhs != ''
         call eskk#mappings#unmap('b', temp_key, 'l')
         call eskk#mappings#map('rb', a:lhs, saved_rhs, 'l')
-    elseif inst.first_setup_for_mode_local_keys
+    elseif s:has_setup_mode_local_keys
         " Show error only first time.
         call eskk#error#logf(
         \   "called eskk#mappings#set_up_temp_key_restore()"
@@ -391,7 +392,7 @@ function! eskk#mappings#set_up_temp_key_restore(lhs) "{{{
         \   a:lhs
         \)
         call eskk#mappings#set_up_key(a:lhs)
-        let inst.first_setup_for_mode_local_keys = 0
+        let s:has_setup_mode_local_keys = 0
     endif
 endfunction "}}}
 function! eskk#mappings#has_temp_key(lhs) "{{{
@@ -427,7 +428,7 @@ function! s:unmap_mode_local_keys(real_keys) "{{{
     for key in a:real_keys
         call eskk#mappings#set_up_temp_key_restore(key)
     endfor
-    let inst.first_setup_for_mode_local_keys = 1
+    let s:has_setup_mode_local_keys = 1
 endfunction "}}}
 
 

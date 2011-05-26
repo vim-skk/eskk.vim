@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 323))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 324))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -34,15 +34,12 @@ delfunction s:SID
 "   Temporary event handler functions/arguments.
 " enabled:
 "   True if s:eskk.enable() is called.
-" first_setup_for_mode_local_keys:
-"   True if s:eskk.enable() is called.
 let s:eskk = {
 \   'mode': '',
 \   'buftable': {},
 \   'is_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
-\   'first_setup_for_mode_local_keys': 0,
 \}
 
 
