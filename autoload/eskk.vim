@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 318))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 319))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -618,7 +618,7 @@ function! eskk#_initialize() "{{{
         call s:validate_vim_version()
     catch /^FINISH\C$/
         " do not initialize eskk
-        " even if user doesn't fill requirements!
+        " if user doesn't fill requirements!
         return
     endtry
     " }}}
