@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 334))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 335))
 
 
 function! s:SID() "{{{
@@ -669,18 +669,6 @@ function! eskk#_initialize() "{{{
         let g:eskk#statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
     endif
 
-    function! s:set_up_mode_use_tables() "{{{
-        " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-        let default = {
-        \   'hira': eskk#table#new_from_file('rom_to_hira'),
-        \   'kata': eskk#table#new_from_file('rom_to_kata'),
-        \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
-        \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
-        \}
-        call extend(s:mode_vs_table, default, 'keep')
-    endfunction "}}}
-    call s:set_up_mode_use_tables()
-
     " Table
     call eskk#util#set_default('g:eskk#cache_table_map', 1)
 
@@ -1180,6 +1168,21 @@ function! eskk#_initialize() "{{{
     " only during insert-mode.
     autocmd eskk InsertLeave *
     \   call eskk#complete#_reset_completed_candidates()
+    " }}}
+
+    " Set up s:mode_vs_table. {{{
+    function! s:set_up_mode_use_tables() "{{{
+        " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
+        for [mode, table] in items({
+        \   'hira': eskk#table#new_from_file('rom_to_hira'),
+        \   'kata': eskk#table#new_from_file('rom_to_kata'),
+        \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
+        \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
+        \})
+            call eskk#register_mode_table(mode, table)
+        endfor
+    endfunction "}}}
+    call s:set_up_mode_use_tables()
     " }}}
 
     let s:initialization_state = s:INIT_DONE
