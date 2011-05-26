@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 321))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 322))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -58,8 +58,6 @@ let s:eskk_instance_id = 0
 let s:available_modes = {}
 " Event handler functions/arguments.
 let s:event_hook_fn = {}
-" Global values of &iminsert, &imsearch.
-let s:saved_im_options = []
 " Flag for `eskk#_initialize()`.
 let s:INIT_YET   = 0
 let s:INIT_DONE  = 1
@@ -1067,15 +1065,10 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " BufEnter: Restore global option value of &iminsert, &imsearch {{{
-    function! s:restore_im_options() "{{{
-        if empty(s:saved_im_options)
-            return
-        endif
-        let [&g:iminsert, &g:imsearch] = s:saved_im_options
-    endfunction "}}}
-
     if !g:eskk#keep_state_beyond_buffer
-        autocmd eskk BufLeave * call s:restore_im_options()
+        execute 'autocmd eskk BufLeave *'
+        \   'let [&g:iminsert, &g:imsearch] ='
+        \   string([&g:iminsert, &g:imsearch])
     endif
     " }}}
 
@@ -1095,11 +1088,6 @@ function! eskk#_initialize() "{{{
         endif
     endfunction "}}}
     autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
-    " }}}
-
-    " s:saved_im_options {{{
-    call eskk#error#assert(empty(s:saved_im_options), "s:saved_im_options must be empty.")
-    let s:saved_im_options = [&g:iminsert, &g:imsearch]
     " }}}
 
     " Event: enter-mode {{{
