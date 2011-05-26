@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 331))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 332))
 
 
 function! s:SID() "{{{
@@ -933,36 +933,24 @@ function! eskk#_initialize() "{{{
         " }}}
 
         " 'hira' mode {{{
-        let dict = {}
-
-        call extend(
-        \   dict,
+        call eskk#register_mode_structure(
+        \   'hira',
         \   eskk#create_asym_filter(eskk#get_mode_table('hira'))
         \)
-
-        call eskk#register_mode_structure('hira', dict)
         " }}}
 
         " 'kata' mode {{{
-        let dict = {}
-
-        call extend(
-        \   dict,
+        call eskk#register_mode_structure(
+        \   'kata',
         \   eskk#create_asym_filter(eskk#get_mode_table('kata'))
         \)
-
-        call eskk#register_mode_structure('kata', dict)
         " }}}
 
         " 'hankata' mode {{{
-        let dict = {}
-
-        call extend(
-        \   dict,
+        call eskk#register_mode_structure(
+        \   'hankata',
         \   eskk#create_asym_filter(eskk#get_mode_table('hankata'))
         \)
-
-        call eskk#register_mode_structure('hankata', dict)
         " }}}
 
         " 'abbrev' mode {{{
