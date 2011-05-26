@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 328))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 329))
 
 
 function! s:SID() "{{{
@@ -152,7 +152,16 @@ function! s:eskk_new() "{{{
     return deepcopy(s:eskk, 1)
 endfunction "}}}
 function! eskk#get_current_instance() "{{{
-    return s:eskk_instances[s:eskk_instance_id]
+    try
+        return s:eskk_instances[s:eskk_instance_id]
+    catch
+        call eskk#error#log_exception(
+        \   'eskk#get_current_instance()')
+        " Trap "E684: list index our of range ..."
+        call eskk#initialize_instance()
+        " This must not raise an error.
+        return s:eskk_instances[s:eskk_instance_id]
+    endtry
 endfunction "}}}
 function! eskk#initialize_instance() "{{{
     let s:eskk_instances = [s:eskk_new()]
