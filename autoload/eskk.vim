@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 330))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 331))
 
 
 function! s:SID() "{{{
@@ -857,8 +857,7 @@ function! eskk#_initialize() "{{{
 
 
         " 'ascii' mode {{{
-        call eskk#register_mode('ascii')
-        let dict = eskk#get_mode_structure('ascii')
+        let dict = {}
 
         function! dict.filter(stash)
             let this = eskk#get_mode_structure('ascii')
@@ -899,12 +898,11 @@ function! eskk#_initialize() "{{{
             endif
         endfunction
 
-        call eskk#validate_mode_structure('ascii')
+        call eskk#register_mode_structure('ascii', dict)
         " }}}
 
         " 'zenei' mode {{{
-        call eskk#register_mode('zenei')
-        let dict = eskk#get_mode_structure('zenei')
+        let dict = {}
 
         function! dict.filter(stash)
             let this = eskk#get_mode_structure('zenei')
@@ -931,48 +929,44 @@ function! eskk#_initialize() "{{{
         \   []
         \)
 
-        call eskk#validate_mode_structure('zenei')
+        call eskk#register_mode_structure('zenei', dict)
         " }}}
 
         " 'hira' mode {{{
-        call eskk#register_mode('hira')
-        let dict = eskk#get_mode_structure('hira')
+        let dict = {}
 
         call extend(
         \   dict,
         \   eskk#create_asym_filter(eskk#get_mode_table('hira'))
         \)
 
-        call eskk#validate_mode_structure('hira')
+        call eskk#register_mode_structure('hira', dict)
         " }}}
 
         " 'kata' mode {{{
-        call eskk#register_mode('kata')
-        let dict = eskk#get_mode_structure('kata')
+        let dict = {}
 
         call extend(
         \   dict,
         \   eskk#create_asym_filter(eskk#get_mode_table('kata'))
         \)
 
-        call eskk#validate_mode_structure('kata')
+        call eskk#register_mode_structure('kata', dict)
         " }}}
 
         " 'hankata' mode {{{
-        call eskk#register_mode('hankata')
-        let dict = eskk#get_mode_structure('hankata')
+        let dict = {}
 
         call extend(
         \   dict,
         \   eskk#create_asym_filter(eskk#get_mode_table('hankata'))
         \)
 
-        call eskk#validate_mode_structure('hankata')
+        call eskk#register_mode_structure('hankata', dict)
         " }}}
 
         " 'abbrev' mode {{{
-        call eskk#register_mode('abbrev')
-        let dict = eskk#get_mode_structure('abbrev')
+        let dict = {}
 
         function! dict.filter(stash) "{{{
             let char = a:stash.char
@@ -1062,7 +1056,7 @@ function! eskk#_initialize() "{{{
         \   []
         \)
 
-        call eskk#validate_mode_structure('abbrev')
+        call eskk#register_mode_structure('abbrev', dict)
         " }}}
     endfunction
     call s:initialize_builtin_modes()
@@ -1399,28 +1393,24 @@ endfunction "}}}
 function! eskk#is_supported_mode(mode) "{{{
     return has_key(s:available_modes, a:mode)
 endfunction "}}}
-function! eskk#register_mode(mode) "{{{
-    let s:available_modes[a:mode] = extend(
-    \   (a:0 ? a:1 : {}),
-    \   {'sandbox': {}},
-    \   'keep'
-    \)
+function! eskk#register_mode_structure(mode, st) "{{{
+    if s:check_mode_structure(a:st)
+        let s:available_modes[a:mode] = a:st
+        let s:available_modes[a:mode].sandbox = {}
+    endif
 endfunction "}}}
-function! eskk#validate_mode_structure(mode) "{{{
-    " It should be recommended to call
-    " this function at the end of mode register.
-
-    let self = eskk#get_current_instance()
-    let st = eskk#get_mode_structure(a:mode)
-
-    for key in ['filter', 'sandbox']
-        if !has_key(st, key)
+function! s:check_mode_structure(st) "{{{
+    " 'sandbox' will be added by eskk#register_mode_structure().
+    for key in ['filter'] " + ['sandbox']
+        if !has_key(a:st, key)
             call eskk#util#warn(
-            \   "eskk#register_mode(" . string(a:mode) . "): "
+            \   "s:check_mode_structure(" . string(a:mode) . "): "
             \       . string(key) . " is not present in structure"
             \)
+            return 0
         endif
     endfor
+    return 1
 endfunction "}}}
 function! eskk#get_current_mode_structure() "{{{
     return eskk#get_mode_structure(eskk#get_mode())
