@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 320))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 321))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -60,8 +60,6 @@ let s:available_modes = {}
 let s:event_hook_fn = {}
 " Global values of &iminsert, &imsearch.
 let s:saved_im_options = []
-" Global values of &backspace.
-let s:saved_backspace = -1
 " Flag for `eskk#_initialize()`.
 let s:INIT_YET   = 0
 let s:INIT_DONE  = 1
@@ -1146,12 +1144,11 @@ function! eskk#_initialize() "{{{
     " FIXME: Due to current implementation,
     " s:buftable.rewrite() assumes that &backspace contains "eol".
     if &l:backspace !~# '\<eol\>'
-        let s:saved_backspace = &l:backspace
+        let saved_backspace = &l:backspace
         setlocal backspace+=eol
         autocmd eskk InsertEnter * setlocal backspace+=eol
-        autocmd eskk InsertLeave * if type(s:saved_backspace) == type("")
-        \                       |      let &l:backspace = s:saved_backspace
-        \                       | endif
+        execute 'autocmd eskk InsertLeave *'
+        \   'let &l:backspace = '.string(saved_backspace)
     endif
     " }}}
 
