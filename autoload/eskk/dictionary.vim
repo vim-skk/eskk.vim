@@ -412,7 +412,7 @@ function! {s:HenkanResult.method('reset')}(this) "{{{
     \   a:this,
     \   {
     \       '_status': g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
-    \       '_candidates': g:eskk#V.Data.OrderedSet.new(
+    \       '_candidates': eskk#vital().Data.OrderedSet.new(
     \           {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
     \       ),
     \       '_candidates_index': 0,
@@ -1082,7 +1082,7 @@ function! {s:Dictionary.constructor()}(this, ...) "{{{
     \           system_dict.sorted,
     \           system_dict.encoding,
     \       ),
-    \       '_registered_words': g:eskk#V.Data.OrderedSet.new(
+    \       '_registered_words': eskk#vital().Data.OrderedSet.new(
     \           {'Fn_identifier':
     \               'eskk#dictionary#_registered_word_identifier'}
     \       ),
@@ -1304,7 +1304,7 @@ function! eskk#dictionary#_candidate_identifier(candidate) "{{{
 endfunction "}}}
 
 " Reduce the losses of creating instance.
-let s:dict_search_candidates = g:eskk#V.Data.OrderedSet.new(
+let s:dict_search_candidates = eskk#vital().Data.OrderedSet.new(
 \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
 \)
 " Search candidates matching with arguments.

@@ -8,9 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 326))
-
-let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 327))
 
 
 function! s:SID() "{{{
@@ -23,6 +21,13 @@ delfunction s:SID
 " See eskk#_initialize() for global variables.
 
 " Variables {{{
+
+" Load dependency modules (only in vital.vim).
+let s:vital = vital#of('eskk').load('Data.OrderedSet')
+function! eskk#vital()
+    return s:vital
+endfunction
+
 
 " mode:
 "   Current mode.
