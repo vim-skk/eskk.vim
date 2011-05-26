@@ -14,6 +14,9 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 
+let s:prev_normal_keys = {}
+
+
 function! s:handle_toggle_hankata(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
@@ -430,16 +433,12 @@ endfunction "}}}
 
 " g:eskk#keep_state
 function! eskk#mappings#save_normal_keys() "{{{
-    let inst = eskk#get_current_instance()
-    let inst.prev_normal_keys = s:save_normal_keys()
-
+    let s:prev_normal_keys = s:save_normal_keys()
     call s:unmap_normal_keys()
 endfunction "}}}
 function! eskk#mappings#restore_normal_keys() "{{{
-    let inst = eskk#get_current_instance()
-    call s:restore_normal_keys(inst.prev_normal_keys)
-    let inst.prev_normal_keys = {}
-
+    call s:restore_normal_keys(s:prev_normal_keys)
+    let s:prev_normal_keys = {}
     call s:map_normal_keys()
 endfunction "}}}
 function! s:get_normal_keys() "{{{
@@ -527,7 +526,6 @@ function! s:do_lmap_non_egg_like_newline(enable) "{{{
         endif
     else
         " Disable
-        let inst = eskk#get_current_instance()
         call eskk#register_temp_event(
         \   'filter-begin',
         \   'eskk#mappings#set_up_temp_key_restore',
