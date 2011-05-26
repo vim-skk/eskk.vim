@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 319))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 320))
 
 let g:eskk#V = vital#of('eskk').load('Data.OrderedSet')
 
@@ -564,36 +564,6 @@ function! eskk#_initialize() "{{{
     let s:initialization_state = s:INIT_ABORT
 
     " Check if prereq libs' versions {{{
-    function! s:version_pack(x, y, z)
-        " All using libraries use this format.
-        return str2nr(printf('%02d%02d%03d', a:x, a:y, a:z))
-    endfunction
-    function! s:version_unpack(version)
-        " Padding missing leading zeroes.
-        let s = printf('%07d', a:version)
-        " str2nr() ignores leading zeroes.
-        return [str2nr(s[:1]), str2nr(s[2:3]), str2nr(s[4:])]
-    endfunction
-    function! s:validate_lib_version(plugin_name, namespace, x, y, z)
-        call {a:namespace}#load()
-        let varname = 'g:' . a:namespace . '#version'
-        if !exists(varname)
-        \   || {varname} < s:version_pack(a:x, a:y, a:z)
-            let current_version = exists(varname) ?
-            \   join(s:version_unpack({varname}), '.') :
-            \   'unknown'
-            echohl WarningMsg
-            echomsg "eskk.vim: warning:"
-            \       "Your installed" a:plugin_name "is old."
-            \       "(required version is"
-            \       join([a:x, a:y, a:z], '.')
-            \       "or later, but current version is"
-            \       current_version . ")"
-            echohl None
-
-            throw 'FINISH'
-        endif
-    endfunction
     function! s:validate_vim_version() "{{{
         let ok =
         \   v:version > 703
@@ -609,12 +579,6 @@ function! eskk#_initialize() "{{{
     endfunction "}}}
 
     try
-        call s:validate_lib_version(
-        \   'savemap.vim', 'savemap', 0, 0, 18
-        \)
-        call s:validate_lib_version(
-        \   'vice.vim', 'vice', 0, 1, 1
-        \)
         call s:validate_vim_version()
     catch /^FINISH\C$/
         " do not initialize eskk
