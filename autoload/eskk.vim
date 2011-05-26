@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 327))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 328))
 
 
 function! s:SID() "{{{
@@ -29,6 +29,9 @@ function! eskk#vital()
 endfunction
 
 
+" These variables are copied when starting new eskk instance.
+" e.g.: Register word(s) recursively
+"
 " mode:
 "   Current mode.
 " buftable:
