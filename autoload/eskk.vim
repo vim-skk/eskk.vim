@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 337))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 338))
 
 
 function! s:SID() "{{{
@@ -1473,8 +1473,10 @@ function! eskk#register_table(table) "{{{
     endif
 endfunction "}}}
 function! eskk#register_mode_table(mode, table) "{{{
-    call eskk#register_table(a:table)
-    let s:mode_vs_table[a:mode] = a:table
+    if !has_key(s:mode_vs_table, a:mode)
+        call eskk#register_table(a:table)
+        let s:mode_vs_table[a:mode] = a:table
+    endif
 endfunction "}}}
 
 " Statusline
