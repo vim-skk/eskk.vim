@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 335))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 336))
 
 
 function! s:SID() "{{{
@@ -201,7 +201,7 @@ endfunction "}}}
 
 " Filter
 " s:asym_filter {{{
-function! s:asym_filter(stash) dict "{{{
+function! s:asym_filter(stash) "{{{
     let char = a:stash.char
     let buftable = eskk#get_buftable()
     let phase = buftable.get_henkan_phase()
