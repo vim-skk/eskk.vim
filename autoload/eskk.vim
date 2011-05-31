@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 336))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 337))
 
 
 function! s:SID() "{{{
@@ -1154,15 +1154,6 @@ function! eskk#_initialize() "{{{
     \)
     " }}}
 
-    " Create "eskk-initialize-post" autocmd event. {{{
-    " If no "User eskk-initialize-post" events,
-    " Vim complains like "No matching autocommands".
-    autocmd eskk User eskk-initialize-post :
-
-    " Throw eskk-initialize-post event.
-    doautocmd User eskk-initialize-post
-    " }}}
-
     " Reset s:completed_candidates in autoload/eskk/complete.vim {{{
     " s:completed_candidates should have non-empty value
     " only during insert-mode.
@@ -1183,6 +1174,15 @@ function! eskk#_initialize() "{{{
         endfor
     endfunction "}}}
     call s:set_up_mode_use_tables()
+    " }}}
+
+    " Create "eskk-initialize-post" autocmd event. {{{
+    " If no "User eskk-initialize-post" events,
+    " Vim complains like "No matching autocommands".
+    autocmd eskk User eskk-initialize-post :
+
+    " Throw eskk-initialize-post event.
+    doautocmd User eskk-initialize-post
     " }}}
 
     let s:initialization_state = s:INIT_DONE
