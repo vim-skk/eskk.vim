@@ -72,40 +72,9 @@ endfunction "}}}
 
 
 " List function
-function! eskk#util#flatten_list(list) "{{{
-    let ret = []
-    for _ in type(a:list) == type([]) ? a:list : [a:list]
-        if type(_) == type([])
-            let ret += eskk#util#flatten_list(_)
-        else
-            call add(ret, _)
-        endif
-    endfor
-    return ret
-endfunction "}}}
-function! eskk#util#list_has(list, elem) "{{{
-    for Value in a:list
-        if Value ==# a:elem
-            return 1
-        endif
-    endfor
-    return 0
-endfunction "}}}
-function! eskk#util#has_idx(list, idx) "{{{
-    " Return true when negative idx.
-    " let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
-    let idx = a:idx
-    return 0 <= idx && idx < len(a:list)
-endfunction "}}}
-
-
-" Format
-function! eskk#util#formatstrf(fmt, ...) "{{{
-    return call(
-    \   'printf',
-    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
-    \)
-endfunction "}}}
+let eskk#util#flatten_list = g:eskk#V.Data.List.flatten
+let eskk#util#list_has = g:eskk#V.Data.List.has
+let eskk#util#has_idx = g:eskk#V.Data.List.has_index
 
 
 " SID/Scripts

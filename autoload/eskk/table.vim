@@ -292,9 +292,11 @@ function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
     else
         throw eskk#internal_error(
         \   ['eskk', 'table'],
-        \   eskk#util#formatstrf(
+        \   printf(
         \       'table name = %s, lhs = %s, index = %d',
-        \       a:table._name, a:lhs, a:index
+        \       string(a:table._name),
+        \       string(a:lhs),
+        \       string(a:index)
         \   )
         \)
     endif
