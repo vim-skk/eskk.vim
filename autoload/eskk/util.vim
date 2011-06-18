@@ -21,7 +21,7 @@ call s:Vital.load('Data.OrderedSet')
 call s:Vital.load('Data.List')
 call s:Vital.load('Data.String')
 call s:Vital.load('System.Filepath')
-call s:Vital.load('System')
+call s:Vital.load('System.File')
 call s:Vital.load('Cmdline')
 
 
@@ -115,13 +115,13 @@ endfunction "}}}
 
 " Filesystem
 function! eskk#util#move_file(src, dest) "{{{
-    return s:Vital.System.move_file(a:src, a:dest)
+    return s:Vital.System.File.move_file(a:src, a:dest)
 endfunction "}}}
 function! eskk#util#copy_file(src, dest) "{{{
-    return s:Vital.System.copy_file(a:src, a:dest)
+    return s:Vital.System.File.copy_file(a:src, a:dest)
 endfunction "}}}
 function! eskk#util#mkdir_nothrow(...) "{{{
-    let module = s:Vital.System
+    let module = s:Vital.System.File
     return call(module.mkdir_nothrow, a:000, module)
 endfunction "}}}
 
