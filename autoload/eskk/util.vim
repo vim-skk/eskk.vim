@@ -77,6 +77,13 @@ let eskk#util#list_has = g:eskk#V.Data.List.has
 let eskk#util#has_idx = g:eskk#V.Data.List.has_index
 
 
+" Ordered Set
+function! eskk#util#create_data_ordered_set(...)
+    let module = g:eskk#V.Data.OrderedSet
+    return call(module.new, a:000, module)
+endfunction
+
+
 " SID/Scripts
 function! eskk#util#get_local_func(funcname, sid) "{{{
     " :help <SID>
