@@ -136,7 +136,7 @@ function! eskk#table#new_from_file(table_name) "{{{
 endfunction "}}}
 
 function! {s:AbstractTable.method('get_all_base_tables')}(this) "{{{
-    let set = eskk#vital().Data.OrderedSet.new()
+    let set = g:eskk#V.Data.OrderedSet.new()
     let table_stack = [a:this]
     while !empty(table_stack)
         let table = remove(table_stack, -1)

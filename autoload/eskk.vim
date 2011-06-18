@@ -10,6 +10,8 @@ set cpo&vim
 
 let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 338))
 
+let g:eskk#V = vital#of('eskk').load('Data.OrderedSet').load('Data.List')
+
 
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
@@ -21,13 +23,6 @@ delfunction s:SID
 " See eskk#_initialize() for global variables.
 
 " Variables {{{
-
-" Load dependency modules (only in vital.vim).
-let s:vital = vital#of('eskk').load('Data.OrderedSet')
-function! eskk#vital()
-    return s:vital
-endfunction
-
 
 " These variables are copied when starting new eskk instance.
 " e.g.: Register word(s) recursively
