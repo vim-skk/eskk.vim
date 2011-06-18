@@ -21,6 +21,7 @@ call s:Vital.load('Data.OrderedSet')
 call s:Vital.load('Data.List')
 call s:Vital.load('Data.String')
 call s:Vital.load('System.Filepath')
+call s:Vital.load('System')
 
 
 " Environment
@@ -112,68 +113,15 @@ endfunction "}}}
 
 
 " Filesystem
-function! eskk#util#move_file(src, dest, ...) "{{{
-    let show_error = a:0 ? a:1 : 1
-    if executable('mv')
-        silent execute '!mv' shellescape(a:src) shellescape(a:dest)
-        if v:shell_error
-            if show_error
-                call eskk#util#warn("'mv' returned failure value: " . v:shell_error)
-                sleep 1
-            endif
-            return 0
-        endif
-        return 1
-    else
-        return s:move_file_vimscript(a:src, a:dest, show_error)
-    endif
+function! eskk#util#move_file(src, dest) "{{{
+    return s:Vital.System.move_file(a:src, a:dest)
 endfunction "}}}
-function! s:move_file_vimscript(src, dest, show_error) "{{{
-    let copy_success = eskk#util#copy_file(a:src, a:dest, a:show_error)
-    let remove_success = delete(a:src) == 0
-
-    if copy_success && remove_success
-        return 1
-    else
-        if a:show_error
-            call eskk#util#warn("can't move '" . a:src . "' to '" . a:dest . "'.")
-        endif
-        return 0
-    endif
-endfunction "}}}
-function! eskk#util#copy_file(src, dest, ...) "{{{
-    let show_error = a:0 ? a:1 : 1
-    if executable('cp')
-        silent execute '!cp' shellescape(a:src) shellescape(a:dest)
-        if v:shell_error
-            if show_error
-                call eskk#util#warn("'cp' returned failure value: " . v:shell_error)
-            endif
-            return 0
-        endif
-        return 1
-    else
-        return s:copy_file_vimscript(a:src, a:dest, show_error)
-    endif
-endfunction "}}}
-function! s:copy_file_vimscript(src, dest, show_error) "{{{
-    let ret = writefile(readfile(a:src, "b"), a:dest, "b")
-    if ret == -1
-        if a:show_error
-            call eskk#util#warn("can't copy '" . a:src . "' to '" . a:dest . "'.")
-            sleep 1
-        endif
-        return 0
-    endif
-    return 1
+function! eskk#util#copy_file(src, dest) "{{{
+    return s:Vital.System.copy_file(a:src, a:dest)
 endfunction "}}}
 function! eskk#util#mkdir_nothrow(...) "{{{
-    try
-        call call('mkdir', a:000)
-        return 1
-    catch
-        return 0
-    endtry
+    let module = s:Vital.System
+    return call(module.mkdir_nothrow, a:000, module)
 endfunction "}}}
 
 
