@@ -20,6 +20,7 @@ let s:Vital = vital#of('eskk')
 call s:Vital.load('Data.OrderedSet')
 call s:Vital.load('Data.List')
 call s:Vital.load('Data.String')
+call s:Vital.load('System.Filepath')
 
 
 " Environment
@@ -177,10 +178,9 @@ endfunction "}}}
 
 
 " Path
-let s:path_sep = eskk#util#is_mswin() ? "\\" : '/'
 function! eskk#util#join_path(...) "{{{
-    let dirs = eskk#util#flatten_list(a:000)
-    return join(dirs, s:path_sep)
+    let module = s:Vital.System.Filepath
+    return call(module.join, a:000, module)
 endfunction "}}}
 
 
