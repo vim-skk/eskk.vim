@@ -15,6 +15,12 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 
+" Load the vital of eskk.
+let s:Vital = vital#of('eskk')
+call s:Vital.load('Data.OrderedSet')
+call s:Vital.load('Data.List')
+
+
 " Environment
 " function! eskk#util#is_mswin() {{{
 if has('win16') || has('win32') || has('win64') || has('win95')
@@ -49,37 +55,20 @@ endfunction "}}}
 
 
 " Encoding
-" eskk#util#mb_strlen(str) {{{
-if exists('*strchars')
-    function! eskk#util#mb_strlen(str)
-        return strchars(a:str)
-    endfunction
-else
-    function! eskk#util#mb_strlen(str)
-        return strlen(substitute(copy(a:str), '.', 'x', 'g'))
-    endfunction
-endif "}}}
-function! eskk#util#mb_chop(str) "{{{
-    return substitute(a:str, '.$', '', '')
-endfunction "}}}
-function! eskk#util#iconv(expr, from, to) "{{{
-    if a:from == '' || a:to == '' || a:from ==? a:to
-        return a:expr
-    endif
-    let result = iconv(a:expr, a:from, a:to)
-    return result != '' ? result : a:expr
-endfunction "}}}
+let eskk#util#mb_strlen = s:Vital.Data.String.strchars
+let eskk#util#mb_chop = s:Vital.Data.String.chop
+let eskk#util#iconv = s:Vital.Data.String.iconv
 
 
 " List function
-let eskk#util#flatten_list = g:eskk#V.Data.List.flatten
-let eskk#util#list_has = g:eskk#V.Data.List.has
-let eskk#util#has_idx = g:eskk#V.Data.List.has_index
+let eskk#util#flatten_list = s:Vital.Data.List.flatten
+let eskk#util#list_has = s:Vital.Data.List.has
+let eskk#util#has_idx = s:Vital.Data.List.has_index
 
 
 " Ordered Set
 function! eskk#util#create_data_ordered_set(...)
-    let module = g:eskk#V.Data.OrderedSet
+    let module = s:Vital.Data.OrderedSet
     return call(module.new, a:000, module)
 endfunction
 

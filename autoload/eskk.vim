@@ -10,8 +10,6 @@ set cpo&vim
 
 let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 338))
 
-let g:eskk#V = vital#of('eskk').load('Data.OrderedSet').load('Data.List').load('Encoding')
-
 
 function! s:SID() "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
