@@ -22,6 +22,7 @@ call s:Vital.load('Data.List')
 call s:Vital.load('Data.String')
 call s:Vital.load('System.Filepath')
 call s:Vital.load('System')
+call s:Vital.load('Cmdline')
 
 
 " Environment
@@ -140,31 +141,12 @@ function! eskk#util#globpath(pat) "{{{
     return split(globpath(&runtimepath, a:pat), '\n')
 endfunction "}}}
 function! eskk#util#getchar(...) "{{{
-    let success = 0
-    if inputsave() !=# success
-        call eskk#error#log("inputsave() failed")
-    endif
-    try
-        let c = call('getchar', a:000)
-        return type(c) == type("") ? c : nr2char(c)
-    finally
-        if inputrestore() !=# success
-            call eskk#error#log("inputrestore() failed")
-        endif
-    endtry
+    let module = s:Vital.Cmdline
+    return call(module.getchar, a:000, module)
 endfunction "}}}
 function! eskk#util#input(...) "{{{
-    let success = 0
-    if inputsave() !=# success
-        call eskk#error#log("inputsave() failed")
-    endif
-    try
-        return call('input', a:000)
-    finally
-        if inputrestore() !=# success
-            call eskk#error#log("inputrestore() failed")
-        endif
-    endtry
+    let module = s:Vital.Cmdline
+    return call(module.input, a:000, module)
 endfunction "}}}
 function! eskk#util#redir_english(excmd) "{{{
     let save_lang = v:lang
