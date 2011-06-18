@@ -15,6 +15,11 @@ function! s:truncate(str, width)"{{{
   " Original function is from mattn.
   " http://github.com/mattn/googlereader-vim/tree/master
 
+  if a:str =~# '^[\x00-\x7f]*$'
+    return len(a:str) < a:width ?
+          \ printf('%-'.a:width.'s', a:str) : strpart(a:str, 0, a:width)
+  endif
+
   let ret = a:str
   let width = s:wcswidth(a:str)
   if width > a:width
@@ -107,12 +112,21 @@ else
   endfunction"}}}
 endif
 
-function! s:is_win()"{{{
-  return has('win16') || has('win32') || has('win64')
+let s:is_windows = has('win16') || has('win32') || has('win64')
+let s:is_mac = !s:is_windows && (has('mac') || has('macunix') || has('gui_macvim') || system('uname') =~? '^darwin')
+function! s:is_windows()"{{{
+  return s:is_windows
+endfunction"}}}
+function! s:is_mac()"{{{
+  return s:is_mac
 endfunction"}}}
 
 function! s:print_error(message)"{{{
-  echohl WarningMsg | echomsg a:message | echohl None
+  echohl ErrorMsg
+  for m in split(a:message, "\n")
+    echomsg m
+  endfor
+  echohl None
 endfunction"}}}
 
 function! s:smart_execute_command(action, word)"{{{
@@ -125,6 +139,19 @@ endfunction"}}}
 function! s:escape_pattern(str)"{{{
   return escape(a:str, '~"\.^$[]*')
 endfunction"}}}
+" iconv() wrapper for safety.
+function! s:iconv(expr, from, to)
+  if a:from == '' || a:to == '' || a:from ==# a:to
+    return a:expr
+  endif
+  let result = iconv(a:expr, a:from, a:to)
+  return result != '' ? result : a:expr
+endfunction
+" Like builtin getchar() but returns string always.
+function! s:getchar(...)
+  let c = call('getchar', a:000)
+  return type(c) == type(0) ? nr2char(c) : c
+endfunction
 
 function! s:set_default(var, val)  "{{{
   if !exists(a:var) || type({a:var}) != type(a:val)
@@ -139,7 +166,7 @@ function! s:set_dictionary_helper(variable, keys, pattern)"{{{
   endfor
 endfunction"}}}
 function! s:substitute_path_separator(path)"{{{
-  return s:is_win() ? substitute(a:path, '\\', '/', 'g') : a:path
+  return s:is_windows ? substitute(a:path, '\\', '/', 'g') : a:path
 endfunction"}}}
 function! s:path2directory(path)"{{{
   return s:substitute_path_separator(isdirectory(a:path) ? a:path : fnamemodify(a:path, ':p:h'))
@@ -192,20 +219,24 @@ function! s:system(str, ...)"{{{
   let l:command = a:str
   let l:input = a:0 >= 1 ? a:1 : ''
   if &termencoding != '' && &termencoding != &encoding
-    let l:command = iconv(l:command, &encoding, &termencoding)
-    let l:input = iconv(l:input, &encoding, &termencoding)
+    let l:command = s:iconv(l:command, &encoding, &termencoding)
+    let l:input = s:iconv(l:input, &encoding, &termencoding)
   endif
 
   if a:0 == 0
     let l:output = s:has_vimproc() ?
           \ vimproc#system(l:command) : system(l:command)
-  else
+  elseif a:0 == 1
     let l:output = s:has_vimproc() ?
           \ vimproc#system(l:command, l:input) : system(l:command, l:input)
+  else
+    " ignores 3rd argument unless you have vimproc.
+    let l:output = s:has_vimproc() ?
+          \ vimproc#system(l:command, l:input, a:2) : system(l:command, l:input)
   endif
 
   if &termencoding != '' && &termencoding != &encoding
-    let l:output = iconv(l:output, &termencoding, &encoding)
+    let l:output = s:iconv(l:output, &termencoding, &encoding)
   endif
 
   return l:output
