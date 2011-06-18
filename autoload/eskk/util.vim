@@ -19,6 +19,7 @@ delfunc s:SID
 let s:Vital = vital#of('eskk')
 call s:Vital.load('Data.OrderedSet')
 call s:Vital.load('Data.List')
+call s:Vital.load('Data.String')
 
 
 " Environment
@@ -55,15 +56,33 @@ endfunction "}}}
 
 
 " Encoding
-let eskk#util#mb_strlen = s:Vital.Data.String.strchars
-let eskk#util#mb_chop = s:Vital.Data.String.chop
-let eskk#util#iconv = s:Vital.Data.String.iconv
+function! eskk#util#mb_strlen(...)
+    let module = s:Vital.Data.String
+    return call(module.strchars, a:000, module)
+endfunction
+function! eskk#util#mb_chop(...)
+    let module = s:Vital.Data.String
+    return call(module.chop, a:000, module)
+endfunction
+function! eskk#util#iconv(...)
+    let module = s:Vital.Data.String
+    return call(module.iconv, a:000, module)
+endfunction
 
 
 " List function
-let eskk#util#flatten_list = s:Vital.Data.List.flatten
-let eskk#util#list_has = s:Vital.Data.List.has
-let eskk#util#has_idx = s:Vital.Data.List.has_index
+function! eskk#util#flatten_list(...)
+    let module = s:Vital.Data.List
+    return call(module.flatten, a:000, module)
+endfunction
+function! eskk#util#list_has(...)
+    let module = s:Vital.Data.List
+    return call(module.has, a:000, module)
+endfunction
+function! eskk#util#has_idx(...)
+    let module = s:Vital.Data.List
+    return call(module.has_index, a:000, module)
+endfunction
 
 
 " Ordered Set
