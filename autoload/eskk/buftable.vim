@@ -759,11 +759,11 @@ function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
         return
     endif
 
-    if !eskk#util#list_has(
+    if index(
     \   [g:eskk#buftable#PHASE_HENKAN,
     \       g:eskk#buftable#PHASE_OKURI],
     \   phase,
-    \)
+    \) ==# -1
         " TODO Add an error id like Vim
         call eskk#util#warnf(
         \   "s:buftable.do_henkan() does not support phase %d.",

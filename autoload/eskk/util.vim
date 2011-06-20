@@ -78,10 +78,6 @@ function! eskk#util#flatten_list(...)
     let module = s:Vital.Data.List
     return call(module.flatten, a:000, module)
 endfunction
-function! eskk#util#list_has(...)
-    let module = s:Vital.Data.List
-    return call(module.has, a:000, module)
-endfunction
 function! eskk#util#has_idx(...)
     let module = s:Vital.Data.List
     return call(module.has_index, a:000, module)

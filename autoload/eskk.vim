@@ -1327,7 +1327,7 @@ function! s:enable_im() "{{{
 endfunction "}}}
 function! s:map_exists_mode_of(mode) "{{{
     let out = eskk#util#redir_english(a:mode . 'map')
-    return !eskk#util#list_has(split(out, '\n'), 'No mapping found')
+    return index(split(out, '\n'), 'No mapping found') ==# -1
 endfunction "}}}
 function! s:disable_im() "{{{
     let &l:iminsert = 0
