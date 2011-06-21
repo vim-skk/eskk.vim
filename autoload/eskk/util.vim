@@ -22,7 +22,6 @@ call s:Vital.load('Data.List')
 call s:Vital.load('Data.String')
 call s:Vital.load('System.Filepath')
 call s:Vital.load('System.File')
-call s:Vital.load('Cmdline')
 
 
 " Environment
@@ -137,12 +136,12 @@ function! eskk#util#identity(value) "{{{
     return a:value
 endfunction "}}}
 function! eskk#util#getchar(...) "{{{
-    let module = s:Vital.Cmdline
-    return call(module.getchar, a:000, module)
+    let module = s:Vital
+    return call(module.getchar_safe, a:000, module)
 endfunction "}}}
 function! eskk#util#input(...) "{{{
-    let module = s:Vital.Cmdline
-    return call(module.input, a:000, module)
+    let module = s:Vital
+    return call(module.input_safe, a:000, module)
 endfunction "}}}
 function! eskk#util#redir_english(excmd) "{{{
     let save_lang = v:lang
