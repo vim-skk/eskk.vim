@@ -58,7 +58,7 @@ function! eskk#util#set_default(var, val) "{{{
 endfunction "}}}
 
 
-" Encoding
+" Multibyte/Encoding
 function! eskk#util#mb_strlen(...)
     let module = s:Vital.Data.String
     return call(module.strchars, a:000, module)
