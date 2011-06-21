@@ -22,13 +22,6 @@ delfunction s:SID
 
 " Variables {{{
 
-" Load dependency modules (only in vital.vim).
-let s:vital = vital#of('eskk').load('Data.OrderedSet')
-function! eskk#vital()
-    return s:vital
-endfunction
-
-
 " These variables are copied when starting new eskk instance.
 " e.g.: Register word(s) recursively
 "
@@ -1334,7 +1327,7 @@ function! s:enable_im() "{{{
 endfunction "}}}
 function! s:map_exists_mode_of(mode) "{{{
     let out = eskk#util#redir_english(a:mode . 'map')
-    return !eskk#util#list_has(split(out, '\n'), 'No mapping found')
+    return index(split(out, '\n'), 'No mapping found') ==# -1
 endfunction "}}}
 function! s:disable_im() "{{{
     let &l:iminsert = 0

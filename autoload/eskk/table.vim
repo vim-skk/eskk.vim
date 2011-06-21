@@ -136,7 +136,7 @@ function! eskk#table#new_from_file(table_name) "{{{
 endfunction "}}}
 
 function! {s:AbstractTable.method('get_all_base_tables')}(this) "{{{
-    let set = eskk#vital().Data.OrderedSet.new()
+    let set = eskk#util#create_data_ordered_set()
     let table_stack = [a:this]
     while !empty(table_stack)
         let table = remove(table_stack, -1)
@@ -292,9 +292,11 @@ function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
     else
         throw eskk#internal_error(
         \   ['eskk', 'table'],
-        \   eskk#util#formatstrf(
+        \   printf(
         \       'table name = %s, lhs = %s, index = %d',
-        \       a:table._name, a:lhs, a:index
+        \       string(a:table._name),
+        \       string(a:lhs),
+        \       string(a:index)
         \   )
         \)
     endif

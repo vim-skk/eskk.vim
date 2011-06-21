@@ -15,6 +15,16 @@ let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
 
+" Load the vital of eskk.
+let s:Vital = vital#of('eskk')
+call s:Vital.load('Data.OrderedSet')
+call s:Vital.load('Data.List')
+call s:Vital.load('Data.String')
+call s:Vital.load('System.Filepath')
+call s:Vital.load('System.File')
+call s:Vital.load('Cmdline')
+
+
 " Environment
 " function! eskk#util#is_mswin() {{{
 if has('win16') || has('win32') || has('win64') || has('win95')
@@ -48,64 +58,37 @@ function! eskk#util#set_default(var, val) "{{{
 endfunction "}}}
 
 
-" Encoding
-" eskk#util#mb_strlen(str) {{{
-if exists('*strchars')
-    function! eskk#util#mb_strlen(str)
-        return strchars(a:str)
-    endfunction
-else
-    function! eskk#util#mb_strlen(str)
-        return strlen(substitute(copy(a:str), '.', 'x', 'g'))
-    endfunction
-endif "}}}
-function! eskk#util#mb_chop(str) "{{{
-    return substitute(a:str, '.$', '', '')
-endfunction "}}}
-function! eskk#util#iconv(expr, from, to) "{{{
-    if a:from == '' || a:to == '' || a:from ==? a:to
-        return a:expr
-    endif
-    let result = iconv(a:expr, a:from, a:to)
-    return result != '' ? result : a:expr
-endfunction "}}}
+" Multibyte/Encoding
+function! eskk#util#mb_strlen(...)
+    let module = s:Vital.Data.String
+    return call(module.strchars, a:000, module)
+endfunction
+function! eskk#util#mb_chop(...)
+    let module = s:Vital.Data.String
+    return call(module.chop, a:000, module)
+endfunction
+function! eskk#util#iconv(...)
+    let module = s:Vital.Data.String
+    return call(module.iconv, a:000, module)
+endfunction
 
 
 " List function
-function! eskk#util#flatten_list(list) "{{{
-    let ret = []
-    for _ in type(a:list) == type([]) ? a:list : [a:list]
-        if type(_) == type([])
-            let ret += eskk#util#flatten_list(_)
-        else
-            call add(ret, _)
-        endif
-    endfor
-    return ret
-endfunction "}}}
-function! eskk#util#list_has(list, elem) "{{{
-    for Value in a:list
-        if Value ==# a:elem
-            return 1
-        endif
-    endfor
-    return 0
-endfunction "}}}
-function! eskk#util#has_idx(list, idx) "{{{
-    " Return true when negative idx.
-    " let idx = a:idx >= 0 ? a:idx : len(a:list) + a:idx
-    let idx = a:idx
-    return 0 <= idx && idx < len(a:list)
-endfunction "}}}
+function! eskk#util#flatten_list(...)
+    let module = s:Vital.Data.List
+    return call(module.flatten, a:000, module)
+endfunction
+function! eskk#util#has_idx(...)
+    let module = s:Vital.Data.List
+    return call(module.has_index, a:000, module)
+endfunction
 
 
-" Format
-function! eskk#util#formatstrf(fmt, ...) "{{{
-    return call(
-    \   'printf',
-    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
-    \)
-endfunction "}}}
+" Ordered Set
+function! eskk#util#create_data_ordered_set(...)
+    let module = s:Vital.Data.OrderedSet
+    return call(module.new, a:000, module)
+endfunction
 
 
 " SID/Scripts
@@ -127,76 +110,25 @@ endfunction "}}}
 
 
 " Filesystem
-function! eskk#util#move_file(src, dest, ...) "{{{
-    let show_error = a:0 ? a:1 : 1
-    if executable('mv')
-        silent execute '!mv' shellescape(a:src) shellescape(a:dest)
-        if v:shell_error
-            if show_error
-                call eskk#util#warn("'mv' returned failure value: " . v:shell_error)
-                sleep 1
-            endif
-            return 0
-        endif
-        return 1
-    else
-        return s:move_file_vimscript(a:src, a:dest, show_error)
-    endif
+function! eskk#util#move_file(src, dest) "{{{
+    return s:Vital.System.File.move_file(a:src, a:dest)
 endfunction "}}}
-function! s:move_file_vimscript(src, dest, show_error) "{{{
-    let copy_success = eskk#util#copy_file(a:src, a:dest, a:show_error)
-    let remove_success = delete(a:src) == 0
-
-    if copy_success && remove_success
-        return 1
-    else
-        if a:show_error
-            call eskk#util#warn("can't move '" . a:src . "' to '" . a:dest . "'.")
-        endif
-        return 0
-    endif
-endfunction "}}}
-function! eskk#util#copy_file(src, dest, ...) "{{{
-    let show_error = a:0 ? a:1 : 1
-    if executable('cp')
-        silent execute '!cp' shellescape(a:src) shellescape(a:dest)
-        if v:shell_error
-            if show_error
-                call eskk#util#warn("'cp' returned failure value: " . v:shell_error)
-            endif
-            return 0
-        endif
-        return 1
-    else
-        return s:copy_file_vimscript(a:src, a:dest, show_error)
-    endif
-endfunction "}}}
-function! s:copy_file_vimscript(src, dest, show_error) "{{{
-    let ret = writefile(readfile(a:src, "b"), a:dest, "b")
-    if ret == -1
-        if a:show_error
-            call eskk#util#warn("can't copy '" . a:src . "' to '" . a:dest . "'.")
-            sleep 1
-        endif
-        return 0
-    endif
-    return 1
+function! eskk#util#copy_file(src, dest) "{{{
+    return s:Vital.System.File.copy_file(a:src, a:dest)
 endfunction "}}}
 function! eskk#util#mkdir_nothrow(...) "{{{
-    try
-        call call('mkdir', a:000)
-        return 1
-    catch
-        return 0
-    endtry
+    let module = s:Vital.System.File
+    return call(module.mkdir_nothrow, a:000, module)
 endfunction "}}}
 
 
 " Path
-let s:path_sep = eskk#util#is_mswin() ? "\\" : '/'
 function! eskk#util#join_path(...) "{{{
-    let dirs = eskk#util#flatten_list(a:000)
-    return join(dirs, s:path_sep)
+    let module = s:Vital.System.Filepath
+    return call(module.join, a:000, module)
+endfunction "}}}
+function! eskk#util#globpath(pat) "{{{
+    return split(globpath(&runtimepath, a:pat), '\n')
 endfunction "}}}
 
 
@@ -204,35 +136,13 @@ endfunction "}}}
 function! eskk#util#identity(value) "{{{
     return a:value
 endfunction "}}}
-function! eskk#util#globpath(pat) "{{{
-    return split(globpath(&runtimepath, a:pat), '\n')
-endfunction "}}}
 function! eskk#util#getchar(...) "{{{
-    let success = 0
-    if inputsave() !=# success
-        call eskk#error#log("inputsave() failed")
-    endif
-    try
-        let c = call('getchar', a:000)
-        return type(c) == type("") ? c : nr2char(c)
-    finally
-        if inputrestore() !=# success
-            call eskk#error#log("inputrestore() failed")
-        endif
-    endtry
+    let module = s:Vital.Cmdline
+    return call(module.getchar, a:000, module)
 endfunction "}}}
 function! eskk#util#input(...) "{{{
-    let success = 0
-    if inputsave() !=# success
-        call eskk#error#log("inputsave() failed")
-    endif
-    try
-        return call('input', a:000)
-    finally
-        if inputrestore() !=# success
-            call eskk#error#log("inputrestore() failed")
-        endif
-    endtry
+    let module = s:Vital.Cmdline
+    return call(module.input, a:000, module)
 endfunction "}}}
 function! eskk#util#redir_english(excmd) "{{{
     let save_lang = v:lang

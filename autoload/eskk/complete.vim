@@ -464,13 +464,13 @@ endfunction "}}}
 function! s:has_marker() "{{{
     return
     \   eskk#get_mode() =~# 'hira\|kata'
-    \   && eskk#util#list_has(
+    \   && index(
     \       [
     \           g:eskk#buftable#PHASE_HENKAN,
     \           g:eskk#buftable#PHASE_OKURI,
     \       ],
     \       eskk#get_buftable().get_henkan_phase(),
-    \   )
+    \   ) !=# -1
 endfunction "}}}
 
 
