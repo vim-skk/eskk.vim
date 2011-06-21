@@ -127,14 +127,14 @@ function! eskk#util#join_path(...) "{{{
     let module = s:Vital.System.Filepath
     return call(module.join, a:000, module)
 endfunction "}}}
+function! eskk#util#globpath(pat) "{{{
+    return split(globpath(&runtimepath, a:pat), '\n')
+endfunction "}}}
 
 
 " Misc.
 function! eskk#util#identity(value) "{{{
     return a:value
-endfunction "}}}
-function! eskk#util#globpath(pat) "{{{
-    return split(globpath(&runtimepath, a:pat), '\n')
 endfunction "}}}
 function! eskk#util#getchar(...) "{{{
     let module = s:Vital.Cmdline
