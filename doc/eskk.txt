@@ -122,7 +122,7 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 			String: >
 				let g:eskk#large_dictionary = {
 				\	'path': {value},
-				\	'sorted': 0,
+				\	'sorted': 1,
 				\	'encoding': 'euc-jp',
 				\}
 <			Dictionary:
@@ -131,8 +131,8 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 				by "not defined" value.
 		not defined: >
 				let g:eskk#large_dictionary = {
-				\	'path': "/usr/local/share/SKK/SKK-JISYO",
-				\	'sorted': 0,
+				\	'path': "/usr/local/share/skk/SKK-JISYO.L",
+				\	'sorted': 1,
 				\	'encoding': 'euc-jp',
 				\}
 
