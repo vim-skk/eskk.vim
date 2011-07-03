@@ -125,7 +125,7 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 			文字列型なら: >
 				let g:eskk#large_dictionary = {
 				\	'path': {value},
-				\	'sorted': 0,
+				\	'sorted': 1,
 				\	'encoding': 'euc-jp',
 				\}
 <			辞書型なら:
@@ -134,8 +134,8 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 				補う形で追加していく
 		定義していなかったら: >
 				let g:eskk#large_dictionary = {
-				\	'path': "/usr/local/share/SKK/SKK-JISYO",
-				\	'sorted': 0,
+				\	'path': "/usr/local/share/skk/SKK-JISYO.L",
+				\	'sorted': 1,
 				\	'encoding': 'euc-jp',
 				\}
 
