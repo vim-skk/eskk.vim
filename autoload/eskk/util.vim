@@ -133,26 +133,26 @@ endfunction "}}}
 
 
 " Mapping
-function! eskk#util#mapopt_chars2raw(...)
+function! eskk#util#mapopt_chars2raw(...) "{{{
     let module = s:Vital.Mapping
     return call(module.options_chars2raw, a:000, module)
-endfunction
-function! eskk#util#mapopt_chars2dict(...)
+endfunction "}}}
+function! eskk#util#mapopt_chars2dict(...) "{{{
     let module = s:Vital.Mapping
     return call(module.options_chars2dict, a:000, module)
-endfunction
-function! eskk#util#mapopt_dict2chars(...)
+endfunction "}}}
+function! eskk#util#mapopt_dict2chars(...) "{{{
     let module = s:Vital.Mapping
     return call(module.options_dict2chars, a:000, module)
-endfunction
-function! eskk#util#get_map_command(...)
+endfunction "}}}
+function! eskk#util#get_map_command(...) "{{{
     let module = s:Vital.Mapping
     return call(module.get_map_command, a:000, module)
-endfunction
-function! eskk#util#get_unmap_command(...)
+endfunction "}}}
+function! eskk#util#get_unmap_command(...) "{{{
     let module = s:Vital.Mapping
     return call(module.get_unmap_command, a:000, module)
-endfunction
+endfunction "}}}
 
 
 " Misc.
