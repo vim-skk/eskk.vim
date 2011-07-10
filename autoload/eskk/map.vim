@@ -242,11 +242,10 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
         return
     endif
 
-    let map = stridx(a:options, 'r') != -1 ? 'map' : 'noremap'
-    let opt = eskk#util#mapopt_chars2raw(a:options)
+    let dict = eskk#util#mapopt_chars2dict(a:options)
     let modes = a:0 ? a:1 : eskk#map#get_map_modes()
     for mode in split(modes, '\zs')
-        let mapcmd = join([mode . map, opt, a:lhs, a:rhs])
+        let mapcmd = eskk#util#get_map_command(mode, dict, a:lhs, a:rhs)
         try
             execute mapcmd
         catch
@@ -260,9 +259,9 @@ function! eskk#map#unmap(options, lhs, modes) "{{{
         return
     endif
 
-    let opt = eskk#util#mapopt_chars2raw(a:options)
+    let dict = eskk#util#mapopt_chars2dict(a:options)
     for mode in split(a:modes, '\zs')
-        let mapcmd = join([mode . 'unmap', opt, a:lhs])
+        let mapcmd = eskk#util#get_unmap_command(mode, dict, a:lhs)
         try
             execute mapcmd
         catch
