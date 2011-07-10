@@ -68,7 +68,7 @@ function! eskk#util#mb_chop(...)
     return call(module.chop, a:000, module)
 endfunction
 function! eskk#util#iconv(...)
-    let module = s:Vital.Data.String
+    let module = s:Vital
     return call(module.iconv, a:000, module)
 endfunction
 
