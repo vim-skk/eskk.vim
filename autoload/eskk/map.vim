@@ -245,6 +245,9 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
     let dict = eskk#util#mapopt_chars2dict(a:options)
     let modes = a:0 ? a:1 : eskk#map#get_map_modes()
     for mode in split(modes, '\zs')
+        if !eskk#util#is_mode_char(mode)
+            continue
+        endif
         let mapcmd = eskk#util#get_map_command(mode, dict, a:lhs, a:rhs)
         try
             execute mapcmd
@@ -261,6 +264,9 @@ function! eskk#map#unmap(options, lhs, modes) "{{{
 
     let dict = eskk#util#mapopt_chars2dict(a:options)
     for mode in split(a:modes, '\zs')
+        if !eskk#util#is_mode_char(mode)
+            continue
+        endif
         let mapcmd = eskk#util#get_unmap_command(mode, dict, a:lhs)
         try
             execute mapcmd

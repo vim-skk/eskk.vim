@@ -153,6 +153,10 @@ function! eskk#util#get_unmap_command(...) "{{{
     let module = s:Vital.Mapping
     return call(module.get_unmap_command, a:000, module)
 endfunction "}}}
+function! eskk#util#is_mode_char(...) "{{{
+    let module = s:Vital.Mapping
+    return call(module.is_mode_char, a:000, module)
+endfunction "}}}
 
 
 " Misc.
