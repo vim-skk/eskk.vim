@@ -277,19 +277,10 @@ function! eskk#map#map_from_maparg_dict(dict) "{{{
         return
     endif
 
-    let lhs = a:dict.lhs
-    let rhs = a:dict.rhs
-    let options = ''
-    for [from, to] in items({
-    \   'silent': 's',
-    \   'expr': 'e',
-    \   'buffer': 'b',
-    \})
-        let options .= a:dict[from] ? to : ''
-    endfor
-    let options .= a:dict.noremap ? '' : 'r'
-    let modes = a:dict.mode
-    return eskk#map#map(options, lhs, rhs, modes)
+    return eskk#map#map(
+    \   eskk#util#mapopt_dict2chars(a:dict),
+    \   a:dict.lhs, a:dict.rhs, a:dict.mode
+    \)
 endfunction "}}}
 
 function! eskk#map#set_up_key(key, ...) "{{{
