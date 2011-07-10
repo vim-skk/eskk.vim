@@ -184,67 +184,9 @@ function! s:create_default_mapopt() "{{{
     \   'expr': 0,
     \   'silent': 0,
     \   'unique': 0,
-    \   'remap': 0,
+    \   'noremap': 1,
     \   'map-if': '1',
     \}
-endfunction "}}}
-function! eskk#map#mapopt_chars2dict(options) "{{{
-    let table = {
-    \   'b': 'buffer',
-    \   'e': 'expr',
-    \   's': 'silent',
-    \   'u': 'unique',
-    \   'r': 'remap',
-    \}
-    let opt = s:create_default_mapopt()
-    for c in split(a:options, '\zs')
-        let opt[table[c]] = 1
-    endfor
-    return opt
-endfunction "}}}
-function! eskk#map#mapopt_dict2raw(options) "{{{
-    let ret = ''
-    for [key, val] in items(a:options)
-        if key ==# 'remap' || key ==# 'map-if'
-            continue
-        endif
-        if val
-            let ret .= printf('<%s>', key)
-        endif
-    endfor
-    return ret
-endfunction "}}}
-function! eskk#map#mapopt_dict2chars(options) "{{{
-    let table = {
-    \   'buffer': 'b',
-    \   'expr': 'e',
-    \   'silent': 's',
-    \   'unique': 'u',
-    \   'remap': 'r',
-    \}
-    return join(
-    \   map(
-    \       keys(a:options),
-    \       'a:options[v:val]'
-    \           . ' && has_key(table, v:val) ? table[v:val] : ""'
-    \   ),
-    \   ''
-    \)
-endfunction "}}}
-function! eskk#map#mapopt_chars2raw(options) "{{{
-    let table = {
-    \   'b': '<buffer>',
-    \   'e': '<expr>',
-    \   's': '<silent>',
-    \   'u': '<unique>',
-    \}
-    return join(
-    \   map(
-    \       split(a:options, '\zs'),
-    \       'get(table, v:val, "")'
-    \   ),
-    \   ''
-    \)
 endfunction "}}}
 
 function! eskk#map#get_map_modes() "{{{
@@ -301,7 +243,7 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
     endif
 
     let map = stridx(a:options, 'r') != -1 ? 'map' : 'noremap'
-    let opt = eskk#map#mapopt_chars2raw(a:options)
+    let opt = eskk#util#mapopt_chars2raw(a:options)
     let modes = a:0 ? a:1 : eskk#map#get_map_modes()
     for mode in split(modes, '\zs')
         let mapcmd = join([mode . map, opt, a:lhs, a:rhs])
@@ -318,7 +260,7 @@ function! eskk#map#unmap(options, lhs, modes) "{{{
         return
     endif
 
-    let opt = eskk#map#mapopt_chars2raw(a:options)
+    let opt = eskk#util#mapopt_chars2raw(a:options)
     for mode in split(a:modes, '\zs')
         let mapcmd = join([mode . 'unmap', opt, a:lhs])
         try
@@ -560,13 +502,13 @@ function! eskk#map#map_all_keys(...) "{{{
         if opt.rhs == ''
             call eskk#map#set_up_key(
             \   key,
-            \   eskk#map#mapopt_dict2chars(opt.options)
+            \   eskk#util#mapopt_dict2chars(opt.options)
             \)
         else
             call eskk#map#map(
             \   'b'
-            \       . (opt.options.remap ? 'r' : '')
-            \       . eskk#map#mapopt_dict2chars(opt.options),
+            \       . (opt.options.noremap ? '' : 'r')
+            \       . eskk#util#mapopt_dict2chars(opt.options),
             \   key,
             \   opt.rhs,
             \   'l'
@@ -739,6 +681,8 @@ function! s:parse_options(args) "{{{
             let type = value
         elseif has_key(opt, optname)
             let opt[optname] = value
+        elseif optname ==# 'remap'
+            let opt.noremap = 0
         else
             throw eskk#map#cmd_eskk_map_invalid_args(
             \   printf("unknown option '%s'.", optname)
