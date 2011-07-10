@@ -270,9 +270,7 @@ function! eskk#map#unmap(options, lhs, modes) "{{{
     endfor
 endfunction "}}}
 function! eskk#map#map_from_maparg_dict(dict) "{{{
-    " FIXME: mapopt dict should follow maparg()'s dict.
-
-    if empty(a:dict)
+    if type(a:dict) !=# type({}) || empty(a:dict)
         " The mapping does not exist.
         return
     endif
