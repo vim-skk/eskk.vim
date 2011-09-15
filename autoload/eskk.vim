@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 350))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 351))
 
 
 function! s:SID() "{{{
@@ -1584,7 +1584,7 @@ function! eskk#filter(char) "{{{
     " Check irregular circumstance.
     if !eskk#is_supported_mode(inst.mode)
         " Detect fatal error. disable eskk...
-        call s:force_disable_eskk(
+        return s:force_disable_eskk(
         \   a:char,
         \   eskk#util#build_error(
         \       ['eskk'],
@@ -1592,7 +1592,6 @@ function! eskk#filter(char) "{{{
         \           . string(inst.mode)]
         \   )
         \)
-        return ''
     endif
 
 
@@ -1627,28 +1626,34 @@ function! eskk#filter(char) "{{{
 
     catch
         " Detect fatal error. disable eskk...
-        call s:force_disable_eskk(
+        return s:force_disable_eskk(
         \   a:char,
         \   eskk#util#build_error(
         \       ['eskk'],
         \       ['main routine raised an error']
         \   )
         \)
-        return ''
 
     finally
         call eskk#throw_event('filter-finalize')
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(char, error) "{{{
-    call eskk#logger#write_error_log_file(
-    \   a:char, a:error,
-    \)
-    sleep 1
     " FIXME: It may cause inconsistency
     " to eskk status and lang options.
     " TODO: detect lang options and follow the status.
     call eskk#disable_im()
+
+    call eskk#logger#write_error_log_file(
+    \   a:char, a:error,
+    \)
+    sleep 1
+
+    " Vim does not disable IME
+    " when changing the value of &iminsert and/or &imsearch.
+    " so do it manually.
+    call eskk#map#map('b', '<Plug>(eskk:_reenter_insert_mode)', '<esc>i')
+    return "\<Plug>(eskk:_reenter_insert_mode)"
 endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
