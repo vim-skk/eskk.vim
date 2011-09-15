@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 348))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 349))
 
 
 function! s:SID() "{{{
@@ -1267,7 +1267,7 @@ function! eskk#enable(...) "{{{
     if mode() =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
-        return s:enable_im()
+        return eskk#enable_im()
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
@@ -1307,7 +1307,7 @@ function! eskk#disable() "{{{
         let buftable = eskk#get_buftable()
         return buftable.generate_kakutei_str() . "\<C-^>"
     else
-        return s:disable_im()
+        return eskk#disable_im()
     endif
 endfunction "}}}
 function! eskk#toggle() "{{{
@@ -1319,7 +1319,7 @@ function! eskk#toggle() "{{{
     endif
     return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
 endfunction "}}}
-function! s:enable_im() "{{{
+function! eskk#enable_im() "{{{
     let &l:iminsert = s:map_exists_mode_of('l') ? 1 : 2
     let &l:imsearch = &l:iminsert
 
@@ -1329,7 +1329,7 @@ function! s:map_exists_mode_of(mode) "{{{
     let out = eskk#util#redir_english(a:mode . 'map')
     return index(split(out, '\n'), 'No mapping found') ==# -1
 endfunction "}}}
-function! s:disable_im() "{{{
+function! eskk#disable_im() "{{{
     let &l:iminsert = 0
     let &l:imsearch = 0
 
@@ -1583,7 +1583,8 @@ function! eskk#filter(char) "{{{
 
     " Check irregular circumstance.
     if !eskk#is_supported_mode(inst.mode)
-        call eskk#error#write_error_log_file(
+        " Detect fatal error. disable eskk...
+        call s:force_disable_eskk(
         \   a:char,
         \   eskk#error#build_error(
         \       ['eskk'],
@@ -1591,7 +1592,7 @@ function! eskk#filter(char) "{{{
         \           . string(inst.mode)]
         \   )
         \)
-        return a:char
+        return ''
     endif
 
 
@@ -1625,12 +1626,29 @@ function! eskk#filter(char) "{{{
         return s:rewrite_string(stash.return)
 
     catch
-        call eskk#error#write_error_log_file(a:char)
-        return a:char
+        " Detect fatal error. disable eskk...
+        call s:force_disable_eskk(
+        \   a:char,
+        \   eskk#error#build_error(
+        \       ['eskk'],
+        \       ['main routine raised an error']
+        \   )
+        \)
+        return ''
 
     finally
         call eskk#throw_event('filter-finalize')
     endtry
+endfunction "}}}
+function! s:force_disable_eskk(char, error) "{{{
+    call eskk#error#write_error_log_file(
+    \   a:char, a:error,
+    \)
+    sleep 1
+    " FIXME: It may cause inconsistency
+    " to eskk status and lang options.
+    " TODO: detect lang options and follow the status.
+    call eskk#disable_im()
 endfunction "}}}
 function! s:rewrite_string(return_string) "{{{
     let redispatch_pre = ''
