@@ -338,6 +338,15 @@ function! eskk#dictionary#_registered_word_identifier(rw) "{{{
     \   ['input', 'key', 'okuri', 'okuri_rom'], 'a:rw[v:val]'), ';')
 endfunction "}}}
 
+function! s:registered_word2candidate(rw, from_type)
+    return s:candidate_new(
+    \   a:from_type,
+    \   a:rw.input,
+    \   a:rw.okuri_rom != '',
+    \   a:rw.annotation
+    \)
+endfunction
+
 " }}}
 
 
@@ -486,13 +495,12 @@ function! {s:HenkanResult.method('get_candidates')}(this) "{{{
         \)
         if !empty(registered)
             for rw in registered
-                let c = s:candidate_new(
-                \   s:CANDIDATE_FROM_REGISTERED_WORDS,
-                \   rw.input,
-                \   rw.okuri_rom != "",
-                \   ''
+                call a:this._candidates.push(
+                \   s:registered_word2candidate(
+                \       rw,
+                \       s:CANDIDATE_FROM_REGISTERED_WORDS
+                \   )
                 \)
-                call a:this._candidates.push(c)
             endfor
         endif
 
@@ -1345,14 +1353,12 @@ function! {s:Dictionary.method('search_all_candidates')}(this, key, okuri, okuri
     call candidates.clear()
     let max_count = g:eskk#max_candidates
 
-    for w in a:this._registered_words.to_list()
-        if w.key ==# key && w.okuri_rom[0] ==# okuri_rom[0]
+    for rw in a:this._registered_words.to_list()
+        if rw.key ==# key && rw.okuri_rom[0] ==# okuri_rom[0]
             call candidates.push(
-            \   s:candidate_new(
+            \   s:registered_word2candidate(
+            \       rw,
             \       s:CANDIDATE_FROM_REGISTERED_WORDS,
-            \       w.input,
-            \       w.okuri_rom != "",
-            \       ''
             \   )
             \)
             if candidates.size() >= max_count
@@ -1374,13 +1380,8 @@ function! {s:Dictionary.method('search_all_candidates')}(this, key, okuri, okuri
                     for c in eskk#dictionary#parse_skk_dict_line(
                     \   line, from_type
                     \)[2]    " candidates
-                        call candidates.push(
-                        \   s:candidate_new(
-                        \       s:CANDIDATE_FROM_REGISTERED_WORDS,
-                        \       c.input,
-                        \       okuri_rom != ""
-                        \   )
-                        \)
+                        let c.from_type = s:CANDIDATE_FROM_REGISTERED_WORDS
+                        call candidates.push(c)
                         if candidates.size() >= max_count
                             throw 'break'
                         endif
