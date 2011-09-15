@@ -16,8 +16,8 @@ set cpo&vim
 " `autoload/eskk/**/*.vim` for libraries.
 " They should not have side-effect due to testability.
 let s:search_all_candidate_memoize = {}
-" eskk#dictionary#search_all_candidates() {{{
-function! eskk#dictionary#search_all_candidates(
+" s:search_all_candidates() {{{
+function! s:search_all_candidates(
 \   physical_dict, key_filter, okuri_rom, ...
 \)
     let limit = a:0 ? a:1 : -1    " No limit by default.
@@ -102,8 +102,8 @@ function! eskk#dictionary#search_all_candidates(
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
-" eskk#dictionary#search_candidate() {{{
-function! eskk#dictionary#search_candidate(
+" s:search_candidate() {{{
+function! s:search_candidate(
 \   physical_dict, key_filter, okuri_rom
 \)
     let has_okuri = a:okuri_rom != ''
@@ -461,10 +461,10 @@ function! {s:HenkanResult.method('get_candidates')}(this) "{{{
         let user_dict = dict.get_user_dict()
         let system_dict = dict.get_system_dict()
         " Look up this henkan result in dictionaries.
-        let user_dict_result = eskk#dictionary#search_candidate(
+        let user_dict_result = s:search_candidate(
         \   user_dict, a:this._key, a:this._okuri_rom
         \)
-        let system_dict_result = eskk#dictionary#search_candidate(
+        let system_dict_result = s:search_candidate(
         \   system_dict, a:this._key, a:this._okuri_rom
         \)
         if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
@@ -962,7 +962,7 @@ function! {s:PhysicalDict.method('get_updated_lines')}(this, registered_words) "
     let ari_lnum = a:this.okuri_ari_idx + 1
     let nasi_lnum = a:this.okuri_nasi_idx + 1
     for w in reverse(a:registered_words.to_list())
-        let [line, index] = eskk#dictionary#search_candidate(
+        let [line, index] = s:search_candidate(
         \   a:this, w.key, w.okuri_rom
         \)
         if w.okuri_rom != ''
@@ -1369,7 +1369,7 @@ function! {s:Dictionary.method('search')}(this, key, okuri, okuri_rom) "{{{
             \   [a:this._user_dict, s:CANDIDATE_FROM_USER_DICT],
             \   [a:this._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
             \]
-                for line in eskk#dictionary#search_all_candidates(
+                for line in s:search_all_candidates(
                 \   dict, key, okuri_rom, max_count - candidates.size()
                 \)
                     for c in eskk#dictionary#parse_skk_dict_line(
