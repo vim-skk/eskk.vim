@@ -216,7 +216,7 @@ function! s:complete(mode, base) "{{{
     \   buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_OKURI
     for c in candidates
         if do_list_okuri_candidates
-            if c.has_okuri
+            if c.okuri_rom_first !=# ''
                 call add(list, {
                 \   'word': marker . c.input,
                 \   'abbr': (has_key(c, 'annotation') ?

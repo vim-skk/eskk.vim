@@ -202,7 +202,6 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     call eskk#util#assert(!empty(list), 'list must not be empty')
     let key = matchstr(list[0], '^[^a-z ]\+')
     let okuri_rom = matchstr(list[0], '[a-z]\+')
-    let has_okuri = okuri_rom != ''
 
     let candidates = []
     for _ in list[1:]
@@ -211,21 +210,23 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
             let c = s:candidate_new(
             \   a:from_type,
             \   _[: semicolon - 1],
-            \   has_okuri,
+            \   key,
+            \   okuri_rom[0],
             \   _[semicolon + 1 :]
             \)
         else
             let c = s:candidate_new(
             \   a:from_type,
             \   _,
-            \   has_okuri,
+            \   key,
+            \   okuri_rom[0],
             \   ''
             \)
         endif
         call add(candidates, c)
     endfor
 
-    return [key, okuri_rom, candidates]
+    return candidates
 endfunction "}}}
 
 " Returns String of the created entry from arguments values.
@@ -291,11 +292,12 @@ let [
 \   s:CANDIDATE_FROM_REGISTERED_WORDS
 \] = range(3)
 
-function! s:candidate_new(from_type, input, has_okuri, annotation) "{{{
+function! s:candidate_new(from_type, input, key, okuri_rom_first, annotation) "{{{
     return {
     \   'from_type': a:from_type,
     \   'input': a:input,
-    \   'has_okuri': a:has_okuri,
+    \   'key': a:key,
+    \   'okuri_rom_first': a:okuri_rom_first,
     \   'annotation': a:annotation,
     \}
 endfunction "}}}
@@ -342,7 +344,8 @@ function! s:registered_word2candidate(rw, from_type)
     return s:candidate_new(
     \   a:from_type,
     \   a:rw.input,
-    \   a:rw.okuri_rom != '',
+    \   a:rw.key,
+    \   a:rw.okuri_rom[0],
     \   a:rw.annotation
     \)
 endfunction
@@ -506,18 +509,24 @@ function! {s:HenkanResult.method('get_candidates')}(this) "{{{
 
         " Merge user dictionary.
         if user_dict_result[1] !=# -1
-            let [key, okuri_rom, candidates] =
+            let candidates =
             \   eskk#dictionary#parse_skk_dict_line(
             \       user_dict_result[0],
             \       s:CANDIDATE_FROM_USER_DICT
             \   )
             call eskk#util#assert(
+            \   !empty(candidates),
+            \   'user dict: `candidates` is not empty.'
+            \)
+            let key = candidates[0].key
+            let okuri_rom_first = candidates[0].okuri_rom_first
+            call eskk#util#assert(
             \   key ==# a:this._key,
             \   "user dict:".string(key)." ==# ".string(a:this._key)
             \)
             call eskk#util#assert(
-            \   okuri_rom ==# a:this._okuri_rom[0],
-            \   "user dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom)
+            \   okuri_rom_first ==# a:this._okuri_rom[0],
+            \   "user dict:".string(okuri_rom_first)." ==# ".string(a:this._okuri_rom)
             \)
 
             for c in candidates
@@ -527,11 +536,17 @@ function! {s:HenkanResult.method('get_candidates')}(this) "{{{
 
         " Merge system dictionary.
         if system_dict_result[1] !=# -1
-            let [key, okuri_rom, candidates] =
+            let candidates =
             \   eskk#dictionary#parse_skk_dict_line(
             \       system_dict_result[0],
             \       s:CANDIDATE_FROM_SYSTEM_DICT
             \   )
+            call eskk#util#assert(
+            \   !empty(candidates),
+            \   'system dict: `candidates` is not empty.'
+            \)
+            let key = candidates[0].key
+            let okuri_rom_first = candidates[0].okuri_rom_first
             call eskk#util#assert(
             \   key ==# a:this._key,
             \   "system dict:".string(key)." ==# ".string(a:this._key)
@@ -1379,7 +1394,7 @@ function! {s:Dictionary.method('search_all_candidates')}(this, key, okuri, okuri
                 \)
                     for c in eskk#dictionary#parse_skk_dict_line(
                     \   line, from_type
-                    \)[2]    " candidates
+                    \)
                         let c.from_type = s:CANDIDATE_FROM_REGISTERED_WORDS
                         call candidates.push(c)
                         if candidates.size() >= max_count
