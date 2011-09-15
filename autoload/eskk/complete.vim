@@ -219,8 +219,9 @@ function! s:complete(mode, base) "{{{
             if c.okuri_rom_first !=# ''
                 call add(list, {
                 \   'word': marker . c.input,
-                \   'abbr': (has_key(c, 'annotation') ?
-                \               c.input . '; ' . c.annotation : c.input),
+                \   'abbr': c.input
+                \           . (get(c, 'annotation', '') !=# '' ?
+                \               '; ' . c.annotation : ''),
                 \   'menu': 'kanji:okuri'
                 \})
             endif
@@ -229,8 +230,9 @@ function! s:complete(mode, base) "{{{
 
         call add(list, {
         \   'word': marker . c.input,
-        \   'abbr': (has_key(c, 'annotation') ?
-        \               c.input . '; ' . c.annotation : c.input),
+        \   'abbr': c.input
+        \           . (get(c, 'annotation', '') !=# '' ?
+        \               '; ' . c.annotation : ''),
         \   'menu': 'kanji'
         \})
     endfor

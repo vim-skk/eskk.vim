@@ -305,7 +305,7 @@ endfunction "}}}
 function! eskk#dictionary#_candidate_identifer(candidate) "{{{
     return
     \   a:candidate.input
-    \   . (has_key(a:candidate, 'annotation') ?
+    \   . (get(a:candidate, 'annotation', '') !=# '' ?
     \       ';' . a:candidate.annotation : '')
 endfunction "}}}
 
@@ -625,7 +625,7 @@ function! {s:HenkanResult.method('select_candidates')}(
         for [c, word] in pages[page_index]
             if g:eskk#show_annotation
                 echon printf('%s:%s%s  ', c, word.input,
-                \       (has_key(word, 'annotation') ?
+                \       (get(word, 'annotation', '') !=# '' ?
                 \           ';' . word.annotation : ''))
             else
                 echon printf('%s:%s  ', c, word.input)
@@ -820,7 +820,7 @@ function! {s:HenkanResult.method('do_delete_from_dict')}(this) "{{{
     \   . a:this._key . a:this._okuri_rom[0]
     \   . ' /'
     \   . candidates[candidates_index].input
-    \   . (has_key(candidates[candidates_index], 'annotation') ?
+    \   . (get(candidates[candidates_index], 'annotation', '') !=# '' ?
     \       ';' . candidates[candidates_index].annotation :
     \       '')
     \   . '/ (yes/no):'
