@@ -218,7 +218,8 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
             let c = s:candidate_new(
             \   a:from_type,
             \   _,
-            \   has_okuri
+            \   has_okuri,
+            \   ''
             \)
         endif
         call add(candidates, c)
@@ -290,18 +291,13 @@ let [
 \   s:CANDIDATE_FROM_REGISTERED_WORDS
 \] = range(3)
 
-function! s:candidate_new(from_type, input, has_okuri, ...) "{{{
-    let obj = {
+function! s:candidate_new(from_type, input, has_okuri, annotation) "{{{
+    return {
     \   'from_type': a:from_type,
     \   'input': a:input,
     \   'has_okuri': a:has_okuri,
+    \   'annotation': a:annotation,
     \}
-
-    if a:0
-        let obj.annotation = a:1
-    endif
-
-    return obj
 endfunction "}}}
 
 function! eskk#dictionary#_candidate_identifer(candidate) "{{{
@@ -492,7 +488,9 @@ function! {s:HenkanResult.method('get_candidates')}(this) "{{{
             for rw in registered
                 let c = s:candidate_new(
                 \   s:CANDIDATE_FROM_REGISTERED_WORDS,
-                \   rw.input, rw.okuri_rom != ""
+                \   rw.input,
+                \   rw.okuri_rom != "",
+                \   ''
                 \)
                 call a:this._candidates.push(c)
             endfor
@@ -1353,7 +1351,8 @@ function! {s:Dictionary.method('search_all_candidates')}(this, key, okuri, okuri
             \   s:candidate_new(
             \       s:CANDIDATE_FROM_REGISTERED_WORDS,
             \       w.input,
-            \       w.okuri_rom != ""
+            \       w.okuri_rom != "",
+            \       ''
             \   )
             \)
             if candidates.size() >= max_count
