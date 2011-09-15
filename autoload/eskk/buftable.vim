@@ -354,7 +354,6 @@ function! s:get_henkan_select_display_str(this, with_marker, with_rom_str) "{{{
 endfunction "}}}
 
 
-" self._henkan_phase
 function! {s:Buftable.method('get_henkan_phase')}(this) "{{{
     return a:this._henkan_phase
 endfunction "}}}

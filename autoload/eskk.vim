@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 347))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 348))
 
 
 function! s:SID() "{{{
@@ -1322,7 +1322,7 @@ endfunction "}}}
 function! s:enable_im() "{{{
     let &l:iminsert = s:map_exists_mode_of('l') ? 1 : 2
     let &l:imsearch = &l:iminsert
-    
+
     return ''
 endfunction "}}}
 function! s:map_exists_mode_of(mode) "{{{
@@ -1332,7 +1332,7 @@ endfunction "}}}
 function! s:disable_im() "{{{
     let &l:iminsert = 0
     let &l:imsearch = 0
-    
+
     return ''
 endfunction "}}}
 
