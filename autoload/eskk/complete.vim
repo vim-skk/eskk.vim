@@ -196,21 +196,13 @@ function! s:complete(mode, base) "{{{
     let marker = g:eskk#marker_popup . g:eskk#marker_henkan
 
     try
-        let _ = dict.search_all_candidates(key, okuri, okuri_rom)
-        if empty(_)
+        let candidates = dict.search_all_candidates(key, okuri, okuri_rom)
+        if empty(candidates)
             return s:skip_complete()
         endif
     catch /^eskk: dictionary look up error:/
         return s:skip_complete()
     endtry
-
-    let [yomigana, candidates] = [_[0], _[2]]
-    " Do not add yomigana to list.
-    " call add(list, {
-    " \   'word' : marker . yomigana,
-    " \   'abbr' : yomigana,
-    " \   'menu' : a:mode,
-    " \})
 
     let do_list_okuri_candidates =
     \   buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_OKURI

@@ -1407,7 +1407,7 @@ function! {s:Dictionary.method('search_all_candidates')}(this, key, okuri, okuri
         endtry
     endif
 
-    return [key, okuri_rom, candidates.to_list()]
+    return candidates.to_list()
 endfunction "}}}
 
 
