@@ -337,7 +337,7 @@ endfunction "}}}
 
 function! eskk#dictionary#_registered_word_identifier(rw) "{{{
     return join(map(
-    \   ['input', 'key', 'okuri', 'okuri_rom'], 'a:rw[v:val]'), ';')
+    \   ['input', 'key', 'okuri', 'okuri_rom', 'annotation'], 'a:rw[v:val]'), ';')
 endfunction "}}}
 
 function! s:registered_word2candidate(rw, from_type)
