@@ -167,6 +167,18 @@ g:eskk#show_candidates_count	*g:eskk#show_candidates_count*
 	this number,
 	Switch to |eskk-select-candidates|.
 
+g:eskk#kata_convert_to_hira_at_henkan	*g:eskk#kata_convert_to_hira_at_henkan*
+							(Default: 1)
+	In |eskk-kata-mode|, Convert katakana to hiragana
+	before looking up SKK dictionary.
+	Therefore, eskk will find the candidates in SKK dictionary.
+	(Because SKK dictionary only contains pairs of hiragana and candidates)
+
+g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_completion*
+							(Default: 1)
+	Same as |g:eskk#kata_convert_to_hira_at_henkan|,
+	But this works at |eskk-completion|.
+
 g:eskk#show_annotation			*g:eskk#show_annotation*
 							(Default: 0)
 	If true, show annotation at |eskk-select-candidates|.
@@ -219,28 +231,11 @@ g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
 	\	'abbrev': 'aあ'
 	\}
 <
-g:eskk#mode_use_tables			*g:eskk#mode_use_tables*
-							(Default: See below)
-	Keys are modes.
-	Values are table names.
-	See |eskk-table| to create own table.
-
-	Default value is: >
-	let g:eskk#mode_use_tables = {
-	\	'hira': 'rom_to_hira',
-	\	'kata': 'rom_to_kata',
-	\	'zenei': 'rom_to_zenei',
-	\	'hankata': 'rom_to_hankata'
-	\}
-<
 
 Table
 --------
 
 g:eskk#cache_table_map			*g:eskk#cache_table_map*
-							(Default: 1)
-
-g:eskk#cache_table_candidates			*g:eskk#cache_table_candidates*
 							(Default: 1)
 
 
@@ -271,13 +266,15 @@ g:eskk#enable_completion		*g:eskk#enable_completion*
 							(Default: 0)
 
 g:eskk#max_candidates			*g:eskk#max_candidates*
-							(Default: 10)
+							(Default: 30)
 
 						*g:eskk#start_completion_length*
 g:eskk#start_completion_length
 							(Default: 3)
 	Skip completion until input characters' (not bytes)
 	length becomes larger than the option value.
+	("Skip completion" means, if completion function
+	was invoked, always returns empty list)
 
 
 
@@ -348,23 +345,8 @@ g:eskk#fix_extra_okuri				*g:eskk#fix_extra_okuri*
 	 >
 	▽おく*r
 <
-g:eskk#ignore_continuous_sticky		*g:eskk#ignore_continuous_sticky*
-							(Default: 1)
-
 g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 							(Default: 0)
-
-g:eskk#kata_convert_to_hira_at_henkan	*g:eskk#kata_convert_to_hira_at_henkan*
-							(Default: 1)
-	In |eskk-kata-mode|, Convert hiragana to katakana
-	before looking up SKK dictionary.
-	Therefore, eskk will find the candidates in SKK dictionary.
-	(Because SKK dictionary only contains pairs of hiragana and candidates)
-
-g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_completion*
-							(Default: 1)
-	Same as |g:eskk#kata_convert_to_hira_at_henkan|,
-	But this works at |eskk-completion|.
 
 
 
@@ -372,6 +354,10 @@ g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_comple
 
 Debugging variables
 ----------------------
+
+NOTE: These variables is developer use only.
+Please note that these variables may change its behavior.
+
 
 g:eskk#debug			*g:eskk#debug*
 						(Default: 0)

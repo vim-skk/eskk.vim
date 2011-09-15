@@ -169,6 +169,21 @@ g:eskk#show_candidates_count	*g:eskk#show_candidates_count*
 	もしユーザが変換キーをタイプした回数がこの値を上回るなら、
 	|eskk-select-candidates| に移る。
 
+g:eskk#kata_convert_to_hira_at_henkan	*g:eskk#kata_convert_to_hira_at_henkan*
+							(Default: 1)
+	SKK辞書にはひらがなと変換候補のペアしか載っていないため、
+	|eskk-kata-mode|でカタカナを入力しても変換できない。
+	この変数が真なら、|eskk-kata-mode| において
+	SKK辞書を探索する前にカタカナをひらがなに変換する。
+	よって|eskk-kata-mode|であってもSKK辞書から候補を見つけ出し、
+	無事変換することができる。
+
+g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_completion*
+							(Default: 1)
+	|g:eskk#kata_convert_to_hira_at_henkan|と同じだが、
+	これは補完候補に対してのみ働く。
+	補完に関して詳しくは|eskk-completion|を参照すること。
+
 g:eskk#show_annotation			*g:eskk#show_annotation*
 							(デフォルト値: 0)
 	もし真なら、|eskk-select-candidates| の時にアノテーションを表示する。
@@ -176,6 +191,7 @@ g:eskk#show_annotation			*g:eskk#show_annotation*
 g:eskk#kakutei_when_unique_candidate	*g:eskk#kakutei_when_unique_candidate*
 							(デフォルト値: 0)
 	もし真なら、漢字変換した時に候補が1つの場合自動的に確定する。
+
 
 キーマッピングに関する変数
 -----------
@@ -220,27 +236,11 @@ g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
 	\	'abbrev': 'aあ'
 	\}
 <
-g:eskk#mode_use_tables			*g:eskk#mode_use_tables*
-							(デフォルト値: 下を参照)
-	キーはモード、値はテーブルの名前。
-	モードを作る場合には |eskk-table| を参照のこと。
-
-	デフォルト値は： >
-	let g:eskk#mode_use_tables = {
-	\	'hira': 'rom_to_hira',
-	\	'kata': 'rom_to_kata',
-	\	'zenei': 'rom_to_zenei',
-	\	'hankata': 'rom_to_hankata'
-	\}
-<
 
 テーブルに関する変数
 --------
 
 g:eskk#cache_table_map			*g:eskk#cache_table_map*
-							(デフォルト値: 1)
-
-g:eskk#cache_table_candidates			*g:eskk#cache_table_candidates*
 							(デフォルト値: 1)
 
 
@@ -268,13 +268,15 @@ g:eskk#marker_popup			*g:eskk#marker_popup*
 -------------
 
 g:eskk#enable_completion		*g:eskk#enable_completion*
-							(デフォルト値: 0)
+							(デフォルト値: 1)
 
 g:eskk#max_candidates			*g:eskk#max_candidates*
-							(デフォルト値: 10)
+							(デフォルト値: 30)
 
-g:eskk#compl_enter_send_keys			*g:eskk#compl_enter_send_keys*
-							(デフォルト値: ["<CR>"])
+g:eskk#start_completion_length			*g:eskk#start_completion_length*
+							(デフォルト値: 3)
+	指定された文字数(バイト数ではない)が入力されるまで
+	補完をしない。(補完関数を実行しても常に空のリストを返す)
 
 
 カーソルの色に関する変数
@@ -332,9 +334,6 @@ g:eskk#set_undo_point				*g:eskk#set_undo_point*
 	\	'kakutei': 1,
 	\}
 <
-g:eskk#context_control				*g:eskk#context_control*
-							(デフォルト値: [])
-
 g:eskk#fix_extra_okuri				*g:eskk#fix_extra_okuri*
 							(デフォルト値: 1)
 	 >
@@ -342,23 +341,9 @@ g:eskk#fix_extra_okuri				*g:eskk#fix_extra_okuri*
 <
 	 >
 	▽おく*r
-<
-g:eskk#ignore_continuous_sticky		*g:eskk#ignore_continuous_sticky*
-							(デフォルト値: 1)
 
 g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 							(デフォルト値: 0)
-
-g:eskk#kata_convert_to_hira_at_henkan	*g:eskk#kata_convert_to_hira_at_henkan*
-							(デフォルト値: 1)
-	|eskk-kata-mode|において、SKK辞書を探索する前にカタカナをひらがなに変換する。
-	したがってeskkはSKK辞書から候補を探し出すことができるようになる。
-	(SKK辞書はひらがなとその候補しか含まないため)
-
-g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_completion*
-							(デフォルト値: 1)
-	|g:eskk#kata_convert_to_hira_at_henkan| と同じだが、
-	|eskk-completion| において働く。
 
 
 
@@ -366,6 +351,10 @@ g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_comple
 
 デバッグ用変数
 ----------------------
+
+NOTE: ここで挙げた変数は開発者専用である。
+よって仕様が変わる可能性が高いので注意。
+
 
 g:eskk#debug			*g:eskk#debug*
 						(デフォルト値: 0)
