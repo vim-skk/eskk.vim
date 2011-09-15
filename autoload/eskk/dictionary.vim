@@ -545,8 +545,8 @@ function! {s:HenkanResult.method('get_candidates')}(this) "{{{
             \   "system dict:".string(key)." ==# ".string(a:this._key)
             \)
             call eskk#util#assert(
-            \   okuri_rom ==# a:this._okuri_rom[0],
-            \   "system dict:".string(okuri_rom)." ==# ".string(a:this._okuri_rom)
+            \   okuri_rom_first ==# a:this._okuri_rom[0],
+            \   "system dict:".string(okuri_rom_first)." ==# ".string(a:this._okuri_rom)
             \)
 
             for c in candidates
