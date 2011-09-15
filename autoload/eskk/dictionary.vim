@@ -902,8 +902,7 @@ endfunction "}}}
 
 let s:PhysicalDict = vice#class('PhysicalDict', s:SID_PREFIX, s:VICE_OPTIONS)
 call s:PhysicalDict.attribute('_content_lines', [])
-call s:PhysicalDict.attribute('_ftime_at_read', 0)
-call s:PhysicalDict.attribute('_loaded', 0)
+call s:PhysicalDict.attribute('_ftime_at_read', -1)
 call s:PhysicalDict.attribute('okuri_ari_idx', -1)
 call s:PhysicalDict.attribute('okuri_nasi_idx', -1)
 call s:PhysicalDict.attribute('path', '')
@@ -934,7 +933,7 @@ function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
     " and control dictionary read timing.
     " (when it should be read?)
     let same_timestamp = a:this._ftime_at_read ==# getftime(a:this.path)
-    if a:this._loaded && same_timestamp && !force
+    if a:this._ftime_at_read isnot -1 && same_timestamp && !force
         return a:this._content_lines
     endif
 
@@ -944,7 +943,6 @@ function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
         call a:this.parse_lines(a:this._content_lines)
 
         let a:this._ftime_at_read = getftime(path)
-        let a:this._loaded = 1
     catch /E484:/    " Can't open file
         call eskk#logger#logf("Can't read '%s'!", path)
     catch /^eskk: parse error/
@@ -1001,7 +999,7 @@ function! {s:PhysicalDict.method('set_lines')}(this, lines) "{{{
     try
         let a:this._content_lines  = a:lines
         call a:this.parse_lines(a:lines)
-        let a:this._loaded = 1
+        let a:this._ftime_at_read = getftime(path)
         let a:this._is_modified = 1
     catch /^eskk: parse error/
         call eskk#logger#log_exception('s:physical_dict.set_lines()')
