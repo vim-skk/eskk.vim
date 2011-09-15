@@ -9,7 +9,7 @@ set cpo&vim
 
 let s:warning_messages = []
 
-function! eskk#error#write_debug_log_file() "{{{
+function! eskk#logger#write_debug_log_file() "{{{
     if empty(s:warning_messages)
         return
     endif
@@ -29,7 +29,7 @@ function! eskk#error#write_debug_log_file() "{{{
         let s:warning_messages = []
     endtry
 endfunction "}}}
-function! eskk#error#write_error_log_file(char, ...) "{{{
+function! eskk#logger#write_error_log_file(char, ...) "{{{
     let v_exception = a:0 ? a:1 : v:exception
 
     let lines = []
@@ -160,13 +160,13 @@ function! eskk#error#write_error_log_file(char, ...) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        call eskk#error#logf("Cannot write to log file '%s'.", log_file)
+        call eskk#logger#logf("Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight
     setlocal cmdheight=3
     try
-        call eskk#util#warnf(
+        call eskk#logger#warnf(
         \   "Error!! See %s for details.",
         \   (write_success ? string(log_file) : ':messages')
         \)
@@ -175,14 +175,14 @@ function! eskk#error#write_error_log_file(char, ...) "{{{
     endtry
 endfunction "}}}
 
-function! eskk#error#log(msg) "{{{
+function! eskk#logger#log(msg) "{{{
     if !g:eskk#debug
         return
     endif
     if !eskk#is_initialized()
         call eskk#register_temp_event(
         \   'enable-im',
-        \   'eskk#error#log',
+        \   'eskk#logger#log',
         \   [a:msg]
         \)
         return
@@ -195,44 +195,35 @@ function! eskk#error#log(msg) "{{{
         call add(s:warning_messages, msg)
     endif
     if g:eskk#debug_out =~# '^\%(cmdline\|both\)$'
-        call eskk#util#warn(msg)
+        call eskk#logger#warn(msg)
     endif
 
     if g:eskk#debug_wait_ms !=# 0
         execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}
-function! eskk#error#logf(fmt, ...) "{{{
-    call eskk#error#log(call('printf', [a:fmt] + a:000))
+function! eskk#logger#logf(fmt, ...) "{{{
+    call eskk#logger#log(call('printf', [a:fmt] + a:000))
 endfunction "}}}
-function! eskk#error#logstrf(fmt, ...) "{{{
+function! eskk#logger#logstrf(fmt, ...) "{{{
     return call(
-    \   'eskk#error#logf',
+    \   'eskk#logger#logf',
     \   [a:fmt] + map(copy(a:000), 'string(v:val)')
     \)
 endfunction "}}}
-function! eskk#error#log_exception(what) "{{{
-    call eskk#error#log("'" . a:what . "' threw exception")
-    call eskk#error#log('v:exception = ' . string(v:exception))
-    call eskk#error#log('v:throwpoint = ' . string(v:throwpoint))
+function! eskk#logger#log_exception(what) "{{{
+    call eskk#logger#log("'" . a:what . "' threw exception")
+    call eskk#logger#log('v:exception = ' . string(v:exception))
+    call eskk#logger#log('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
 
-function! eskk#error#build_error(from, msg_list) "{{{
-    let file = 'autoload/' . join(a:from, '/') . '.vim'
-    return 'eskk: ' . join(a:msg_list, ': ') . ' (at ' . file . ')'
+function! eskk#logger#warn(msg) "{{{
+    echohl WarningMsg
+    echomsg a:msg
+    echohl None
 endfunction "}}}
-
-function! eskk#error#assert(cond, msg) "{{{
-    if !a:cond
-        throw eskk#error#assertion_failure_error(a:msg)
-    endif
-endfunction "}}}
-function! eskk#error#assertion_failure_error(msg) "{{{
-    " This is only used from eskk#error#assert().
-    return eskk#error#build_error(
-    \   ['eskk', 'error'],
-    \   ['assertion failed', a:msg]
-    \)
+function! eskk#logger#warnf(msg, ...) "{{{
+    call eskk#logger#warn(call('printf', [a:msg] + a:000))
 endfunction "}}}
 
 

@@ -36,9 +36,9 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return s:eskkcomplete(a:findstart, a:base)
     catch
         redraw
-        call eskk#error#log_exception('s:eskkcomplete()')
+        call eskk#logger#log_exception('s:eskkcomplete()')
         if g:eskk#debug_out ==# 'file'
-            call eskk#util#warn('s:eskkcomplete(): ' . v:exception)
+            call eskk#logger#warn('s:eskkcomplete(): ' . v:exception)
         endif
 
         if a:findstart
@@ -57,7 +57,7 @@ function! s:eskkcomplete(findstart, base) "{{{
         call s:initialize_variables()
 
         let [success, _, pos] = s:get_buftable_pos()
-        call eskk#error#assert(success, "s:get_buftable_pos() must not fail")
+        call eskk#util#assert(success, "s:get_buftable_pos() must not fail")
         return pos[2] - 1
     endif
 
@@ -413,7 +413,7 @@ function! s:get_buftable_pos() "{{{
     let buftable = eskk#get_buftable()
     let l = buftable.get_begin_pos()
     if empty(l)
-        call eskk#error#log("Can't get begin pos.")
+        call eskk#logger#log("Can't get begin pos.")
         return [0, 0, 0]
     endif
     let [mode, pos] = l
@@ -434,7 +434,7 @@ function! s:get_buftable_str(with_marker, ...) "{{{
 
     let [success, _, pos] = s:get_buftable_pos()
     if !success
-        call eskk#error#log('s:get_buftable_pos() failed')
+        call eskk#logger#log('s:get_buftable_pos() failed')
         return ''
     endif
     let begin = pos[2] - 1
@@ -455,7 +455,7 @@ function! s:get_buftable_str(with_marker, ...) "{{{
         \   ==# g:eskk#marker_henkan
             let begin += strlen(g:eskk#marker_henkan)
         else
-            call eskk#error#assert(0, '404: marker not found')
+            call eskk#util#assert(0, '404: marker not found')
         endif
     endif
 

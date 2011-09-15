@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 349))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 350))
 
 
 function! s:SID() "{{{
@@ -130,7 +130,7 @@ if !exists('g:__eskk_now_reloading')
             try
                 source `=script`
             catch
-                call eskk#util#warnf('[%s] at [%s]', v:exception, v:throwpoint)
+                call eskk#logger#warnf('[%s] at [%s]', v:exception, v:throwpoint)
             finally
                 unlet g:__eskk_now_reloading
             endtry
@@ -148,7 +148,7 @@ function! eskk#get_current_instance() "{{{
     try
         return s:eskk_instances[s:eskk_instance_id]
     catch
-        call eskk#error#log_exception(
+        call eskk#logger#log_exception(
         \   'eskk#get_current_instance()')
         " Trap "E684: list index our of range ..."
         call eskk#initialize_instance()
@@ -452,7 +452,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endif
         endif
 
-        call eskk#error#assert(char != '', 'char must not be empty')
+        call eskk#util#assert(char != '', 'char must not be empty')
         call okuri_buf_str.rom_str.append(char)
 
         let has_rest = 0
@@ -481,7 +481,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call okuri_buf_str.rom_str.clear()
 
         let matched = okuri_buf_str.rom_pairs.get()
-        call eskk#error#assert(!empty(matched), 'matched must not be empty.')
+        call eskk#util#assert(!empty(matched), 'matched must not be empty.')
         " TODO `len(matched) == 1`: Do henkan at only the first time.
 
         if !has_rest && g:eskk#auto_henkan_at_okuri_match
@@ -629,7 +629,7 @@ function! eskk#_initialize() "{{{
             elseif type({s:varname}) == type({})
                 call extend({s:varname}, s:default, "keep")
             else
-                call eskk#util#warn(
+                call eskk#logger#warn(
                 \   s:varname . "'s type is either String or Dictionary."
                 \)
             endif
@@ -720,7 +720,7 @@ function! eskk#_initialize() "{{{
         let dir = expand(g:eskk#directory)
         for d in [dir, eskk#util#join_path(dir, 'log')]
             if !isdirectory(d) && !eskk#util#mkdir_nothrow(d)
-                call eskk#error#logf("can't create directory '%s'.", d)
+                call eskk#logger#logf("can't create directory '%s'.", d)
             endif
         endfor
     endfunction
@@ -1111,7 +1111,7 @@ function! eskk#_initialize() "{{{
     " Check some variables values. {{{
     function! s:initialize_check_variables()
         if g:eskk#marker_henkan ==# g:eskk#marker_popup
-            call eskk#util#warn(
+            call eskk#logger#warn(
             \   'g:eskk#marker_henkan and g:eskk#marker_popup'
             \       . ' must be different.'
             \)
@@ -1124,7 +1124,7 @@ function! eskk#_initialize() "{{{
     if g:eskk#debug
         " Should I create autoload/eskk/log.vim ?
         autocmd eskk CursorHold,VimLeavePre *
-        \            call eskk#error#write_debug_log_file()
+        \            call eskk#logger#write_debug_log_file()
     endif
     " }}}
 
@@ -1340,10 +1340,10 @@ endfunction "}}}
 function! eskk#set_mode(next_mode) "{{{
     let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:next_mode)
-        call eskk#error#log(
+        call eskk#logger#log(
         \   "mode '" . a:next_mode . "' is not supported."
         \)
-        call eskk#error#log(
+        call eskk#logger#log(
         \   's:available_modes = ' . string(s:available_modes)
         \)
         return
@@ -1386,7 +1386,7 @@ function! s:check_mode_structure(st) "{{{
     " 'temp' will be added by eskk#register_mode_structure().
     for key in ['filter'] " + ['temp']
         if !has_key(a:st, key)
-            call eskk#util#warn(
+            call eskk#logger#warn(
             \   "s:check_mode_structure(" . string(a:mode) . "): "
             \       . string(key) . " is not present in structure"
             \)
@@ -1401,7 +1401,7 @@ endfunction "}}}
 function! eskk#get_mode_structure(mode) "{{{
     let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:mode)
-        call eskk#util#warn(
+        call eskk#logger#warn(
         \   "mode '" . a:mode . "' is not available."
         \)
     endif
@@ -1586,7 +1586,7 @@ function! eskk#filter(char) "{{{
         " Detect fatal error. disable eskk...
         call s:force_disable_eskk(
         \   a:char,
-        \   eskk#error#build_error(
+        \   eskk#util#build_error(
         \       ['eskk'],
         \       ['current mode is not supported: '
         \           . string(inst.mode)]
@@ -1614,7 +1614,7 @@ function! eskk#filter(char) "{{{
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
-                call eskk#error#log_exception(
+                call eskk#logger#log_exception(
                 \   'eskk#complete#handle_special_key()'
                 \)
             endtry
@@ -1629,7 +1629,7 @@ function! eskk#filter(char) "{{{
         " Detect fatal error. disable eskk...
         call s:force_disable_eskk(
         \   a:char,
-        \   eskk#error#build_error(
+        \   eskk#util#build_error(
         \       ['eskk'],
         \       ['main routine raised an error']
         \   )
@@ -1641,7 +1641,7 @@ function! eskk#filter(char) "{{{
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(char, error) "{{{
-    call eskk#error#write_error_log_file(
+    call eskk#logger#write_error_log_file(
     \   a:char, a:error,
     \)
     sleep 1
@@ -1723,7 +1723,7 @@ endfunction "}}}
 
 " Exceptions
 function! eskk#internal_error(from, ...) "{{{
-    return eskk#error#build_error(a:from, ['internal error'] + a:000)
+    return eskk#util#build_error(a:from, ['internal error'] + a:000)
 endfunction "}}}
 
 call eskk#_initialize()

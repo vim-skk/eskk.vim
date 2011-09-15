@@ -595,7 +595,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
     let prev_buftable = henkan_result.buftable
     let rom_str = cur_buf_str.rom_pairs.get_rom()
 
-    call eskk#error#assert(
+    call eskk#util#assert(
     \   a:this.get_henkan_phase()
     \       ==# g:eskk#buftable#PHASE_HENKAN_SELECT,
     \   "current phase is henkan select phase."
@@ -764,7 +764,7 @@ function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
     \   phase,
     \) ==# -1
         " TODO Add an error id like Vim
-        call eskk#util#warnf(
+        call eskk#logger#warnf(
         \   "s:buftable.do_henkan() does not support phase %d.",
         \   phase
         \)
@@ -932,7 +932,7 @@ function! {s:Buftable.method('do_escape')}(this, stash) "{{{
     let kakutei_str = a:this.generate_kakutei_str()
     " NOTE: This function return value is not remapped.
     let esc = eskk#map#get_special_key('escape-key')
-    call eskk#error#assert(esc != '', 'esc must not be empty string')
+    call eskk#util#assert(esc != '', 'esc must not be empty string')
     let a:stash.return = kakutei_str . eskk#map#key2char(esc)
 endfunction "}}}
 function! {s:Buftable.method('do_tab')}(this, stash) "{{{
@@ -1062,7 +1062,7 @@ function! {s:Buftable.method('remove_display_str')}(this) "{{{
 
     " NOTE: This function return value is not remapped.
     let bs = eskk#map#get_special_key('backspace-key')
-    call eskk#error#assert(bs != '', 'bs must not be empty string')
+    call eskk#util#assert(bs != '', 'bs must not be empty string')
 
     return repeat(
     \   eskk#map#key2char(bs),
@@ -1082,7 +1082,7 @@ function! {s:Buftable.method('set_begin_pos')}(this, expr) "{{{
     elseif mode() ==# 'c'
         let a:this._begin_pos = ['c', getcmdpos()]
     else
-        call eskk#error#logf("called eskk from mode '%s'.", mode())
+        call eskk#logger#logf("called eskk from mode '%s'.", mode())
     endif
 endfunction "}}}
 
@@ -1120,7 +1120,7 @@ function! s:validate_table_idx(table, henkan_phase) "{{{
     endif
 endfunction "}}}
 function! eskk#buftable#invalid_henkan_phase_value_error(henkan_phase) "{{{
-    return eskk#error#build_error(
+    return eskk#util#build_error(
     \   ["eskk", "buftable"],
     \   ["invalid henkan phase value '" . a:henkan_phase . "'"]
     \)

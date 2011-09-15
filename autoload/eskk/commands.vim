@@ -58,7 +58,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         if eskk#util#copy_file(path, path . '.bak')
             echom "original file was moved to '" . path . ".bak'."
         else
-            call eskk#util#warn(
+            call eskk#logger#warn(
             \   "Could not back up dictionary '" . path . "'."
             \   . " skip fixing the dictionary."
             \)
@@ -126,7 +126,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
         \   path
         \)
         if r == -1
-            call eskk#util#warn(
+            call eskk#logger#warn(
             \   ':EskkFixDictionary - '
             \   . "Could not write to '"
             \   . fnamemodify(path, ':~')

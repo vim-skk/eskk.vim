@@ -234,7 +234,7 @@ endfunction "}}}
 
 function! eskk#map#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
-        call eskk#error#logstrf(
+        call eskk#logger#logstrf(
         \   'lhs or rhs is empty: lhs = %s, rhs = %s',
         \   a:lhs,
         \   a:rhs
@@ -252,13 +252,13 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
         try
             execute mapcmd
         catch
-            call eskk#error#log_exception(mapcmd)
+            call eskk#logger#log_exception(mapcmd)
         endtry
     endfor
 endfunction "}}}
 function! eskk#map#unmap(options, lhs, modes) "{{{
     if a:lhs == ''
-        call eskk#error#logstrf('lhs is empty: lhs = %s', a:lhs)
+        call eskk#logger#logstrf('lhs is empty: lhs = %s', a:lhs)
         return
     endif
 
@@ -271,7 +271,7 @@ function! eskk#map#unmap(options, lhs, modes) "{{{
         try
             execute mapcmd
         catch
-            call eskk#error#log_exception(mapcmd)
+            call eskk#logger#log_exception(mapcmd)
         endtry
     endfor
 endfunction "}}}
@@ -322,7 +322,7 @@ function! eskk#map#set_up_temp_key_restore(lhs) "{{{
         call eskk#map#map('rb', a:lhs, saved_rhs, 'l')
     elseif s:has_setup_mode_local_keys
         " Show error only first time.
-        call eskk#error#logf(
+        call eskk#logger#logf(
         \   "called eskk#map#set_up_temp_key_restore()"
         \       . " but no '%s' key is stashed.",
         \   a:lhs
@@ -571,7 +571,7 @@ function! s:create_map(type, options, lhs, rhs, from) "{{{
 
     let eskk_mappings = eskk#_get_eskk_mappings()
     if !has_key(eskk_mappings, a:type)
-        call eskk#util#warn(
+        call eskk#logger#warn(
         \   a:from . ": unknown type '" . a:type . "'."
         \)
         return
@@ -580,11 +580,11 @@ function! s:create_map(type, options, lhs, rhs, from) "{{{
 
     if a:type ==# 'general'
         if lhs == ''
-            call eskk#util#warn("lhs must not be empty string.")
+            call eskk#logger#warn("lhs must not be empty string.")
             return
         endif
         if has_key(type_st, lhs) && a:options.unique
-            call eskk#util#warn(
+            call eskk#logger#warn(
             \   a:from . ": Already mapped to '" . lhs . "'."
             \)
             return
@@ -595,7 +595,7 @@ function! s:create_map(type, options, lhs, rhs, from) "{{{
         \}
     else
         if a:options.unique && has_key(type_st, 'lhs')
-            call eskk#util#warn(
+            call eskk#logger#warn(
             \   a:type . ': -unique is specified'
             \       . ' and mapping already exists. skip.'
             \)
@@ -686,7 +686,7 @@ function! s:parse_options(args) "{{{
     return [opt, type, args]
 endfunction "}}}
 function! eskk#map#cmd_eskk_map_invalid_args(...) "{{{
-    return eskk#error#build_error(
+    return eskk#util#build_error(
     \   ['eskk', 'mappings'],
     \   [':EskkMap argument parse error'] + a:000
     \)

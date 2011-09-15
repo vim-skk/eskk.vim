@@ -56,7 +56,7 @@ endfunction "}}}
 function! s:must_not_reach_here(table) "{{{
     " Handle cyclic reference.
     let dump = type(a:table) ==# type([]) ? '[Array]' : string(a:table)
-    throw eskk#error#build_error(
+    throw eskk#util#build_error(
     \   ['eskk', 'build'],
     \   ["s:get_table_obj() received invalid arguments: "
     \   . dump]
@@ -114,13 +114,13 @@ function! s:validate_base_tables(this) "{{{
     call a:this.get_all_base_tables()
 endfunction "}}}
 function! eskk#table#extending_myself_error(table_name) "{{{
-    return eskk#error#build_error(
+    return eskk#util#build_error(
     \   ['eskk', 'table'],
     \   ["table '" . a:table_name . "' derived from itself"]
     \)
 endfunction "}}}
 function! eskk#table#invalid_arguments_error(table_name) "{{{
-    return eskk#error#build_error(
+    return eskk#util#build_error(
     \   ['eskk', 'build'],
     \   ["eskk#table#new() received invalid arguments "
     \   . "(table name: " . a:table_name . ")"]
@@ -178,7 +178,7 @@ endfunction "}}}
 function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     " TODO: Implement a:max_candidates
 
-    call eskk#error#assert(
+    call eskk#util#assert(
     \   a:max_candidates !=# 0,
     \   "a:max_candidates must be negative or positive."
     \)

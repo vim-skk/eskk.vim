@@ -39,14 +39,18 @@ endif
 " }}}
 
 
-" Message
-function! eskk#util#warn(msg) "{{{
-    echohl WarningMsg
-    echomsg a:msg
-    echohl None
+" Assert, Error
+function! eskk#util#assert(cond, msg) "{{{
+    if !a:cond
+        throw eskk#util#build_error(
+        \   ['eskk', 'error'],
+        \   ['assertion failed', a:msg]
+        \)
+    endif
 endfunction "}}}
-function! eskk#util#warnf(msg, ...) "{{{
-    call eskk#util#warn(call('printf', [a:msg] + a:000))
+function! eskk#util#build_error(from, msg_list) "{{{
+    let file = 'autoload/' . join(a:from, '/') . '.vim'
+    return 'eskk: ' . join(a:msg_list, ': ') . ' (at ' . file . ')'
 endfunction "}}}
 
 
