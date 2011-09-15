@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 345))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 346))
 
 
 function! s:SID() "{{{
@@ -1228,7 +1228,7 @@ function! eskk#enable(...) "{{{
         return ''
     endif
 
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     let do_map = a:0 != 0 ? a:1 : 1
 
     if eskk#is_enabled()
@@ -1242,7 +1242,7 @@ function! eskk#enable(...) "{{{
     call eskk#throw_event('enable-im')
 
     " Clear current variable states.
-    let self.mode = ''
+    let inst.mode = ''
     call eskk#get_buftable().reset()
 
     " Set up Mappings.
@@ -1259,11 +1259,11 @@ function! eskk#enable(...) "{{{
     endif
 
     if g:eskk#enable_completion
-        let self.omnifunc_save = &l:omnifunc
+        let inst.omnifunc_save = &l:omnifunc
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
     endif
 
-    let self.enabled = 1
+    let inst.enabled = 1
     if mode() =~# '^[ic]$'
         return disable_skk_vim . "\<C-^>"
     else
@@ -1278,7 +1278,7 @@ function! eskk#disable() "{{{
         return ''
     endif
 
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     let do_unmap = a:0 != 0 ? a:1 : 0
 
     if !eskk#is_enabled()
@@ -1295,13 +1295,13 @@ function! eskk#disable() "{{{
         call eskk#map#unmap_all_keys()
     endif
 
-    if g:eskk#enable_completion && has_key(self, 'omnifunc_save')
-        let &l:omnifunc = self.omnifunc_save
+    if g:eskk#enable_completion && has_key(inst, 'omnifunc_save')
+        let &l:omnifunc = inst.omnifunc_save
     endif
 
     call eskk#unlock_neocomplcache()
 
-    let self.enabled = 0
+    let inst.enabled = 0
 
     if mode() =~# '^[ic]$'
         let buftable = eskk#get_buftable()
@@ -1338,7 +1338,7 @@ endfunction "}}}
 
 " Mode
 function! eskk#set_mode(next_mode) "{{{
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#error#log(
         \   "mode '" . a:next_mode . "' is not supported."
@@ -1349,22 +1349,22 @@ function! eskk#set_mode(next_mode) "{{{
         return
     endif
 
-    call eskk#throw_event('leave-mode-' . self.mode)
+    call eskk#throw_event('leave-mode-' . inst.mode)
     call eskk#throw_event('leave-mode')
 
     " Change mode.
-    let prev_mode = self.mode
-    let self.mode = a:next_mode
+    let prev_mode = inst.mode
+    let inst.mode = a:next_mode
 
-    call eskk#throw_event('enter-mode-' . self.mode)
+    call eskk#throw_event('enter-mode-' . inst.mode)
     call eskk#throw_event('enter-mode')
 
     " For &statusline.
     redrawstatus
 endfunction "}}}
 function! eskk#get_mode() "{{{
-    let self = eskk#get_current_instance()
-    return self.mode
+    let inst = eskk#get_current_instance()
+    return inst.mode
 endfunction "}}}
 function! eskk#is_supported_mode(mode) "{{{
     return has_key(s:available_modes, a:mode)
@@ -1399,7 +1399,7 @@ function! eskk#get_current_mode_structure() "{{{
     return eskk#get_mode_structure(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_structure(mode) "{{{
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:mode)
         call eskk#util#warn(
         \   "mode '" . a:mode . "' is not available."
@@ -1408,18 +1408,18 @@ function! eskk#get_mode_structure(mode) "{{{
     return s:available_modes[a:mode]
 endfunction "}}}
 function! eskk#has_mode_func(func_key) "{{{
-    let self = eskk#get_current_instance()
-    let st = eskk#get_mode_structure(self.mode)
+    let inst = eskk#get_current_instance()
+    let st = eskk#get_mode_structure(inst.mode)
     return has_key(st, a:func_key)
 endfunction "}}}
 function! eskk#call_mode_func(func_key, args, required) "{{{
-    let self = eskk#get_current_instance()
-    let st = eskk#get_mode_structure(self.mode)
+    let inst = eskk#get_current_instance()
+    let st = eskk#get_mode_structure(inst.mode)
     if !has_key(st, a:func_key)
         if a:required
             throw eskk#internal_error(
             \   ['eskk'],
-            \   "Mode '" . self.mode . "' does not have"
+            \   "Mode '" . inst.mode . "' does not have"
             \       . " required function key"
             \)
         endif
@@ -1493,18 +1493,18 @@ endfunction "}}}
 
 " Buftable
 function! eskk#get_buftable() "{{{
-    let self = eskk#get_current_instance()
-    if empty(self.buftable)
-        let self.buftable = eskk#buftable#new()
+    let inst = eskk#get_current_instance()
+    if empty(inst.buftable)
+        let inst.buftable = eskk#buftable#new()
     endif
-    return self.buftable
+    return inst.buftable
 endfunction "}}}
 function! eskk#set_buftable(buftable) "{{{
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     call a:buftable.set_old_str(
-    \   empty(self.buftable) ? '' : self.buftable.get_old_str()
+    \   empty(inst.buftable) ? '' : inst.buftable.get_old_str()
     \)
-    let self.buftable = a:buftable
+    let inst.buftable = a:buftable
 endfunction "}}}
 
 " Event
@@ -1518,16 +1518,16 @@ function! eskk#register_event(event_names, Fn, head_args, ...) "{{{
     \)
 endfunction "}}}
 function! eskk#register_temp_event(event_names, Fn, head_args, ...) "{{{
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     return s:register_event(
-    \   self.temp_event_hook_fn,
+    \   inst.temp_event_hook_fn,
     \   a:event_names,
     \   a:Fn,
     \   a:head_args,
     \   (a:0 ? a:1 : -1)
     \)
 endfunction "}}}
-function! s:register_event(st, event_names, Fn, head_args, self) "{{{
+function! s:register_event(st, event_names, Fn, head_args, inst) "{{{
     let event_names = type(a:event_names) == type([]) ?
     \                   a:event_names : [a:event_names]
     for name in event_names
@@ -1537,15 +1537,15 @@ function! s:register_event(st, event_names, Fn, head_args, self) "{{{
         call add(
         \   a:st[name],
         \   [a:Fn, a:head_args]
-        \       + (type(a:self) == type({}) ? [a:self] : [])
+        \       + (type(a:inst) == type({}) ? [a:inst] : [])
         \)
     endfor
 endfunction "}}}
 function! eskk#throw_event(event_name) "{{{
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     let ret        = []
     let event      = get(s:event_hook_fn, a:event_name, [])
-    let temp_event = get(self.temp_event_hook_fn, a:event_name, [])
+    let temp_event = get(inst.temp_event_hook_fn, a:event_name, [])
     let all_events = event + temp_event
     if empty(all_events)
         return []
@@ -1556,39 +1556,39 @@ function! eskk#throw_event(event_name) "{{{
     endwhile
 
     " Clear temporary hooks.
-    let self.temp_event_hook_fn[a:event_name] = []
+    let inst.temp_event_hook_fn[a:event_name] = []
 
     return ret
 endfunction "}}}
 function! eskk#has_event(event_name) "{{{
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
     return
     \   !empty(get(s:event_hook_fn, a:event_name, []))
-    \   || !empty(get(self.temp_event_hook_fn, a:event_name, []))
+    \   || !empty(get(inst.temp_event_hook_fn, a:event_name, []))
 endfunction "}}}
 
 " Locking diff old string
 function! eskk#lock_old_str() "{{{
-    let self = eskk#get_current_instance()
-    let self.has_locked_old_str = 1
+    let inst = eskk#get_current_instance()
+    let inst.has_locked_old_str = 1
 endfunction "}}}
 function! eskk#unlock_old_str() "{{{
-    let self = eskk#get_current_instance()
-    let self.has_locked_old_str = 0
+    let inst = eskk#get_current_instance()
+    let inst.has_locked_old_str = 0
 endfunction "}}}
 
 " Filter
 function! eskk#filter(char) "{{{
-    let self = eskk#get_current_instance()
+    let inst = eskk#get_current_instance()
 
     " Check irregular circumstance.
-    if !eskk#is_supported_mode(self.mode)
+    if !eskk#is_supported_mode(inst.mode)
         call eskk#error#write_error_log_file(
         \   a:char,
         \   eskk#error#build_error(
         \       ['eskk'],
         \       ['current mode is not supported: '
-        \           . string(self.mode)]
+        \           . string(inst.mode)]
         \   )
         \)
         return a:char
@@ -1603,7 +1603,7 @@ function! eskk#filter(char) "{{{
     \   'return': 0,
     \}
 
-    if !self.has_locked_old_str
+    if !inst.has_locked_old_str
         call buftable.set_old_str(buftable.get_display_str())
     endif
 
@@ -1646,8 +1646,8 @@ function! s:rewrite_string(return_string) "{{{
     endif
 
     if type(a:return_string) == type("")
-        let inst = eskk#get_buffer_instance()
-        let inst.return_string = a:return_string
+        let buf_inst = eskk#get_buffer_instance()
+        let buf_inst.return_string = a:return_string
         call eskk#map#map(
         \   'be',
         \   '<Plug>(eskk:expr:_return_string)',
