@@ -565,8 +565,7 @@ function! eskk#map#handle_special_lhs(char, type, stash) "{{{
     \   && has_key(eskk_mappings, a:type)
     \   && call(eskk_mappings[a:type].fn, [a:stash])
 endfunction "}}}
-function! s:create_map(self, type, options, lhs, rhs, from) "{{{
-    let self = a:self
+function! s:create_map(type, options, lhs, rhs, from) "{{{
     let lhs = a:lhs
     let rhs = a:rhs
 
@@ -702,7 +701,6 @@ function! eskk#map#_cmd_eskk_map(args) "{{{
     let rhs = s:skip_white(args)
 
     call s:create_map(
-    \   eskk#get_current_instance(),
     \   type,
     \   options,
     \   lhs,
