@@ -196,15 +196,16 @@ function! s:complete(mode, base) "{{{
     let marker = g:eskk#marker_popup . g:eskk#marker_henkan
 
     try
-        let s = dict.search_all_candidates(key, okuri, okuri_rom)
-        if empty(s)
+        let _ = dict.search_all_candidates(key, okuri, okuri_rom)
+        if empty(_)
             return s:skip_complete()
         endif
     catch /^eskk: dictionary look up error:/
         return s:skip_complete()
     endtry
 
-    let [yomigana, _, candidates] = s
+    let [yomigana, candidates] = [_[0], _[2]]
+    " Do not add yomigana to list.
     " call add(list, {
     " \   'word' : marker . yomigana,
     " \   'abbr' : yomigana,
@@ -376,7 +377,7 @@ function! s:adjust_candidate(stash, recall_key) "{{{
     endif
 endfunction "}}}
 function! s:set_selected_item() "{{{
-    " Set selected item by pum to buftable.
+    " Get selected item from pum and set to buftable.
 
     let buftable = eskk#get_buftable()
     let filter_str = s:get_buftable_str(0)
@@ -389,6 +390,8 @@ function! s:set_selected_item() "{{{
         let rom_str = ''
     endif
 
+
+    " Set henkan_buf_str
     let henkan_buf_str = buftable.get_buf_str(
     \   g:eskk#buftable#PHASE_HENKAN
     \)
@@ -397,14 +400,16 @@ function! s:set_selected_item() "{{{
         call henkan_buf_str.rom_pairs.push_one_pair('', char)
     endfor
 
+    " Set okuri_buf_str
     let okuri_buf_str = buftable.get_buf_str(
     \   g:eskk#buftable#PHASE_OKURI
     \)
     call okuri_buf_str.clear()
     call okuri_buf_str.rom_str.set(rom_str)
 
+    " Set henkan phase to PHASE_HENKAN.
     call buftable.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
-    " Do not rewrite anything.
+    " Update old string.
     call buftable.set_old_str(s:get_buftable_str(1))
 
     call s:initialize_variables()
