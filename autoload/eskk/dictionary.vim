@@ -1333,7 +1333,7 @@ let s:dict_search_candidates = eskk#util#create_data_ordered_set(
 \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
 \)
 " Search candidates matching with arguments.
-function! {s:Dictionary.method('search')}(this, key, okuri, okuri_rom) "{{{
+function! {s:Dictionary.method('search_all_candidates')}(this, key, okuri, okuri_rom) "{{{
     let key = a:key
     let okuri = a:okuri
     let okuri_rom = a:okuri_rom

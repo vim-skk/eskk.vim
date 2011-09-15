@@ -196,7 +196,7 @@ function! s:complete(mode, base) "{{{
     let marker = g:eskk#marker_popup . g:eskk#marker_henkan
 
     try
-        let s = dict.search(key, okuri, okuri_rom)
+        let s = dict.search_all_candidates(key, okuri, okuri_rom)
         if empty(s)
             return s:skip_complete()
         endif
