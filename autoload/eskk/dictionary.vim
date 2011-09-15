@@ -282,7 +282,7 @@ endfunction "}}}
 " }}}
 
 
-" s:Candidate: s:candidate_new() {{{
+" s:Candidate {{{
 " One s:Candidate corresponds to SKK dictionary's one line.
 " It is the pair of filtered string and its converted string.
 
@@ -321,7 +321,7 @@ endfunction "}}}
 
 " }}}
 
-" s:RegisteredWord: s:registered_word_new() {{{
+" s:RegisteredWord {{{
 " s:RegisteredWord is the word registered by
 " s:Dictionary.remember_word_prompt().
 
