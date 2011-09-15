@@ -929,9 +929,6 @@ endfunction "}}}
 function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
     let force = a:0 ? a:1 : 0
 
-    " FIXME: Separate this to another method
-    " and control dictionary read timing.
-    " (when it should be read?)
     let same_timestamp = a:this._ftime_at_read ==# getftime(a:this.path)
     if a:this._ftime_at_read isnot -1 && same_timestamp && !force
         return a:this._content_lines
