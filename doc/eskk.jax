@@ -278,6 +278,11 @@ g:eskk#start_completion_length			*g:eskk#start_completion_length*
 	指定された文字数(バイト数ではない)が入力されるまで
 	補完をしない。(補完関数を実行しても常に空のリストを返す)
 
+g:eskk#register_completed_word			*g:eskk#register_completed_word*
+							(デフォルト値: 1)
+	もし真なら、補完時に決定した候補を自動的に辞書登録する。
+	補完については |eskk-completion| 参照。
+
 
 カーソルの色に関する変数
 ---------------
