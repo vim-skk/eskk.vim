@@ -356,9 +356,29 @@ let s:VICE_OPTIONS = {'generate_stub': 1}
 
 " s:HenkanResult {{{
 
-" Interface for henkan result.
-" This provides a method `get_next()`
-" to get next candidate string.
+" This provides a way to get
+" next candidate string.
+" - s:HenkanResult.forward()
+" - s:HenkanResult.back()
+"
+" self._key, self._okuri_rom, self._okuri:
+"   Query for this henkan result.
+"
+" self._status:
+"   One of g:eskk#dictionary#HR_*
+"
+" self._candidates:
+"   Candidates looked up by
+"   self._key, self._okuri_rom, self._okuri
+"   NOTE: Do not access directly.
+"   Getter is s:HenkanResult.get_candidates().
+"
+" self._candidates_index:
+"   Current index of List self._candidates
+"
+" self._user_dict_found_index:
+"   The lnum of found the candidate in user dictionary.
+"   Used by s:HenkanResult.delete_from_dict()
 
 let [
 \   g:eskk#dictionary#HR_NO_RESULT,
@@ -366,20 +386,6 @@ let [
 \   g:eskk#dictionary#HR_GOT_RESULT
 \] = range(3)
 
-" self._key, self._okuri_rom, self._okuri:
-"   Query for this henkan result.
-" self._status:
-"   One of g:eskk#dictionary#HR_*
-" self._candidates:
-"   Candidates looked up by self._key, self._okuri_rom, self._okuri
-"   NOTE:
-"   Do not access directly.
-"   Getter is s:HenkanResult.get_candidates().
-" self._candidates_index:
-"   Current index of List self._candidates
-" self._user_dict_found_index:
-"   The lnum of found the candidate in user dictionary.
-"   Used by s:HenkanResult.delete_from_dict()
 let s:HenkanResult = vice#class('HenkanResult', s:SID_PREFIX, s:VICE_OPTIONS)
 call s:HenkanResult.attribute('buftable', {})
 call s:HenkanResult.attribute('_key', '')
@@ -858,13 +864,41 @@ endfunction "}}}
 
 " s:PhysicalDict {{{
 "
-" Database for physical file dictionary.
-" `s:PhysicalDict` manipulates only one file.
-" But `s:Dictionary` may manipulate multiple dictionaries.
+" s:Dictionary may manipulate/abstract multiple dictionaries
+" But s:PhysicalDict only manupulates one dictionary.
 "
-" `get_lines()` does
-" - Lazy file read
-" - Memoization for getting file content
+" _content_lines:
+"   Whole lines of dictionary file.
+"   Use `s:PhysicalDict.get_lines()` to get this.
+"   `s:PhysicalDict.get_lines()` does:
+"   - Lazy file read
+"   - Memoization for getting file content
+"
+" _ftime_at_read:
+"   getftime() value when `_content_lines` is set.
+"
+" okuri_ari_idx:
+"   Line number of SKK dictionary
+"   where ";; okuri-ari entries." found.
+"
+" okuri_nasi_idx:
+"   Line number of SKK dictionary
+"   where ";; okuri-nasi entries." found.
+"
+" path:
+"   File path of SKK dictionary.
+"
+" sorted:
+"   If this value is true, assume SKK dictionary is sorted.
+"   Otherwise, assume SKK dictionary is not sorted.
+"
+" encoding:
+"   Character encoding of SKK dictionary.
+"
+" _is_modified:
+"   If this value is true, lines were changed
+"   by `s:PhysicalDict.set_lines()`.
+"   Otherwise, lines were not changed.
 
 let s:PhysicalDict = vice#class('PhysicalDict', s:SID_PREFIX, s:VICE_OPTIONS)
 call s:PhysicalDict.attribute('_content_lines', [])
@@ -1036,13 +1070,9 @@ endfunction "}}}
 
 " s:Dictionary {{{
 "
-" Interface for multiple dictionary.
 " This behaves like one file dictionary.
-" But it may have multiple dictionaries.
+" But it may manipulate multiple dictionaries.
 "
-" See section `Searching Functions` for
-" implementation of searching dictionaries.
-
 " _user_dict:
 "   User dictionary.
 "
