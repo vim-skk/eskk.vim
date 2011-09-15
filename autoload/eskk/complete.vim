@@ -384,20 +384,47 @@ function! s:set_selected_item() "{{{
         let rom_str = ''
     endif
 
-
-    " Set henkan_buf_str
     let henkan_buf_str = buftable.get_buf_str(
     \   g:eskk#buftable#PHASE_HENKAN
     \)
+    let okuri_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#PHASE_OKURI
+    \)
+
+    " Register a new word.
+    if g:eskk#register_completed_word
+        " e.g.: key = 'じどうほ', okuri = '', okuri_rom = '',
+        " c.key = 'じどうほかん', c.input = '自動補完'
+        let key = henkan_buf_str.rom_pairs.get_filter()
+        let okuri = okuri_buf_str.rom_pairs.get_filter()
+        let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
+        let dict = eskk#get_skk_dict()
+        try
+            for c in dict.search_all_candidates(key, okuri, okuri_rom)
+                if c.input ==# filter_str
+                    call dict.remember_word(
+                    \   c.input,
+                    \   c.key,
+                    \   okuri,
+                    \   okuri_rom,
+                    \   c.annotation
+                    \)
+                    break
+                endif
+            endfor
+        catch /^eskk: dictionary look up error:/
+            redraw
+            call eskk#logger#log_exception('s:eskkcomplete()')
+        endtry
+    endif
+
+    " Set henkan_buf_str
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
         call henkan_buf_str.rom_pairs.push_one_pair('', char)
     endfor
 
     " Set okuri_buf_str
-    let okuri_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#PHASE_OKURI
-    \)
     call okuri_buf_str.clear()
     call okuri_buf_str.rom_str.set(rom_str)
 
