@@ -302,13 +302,6 @@ function! s:candidate_new(from_type, input, key, okuri_rom_first, annotation) "{
     \}
 endfunction "}}}
 
-function! eskk#dictionary#_candidate_identifer(candidate) "{{{
-    return
-    \   a:candidate.input
-    \   . (get(a:candidate, 'annotation', '') !=# '' ?
-    \       ';' . a:candidate.annotation : '')
-endfunction "}}}
-
 function! s:candidate2registered_word(candidate, key, okuri, okuri_rom) "{{{
     return s:registered_word_new(
     \   a:candidate.input,
