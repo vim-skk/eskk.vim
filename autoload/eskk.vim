@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 370))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 371))
 
 
 function! s:SID() "{{{
@@ -1631,7 +1631,7 @@ function! eskk#filter(char) "{{{
         \   a:char,
         \   eskk#util#build_error(
         \       ['eskk'],
-        \       ['main routine raised an error']
+        \       ['main routine raised an error: '.v:exception]
         \   )
         \)
 
