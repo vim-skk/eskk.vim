@@ -948,14 +948,13 @@ function! {s:PhysicalDict.method('get_lines')}(this, ...) "{{{
         return a:this._content_lines
     endif
 
-    let path = a:this.path
     try
-        let a:this._content_lines  = readfile(path)
+        let a:this._content_lines  = readfile(a:this.path)
         call a:this.parse_lines(a:this._content_lines)
 
-        let a:this._ftime_at_read = getftime(path)
+        let a:this._ftime_at_read = getftime(a:this.path)
     catch /E484:/    " Can't open file
-        call eskk#logger#logf("Can't read '%s'!", path)
+        call eskk#logger#logf("Can't read '%s'!", a:this.path)
     catch /^eskk: parse error/
         call eskk#logger#log_exception('s:physical_dict.get_lines()')
         let a:this.okuri_ari_idx = -1
