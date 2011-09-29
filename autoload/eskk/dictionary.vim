@@ -565,7 +565,7 @@ function! eskk#dictionary#look_up_error(msg) "{{{
 endfunction "}}}
 
 " Select candidate from command-line.
-function! s:HenkanResult_select_candidates(with_okuri, skip_num, functor) dict "{{{
+function! s:HenkanResult_select_candidate_prompt(with_okuri, skip_num, functor) dict "{{{
     " Select candidates by getchar()'s character.
     let words = copy(self.get_candidates())
     let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
@@ -708,7 +708,7 @@ function! s:HenkanResult_get_current_candidate(...) dict "{{{
             \]
         endfunction
 
-        let self._candidate = self.select_candidates(
+        let self._candidate = self.select_candidate_prompt(
         \   with_okuri, max_count, functor
         \)
     else
@@ -868,7 +868,7 @@ let s:HenkanResult = {
 \   'reset': eskk#util#get_local_funcref('HenkanResult_reset', s:SID_PREFIX),
 \   'advance': eskk#util#get_local_funcref('HenkanResult_advance', s:SID_PREFIX),
 \   'get_candidates': eskk#util#get_local_funcref('HenkanResult_get_candidates', s:SID_PREFIX),
-\   'select_candidates': eskk#util#get_local_funcref('HenkanResult_select_candidates', s:SID_PREFIX),
+\   'select_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_select_candidate_prompt', s:SID_PREFIX),
 \   'remove_cache': eskk#util#get_local_funcref('HenkanResult_remove_cache', s:SID_PREFIX),
 \   'get_current_candidate': eskk#util#get_local_funcref('HenkanResult_get_current_candidate', s:SID_PREFIX),
 \   'get_key': eskk#util#get_local_funcref('HenkanResult_get_key', s:SID_PREFIX),
