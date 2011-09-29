@@ -774,7 +774,13 @@ function! s:HenkanResult_delete_from_dict() dict "{{{
     endtry
 endfunction "}}}
 function! s:HenkanResult_do_delete_from_dict() dict "{{{
-    let candidates = self.get_candidates()
+    try
+        let candidates = self.get_candidates()
+    catch /^eskk: dictionary look up error/
+        call eskk#logger#log_exception(
+        \   's:HenkanResult.get_candidates()')
+        return
+    endtry
     let candidates_index = self._candidates_index
     let user_dict_idx = self._user_dict_found_index
 
@@ -836,7 +842,13 @@ endfunction "}}}
 
 " Move this henkan result to the first of self._registered_words.
 function! s:HenkanResult_update_rank() dict "{{{
-    let candidates = self.get_candidates()
+    try
+        let candidates = self.get_candidates()
+    catch /^eskk: dictionary look up error/
+        call eskk#logger#log_exception(
+        \   's:HenkanResult.get_candidates()')
+        return
+    endtry
     let candidates_index = self._candidates_index
 
     if !eskk#util#has_idx(candidates, candidates_index)
