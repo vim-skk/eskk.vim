@@ -157,6 +157,12 @@ function! s:AbstractTable_has_candidates(lhs_head) dict "{{{
     return self.get_candidates(a:lhs_head, 1, NONE) isnot NONE
 endfunction "}}}
 function! s:AbstractTable_has_n_candidates(lhs_head, n) dict "{{{
+    if a:n <= 0
+        throw eskk#util#build_error(
+        \   ['eskk', 'table'],
+        \   's:AbstractTable.has_n_candidates(): a:n must be positive'
+        \)
+    endif
     " Has n candidates at least.
     let NONE = []
     let c = self.get_candidates(a:lhs_head, NONE)
