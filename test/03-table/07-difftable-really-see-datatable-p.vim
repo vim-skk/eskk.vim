@@ -30,8 +30,8 @@ function! s:run()
     Isnt t.get_map('z ', NOT_FOUND), NOT_FOUND, 'has "z " map'
     Isnt t.get_map('za', NOT_FOUND), NOT_FOUND, 'has "za" map'
 
-    Ok !empty(t.get_candidates('z ', 999)), 'has "z " candidates'
-    Ok !empty(t.get_candidates('za', 999)), 'has "za" candidates'
+    Ok !empty(t.get_candidates('z ')), 'has "z " candidates'
+    Ok !empty(t.get_candidates('za')), 'has "za" candidates'
     Ok t.has_candidates('z '), 'has "z " candidates'
     Ok t.has_candidates('za'), 'has "za" candidates'
     Ok t.has_n_candidates('z ', 1), 'has "z " map'

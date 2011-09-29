@@ -159,23 +159,16 @@ endfunction "}}}
 function! s:AbstractTable_has_n_candidates(lhs_head, n) dict "{{{
     " Has n candidates at least.
     let NONE = []
-    let c = self.get_candidates(a:lhs_head, a:n, NONE)
+    let c = self.get_candidates(a:lhs_head, NONE)
     return c isnot NONE && len(c) >= a:n
 endfunction "}}}
-function! s:AbstractTable_get_candidates(lhs_head, max_candidates, ...) dict "{{{
+function! s:AbstractTable_get_candidates(lhs_head, ...) dict "{{{
     return call(
     \   's:get_candidates',
-    \   [self, a:lhs_head, a:max_candidates] + a:000
+    \   [self, a:lhs_head] + a:000
     \)
 endfunction "}}}
-function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
-    " TODO: Implement a:max_candidates
-
-    call eskk#util#assert(
-    \   a:max_candidates !=# 0,
-    \   "a:max_candidates must be negative or positive."
-    \)
-
+function! s:get_candidates(table, lhs_head, ...) "{{{
     let candidates = filter(
     \   keys(a:table.load()),
     \   '!stridx(v:val, a:lhs_head)'
@@ -186,7 +179,6 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
             let candidates += s:get_candidates(
             \   base,
             \   a:lhs_head,
-            \   a:max_candidates,
             \   []
             \)
         endfor
