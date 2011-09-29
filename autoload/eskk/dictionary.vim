@@ -677,7 +677,7 @@ endfunction "}}}
 " Returns candidate String.
 " if optional {with_okuri} arguments are supplied,
 " returns candidate String with okuri.
-function! s:HenkanResult_get_candidate(...) dict "{{{
+function! s:HenkanResult_get_current_candidate(...) dict "{{{
     let with_okuri = a:0 ? a:1 : 1
 
     if has_key(self, '_candidate')
@@ -870,7 +870,7 @@ let s:HenkanResult = {
 \   'get_candidates': eskk#util#get_local_funcref('HenkanResult_get_candidates', s:SID_PREFIX),
 \   'select_candidates': eskk#util#get_local_funcref('HenkanResult_select_candidates', s:SID_PREFIX),
 \   'remove_cache': eskk#util#get_local_funcref('HenkanResult_remove_cache', s:SID_PREFIX),
-\   'get_candidate': eskk#util#get_local_funcref('HenkanResult_get_candidate', s:SID_PREFIX),
+\   'get_current_candidate': eskk#util#get_local_funcref('HenkanResult_get_current_candidate', s:SID_PREFIX),
 \   'get_key': eskk#util#get_local_funcref('HenkanResult_get_key', s:SID_PREFIX),
 \   'get_okuri': eskk#util#get_local_funcref('HenkanResult_get_okuri', s:SID_PREFIX),
 \   'get_okuri_rom': eskk#util#get_local_funcref('HenkanResult_get_okuri_rom', s:SID_PREFIX),

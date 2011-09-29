@@ -598,7 +598,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
     \)
 
     if henkan_result[a:next ? 'forward' : 'back']()
-        let candidate = henkan_result.get_candidate()
+        let candidate = henkan_result.get_current_candidate()
 
         " Set candidate.
         " FIXME:
@@ -786,7 +786,7 @@ function! s:Buftable_do_henkan_abbrev(stash, convert_at_exact_match) dict "{{{
     call dict.refer(self, rom_str, '', '')
 
     try
-        let candidate = dict.get_henkan_result().get_candidate()
+        let candidate = dict.get_henkan_result().get_current_candidate()
         " No thrown exception. continue...
 
         call self.clear_all()
@@ -864,9 +864,9 @@ function! s:Buftable_do_henkan_other(stash, convert_at_exact_match) dict "{{{
     let okuri_matched_rom = okuri_buf_str.rom_pairs.get_rom()
     let rom_str = henkan_matched_rom . okuri_matched_rom
     try
-        " .get_candidate() may throw dictionary look up exception.
+        " .get_current_candidate() may throw dictionary look up exception.
         let hr = dict.get_henkan_result()
-        let candidate = hr.get_candidate()
+        let candidate = hr.get_current_candidate()
 
         call self.clear_all()
         if a:convert_at_exact_match
