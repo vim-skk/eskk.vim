@@ -96,6 +96,9 @@ endfunction
 
 
 " SID/Scripts
+function! eskk#util#get_local_funcref(funcname, sid) "{{{
+    return function(eskk#util#get_local_func(a:funcname, a:sid))
+endfunction "}}}
 function! eskk#util#get_local_func(funcname, sid) "{{{
     " :help <SID>
     return printf('<SNR>%d_%s', a:sid, a:funcname)

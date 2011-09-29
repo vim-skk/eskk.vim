@@ -27,161 +27,157 @@ let [
 " }}}
 
 " Functions {{{
-let s:VICE_OPTIONS = {'generate_stub': 1, 'auto_clone_method': 1}
-" s:BufferString {{{
-let s:BufferString = vice#class('BufferString', s:SID_PREFIX, s:VICE_OPTIONS)
 
+" s:RomStr {{{
 
-let s:RomStr = vice#class('RomStr', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:RomStr.property('_str', '')
-function! {s:RomStr.method('get')}(this) "{{{
-    return a:this._str.get()
+function! s:RomStr_get() dict "{{{
+    return self._str
 endfunction "}}}
-function! {s:RomStr.method('set')}(this, str) "{{{
-    return a:this._str.set(a:str)
+function! s:RomStr_set(str) dict "{{{
+    let self._str = a:str
 endfunction "}}}
-function! {s:RomStr.method('append')}(this, str) "{{{
-    return a:this._str.set(a:this._str.get() . a:str)
+function! s:RomStr_append(str) dict "{{{
+    let self._str .= a:str
 endfunction "}}}
-function! {s:RomStr.method('chop')}(this) "{{{
-    let s = a:this._str.get()
-    return a:this._str.set(strpart(s, 0, strlen(s) - 1))
+function! s:RomStr_chop() dict "{{{
+    let s = self._str
+    let s = strpart(s, 0, strlen(s) - 1)
+    let self._str = s
 endfunction "}}}
-function! {s:RomStr.method('clear')}(this) "{{{
-    return a:this._str.set('')
+function! s:RomStr_clear() dict "{{{
+    let self._str = ''
 endfunction "}}}
-function! {s:RomStr.method('empty')}(this) "{{{
-    return a:this._str.get() ==# ''
+function! s:RomStr_empty() dict "{{{
+    return self._str ==# ''
 endfunction "}}}
 
-call s:BufferString.attribute('rom_str', s:RomStr.new())
-unlet s:RomStr
+let s:RomStr = {
+\   '_str': '',
+\
+\   'get': eskk#util#get_local_funcref('RomStr_get', s:SID_PREFIX),
+\   'set': eskk#util#get_local_funcref('RomStr_set', s:SID_PREFIX),
+\   'append': eskk#util#get_local_funcref('RomStr_append', s:SID_PREFIX),
+\   'chop': eskk#util#get_local_funcref('RomStr_chop', s:SID_PREFIX),
+\   'clear': eskk#util#get_local_funcref('RomStr_clear', s:SID_PREFIX),
+\   'empty': eskk#util#get_local_funcref('RomStr_empty', s:SID_PREFIX),
+\}
+" }}}
 
+" s:RomPairs {{{
 
-let s:RomPairs = vice#class('RomPairs', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:RomPairs.property('_pairs', [])
-function! {s:RomPairs.method('get')}(this) "{{{
-    return a:this._pairs.get()
+function! s:RomPairs_get() dict "{{{
+    return copy(self._pairs)
 endfunction "}}}
-function! {s:RomPairs.method('get_rom')}(this) "{{{
-    return join(map(copy(a:this._pairs.get()), 'v:val[0]'), '')
+function! s:RomPairs_get_rom() dict "{{{
+    return join(map(copy(self._pairs), 'v:val[0]'), '')
 endfunction "}}}
-function! {s:RomPairs.method('get_filter')}(this) "{{{
-    return join(map(copy(a:this._pairs.get()), 'v:val[1]'), '')
+function! s:RomPairs_get_filter() dict "{{{
+    return join(map(copy(self._pairs), 'v:val[1]'), '')
 endfunction "}}}
-function! {s:RomPairs.method('set')}(this, list_pairs) "{{{
-    return a:this._pairs.set(a:list_pairs)
+function! s:RomPairs_set(list_pairs) dict "{{{
+    let self._pairs = a:list_pairs
 endfunction "}}}
-function! {s:RomPairs.method('set_one_pair')}(this, rom_str, filter_str) "{{{
+function! s:RomPairs_set_one_pair(rom_str, filter_str) dict "{{{
     let pair = [a:rom_str, a:filter_str]
-    return a:this._pairs.set([pair])
+    let self._pairs = [pair]
 endfunction "}}}
-function! {s:RomPairs.method('push_one_pair')}(this, rom_str, filter_str) "{{{
+function! s:RomPairs_push_one_pair(rom_str, filter_str) dict "{{{
     let pair = [a:rom_str, a:filter_str]
-    return a:this._pairs.set(a:this._pairs.get() + [pair])
+    let self._pairs += [pair]
 endfunction "}}}
-function! {s:RomPairs.method('pop')}(this) "{{{
-    let p = a:this._pairs.get()
+function! s:RomPairs_pop() dict "{{{
+    let p = self._pairs
     if empty(p)
         return []
     else
         let r = remove(p, -1)
-        call a:this._pairs.set(p)
+        let self._pairs = p
         return r
     endif
 endfunction "}}}
-function! {s:RomPairs.method('clear')}(this) "{{{
-    call a:this._pairs.set([])
+function! s:RomPairs_clear() dict "{{{
+    let self._pairs = []
 endfunction "}}}
-function! {s:RomPairs.method('empty')}(this) "{{{
-    return empty(a:this._pairs.get())
-endfunction "}}}
-
-call s:BufferString.attribute('rom_pairs', s:RomPairs.new())
-unlet s:RomPairs
-
-
-function! {s:BufferString.method('get_input_rom')}(this) "{{{
-    return a:this.rom_pairs.get_rom() . a:this.rom_str.get()
+function! s:RomPairs_empty() dict "{{{
+    return empty(self._pairs)
 endfunction "}}}
 
-function! {s:BufferString.method('empty')}(this) "{{{
-    return a:this.rom_str.empty()
-    \   && a:this.rom_pairs.empty()
-endfunction "}}}
+let s:RomPairs = {
+\   '_pairs': [],
+\
+\   'get': eskk#util#get_local_funcref('RomPairs_get', s:SID_PREFIX),
+\   'get_rom': eskk#util#get_local_funcref('RomPairs_get_rom', s:SID_PREFIX),
+\   'get_filter': eskk#util#get_local_funcref('RomPairs_get_filter', s:SID_PREFIX),
+\   'set': eskk#util#get_local_funcref('RomPairs_set', s:SID_PREFIX),
+\   'set_one_pair': eskk#util#get_local_funcref('RomPairs_set_one_pair', s:SID_PREFIX),
+\   'push_one_pair': eskk#util#get_local_funcref('RomPairs_push_one_pair', s:SID_PREFIX),
+\   'pop': eskk#util#get_local_funcref('RomPairs_pop', s:SID_PREFIX),
+\   'clear': eskk#util#get_local_funcref('RomPairs_clear', s:SID_PREFIX),
+\   'empty': eskk#util#get_local_funcref('RomPairs_empty', s:SID_PREFIX),
+\}
 
-function! {s:BufferString.method('clear')}(this) "{{{
-    call a:this.rom_str.clear()
-    call a:this.rom_pairs.clear()
-endfunction "}}}
-
-" for memory, store object instead of object factory (class).
-let s:BufferString = s:BufferString.new()
 " }}}
+
+
+
+" s:BufferString {{{
+function! s:BufferString_get_input_rom() dict "{{{
+    return self.rom_pairs.get_rom() . self.rom_str.get()
+endfunction "}}}
+
+function! s:BufferString_empty() dict "{{{
+    return self.rom_str.empty()
+    \   && self.rom_pairs.empty()
+endfunction "}}}
+
+function! s:BufferString_clear() dict "{{{
+    call self.rom_str.clear()
+    call self.rom_pairs.clear()
+endfunction "}}}
+
+
+let s:BufferString = {
+\   'rom_str': s:RomStr,
+\   'rom_pairs': s:RomPairs,
+\
+\   'get_input_rom': eskk#util#get_local_funcref('BufferString_get_input_rom', s:SID_PREFIX),
+\   'empty': eskk#util#get_local_funcref('BufferString_empty', s:SID_PREFIX),
+\   'clear': eskk#util#get_local_funcref('BufferString_clear', s:SID_PREFIX),
+\}
+unlet s:RomStr s:RomPairs
+" }}}
+
 " s:Buftable {{{
-let s:Buftable = vice#class('Buftable', s:SID_PREFIX, s:VICE_OPTIONS)
-
-call s:Buftable.attribute(
-\   '_table',
-\   [
-\       s:BufferString.clone(),
-\       s:BufferString.clone(),
-\       s:BufferString.clone(),
-\       s:BufferString.clone(),
-\       s:BufferString.clone(),
-\   ]
-\)
-call s:Buftable.attribute(
-\   '_kakutei_str',
-\   ''
-\)
-call s:Buftable.attribute(
-\   '_old_str',
-\   ''
-\)
-call s:Buftable.attribute(
-\   '_begin_pos',
-\   []
-\)
-call s:Buftable.attribute(
-\   '_henkan_phase',
-\   g:eskk#buftable#PHASE_NORMAL
-\)
-call s:Buftable.attribute(
-\   '_set_begin_pos_at_rewrite',
-\   0
-\)
-
 
 function! eskk#buftable#new() "{{{
-    return s:Buftable.clone()
+    return deepcopy(s:Buftable)
 endfunction "}}}
 
-function! {s:Buftable.method('reset')}(this) "{{{
-    let obj = s:Buftable.clone()
+function! s:Buftable_reset() dict "{{{
+    let obj = deepcopy(s:Buftable)
     for k in keys(obj)
-        let a:this[k] = obj[k]
+        let self[k] = obj[k]
     endfor
 endfunction "}}}
 
-function! {s:Buftable.method('get_buf_str')}(this, henkan_phase) "{{{
-    call s:validate_table_idx(a:this._table, a:henkan_phase)
-    return a:this._table[a:henkan_phase]
+function! s:Buftable_get_buf_str(henkan_phase) dict "{{{
+    call s:validate_table_idx(self._table, a:henkan_phase)
+    return self._table[a:henkan_phase]
 endfunction "}}}
-function! {s:Buftable.method('get_current_buf_str')}(this) "{{{
-    return a:this.get_buf_str(a:this._henkan_phase)
+function! s:Buftable_get_current_buf_str() dict "{{{
+    return self.get_buf_str(self._henkan_phase)
 endfunction "}}}
-function! {s:Buftable.method('set_buf_str')}(this, henkan_phase, buf_str) "{{{
-    call s:validate_table_idx(a:this._table, a:henkan_phase)
-    let a:this._table[a:henkan_phase] = a:buf_str
+function! s:Buftable_set_buf_str(henkan_phase, buf_str) dict "{{{
+    call s:validate_table_idx(self._table, a:henkan_phase)
+    let self._table[a:henkan_phase] = a:buf_str
 endfunction "}}}
 
 
-function! {s:Buftable.method('set_old_str')}(this, str) "{{{
-    let a:this._old_str = a:str
+function! s:Buftable_set_old_str(str) dict "{{{
+    let self._old_str = a:str
 endfunction "}}}
-function! {s:Buftable.method('get_old_str')}(this) "{{{
-    return a:this._old_str
+function! s:Buftable_get_old_str() dict "{{{
+    return self._old_str
 endfunction "}}}
 
 " Rewrite old string, Insert new string.
@@ -192,16 +188,16 @@ endfunction "}}}
 "
 " TODO Rewrite mininum string as possible
 " when old or new string become too long.
-function! {s:Buftable.method('rewrite')}(this) "{{{
-    let [old, new] = [a:this._old_str, a:this.get_display_str()]
+function! s:Buftable_rewrite() dict "{{{
+    let [old, new] = [self._old_str, self.get_display_str()]
 
-    let kakutei = a:this._kakutei_str
-    let a:this._kakutei_str = ''
+    let kakutei = self._kakutei_str
+    let self._kakutei_str = ''
 
     let set_begin_pos =
-    \   a:this._set_begin_pos_at_rewrite
-    \   && a:this._henkan_phase ==# g:eskk#buftable#PHASE_HENKAN
-    let a:this._set_begin_pos_at_rewrite = 0
+    \   self._set_begin_pos_at_rewrite
+    \   && self._henkan_phase ==# g:eskk#buftable#PHASE_HENKAN
+    let self._set_begin_pos_at_rewrite = 0
 
     let inst = eskk#get_buffer_instance()
     if set_begin_pos
@@ -227,7 +223,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
         endif
 
         return
-        \   a:this.make_remove_bs()
+        \   self.make_remove_bs()
         \   . (kakutei != '' ? "\<Plug>(eskk:expr:_inserted_kakutei)" : '')
         \   . "\<Plug>(eskk:_set_begin_pos)"
         \   . (new != '' ? "\<Plug>(eskk:expr:_inserted_new)" : '')
@@ -236,7 +232,7 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
         if old ==# inserted_str
             return ''
         elseif inserted_str == ''
-            return a:this.make_remove_bs()
+            return self.make_remove_bs()
         elseif inserted_str != '' && stridx(old, inserted_str) == 0
             " When inserted_str == "foo", old == "foobar"
             " Insert Remove "bar"
@@ -267,24 +263,24 @@ function! {s:Buftable.method('rewrite')}(this) "{{{
             \   '<Plug>(eskk:expr:_inserted)',
             \   'eskk#get_buffer_instance().inserted'
             \)
-            return a:this.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
+            return self.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
         endif
     endif
 endfunction "}}}
-function! {s:Buftable.method('make_remove_bs')}(this) "{{{
+function! s:Buftable_make_remove_bs() dict "{{{
     return repeat(
     \   eskk#map#key2char(eskk#map#get_special_map("backspace-key")),
-    \   eskk#util#mb_strlen(a:this._old_str),
+    \   eskk#util#mb_strlen(self._old_str),
     \)
 endfunction "}}}
 
-function! {s:Buftable.method('has_changed')}(this) "{{{
-    let kakutei = a:this._kakutei_str
+function! s:Buftable_has_changed() dict "{{{
+    let kakutei = self._kakutei_str
     if kakutei != ''
         return 1
     endif
 
-    let [old, new] = [a:this._old_str, a:this.get_display_str()]
+    let [old, new] = [self._old_str, self.get_display_str()]
     let inserted_str = kakutei . new
     if old !=# inserted_str
         return 1
@@ -293,19 +289,19 @@ function! {s:Buftable.method('has_changed')}(this) "{{{
     return 0
 endfunction "}}}
 
-function! {s:Buftable.method('get_display_str')}(this, ...) "{{{
+function! s:Buftable_get_display_str(...) dict "{{{
     let with_marker  = get(a:000, 0, 1)
     let with_rom_str = get(a:000, 1, 1)
-    let phase = a:this._henkan_phase
+    let phase = self._henkan_phase
 
     if phase ==# g:eskk#buftable#PHASE_NORMAL
-        return s:get_normal_display_str(a:this, with_rom_str)
+        return s:get_normal_display_str(self, with_rom_str)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
-        return s:get_henkan_display_str(a:this, with_marker, with_rom_str)
+        return s:get_henkan_display_str(self, with_marker, with_rom_str)
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
-        return s:get_okuri_display_str(a:this, with_marker, with_rom_str)
+        return s:get_okuri_display_str(self, with_marker, with_rom_str)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
-        return s:get_henkan_select_display_str(a:this, with_marker, with_rom_str)
+        return s:get_henkan_select_display_str(self, with_marker, with_rom_str)
     else
         throw eskk#internal_error(['eskk', 'buftable'])
     endif
@@ -354,27 +350,27 @@ function! s:get_henkan_select_display_str(this, with_marker, with_rom_str) "{{{
 endfunction "}}}
 
 
-function! {s:Buftable.method('get_henkan_phase')}(this) "{{{
-    return a:this._henkan_phase
+function! s:Buftable_get_henkan_phase() dict "{{{
+    return self._henkan_phase
 endfunction "}}}
-function! {s:Buftable.method('set_henkan_phase')}(this, henkan_phase) "{{{
-    if a:henkan_phase ==# a:this._henkan_phase
+function! s:Buftable_set_henkan_phase(henkan_phase) dict "{{{
+    if a:henkan_phase ==# self._henkan_phase
         return
     endif
 
-    call s:validate_table_idx(a:this._table, a:henkan_phase)
+    call s:validate_table_idx(self._table, a:henkan_phase)
 
     call eskk#throw_event(
-    \   'leave-phase-' . a:this.get_phase_name(a:this._henkan_phase)
+    \   'leave-phase-' . self.get_phase_name(self._henkan_phase)
     \)
-    let a:this._henkan_phase = a:henkan_phase
+    let self._henkan_phase = a:henkan_phase
     call eskk#throw_event(
-    \   'enter-phase-' . a:this.get_phase_name(a:this._henkan_phase)
+    \   'enter-phase-' . self.get_phase_name(self._henkan_phase)
     \)
 endfunction "}}}
 
 
-function! {s:Buftable.method('get_phase_name')}(this, phase) "{{{
+function! s:Buftable_get_phase_name(phase) dict "{{{
     return [
     \   'normal',
     \   'henkan',
@@ -385,13 +381,13 @@ function! {s:Buftable.method('get_phase_name')}(this, phase) "{{{
 endfunction "}}}
 
 
-function! {s:Buftable.method('get_lower_phases')}(this) "{{{
+function! s:Buftable_get_lower_phases() dict "{{{
     return reverse(range(
     \   g:eskk#buftable#PHASE_NORMAL,
-    \   a:this._henkan_phase
+    \   self._henkan_phase
     \))
 endfunction "}}}
-function! {s:Buftable.method('get_all_phases')}(this) "{{{
+function! s:Buftable_get_all_phases() dict "{{{
     return range(
     \   g:eskk#buftable#PHASE_NORMAL,
     \   g:eskk#buftable#PHASE_HENKAN_SELECT
@@ -399,7 +395,7 @@ function! {s:Buftable.method('get_all_phases')}(this) "{{{
 endfunction "}}}
 
 
-function! {s:Buftable.method('get_marker')}(this, henkan_phase) "{{{
+function! s:Buftable_get_marker(henkan_phase) dict "{{{
     let table = [
     \    '',
     \    g:eskk#marker_henkan,
@@ -410,17 +406,17 @@ function! {s:Buftable.method('get_marker')}(this, henkan_phase) "{{{
     call s:validate_table_idx(table, a:henkan_phase)
     return table[a:henkan_phase]
 endfunction "}}}
-function! {s:Buftable.method('get_current_marker')}(this) "{{{
-    return a:this.get_marker(a:this.get_henkan_phase())
+function! s:Buftable_get_current_marker() dict "{{{
+    return self.get_marker(self.get_henkan_phase())
 endfunction "}}}
 
 
-function! {s:Buftable.method('push_kakutei_str')}(this, str) "{{{
-    let a:this._kakutei_str .= a:str
+function! s:Buftable_push_kakutei_str(str) dict "{{{
+    let self._kakutei_str .= a:str
 endfunction "}}}
 
-function! {s:Buftable.method('do_enter')}(this, stash) "{{{
-    let phase = a:this.get_henkan_phase()
+function! s:Buftable_do_enter(stash) dict "{{{
+    let phase = self.get_henkan_phase()
     let enter_char =
     \   eskk#map#key2char(eskk#map#get_special_map('enter-key'))
     let undo_char  =
@@ -429,14 +425,14 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
     let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#buftable#PHASE_NORMAL
-        call a:this.convert_rom_str_inplace(phase)
+        call self.convert_rom_str_inplace(phase)
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
         \   'eskk#util#identity',
         \   [enter_char]
         \)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
-        call a:this.convert_rom_str_inplace(phase)
+        call self.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
@@ -445,16 +441,16 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
             \)
         endif
 
-        call a:this.push_kakutei_str(a:this.get_display_str(0))
-        call a:this.clear_all()
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
 
         if !empty(henkan_result)
             call henkan_result.update_candidate()
         endif
 
-        call a:this.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
-        call a:this.convert_rom_str_inplace(
+        call self.convert_rom_str_inplace(
         \   [g:eskk#buftable#PHASE_HENKAN, phase]
         \)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
@@ -465,16 +461,16 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
             \)
         endif
 
-        call a:this.push_kakutei_str(a:this.get_display_str(0))
-        call a:this.clear_all()
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
 
         if !empty(henkan_result)
             call henkan_result.update_candidate()
         endif
 
-        call a:this.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
-        call a:this.convert_rom_str_inplace(phase)
+        call self.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
@@ -487,38 +483,38 @@ function! {s:Buftable.method('do_enter')}(this, stash) "{{{
             call henkan_result.update_candidate()
         endif
 
-        call a:this.push_kakutei_str(a:this.get_display_str(0))
-        call a:this.clear_all()
+        call self.push_kakutei_str(self.get_display_str(0))
+        call self.clear_all()
 
-        call a:this.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
     else
         throw eskk#internal_error(['eskk', 'buftable'])
     endif
 endfunction "}}}
-function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
-    if a:this.get_old_str() == ''
+function! s:Buftable_do_backspace(stash) dict "{{{
+    if self.get_old_str() == ''
         let a:stash.return = eskk#map#key2char(
         \   eskk#map#get_special_key('backspace-key')
         \)
         return
     endif
 
-    let phase = a:this.get_henkan_phase()
+    let phase = self.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         if g:eskk#delete_implies_kakutei
             " Enter normal phase and delete one character.
-            let filter_str = eskk#util#mb_chop(a:this.get_display_str(0))
-            call a:this.push_kakutei_str(filter_str)
-            let henkan_select_buf_str = a:this.get_buf_str(
+            let filter_str = eskk#util#mb_chop(self.get_display_str(0))
+            call self.push_kakutei_str(filter_str)
+            let henkan_select_buf_str = self.get_buf_str(
             \   g:eskk#buftable#PHASE_HENKAN_SELECT
             \)
             call henkan_select_buf_str.clear()
 
-            call a:this.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+            call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
             return
         else
             " Leave henkan select or back to previous candidate if it exists.
-            call a:this.choose_prev_candidate(a:stash)
+            call self.choose_prev_candidate(a:stash)
             return
         endif
     endif
@@ -532,18 +528,18 @@ function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
 
         if g:eskk#delete_implies_kakutei
             " Enter normal phase and delete one character.
-            let filter_str = eskk#util#mb_chop(a:this.get_display_str(0))
-            call a:this.push_kakutei_str(filter_str)
-            let henkan_select_buf_str = a:this.get_buf_str(
+            let filter_str = eskk#util#mb_chop(self.get_display_str(0))
+            call self.push_kakutei_str(filter_str)
+            let henkan_select_buf_str = self.get_buf_str(
             \   g:eskk#buftable#PHASE_HENKAN_SELECT
             \)
             call henkan_select_buf_str.clear()
 
-            call a:this.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+            call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
             return
         else
             let filter_str = join(map(copy(p), 'v:val[1]'), '')
-            let buf_str = a:this.get_buf_str(
+            let buf_str = self.get_buf_str(
             \   g:eskk#buftable#PHASE_HENKAN
             \)
             if filter_str ==# buf_str.rom_pairs.get_filter()
@@ -556,8 +552,8 @@ function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
     endif
 
     " Build backspaces to delete previous characters.
-    for phase in a:this.get_lower_phases()
-        let buf_str = a:this.get_buf_str(phase)
+    for phase in self.get_lower_phases()
+        let buf_str = self.get_buf_str(phase)
         if !buf_str.rom_str.empty()
             call buf_str.rom_str.chop()
             break
@@ -571,8 +567,8 @@ function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
                 call buf_str.rom_pairs.push_one_pair(p[0], eskk#util#mb_chop(p[1]))
             endif
             break
-        elseif a:this.get_marker(phase) != ''
-            if !a:this.step_back_henkan_phase()
+        elseif self.get_marker(phase) != ''
+            if !self.step_back_henkan_phase()
                 let msg = "Normal phase's marker is empty, "
                 \       . "and other phases *should* be able to change "
                 \       . "current henkan phase."
@@ -582,11 +578,11 @@ function! {s:Buftable.method('do_backspace')}(this, stash) "{{{
         endif
     endfor
 endfunction "}}}
-function! {s:Buftable.method('choose_next_candidate')}(this, stash) "{{{
-    return s:get_next_candidate(a:this, a:stash, 1)
+function! s:Buftable_choose_next_candidate(stash) dict "{{{
+    return s:get_next_candidate(self, a:stash, 1)
 endfunction "}}}
-function! {s:Buftable.method('choose_prev_candidate')}(this, stash) "{{{
-    return s:get_next_candidate(a:this, a:stash, 0)
+function! s:Buftable_choose_prev_candidate(stash) dict "{{{
+    return s:get_next_candidate(self, a:stash, 0)
 endfunction "}}}
 function! s:get_next_candidate(this, stash, next) "{{{
     let cur_buf_str = a:this.get_current_buf_str()
@@ -679,12 +675,12 @@ function! s:get_next_candidate(this, stash, next) "{{{
         endif
     endif
 endfunction "}}}
-function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
-    let phase   = a:this.get_henkan_phase()
-    let buf_str = a:this.get_current_buf_str()
+function! s:Buftable_do_sticky(stash) dict "{{{
+    let phase   = self.get_henkan_phase()
+    let buf_str = self.get_current_buf_str()
 
     " Convert rom_str if possible.
-    call a:this.convert_rom_str_inplace([
+    call self.convert_rom_str_inplace([
     \   g:eskk#buftable#PHASE_HENKAN,
     \   g:eskk#buftable#PHASE_OKURI
     \])
@@ -692,8 +688,8 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
     if phase ==# g:eskk#buftable#PHASE_NORMAL
         if !buf_str.rom_str.empty()
         \   || !buf_str.rom_pairs.empty()
-            call a:this.convert_rom_str_inplace(phase)
-            call a:this.push_kakutei_str(a:this.get_display_str(0))
+            call self.convert_rom_str_inplace(phase)
+            call self.push_kakutei_str(self.get_display_str(0))
             call buf_str.clear()
         endif
         if get(g:eskk#set_undo_point, 'sticky', 0) && mode() ==# 'i'
@@ -705,32 +701,32 @@ function! {s:Buftable.method('do_sticky')}(this, stash) "{{{
             \   )]
             \)
         endif
-        let a:this._set_begin_pos_at_rewrite = 1
-        call a:this.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
+        let self._set_begin_pos_at_rewrite = 1
+        call self.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         if !buf_str.rom_str.empty()
         \   || !buf_str.rom_pairs.empty()
-            call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
+            call self.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
         endif
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
         " nop
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
-        call a:this.do_enter(a:stash)
-        call a:this.do_sticky(a:stash)
+        call self.do_enter(a:stash)
+        call self.do_sticky(a:stash)
     else
         throw eskk#internal_error(['eskk', 'buftable'])
     endif
 endfunction "}}}
-function! {s:Buftable.method('step_back_henkan_phase')}(this) "{{{
-    let phase   = a:this.get_henkan_phase()
-    let buf_str = a:this.get_current_buf_str()
+function! s:Buftable_step_back_henkan_phase() dict "{{{
+    let phase   = self.get_henkan_phase()
+    let buf_str = self.get_current_buf_str()
 
     if phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         call buf_str.clear()
-        let okuri_buf_str = a:this.get_buf_str(
+        let okuri_buf_str = self.get_buf_str(
         \   g:eskk#buftable#PHASE_OKURI
         \)
-        call a:this.set_henkan_phase(
+        call self.set_henkan_phase(
         \   !empty(okuri_buf_str.rom_pairs.get()) ?
         \       g:eskk#buftable#PHASE_OKURI
         \       : g:eskk#buftable#PHASE_HENKAN
@@ -738,11 +734,11 @@ function! {s:Buftable.method('step_back_henkan_phase')}(this) "{{{
         return 1
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
         call buf_str.clear()
-        call a:this.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
+        call self.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
         return 1    " stepped.
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         call buf_str.clear()
-        call a:this.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
         return 1    " stepped.
     elseif phase ==# g:eskk#buftable#PHASE_NORMAL
         return 0    " failed.
@@ -750,11 +746,11 @@ function! {s:Buftable.method('step_back_henkan_phase')}(this) "{{{
         throw eskk#internal_error(['eskk', 'buftable'])
     endif
 endfunction "}}}
-function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
+function! s:Buftable_do_henkan(stash, ...) dict "{{{
     let convert_at_exact_match = a:0 ? a:1 : 0
-    let phase = a:this.get_henkan_phase()
+    let phase = self.get_henkan_phase()
 
-    if a:this.get_current_buf_str().empty()
+    if self.get_current_buf_str().empty()
         return
     endif
 
@@ -772,33 +768,33 @@ function! {s:Buftable.method('do_henkan')}(this, stash, ...) "{{{
     endif
 
     if eskk#get_mode() ==# 'abbrev'
-        call a:this.do_henkan_abbrev(a:stash, convert_at_exact_match)
+        call self.do_henkan_abbrev(a:stash, convert_at_exact_match)
     else
-        call a:this.do_henkan_other(a:stash, convert_at_exact_match)
+        call self.do_henkan_other(a:stash, convert_at_exact_match)
     endif
 endfunction "}}}
-function! {s:Buftable.method('do_henkan_abbrev')}(this, stash, convert_at_exact_match) "{{{
-    let henkan_buf_str = a:this.get_buf_str(
+function! s:Buftable_do_henkan_abbrev(stash, convert_at_exact_match) dict "{{{
+    let henkan_buf_str = self.get_buf_str(
     \   g:eskk#buftable#PHASE_HENKAN
     \)
-    let henkan_select_buf_str = a:this.get_buf_str(
+    let henkan_select_buf_str = self.get_buf_str(
     \   g:eskk#buftable#PHASE_HENKAN_SELECT
     \)
 
     let rom_str = henkan_buf_str.rom_str.get()
     let dict = eskk#get_skk_dict()
-    call dict.refer(a:this, rom_str, '', '')
+    call dict.refer(self, rom_str, '', '')
 
     try
         let candidate = dict.get_henkan_result().get_candidate()
         " No thrown exception. continue...
 
-        call a:this.clear_all()
+        call self.clear_all()
         if a:convert_at_exact_match
             call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
         else
             call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
-            call a:this.set_henkan_phase(
+            call self.set_henkan_phase(
             \   g:eskk#buftable#PHASE_HENKAN_SELECT
             \)
         endif
@@ -809,29 +805,29 @@ function! {s:Buftable.method('do_henkan_abbrev')}(this, stash, convert_at_exact_
         \      dict.get_henkan_result()
         \   )
         if input != ''
-            call a:this.clear_all()
-            call a:this.push_kakutei_str(input . okuri)
-            call a:this.set_henkan_phase(
+            call self.clear_all()
+            call self.push_kakutei_str(input . okuri)
+            call self.set_henkan_phase(
             \   g:eskk#buftable#PHASE_NORMAL
             \)
         endif
     endtry
 endfunction "}}}
-function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_match) "{{{
-    let phase = a:this.get_henkan_phase()
-    let henkan_buf_str = a:this.get_buf_str(
+function! s:Buftable_do_henkan_other(stash, convert_at_exact_match) dict "{{{
+    let phase = self.get_henkan_phase()
+    let henkan_buf_str = self.get_buf_str(
     \   g:eskk#buftable#PHASE_HENKAN
     \)
-    let okuri_buf_str = a:this.get_buf_str(
+    let okuri_buf_str = self.get_buf_str(
     \   g:eskk#buftable#PHASE_OKURI
     \)
-    let henkan_select_buf_str = a:this.get_buf_str(
+    let henkan_select_buf_str = self.get_buf_str(
     \   g:eskk#buftable#PHASE_HENKAN_SELECT
     \)
 
     if g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
-        call a:this.convert_rom_pairs_inplace(
+        call self.convert_rom_pairs_inplace(
         \   [
         \       g:eskk#buftable#PHASE_HENKAN,
         \       g:eskk#buftable#PHASE_OKURI,
@@ -841,7 +837,7 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     endif
 
     " Convert rom_str if possible.
-    call a:this.convert_rom_str_inplace([
+    call self.convert_rom_str_inplace([
     \   g:eskk#buftable#PHASE_HENKAN,
     \   g:eskk#buftable#PHASE_OKURI
     \])
@@ -851,7 +847,7 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     \   && phase ==# g:eskk#buftable#PHASE_HENKAN
         call okuri_buf_str.rom_str.set(henkan_buf_str.rom_str.get())
         call henkan_buf_str.rom_str.clear()
-        call a:this.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
+        call self.set_henkan_phase(g:eskk#buftable#PHASE_OKURI)
         return
     endif
 
@@ -859,7 +855,7 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
     let okuri = okuri_buf_str.rom_pairs.get_filter()
     let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
     let dict = eskk#get_skk_dict()
-    call dict.refer(a:this, hira, okuri, okuri_rom)
+    call dict.refer(self, hira, okuri, okuri_rom)
 
     " Clear phase henkan/okuri buffer string.
     " NOTE: I assume that `dict.refer()`
@@ -872,20 +868,20 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
         let hr = dict.get_henkan_result()
         let candidate = hr.get_candidate()
 
-        call a:this.clear_all()
+        call self.clear_all()
         if a:convert_at_exact_match
             call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
         else
             call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
-            call a:this.set_henkan_phase(
+            call self.set_henkan_phase(
             \   g:eskk#buftable#PHASE_HENKAN_SELECT
             \)
             if g:eskk#kakutei_when_unique_candidate && !hr.has_next()
-                call a:this.push_kakutei_str(
-                \   a:this.get_display_str(0)
+                call self.push_kakutei_str(
+                \   self.get_display_str(0)
                 \)
-                call a:this.clear_all()
-                call a:this.set_henkan_phase(
+                call self.clear_all()
+                call self.set_henkan_phase(
                 \   g:eskk#buftable#PHASE_NORMAL
                 \)
             endif
@@ -897,57 +893,57 @@ function! {s:Buftable.method('do_henkan_other')}(this, stash, convert_at_exact_m
         \      dict.get_henkan_result()
         \   )
         if input != ''
-            call a:this.clear_all()
-            call a:this.push_kakutei_str(input . okuri)
-            call a:this.set_henkan_phase(
+            call self.clear_all()
+            call self.push_kakutei_str(input . okuri)
+            call self.set_henkan_phase(
             \   g:eskk#buftable#PHASE_NORMAL
             \)
         endif
     endtry
 endfunction "}}}
-function! {s:Buftable.method('do_ctrl_q_key')}(this) "{{{
+function! s:Buftable_do_ctrl_q_key() dict "{{{
     return s:convert_again_with_table(
-    \   a:this,
+    \   self,
     \   (eskk#get_mode() ==# 'hira' ?
     \       eskk#get_mode_table('hankata') :
     \       eskk#get_mode_table('hira'))
     \)
 endfunction "}}}
-function! {s:Buftable.method('do_q_key')}(this) "{{{
+function! s:Buftable_do_q_key() dict "{{{
     return s:convert_again_with_table(
-    \   a:this,
+    \   self,
     \   (eskk#get_mode() ==# 'hira' ?
     \       eskk#get_mode_table('kata') :
     \       eskk#get_mode_table('hira'))
     \)
 endfunction "}}}
-function! {s:Buftable.method('do_l_key')}(this) "{{{
-    return s:convert_again_with_table(a:this, {})
+function! s:Buftable_do_l_key() dict "{{{
+    return s:convert_again_with_table(self, {})
 endfunction "}}}
-function! {s:Buftable.method('do_escape')}(this, stash) "{{{
-    call a:this.convert_rom_str_inplace(
-    \   a:this.get_henkan_phase()
+function! s:Buftable_do_escape(stash) dict "{{{
+    call self.convert_rom_str_inplace(
+    \   self.get_henkan_phase()
     \)
 
-    let kakutei_str = a:this.generate_kakutei_str()
+    let kakutei_str = self.generate_kakutei_str()
     " NOTE: This function return value is not remapped.
     let esc = eskk#map#get_special_key('escape-key')
     call eskk#util#assert(esc != '', 'esc must not be empty string')
     let a:stash.return = kakutei_str . eskk#map#key2char(esc)
 endfunction "}}}
-function! {s:Buftable.method('do_tab')}(this, stash) "{{{
-    let buf_str = a:this.get_current_buf_str()
+function! s:Buftable_do_tab(stash) dict "{{{
+    let buf_str = self.get_current_buf_str()
     call buf_str.rom_str.append(s:get_tab_raw_str())
 endfunction "}}}
 function! s:get_tab_raw_str() "{{{
     return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
 endfunction "}}}
 
-function! {s:Buftable.method('convert_rom_str_inplace')}(this, phases, ...) "{{{
+function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
-    for buf_str in map(phases, 'a:this.get_buf_str(v:val)')
+    for buf_str in map(phases, 'self.get_buf_str(v:val)')
         let rom_str = buf_str.rom_str.get()
         if table.has_map(rom_str)
             call buf_str.rom_pairs.push_one_pair(
@@ -958,22 +954,22 @@ function! {s:Buftable.method('convert_rom_str_inplace')}(this, phases, ...) "{{{
         endif
     endfor
 endfunction "}}}
-function! {s:Buftable.method('convert_rom_pairs_inplace')}(this, phases, ...) "{{{
+function! s:Buftable_convert_rom_pairs_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
     for p in phases
-        let buf_str = a:this.convert_rom_pairs(p, table)
-        call a:this.set_buf_str(p, buf_str)
+        let buf_str = self.convert_rom_pairs(p, table)
+        call self.set_buf_str(p, buf_str)
     endfor
 endfunction "}}}
-function! {s:Buftable.method('convert_rom_pairs')}(this, phases, ...) "{{{
+function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
     let r = []
     for p in phases
-        let buf_str = deepcopy(a:this.get_buf_str(p), 1)
+        let buf_str = deepcopy(self.get_buf_str(p), 1)
         let matched = buf_str.rom_pairs.get()
         call buf_str.rom_pairs.clear()
         for [rom_str, filter_str] in matched
@@ -1050,15 +1046,15 @@ function! s:convert_again_with_table(this, table) "{{{
     endif
 endfunction "}}}
 
-function! {s:Buftable.method('clear_all')}(this) "{{{
-    for phase in a:this.get_all_phases()
-        let buf_str = a:this.get_buf_str(phase)
+function! s:Buftable_clear_all() dict "{{{
+    for phase in self.get_all_phases()
+        let buf_str = self.get_buf_str(phase)
         call buf_str.clear()
     endfor
 endfunction "}}}
 
-function! {s:Buftable.method('remove_display_str')}(this) "{{{
-    let current_str = a:this.get_display_str()
+function! s:Buftable_remove_display_str() dict "{{{
+    let current_str = self.get_display_str()
 
     " NOTE: This function return value is not remapped.
     let bs = eskk#map#get_special_key('backspace-key')
@@ -1069,28 +1065,28 @@ function! {s:Buftable.method('remove_display_str')}(this) "{{{
     \   eskk#util#mb_strlen(current_str)
     \)
 endfunction "}}}
-function! {s:Buftable.method('generate_kakutei_str')}(this) "{{{
-    return a:this.remove_display_str() . a:this.get_display_str(0)
+function! s:Buftable_generate_kakutei_str() dict "{{{
+    return self.remove_display_str() . self.get_display_str(0)
 endfunction "}}}
 
-function! {s:Buftable.method('get_begin_pos')}(this) "{{{
-    return a:this._begin_pos
+function! s:Buftable_get_begin_pos() dict "{{{
+    return self._begin_pos
 endfunction "}}}
-function! {s:Buftable.method('set_begin_pos')}(this, expr) "{{{
+function! s:Buftable_set_begin_pos(expr) dict "{{{
     if mode() ==# 'i'
-        let a:this._begin_pos = ['i', getpos(a:expr)]
+        let self._begin_pos = ['i', getpos(a:expr)]
     elseif mode() ==# 'c'
-        let a:this._begin_pos = ['c', getcmdpos()]
+        let self._begin_pos = ['c', getcmdpos()]
     else
         call eskk#logger#logf("called eskk from mode '%s'.", mode())
     endif
 endfunction "}}}
 
 
-function! {s:Buftable.method('empty')}(this) "{{{
+function! s:Buftable_empty() dict "{{{
     for buf_str in map(
-    \   a:this.get_all_phases(),
-    \   'a:this.get_buf_str(v:val)'
+    \   self.get_all_phases(),
+    \   'self.get_buf_str(v:val)'
     \)
         if !buf_str.empty()
             return 0
@@ -1100,12 +1096,12 @@ function! {s:Buftable.method('empty')}(this) "{{{
 endfunction "}}}
 
 
-function! {s:Buftable.method('dump')}(this) "{{{
+function! s:Buftable_dump() dict "{{{
     let lines = []
-    call add(lines, 'current phase: ' . a:this._henkan_phase)
-    call add(lines, 'begin pos: ' . string(a:this.get_begin_pos()))
-    for phase in a:this.get_all_phases()
-        let buf_str = a:this.get_buf_str(phase)
+    call add(lines, 'current phase: ' . self._henkan_phase)
+    call add(lines, 'begin pos: ' . string(self.get_begin_pos()))
+    for phase in self.get_all_phases()
+        let buf_str = self.get_buf_str(phase)
         call add(lines, 'phase: ' . phase)
         call add(lines, 'rom_str: ' . string(buf_str.rom_str.get()))
         call add(lines, 'matched pairs: ' . string(buf_str.rom_pairs.get()))
@@ -1126,13 +1122,67 @@ function! eskk#buftable#invalid_henkan_phase_value_error(henkan_phase) "{{{
     \)
 endfunction "}}}
 
-" for memory, store object instead of object factory (class).
-let s:Buftable = s:Buftable.new()
+
+let s:Buftable = {
+\   '_table': [
+\       deepcopy(s:BufferString),
+\       deepcopy(s:BufferString),
+\       deepcopy(s:BufferString),
+\       deepcopy(s:BufferString),
+\       deepcopy(s:BufferString),
+\   ],
+\   '_kakutei_str': '',
+\   '_old_str': '',
+\   '_begin_pos': [],
+\   '_henkan_phase': g:eskk#buftable#PHASE_NORMAL,
+\   '_set_begin_pos_at_rewrite': 0,
+\
+\   'reset': eskk#util#get_local_funcref('Buftable_reset', s:SID_PREFIX),
+\   'get_buf_str': eskk#util#get_local_funcref('Buftable_get_buf_str', s:SID_PREFIX),
+\   'get_current_buf_str': eskk#util#get_local_funcref('Buftable_get_current_buf_str', s:SID_PREFIX),
+\   'set_buf_str': eskk#util#get_local_funcref('Buftable_set_buf_str', s:SID_PREFIX),
+\   'set_old_str': eskk#util#get_local_funcref('Buftable_set_old_str', s:SID_PREFIX),
+\   'get_old_str': eskk#util#get_local_funcref('Buftable_get_old_str', s:SID_PREFIX),
+\   'rewrite': eskk#util#get_local_funcref('Buftable_rewrite', s:SID_PREFIX),
+\   'make_remove_bs': eskk#util#get_local_funcref('Buftable_make_remove_bs', s:SID_PREFIX),
+\   'has_changed': eskk#util#get_local_funcref('Buftable_has_changed', s:SID_PREFIX),
+\   'get_display_str': eskk#util#get_local_funcref('Buftable_get_display_str', s:SID_PREFIX),
+\   'get_henkan_phase': eskk#util#get_local_funcref('Buftable_get_henkan_phase', s:SID_PREFIX),
+\   'set_henkan_phase': eskk#util#get_local_funcref('Buftable_set_henkan_phase', s:SID_PREFIX),
+\   'get_phase_name': eskk#util#get_local_funcref('Buftable_get_phase_name', s:SID_PREFIX),
+\   'get_lower_phases': eskk#util#get_local_funcref('Buftable_get_lower_phases', s:SID_PREFIX),
+\   'get_all_phases': eskk#util#get_local_funcref('Buftable_get_all_phases', s:SID_PREFIX),
+\   'get_marker': eskk#util#get_local_funcref('Buftable_get_marker', s:SID_PREFIX),
+\   'get_current_marker': eskk#util#get_local_funcref('Buftable_get_current_marker', s:SID_PREFIX),
+\   'push_kakutei_str': eskk#util#get_local_funcref('Buftable_push_kakutei_str', s:SID_PREFIX),
+\   'do_enter': eskk#util#get_local_funcref('Buftable_do_enter', s:SID_PREFIX),
+\   'do_backspace': eskk#util#get_local_funcref('Buftable_do_backspace', s:SID_PREFIX),
+\   'choose_next_candidate': eskk#util#get_local_funcref('Buftable_choose_next_candidate', s:SID_PREFIX),
+\   'choose_prev_candidate': eskk#util#get_local_funcref('Buftable_choose_prev_candidate', s:SID_PREFIX),
+\   'do_sticky': eskk#util#get_local_funcref('Buftable_do_sticky', s:SID_PREFIX),
+\   'step_back_henkan_phase': eskk#util#get_local_funcref('Buftable_step_back_henkan_phase', s:SID_PREFIX),
+\   'do_henkan': eskk#util#get_local_funcref('Buftable_do_henkan', s:SID_PREFIX),
+\   'do_henkan_abbrev': eskk#util#get_local_funcref('Buftable_do_henkan_abbrev', s:SID_PREFIX),
+\   'do_henkan_other': eskk#util#get_local_funcref('Buftable_do_henkan_other', s:SID_PREFIX),
+\   'do_ctrl_q_key': eskk#util#get_local_funcref('Buftable_do_ctrl_q_key', s:SID_PREFIX),
+\   'do_q_key': eskk#util#get_local_funcref('Buftable_do_q_key', s:SID_PREFIX),
+\   'do_l_key': eskk#util#get_local_funcref('Buftable_do_l_key', s:SID_PREFIX),
+\   'do_escape': eskk#util#get_local_funcref('Buftable_do_escape', s:SID_PREFIX),
+\   'do_tab': eskk#util#get_local_funcref('Buftable_do_tab', s:SID_PREFIX),
+\   'convert_rom_str_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_str_inplace', s:SID_PREFIX),
+\   'convert_rom_pairs_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_pairs_inplace', s:SID_PREFIX),
+\   'convert_rom_pairs': eskk#util#get_local_funcref('Buftable_convert_rom_pairs', s:SID_PREFIX),
+\   'clear_all': eskk#util#get_local_funcref('Buftable_clear_all', s:SID_PREFIX),
+\   'remove_display_str': eskk#util#get_local_funcref('Buftable_remove_display_str', s:SID_PREFIX),
+\   'generate_kakutei_str': eskk#util#get_local_funcref('Buftable_generate_kakutei_str', s:SID_PREFIX),
+\   'get_begin_pos': eskk#util#get_local_funcref('Buftable_get_begin_pos', s:SID_PREFIX),
+\   'set_begin_pos': eskk#util#get_local_funcref('Buftable_set_begin_pos', s:SID_PREFIX),
+\   'empty': eskk#util#get_local_funcref('Buftable_empty', s:SID_PREFIX),
+\   'dump': eskk#util#get_local_funcref('Buftable_dump', s:SID_PREFIX),
+\}
+
 " }}}
 
-" :unlet for memory.
-" Those classes' methods/properties are copied already.
-unlet s:BufferString
 " }}}
 
 " Restore 'cpoptions' {{{

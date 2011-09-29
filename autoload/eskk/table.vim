@@ -70,19 +70,12 @@ endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
-let s:VICE_OPTIONS = {'generate_stub': 1, 'auto_clone_method': 1}
-
 " s:AbstractTable {{{
-let s:AbstractTable = vice#class('AbstractTable', s:SID_PREFIX, s:VICE_OPTIONS)
-
-call s:AbstractTable.attribute('_name', '')
-call s:AbstractTable.attribute('_data', {})
-call s:AbstractTable.attribute('_cached_maps', {})
 
 " Constructor of s:DataTable, s:DiffTable
 function! eskk#table#new(table_name, ...) "{{{
     if a:0
-        let obj = s:DiffTable.clone()
+        let obj = deepcopy(s:DiffTable)
         let obj._name = a:table_name
         let obj._bases = []
         for base in type(a:1) == type([]) ? a:1 : [a:1]
@@ -98,7 +91,7 @@ function! eskk#table#new(table_name, ...) "{{{
         endfor
         call s:validate_base_tables(obj)
     else
-        let obj = s:DataTable.clone()
+        let obj = deepcopy(s:DataTable)
         let obj._name = a:table_name
     endif
 
@@ -135,9 +128,9 @@ function! eskk#table#new_from_file(table_name) "{{{
     return obj
 endfunction "}}}
 
-function! {s:AbstractTable.method('get_all_base_tables')}(this) "{{{
+function! s:AbstractTable_get_all_base_tables() dict "{{{
     let set = eskk#util#create_data_ordered_set()
-    let table_stack = [a:this]
+    let table_stack = [self]
     while !empty(table_stack)
         let table = remove(table_stack, -1)
         if set.has(table._name)
@@ -150,8 +143,8 @@ function! {s:AbstractTable.method('get_all_base_tables')}(this) "{{{
     endwhile
     return set.to_list()
 endfunction "}}}
-function! {s:AbstractTable.method('derived_from')}(this, base) "{{{
-    for table in a:this.get_all_base_tables()
+function! s:AbstractTable_derived_from(base) dict "{{{
+    for table in self.get_all_base_tables()
         if table ==# a:base
             return 1
         endif
@@ -159,20 +152,20 @@ function! {s:AbstractTable.method('derived_from')}(this, base) "{{{
     return 0
 endfunction "}}}
 
-function! {s:AbstractTable.method('has_candidates')}(this, lhs_head) "{{{
-    let not_found = {}
-    return a:this.get_candidates(a:lhs_head, 1, not_found) isnot not_found
+function! s:AbstractTable_has_candidates(lhs_head) dict "{{{
+    let NONE = []
+    return self.get_candidates(a:lhs_head, 1, NONE) isnot NONE
 endfunction "}}}
-function! {s:AbstractTable.method('has_n_candidates')}(this, lhs_head, n) "{{{
+function! s:AbstractTable_has_n_candidates(lhs_head, n) dict "{{{
     " Has n candidates at least.
-    let not_found = {}
-    let c = a:this.get_candidates(a:lhs_head, a:n, not_found)
-    return c isnot not_found && len(c) >= a:n
+    let NONE = []
+    let c = self.get_candidates(a:lhs_head, a:n, NONE)
+    return c isnot NONE && len(c) >= a:n
 endfunction "}}}
-function! {s:AbstractTable.method('get_candidates')}(this, lhs_head, max_candidates, ...) "{{{
+function! s:AbstractTable_get_candidates(lhs_head, max_candidates, ...) dict "{{{
     return call(
     \   's:get_candidates',
-    \   [a:this, a:lhs_head, a:max_candidates] + a:000
+    \   [self, a:lhs_head, a:max_candidates] + a:000
     \)
 endfunction "}}}
 function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
@@ -184,7 +177,8 @@ function! s:get_candidates(table, lhs_head, max_candidates, ...) "{{{
     \)
 
     let candidates = filter(
-    \   keys(a:table.load()), 'stridx(v:val, a:lhs_head) == 0'
+    \   keys(a:table.load()),
+    \   '!stridx(v:val, a:lhs_head)'
     \)
     if a:table.is_child()
         " Search base tables.
@@ -216,24 +210,24 @@ let [
 \   s:REST_INDEX
 \] = range(2)
 
-function! {s:AbstractTable.method('has_map')}(this, lhs) "{{{
+function! s:AbstractTable_has_map(lhs) dict "{{{
     let not_found = {}
-    return a:this.get_map(a:lhs, not_found) isnot not_found
+    return self.get_map(a:lhs, not_found) isnot not_found
 endfunction "}}}
-function! {s:AbstractTable.method('get_map')}(this, lhs, ...) "{{{
+function! s:AbstractTable_get_map(lhs, ...) dict "{{{
     return call(
     \   's:get_map',
-    \   [a:this, a:lhs, s:MAP_INDEX] + a:000
+    \   [self, a:lhs, s:MAP_INDEX] + a:000
     \)
 endfunction "}}}
-function! {s:AbstractTable.method('has_rest')}(this, lhs) "{{{
+function! s:AbstractTable_has_rest(lhs) dict "{{{
     let not_found = {}
-    return a:this.get_rest(a:lhs, not_found) isnot not_found
+    return self.get_rest(a:lhs, not_found) isnot not_found
 endfunction "}}}
-function! {s:AbstractTable.method('get_rest')}(this, lhs, ...) "{{{
+function! s:AbstractTable_get_rest(lhs, ...) dict "{{{
     return call(
     \   's:get_map',
-    \   [a:this, a:lhs, s:REST_INDEX] + a:000
+    \   [self, a:lhs, s:REST_INDEX] + a:000
     \)
 endfunction "}}}
 function! s:get_map(table, lhs, index, ...) "{{{
@@ -302,19 +296,19 @@ function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
     endif
 endfunction "}}}
 
-function! {s:AbstractTable.method('load')}(this) "{{{
-    if has_key(a:this, '_bases')
+function! s:AbstractTable_load() dict "{{{
+    if has_key(self, '_bases')
         " TODO: after initializing base tables,
         " this object has no need to have base references.
         " because they can ("should", curerntly) be
         " obtained from s:table_defs in autoload/eskk.vim
         " (it can be considered as flyweight object for all tables)
-        for base in a:this._bases
+        for base in self._bases
             call s:do_initialize(base)
         endfor
     endif
-    call s:do_initialize(a:this)
-    return a:this._data
+    call s:do_initialize(self)
+    return self._data
 endfunction "}}}
 function! s:AbstractTable_get_mappings() dict "{{{
     return self._data
@@ -330,62 +324,96 @@ function! s:do_initialize(table) "{{{
     endif
 endfunction "}}}
 
-function! {s:AbstractTable.method('is_base')}(this) "{{{
-    return !has_key(a:this, '_bases')
+function! s:AbstractTable_is_base() dict "{{{
+    return !has_key(self, '_bases')
 endfunction "}}}
-function! {s:AbstractTable.method('is_child')}(this) "{{{
-    return !a:this.is_base()
+function! s:AbstractTable_is_child() dict "{{{
+    return !self.is_base()
 endfunction "}}}
 
-function! {s:AbstractTable.method('get_name')}(this) "{{{
-    return a:this._name
+function! s:AbstractTable_get_name() dict "{{{
+    return self._name
 endfunction "}}}
-function! {s:AbstractTable.method('get_base_tables')}(this) "{{{
-    return a:this.is_child() ? a:this._bases : []
+function! s:AbstractTable_get_base_tables() dict "{{{
+    return self.is_child() ? self._bases : []
 endfunction "}}}
+
+
+let s:AbstractTable = {
+\   '_name': '',
+\   '_data': {},
+\   '_cached_maps': {},
+\
+\   'get_all_base_tables': eskk#util#get_local_funcref('AbstractTable_get_all_base_tables', s:SID_PREFIX),
+\   'derived_from': eskk#util#get_local_funcref('AbstractTable_derived_from', s:SID_PREFIX),
+\   'has_candidates': eskk#util#get_local_funcref('AbstractTable_has_candidates', s:SID_PREFIX),
+\   'has_n_candidates': eskk#util#get_local_funcref('AbstractTable_has_n_candidates', s:SID_PREFIX),
+\   'get_candidates': eskk#util#get_local_funcref('AbstractTable_get_candidates', s:SID_PREFIX),
+\   'has_map': eskk#util#get_local_funcref('AbstractTable_has_map', s:SID_PREFIX),
+\   'get_map': eskk#util#get_local_funcref('AbstractTable_get_map', s:SID_PREFIX),
+\   'has_rest': eskk#util#get_local_funcref('AbstractTable_has_rest', s:SID_PREFIX),
+\   'get_rest': eskk#util#get_local_funcref('AbstractTable_get_rest', s:SID_PREFIX),
+\   'load': eskk#util#get_local_funcref('AbstractTable_load', s:SID_PREFIX),
+\   'get_mappings': eskk#util#get_local_funcref('AbstractTable_get_mappings', s:SID_PREFIX),
+\   'is_base': eskk#util#get_local_funcref('AbstractTable_is_base', s:SID_PREFIX),
+\   'is_child': eskk#util#get_local_funcref('AbstractTable_is_child', s:SID_PREFIX),
+\   'get_name': eskk#util#get_local_funcref('AbstractTable_get_name', s:SID_PREFIX),
+\   'get_base_tables': eskk#util#get_local_funcref('AbstractTable_get_base_tables', s:SID_PREFIX),
+\}
+
 " }}}
 
 " s:DataTable {{{
-let s:DataTable = vice#class('DataTable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:DataTable.extends(s:AbstractTable)
 
-function! {s:DataTable.method('add_from_dict')}(this, dict) "{{{
-    let a:this._data = a:dict
+function! s:DataTable_add_from_dict(dict) dict "{{{
+    let self._data = a:dict
 endfunction "}}}
 
-function! {s:DataTable.method('add_map')}(this, lhs, map, ...) "{{{
+function! s:DataTable_add_map(lhs, map, ...) dict "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
-    let a:this._data[a:lhs] = pair
+    let self._data[a:lhs] = pair
 endfunction "}}}
+
+
+let s:DataTable = extend(
+\   deepcopy(s:AbstractTable),
+\   {
+\       'add_from_dict': eskk#util#get_local_funcref('DataTable_add_from_dict', s:SID_PREFIX),
+\       'add_map': eskk#util#get_local_funcref('DataTable_add_map', s:SID_PREFIX),
+\   }
+\)
+
 " }}}
 
 " s:DiffTable {{{
-let s:DiffTable = vice#class('DiffTable', s:SID_PREFIX, s:VICE_OPTIONS)
-call s:DiffTable.extends(s:AbstractTable)
 
-function! {s:DiffTable.method('add_map')}(this, lhs, map, ...) "{{{
+function! s:DiffTable_add_map(lhs, map, ...) dict "{{{
     let pair = [a:map, (a:0 ? a:1 : '')]
-    let a:this._data[a:lhs] = {'method': 'add', 'data': pair}
+    let self._data[a:lhs] = {'method': 'add', 'data': pair}
 endfunction "}}}
 
-function! {s:DiffTable.method('remove_map')}(this, lhs) "{{{
-    if has_key(a:this._data, a:lhs)
-        unlet a:this._data[a:lhs]
+function! s:DiffTable_remove_map(lhs) dict "{{{
+    if has_key(self._data, a:lhs)
+        unlet self._data[a:lhs]
     else
         " Assumpiton: It must be a lhs of bases.
         " One of base tables must have this lhs.
         " No way to check if this lhs is base one,
         " because .load() is called lazily
         " for saving memory.
-        let a:this._data[a:lhs] = {'method': 'remove'}
+        let self._data[a:lhs] = {'method': 'remove'}
     endif
 endfunction "}}}
-" }}}
 
-" for memory, store object instead of object factory (class).
-unlet s:AbstractTable
-let s:DataTable = s:DataTable.new()
-let s:DiffTable = s:DiffTable.new()
+let s:DiffTable = extend(
+\   deepcopy(s:AbstractTable),
+\   {
+\       'add_map': eskk#util#get_local_funcref('DiffTable_add_map', s:SID_PREFIX),
+\       'remove_map': eskk#util#get_local_funcref('DiffTable_remove_map', s:SID_PREFIX),
+\   }
+\)
+
+" }}}
 
 
 " Restore 'cpoptions' {{{
