@@ -445,7 +445,7 @@ function! s:Buftable_do_enter(stash) dict "{{{
         call self.clear_all()
 
         if !empty(henkan_result)
-            call henkan_result.update_candidate()
+            call henkan_result.update_rank()
         endif
 
         call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
@@ -465,7 +465,7 @@ function! s:Buftable_do_enter(stash) dict "{{{
         call self.clear_all()
 
         if !empty(henkan_result)
-            call henkan_result.update_candidate()
+            call henkan_result.update_rank()
         endif
 
         call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
@@ -480,7 +480,7 @@ function! s:Buftable_do_enter(stash) dict "{{{
         endif
 
         if !empty(henkan_result)
-            call henkan_result.update_candidate()
+            call henkan_result.update_rank()
         endif
 
         call self.push_kakutei_str(self.get_display_str(0))
@@ -1042,7 +1042,7 @@ function! s:convert_again_with_table(this, table) "{{{
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
     if !empty(henkan_result)
-      call henkan_result.update_candidate()
+      call henkan_result.update_rank()
     endif
 endfunction "}}}
 

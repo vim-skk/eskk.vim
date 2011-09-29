@@ -834,7 +834,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
 endfunction "}}}
 
 " Move this henkan result to the first of self._registered_words.
-function! s:HenkanResult_update_candidate() dict "{{{
+function! s:HenkanResult_update_rank() dict "{{{
     let candidates = self.get_candidates()
     let candidates_index = self._candidates_index
 
@@ -880,7 +880,7 @@ let s:HenkanResult = {
 \   'has_next': eskk#util#get_local_funcref('HenkanResult_has_next', s:SID_PREFIX),
 \   'delete_from_dict': eskk#util#get_local_funcref('HenkanResult_delete_from_dict', s:SID_PREFIX),
 \   
-\   'update_candidate': eskk#util#get_local_funcref('HenkanResult_update_candidate', s:SID_PREFIX),
+\   'update_rank': eskk#util#get_local_funcref('HenkanResult_update_rank', s:SID_PREFIX),
 \}
 
 " }}}
