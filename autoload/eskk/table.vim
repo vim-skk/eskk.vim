@@ -317,10 +317,6 @@ function! s:do_initialize(table) "{{{
     if has_key(a:table, 'initialize')
         call a:table.initialize()
         unlet a:table.initialize
-
-        " TODO: You can't this if using vice.vim!
-        " let a:table.load = eskk#util#get_local_func(
-        " \                       'AbstractTable_get_mappings', s:SID_PREFIX)
     endif
 endfunction "}}}
 
