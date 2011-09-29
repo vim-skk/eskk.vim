@@ -1010,7 +1010,7 @@ function! {s:PhysicalDict.method('set_lines')}(this, lines) "{{{
     try
         let a:this._content_lines  = a:lines
         call a:this.parse_lines(a:lines)
-        let a:this._ftime_at_read = getftime(path)
+        let a:this._ftime_at_read = getftime(a:this.path)
         let a:this._is_modified = 1
     catch /^eskk: parse error/
         call eskk#logger#log_exception('s:physical_dict.set_lines()')
