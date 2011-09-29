@@ -565,7 +565,9 @@ function! eskk#dictionary#look_up_error(msg) "{{{
 endfunction "}}}
 
 " Select candidate from command-line.
-function! s:HenkanResult_select_candidate_prompt(with_okuri, skip_num, functor) dict "{{{
+"
+" @throws eskk#dictionary#look_up_error()
+function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
     " Select candidates by getchar()'s character.
     let words = copy(self.get_candidates())
     let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
@@ -609,14 +611,14 @@ function! s:HenkanResult_select_candidate_prompt(with_okuri, skip_num, functor) 
         try
             let char = eskk#util#getchar()
         catch /^Vim:Interrupt$/
-            return a:functor.funcall()
+            return a:fallback
         endtry
 
 
         if eskk#map#is_special_lhs(
         \   char, 'phase:henkan-select:escape'
         \)
-            return a:functor.funcall()
+            return a:fallback
         elseif eskk#map#is_special_lhs(
         \   char, 'phase:henkan-select:next-page'
         \)
@@ -644,7 +646,7 @@ function! s:HenkanResult_select_candidate_prompt(with_okuri, skip_num, functor) 
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
-                return a:functor.funcall()
+                return a:fallback
             endif
         elseif stridx(g:eskk#select_cand_keys, char) != -1
             let selected = g:eskk#select_cand_keys[
@@ -656,10 +658,7 @@ function! s:HenkanResult_select_candidate_prompt(with_okuri, skip_num, functor) 
                     " Dummy result list for `word`.
                     " Note that assigning to index number is useless.
                     let self._candidates_index = idx + a:skip_num
-                    return [
-                    \   word.input,
-                    \   (a:with_okuri ? self._okuri : '')
-                    \]
+                    return [word.input, self._okuri]
                 endif
             endfor
         endif
@@ -686,39 +685,41 @@ function! s:HenkanResult_get_current_candidate(...) dict "{{{
 
     let max_count = g:eskk#show_candidates_count >= 0 ?
     \                   g:eskk#show_candidates_count : 0
-    let candidates = self.get_candidates()
-
     if self._candidates_index >= max_count
-        let functor = {
-        \   'candidates': candidates,
-        \   'this': self,
-        \   'with_okuri': with_okuri,
-        \}
-        function functor.funcall()
+        let NONE = []
+        let cand = self.select_candidate_prompt(max_count, NONE)
+        if cand isnot NONE
+            let self._candidate = cand
+        else
             " Clear command-line.
             call s:clear_command_line()
 
-            if self.this._candidates_index > 0
-                " This changes self.this._candidates_index.
-                call self.this.back()
+            if self._candidates_index > 0
+                " This changes self._candidates_index.
+                call self.back()
             endif
-            return [
-            \   self.candidates[self.this._candidates_index].input,
-            \   (self.with_okuri ? self.this._okuri : '')
+            " self.get_candidates() may throw an exception.
+            " XXX: ...Or not thrown because already fetched candidates.
+            let candidates = self.get_candidates()
+            let self._candidate = [
+            \   candidates[self._candidates_index].input,
+            \   self._okuri
             \]
-        endfunction
-
-        let self._candidate = self.select_candidate_prompt(
-        \   with_okuri, max_count, functor
-        \)
+        endif
     else
-        let self._candidate = [
-        \   candidates[self._candidates_index].input,
-        \   (with_okuri ? self._okuri : '')
-        \]
+        call self.update_candidate()
     endif
 
     return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
+endfunction "}}}
+" Set current candidate.
+" @throws eskk#dictionary#look_up_error()
+function! s:HenkanResult_update_candidate() dict "{{{
+    let candidates = self.get_candidates()
+    let self._candidate = [
+    \   candidates[self._candidates_index].input,
+    \   self._okuri
+    \]
 endfunction "}}}
 " Getter for self._key
 function! s:HenkanResult_get_key() dict "{{{
@@ -871,6 +872,7 @@ let s:HenkanResult = {
 \   'select_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_select_candidate_prompt', s:SID_PREFIX),
 \   'remove_cache': eskk#util#get_local_funcref('HenkanResult_remove_cache', s:SID_PREFIX),
 \   'get_current_candidate': eskk#util#get_local_funcref('HenkanResult_get_current_candidate', s:SID_PREFIX),
+\   'update_candidate': eskk#util#get_local_funcref('HenkanResult_update_candidate', s:SID_PREFIX),
 \   'get_key': eskk#util#get_local_funcref('HenkanResult_get_key', s:SID_PREFIX),
 \   'get_okuri': eskk#util#get_local_funcref('HenkanResult_get_okuri', s:SID_PREFIX),
 \   'get_okuri_rom': eskk#util#get_local_funcref('HenkanResult_get_okuri_rom', s:SID_PREFIX),
