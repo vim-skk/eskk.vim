@@ -918,6 +918,7 @@ let s:HenkanResult = {
 \   'back': eskk#util#get_local_funcref('HenkanResult_back', s:SID_PREFIX),
 \   'has_next': eskk#util#get_local_funcref('HenkanResult_has_next', s:SID_PREFIX),
 \   'delete_from_dict': eskk#util#get_local_funcref('HenkanResult_delete_from_dict', s:SID_PREFIX),
+\   'do_delete_from_dict': eskk#util#get_local_funcref('HenkanResult_do_delete_from_dict', s:SID_PREFIX),
 \   'update_rank': eskk#util#get_local_funcref('HenkanResult_update_rank', s:SID_PREFIX),
 \}
 
