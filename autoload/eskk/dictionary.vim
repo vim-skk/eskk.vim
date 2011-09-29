@@ -399,9 +399,9 @@ function! s:HenkanResult_new(key, okuri_rom, okuri, buftable) "{{{
     return obj
 endfunction "}}}
 
-" Reset candidates.
 " After calling this function,
 " s:HenkanResult.get_candidates() will look up dictionary again.
+" So call this function when you modified SKK dictionary file.
 function! s:HenkanResult_reset() dict "{{{
     let self._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
     let self._candidates = eskk#util#create_data_ordered_set(
@@ -414,27 +414,89 @@ endfunction "}}}
 " Forward/Back self._candidates_index safely
 " Returns true value when succeeded / false value when failed
 function! s:HenkanResult_advance(advance) dict "{{{
+    try
+        if !self.advance_index(a:advance)
+            return 0    " Can't forward/back anymore...
+        endif
+        call self.update_candidate_prompt()
+        return 1
+    catch /^eskk: dictionary look up error/
+        call eskk#logger#log_exception(
+        \   's:HenkanResult.get_candidates()')
+        return 0
+    endtry
+endfunction "}}}
+" Advance self._candidates_index
+function! s:HenkanResult_advance_index(advance) dict "{{{
+    " Remove cache before changing `self` states,
+    " because the cache depends on those states.
     call self.remove_cache()
 
     try
         let candidates = self.get_candidates()
-        let idx = self._candidates_index
-        if eskk#util#has_idx(candidates, idx + (a:advance ? 1 : -1))
-            " Next time to call s:HenkanResult.get_candidates(),
-            " eskk will getchar() if `idx >= g:eskk#show_candidates_count`
-            let self._candidates_index +=  (a:advance ? 1 : -1)
-            return 1
-        else
-            return 0
-        endif
     catch /^eskk: dictionary look up error/
         " Shut up error. This function does not throw exception.
         call eskk#logger#log_exception('s:HenkanResult.get_candidates()')
         return 0
     endtry
+
+    let next_idx = self._candidates_index + (a:advance ? 1 : -1)
+    if eskk#util#has_idx(candidates, next_idx)
+        " Next time to call s:HenkanResult.get_candidates(),
+        " eskk will getchar() if `next_idx >= g:eskk#show_candidates_count`
+        let self._candidates_index = next_idx
+        return 1
+    else
+        return 0
+    endif
+endfunction "}}}
+" Set current candidate.
+" but this function asks to user in command-line
+" when `self._candidates_index >= g:eskk#show_candidates_count`.
+"
+" @throws eskk#dictionary#look_up_error()
+function! s:HenkanResult_update_candidate_prompt() dict "{{{
+    let max_count = g:eskk#show_candidates_count >= 0 ?
+    \                   g:eskk#show_candidates_count : 0
+    if self._candidates_index >= max_count
+        let NONE = []
+        let cand = self.select_candidate_prompt(max_count, NONE)
+        if cand isnot NONE
+            let [self._candidate, self._candidate_okuri] = cand
+        else
+            " Clear command-line.
+            call s:clear_command_line()
+
+            if self._candidates_index > 0
+                " This changes self._candidates_index.
+                call self.back()
+            endif
+            " self.get_candidates() may throw an exception.
+            " XXX: ...Or not thrown because already fetched candidates?
+            let candidates = self.get_candidates()
+            return [
+            \   candidates[self._candidates_index].input,
+            \   self._okuri
+            \]
+        endif
+    else
+        call self.update_candidate()
+    endif
+endfunction "}}}
+" Set current candidate.
+" @throws eskk#dictionary#look_up_error()
+function! s:HenkanResult_update_candidate() dict "{{{
+    let candidates = self.get_candidates()
+    let [self._candidate, self._candidate_okuri] =
+    \   [
+    \       candidates[self._candidates_index].input,
+    \       self._okuri
+    \   ]
 endfunction "}}}
 
 " Returns List of candidates.
+"
+" @throws eskk#dictionary#look_up_error()
 function! s:HenkanResult_get_candidates() dict "{{{
     if self._status ==# g:eskk#dictionary#HR_GOT_RESULT
         return self._candidates.to_list()
@@ -667,9 +729,8 @@ endfunction "}}}
 
 " Clear cache of current candidate.
 function! s:HenkanResult_remove_cache() dict "{{{
-    if has_key(self, '_candidate')
-        unlet self._candidate
-    endif
+    let self._candidate       = ''
+    let self._candidate_okuri = ''
 endfunction "}}}
 
 
@@ -678,48 +739,8 @@ endfunction "}}}
 " returns candidate String with okuri.
 function! s:HenkanResult_get_current_candidate(...) dict "{{{
     let with_okuri = a:0 ? a:1 : 1
-
-    if has_key(self, '_candidate')
-        return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
-    endif
-
-    let max_count = g:eskk#show_candidates_count >= 0 ?
-    \                   g:eskk#show_candidates_count : 0
-    if self._candidates_index >= max_count
-        let NONE = []
-        let cand = self.select_candidate_prompt(max_count, NONE)
-        if cand isnot NONE
-            let self._candidate = cand
-        else
-            " Clear command-line.
-            call s:clear_command_line()
-
-            if self._candidates_index > 0
-                " This changes self._candidates_index.
-                call self.back()
-            endif
-            " self.get_candidates() may throw an exception.
-            " XXX: ...Or not thrown because already fetched candidates.
-            let candidates = self.get_candidates()
-            let self._candidate = [
-            \   candidates[self._candidates_index].input,
-            \   self._okuri
-            \]
-        endif
-    else
-        call self.update_candidate()
-    endif
-
-    return self._candidate[0] . (with_okuri ? self._candidate[1] : '')
-endfunction "}}}
-" Set current candidate.
-" @throws eskk#dictionary#look_up_error()
-function! s:HenkanResult_update_candidate() dict "{{{
-    let candidates = self.get_candidates()
-    let self._candidate = [
-    \   candidates[self._candidates_index].input,
-    \   self._okuri
-    \]
+    return self._candidate
+    \   . (with_okuri ? self._candidate_okuri : '')
 endfunction "}}}
 " Getter for self._key
 function! s:HenkanResult_get_key() dict "{{{
@@ -877,14 +898,18 @@ let s:HenkanResult = {
 \   '_candidates': {},
 \   '_candidates_index': -1,
 \   '_user_dict_found_index': -1,
+\   '_candidate': '',
+\   '_candidate_okuri': '',
 \
 \   'reset': eskk#util#get_local_funcref('HenkanResult_reset', s:SID_PREFIX),
 \   'advance': eskk#util#get_local_funcref('HenkanResult_advance', s:SID_PREFIX),
+\   'advance_index': eskk#util#get_local_funcref('HenkanResult_advance_index', s:SID_PREFIX),
+\   'update_candidate': eskk#util#get_local_funcref('HenkanResult_update_candidate', s:SID_PREFIX),
+\   'update_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_update_candidate_prompt', s:SID_PREFIX),
 \   'get_candidates': eskk#util#get_local_funcref('HenkanResult_get_candidates', s:SID_PREFIX),
 \   'select_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_select_candidate_prompt', s:SID_PREFIX),
 \   'remove_cache': eskk#util#get_local_funcref('HenkanResult_remove_cache', s:SID_PREFIX),
 \   'get_current_candidate': eskk#util#get_local_funcref('HenkanResult_get_current_candidate', s:SID_PREFIX),
-\   'update_candidate': eskk#util#get_local_funcref('HenkanResult_update_candidate', s:SID_PREFIX),
 \   'get_key': eskk#util#get_local_funcref('HenkanResult_get_key', s:SID_PREFIX),
 \   'get_okuri': eskk#util#get_local_funcref('HenkanResult_get_okuri', s:SID_PREFIX),
 \   'get_okuri_rom': eskk#util#get_local_funcref('HenkanResult_get_okuri_rom', s:SID_PREFIX),
@@ -893,7 +918,6 @@ let s:HenkanResult = {
 \   'back': eskk#util#get_local_funcref('HenkanResult_back', s:SID_PREFIX),
 \   'has_next': eskk#util#get_local_funcref('HenkanResult_has_next', s:SID_PREFIX),
 \   'delete_from_dict': eskk#util#get_local_funcref('HenkanResult_delete_from_dict', s:SID_PREFIX),
-\   
 \   'update_rank': eskk#util#get_local_funcref('HenkanResult_update_rank', s:SID_PREFIX),
 \}
 
@@ -1170,6 +1194,9 @@ function! s:Dictionary_refer(buftable, key, okuri, okuri_rom) dict "{{{
     \   deepcopy(a:buftable, 1),
     \)
     let self._current_henkan_result = hr
+    " s:HenkanResult.update_candidates() may throw
+    " eskk#dictionary#look_up_error() exception.
+    call hr.update_candidate()
     return hr
 endfunction "}}}
 

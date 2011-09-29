@@ -195,14 +195,10 @@ function! s:complete(mode, base) "{{{
     let filter_str = s:get_buftable_str(0, a:base)
     let marker = g:eskk#marker_popup . g:eskk#marker_henkan
 
-    try
-        let candidates = dict.search_all_candidates(key, okuri, okuri_rom)
-        if empty(candidates)
-            return s:skip_complete()
-        endif
-    catch /^eskk: dictionary look up error:/
+    let candidates = dict.search_all_candidates(key, okuri, okuri_rom)
+    if empty(candidates)
         return s:skip_complete()
-    endtry
+    endif
 
     let do_list_okuri_candidates =
     \   buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_OKURI
@@ -399,23 +395,18 @@ function! s:set_selected_item() "{{{
         let okuri = okuri_buf_str.rom_pairs.get_filter()
         let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
         let dict = eskk#get_skk_dict()
-        try
-            for c in dict.search_all_candidates(key, okuri, okuri_rom)
-                if c.input ==# filter_str
-                    call dict.remember_word(
-                    \   c.input,
-                    \   c.key,
-                    \   okuri,
-                    \   okuri_rom,
-                    \   c.annotation
-                    \)
-                    break
-                endif
-            endfor
-        catch /^eskk: dictionary look up error:/
-            redraw
-            call eskk#logger#log_exception('s:eskkcomplete()')
-        endtry
+        for c in dict.search_all_candidates(key, okuri, okuri_rom)
+            if c.input ==# filter_str
+                call dict.remember_word(
+                \   c.input,
+                \   c.key,
+                \   okuri,
+                \   okuri_rom,
+                \   c.annotation
+                \)
+                break
+            endif
+        endfor
     endif
 
     " Set henkan_buf_str
