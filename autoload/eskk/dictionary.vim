@@ -989,7 +989,9 @@ function! s:PhysicalDict_get_lines(...) dict "{{{
     " FIXME: Update s:HenkanResult._user_dict_found_index
     " when newly read it.
     try
+        unlockvar 1 self._content_lines
         let self._content_lines  = readfile(self.path)
+        lockvar 1 self._content_lines
         call self.parse_lines()
 
         let self._ftime_at_read = getftime(self.path)
@@ -1006,6 +1008,7 @@ endfunction "}}}
 
 function! s:PhysicalDict_get_lines_copy() dict "{{{
     let lines = copy(self.get_lines())
+    unlockvar 1 lines
     return lines
 endfunction "}}}
 
@@ -1048,7 +1051,9 @@ endfunction "}}}
 " Set List of whole lines of dictionary.
 function! s:PhysicalDict_set_lines(lines) dict "{{{
     try
+        unlockvar 1 self._content_lines
         let self._content_lines  = a:lines
+        lockvar 1 self._content_lines
         call self.parse_lines()
         let self._ftime_at_read = localtime()
         let self._is_modified = 1
