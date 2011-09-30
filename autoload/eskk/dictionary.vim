@@ -856,8 +856,6 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     endtry
 
     call self.reset()
-
-    redraw
     call dict.update_dictionary()
 endfunction "}}}
 
@@ -1369,6 +1367,7 @@ function! s:Dictionary_write_lines(lines, verbose) dict "{{{
     \   . "'..."
 
     if a:verbose
+        redraw
         echo save_msg
     endif
 
