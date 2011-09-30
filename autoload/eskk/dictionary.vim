@@ -264,11 +264,11 @@ function! s:delete_candidate_from_line(line, candidate) "{{{
     \   eskk#dictionary#parse_skk_dict_line(
     \       a:line, a:candidate.from_type)
     " XXX: Should we see `a:candidate.annotation`?
-    let match =
-    \   'v:val.input ==# a:candidate.input'
+    let not_match =
+    \   '!(v:val.input ==# a:candidate.input'
     \   . '&& v:val.key ==# a:candidate.key'
-    \   . '&& v:val.okuri_rom_first ==# a:candidate.okuri_rom_first'
-    call filter(candidates, match)
+    \   . '&& v:val.okuri_rom_first ==# a:candidate.okuri_rom_first)'
+    call filter(candidates, not_match)
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
 function! s:make_line_from_candidates(candidates) "{{{
@@ -390,10 +390,6 @@ delfunc s:SID
 "
 " self._candidates_index:
 "   Current index of List self._candidates
-"
-" self._user_dict_found_index:
-"   The lnum of found the candidate in user dictionary.
-"   Used by s:HenkanResult.delete_from_dict()
 
 let [
 \   g:eskk#dictionary#HR_NO_RESULT,
@@ -611,7 +607,6 @@ function! s:HenkanResult_get_candidates() dict "{{{
             endfor
         endif
 
-        let self._user_dict_found_index = user_dict_result[1]
         let self._status = g:eskk#dictionary#HR_GOT_RESULT
 
         return self._candidates.to_list()
@@ -807,6 +802,7 @@ function! s:HenkanResult_delete_from_dict() dict "{{{
     endtry
 endfunction "}}}
 function! s:HenkanResult_do_delete_from_dict() dict "{{{
+    " Check if `self` can get candidates.
     try
         let candidates = self.get_candidates()
     catch /^eskk: dictionary look up error/
@@ -814,27 +810,25 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         \   's:HenkanResult.get_candidates()')
         return
     endtry
+    " Check invalid index.
     let candidates_index = self._candidates_index
-    let user_dict_idx = self._user_dict_found_index
-
     if !eskk#util#has_idx(candidates, candidates_index)
         return
     endif
-    let delete_word = candidates[candidates_index]
-
+    " Check that user dictionary is valid.
+    let del_cand = candidates[candidates_index]
     let dict = eskk#get_skk_dict()
-    let user_dict_lines = dict.get_user_dict().get_lines()
     if !dict.get_user_dict().is_valid()
         return
     endif
-
+    " Check user input.
     let input = eskk#util#input(
     \   'Really purge? '
     \   . self._key . self._okuri_rom[0]
     \   . ' /'
-    \   . delete_word.input
-    \   . (get(delete_word, 'annotation', '') !=# '' ?
-    \       ';' . delete_word.annotation :
+    \   . del_cand.input
+    \   . (get(del_cand, 'annotation', '') !=# '' ?
+    \       ';' . del_cand.annotation :
     \       '')
     \   . '/ (yes/no):'
     \)
@@ -842,29 +836,46 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         return
     endif
 
-    if delete_word.from_type ==#
-    \   s:CANDIDATE_FROM_REGISTERED_WORDS
-        " Remove all elements matching with current candidate
-        " from registered words.
-        for word in dict.get_registered_words()
-            if word.input ==# delete_word.input
-                call dict.remove_registered_word(word)
-            endif
-        endfor
-        return
-    endif
 
-    if eskk#util#has_idx(user_dict_lines, user_dict_idx)
-        call remove(user_dict_lines, user_dict_idx)
-    endif
+    " Clear self.
+    call self.reset()
+
+    " Remove all elements matching with current candidate
+    " from registered words.
+    for word in dict.get_registered_words()
+        call dict.remove_registered_word(word)
+    endfor
+
+    " Remove all elements matching with current candidate
+    " from SKK dictionary.
+    let lines = dict.get_user_dict().get_lines_copy()
+    let i = 0
+    let len = len(lines)
+    while i < len
+        " Leave comment line.
+        if lines[i] =~# '^\s*;'
+            let i += 1
+            continue
+        endif
+
+        let lines[i] =
+        \   s:delete_candidate_from_line(lines[i], del_cand)
+        if lines[i] ==# ''
+            " If there is no more candidates,
+            " delete the line.
+            unlet lines[i]
+            let len -= 1
+            continue
+        endif
+        let i += 1
+    endwhile
     try
-        call dict.get_user_dict().set_lines(user_dict_lines)
+        call dict.get_user_dict().set_lines(lines)
     catch /^eskk: parse error/
         return
     endtry
-
-    call self.reset()
-    call dict.update_dictionary()
+    " Write to dictionary.
+    call dict.update_dictionary(1, 0)
 endfunction "}}}
 
 " Move this henkan result to the first of self._registered_words.
@@ -903,7 +914,6 @@ let s:HenkanResult = {
 \   '_status': -1,
 \   '_candidates': {},
 \   '_candidates_index': -1,
-\   '_user_dict_found_index': -1,
 \   '_candidate': '',
 \   '_candidate_okuri': '',
 \
@@ -992,8 +1002,6 @@ function! s:PhysicalDict_get_lines(...) dict "{{{
         return self._content_lines
     endif
 
-    " FIXME: Update s:HenkanResult._user_dict_found_index
-    " when newly read it.
     try
         unlockvar 1 self._content_lines
         let self._content_lines  = readfile(self.path)
@@ -1339,12 +1347,15 @@ endfunction "}}}
 " Write to user dictionary.
 " By default, This function is executed at VimLeavePre.
 function! s:Dictionary_update_dictionary(...) dict "{{{
-    let verbose = a:0 ? a:1 : 1
+    let verbose      = get(a:000, 0, 1)
+    let do_get_lines = get(a:000, 1, 1)
     if !self.is_modified()
         return
     endif
 
-    call self._user_dict.get_lines()
+    if do_get_lines
+        call self._user_dict.get_lines()
+    endif
     if filereadable(self._user_dict.path)
         if !self._user_dict.is_valid()
             return
