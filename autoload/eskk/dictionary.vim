@@ -491,16 +491,27 @@ function! s:HenkanResult_get_candidates() dict "{{{
 
     elseif self._status ==# g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
         let dict = eskk#get_skk_dict()
+
+        " Look up from registered words.
+        let registered = filter(
+        \   copy(dict.get_registered_words()),
+        \   'v:val.key ==# self._key '
+        \       . '&& v:val.okuri_rom[0] ==# self._okuri_rom[0]'
+        \)
+
+        " Look up from dictionaries.
         let user_dict = dict.get_user_dict()
         let system_dict = dict.get_system_dict()
-        " Look up this henkan result in dictionaries.
         let user_dict_result = s:search_candidate(
         \   user_dict, self._key, self._okuri_rom
         \)
         let system_dict_result = s:search_candidate(
         \   system_dict, self._key, self._okuri_rom
         \)
-        if user_dict_result[1] ==# -1 && system_dict_result[1] ==# -1
+
+        if user_dict_result[1] ==# -1
+        \   && system_dict_result[1] ==# -1
+        \   && empty(registered)
             let self._status = g:eskk#dictionary#HR_NO_RESULT
             throw eskk#dictionary#look_up_error(
             \   "Can't look up '"
@@ -516,11 +527,6 @@ function! s:HenkanResult_get_candidates() dict "{{{
         " registered word, user dictionary, system dictionary.
 
         " Merge registered words.
-        let registered = filter(
-        \   copy(dict.get_registered_words()),
-        \   'v:val.key ==# self._key '
-        \       . '&& v:val.okuri_rom[0] ==# self._okuri_rom[0]'
-        \)
         if !empty(registered)
             for rw in registered
                 call self._candidates.push(
