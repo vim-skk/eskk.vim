@@ -1004,12 +1004,16 @@ function! s:PhysicalDict_get_lines(...) dict "{{{
     return self._content_lines
 endfunction "}}}
 
+function! s:PhysicalDict_get_lines_copy() dict "{{{
+    let lines = copy(self.get_lines())
+    return lines
+endfunction "}}}
+
 function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
-    let user_dict_lines = self.get_lines()
     if a:registered_words.empty()
-        return user_dict_lines
+        return self.get_lines()
     endif
-    let user_dict_lines = copy(user_dict_lines)
+    let user_dict_lines = self.get_lines_copy()
 
     " Check if self._user_dict really does not have registered words.
     let ari_lnum = self.okuri_ari_idx + 1
@@ -1123,6 +1127,7 @@ let s:PhysicalDict = {
 \   '_is_modified': 0,
 \
 \   'get_lines': eskk#util#get_local_funcref('PhysicalDict_get_lines', s:SID_PREFIX),
+\   'get_lines_copy': eskk#util#get_local_funcref('PhysicalDict_get_lines_copy', s:SID_PREFIX),
 \   'get_updated_lines': eskk#util#get_local_funcref('PhysicalDict_get_updated_lines', s:SID_PREFIX),
 \   'set_lines': eskk#util#get_local_funcref('PhysicalDict_set_lines', s:SID_PREFIX),
 \   'parse_lines': eskk#util#get_local_funcref('PhysicalDict_parse_lines', s:SID_PREFIX),
