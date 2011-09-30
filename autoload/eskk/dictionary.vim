@@ -803,10 +803,8 @@ endfunction "}}}
 
 
 " Get List of whole lines of dictionary.
-function! s:PhysicalDict_get_lines(...) dict "{{{
-    let force = a:0 ? a:1 : 0
-    if !force
-    \   && self._ftime_at_set isnot -1
+function! s:PhysicalDict_get_lines() dict "{{{
+    if self._ftime_at_set isnot -1
     \   && self._ftime_at_set >=# getftime(self.path)
         return self._content_lines
     endif
