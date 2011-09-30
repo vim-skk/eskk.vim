@@ -848,7 +848,9 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         return
     endif
 
-    call remove(user_dict_lines, user_dict_idx)
+    if eskk#util#has_idx(user_dict_lines, user_dict_idx)
+        call remove(user_dict_lines, user_dict_idx)
+    endif
     try
         call dict.get_user_dict().set_lines(user_dict_lines)
     catch /^eskk: parse error/
