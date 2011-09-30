@@ -1337,20 +1337,18 @@ function! s:Dictionary_update_dictionary(...) dict "{{{
         return
     endif
 
-    let user_dict_lines = self._user_dict.get_lines()
+    call self._user_dict.get_lines()
     if filereadable(self._user_dict.path)
         if !self._user_dict.is_valid()
             return
         endif
     else
         " Create new lines.
-        let user_dict_lines = [
+        " NOTE: It must not throw parse error exception!
+        call self._user_dict.set_lines([
         \   ';; okuri-ari entries.',
         \   ';; okuri-nasi entries.'
-        \]
-        call self._user_dict.set_lines(user_dict_lines)
-        " NOTE: .set_lines() does not write to dictionary.
-        " At this time, dictionary file does not exist.
+        \])
     endif
 
     call self.write_lines(
@@ -1363,7 +1361,7 @@ function! s:Dictionary_update_dictionary(...) dict "{{{
     call self._user_dict.clear_modified_flags()
 endfunction "}}}
 function! s:Dictionary_write_lines(lines, verbose) dict "{{{
-    let user_dict_lines = a:lines
+    let lines = a:lines
 
     let save_msg =
     \   "Saving to '"
@@ -1376,8 +1374,7 @@ function! s:Dictionary_write_lines(lines, verbose) dict "{{{
 
     let ret_success = 0
     try
-        let ret = writefile(
-        \   user_dict_lines, self._user_dict.path)
+        let ret = writefile(lines, self._user_dict.path)
         if ret ==# ret_success
             if a:verbose
                 redraw
