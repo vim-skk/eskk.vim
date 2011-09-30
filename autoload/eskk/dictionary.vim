@@ -958,6 +958,8 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
 
+    " self.is_valid() loads whole lines if it does not have,
+    " so `self` can check the lines.
     let whole_lines = self.get_lines()
     if !self.is_valid()
         return []
