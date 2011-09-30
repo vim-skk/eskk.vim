@@ -473,7 +473,6 @@ function! s:HenkanResult_update_candidate_prompt() dict "{{{
                 call self.back()
             endif
             " self.get_candidates() may throw an exception.
-            " XXX: ...Or not thrown because already fetched candidates?
             let candidates = self.get_candidates()
             return [
             \   candidates[self._candidates_index].input,
