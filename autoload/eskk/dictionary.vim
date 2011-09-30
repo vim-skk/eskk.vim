@@ -988,6 +988,8 @@ function! s:PhysicalDict_get_lines(...) dict "{{{
         return self._content_lines
     endif
 
+    " FIXME: Update s:HenkanResult._user_dict_found_index
+    " when newly read it.
     try
         let self._content_lines  = readfile(self.path)
         call self.parse_lines(self._content_lines)
