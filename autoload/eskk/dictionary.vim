@@ -794,7 +794,7 @@ let s:HenkanResult = {
 
 
 function! s:PhysicalDict_new(path, sorted, encoding) "{{{
-    return extend(
+    let obj = extend(
     \   deepcopy(s:PhysicalDict),
     \   {
     \       'path': expand(a:path),
@@ -803,6 +803,8 @@ function! s:PhysicalDict_new(path, sorted, encoding) "{{{
     \   },
     \   'force'
     \)
+    call obj.update_lines()
+    return obj
 endfunction "}}}
 
 
