@@ -231,10 +231,11 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
 endfunction "}}}
 
 " Returns String of the created entry from arguments values.
-" eskk#dictionary#create_new_entry() {{{
-function! eskk#dictionary#create_new_entry(
-\   existing_line, key, okuri_rom, new_word, annotation
-\)
+function! s:add_candidate_to_line(existing_line, word) "{{{
+    let key = a:word.key
+    let okuri_rom = a:word.okuri_rom
+    let new_word = a:word.input
+    let annotation = a:word.annotation
     " XXX:
     " TODO:
     " Rewrite for eskk.
@@ -243,10 +244,10 @@ function! eskk#dictionary#create_new_entry(
     " XXX:
     " Modify them to make the same input to
     " the original s:SkkMakeNewEntry()'s arguments.
-    let key = a:key . (a:okuri_rom == '' ? '' : a:okuri_rom[0]) . ' '
-    let cand = a:new_word
-    if a:annotation != ''
-        let cand .= ';' . a:annotation
+    let key = key . (okuri_rom == '' ? '' : okuri_rom[0]) . ' '
+    let cand = new_word
+    if annotation != ''
+        let cand .= ';' . annotation
     endif
     let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
 
@@ -1033,10 +1034,7 @@ function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
         " Merge old one and create new entry.
         call insert(
         \   user_dict_lines,
-        \   eskk#dictionary#create_new_entry(
-        \       line, w.key, w.okuri_rom,
-        \       w.input, w.annotation
-        \   ),
+        \   s:add_candidate_to_line(line, w),
         \   lnum
         \)
     endfor
