@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 425))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 426))
 
 
 function! s:SID() "{{{
@@ -309,6 +309,22 @@ function! s:asym_filter(stash) "{{{
                 \   deepcopy(henkan_result.buftable)
                 if henkan_result.delete_from_dict()
                     call eskk#set_buftable(prev_buftable)
+                else
+                    " Fail to delete current candidate...
+                    " push current candidate and
+                    " back to normal phase.
+                    call eskk#logger#warn(
+                    \   'Failed to delete current candidate...'
+                    \)
+                    sleep 1
+
+                    let buftable = eskk#get_buftable()
+                    call buftable.push_kakutei_str(
+                    \   buftable.get_display_str(0)
+                    \)
+                    call buftable.set_henkan_phase(
+                    \   g:eskk#buftable#PHASE_NORMAL
+                    \)
                 endif
             endif
         else
