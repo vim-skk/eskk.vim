@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 411))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 412))
 
 
 function! s:SID() "{{{
@@ -305,12 +305,10 @@ function! s:asym_filter(stash) "{{{
         \)
             let henkan_result = eskk#get_skk_dict().get_henkan_result()
             if !empty(henkan_result)
+                let prev_buftable =
+                \   deepcopy(henkan_result.buftable)
+                call eskk#set_buftable(prev_buftable)
                 call henkan_result.delete_from_dict()
-
-                call buftable.push_kakutei_str(buftable.get_display_str(0))
-                call buftable.set_henkan_phase(
-                \   g:eskk#buftable#PHASE_NORMAL
-                \)
             endif
         else
             call buftable.do_enter(a:stash)
