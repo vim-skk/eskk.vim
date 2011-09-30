@@ -1203,6 +1203,9 @@ function! s:Dictionary_refer(buftable, key, okuri, okuri_rom) dict "{{{
     " s:HenkanResult.update_candidates() may throw
     " eskk#dictionary#look_up_error() exception.
     call hr.update_candidate()
+    " Newly read lines or update lines
+    " if SKK dictionary is updated.
+    call self._user_dict.update_lines()
     return hr
 endfunction "}}}
 
