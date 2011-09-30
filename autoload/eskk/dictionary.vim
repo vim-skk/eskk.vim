@@ -24,12 +24,13 @@ function! s:search_all_candidates(
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
 
-    let cache_key =
-    \   a:physical_dict.get_ftime_at_read()
-    \   . a:physical_dict.path
-    \   . a:key_filter
-    \   . a:okuri_rom
-    \   . limit
+    let cache_key = join([
+    \   a:physical_dict.get_ftime_at_read(),
+    \   a:physical_dict.path,
+    \   a:key_filter,
+    \   a:okuri_rom,
+    \   limit,
+    \], '|')
 
     if has_key(s:search_all_candidate_memoize, cache_key)
         return s:search_all_candidate_memoize[cache_key]
