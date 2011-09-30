@@ -40,9 +40,19 @@ function! s:cmd_forget_registered_words() "{{{
 endfunction "}}}
 
 function! s:cmd_update_dictionary(silent) "{{{
-    let verbose = !a:silent
-    let dict = eskk#get_skk_dict()
-    call dict.update_dictionary(verbose)
+    try
+        let verbose = !a:silent
+        let dict = eskk#get_skk_dict()
+        call dict.update_dictionary(verbose)
+    catch
+        call eskk#logger#write_error_log_file(
+        \   '',
+        \   eskk#util#build_error(
+        \       ['eskk', 'commands'],
+        \       ['error occurred while :'
+        \           . 'EskkUpdateDictionary: '.v:exception])
+        \)
+    endtry
 endfunction "}}}
 
 function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
