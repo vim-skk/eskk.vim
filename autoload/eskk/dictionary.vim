@@ -258,9 +258,6 @@ function! s:make_line_from_candidates(candidates) "{{{
     \   || empty(a:candidates)
         return ''
     endif
-    " NOTE: `candidates` is from
-    " eskk#dictionary#parse_skk_dict_line().
-    " So we can destroy it.
     let c = a:candidates[0]
     let make_string =
     \   'v:val.input . '
@@ -268,7 +265,7 @@ function! s:make_line_from_candidates(candidates) "{{{
     \   . '";" . v:val.annotation)'
     return
     \   c.key . c.okuri_rom_first . ' '
-    \   . '/'.join(map(a:candidates, make_string), '/').'/'
+    \   . '/'.join(map(copy(a:candidates), make_string), '/').'/'
 endfunction "}}}
 
 
@@ -1012,42 +1009,46 @@ function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
     if a:registered_words.empty()
         return self.get_lines()
     endif
-    let user_dict_lines = self.get_lines_copy()
+    let lines = self.get_lines_copy()
 
     " Check if self._user_dict really does not have registered words.
     let ari_lnum = self.okuri_ari_idx + 1
     let nasi_lnum = self.okuri_nasi_idx + 1
     for w in reverse(a:registered_words.to_list())
-        let [line, index] = s:search_candidate(
+        " Search the line which has `w`.
+        let [l, index] = s:search_candidate(
         \   self, w.key, w.okuri_rom
         \)
-        if w.okuri_rom != ''
-            let lnum = ari_lnum
-        else
-            let lnum = nasi_lnum
-        endif
-        " Delete old entry.
-        if index !=# -1
-            call remove(user_dict_lines, index)
-            call eskk#util#assert(line != '', 'line must not be empty string')
-        elseif w.okuri_rom != ''
-            let nasi_lnum += 1
-        endif
-        " Merge old one and create new entry.
         let candidate =
         \   s:registered_word2candidate(w,
         \       s:CANDIDATE_FROM_REGISTERED_WORDS)
-        let line = s:add_candidate_to_line(line, candidate)
-        if line !=# ''
-            call insert(
-            \   user_dict_lines,
-            \   line,
-            \   lnum
+        if index >=# 0
+            " If the line exists, add `w` to the line.
+            call eskk#util#assert(
+            \   l != '',
+            \   'line must not be empty string'
+            \   . ' (index = '.index.')'
             \)
+            let lines[index] =
+            \   s:add_candidate_to_line(l, candidate)
+        else
+            " If the line does not exists, add new line.
+            let l = s:make_line_from_candidates([candidate])
+            call eskk#util#assert(
+            \   l !=# '',
+            \   'line must not be empty string'
+            \   . ' (index = '.index.')'
+            \)
+            if w.okuri_rom !=# ''
+                call insert(lines, l, ari_lnum)
+                let nasi_lnum += 1
+            else
+                call insert(lines, l, nasi_lnum)
+            endif
         endif
     endfor
 
-    return user_dict_lines
+    return lines
 endfunction "}}}
 
 " Set List of whole lines of dictionary.
