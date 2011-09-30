@@ -837,13 +837,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         " from registered words.
         for word in dict.get_registered_words()
             if word.input ==# delete_word.input
-                call dict.remove_registered_word(
-                \   word.input,
-                \   word.key,
-                \   word.okuri,
-                \   word.okuri_rom,
-                \   word.annotation
-                \)
+                call dict.remove_registered_word(word)
             endif
         endfor
         return
@@ -1275,7 +1269,7 @@ function! s:Dictionary_forget_word(input, key, okuri, okuri_rom, annotation) dic
         return
     endif
 
-    call self._registered_words.remove(rw)
+    call self.remove_registered_word(rw)
     if self._registered_words.empty()
         let self._registered_words_modified = 0
     endif
@@ -1309,13 +1303,8 @@ function! s:Dictionary_get_registered_words() dict "{{{
 endfunction "}}}
 
 " Remove registered word matching with arguments values.
-function! s:Dictionary_remove_registered_word(input, key, okuri, okuri_rom, annotation) dict "{{{
-    call self._registered_words.remove(
-    \   s:registered_word_new(
-    \       a:input, a:key, a:okuri,
-    \       a:okuri_rom, a:annotation
-    \   )
-    \)
+function! s:Dictionary_remove_registered_word(word) dict "{{{
+    call self._registered_words.remove(a:word)
 endfunction "}}}
 
 " Returns true value if new registered is added
