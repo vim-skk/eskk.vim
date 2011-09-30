@@ -937,7 +937,7 @@ let s:HenkanResult = {
 "   - Lazy file read
 "   - Memoization for getting file content
 "
-" _ftime_at_read:
+" _ftime_at_set:
 "   getftime() value when `_content_lines` is set.
 "
 " okuri_ari_idx:
@@ -982,8 +982,8 @@ endfunction "}}}
 function! s:PhysicalDict_get_lines(...) dict "{{{
     let force = a:0 ? a:1 : 0
 
-    let same_timestamp = self._ftime_at_read ==# getftime(self.path)
-    if self._ftime_at_read isnot -1 && same_timestamp && !force
+    let same_timestamp = self._ftime_at_set ==# getftime(self.path)
+    if self._ftime_at_set isnot -1 && same_timestamp && !force
         return self._content_lines
     endif
 
@@ -995,7 +995,7 @@ function! s:PhysicalDict_get_lines(...) dict "{{{
         lockvar 1 self._content_lines
         call self.parse_lines()
 
-        let self._ftime_at_read = getftime(self.path)
+        let self._ftime_at_set = getftime(self.path)
     catch /E484:/    " Can't open file
         call eskk#logger#logf("Can't read '%s'!", self.path)
     catch /^eskk: parse error/
@@ -1056,7 +1056,7 @@ function! s:PhysicalDict_set_lines(lines) dict "{{{
         let self._content_lines  = a:lines
         lockvar 1 self._content_lines
         call self.parse_lines()
-        let self._ftime_at_read = localtime()
+        let self._ftime_at_set = localtime()
         let self._is_modified = 1
     catch /^eskk: parse error/
         call eskk#logger#log_exception('s:physical_dict.set_lines()')
@@ -1110,10 +1110,10 @@ function! s:PhysicalDict_is_valid() dict "{{{
     \   && self.okuri_nasi_idx >= 0
 endfunction "}}}
 
-" Get self._ftime_at_read.
-" See self._ftime_at_read description at "s:physical_dict".
+" Get self._ftime_at_set.
+" See self._ftime_at_set description at "s:physical_dict".
 function! s:PhysicalDict_get_ftime_at_read() dict "{{{
-    return self._ftime_at_read
+    return self._ftime_at_set
 endfunction "}}}
 
 " Set false to `self._is_modified`.
@@ -1124,7 +1124,7 @@ endfunction "}}}
 
 let s:PhysicalDict = {
 \   '_content_lines': [],
-\   '_ftime_at_read': -1,
+\   '_ftime_at_set': -1,
 \   'okuri_ari_idx': -1,
 \   'okuri_nasi_idx': -1,
 \   'path': '',
