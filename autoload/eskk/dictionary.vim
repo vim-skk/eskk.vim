@@ -1044,11 +1044,17 @@ function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
             let nasi_lnum += 1
         endif
         " Merge old one and create new entry.
-        call insert(
-        \   user_dict_lines,
-        \   s:add_candidate_to_line(line, w),
-        \   lnum
-        \)
+        let candidate =
+        \   s:registered_word2candidate(w,
+        \       s:CANDIDATE_FROM_REGISTERED_WORDS)
+        let line = s:add_candidate_to_line(line, candidate)
+        if line !=# ''
+            call insert(
+            \   user_dict_lines,
+            \   line,
+            \   lnum
+            \)
+        endif
     endfor
 
     return user_dict_lines
