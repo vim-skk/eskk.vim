@@ -1304,7 +1304,7 @@ endfunction "}}}
 
 " Remove registered word matching with arguments values.
 function! s:Dictionary_remove_registered_word(word) dict "{{{
-    call self._registered_words.remove(a:word)
+    return self._registered_words.remove(a:word)
 endfunction "}}}
 
 " Returns true value if new registered is added
