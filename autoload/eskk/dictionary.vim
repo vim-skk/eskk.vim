@@ -54,7 +54,7 @@ function! s:add_candidate_to_line(line, candidate) "{{{
     endif
     let candidates =
     \   eskk#dictionary#parse_skk_dict_line(
-    \       line, a:candidate.from_type)
+    \       a:line, a:candidate.from_type)
     call add(candidates, a:candidate)
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
