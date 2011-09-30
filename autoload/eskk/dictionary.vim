@@ -1051,7 +1051,7 @@ function! s:PhysicalDict_set_lines(lines) dict "{{{
     try
         let self._content_lines  = a:lines
         call self.parse_lines(a:lines)
-        let self._ftime_at_read = getftime(self.path)
+        let self._ftime_at_read = localtime()
         let self._is_modified = 1
     catch /^eskk: parse error/
         call eskk#logger#log_exception('s:physical_dict.set_lines()')
