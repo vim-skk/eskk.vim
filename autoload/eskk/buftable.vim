@@ -86,13 +86,10 @@ function! s:RomPairs_push_one_pair(rom_str, filter_str) dict "{{{
     let self._pairs += [pair]
 endfunction "}}}
 function! s:RomPairs_pop() dict "{{{
-    let p = self._pairs
-    if empty(p)
+    if empty(self._pairs)
         return []
     else
-        let r = remove(p, -1)
-        let self._pairs = p
-        return r
+        return remove(self._pairs, -1)
     endif
 endfunction "}}}
 function! s:RomPairs_clear() dict "{{{
