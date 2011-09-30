@@ -657,7 +657,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
 
     " Remove all elements matching with current candidate
     " from SKK dictionary.
-    let lines = dict.get_user_dict().get_lines_copy()
+    let lines = dict.get_user_dict().update_lines_copy()
     let i = 0
     let len = len(lines)
     while i < len
@@ -684,6 +684,9 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         return
     endtry
     " Write to dictionary.
+    "
+    " FIXME: Lose data written between above
+    " `dict.get_user_dict().update_lines()` call and here.
     call dict.update_dictionary(1, 0)
 endfunction "}}}
 
@@ -756,8 +759,8 @@ let s:HenkanResult = {
 "
 " _content_lines:
 "   Whole lines of dictionary file.
-"   Use `s:PhysicalDict.get_lines()` to get this.
-"   `s:PhysicalDict.get_lines()` does:
+"   Use `s:PhysicalDict.update_lines()` to get this.
+"   `s:PhysicalDict.update_lines()` does:
 "   - Lazy file read
 "   - Memoization for getting file content
 "
@@ -804,26 +807,6 @@ endfunction "}}}
 
 " Get List of whole lines of dictionary.
 function! s:PhysicalDict_get_lines() dict "{{{
-    if self._ftime_at_set isnot -1
-    \   && self._ftime_at_set >=# getftime(self.path)
-        return self._content_lines
-    endif
-
-    try
-        unlockvar 1 self._content_lines
-        let self._content_lines  = readfile(self.path)
-        lockvar 1 self._content_lines
-        call self.parse_lines()
-
-        let self._ftime_at_set = getftime(self.path)
-    catch /E484:/    " Can't open file
-        call eskk#logger#logf("Can't read '%s'!", self.path)
-    catch /^eskk: parse error/
-        call eskk#logger#log_exception('s:PhysicalDict.get_lines()')
-        let self.okuri_ari_idx = -1
-        let self.okuri_nasi_idx = -1
-    endtry
-
     return self._content_lines
 endfunction "}}}
 
@@ -835,9 +818,9 @@ endfunction "}}}
 
 function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
     if a:registered_words.empty()
-        return self.get_lines()
+        return self.update_lines()
     endif
-    let lines = self.get_lines_copy()
+    let lines = self.update_lines_copy()
 
     " Check if self._user_dict really does not have registered words.
     let ari_lnum = self.okuri_ari_idx + 1
@@ -874,6 +857,36 @@ function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
         endif
     endfor
 
+    return lines
+endfunction "}}}
+
+function! s:PhysicalDict_update_lines() dict "{{{
+    if self._ftime_at_set isnot -1
+    \   && self._ftime_at_set >=# getftime(self.path)
+        return self._content_lines
+    endif
+
+    try
+        unlockvar 1 self._content_lines
+        let self._content_lines  = readfile(self.path)
+        lockvar 1 self._content_lines
+        call self.parse_lines()
+
+        let self._ftime_at_set = getftime(self.path)
+    catch /E484:/    " Can't open file
+        call eskk#logger#logf("Can't read '%s'!", self.path)
+    catch /^eskk: parse error/
+        call eskk#logger#log_exception('s:PhysicalDict.update_lines()')
+        let self.okuri_ari_idx = -1
+        let self.okuri_nasi_idx = -1
+    endtry
+
+    return self._content_lines
+endfunction "}}}
+
+function! s:PhysicalDict_update_lines_copy() dict "{{{
+    let lines = copy(self.update_lines())
+    unlockvar 1 lines
     return lines
 endfunction "}}}
 
@@ -952,7 +965,7 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
 
     " self.is_valid() loads whole lines if it does not have,
     " so `self` can check the lines.
-    let whole_lines = self.get_lines()
+    let whole_lines = self.update_lines()
     if !self.is_valid()
         return []
     endif
@@ -1017,7 +1030,7 @@ function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
-    let whole_lines = self.get_lines()
+    let whole_lines = self.update_lines()
     if !self.is_valid()
         return ['', -1]
     endif
@@ -1112,6 +1125,8 @@ let s:PhysicalDict = {
 \   'get_lines': eskk#util#get_local_funcref('PhysicalDict_get_lines', s:SID_PREFIX),
 \   'get_lines_copy': eskk#util#get_local_funcref('PhysicalDict_get_lines_copy', s:SID_PREFIX),
 \   'get_updated_lines': eskk#util#get_local_funcref('PhysicalDict_get_updated_lines', s:SID_PREFIX),
+\   'update_lines': eskk#util#get_local_funcref('PhysicalDict_update_lines', s:SID_PREFIX),
+\   'update_lines_copy': eskk#util#get_local_funcref('PhysicalDict_update_lines_copy', s:SID_PREFIX),
 \   'set_lines': eskk#util#get_local_funcref('PhysicalDict_set_lines', s:SID_PREFIX),
 \   'parse_lines': eskk#util#get_local_funcref('PhysicalDict_parse_lines', s:SID_PREFIX),
 \   'is_valid': eskk#util#get_local_funcref('PhysicalDict_is_valid', s:SID_PREFIX),
@@ -1309,13 +1324,13 @@ endfunction "}}}
 " By default, This function is executed at VimLeavePre.
 function! s:Dictionary_update_dictionary(...) dict "{{{
     let verbose      = get(a:000, 0, 1)
-    let do_get_lines = get(a:000, 1, 1)
+    let do_update_lines = get(a:000, 1, 1)
     if !self.is_modified()
         return
     endif
 
-    if do_get_lines
-        call self._user_dict.get_lines()
+    if do_update_lines
+        call self._user_dict.update_lines()
     endif
     if filereadable(self._user_dict.path)
         if !self._user_dict.is_valid()
