@@ -986,9 +986,9 @@ endfunction "}}}
 " Get List of whole lines of dictionary.
 function! s:PhysicalDict_get_lines(...) dict "{{{
     let force = a:0 ? a:1 : 0
-
-    let same_timestamp = self._ftime_at_set ==# getftime(self.path)
-    if self._ftime_at_set isnot -1 && same_timestamp && !force
+    if !force
+    \   && self._ftime_at_set isnot -1
+    \   && self._ftime_at_set >=# getftime(self.path)
         return self._content_lines
     endif
 
