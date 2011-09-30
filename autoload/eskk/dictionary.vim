@@ -808,6 +808,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     if !eskk#util#has_idx(candidates, candidates_index)
         return
     endif
+    let delete_word = candidates[candidates_index]
 
     let dict = eskk#get_skk_dict()
     let user_dict_lines = dict.get_user_dict().get_lines()
@@ -819,9 +820,9 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     \   'Really purge? '
     \   . self._key . self._okuri_rom[0]
     \   . ' /'
-    \   . candidates[candidates_index].input
-    \   . (get(candidates[candidates_index], 'annotation', '') !=# '' ?
-    \       ';' . candidates[candidates_index].annotation :
+    \   . delete_word.input
+    \   . (get(delete_word, 'annotation', '') !=# '' ?
+    \       ';' . delete_word.annotation :
     \       '')
     \   . '/ (yes/no):'
     \)
@@ -829,19 +830,18 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         return
     endif
 
-    let from_type = candidates[candidates_index].from_type
-    if from_type ==# s:CANDIDATE_FROM_REGISTERED_WORDS
+    if delete_word.from_type ==#
+    \   s:CANDIDATE_FROM_REGISTERED_WORDS
         " Remove all elements matching with current candidate
         " from registered words.
-        let words = dict.get_registered_words()
-        for i in range(len(words))
-            if candidates[candidates_index].input ==# words[i].input
+        for word in dict.get_registered_words()
+            if word.input ==# delete_word.input
                 call dict.remove_registered_word(
-                \   words[i].input,
-                \   words[i].key,
-                \   words[i].okuri,
-                \   words[i].okuri_rom,
-                \   words[i].annotation
+                \   word.input,
+                \   word.key,
+                \   word.okuri,
+                \   word.okuri_rom,
+                \   word.annotation
                 \)
             endif
         endfor
