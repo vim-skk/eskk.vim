@@ -12,10 +12,6 @@ set cpo&vim
 
 " Returns all lines matching the candidate.
 "
-" TODO: memoization should be done by `autload/eskk.vim`.
-" `autoload/eskk/**/*.vim` for libraries.
-" They should not have side-effect due to testability.
-let s:search_all_candidate_memoize = {}
 " s:search_all_candidates() {{{
 function! s:search_all_candidates(
 \   physical_dict, key_filter, okuri_rom, ...
@@ -31,10 +27,6 @@ function! s:search_all_candidates(
     \   a:okuri_rom,
     \   limit,
     \], '|')
-
-    if has_key(s:search_all_candidate_memoize, cache_key)
-        return s:search_all_candidate_memoize[cache_key]
-    endif
 
     let whole_lines = a:physical_dict.get_lines()
     if !a:physical_dict.is_valid()
@@ -52,7 +44,6 @@ function! s:search_all_candidates(
         \)
 
         if idx == -1
-            let s:search_all_candidate_memoize[cache_key] = []
             return []
         endif
 
@@ -69,7 +60,7 @@ function! s:search_all_candidates(
             let end = begin + limit
         endif
 
-        let s:search_all_candidate_memoize[cache_key] = map(
+        return map(
         \   whole_lines[begin : end],
         \   'eskk#util#iconv(v:val, a:physical_dict.encoding, &l:encoding)'
         \)
@@ -93,13 +84,11 @@ function! s:search_all_candidates(
             let start = idx + 1
         endwhile
 
-        let s:search_all_candidate_memoize[cache_key] = map(
+        return map(
         \   lines,
         \   'eskk#util#iconv(v:val, a:physical_dict.encoding, &l:encoding)'
         \)
     endif
-
-    return s:search_all_candidate_memoize[cache_key]
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
