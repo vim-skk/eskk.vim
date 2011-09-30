@@ -958,14 +958,6 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
 
-    let cache_key = join([
-    \   self.get_ftime_at_read(),
-    \   self.path,
-    \   a:key_filter,
-    \   a:okuri_rom,
-    \   limit,
-    \], '|')
-
     let whole_lines = self.get_lines()
     if !self.is_valid()
         return []
