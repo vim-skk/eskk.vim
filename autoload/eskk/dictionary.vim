@@ -938,12 +938,6 @@ function! s:PhysicalDict_is_valid() dict "{{{
     \   && self.okuri_nasi_idx >= 0
 endfunction "}}}
 
-" Get self._ftime_at_set.
-" See self._ftime_at_set description at "s:PhysicalDict".
-function! s:PhysicalDict_get_ftime_at_read() dict "{{{
-    return self._ftime_at_set
-endfunction "}}}
-
 " Set false to `self._is_modified`.
 function! s:PhysicalDict_clear_modified_flags() dict "{{{
     let self._is_modified = 0
@@ -1121,7 +1115,6 @@ let s:PhysicalDict = {
 \   'set_lines': eskk#util#get_local_funcref('PhysicalDict_set_lines', s:SID_PREFIX),
 \   'parse_lines': eskk#util#get_local_funcref('PhysicalDict_parse_lines', s:SID_PREFIX),
 \   'is_valid': eskk#util#get_local_funcref('PhysicalDict_is_valid', s:SID_PREFIX),
-\   'get_ftime_at_read': eskk#util#get_local_funcref('PhysicalDict_get_ftime_at_read', s:SID_PREFIX),
 \   'clear_modified_flags': eskk#util#get_local_funcref('PhysicalDict_clear_modified_flags', s:SID_PREFIX),
 \   'search_all_candidates': eskk#util#get_local_funcref('PhysicalDict_search_all_candidates', s:SID_PREFIX),
 \   'search_candidate': eskk#util#get_local_funcref('PhysicalDict_search_candidate', s:SID_PREFIX),
