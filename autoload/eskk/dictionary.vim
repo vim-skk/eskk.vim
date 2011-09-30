@@ -1433,11 +1433,11 @@ function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) dict "{{{
     if candidates.size() < max_count
         " User dictionary, System dictionary
         try
-            for [dict, from_type] in [
+            for [physical_dict, from_type] in [
             \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
             \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
             \]
-                for line in dict.search_all_candidates(
+                for line in physical_dict.search_all_candidates(
                 \   key, okuri_rom, max_count - candidates.size()
                 \)
                     for c in eskk#dictionary#parse_skk_dict_line(
