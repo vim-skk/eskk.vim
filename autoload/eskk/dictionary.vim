@@ -233,49 +233,60 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     return candidates
 endfunction "}}}
 
-" Returns String of the created entry from arguments values.
-function! s:add_candidate_to_line(existing_line, word) "{{{
-    let key = a:word.key
-    let okuri_rom = a:word.okuri_rom
-    let new_word = a:word.input
-    let annotation = a:word.annotation
-    " XXX:
-    " TODO:
-    " Rewrite for eskk.
-    " This function is from skk.vim's s:SkkMakeNewEntry().
-
-    " XXX:
-    " Modify them to make the same input to
-    " the original s:SkkMakeNewEntry()'s arguments.
-    let key = key . (okuri_rom == '' ? '' : okuri_rom[0]) . ' '
-    let cand = new_word
-    if annotation != ''
-        let cand .= ';' . annotation
+" Returns line (String) which includes a:candidate.
+" If invalid arguments were given, returns empty string.
+function! s:add_candidate_to_line(line, candidate) "{{{
+    if a:line =~# '^\s*;'
+        return ''
     endif
-    let line = (a:existing_line == '' ? '' : substitute(a:existing_line, '^\S\+ ', '', ''))
 
-
-    let entry = key . '/' . cand . '/'
-    let sla1 = match(line, '/', 0)
-    if line[sla1 + 1] == '['
-        let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
-    else
-        let sla2 = match(line, '/', sla1 + 1)
+    " Remove duplicated candidates, just in case
+    let line = s:delete_candidate_from_line(a:line, a:candidate)
+    if line ==# ''
+        return ''
     endif
-    while sla2 != -1
-        let s = strpart(line, sla1 + 1, sla2 - sla1 - 1)
-        let sla1 = sla2
-        if line[sla1 + 1] == '['
-            let sla2 = matchend(line, '/\]/', sla1 + 1) - 1
-        else
-            let sla2 = match(line, '/', sla1 + 1)
-        endif
-        if s ==# cand
-            continue
-        endif
-        let entry = entry . s . '/'
-    endwhile
-    return entry
+
+    let candidates =
+    \   eskk#dictionary#parse_skk_dict_line(
+    \       line, a:candidate.from_type)
+    call add(candidates, a:candidate)
+    return s:make_line_from_candidates(candidates)
+endfunction "}}}
+
+" Returns line (String) which DOES NOT includes a:candidate.
+" If invalid arguments were given, returns empty string.
+function! s:delete_candidate_from_line(line, candidate) "{{{
+    if a:line =~# '^\s*;'
+        return ''
+    endif
+
+    let candidates =
+    \   eskk#dictionary#parse_skk_dict_line(
+    \       a:line, a:candidate.from_type)
+    " XXX: Should we see `a:candidate.annotation`?
+    let match =
+    \   'v:val.input ==# a:candidate.input'
+    \   . '&& v:val.key ==# a:candidate.key'
+    \   . '&& v:val.okuri_rom_first ==# a:candidate.okuri_rom_first'
+    call filter(candidates, match)
+    return s:make_line_from_candidates(candidates)
+endfunction "}}}
+function! s:make_line_from_candidates(candidates) "{{{
+    if type(a:candidates) isnot type([])
+    \   || empty(a:candidates)
+        return ''
+    endif
+    " NOTE: `candidates` is from
+    " eskk#dictionary#parse_skk_dict_line().
+    " So we can destroy it.
+    let c = a:candidates[0]
+    let make_string =
+    \   'v:val.input . '
+    \   . '(v:val.annotation ==# "" ? "" : '
+    \   . '";" . v:val.annotation)'
+    return
+    \   c.key . c.okuri_rom_first . ' '
+    \   . '/'.join(map(a:candidates, make_string), '/').'/'
 endfunction "}}}
 
 
