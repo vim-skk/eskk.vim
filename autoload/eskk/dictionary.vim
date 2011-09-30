@@ -991,7 +991,7 @@ function! s:PhysicalDict_get_lines(...) dict "{{{
     " when newly read it.
     try
         let self._content_lines  = readfile(self.path)
-        call self.parse_lines(self._content_lines)
+        call self.parse_lines()
 
         let self._ftime_at_read = getftime(self.path)
     catch /E484:/    " Can't open file
@@ -1046,7 +1046,7 @@ endfunction "}}}
 function! s:PhysicalDict_set_lines(lines) dict "{{{
     try
         let self._content_lines  = a:lines
-        call self.parse_lines(a:lines)
+        call self.parse_lines()
         let self._ftime_at_read = localtime()
         let self._is_modified = 1
     catch /^eskk: parse error/
@@ -1058,7 +1058,7 @@ endfunction "}}}
 
 " - Validate List of whole lines of dictionary.
 " - Set self.okuri_ari_idx, self.okuri_nasi_idx.
-function! s:PhysicalDict_parse_lines(lines) dict "{{{
+function! s:PhysicalDict_parse_lines() dict "{{{
     let self.okuri_ari_idx  = index(
     \   self._content_lines,
     \   ';; okuri-ari entries.'
