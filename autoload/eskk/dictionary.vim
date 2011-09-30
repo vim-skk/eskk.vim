@@ -1072,7 +1072,7 @@ function! s:PhysicalDict_parse_lines() dict "{{{
     \   self._content_lines,
     \   ';; okuri-ari entries.'
     \)
-    if self.okuri_ari_idx ==# -1
+    if self.okuri_ari_idx <# 0
         throw eskk#dictionary#parse_error(
         \   "invalid self.okuri_ari_idx value"
         \)
@@ -1082,7 +1082,7 @@ function! s:PhysicalDict_parse_lines() dict "{{{
     \   self._content_lines,
     \   ';; okuri-nasi entries.'
     \)
-    if self.okuri_nasi_idx ==# -1
+    if self.okuri_nasi_idx <# 0
         throw eskk#dictionary#parse_error(
         \   "invalid self.okuri_nasi_idx value"
         \)
