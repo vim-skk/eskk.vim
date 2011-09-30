@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 424))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 425))
 
 
 function! s:SID() "{{{
@@ -307,8 +307,9 @@ function! s:asym_filter(stash) "{{{
             if !empty(henkan_result)
                 let prev_buftable =
                 \   deepcopy(henkan_result.buftable)
-                call eskk#set_buftable(prev_buftable)
-                call henkan_result.delete_from_dict()
+                if henkan_result.delete_from_dict()
+                    call eskk#set_buftable(prev_buftable)
+                endif
             endif
         else
             call buftable.do_enter(a:stash)

@@ -617,18 +617,18 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     catch /^eskk: dictionary look up error/
         call eskk#logger#log_exception(
         \   's:HenkanResult.get_candidates()')
-        return
+        return 0
     endtry
     " Check invalid index.
     let candidates_index = self._candidates_index
     if !eskk#util#has_idx(candidates, candidates_index)
-        return
+        return 0
     endif
     " Check that user dictionary is valid.
     let del_cand = candidates[candidates_index]
     let dict = eskk#get_skk_dict()
     if !dict.get_user_dict().is_valid()
-        return
+        return 0
     endif
     " Check user input.
     let input = eskk#util#input(
@@ -642,7 +642,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     \   . '/ (yes/no):'
     \)
     if input !~? '^y\%[es]$'
-        return
+        return 0
     endif
 
 
@@ -681,13 +681,15 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     try
         call dict.get_user_dict().set_lines(lines)
     catch /^eskk: parse error/
-        return
+        return 0
     endtry
     " Write to dictionary.
     "
     " FIXME: Lose data written between above
     " `dict.get_user_dict().update_lines()` call and here.
     call dict.update_dictionary(1, 0)
+
+    return 1
 endfunction "}}}
 
 " Move this henkan result to the first of self._registered_words.
