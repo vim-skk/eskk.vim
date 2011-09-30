@@ -10,182 +10,6 @@ set cpo&vim
 
 " Utility functions {{{
 
-" Returns all lines matching the candidate.
-"
-" s:search_all_candidates() {{{
-function! s:search_all_candidates(
-\   physical_dict, key_filter, okuri_rom, ...
-\)
-    let limit = a:0 ? a:1 : -1    " No limit by default.
-    let has_okuri = a:okuri_rom != ''
-    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
-
-    let cache_key = join([
-    \   a:physical_dict.get_ftime_at_read(),
-    \   a:physical_dict.path,
-    \   a:key_filter,
-    \   a:okuri_rom,
-    \   limit,
-    \], '|')
-
-    let whole_lines = a:physical_dict.get_lines()
-    if !a:physical_dict.is_valid()
-        return []
-    endif
-
-    let converted = eskk#util#iconv(needle, &l:encoding, a:physical_dict.encoding)
-    if a:physical_dict.sorted
-        let [line, idx] = s:search_binary(
-        \   a:physical_dict,
-        \   whole_lines,
-        \   converted,
-        \   has_okuri,
-        \   100
-        \)
-
-        if idx == -1
-            return []
-        endif
-
-        " Get lines until limit.
-        let begin = idx
-        let i = begin + 1
-        while eskk#util#has_idx(whole_lines, i)
-                    \   && stridx(whole_lines[i], converted) == 0
-            let i += 1
-        endwhile
-        let end = i - 1
-        call eskk#util#assert(begin <= end, 'begin <= end')
-        if limit >= 0 && begin + limit < end
-            let end = begin + limit
-        endif
-
-        return map(
-        \   whole_lines[begin : end],
-        \   'eskk#util#iconv(v:val, a:physical_dict.encoding, &l:encoding)'
-        \)
-    else
-        let lines = []
-        let start = 1
-        while 1
-            let [line, idx] = s:search_linear(
-            \   a:physical_dict,
-            \   whole_lines,
-            \   converted,
-            \   has_okuri,
-            \   start
-            \)
-
-            if idx == -1
-                break
-            endif
-
-            call add(lines, line)
-            let start = idx + 1
-        endwhile
-
-        return map(
-        \   lines,
-        \   'eskk#util#iconv(v:val, a:physical_dict.encoding, &l:encoding)'
-        \)
-    endif
-endfunction "}}}
-
-" Returns [line_string, idx] matching the candidate.
-" s:search_candidate() {{{
-function! s:search_candidate(
-\   physical_dict, key_filter, okuri_rom
-\)
-    let has_okuri = a:okuri_rom != ''
-    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
-
-    let whole_lines = a:physical_dict.get_lines()
-    if !a:physical_dict.is_valid()
-        return ['', -1]
-    endif
-
-    let converted = eskk#util#iconv(needle, &l:encoding, a:physical_dict.encoding)
-    if a:physical_dict.sorted
-        let [line, idx] = s:search_binary(
-        \   a:physical_dict, whole_lines, converted, has_okuri, 100
-        \)
-    else
-        let [line, idx] = s:search_linear(
-        \   a:physical_dict, whole_lines, converted, has_okuri
-        \)
-    endif
-    if idx !=# -1
-        return [
-        \   eskk#util#iconv(line, a:physical_dict.encoding, &l:encoding),
-        \   idx
-        \]
-    else
-        return ['', -1]
-    endif
-endfunction "}}}
-" Returns [line_string, idx] matching the candidate.
-" s:search_binary() {{{
-function! s:search_binary(
-\   ph_dict, whole_lines, needle, has_okuri, limit
-\)
-    " Assumption: `a:needle` is encoded to dictionary file encoding.
-    " NOTE: min, max, mid are index number. not lnum.
-
-    if a:has_okuri
-        let min = a:ph_dict.okuri_ari_idx
-        let max = a:ph_dict.okuri_nasi_idx
-    else
-        let min = a:ph_dict.okuri_nasi_idx
-        let max = len(a:whole_lines) - 1
-    endif
-
-    if a:has_okuri
-        while max - min > a:limit
-            let mid = (min + max) / 2
-            if a:needle >=# a:whole_lines[mid]
-                let max = mid
-            else
-                let min = mid
-            endif
-        endwhile
-    else
-        while max - min > a:limit
-            let mid = (min + max) / 2
-            if a:needle >=# a:whole_lines[mid]
-                let min = mid
-            else
-                let max = mid
-            endif
-        endwhile
-    endif
-
-    " NOTE: min, max: Give index number, not lnum.
-    return s:search_linear(
-    \   a:ph_dict, a:whole_lines, a:needle, a:has_okuri, min, max
-    \)
-endfunction "}}}
-" Returns [line_string, idx] matching the candidate.
-" s:search_linear() {{{
-function! s:search_linear(
-\   ph_dict, whole_lines, needle, has_okuri, ...
-\)
-    " Assumption: `a:needle` is encoded to dictionary file encoding.
-    let min_which = a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'
-    let min = get(a:000, 0, a:ph_dict[min_which])
-    let max = get(a:000, 1, len(a:whole_lines) - 1)
-
-    call eskk#util#assert(min <=# max, min.' <=# '.max)
-    call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
-
-    while min <=# max
-        if stridx(a:whole_lines[min], a:needle) == 0
-            return [a:whole_lines[min], min]
-        endif
-        let min += 1
-    endwhile
-    return ['', -1]
-endfunction "}}}
-
 " Returns [key, okuri_rom, candidates] which line contains.
 function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     let list = split(a:line, '/')
@@ -502,12 +326,12 @@ function! s:HenkanResult_get_candidates() dict "{{{
         " Look up from dictionaries.
         let user_dict = dict.get_user_dict()
         let system_dict = dict.get_system_dict()
-        let user_dict_result = s:search_candidate(
-        \   user_dict, self._key, self._okuri_rom
-        \)
-        let system_dict_result = s:search_candidate(
-        \   system_dict, self._key, self._okuri_rom
-        \)
+        let user_dict_result =
+        \   user_dict.search_candidate(
+        \       self._key, self._okuri_rom)
+        let system_dict_result =
+        \   system_dict.search_candidate(
+        \       self._key, self._okuri_rom)
 
         if user_dict_result[1] ==# -1
         \   && system_dict_result[1] ==# -1
@@ -1022,9 +846,7 @@ function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
     let nasi_lnum = self.okuri_nasi_idx + 1
     for w in reverse(a:registered_words.to_list())
         " Search the line which has `w`.
-        let [l, index] = s:search_candidate(
-        \   self, w.key, w.okuri_rom
-        \)
+        let [l, index] = self.search_candidate(w.key, w.okuri_rom)
         let candidate =
         \   s:registered_word2candidate(w,
         \       s:CANDIDATE_FROM_REGISTERED_WORDS)
@@ -1130,6 +952,167 @@ function! s:PhysicalDict_clear_modified_flags() dict "{{{
 endfunction "}}}
 
 
+" Returns all lines matching the candidate.
+function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict "{{{
+    let limit = a:0 ? a:1 : -1    " No limit by default.
+    let has_okuri = a:okuri_rom != ''
+    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
+
+    let cache_key = join([
+    \   self.get_ftime_at_read(),
+    \   self.path,
+    \   a:key_filter,
+    \   a:okuri_rom,
+    \   limit,
+    \], '|')
+
+    let whole_lines = self.get_lines()
+    if !self.is_valid()
+        return []
+    endif
+
+    let converted = eskk#util#iconv(needle, &l:encoding, self.encoding)
+    if self.sorted
+        let [line, idx] = self.search_binary(
+        \   whole_lines,
+        \   converted,
+        \   has_okuri,
+        \   100
+        \)
+
+        if idx == -1
+            return []
+        endif
+
+        " Get lines until limit.
+        let begin = idx
+        let i = begin + 1
+        while eskk#util#has_idx(whole_lines, i)
+                    \   && stridx(whole_lines[i], converted) == 0
+            let i += 1
+        endwhile
+        let end = i - 1
+        call eskk#util#assert(begin <= end, 'begin <= end')
+        if limit >= 0 && begin + limit < end
+            let end = begin + limit
+        endif
+
+        return map(
+        \   whole_lines[begin : end],
+        \   'eskk#util#iconv(v:val, self.encoding, &l:encoding)'
+        \)
+    else
+        let lines = []
+        let start = 1
+        while 1
+            let [line, idx] = self.search_linear(
+            \   whole_lines,
+            \   converted,
+            \   has_okuri,
+            \   start
+            \)
+
+            if idx == -1
+                break
+            endif
+
+            call add(lines, line)
+            let start = idx + 1
+        endwhile
+
+        return map(
+        \   lines,
+        \   'eskk#util#iconv(v:val, self.encoding, &l:encoding)'
+        \)
+    endif
+endfunction "}}}
+" Returns [line_string, idx] matching the candidate.
+function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
+    let has_okuri = a:okuri_rom != ''
+    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
+
+    let whole_lines = self.get_lines()
+    if !self.is_valid()
+        return ['', -1]
+    endif
+
+    let converted = eskk#util#iconv(needle, &l:encoding, self.encoding)
+    if self.sorted
+        let [line, idx] = self.search_binary(
+        \   whole_lines, converted, has_okuri, 100
+        \)
+    else
+        let [line, idx] = self.search_linear(
+        \   whole_lines, converted, has_okuri
+        \)
+    endif
+    if idx !=# -1
+        return [
+        \   eskk#util#iconv(line, self.encoding, &l:encoding),
+        \   idx
+        \]
+    else
+        return ['', -1]
+    endif
+endfunction "}}}
+" Returns [line_string, idx] matching the candidate.
+function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) dict "{{{
+    " Assumption: `a:needle` is encoded to dictionary file encoding.
+    " NOTE: min, max, mid are index number. not lnum.
+
+    if a:has_okuri
+        let min = self.okuri_ari_idx
+        let max = self.okuri_nasi_idx
+    else
+        let min = self.okuri_nasi_idx
+        let max = len(a:whole_lines) - 1
+    endif
+
+    if a:has_okuri
+        while max - min > a:limit
+            let mid = (min + max) / 2
+            if a:needle >=# a:whole_lines[mid]
+                let max = mid
+            else
+                let min = mid
+            endif
+        endwhile
+    else
+        while max - min > a:limit
+            let mid = (min + max) / 2
+            if a:needle >=# a:whole_lines[mid]
+                let min = mid
+            else
+                let max = mid
+            endif
+        endwhile
+    endif
+
+    " NOTE: min, max: Give index number, not lnum.
+    return self.search_linear(
+    \   a:whole_lines, a:needle, a:has_okuri, min, max
+    \)
+endfunction "}}}
+" Returns [line_string, idx] matching the candidate.
+function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict "{{{
+    " Assumption: `a:needle` is encoded to dictionary file encoding.
+    let min_which = a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'
+    let min = get(a:000, 0, self[min_which])
+    let max = get(a:000, 1, len(a:whole_lines) - 1)
+
+    call eskk#util#assert(min <=# max, min.' <=# '.max)
+    call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
+
+    while min <=# max
+        if stridx(a:whole_lines[min], a:needle) == 0
+            return [a:whole_lines[min], min]
+        endif
+        let min += 1
+    endwhile
+    return ['', -1]
+endfunction "}}}
+
+
 let s:PhysicalDict = {
 \   '_content_lines': [],
 \   '_ftime_at_set': -1,
@@ -1148,6 +1131,10 @@ let s:PhysicalDict = {
 \   'is_valid': eskk#util#get_local_funcref('PhysicalDict_is_valid', s:SID_PREFIX),
 \   'get_ftime_at_read': eskk#util#get_local_funcref('PhysicalDict_get_ftime_at_read', s:SID_PREFIX),
 \   'clear_modified_flags': eskk#util#get_local_funcref('PhysicalDict_clear_modified_flags', s:SID_PREFIX),
+\   'search_all_candidates': eskk#util#get_local_funcref('PhysicalDict_search_all_candidates', s:SID_PREFIX),
+\   'search_candidate': eskk#util#get_local_funcref('PhysicalDict_search_candidate', s:SID_PREFIX),
+\   'search_binary': eskk#util#get_local_funcref('PhysicalDict_search_binary', s:SID_PREFIX),
+\   'search_linear': eskk#util#get_local_funcref('PhysicalDict_search_linear', s:SID_PREFIX),
 \}
 
 " }}}
@@ -1450,8 +1437,8 @@ function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) dict "{{{
             \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
             \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
             \]
-                for line in s:search_all_candidates(
-                \   dict, key, okuri_rom, max_count - candidates.size()
+                for line in dict.search_all_candidates(
+                \   key, okuri_rom, max_count - candidates.size()
                 \)
                     for c in eskk#dictionary#parse_skk_dict_line(
                     \   line, from_type
