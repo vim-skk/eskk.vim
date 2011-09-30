@@ -953,7 +953,7 @@ let s:HenkanResult = {
 "   - Memoization for getting file content
 "
 " _ftime_at_set:
-"   getftime() value when `_content_lines` is set.
+"   UNIX time number when `_content_lines` is set.
 "
 " okuri_ari_idx:
 "   Line number of SKK dictionary
@@ -1012,7 +1012,7 @@ function! s:PhysicalDict_get_lines(...) dict "{{{
     catch /E484:/    " Can't open file
         call eskk#logger#logf("Can't read '%s'!", self.path)
     catch /^eskk: parse error/
-        call eskk#logger#log_exception('s:physical_dict.get_lines()')
+        call eskk#logger#log_exception('s:PhysicalDict.get_lines()')
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
@@ -1078,7 +1078,7 @@ function! s:PhysicalDict_set_lines(lines) dict "{{{
         let self._ftime_at_set = localtime()
         let self._is_modified = 1
     catch /^eskk: parse error/
-        call eskk#logger#log_exception('s:physical_dict.set_lines()')
+        call eskk#logger#log_exception('s:PhysicalDict.set_lines()')
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
     endtry
@@ -1130,7 +1130,7 @@ function! s:PhysicalDict_is_valid() dict "{{{
 endfunction "}}}
 
 " Get self._ftime_at_set.
-" See self._ftime_at_set description at "s:physical_dict".
+" See self._ftime_at_set description at "s:PhysicalDict".
 function! s:PhysicalDict_get_ftime_at_read() dict "{{{
     return self._ftime_at_set
 endfunction "}}}
@@ -1334,7 +1334,7 @@ endfunction "}}}
 
 " Returns true value if new registered is added
 " or user dictionary's lines are
-" modified by "s:physical_dict.set_lines()".
+" modified by "s:PhysicalDict.set_lines()".
 " If this value is false, s:Dictionary.update_dictionary() does nothing.
 function! s:Dictionary_is_modified() dict "{{{
     " No need to check system dictionary.
