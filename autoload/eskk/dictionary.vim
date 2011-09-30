@@ -228,13 +228,6 @@ function! s:add_candidate_to_line(line, candidate) "{{{
     if a:line =~# '^\s*;'
         return ''
     endif
-
-    " Remove duplicated candidates, just in case
-    let line = s:delete_candidate_from_line(a:line, a:candidate)
-    if line ==# ''
-        return ''
-    endif
-
     let candidates =
     \   eskk#dictionary#parse_skk_dict_line(
     \       line, a:candidate.from_type)
