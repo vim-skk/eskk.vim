@@ -965,11 +965,11 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
 
     " self.is_valid() loads whole lines if it does not have,
     " so `self` can check the lines.
-    let whole_lines = self.update_lines()
     if !self.is_valid()
         return []
     endif
 
+    let whole_lines = self.get_lines()
     let converted = eskk#util#iconv(needle, &l:encoding, self.encoding)
     if self.sorted
         let [line, idx] = self.search_binary(
@@ -1030,11 +1030,11 @@ function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
     let has_okuri = a:okuri_rom != ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
 
-    let whole_lines = self.update_lines()
     if !self.is_valid()
         return ['', -1]
     endif
 
+    let whole_lines = self.get_lines()
     let converted = eskk#util#iconv(needle, &l:encoding, self.encoding)
     if self.sorted
         let [line, idx] = self.search_binary(
