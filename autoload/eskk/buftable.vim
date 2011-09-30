@@ -87,7 +87,7 @@ function! s:RomPairs_push_one_pair(rom_str, filter_str) dict "{{{
 endfunction "}}}
 function! s:RomPairs_pop() dict "{{{
     if empty(self._pairs)
-        return []
+        return ''
     else
         return remove(self._pairs, -1)
     endif
