@@ -40,8 +40,9 @@ function! s:cmd_forget_registered_words() "{{{
 endfunction "}}}
 
 function! s:cmd_update_dictionary(silent) "{{{
+    let verbose = !a:silent
     let dict = eskk#get_skk_dict()
-    execute (a:silent ? 'silent' : '') 'call dict.update_dictionary()'
+    call dict.update_dictionary(verbose)
 endfunction "}}}
 
 function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
