@@ -200,7 +200,10 @@ endfunction "}}}
 " Returns [key, okuri_rom, candidates] which line contains.
 function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     let list = split(a:line, '/')
-    call eskk#util#assert(!empty(list), 'list must not be empty')
+    call eskk#util#assert(
+    \   !empty(list),
+    \   'list must not be empty. (a:line = '
+    \   .string(a:line).')')
     let key = matchstr(list[0], '^[^a-z ]\+')
     let okuri_rom = matchstr(list[0], '[a-z]\+')
 
