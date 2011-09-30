@@ -454,7 +454,6 @@ endfunction "}}}
 " Set current candidate.
 " but this function asks to user in command-line
 " when `self._candidates_index >= g:eskk#show_candidates_count`.
-"
 " @throws eskk#dictionary#look_up_error()
 function! s:HenkanResult_update_candidate_prompt() dict "{{{
     let max_count = g:eskk#show_candidates_count >= 0 ?
@@ -496,7 +495,6 @@ function! s:HenkanResult_update_candidate() dict "{{{
 endfunction "}}}
 
 " Returns List of candidates.
-"
 " @throws eskk#dictionary#look_up_error()
 function! s:HenkanResult_get_candidates() dict "{{{
     if self._status ==# g:eskk#dictionary#HR_GOT_RESULT
@@ -628,7 +626,6 @@ function! eskk#dictionary#look_up_error(msg) "{{{
 endfunction "}}}
 
 " Select candidate from command-line.
-"
 " @throws eskk#dictionary#look_up_error()
 function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
     " Select candidates by getchar()'s character.
