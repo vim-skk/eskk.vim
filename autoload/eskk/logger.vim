@@ -166,7 +166,7 @@ function! eskk#logger#write_error_log_file(char, ...) "{{{
     let save_cmdheight = &cmdheight
     setlocal cmdheight=3
     try
-        call eskk#logger#warnf(
+        call eskk#logger#errorf(
         \   "Error!! See %s for details.",
         \   (write_success ? string(log_file) : ':messages')
         \)
@@ -224,6 +224,15 @@ function! eskk#logger#warn(msg) "{{{
 endfunction "}}}
 function! eskk#logger#warnf(msg, ...) "{{{
     call eskk#logger#warn(call('printf', [a:msg] + a:000))
+endfunction "}}}
+
+function! eskk#logger#error(msg) "{{{
+    echohl ErrorMsg
+    echomsg a:msg
+    echohl None
+endfunction "}}}
+function! eskk#logger#errorf(msg, ...) "{{{
+    call eskk#logger#error(call('printf', [a:msg] + a:000))
 endfunction "}}}
 
 
