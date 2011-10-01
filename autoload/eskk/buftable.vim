@@ -975,7 +975,9 @@ function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
         for [rom_str, filter_str] in matched
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str,
-            \   table.get_map(rom_str, rom_str)
+            \   (!empty(table) ?
+            \       table.get_map(rom_str, rom_str) :
+            \       rom_str)
             \)
         endfor
         call add(r, buf_str)
@@ -991,51 +993,16 @@ function! s:get_current_table() "{{{
     endif
 endfunction "}}}
 function! s:convert_roms_and_kakutei(this, table) "{{{
-    " Convert rom_str if possible.
-    call a:this.convert_rom_str_inplace([
+    call a:this.convert_rom_pairs_inplace([
+    \   g:eskk#buftable#PHASE_NORMAL,
     \   g:eskk#buftable#PHASE_HENKAN,
-    \   g:eskk#buftable#PHASE_OKURI
-    \], !empty(a:table) ? a:table : s:get_current_table())
-
-    let henkan_buf_str = a:this.get_buf_str(
-    \   g:eskk#buftable#PHASE_HENKAN
-    \)
-    let okuri_buf_str = a:this.get_buf_str(
-    \   g:eskk#buftable#PHASE_OKURI
-    \)
-    for buf_str in [henkan_buf_str, okuri_buf_str]
-        let rom_str = buf_str.rom_str.get()
-        let rom_str_pair = [rom_str, rom_str]
-        for m in buf_str.rom_pairs.get()
-        \           + (rom_str !=# '' ? [rom_str_pair] : [])
-            call a:this.push_kakutei_str(
-            \   !empty(a:table) ?
-            \       a:table.get_map(m[0], m[1]) : m[0]
-            \)
-        endfor
-    endfor
+    \   g:eskk#buftable#PHASE_OKURI,
+    \], a:table)
+    call a:this.push_kakutei_str(a:this.get_display_str(0))
     call a:this.clear_all()
-    call a:this.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
-
-    call eskk#register_temp_event(
-    \   'filter-begin',
-    \   eskk#util#get_local_func('finalize', s:SID_PREFIX),
-    \   []
+    call a:this.set_henkan_phase(
+    \   g:eskk#buftable#PHASE_NORMAL
     \)
-
-    " Update dictionary.
-    let dict = eskk#get_skk_dict()
-    let henkan_result = dict.get_henkan_result()
-    if !empty(henkan_result)
-      call henkan_result.update_rank()
-    endif
-endfunction "}}}
-function! s:finalize() "{{{
-    let a:this = eskk#get_buftable()
-    if a:this.get_henkan_phase() ==# g:eskk#buftable#PHASE_NORMAL
-        let cur_buf_str = a:this.get_current_buf_str()
-        call cur_buf_str.rom_pairs.clear()
-    endif
 endfunction "}}}
 
 function! s:Buftable_clear_all() dict "{{{
