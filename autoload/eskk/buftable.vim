@@ -898,7 +898,7 @@ function! s:Buftable_do_henkan_other(stash, convert_at_exact_match) dict "{{{
     endtry
 endfunction "}}}
 function! s:Buftable_do_ctrl_q_key() dict "{{{
-    return s:convert_again_with_table(
+    return s:convert_roms_and_kakutei(
     \   self,
     \   (eskk#get_mode() ==# 'hira' ?
     \       eskk#get_mode_table('hankata') :
@@ -906,7 +906,7 @@ function! s:Buftable_do_ctrl_q_key() dict "{{{
     \)
 endfunction "}}}
 function! s:Buftable_do_q_key() dict "{{{
-    return s:convert_again_with_table(
+    return s:convert_roms_and_kakutei(
     \   self,
     \   (eskk#get_mode() ==# 'hira' ?
     \       eskk#get_mode_table('kata') :
@@ -914,7 +914,7 @@ function! s:Buftable_do_q_key() dict "{{{
     \)
 endfunction "}}}
 function! s:Buftable_do_l_key() dict "{{{
-    return s:convert_again_with_table(self, {})
+    return s:convert_roms_and_kakutei(self, {})
 endfunction "}}}
 function! s:Buftable_do_escape(stash) dict "{{{
     call self.convert_rom_str_inplace(
@@ -986,7 +986,7 @@ function! s:get_current_table() "{{{
         return eskk#get_current_mode_table()
     endif
 endfunction "}}}
-function! s:convert_again_with_table(this, table) "{{{
+function! s:convert_roms_and_kakutei(this, table) "{{{
     " Convert rom_str if possible.
     call a:this.convert_rom_str_inplace([
     \   g:eskk#buftable#PHASE_HENKAN,
