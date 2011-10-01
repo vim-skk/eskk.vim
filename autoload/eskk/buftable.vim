@@ -991,7 +991,7 @@ function! s:convert_again_with_table(this, table) "{{{
     call a:this.convert_rom_str_inplace([
     \   g:eskk#buftable#PHASE_HENKAN,
     \   g:eskk#buftable#PHASE_OKURI
-    \])
+    \], !empty(a:table) ? a:table : s:get_current_table())
 
     let henkan_buf_str = a:this.get_buf_str(
     \   g:eskk#buftable#PHASE_HENKAN
