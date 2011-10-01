@@ -56,8 +56,8 @@ function! s:eskkcomplete(findstart, base) "{{{
 
         call s:initialize_variables()
 
-        let [success, _, pos] = s:get_buftable_pos()
-        call eskk#util#assert(success, "s:get_buftable_pos() must not fail")
+        let pos = eskk#get_begin_pos()
+        call eskk#util#assert(!empty(pos), "pos is not empty")
         return pos[2] - 1
     endif
 
@@ -72,8 +72,8 @@ function! eskk#complete#can_find_start() "{{{
         return 0
     endif
 
-    let [success, mode, pos] = s:get_buftable_pos()
-    if !success
+    let pos = eskk#get_begin_pos()
+    if empty(pos)
         return 0
     endif
 
@@ -287,8 +287,8 @@ function! s:do_tab(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
-    let [success, _, pos] = s:get_buftable_pos()
-    if !success
+    let pos = eskk#get_begin_pos()
+    if empty(pos)
         return
     endif
     if pos[2] >= col('.')
@@ -422,14 +422,6 @@ function! s:set_selected_item() "{{{
 
     call s:initialize_variables()
 endfunction "}}}
-function! s:get_buftable_pos() "{{{
-    let pos = eskk#get_begin_pos()
-    if empty(pos)
-        call eskk#logger#warn("Can't get begin pos.")
-        return [0, 0, 0]
-    endif
-    return [1, 'i', ]
-endfunction "}}}
 function! s:get_buftable_str(with_marker, ...) "{{{
     " NOTE: getline('.') returns string without string after a:base
     " while matching the head of input string,
@@ -440,9 +432,9 @@ function! s:get_buftable_str(with_marker, ...) "{{{
         return ''
     endif
 
-    let [success, _, pos] = s:get_buftable_pos()
-    if !success
-        call eskk#logger#log('s:get_buftable_pos() failed')
+    let pos = eskk#get_begin_pos()
+    if empty(pos)
+        call eskk#logger#log("Can't get begin pos.")
         return ''
     endif
     let begin = pos[2] - 1
