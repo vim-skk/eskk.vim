@@ -1000,7 +1000,10 @@ function! s:convert_again_with_table(this, table) "{{{
     \   g:eskk#buftable#PHASE_OKURI
     \)
     for buf_str in [henkan_buf_str, okuri_buf_str]
+        let rom_str = buf_str.rom_str.get()
+        let rom_str_pair = [rom_str, rom_str]
         for m in buf_str.rom_pairs.get()
+        \           + (rom_str !=# '' ? [rom_str_pair] : [])
             call a:this.push_kakutei_str(
             \   !empty(a:table) ?
             \       a:table.get_map(m[0], m[1]) : m[0]
