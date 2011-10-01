@@ -371,7 +371,7 @@ function! s:set_selected_item() "{{{
 
     let buftable = eskk#get_buftable()
     let filter_str = s:get_buftable_str(0)
-    if filter_str =~# '[a-z]$'
+    if filter_str =~# '[^a-z][a-z]$'
         let [filter_str, rom_str] = [
         \   substitute(filter_str, '.$', '', ''),
         \   substitute(filter_str, '.*\(.\)$', '\1', '')
@@ -408,15 +408,18 @@ function! s:set_selected_item() "{{{
     " Set henkan_buf_str
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
-        call henkan_buf_str.rom_pairs.push_one_pair('', char)
+        call henkan_buf_str.rom_pairs.push_one_pair(char, char)
     endfor
-
     " Set okuri_buf_str
     call okuri_buf_str.clear()
-    call okuri_buf_str.rom_str.set(rom_str)
-
-    " Set henkan phase to PHASE_HENKAN.
-    call buftable.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
+    if rom_str !=# ''
+        call okuri_buf_str.rom_str.set(rom_str)
+        call buftable.set_henkan_phase(
+        \       g:eskk#buftable#PHASE_OKURI)
+    else
+        call buftable.set_henkan_phase(
+        \       g:eskk#buftable#PHASE_HENKAN)
+    endif
     " Update old string.
     call buftable.set_old_str(s:get_buftable_str(1))
 
