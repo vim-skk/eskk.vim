@@ -19,10 +19,10 @@ delfunc s:SID
 " 2: Waiting for okurigana.
 " 3: Choosing henkan candidates.
 let [
-\   eskk#buftable#PHASE_NORMAL,
-\   eskk#buftable#PHASE_HENKAN,
-\   eskk#buftable#PHASE_OKURI,
-\   eskk#buftable#PHASE_HENKAN_SELECT
+\   g:eskk#buftable#PHASE_NORMAL,
+\   g:eskk#buftable#PHASE_HENKAN,
+\   g:eskk#buftable#PHASE_OKURI,
+\   g:eskk#buftable#PHASE_HENKAN_SELECT
 \] = range(4)
 " }}}
 
