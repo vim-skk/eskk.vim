@@ -397,13 +397,9 @@ function! s:set_selected_item() "{{{
         let dict = eskk#get_skk_dict()
         for c in dict.search_all_candidates(key, okuri, okuri_rom)
             if c.input ==# filter_str
-                call dict.remember_word(
-                \   c.input,
-                \   c.key,
-                \   okuri,
-                \   okuri_rom,
-                \   c.annotation
-                \)
+                let word =
+                \   eskk#dictionary#candidate2registered_word(c, c.key, okuri, okuri_rom)
+                call dict.remember_word(word)
                 break
             endif
         endfor

@@ -121,7 +121,7 @@ function! s:candidate_new(from_type, input, key, okuri_rom_first, annotation) "{
     \}
 endfunction "}}}
 
-function! s:candidate2registered_word(candidate, key, okuri, okuri_rom) "{{{
+function! eskk#dictionary#candidate2registered_word(candidate, key, okuri, okuri_rom) "{{{
     return s:registered_word_new(
     \   a:candidate.input,
     \   a:key,
@@ -706,7 +706,7 @@ function! s:HenkanResult_update_rank() dict "{{{
     if !eskk#util#has_idx(candidates, candidates_index)
         return
     endif
-    let rw = s:candidate2registered_word(
+    let rw = eskk#dictionary#candidate2registered_word(
     \   candidates[candidates_index],
     \   self._key,
     \   self._okuri,
@@ -715,8 +715,8 @@ function! s:HenkanResult_update_rank() dict "{{{
 
     " Move self to the first.
     let dict = eskk#get_skk_dict()
-    call dict.forget_word(rw.input, rw.key, rw.okuri, rw.okuri_rom, rw.annotation)
-    call dict.remember_word(rw.input, rw.key, rw.okuri, rw.okuri_rom, rw.annotation)
+    call dict.forget_word(rw)
+    call dict.remember_word(rw)
 endfunction "}}}
 
 
@@ -1258,7 +1258,9 @@ function! s:Dictionary_remember_word_prompt(henkan_result) dict "{{{
         let [input, annotation] =
         \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
         let annotation = substitute(annotation, '^;', '', '')
-        call self.remember_word(input, key, okuri, okuri_rom, annotation)
+        call self.remember_word(
+        \       s:registered_word_new(
+        \           input, key, okuri, okuri_rom, annotation))
     endif
 
     call s:clear_command_line()
@@ -1271,13 +1273,12 @@ function! s:Dictionary_forget_all_words() dict "{{{
 endfunction "}}}
 
 " Clear given registered word.
-function! s:Dictionary_forget_word(input, key, okuri, okuri_rom, annotation) dict "{{{
-    let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom, a:annotation)
-    if !self._registered_words.has(rw)
+function! s:Dictionary_forget_word(word) dict "{{{
+    if !self._registered_words.has(a:word)
         return
     endif
 
-    call self.remove_registered_word(rw)
+    call self.remove_registered_word(a:word)
     if self._registered_words.empty()
         let self._registered_words_modified = 0
     endif
@@ -1288,13 +1289,12 @@ function! s:Dictionary_forget_word(input, key, okuri, okuri_rom, annotation) dic
 endfunction "}}}
 
 " Add registered word.
-function! s:Dictionary_remember_word(input, key, okuri, okuri_rom, annotation) dict "{{{
-    let rw = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom, a:annotation)
-    if self._registered_words.has(rw)
+function! s:Dictionary_remember_word(word) dict "{{{
+    if self._registered_words.has(a:word)
         return
     endif
 
-    call self._registered_words.unshift(rw)
+    call self._registered_words.unshift(a:word)
 
     if self._registered_words.size() >= g:eskk#dictionary_save_count
         call self.update_dictionary(0)
