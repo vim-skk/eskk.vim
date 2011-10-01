@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 435))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 436))
 
 
 function! s:SID() "{{{
@@ -37,6 +37,7 @@ delfunction s:SID
 "   True if s:eskk.enable() is called.
 let s:eskk = {
 \   'mode': '',
+\   'begin_pos': [],
 \   'buftable': {},
 \   'has_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
@@ -840,11 +841,6 @@ function! eskk#_initialize() "{{{
 
     " Register builtin-modes. {{{
     function! s:initialize_builtin_modes()
-        function! s:set_current_to_begin_pos() "{{{
-            call eskk#get_buftable().set_begin_pos('.')
-        endfunction "}}}
-
-
         " 'ascii' mode {{{
         let dict = {}
 
@@ -862,7 +858,7 @@ function! eskk#_initialize() "{{{
                         \   this.temp, 'already_set_for_this_word'
                         \)
                             " Set start col of word.
-                            call s:set_current_to_begin_pos()
+                            call eskk#set_begin_pos('.')
                             let this.temp.already_set_for_this_word = 1
                         endif
                     else
@@ -912,10 +908,10 @@ function! eskk#_initialize() "{{{
         call eskk#register_event(
         \   'enter-mode-abbrev',
         \   eskk#util#get_local_func(
-        \       'set_current_to_begin_pos',
+        \       'eskk#set_begin_pos',
         \       s:SID_PREFIX
         \   ),
-        \   []
+        \   ['.']
         \)
 
         call eskk#register_mode_structure('zenei', dict)
@@ -1027,10 +1023,10 @@ function! eskk#_initialize() "{{{
         call eskk#register_event(
         \   'enter-mode-abbrev',
         \   eskk#util#get_local_func(
-        \       'set_current_to_begin_pos',
+        \       'eskk#set_begin_pos',
         \       s:SID_PREFIX
         \   ),
-        \   []
+        \   ['.']
         \)
 
         call eskk#register_mode_structure('abbrev', dict)
@@ -1148,7 +1144,7 @@ function! eskk#_initialize() "{{{
     call eskk#map#map(
     \   'e',
     \   '<Plug>(eskk:_set_begin_pos)',
-    \   '[eskk#get_buftable().set_begin_pos("."), ""][1]',
+    \   '[eskk#set_begin_pos("."), ""][1]',
     \   'ic'
     \)
     call eskk#map#map(
@@ -1485,6 +1481,20 @@ function! eskk#register_mode_table(mode, table) "{{{
     if !has_key(s:mode_vs_table, a:mode)
         call eskk#register_table(a:table)
         let s:mode_vs_table[a:mode] = a:table
+    endif
+endfunction "}}}
+
+" Begin pos
+function! eskk#get_begin_pos() "{{{
+    let inst = eskk#get_current_instance()
+    return inst.begin_pos
+endfunction "}}}
+function! eskk#set_begin_pos(expr) "{{{
+    let inst = eskk#get_current_instance()
+    if mode() ==# 'i'
+        let inst.begin_pos = getpos(a:expr)
+    else
+        call eskk#logger#logf("called eskk from mode '%s'.", mode())
     endif
 endfunction "}}}
 

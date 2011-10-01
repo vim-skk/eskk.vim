@@ -1061,19 +1061,6 @@ function! s:Buftable_generate_kakutei_str() dict "{{{
     return self.remove_display_str() . self.get_display_str(0)
 endfunction "}}}
 
-function! s:Buftable_get_begin_pos() dict "{{{
-    return self._begin_pos
-endfunction "}}}
-function! s:Buftable_set_begin_pos(expr) dict "{{{
-    if mode() ==# 'i'
-        let self._begin_pos = ['i', getpos(a:expr)]
-    elseif mode() ==# 'c'
-        let self._begin_pos = ['c', getcmdpos()]
-    else
-        call eskk#logger#logf("called eskk from mode '%s'.", mode())
-    endif
-endfunction "}}}
-
 
 function! s:Buftable_empty() dict "{{{
     for buf_str in map(
@@ -1091,7 +1078,6 @@ endfunction "}}}
 function! s:Buftable_dump() dict "{{{
     let lines = []
     call add(lines, 'current phase: ' . self._henkan_phase)
-    call add(lines, 'begin pos: ' . string(self.get_begin_pos()))
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call add(lines, 'phase: ' . phase)
@@ -1167,8 +1153,6 @@ let s:Buftable = {
 \   'clear_all': eskk#util#get_local_funcref('Buftable_clear_all', s:SID_PREFIX),
 \   'remove_display_str': eskk#util#get_local_funcref('Buftable_remove_display_str', s:SID_PREFIX),
 \   'generate_kakutei_str': eskk#util#get_local_funcref('Buftable_generate_kakutei_str', s:SID_PREFIX),
-\   'get_begin_pos': eskk#util#get_local_funcref('Buftable_get_begin_pos', s:SID_PREFIX),
-\   'set_begin_pos': eskk#util#get_local_funcref('Buftable_set_begin_pos', s:SID_PREFIX),
 \   'empty': eskk#util#get_local_funcref('Buftable_empty', s:SID_PREFIX),
 \   'dump': eskk#util#get_local_funcref('Buftable_dump', s:SID_PREFIX),
 \}

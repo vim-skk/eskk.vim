@@ -423,17 +423,12 @@ function! s:set_selected_item() "{{{
     call s:initialize_variables()
 endfunction "}}}
 function! s:get_buftable_pos() "{{{
-    let buftable = eskk#get_buftable()
-    let l = buftable.get_begin_pos()
-    if empty(l)
-        call eskk#logger#log("Can't get begin pos.")
+    let pos = eskk#get_begin_pos()
+    if empty(pos)
+        call eskk#logger#warn("Can't get begin pos.")
         return [0, 0, 0]
     endif
-    let [mode, pos] = l
-    if mode !=# 'i'
-        return [0, mode, pos]
-    endif
-    return [1, mode, pos]
+    return [1, 'i', ]
 endfunction "}}}
 function! s:get_buftable_str(with_marker, ...) "{{{
     " NOTE: getline('.') returns string without string after a:base
