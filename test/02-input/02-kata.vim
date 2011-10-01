@@ -15,8 +15,8 @@ function! s:run()
     Is eskk#test#emulate_filter_keys("qasaq"), "アサ"
 
     Is eskk#test#emulate_filter_keys(';aq'), 'ア'
-    Is eskk#test#emulate_filter_keys(';sq'), ''
-    Is eskk#test#emulate_filter_keys(";asq"), "ア"
+    Is eskk#test#emulate_filter_keys(';sq'), 's'
+    Is eskk#test#emulate_filter_keys(";asq"), "アs"
     Is eskk#test#emulate_filter_keys(";asaq"), "アサ"
 endfunction
 
