@@ -1360,6 +1360,8 @@ function! s:Dictionary_update_dictionary(...) dict "{{{
     \)
     call self.forget_all_words()
     call self._user_dict.clear_modified_flags()
+    " Load changed lines.
+    call self._user_dict.update_lines()
 endfunction "}}}
 function! s:Dictionary_write_lines(lines, verbose) dict "{{{
     let lines = a:lines
