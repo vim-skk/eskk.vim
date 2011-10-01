@@ -1059,7 +1059,6 @@ let s:Buftable = {
 \       deepcopy(s:BufferString),
 \       deepcopy(s:BufferString),
 \       deepcopy(s:BufferString),
-\       deepcopy(s:BufferString),
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
