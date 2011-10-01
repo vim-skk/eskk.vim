@@ -484,7 +484,9 @@ function! eskk#map#map_all_keys(...) "{{{
 
     " Map mapped keys.
     for key in g:eskk#mapped_keys
-        call call('eskk#map#set_up_key', [key] + a:000)
+        if maparg(key, 'l') ==# ''
+            call call('eskk#map#set_up_key', [key] + a:000)
+        endif
     endfor
 
     " Map `:EskkMap -general` keys.
