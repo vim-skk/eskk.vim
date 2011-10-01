@@ -127,7 +127,7 @@ function! eskk#dictionary#candidate2registered_word(candidate, key, okuri, okuri
     \   a:key,
     \   a:okuri,
     \   a:okuri_rom,
-    \   ''
+    \   a:candidate.annotation
     \)
 endfunction "}}}
 
