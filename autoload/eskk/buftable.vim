@@ -935,6 +935,7 @@ function! s:get_tab_raw_str() "{{{
     return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
 endfunction "}}}
 
+" Convert rom_str and move it to rom_pairs.
 function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
@@ -942,6 +943,7 @@ function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
     for buf_str in map(phases, 'self.get_buf_str(v:val)')
         let rom_str = buf_str.rom_str.get()
         if table.has_map(rom_str)
+            " "n" => "ん"
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str,
             \   table.get_map(rom_str)
@@ -950,6 +952,7 @@ function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
         endif
     endfor
 endfunction "}}}
+" Convert rom_pairs and store it to rom_pairs itself.
 function! s:Buftable_convert_rom_pairs_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
@@ -959,6 +962,7 @@ function! s:Buftable_convert_rom_pairs_inplace(phases, ...) dict "{{{
         call self.set_buf_str(p, buf_str)
     endfor
 endfunction "}}}
+" Convert rom_pairs and return it.
 function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
