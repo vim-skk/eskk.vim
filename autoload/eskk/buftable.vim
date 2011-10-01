@@ -438,14 +438,11 @@ function! s:Buftable_do_enter(stash) dict "{{{
             \)
         endif
 
-        call self.push_kakutei_str(self.get_display_str(0))
-        call self.clear_all()
-
         if !empty(henkan_result)
             call henkan_result.update_rank()
         endif
+        call self.kakutei(self.get_display_str(0))
 
-        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#PHASE_OKURI
         call self.convert_rom_str_inplace(
         \   [g:eskk#buftable#PHASE_HENKAN, phase]
@@ -458,14 +455,11 @@ function! s:Buftable_do_enter(stash) dict "{{{
             \)
         endif
 
-        call self.push_kakutei_str(self.get_display_str(0))
-        call self.clear_all()
-
         if !empty(henkan_result)
             call henkan_result.update_rank()
         endif
+        call self.kakutei(self.get_display_str(0))
 
-        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         call self.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
@@ -479,11 +473,8 @@ function! s:Buftable_do_enter(stash) dict "{{{
         if !empty(henkan_result)
             call henkan_result.update_rank()
         endif
+        call self.kakutei(self.get_display_str(0))
 
-        call self.push_kakutei_str(self.get_display_str(0))
-        call self.clear_all()
-
-        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
     else
         throw eskk#internal_error(['eskk', 'buftable'])
     endif
@@ -613,11 +604,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
             \      dict.get_henkan_result()
             \   )
             if input != ''
-                call a:this.clear_all()
-                call a:this.push_kakutei_str(input . okuri)
-                call a:this.set_henkan_phase(
-                \   g:eskk#buftable#PHASE_NORMAL
-                \)
+                call a:this.kakutei(input . okuri)
             endif
         else
             " Restore previous buftable state
@@ -802,11 +789,7 @@ function! s:Buftable_do_henkan_abbrev(stash, convert_at_exact_match) dict "{{{
         \      dict.get_henkan_result()
         \   )
         if input != ''
-            call self.clear_all()
-            call self.push_kakutei_str(input . okuri)
-            call self.set_henkan_phase(
-            \   g:eskk#buftable#PHASE_NORMAL
-            \)
+            call self.kakutei(input . okuri)
         endif
     endtry
 endfunction "}}}
@@ -873,13 +856,7 @@ function! s:Buftable_do_henkan_other(stash, convert_at_exact_match) dict "{{{
             \)
             if g:eskk#kakutei_when_unique_candidate
             \   && !henkan_result.has_next()
-                call self.push_kakutei_str(
-                \   self.get_display_str(0)
-                \)
-                call self.clear_all()
-                call self.set_henkan_phase(
-                \   g:eskk#buftable#PHASE_NORMAL
-                \)
+                call self.kakutei(self.get_display_str(0))
             endif
         endif
     catch /^eskk: dictionary look up error/
@@ -889,11 +866,7 @@ function! s:Buftable_do_henkan_other(stash, convert_at_exact_match) dict "{{{
         \      dict.get_henkan_result()
         \   )
         if input != ''
-            call self.clear_all()
-            call self.push_kakutei_str(input . okuri)
-            call self.set_henkan_phase(
-            \   g:eskk#buftable#PHASE_NORMAL
-            \)
+            call self.kakutei(input . okuri)
         endif
     endtry
 endfunction "}}}
@@ -1004,9 +977,15 @@ function! s:convert_roms_and_kakutei(this, table) "{{{
     \   g:eskk#buftable#PHASE_HENKAN,
     \   g:eskk#buftable#PHASE_OKURI,
     \], a:table)
-    call a:this.push_kakutei_str(a:this.get_display_str(0))
-    call a:this.clear_all()
-    call a:this.set_henkan_phase(
+    call a:this.kakutei(a:this.get_display_str(0))
+endfunction "}}}
+
+function! s:Buftable_kakutei(str) dict "{{{
+    if a:str !=# ''
+        call self.push_kakutei_str(a:str)
+    endif
+    call self.clear_all()
+    call self.set_henkan_phase(
     \   g:eskk#buftable#PHASE_NORMAL
     \)
 endfunction "}}}
@@ -1123,6 +1102,7 @@ let s:Buftable = {
 \   'convert_rom_str_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_str_inplace', s:SID_PREFIX),
 \   'convert_rom_pairs_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_pairs_inplace', s:SID_PREFIX),
 \   'convert_rom_pairs': eskk#util#get_local_funcref('Buftable_convert_rom_pairs', s:SID_PREFIX),
+\   'kakutei': eskk#util#get_local_funcref('Buftable_kakutei', s:SID_PREFIX),
 \   'clear_all': eskk#util#get_local_funcref('Buftable_clear_all', s:SID_PREFIX),
 \   'remove_display_str': eskk#util#get_local_funcref('Buftable_remove_display_str', s:SID_PREFIX),
 \   'generate_kakutei_str': eskk#util#get_local_funcref('Buftable_generate_kakutei_str', s:SID_PREFIX),
