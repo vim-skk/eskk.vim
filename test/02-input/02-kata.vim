@@ -9,6 +9,10 @@ set cpo&vim
 
 
 function! s:run()
+    Is eskk#test#emulate_filter_keys(";q"), ""
+    Is eskk#test#emulate_filter_keys("a"), "あ"
+    Is eskk#test#emulate_filter_keys(";qa"), "あ"
+
     Is eskk#test#emulate_filter_keys('qaq'), 'ア'
     Is eskk#test#emulate_filter_keys('qsq'), ''
     Is eskk#test#emulate_filter_keys("qasq"), "ア"
