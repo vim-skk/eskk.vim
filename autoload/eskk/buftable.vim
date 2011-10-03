@@ -972,6 +972,9 @@ function! s:get_current_table() "{{{
     endif
 endfunction "}}}
 function! s:convert_roms_and_kakutei(this, table) "{{{
+    call a:this.convert_rom_str_inplace(
+    \   a:this.get_henkan_phase()
+    \)
     call a:this.convert_rom_pairs_inplace([
     \   g:eskk#buftable#PHASE_NORMAL,
     \   g:eskk#buftable#PHASE_HENKAN,
