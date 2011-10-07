@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 446))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 447))
 
 
 function! s:SID() "{{{
@@ -1635,7 +1635,8 @@ function! eskk#filter(char) "{{{
 
     try
         let do_filter = 1
-        if g:eskk#enable_completion && pumvisible()
+        if g:eskk#enable_completion
+        \&& pumvisible() && mode() ==# 'i'
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
