@@ -1376,29 +1376,21 @@ function! s:Dictionary_write_lines(lines, verbose) dict "{{{
         echo save_msg
     endif
 
-    let ret_success = 0
     try
-        let ret = writefile(lines, self._user_dict.path)
-        if ret ==# ret_success
-            if a:verbose
-                redraw
-                echo save_msg . 'Done.'
-            endif
-        else
-            throw eskk#internal_error(
-            \   ['eskk', 'dictionary'],
-            \   "can't write to '"
-            \       . self._user_dict.path
-            \       . "'."
-            \)
+        call writefile(lines, self._user_dict.path)
+        if a:verbose
+            redraw
+            echo save_msg . 'Done.'
         endif
     catch
-        redraw
-        echohl WarningMsg
-        echomsg save_msg . "Error. - " . v:exception
-        echomsg " Please check permission of '"
+        throw eskk#internal_error(
+        \   ['eskk', 'dictionary'],
+        \   "can't write to '"
+        \       . self._user_dict.path
+        \       . "'."
+        \   . " Please check permission of '"
         \   . self._user_dict.path . "'."
-        echohl None
+        \)
     endtry
 endfunction "}}}
 

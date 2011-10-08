@@ -129,21 +129,22 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             call okuri_nasi.match_and_add(line, '^\(\S\+[^a-z]\)[ \t]\+\(.\+\)')
         endfor
 
-        let r = writefile(
-        \   [';; okuri-ari entries.']
-        \       + okuri_ari.get_candidates()
-        \       + [';; okuri-nasi entries.']
-        \       + okuri_nasi.get_candidates(),
-        \   path
-        \)
-        if r == -1
+        try
+            call writefile(
+            \   [';; okuri-ari entries.']
+            \       + okuri_ari.get_candidates()
+            \       + [';; okuri-nasi entries.']
+            \       + okuri_nasi.get_candidates(),
+            \   path
+            \)
+        catch
             call eskk#logger#warn(
             \   ':EskkFixDictionary - '
             \   . "Could not write to '"
             \   . fnamemodify(path, ':~')
             \   . "'."
             \)
-        endif
+        endtry
     endif
 endfunction "}}}
 
