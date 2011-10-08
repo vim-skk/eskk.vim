@@ -60,6 +60,15 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
     \          exists('g:eskk#dictionary.path') ? g:eskk#dictionary.path : ''
     let path = expand(path)
     if !filereadable(path)
+        echohl ErrorMsg
+        echom "'".path."' is not readable."
+        echohl None
+        return
+    endif
+    if !filewritable(path)
+        echohl ErrorMsg
+        echom "'".path."' is not writable."
+        echohl None
         return
     endif
 
