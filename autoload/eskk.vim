@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 449))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 450))
 
 
 function! s:SID() "{{{
@@ -42,6 +42,7 @@ let s:eskk = {
 \   'has_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
+\   'formatoptions': 0,
 \}
 
 
@@ -1188,6 +1189,25 @@ function! eskk#_initialize() "{{{
 
     " Throw eskk-initialize-post event.
     doautocmd User eskk-initialize-post
+    " }}}
+
+    " Save/Restore 'formatoptions'. {{{
+    function! s:save_restore_formatoptions(enable)
+        let inst = eskk#get_current_instance()
+        if a:enable
+            if type(inst.formatoptions) is type(0)
+                let inst.formatoptions = &l:formatoptions
+                let &l:formatoptions = ''
+            endif
+        else
+            if type(inst.formatoptions) is type("")
+                let &l:formatoptions = inst.formatoptions
+                let inst.formatoptions = 0
+            endif
+        endif
+    endfunction
+    call eskk#register_event('enable-im', eskk#util#get_local_func('save_restore_formatoptions', s:SID_PREFIX), [1])
+    call eskk#register_event('disable-im', eskk#util#get_local_func('save_restore_formatoptions', s:SID_PREFIX), [0])
     " }}}
 
     let s:initialization_state = s:INIT_DONE
