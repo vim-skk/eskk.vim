@@ -550,10 +550,6 @@ function! s:Buftable_do_backspace(stash) dict "{{{
             if empty(p)
                 continue
             endif
-            " ["tyo", "ちょ"] => ["tyo", "ち"]
-            if eskk#util#mb_strlen(p[1]) !=# 1
-                call buf_str.rom_pairs.push_one_pair(p[0], eskk#util#mb_chop(p[1]))
-            endif
             break
         elseif self.get_marker(phase) != ''
             if !self.step_back_henkan_phase()
