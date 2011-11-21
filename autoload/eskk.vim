@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 451))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 452))
 
 
 function! s:SID() "{{{
@@ -945,7 +945,6 @@ function! eskk#_initialize() "{{{
         function! dict.filter(stash) "{{{
             let char = a:stash.char
             let buftable = eskk#get_buftable()
-            let this = eskk#get_mode_structure('abbrev')
             let buf_str = buftable.get_current_buf_str()
             let phase = buftable.get_henkan_phase()
 
@@ -1013,12 +1012,6 @@ function! eskk#_initialize() "{{{
         endfunction "}}}
         function! dict.get_init_phase() "{{{
             return g:eskk#buftable#PHASE_HENKAN
-        endfunction "}}}
-        function! dict.get_supported_phases() "{{{
-            return [
-            \   g:eskk#buftable#PHASE_HENKAN,
-            \   g:eskk#buftable#PHASE_HENKAN_SELECT,
-            \]
         endfunction "}}}
 
         call eskk#register_event(
