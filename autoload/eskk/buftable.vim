@@ -539,6 +539,12 @@ function! s:Buftable_do_backspace(stash) dict "{{{
         endif
     endif
 
+    " TODO:
+    " "sた" => type "<BS>a" => "さ" (not "sa")
+    " Solution:
+    " - Save the flag whether "s" is converted or not
+    "   to "Pair" object.
+    "
     " Build backspaces to delete previous characters.
     for phase in self.get_lower_phases()
         let buf_str = self.get_buf_str(phase)
