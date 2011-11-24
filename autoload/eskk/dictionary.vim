@@ -1335,15 +1335,12 @@ function! s:Dictionary_update_dictionary(...) dict "{{{
     if !self.is_modified()
         return
     endif
-
-    if do_update_lines
-        call self._user_dict.update_lines()
-    endif
+    " Invalid data.
     if filereadable(self._user_dict.path)
-        if !self._user_dict.is_valid()
-            return
-        endif
-    else
+    \   && !self._user_dict.is_valid()
+        return
+    endif
+    if !filereadable(self._user_dict.path)
         " Create new lines.
         " NOTE: It must not throw parse error exception!
         call self._user_dict.set_lines([
@@ -1352,6 +1349,9 @@ function! s:Dictionary_update_dictionary(...) dict "{{{
         \])
     endif
 
+    if do_update_lines
+        call self._user_dict.update_lines()
+    endif
     call self.write_lines(
     \   self._user_dict.get_updated_lines(
     \       self._registered_words
