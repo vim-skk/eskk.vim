@@ -29,8 +29,6 @@ delfunction s:SID
 "   Current mode.
 " buftable:
 "   Buffer strings for inserted, filtered and so on.
-" has_locked_old_str:
-"   Lock current diff old string?
 " temp_event_hook_fn:
 "   Temporary event handler functions/arguments.
 " enabled:
@@ -39,7 +37,6 @@ let s:eskk = {
 \   'mode': '',
 \   'begin_pos': [],
 \   'buftable': {},
-\   'has_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'formatoptions': 0,
@@ -230,50 +227,44 @@ function! s:asym_filter(stash) "{{{
     endfor
 
 
-    " In order not to change current buftable old string.
-    call eskk#lock_old_str()
-    try
-        " Handle special characters.
-        " These characters are handled regardless of current phase.
-        if eskk#map#is_special_lhs(char, 'backspace-key')
-            call buftable.do_backspace(a:stash)
-            return
-        elseif eskk#map#is_special_lhs(char, 'enter-key')
-            call buftable.do_enter(a:stash)
-            return
-        elseif eskk#map#is_special_lhs(char, 'sticky')
+    " Handle special characters.
+    " These characters are handled regardless of current phase.
+    if eskk#map#is_special_lhs(char, 'backspace-key')
+        call buftable.do_backspace(a:stash)
+        return
+    elseif eskk#map#is_special_lhs(char, 'enter-key')
+        call buftable.do_enter(a:stash)
+        return
+    elseif eskk#map#is_special_lhs(char, 'sticky')
+        call buftable.do_sticky(a:stash)
+        return
+    elseif char =~# '^[A-Z]$'
+    \   && !eskk#map#is_special_lhs(
+    \          char, 'phase:henkan-select:delete-from-dict'
+    \       )
+        if buftable.get_current_buf_str().rom_str.empty()
             call buftable.do_sticky(a:stash)
-            return
-        elseif char =~# '^[A-Z]$'
-        \   && !eskk#map#is_special_lhs(
-        \          char, 'phase:henkan-select:delete-from-dict'
-        \       )
-            if buftable.get_current_buf_str().rom_str.empty()
-                call buftable.do_sticky(a:stash)
-                call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#map#key2char',
-                \   [eskk#map#get_filter_map(tolower(char))]
-                \)
-                return
-            else
-                " NOTE: Assume "SAkujo" as "Sakujo".
-                let stash = deepcopy(a:stash)
-                let stash.char = tolower(stash.char)
-                return s:asym_filter(stash)
-            endif
-        elseif eskk#map#is_special_lhs(char, 'escape-key')
-            call buftable.do_escape(a:stash)
-            return
-        elseif eskk#map#is_special_lhs(char, 'tab')
-            call buftable.do_tab(a:stash)
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#map#key2char',
+            \   [eskk#map#get_filter_map(tolower(char))]
+            \)
             return
         else
-            " Fall through.
+            " NOTE: Assume "SAkujo" as "Sakujo".
+            let stash = deepcopy(a:stash)
+            let stash.char = tolower(stash.char)
+            return s:asym_filter(stash)
         endif
-    finally
-        call eskk#unlock_old_str()
-    endtry
+    elseif eskk#map#is_special_lhs(char, 'escape-key')
+        call buftable.do_escape(a:stash)
+        return
+    elseif eskk#map#is_special_lhs(char, 'tab')
+        call buftable.do_tab(a:stash)
+        return
+    else
+        " Fall through.
+    endif
 
 
     " Handle other characters.
@@ -1642,9 +1633,7 @@ function! eskk#filter(char) "{{{
     \   'return': 0,
     \}
 
-    if !inst.has_locked_old_str
-        call buftable.set_old_str(buftable.get_display_str())
-    endif
+    call buftable.set_old_str(buftable.get_display_str())
 
     try
         let do_filter = 1
