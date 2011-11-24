@@ -232,7 +232,7 @@ function! s:Buftable_rewrite() dict "{{{
             return self.make_remove_bs()
         elseif inserted_str != '' && stridx(old, inserted_str) == 0
             " When inserted_str == "foo", old == "foobar"
-            " Insert Remove "bar"
+            " Remove "bar".
             return repeat(
             \   eskk#map#key2char(
             \       eskk#map#get_special_map("backspace-key")
