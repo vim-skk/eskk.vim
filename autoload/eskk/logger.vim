@@ -29,7 +29,7 @@ function! eskk#logger#write_debug_log_file() "{{{
         let s:warning_messages = []
     endtry
 endfunction "}}}
-function! eskk#logger#write_error_log_file(char, ...) "{{{
+function! eskk#logger#write_error_log_file(stash, ...) "{{{
     let v_exception = a:0 ? a:1 : v:exception
 
     let lines = []
@@ -45,7 +45,7 @@ function! eskk#logger#write_error_log_file(char, ...) "{{{
     call add(lines, '--- g:eskk#version ---')
 
     call add(lines, '--- char ---')
-    call add(lines, printf('char: %s(%d)', string(a:char), char2nr(a:char)))
+    call add(lines, printf('char: %s(%d)', string(a:stash.char), char2nr(a:stash.char)))
     call add(lines, printf('mode(): %s', mode()))
     call add(lines, '--- char ---')
 
@@ -106,7 +106,7 @@ function! eskk#logger#write_error_log_file(char, ...) "{{{
     call add(lines, '')
 
     call add(lines, '--- buftable ---')
-    let lines += eskk#get_buftable().dump()
+    let lines += a:stash.buftable.dump()
     call add(lines, '--- buftable ---')
 
     call add(lines, '')

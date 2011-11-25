@@ -1597,12 +1597,17 @@ endfunction "}}}
 " Filter
 function! eskk#filter(char) "{{{
     let inst = eskk#get_current_instance()
+    let buftable = eskk#get_buftable()
+    let stash = {
+    \   'char': a:char,
+    \   'buftable': buftable,
+    \}
 
     " Check irregular circumstance.
     if !eskk#is_supported_mode(inst.mode)
         " Detect fatal error. disable eskk...
         return s:force_disable_eskk(
-        \   a:char,
+        \   stash,
         \   eskk#util#build_error(
         \       ['eskk'],
         \       ['current mode is not supported: '
@@ -1611,14 +1616,7 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
-
     call eskk#throw_event('filter-begin')
-
-    let buftable = eskk#get_buftable()
-    let stash = {
-    \   'char': a:char,
-    \}
-
     call buftable.set_old_str(buftable.get_display_str())
 
     try
@@ -1647,7 +1645,7 @@ function! eskk#filter(char) "{{{
     catch
         " Detect fatal error. disable eskk...
         return s:force_disable_eskk(
-        \   a:char,
+        \   stash,
         \   eskk#util#build_error(
         \       ['eskk'],
         \       ['main routine raised an error: '.v:exception]
@@ -1658,14 +1656,14 @@ function! eskk#filter(char) "{{{
         call eskk#throw_event('filter-finalize')
     endtry
 endfunction "}}}
-function! s:force_disable_eskk(char, error) "{{{
+function! s:force_disable_eskk(stash, error) "{{{
     " FIXME: It may cause inconsistency
     " to eskk status and lang options.
     " TODO: detect lang options and follow the status.
     call eskk#disable_im()
 
     call eskk#logger#write_error_log_file(
-    \   a:char, a:error,
+    \   a:stash, a:error,
     \)
     sleep 1
 
