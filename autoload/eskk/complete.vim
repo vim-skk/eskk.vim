@@ -426,11 +426,6 @@ function! s:set_selected_item() "{{{
     call s:initialize_variables()
 endfunction "}}}
 function! s:get_buftable_str(with_marker, ...) "{{{
-    " NOTE: getline('.') returns string without string after a:base
-    " while matching the head of input string,
-    " but eskk#complete#eskkcomplete() returns `pos[2] - 1`
-    " it always does not match to input string
-    " so getline('.') returns whole string.
     if col('.') == 1
         return ''
     endif
@@ -441,12 +436,13 @@ function! s:get_buftable_str(with_marker, ...) "{{{
         return ''
     endif
     let begin = pos[2] - 1
-    if a:0
-        " Manual completion (not by neocomplcache).
-        " a:1 is a:base.
-        let line = getline('.')[: col('.') - 2] . a:1
-    else
-        let line = getline('.')[: col('.') - 2]
+    let line = getline('.')[: col('.') - 2]
+    if a:0 && eskk#is_neocomplcache_locked()
+        " XXX:
+        " when called by manual completion,
+        " a:base (= a:1) is not added
+        " to getline('.')'s return value.
+        let line .= a:1
     endif
 
     if !a:with_marker && s:has_marker()
