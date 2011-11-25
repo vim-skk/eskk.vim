@@ -843,15 +843,18 @@ function! eskk#_initialize() "{{{
                     endif
                 endif
 
+                let buftable = eskk#get_buftable()
                 if eskk#has_mode_table('ascii')
                     if !has_key(this.temp, 'table')
                         let this.temp.table = eskk#get_mode_table('ascii')
                     endif
-                    let a:stash.return = this.temp.table.get_map(
-                    \   a:stash.char, a:stash.char
+                    call buftable.push_kakutei_str(
+                    \   this.temp.table.get_map(
+                    \      a:stash.char, a:stash.char
+                    \   )
                     \)
                 else
-                    let a:stash.return = a:stash.char
+                    call buftable.push_kakutei_str(a:stash.char)
                 endif
             endif
         endfunction
@@ -872,8 +875,11 @@ function! eskk#_initialize() "{{{
                 if !has_key(this.temp, 'table')
                     let this.temp.table = eskk#get_mode_table('zenei')
                 endif
-                let a:stash.return = this.temp.table.get_map(
-                \   a:stash.char, a:stash.char
+                let buftable = eskk#get_buftable()
+                call buftable.push_kakutei_str(
+                \   this.temp.table.get_map(
+                \      a:stash.char, a:stash.char
+                \   )
                 \)
             endif
         endfunction
@@ -1611,7 +1617,6 @@ function! eskk#filter(char) "{{{
     let buftable = eskk#get_buftable()
     let stash = {
     \   'char': a:char,
-    \   'return': 0,
     \}
 
     call buftable.set_old_str(buftable.get_display_str())
@@ -1632,7 +1637,12 @@ function! eskk#filter(char) "{{{
         if do_filter
             call eskk#call_mode_func('filter', [stash], 1)
         endif
-        return s:rewrite_string(stash.return)
+        return
+        \   (eskk#has_event('filter-redispatch-pre') ?
+        \       "\<Plug>(eskk:_filter_redispatch_pre)" : '')
+        \   . eskk#get_buftable().rewrite()
+        \   . (eskk#has_event('filter-redispatch-post') ?
+        \       "\<Plug>(eskk:_filter_redispatch_post)" : '')
 
     catch
         " Detect fatal error. disable eskk...
@@ -1664,36 +1674,6 @@ function! s:force_disable_eskk(char, error) "{{{
     " so do it manually.
     call eskk#map#map('b', '<Plug>(eskk:_reenter_insert_mode)', '<esc>i')
     return "\<Plug>(eskk:_reenter_insert_mode)"
-endfunction "}}}
-function! s:rewrite_string(return_string) "{{{
-    let redispatch_pre = ''
-    if eskk#has_event('filter-redispatch-pre')
-        let redispatch_pre =
-        \   "\<Plug>(eskk:_filter_redispatch_pre)"
-    endif
-
-    let redispatch_post = ''
-    if eskk#has_event('filter-redispatch-post')
-        let redispatch_post =
-        \   "\<Plug>(eskk:_filter_redispatch_post)"
-    endif
-
-    if type(a:return_string) == type("")
-        let buf_inst = eskk#get_buffer_instance()
-        let buf_inst.return_string = a:return_string
-        call eskk#map#map(
-        \   'be',
-        \   '<Plug>(eskk:expr:_return_string)',
-        \   'eskk#get_buffer_instance().return_string'
-        \)
-        let string = "\<Plug>(eskk:expr:_return_string)"
-    else
-        let string = eskk#get_buftable().rewrite()
-    endif
-    return
-    \   redispatch_pre
-    \   . string
-    \   . redispatch_post
 endfunction "}}}
 
 " g:eskk#use_color_cursor

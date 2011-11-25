@@ -310,10 +310,12 @@ function! s:do_escape(stash) "{{{
 endfunction "}}}
 function! s:select_item(stash) "{{{
     let s:completion_selected = 1
-    let a:stash.return = a:stash.char
+    let buftable = eskk#get_buftable()
+    call buftable.push_kakutei_str(a:stash.char)
 endfunction "}}}
 function! s:identity(stash) "{{{
-    let a:stash.return = a:stash.char
+    let buftable = eskk#get_buftable()
+    call buftable.push_kakutei_str(a:stash.char)
 endfunction "}}}
 function! s:nop(stash) "{{{
 endfunction "}}}
@@ -351,7 +353,8 @@ function! s:adjust_candidate(stash, recall_key) "{{{
     if s:completion_selected
         let s:completion_selected = 0
         " Insert selected item.
-        let a:stash.return = "\<C-n>\<C-p>"
+        let buftable = eskk#get_buftable()
+        call buftable.push_kakutei_str("\<C-n>\<C-p>")
         " Call `s:close_pum()` at next time.
         call eskk#register_temp_event(
         \   'filter-redispatch-post',
