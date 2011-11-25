@@ -118,25 +118,6 @@ function! eskk#load() "{{{
     runtime! plugin/eskk.vim
 endfunction "}}}
 
-if !exists('g:__eskk_now_reloading')
-    function! eskk#reload() "{{{
-        let scripts = []
-        let scripts += eskk#util#get_loaded_scripts('\C'.'/autoload/eskk/\S\+\.vim$')
-        let scripts += eskk#util#get_loaded_scripts('\C'.'/autoload/eskk\.vim$')
-        unlet! g:__eskk_now_reloading
-        for script in sort(scripts)    " Make :source order consistent
-            let g:__eskk_now_reloading = 1
-            try
-                source `=script`
-            catch
-                call eskk#logger#warnf('[%s] at [%s]', v:exception, v:throwpoint)
-            finally
-                unlet g:__eskk_now_reloading
-            endtry
-        endfor
-    endfunction "}}}
-endif
-
 
 
 " Instance

@@ -28,11 +28,6 @@ function! eskk#commands#define() "{{{
     \   -bar -bang -nargs=* -complete=file
     \   EskkFixDictionary
     \   call s:cmd_fix_dictionary(<q-args>, <bang>0)
-
-    command!
-    \   -bar
-    \   EskkReload
-    \   call eskk#reload()
 endfunction "}}}
 
 function! s:cmd_forget_registered_words() "{{{
