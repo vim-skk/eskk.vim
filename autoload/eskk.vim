@@ -368,13 +368,6 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             endfor
         endif
 
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('clear_buffer_string', s:SID_PREFIX),
-        \   [g:eskk#buftable#PHASE_NORMAL]
-        \)
-
         if g:eskk#convert_at_exact_match
         \   && phase ==# g:eskk#buftable#PHASE_HENKAN
             let st = eskk#get_current_mode_structure()
@@ -523,14 +516,6 @@ function! s:filter_rom_no_match(stash, table) "{{{
         call buf_str.rom_str.clear()
     else
         call buf_str.rom_str.set(char)
-    endif
-endfunction "}}}
-" Clear filtered string when eskk#filter()'s finalizing.
-function! s:clear_buffer_string(phase) "{{{
-    let buftable = eskk#get_buftable()
-    if buftable.get_henkan_phase() ==# a:phase
-        let buf_str = buftable.get_current_buf_str()
-        call buf_str.rom_pairs.clear()
     endif
 endfunction "}}}
 
@@ -1652,7 +1637,9 @@ function! eskk#filter(char) "{{{
         \)
 
     finally
-        call eskk#throw_event('filter-finalize')
+        if buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_NORMAL
+            call buftable.get_current_buf_str().rom_pairs.clear()
+        endif
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(stash, error) "{{{
