@@ -193,7 +193,7 @@ function! s:complete(mode, base) "{{{
     let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
 
     let filter_str = s:get_buftable_str(0, a:base)
-    let marker = g:eskk#marker_popup . g:eskk#marker_henkan
+    let marker = g:eskk#marker_popup
 
     let candidates = dict.search_all_candidates(key, okuri, okuri_rom)
     if empty(candidates)
@@ -453,7 +453,6 @@ function! s:get_buftable_str(with_marker, ...) "{{{
         if line[begin : begin + strlen(g:eskk#marker_popup) - 1]
         \   ==# g:eskk#marker_popup
             let begin += strlen(g:eskk#marker_popup)
-            \               + strlen(g:eskk#marker_henkan)
         elseif line[begin : begin + strlen(g:eskk#marker_henkan) - 1]
         \   ==# g:eskk#marker_henkan
             let begin += strlen(g:eskk#marker_henkan)
