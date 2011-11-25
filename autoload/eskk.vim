@@ -659,7 +659,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#marker_okuri', '*')
     call eskk#util#set_default('g:eskk#marker_henkan_select', '▼')
     call eskk#util#set_default('g:eskk#marker_jisyo_touroku', '?')
-    call eskk#util#set_default('g:eskk#marker_popup', '#')
+    call eskk#util#set_default('g:eskk#marker_popup', '◇')
 
     " Completion
     call eskk#util#set_default('g:eskk#enable_completion', 1)
