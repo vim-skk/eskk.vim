@@ -176,7 +176,7 @@ endfunction "}}}
 " s:asym_filter {{{
 function! s:asym_filter(stash) "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let phase = buftable.get_henkan_phase()
 
 
@@ -292,7 +292,6 @@ function! s:asym_filter(stash) "{{{
                     \)
                     sleep 1
 
-                    let buftable = eskk#get_buftable()
                     call buftable.push_kakutei_str(
                     \   buftable.get_display_str(0)
                     \)
@@ -319,7 +318,7 @@ endfunction "}}}
 
 function! s:filter_rom(stash, table) "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
 
@@ -336,7 +335,7 @@ function! s:filter_rom(stash, table) "{{{
 endfunction "}}}
 function! s:filter_rom_exact_match(stash, table) "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
     let phase = buftable.get_henkan_phase()
@@ -479,8 +478,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     endif
 endfunction "}}}
 function! s:filter_rom_has_candidates(stash) "{{{
-    let buftable = eskk#get_buftable()
-    let buf_str  = buftable.get_current_buf_str()
+    let buf_str  = a:stash.buftable.get_current_buf_str()
     call buf_str.rom_str.append(a:stash.char)
 endfunction "}}}
 function! s:filter_rom_no_match(stash, table) "{{{
@@ -843,18 +841,17 @@ function! eskk#_initialize() "{{{
                     endif
                 endif
 
-                let buftable = eskk#get_buftable()
                 if eskk#has_mode_table('ascii')
                     if !has_key(this.temp, 'table')
                         let this.temp.table = eskk#get_mode_table('ascii')
                     endif
-                    call buftable.push_kakutei_str(
+                    call a:stash.buftable.push_kakutei_str(
                     \   this.temp.table.get_map(
                     \      a:stash.char, a:stash.char
                     \   )
                     \)
                 else
-                    call buftable.push_kakutei_str(a:stash.char)
+                    call a:stash.buftable.push_kakutei_str(a:stash.char)
                 endif
             endif
         endfunction
@@ -875,8 +872,7 @@ function! eskk#_initialize() "{{{
                 if !has_key(this.temp, 'table')
                     let this.temp.table = eskk#get_mode_table('zenei')
                 endif
-                let buftable = eskk#get_buftable()
-                call buftable.push_kakutei_str(
+                call a:stash.buftable.push_kakutei_str(
                 \   this.temp.table.get_map(
                 \      a:stash.char, a:stash.char
                 \   )
@@ -922,7 +918,7 @@ function! eskk#_initialize() "{{{
 
         function! dict.filter(stash) "{{{
             let char = a:stash.char
-            let buftable = eskk#get_buftable()
+            let buftable = a:stash.buftable
             let buf_str = buftable.get_current_buf_str()
             let phase = buftable.get_henkan_phase()
 
@@ -1635,6 +1631,9 @@ function! eskk#filter(char) "{{{
         if do_filter
             call eskk#call_mode_func('filter', [stash], 1)
         endif
+
+        " NOTE: `buftable` may become invalid reference
+        " because `eskk#call_mode_func()` may call `eskk#set_buftable()`.
         return
         \   (eskk#has_event('filter-redispatch-pre') ?
         \       "\<Plug>(eskk:_filter_redispatch_pre)" : '')
