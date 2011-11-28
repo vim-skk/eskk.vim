@@ -438,12 +438,6 @@ eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
 >
     autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
     function! s:eskk_initial_pre()
-        " User can be allowed to modify
-        " eskk global variables (`g:eskk#...`)
-        " until `User eskk-initialize-pre` event.
-        " So user can do something heavy process here.
-        " (I'm a paranoia, eskk#table#new() is not so heavy.
-        " But it loads autoload/vice.vim recursively)
         let t = eskk#table#new('rom_to_hira*', 'rom_to_hira')
         call t.add_map('~', '～')
         call t.add_map('zc', '(c)')
