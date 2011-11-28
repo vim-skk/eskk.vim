@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 455))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 456))
 
 
 function! s:SID() "{{{
@@ -907,7 +907,7 @@ function! eskk#_initialize() "{{{
         endfunction
 
         call eskk#register_event(
-        \   'enter-mode-abbrev',
+        \   'enter-mode-zenei',
         \   'eskk#set_begin_pos',
         \   ['.']
         \)
