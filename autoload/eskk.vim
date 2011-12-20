@@ -77,6 +77,7 @@ let s:eskk_mappings = {
 \   'escape-key': {},
 \   'enter-key': {},
 \   'tab': {},
+\   'phase:cancel': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -267,6 +268,9 @@ function! s:asym_filter(stash) "{{{
             return
         elseif eskk#map#is_special_lhs(char, 'tab')
             call buftable.do_tab(a:stash)
+            return
+        elseif eskk#map#is_special_lhs(char, 'phase:cancel')
+            call buftable.do_cancel(a:stash)
             return
         else
             " Fall through.
@@ -770,6 +774,8 @@ function! eskk#_initialize() "{{{
     EskkMap -type=enter-key -unique <CR>
     EskkMap -type=escape-key -unique <Esc>
     EskkMap -type=tab -unique <Tab>
+
+    EskkMap -type=phase:cancel -unique <C-g>
 
     EskkMap -type=phase:henkan:henkan-key -unique <Space>
 

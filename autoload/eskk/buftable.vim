@@ -904,6 +904,22 @@ function! s:Buftable_do_escape(stash) dict "{{{
     call eskk#util#assert(esc != '', 'esc must not be empty string')
     let a:stash.return = kakutei_str . eskk#map#key2char(esc)
 endfunction "}}}
+
+
+function! s:Buftable_do_cancel(stash) dict "{{{
+    let kakutei_str = self.get_display_str(0)
+    if len(kakutei_str) > 0
+      " TODO: remove only pre-editing string. note that don't remove marks.
+      for _ in split(kakutei_str, '\zs')
+        call self.do_backspace(a:stash)
+      endfor
+    else
+      call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+      call self.clear_all()
+    endif
+endfunction "}}}
+
+
 function! s:Buftable_do_tab(stash) dict "{{{
     let buf_str = self.get_current_buf_str()
     call buf_str.rom_str.append(s:get_tab_raw_str())
@@ -1002,8 +1018,9 @@ function! s:Buftable_clear_all() dict "{{{
     endfor
 endfunction "}}}
 
-function! s:Buftable_remove_display_str() dict "{{{
-    let current_str = self.get_display_str()
+function! s:Buftable_remove_display_str(...) dict "{{{
+    let with_marker  = get(a:000, 0, 1)
+    let current_str = self.get_display_str(with_marker)
 
     " NOTE: This function return value is not remapped.
     let bs = eskk#map#get_special_key('backspace-key')
@@ -1102,6 +1119,7 @@ let s:Buftable = {
 \   'do_q_key': eskk#util#get_local_funcref('Buftable_do_q_key', s:SID_PREFIX),
 \   'do_l_key': eskk#util#get_local_funcref('Buftable_do_l_key', s:SID_PREFIX),
 \   'do_escape': eskk#util#get_local_funcref('Buftable_do_escape', s:SID_PREFIX),
+\   'do_cancel': eskk#util#get_local_funcref('Buftable_do_cancel', s:SID_PREFIX),
 \   'do_tab': eskk#util#get_local_funcref('Buftable_do_tab', s:SID_PREFIX),
 \   'convert_rom_str_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_str_inplace', s:SID_PREFIX),
 \   'convert_rom_pairs_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_pairs_inplace', s:SID_PREFIX),

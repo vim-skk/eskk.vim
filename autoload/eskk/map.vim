@@ -98,6 +98,7 @@ endfunction "}}}
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
 \   'hira': [
+\       'phase:cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
@@ -114,6 +115,7 @@ let s:MODE_LOCAL_KEYS = {
 \       'mode:hira:to-abbrev',
 \   ],
 \   'kata': [
+\       'phase:cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
@@ -130,6 +132,7 @@ let s:MODE_LOCAL_KEYS = {
 \       'mode:kata:to-abbrev',
 \   ],
 \   'hankata': [
+\       'phase:cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
