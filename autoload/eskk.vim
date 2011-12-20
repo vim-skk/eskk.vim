@@ -1318,14 +1318,20 @@ function! eskk#disable() "{{{
         let &l:omnifunc = inst.omnifunc_save
     endif
 
-    call eskk#unlock_neocomplcache()
-
-    let inst.enabled = 0
-
     if mode() =~# '^[ic]$'
         let buftable = eskk#get_buftable()
-        return buftable.generate_kakutei_str() . "\<C-^>"
+        let kakutei_str = buftable.get_display_str(0)
+        if len(kakutei_str) > 0
+          let kakutei_str = buftable.remove_display_str() . kakutei_str
+        else
+          let kakutei_str = "\<cr>"
+        endif
+        call buftable.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+        call buftable.clear_all()
+        return kakutei_str
     else
+        call eskk#unlock_neocomplcache()
+        let inst.enabled = 0
         return eskk#disable_im()
     endif
 endfunction "}}}
