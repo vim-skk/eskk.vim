@@ -1020,9 +1020,8 @@ function! s:Buftable_clear_all() dict "{{{
     endfor
 endfunction "}}}
 
-function! s:Buftable_remove_display_str(...) dict "{{{
-    let with_marker  = get(a:000, 0, 1)
-    let current_str = self.get_display_str(with_marker)
+function! s:Buftable_remove_display_str() dict "{{{
+    let current_str = self.get_display_str()
 
     " NOTE: This function return value is not remapped.
     let bs = eskk#map#get_special_key('backspace-key')
