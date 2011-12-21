@@ -1326,15 +1326,16 @@ function! eskk#disable() "{{{
 
     if mode() =~# '^[ic]$'
         let buftable = eskk#get_buftable()
-        let kakutei_str = buftable.get_display_str(0)
-        if len(kakutei_str) > 0
-          let kakutei_str = buftable.remove_display_str() . kakutei_str
+        let kakutei_str = buftable.generate_kakutei_str()
+        if !empty(buftable.get_display_str(0))
+            call buftable.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+            call buftable.clear_all()
+            return kakutei_str
         else
-          let kakutei_str = "\<cr>"
+            call eskk#unlock_neocomplcache()
+            let inst.enabled = 0
+            return kakutei_str . "\<C-^>"
         endif
-        call buftable.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
-        call buftable.clear_all()
-        return kakutei_str
     else
         call eskk#unlock_neocomplcache()
         let inst.enabled = 0
