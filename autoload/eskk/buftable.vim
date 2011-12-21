@@ -481,8 +481,10 @@ function! s:Buftable_do_enter(stash) dict "{{{
 endfunction "}}}
 function! s:Buftable_do_backspace(stash) dict "{{{
     if self.get_old_str() == ''
-        let a:stash.return = eskk#map#key2char(
-        \   eskk#map#get_special_key('backspace-key')
+        call self.push_kakutei_str(
+        \   eskk#map#key2char(
+        \      eskk#map#get_special_key('backspace-key')
+        \   )
         \)
         return
     endif
@@ -902,7 +904,7 @@ function! s:Buftable_do_escape(stash) dict "{{{
     " NOTE: This function return value is not remapped.
     let esc = eskk#map#get_special_key('escape-key')
     call eskk#util#assert(esc != '', 'esc must not be empty string')
-    let a:stash.return = kakutei_str . eskk#map#key2char(esc)
+    call self.push_kakutei_str(kakutei_str . eskk#map#key2char(esc))
 endfunction "}}}
 
 

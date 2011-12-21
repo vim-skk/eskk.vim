@@ -29,8 +29,6 @@ delfunction s:SID
 "   Current mode.
 " buftable:
 "   Buffer strings for inserted, filtered and so on.
-" has_locked_old_str:
-"   Lock current diff old string?
 " temp_event_hook_fn:
 "   Temporary event handler functions/arguments.
 " enabled:
@@ -39,7 +37,6 @@ let s:eskk = {
 \   'mode': '',
 \   'begin_pos': [],
 \   'buftable': {},
-\   'has_locked_old_str': 0,
 \   'temp_event_hook_fn': {},
 \   'enabled': 0,
 \   'formatoptions': 0,
@@ -122,25 +119,6 @@ function! eskk#load() "{{{
     runtime! plugin/eskk.vim
 endfunction "}}}
 
-if !exists('g:__eskk_now_reloading')
-    function! eskk#reload() "{{{
-        let scripts = []
-        let scripts += eskk#util#get_loaded_scripts('\C'.'/autoload/eskk/\S\+\.vim$')
-        let scripts += eskk#util#get_loaded_scripts('\C'.'/autoload/eskk\.vim$')
-        unlet! g:__eskk_now_reloading
-        for script in sort(scripts)    " Make :source order consistent
-            let g:__eskk_now_reloading = 1
-            try
-                source `=script`
-            catch
-                call eskk#logger#warnf('[%s] at [%s]', v:exception, v:throwpoint)
-            finally
-                unlet g:__eskk_now_reloading
-            endtry
-        endfor
-    endfunction "}}}
-endif
-
 
 
 " Instance
@@ -199,7 +177,7 @@ endfunction "}}}
 " s:asym_filter {{{
 function! s:asym_filter(stash) "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let phase = buftable.get_henkan_phase()
 
 
@@ -231,53 +209,47 @@ function! s:asym_filter(stash) "{{{
     endfor
 
 
-    " In order not to change current buftable old string.
-    call eskk#lock_old_str()
-    try
-        " Handle special characters.
-        " These characters are handled regardless of current phase.
-        if eskk#map#is_special_lhs(char, 'backspace-key')
-            call buftable.do_backspace(a:stash)
-            return
-        elseif eskk#map#is_special_lhs(char, 'enter-key')
-            call buftable.do_enter(a:stash)
-            return
-        elseif eskk#map#is_special_lhs(char, 'sticky')
+    " Handle special characters.
+    " These characters are handled regardless of current phase.
+    if eskk#map#is_special_lhs(char, 'backspace-key')
+        call buftable.do_backspace(a:stash)
+        return
+    elseif eskk#map#is_special_lhs(char, 'enter-key')
+        call buftable.do_enter(a:stash)
+        return
+    elseif eskk#map#is_special_lhs(char, 'sticky')
+        call buftable.do_sticky(a:stash)
+        return
+    elseif char =~# '^[A-Z]$'
+    \   && !eskk#map#is_special_lhs(
+    \          char, 'phase:henkan-select:delete-from-dict'
+    \       )
+        if buftable.get_current_buf_str().rom_str.empty()
             call buftable.do_sticky(a:stash)
-            return
-        elseif char =~# '^[A-Z]$'
-        \   && !eskk#map#is_special_lhs(
-        \          char, 'phase:henkan-select:delete-from-dict'
-        \       )
-            if buftable.get_current_buf_str().rom_str.empty()
-                call buftable.do_sticky(a:stash)
-                call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#map#key2char',
-                \   [eskk#map#get_filter_map(tolower(char))]
-                \)
-                return
-            else
-                " NOTE: Assume "SAkujo" as "Sakujo".
-                let stash = deepcopy(a:stash)
-                let stash.char = tolower(stash.char)
-                return s:asym_filter(stash)
-            endif
-        elseif eskk#map#is_special_lhs(char, 'escape-key')
-            call buftable.do_escape(a:stash)
-            return
-        elseif eskk#map#is_special_lhs(char, 'tab')
-            call buftable.do_tab(a:stash)
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#map#key2char',
+            \   [eskk#map#get_filter_map(tolower(char))]
+            \)
             return
         elseif eskk#map#is_special_lhs(char, 'phase:cancel')
             call buftable.do_cancel(a:stash)
             return
         else
-            " Fall through.
+            " NOTE: Assume "SAkujo" as "Sakujo".
+            let stash = deepcopy(a:stash)
+            let stash.char = tolower(stash.char)
+            return s:asym_filter(stash)
         endif
-    finally
-        call eskk#unlock_old_str()
-    endtry
+    elseif eskk#map#is_special_lhs(char, 'escape-key')
+        call buftable.do_escape(a:stash)
+        return
+    elseif eskk#map#is_special_lhs(char, 'tab')
+        call buftable.do_tab(a:stash)
+        return
+    else
+        " Fall through.
+    endif
 
 
     " Handle other characters.
@@ -324,7 +296,6 @@ function! s:asym_filter(stash) "{{{
                     \)
                     sleep 1
 
-                    let buftable = eskk#get_buftable()
                     call buftable.push_kakutei_str(
                     \   buftable.get_display_str(0)
                     \)
@@ -351,7 +322,7 @@ endfunction "}}}
 
 function! s:filter_rom(stash, table) "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
 
@@ -368,7 +339,7 @@ function! s:filter_rom(stash, table) "{{{
 endfunction "}}}
 function! s:filter_rom_exact_match(stash, table) "{{{
     let char = a:stash.char
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let buf_str = buftable.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
     let phase = buftable.get_henkan_phase()
@@ -400,13 +371,6 @@ function! s:filter_rom_exact_match(stash, table) "{{{
                 \)
             endfor
         endif
-
-
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   eskk#util#get_local_func('clear_buffer_string', s:SID_PREFIX),
-        \   [g:eskk#buftable#PHASE_NORMAL]
-        \)
 
         if g:eskk#convert_at_exact_match
         \   && phase ==# g:eskk#buftable#PHASE_HENKAN
@@ -511,8 +475,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     endif
 endfunction "}}}
 function! s:filter_rom_has_candidates(stash) "{{{
-    let buftable = eskk#get_buftable()
-    let buf_str  = buftable.get_current_buf_str()
+    let buf_str  = a:stash.buftable.get_current_buf_str()
     call buf_str.rom_str.append(a:stash.char)
 endfunction "}}}
 function! s:filter_rom_no_match(stash, table) "{{{
@@ -557,14 +520,6 @@ function! s:filter_rom_no_match(stash, table) "{{{
         call buf_str.rom_str.clear()
     else
         call buf_str.rom_str.set(char)
-    endif
-endfunction "}}}
-" Clear filtered string when eskk#filter()'s finalizing.
-function! s:clear_buffer_string(phase) "{{{
-    let buftable = eskk#get_buftable()
-    if buftable.get_henkan_phase() ==# a:phase
-        let buf_str = buftable.get_current_buf_str()
-        call buf_str.rom_pairs.clear()
     endif
 endfunction "}}}
 
@@ -691,7 +646,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#marker_okuri', '*')
     call eskk#util#set_default('g:eskk#marker_henkan_select', '▼')
     call eskk#util#set_default('g:eskk#marker_jisyo_touroku', '?')
-    call eskk#util#set_default('g:eskk#marker_popup', '#')
+    call eskk#util#set_default('g:eskk#marker_popup', '◇')
 
     " Completion
     call eskk#util#set_default('g:eskk#enable_completion', 1)
@@ -881,11 +836,13 @@ function! eskk#_initialize() "{{{
                     if !has_key(this.temp, 'table')
                         let this.temp.table = eskk#get_mode_table('ascii')
                     endif
-                    let a:stash.return = this.temp.table.get_map(
-                    \   a:stash.char, a:stash.char
+                    call a:stash.buftable.push_kakutei_str(
+                    \   this.temp.table.get_map(
+                    \      a:stash.char, a:stash.char
+                    \   )
                     \)
                 else
-                    let a:stash.return = a:stash.char
+                    call a:stash.buftable.push_kakutei_str(a:stash.char)
                 endif
             endif
         endfunction
@@ -906,8 +863,10 @@ function! eskk#_initialize() "{{{
                 if !has_key(this.temp, 'table')
                     let this.temp.table = eskk#get_mode_table('zenei')
                 endif
-                let a:stash.return = this.temp.table.get_map(
-                \   a:stash.char, a:stash.char
+                call a:stash.buftable.push_kakutei_str(
+                \   this.temp.table.get_map(
+                \      a:stash.char, a:stash.char
+                \   )
                 \)
             endif
         endfunction
@@ -947,7 +906,7 @@ function! eskk#_initialize() "{{{
 
         function! dict.filter(stash) "{{{
             let char = a:stash.char
-            let buftable = eskk#get_buftable()
+            let buftable = a:stash.buftable
             let buf_str = buftable.get_current_buf_str()
             let phase = buftable.get_henkan_phase()
 
@@ -1626,12 +1585,17 @@ endfunction "}}}
 " Filter
 function! eskk#filter(char) "{{{
     let inst = eskk#get_current_instance()
+    let buftable = eskk#get_buftable()
+    let stash = {
+    \   'char': a:char,
+    \   'buftable': buftable,
+    \}
 
     " Check irregular circumstance.
     if !eskk#is_supported_mode(inst.mode)
         " Detect fatal error. disable eskk...
         return s:force_disable_eskk(
-        \   a:char,
+        \   stash,
         \   eskk#util#build_error(
         \       ['eskk'],
         \       ['current mode is not supported: '
@@ -1640,18 +1604,8 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
-
     call eskk#throw_event('filter-begin')
-
-    let buftable = eskk#get_buftable()
-    let stash = {
-    \   'char': a:char,
-    \   'return': 0,
-    \}
-
-    if !inst.has_locked_old_str
-        call buftable.set_old_str(buftable.get_display_str())
-    endif
+    call buftable.set_old_str(buftable.get_display_str())
 
     try
         let do_filter = 1
@@ -1669,12 +1623,20 @@ function! eskk#filter(char) "{{{
         if do_filter
             call eskk#call_mode_func('filter', [stash], 1)
         endif
-        return s:rewrite_string(stash.return)
+
+        " NOTE: `buftable` may become invalid reference
+        " because `eskk#call_mode_func()` may call `eskk#set_buftable()`.
+        return
+        \   (eskk#has_event('filter-redispatch-pre') ?
+        \       "\<Plug>(eskk:_filter_redispatch_pre)" : '')
+        \   . eskk#get_buftable().rewrite()
+        \   . (eskk#has_event('filter-redispatch-post') ?
+        \       "\<Plug>(eskk:_filter_redispatch_post)" : '')
 
     catch
         " Detect fatal error. disable eskk...
         return s:force_disable_eskk(
-        \   a:char,
+        \   stash,
         \   eskk#util#build_error(
         \       ['eskk'],
         \       ['main routine raised an error: '.v:exception]
@@ -1682,17 +1644,19 @@ function! eskk#filter(char) "{{{
         \)
 
     finally
-        call eskk#throw_event('filter-finalize')
+        if buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_NORMAL
+            call buftable.get_current_buf_str().rom_pairs.clear()
+        endif
     endtry
 endfunction "}}}
-function! s:force_disable_eskk(char, error) "{{{
+function! s:force_disable_eskk(stash, error) "{{{
     " FIXME: It may cause inconsistency
     " to eskk status and lang options.
     " TODO: detect lang options and follow the status.
     call eskk#disable_im()
 
     call eskk#logger#write_error_log_file(
-    \   a:char, a:error,
+    \   a:stash, a:error,
     \)
     sleep 1
 
@@ -1701,36 +1665,6 @@ function! s:force_disable_eskk(char, error) "{{{
     " so do it manually.
     call eskk#map#map('b', '<Plug>(eskk:_reenter_insert_mode)', '<esc>i')
     return "\<Plug>(eskk:_reenter_insert_mode)"
-endfunction "}}}
-function! s:rewrite_string(return_string) "{{{
-    let redispatch_pre = ''
-    if eskk#has_event('filter-redispatch-pre')
-        let redispatch_pre =
-        \   "\<Plug>(eskk:_filter_redispatch_pre)"
-    endif
-
-    let redispatch_post = ''
-    if eskk#has_event('filter-redispatch-post')
-        let redispatch_post =
-        \   "\<Plug>(eskk:_filter_redispatch_post)"
-    endif
-
-    if type(a:return_string) == type("")
-        let buf_inst = eskk#get_buffer_instance()
-        let buf_inst.return_string = a:return_string
-        call eskk#map#map(
-        \   'be',
-        \   '<Plug>(eskk:expr:_return_string)',
-        \   'eskk#get_buffer_instance().return_string'
-        \)
-        let string = "\<Plug>(eskk:expr:_return_string)"
-    else
-        let string = eskk#get_buftable().rewrite()
-    endif
-    return
-    \   redispatch_pre
-    \   . string
-    \   . redispatch_post
 endfunction "}}}
 
 " g:eskk#use_color_cursor
