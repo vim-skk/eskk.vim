@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 461))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 462))
 
 
 function! s:SID() "{{{
@@ -1076,11 +1076,9 @@ function! eskk#_initialize() "{{{
     " FIXME: Due to current implementation,
     " s:buftable.rewrite() assumes that &backspace contains "eol".
     if &l:backspace !~# '\<eol\>'
-        let saved_backspace = &l:backspace
         setlocal backspace+=eol
         autocmd eskk InsertEnter * setlocal backspace+=eol
-        execute 'autocmd eskk InsertLeave *'
-        \   'let &l:backspace = '.string(saved_backspace)
+        autocmd eskk InsertLeave * setlocal backspace-=eol
     endif
     " }}}
 
