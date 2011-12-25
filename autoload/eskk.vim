@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 459))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 460))
 
 
 function! s:SID() "{{{
@@ -693,6 +693,18 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
     " }}}
 
+    " Check global variables values. {{{
+    function! s:initialize_check_variables()
+        if g:eskk#marker_henkan ==# g:eskk#marker_popup
+            call eskk#logger#warn(
+            \   'g:eskk#marker_henkan and g:eskk#marker_popup'
+            \       . ' must be different.'
+            \)
+        endif
+    endfunction
+    call s:initialize_check_variables()
+    " }}}
+
     " Set up g:eskk#directory. {{{
     function! s:initialize_set_up_eskk_directory()
         let dir = expand(g:eskk#directory)
@@ -1072,18 +1084,6 @@ function! eskk#_initialize() "{{{
         execute 'autocmd eskk InsertLeave *'
         \   'let &l:backspace = '.string(saved_backspace)
     endif
-    " }}}
-
-    " Check some variables values. {{{
-    function! s:initialize_check_variables()
-        if g:eskk#marker_henkan ==# g:eskk#marker_popup
-            call eskk#logger#warn(
-            \   'g:eskk#marker_henkan and g:eskk#marker_popup'
-            \       . ' must be different.'
-            \)
-        endif
-    endfunction
-    call s:initialize_check_variables()
     " }}}
 
     " Logging event {{{
