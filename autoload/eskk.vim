@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 458))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 459))
 
 
 function! s:SID() "{{{
@@ -224,7 +224,8 @@ function! s:asym_filter(stash) "{{{
     \   && !eskk#map#is_special_lhs(
     \          char, 'phase:henkan-select:delete-from-dict'
     \       )
-        if buftable.get_current_buf_str().rom_str.empty()
+        if phase !=# g:eskk#buftable#PHASE_NORMAL
+        \   || buftable.get_current_buf_str().rom_str.empty()
             call buftable.do_sticky(a:stash)
             call eskk#register_temp_event(
             \   'filter-redispatch-post',
