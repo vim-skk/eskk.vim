@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 460))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 461))
 
 
 function! s:SID() "{{{
@@ -568,12 +568,10 @@ function! eskk#_initialize() "{{{
     augroup END
     " }}}
 
-    " Create "eskk-initialize-pre" autocmd event. {{{
-    " If no "User eskk-initialize-pre" events,
+    " Throw "eskk-initialize-pre" autocmd event. {{{
+    " NOTE: If no "User eskk-initialize-pre" events,
     " Vim complains like "No matching autocommands".
     autocmd eskk User eskk-initialize-pre :
-
-    " Throw eskk-initialize-pre event.
     doautocmd User eskk-initialize-pre
     " }}}
 
@@ -1135,12 +1133,10 @@ function! eskk#_initialize() "{{{
     call s:set_up_mode_use_tables()
     " }}}
 
-    " Create "eskk-initialize-post" autocmd event. {{{
-    " If no "User eskk-initialize-post" events,
+    " Throw "eskk-initialize-post" autocmd event. {{{
+    " NOTE: If no "User eskk-initialize-post" events,
     " Vim complains like "No matching autocommands".
     autocmd eskk User eskk-initialize-post :
-
-    " Throw eskk-initialize-post event.
     doautocmd User eskk-initialize-post
     " }}}
 
