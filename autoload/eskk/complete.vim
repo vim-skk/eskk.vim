@@ -408,6 +408,7 @@ function! s:set_selected_item() "{{{
     " Set henkan_buf_str
     call henkan_buf_str.clear()
     for char in split(filter_str, '\zs')
+        " XXX
         call henkan_buf_str.rom_pairs.push_one_pair(char, char)
     endfor
     " Set okuri_buf_str
