@@ -65,8 +65,7 @@ let s:skk_dict = {}
 let s:mode_vs_table = {}
 " All tables structures.
 let s:table_defs = {}
-" All special mappings eskk knows.
-" `special` means "they don't have something to do with mappings Vim knows."
+" All special mappings.
 let s:eskk_general_mappings = {}
 let s:eskk_mappings = {
 \   'disable': {'fn': 's:handle_disable'},
