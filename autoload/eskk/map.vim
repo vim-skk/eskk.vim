@@ -334,12 +334,13 @@ endfunction "}}}
 " Functions using s:eskk_mappings
 function! eskk#map#map_all_keys(...) "{{{
     let inst = eskk#get_buffer_instance()
-    if has_key(inst, 'has_mapped')
+    if has_key(inst, 'prev_lang_keys')
         return
     endif
-
+    let inst.prev_lang_keys = savemap#save_map('l')
 
     lmapclear <buffer>
+    lmapclear
 
     " Map mapped keys.
     for key in g:eskk#mapped_keys
@@ -372,20 +373,18 @@ function! eskk#map#map_all_keys(...) "{{{
             \)
         endif
     endfor
-
-    let inst.has_mapped = 1
 endfunction "}}}
 function! eskk#map#unmap_all_keys() "{{{
     let inst = eskk#get_buffer_instance()
-    if !has_key(inst, 'has_mapped')
+    if !has_key(inst, 'prev_lang_keys')
         return
     endif
 
-    for key in g:eskk#mapped_keys
-        call eskk#map#unmap('b', key, 'l')
-    endfor
+    lmapclear <buffer>
+    lmapclear
 
-    unlet inst.has_mapped
+    call inst.prev_lang_keys.restore()
+    unlet inst.prev_lang_keys
 endfunction "}}}
 function! eskk#map#is_special_lhs(char, type) "{{{
     " NOTE: This function must not show error
