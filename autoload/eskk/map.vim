@@ -26,14 +26,13 @@ function! s:handle_disable(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_kakutei(stash) "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
-    if phase ==# g:eskk#buftable#PHASE_NORMAL
-        let buftable = eskk#get_buftable()
-        let kakutei_str = buftable.generate_kakutei_str()
+    let buftable = eskk#get_buftable()
+    let phase = buftable.get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
+    \   || phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         if !empty(buftable.get_display_str(0))
-            call buftable.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
-            call buftable.clear_all()
-            return kakutei_str
+            call buftable.do_enter(a:stash)
             return 1
         endif
     endif
