@@ -15,7 +15,6 @@ delfunc s:SID
 
 
 let s:prev_normal_keys = {}
-let s:has_setup_mode_local_keys = 0
 
 
 function! s:handle_toggle_hankata(stash) "{{{
@@ -94,67 +93,6 @@ function! s:handle_to_abbrev(stash) "{{{
     endif
     return 0
 endfunction "}}}
-
-" Keys used by only its mode.
-let s:MODE_LOCAL_KEYS = {
-\   'hira': [
-\       'phase:cancel',
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:hira:toggle-hankata',
-\       'mode:hira:ctrl-q-key',
-\       'mode:hira:toggle-kata',
-\       'mode:hira:q-key',
-\       'mode:hira:to-ascii',
-\       'mode:hira:to-zenei',
-\       'mode:hira:to-abbrev',
-\   ],
-\   'kata': [
-\       'phase:cancel',
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:kata:toggle-hankata',
-\       'mode:kata:ctrl-q-key',
-\       'mode:kata:toggle-kata',
-\       'mode:kata:q-key',
-\       'mode:kata:to-ascii',
-\       'mode:kata:to-zenei',
-\       'mode:kata:to-abbrev',
-\   ],
-\   'hankata': [
-\       'phase:cancel',
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:hankata:toggle-hankata',
-\       'mode:hankata:ctrl-q-key',
-\       'mode:hankata:toggle-kata',
-\       'mode:hankata:q-key',
-\       'mode:hankata:to-ascii',
-\       'mode:hankata:to-zenei',
-\       'mode:hankata:to-abbrev',
-\   ],
-\   'ascii': [
-\       'mode:ascii:to-hira',
-\   ],
-\   'zenei': [
-\       'mode:zenei:to-hira',
-\   ],
-\}
 
 
 " Utilities
@@ -259,6 +197,14 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
         endtry
     endfor
 endfunction "}}}
+function! eskk#map#set_up_key(key, ...) "{{{
+    call eskk#map#map(
+    \   'rb' . (a:0 ? a:1 : ''),
+    \   a:key,
+    \   eskk#map#get_filter_map(a:key),
+    \   'l'
+    \)
+endfunction "}}}
 function! eskk#map#unmap(options, lhs, modes) "{{{
     if a:lhs == ''
         call eskk#logger#logstrf('lhs is empty: lhs = %s', a:lhs)
@@ -288,86 +234,6 @@ function! eskk#map#map_from_maparg_dict(dict) "{{{
     \   eskk#util#mapopt_dict2chars(a:dict),
     \   a:dict.lhs, a:dict.rhs, a:dict.mode
     \)
-endfunction "}}}
-
-function! eskk#map#set_up_key(key, ...) "{{{
-    call eskk#map#map(
-    \   'rb' . (a:0 ? a:1 : ''),
-    \   a:key,
-    \   eskk#map#get_filter_map(a:key),
-    \   'l'
-    \)
-endfunction "}}}
-function! eskk#map#set_up_temp_key(lhs, ...) "{{{
-    " Assumption: a:lhs must be '<Bar>' not '|'.
-
-    " Save current a:lhs mapping.
-    let save_lhs = s:temp_key_map(a:lhs)
-    let save_rhs = maparg(a:lhs, 'l')
-    if save_rhs != '' && maparg(save_lhs) == ''
-        " TODO Check if a:lhs is buffer local.
-        call eskk#map#map('rb', save_lhs, save_rhs, 'l')
-    endif
-
-    if a:0
-        call eskk#map#map('rb', a:lhs, a:1, 'l')
-    else
-        call eskk#map#set_up_key(a:lhs)
-    endif
-endfunction "}}}
-function! eskk#map#set_up_temp_key_restore(lhs) "{{{
-    let temp_key   = s:temp_key_map(a:lhs)
-    let saved_rhs  = maparg(temp_key, 'l')
-    let inst       = eskk#get_current_instance()
-
-    if saved_rhs != ''
-        call eskk#map#unmap('b', temp_key, 'l')
-        call eskk#map#map('rb', a:lhs, saved_rhs, 'l')
-    elseif s:has_setup_mode_local_keys
-        " Show error only first time.
-        call eskk#logger#logf(
-        \   "called eskk#map#set_up_temp_key_restore()"
-        \       . " but no '%s' key is stashed.",
-        \   a:lhs
-        \)
-        call eskk#map#set_up_key(a:lhs)
-        let s:has_setup_mode_local_keys = 0
-    endif
-endfunction "}}}
-function! eskk#map#has_temp_key(lhs) "{{{
-    let temp_key = s:temp_key_map(a:lhs)
-    let saved_rhs = maparg(temp_key, 'l')
-    return saved_rhs != ''
-endfunction "}}}
-function! s:temp_key_map(key) "{{{
-    return printf('<Plug>(eskk:prevmap:%s)', a:key)
-endfunction "}}}
-
-function! eskk#map#map_mode_local_keys() "{{{
-    let mode = eskk#get_mode()
-
-    let real_keys = []
-    for key in get(s:MODE_LOCAL_KEYS, mode, [])
-        let sp_key = eskk#map#get_special_key(key)
-        call eskk#map#set_up_temp_key(sp_key)
-        call add(real_keys, sp_key)
-    endfor
-
-    call eskk#register_temp_event(
-    \   'leave-mode-' . mode,
-    \   eskk#util#get_local_func(
-    \       'unmap_mode_local_keys',
-    \       s:SID_PREFIX
-    \   ),
-    \   [real_keys]
-    \)
-endfunction "}}}
-function! s:unmap_mode_local_keys(real_keys) "{{{
-    let inst = eskk#get_current_instance()
-    for key in a:real_keys
-        call eskk#map#set_up_temp_key_restore(key)
-    endfor
-    let s:has_setup_mode_local_keys = 1
 endfunction "}}}
 
 
@@ -469,9 +335,7 @@ function! eskk#map#map_all_keys(...) "{{{
 
     " Map mapped keys.
     for key in g:eskk#mapped_keys
-        if maparg(key, 'l') ==# ''
-            call call('eskk#map#set_up_key', [key] + a:000)
-        endif
+        call call('eskk#map#set_up_key', [key] + a:000)
     endfor
     " Egg like newline
     call s:map_egg_like_newline(
@@ -554,6 +418,7 @@ function! eskk#map#handle_special_lhs(char, type, stash) "{{{
     return
     \   eskk#map#is_special_lhs(a:char, a:type)
     \   && has_key(eskk_mappings, a:type)
+    \   && has_key(eskk_mappings[a:type], 'fn')
     \   && call(eskk_mappings[a:type].fn, [a:stash])
 endfunction "}}}
 function! s:create_map(type, options, lhs, rhs, from) "{{{

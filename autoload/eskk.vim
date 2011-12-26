@@ -69,6 +69,7 @@ let s:table_defs = {}
 " `special` means "they don't have something to do with mappings Vim knows."
 let s:eskk_mappings = {
 \   'general': {},
+\   'disable': {},
 \   'sticky': {},
 \   'backspace-key': {},
 \   'escape-key': {},
@@ -110,6 +111,69 @@ let s:eskk_mappings = {
 \   'mode:ascii:to-hira': {'fn': 's:handle_toggle_hankata'},
 \   'mode:zenei:to-hira': {'fn': 's:handle_toggle_hankata'},
 \   'mode:abbrev:henkan-key': {},
+\}
+" Keys used by only its mode.
+let s:MODE_LOCAL_KEYS = {
+\   'hira': [
+\       'disable',
+\       'phase:cancel',
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
+\       'mode:hira:toggle-hankata',
+\       'mode:hira:ctrl-q-key',
+\       'mode:hira:toggle-kata',
+\       'mode:hira:q-key',
+\       'mode:hira:to-ascii',
+\       'mode:hira:to-zenei',
+\       'mode:hira:to-abbrev',
+\   ],
+\   'kata': [
+\       'disable',
+\       'phase:cancel',
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
+\       'mode:kata:toggle-hankata',
+\       'mode:kata:ctrl-q-key',
+\       'mode:kata:toggle-kata',
+\       'mode:kata:q-key',
+\       'mode:kata:to-ascii',
+\       'mode:kata:to-zenei',
+\       'mode:kata:to-abbrev',
+\   ],
+\   'hankata': [
+\       'disable',
+\       'phase:cancel',
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
+\       'mode:hankata:toggle-hankata',
+\       'mode:hankata:ctrl-q-key',
+\       'mode:hankata:toggle-kata',
+\       'mode:hankata:q-key',
+\       'mode:hankata:to-ascii',
+\       'mode:hankata:to-zenei',
+\       'mode:hankata:to-abbrev',
+\   ],
+\   'ascii': [
+\       'mode:ascii:to-hira',
+\   ],
+\   'zenei': [
+\       'mode:zenei:to-hira',
+\   ],
 \}
 " }}}
 
@@ -192,7 +256,7 @@ function! s:asym_filter(stash) "{{{
     let to_zenei = printf('mode:%s:to-zenei', cur_mode)
     let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
 
-    for key in [
+    for key in get(s:MODE_LOCAL_KEYS, cur_mode, []) + [
     \   toggle_hankata,
     \   ctrl_q_key,
     \   toggle_kata,
@@ -728,6 +792,9 @@ function! eskk#_initialize() "{{{
     " Default mappings - :EskkMap {{{
     call eskk#commands#define()
 
+    " TODO: Separate to hira:disable, kata:disable, hankata:disable ?
+    EskkMap -type=disable -unique <C-j>
+
     EskkMap -type=sticky -unique ;
     EskkMap -type=backspace-key -unique <C-h>
     EskkMap -type=enter-key -unique <CR>
@@ -789,14 +856,6 @@ function! eskk#_initialize() "{{{
 
     EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
     " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
-    " }}}
-
-    " Map temporary key to keys to use in that mode {{{
-    call eskk#register_event(
-    \   'enter-mode',
-    \   'eskk#map#map_mode_local_keys',
-    \   []
-    \)
     " }}}
 
     " Save dictionary if modified {{{
@@ -1175,6 +1234,7 @@ function! eskk#get_default_mapped_keys() "{{{
     \   "<Down>",
     \   "<C-n>",
     \   "<C-p>",
+    \   "<C-j>",
     \]
 endfunction "}}}
 
