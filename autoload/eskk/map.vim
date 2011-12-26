@@ -433,17 +433,17 @@ endfunction "}}}
 
 
 " Egg like newline
-function! eskk#map#egg_like_newline(eln_insert, eln_compl) "{{{
+function! s:map_egg_like_newline(eln_insert, eln_compl) "{{{
     let egg_like     = "\<Plug>(eskk:filter:<CR>)"
     let non_egg_like = repeat(egg_like, 2)
     call eskk#map#map(
     \   'rbe',
     \   '<CR>',
-    \   'eskk#map#should_disable_egg_like_newline('.a:eln_insert.','.a:eln_compl.') ? '.string(non_egg_like).' : '.string(egg_like),
+    \   'eskk#map#_should_disable_egg_like_newline('.a:eln_insert.','.a:eln_compl.') ? '.string(non_egg_like).' : '.string(egg_like),
     \   'l'
     \)
 endfunction "}}}
-function! eskk#map#should_disable_egg_like_newline(eln_insert, eln_compl) "{{{
+function! eskk#map#_should_disable_egg_like_newline(eln_insert, eln_compl) "{{{
     if mode() ==# 'i' && pumvisible()
         return !a:eln_compl
     endif
@@ -474,7 +474,7 @@ function! eskk#map#map_all_keys(...) "{{{
         endif
     endfor
     " Egg like newline
-    call eskk#map#egg_like_newline(
+    call s:map_egg_like_newline(
     \   g:eskk#egg_like_newline,
     \   g:eskk#egg_like_newline_completion)
 
