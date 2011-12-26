@@ -1294,9 +1294,11 @@ function! eskk#enable() "{{{
         " in insert-mode or commandline-mode.
         " We have to use i_CTRL-^ .
         setlocal imsearch=-1
+        redrawstatus
         return "\<C-^>"
     else
         setlocal iminsert=1 imsearch=-1
+        redrawstatus
         return ''
     endif
 endfunction "}}}
@@ -1327,11 +1329,14 @@ function! eskk#disable() "{{{
         " in insert-mode or commandline-mode.
         " We have to use i_CTRL-^ .
 
-        " See eskk#filter() for disable handler.
-        call eskk#logger#warn('never reach here...right?')
-        return ''
+        " In insert-mode, See eskk#filter() for disable handler.
+        " This path is for only commandline-mode.
+        redrawstatus
+        let kakutei_str = eskk#get_buftable().generate_kakutei_str()
+        return kakutei_str . "\<C-^>"
     else
         setlocal iminsert=0 imsearch=0
+        redrawstatus
         return ''
     endif
 endfunction "}}}
