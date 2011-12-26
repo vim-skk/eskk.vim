@@ -75,7 +75,7 @@ let s:eskk_mappings = {
 \   'escape-key': {},
 \   'enter-key': {},
 \   'tab': {},
-\   'phase:cancel': {},
+\   'cancel': {},
 \   'phase:henkan:henkan-key': {},
 \   'phase:okuri:henkan-key': {},
 \   'phase:henkan-select:choose-next': {},
@@ -117,7 +117,7 @@ let s:MODE_LOCAL_KEYS = {
 \   'hira': [
 \       'kakutei',
 \       'disable',
-\       'phase:cancel',
+\       'cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
@@ -136,7 +136,7 @@ let s:MODE_LOCAL_KEYS = {
 \   'kata': [
 \       'kakutei',
 \       'disable',
-\       'phase:cancel',
+\       'cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
@@ -155,7 +155,7 @@ let s:MODE_LOCAL_KEYS = {
 \   'hankata': [
 \       'kakutei',
 \       'disable',
-\       'phase:cancel',
+\       'cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
 \       'phase:henkan-select:choose-next',
@@ -287,6 +287,9 @@ function! s:asym_filter(stash) "{{{
     elseif eskk#map#is_special_lhs(char, 'sticky')
         call buftable.do_sticky(a:stash)
         return
+    elseif eskk#map#is_special_lhs(char, 'cancel')
+        call buftable.do_cancel(a:stash)
+        return
     elseif char =~# '^[A-Z]$'
     \   && !eskk#map#is_special_lhs(
     \          char, 'phase:henkan-select:delete-from-dict'
@@ -299,9 +302,6 @@ function! s:asym_filter(stash) "{{{
             \   'eskk#map#key2char',
             \   [eskk#map#get_filter_map(tolower(char))]
             \)
-            return
-        elseif eskk#map#is_special_lhs(char, 'phase:cancel')
-            call buftable.do_cancel(a:stash)
             return
         else
             " NOTE: Assume "SAkujo" as "Sakujo".
@@ -805,7 +805,7 @@ function! eskk#_initialize() "{{{
     EskkMap -type=escape-key -unique <Esc>
     EskkMap -type=tab -unique <Tab>
 
-    EskkMap -type=phase:cancel -unique <C-g>
+    EskkMap -type=cancel -unique <C-g>
 
     EskkMap -type=phase:henkan:henkan-key -unique <Space>
 
@@ -1239,6 +1239,7 @@ function! eskk#get_default_mapped_keys() "{{{
     \   "<C-n>",
     \   "<C-p>",
     \   "<C-j>",
+    \   "<C-g>",
     \]
 endfunction "}}}
 

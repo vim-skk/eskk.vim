@@ -909,16 +909,8 @@ endfunction "}}}
 
 
 function! s:Buftable_do_cancel(stash) dict "{{{
-    let kakutei_str = self.get_display_str(0)
-    if len(kakutei_str) > 0
-      " TODO: remove only pre-editing string. note that don't remove marks.
-      for _ in split(kakutei_str, '\zs')
-        call self.do_backspace(a:stash)
-      endfor
-    else
-      call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
-      call self.clear_all()
-    endif
+    call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+    call self.clear_all()
 endfunction "}}}
 
 
