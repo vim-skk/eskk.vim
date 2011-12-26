@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 471))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 472))
 
 
 function! s:SID() "{{{
@@ -1433,23 +1433,23 @@ endfunction "}}}
 function! eskk#get_table(name) "{{{
     return s:table_defs[a:name]
 endfunction "}}}
-function! eskk#register_table(table) "{{{
+function! eskk#register_mode_table(mode, table) "{{{
+    if !has_key(s:mode_vs_table, a:mode)
+        call s:register_table(a:table)
+        let s:mode_vs_table[a:mode] = a:table
+    endif
+endfunction "}}}
+function! s:register_table(table) "{{{
     for base in a:table.get_base_tables()
-        call eskk#register_table(base)
+        call s:register_table(base)
     endfor
-    " eskk#register_table() MUST NOT allow to overwrite
+    " s:register_table() MUST NOT allow to overwrite
     " already registered tables.
     " because it is harmful to be able to
-    " rewrite base (derived) tables. (what will happen? I don't know)
+    " rewrite base (derived) tables.
     let name = a:table.get_name()
     if !has_key(s:table_defs, name)
         let s:table_defs[name] = a:table
-    endif
-endfunction "}}}
-function! eskk#register_mode_table(mode, table) "{{{
-    if !has_key(s:mode_vs_table, a:mode)
-        call eskk#register_table(a:table)
-        let s:mode_vs_table[a:mode] = a:table
     endif
 endfunction "}}}
 
