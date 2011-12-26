@@ -310,6 +310,9 @@ Misc.
 g:eskk#egg_like_newline			*g:eskk#egg_like_newline*
 							(Default: 0)
 
+g:eskk#egg_like_newline_completion	*g:eskk#egg_like_newline_completion*
+							(Default: 0)
+
 g:eskk#keep_state			*g:eskk#keep_state*
 							(Default: 0)
 

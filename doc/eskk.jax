@@ -313,6 +313,9 @@ g:eskk#cursor_color			*g:eskk#cursor_color*
 g:eskk#egg_like_newline			*g:eskk#egg_like_newline*
 							(デフォルト値: 0)
 
+g:eskk#egg_like_newline_completion	*g:eskk#egg_like_newline_completion*
+							(デフォルト値: 0)
+
 g:eskk#keep_state			*g:eskk#keep_state*
 							(デフォルト値: 0)
 
