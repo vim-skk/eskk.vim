@@ -70,6 +70,7 @@ let s:table_defs = {}
 let s:eskk_mappings = {
 \   'general': {},
 \   'disable': {'fn': 's:handle_disable'},
+\   'kakutei': {'fn': 's:handle_kakutei'},
 \   'sticky': {},
 \   'backspace-key': {},
 \   'escape-key': {},

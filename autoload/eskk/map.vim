@@ -25,6 +25,20 @@ function! s:handle_disable(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! s:handle_kakutei(stash) "{{{
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+        let buftable = eskk#get_buftable()
+        let kakutei_str = buftable.generate_kakutei_str()
+        if !empty(buftable.get_display_str(0))
+            call buftable.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+            call buftable.clear_all()
+            return kakutei_str
+            return 1
+        endif
+    endif
+    return 0
+endfunction "}}}
 function! s:handle_toggle_hankata(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
