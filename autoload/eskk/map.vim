@@ -365,8 +365,8 @@ function! eskk#map#map_all_keys(...) "{{{
     \   g:eskk#egg_like_newline_completion)
 
     " Map `:EskkMap -general` keys.
-    let eskk_mappings = eskk#_get_eskk_mappings()
-    for [key, opt] in items(eskk_mappings.general)
+    let general_mappings = eskk#_get_eskk_general_mappings()
+    for [key, opt] in items(general_mappings)
         if !eval(opt.options['map-if'])
             continue
         endif
@@ -457,32 +457,36 @@ function! s:create_map(type, options, lhs, rhs, from) "{{{
     endif
     let type_st = eskk_mappings[a:type]
 
-    if a:type ==# 'general'
-        if lhs == ''
-            call eskk#logger#warn("lhs must not be empty string.")
-            return
-        endif
-        if has_key(type_st, lhs) && a:options.unique
-            call eskk#logger#warn(
-            \   a:from . ": Already mapped to '" . lhs . "'."
-            \)
-            return
-        endif
-        let type_st[lhs] = {
-        \   'options': a:options,
-        \   'rhs': rhs
-        \}
-    else
-        if a:options.unique && has_key(type_st, 'lhs')
-            call eskk#logger#warn(
-            \   a:type . ': -unique is specified'
-            \       . ' and mapping already exists. skip.'
-            \)
-            return
-        endif
-        let type_st.options = a:options
-        let type_st.lhs = lhs
+    if a:options.unique && has_key(type_st, 'lhs')
+        call eskk#util#warn(
+        \   a:type . ': -unique is specified'
+        \       . ' and mapping already exists. skip.'
+        \)
+        return
     endif
+    let type_st.options = a:options
+    let type_st.lhs = lhs
+endfunction "}}}
+function! s:create_general_map(self, options, lhs, rhs, from) "{{{
+    let self = a:self
+    let lhs = a:lhs
+    let rhs = a:rhs
+    let type_st = eskk#_get_eskk_general_mappings()
+
+    if lhs == ''
+        call eskk#util#warn("lhs must not be empty string.")
+        return
+    endif
+    if has_key(type_st, lhs) && a:options.unique
+        call eskk#util#warn(
+        \   a:from . ": Already mapped to '" . lhs . "'."
+        \)
+        return
+    endif
+    let type_st[lhs] = {
+    \   'options': a:options,
+    \   'rhs': rhs
+    \}
 endfunction "}}}
 
 
@@ -579,13 +583,23 @@ function! eskk#map#_cmd_eskk_map(args) "{{{
     " Get rhs.
     let rhs = s:skip_white(args)
 
-    call s:create_map(
-    \   type,
-    \   options,
-    \   lhs,
-    \   rhs,
-    \   'EskkMap'
-    \)
+    if type ==# 'general'
+        call s:create_general_map(
+        \   eskk#get_current_instance(),
+        \   options,
+        \   lhs,
+        \   rhs,
+        \   'EskkMap'
+        \)
+    else
+        call s:create_map(
+        \   type,
+        \   options,
+        \   lhs,
+        \   rhs,
+        \   'EskkMap'
+        \)
+    endif
 endfunction "}}}
 
 
