@@ -1290,20 +1290,15 @@ function! eskk#enable() "{{{
 
     let inst.enabled = 1
     if mode() =~# '^[ic]$'
+        " NOTE: Vim can't enter lang-mode immediately
+        " in insert-mode or commandline-mode.
+        " We have to use i_CTRL-^ .
+        setlocal imsearch=-1
         return "\<C-^>"
     else
-        return s:enable_im()
+        setlocal iminsert=1 imsearch=-1
+        return ''
     endif
-endfunction "}}}
-function! s:enable_im() "{{{
-    let &l:iminsert = s:map_exists_mode_of('l') ? 1 : 2
-    let &l:imsearch = &l:iminsert
-
-    return ''
-endfunction "}}}
-function! s:map_exists_mode_of(mode) "{{{
-    let out = eskk#util#redir_english(a:mode . 'map')
-    return index(split(out, '\n'), 'No mapping found') ==# -1
 endfunction "}}}
 function! eskk#disable() "{{{
     if !eskk#is_initialized()
@@ -1328,18 +1323,17 @@ function! eskk#disable() "{{{
     call eskk#unlock_neocomplcache()
     let inst.enabled = 0
     if mode() =~# '^[ic]$'
-        let buftable = eskk#get_buftable()
-        let kakutei_str = buftable.generate_kakutei_str()
-        return kakutei_str . "\<C-^>"
-    else
-        return s:disable_im()
-    endif
-endfunction "}}}
-function! s:disable_im() "{{{
-    let &l:iminsert = 0
-    let &l:imsearch = 0
+        " NOTE: Vim can't escape lang-mode immediately
+        " in insert-mode or commandline-mode.
+        " We have to use i_CTRL-^ .
 
-    return ''
+        " See eskk#filter() for disable handler.
+        call eskk#logger#warn('never reach here...right?')
+        return ''
+    else
+        setlocal iminsert=0 imsearch=0
+        return ''
+    endif
 endfunction "}}}
 
 " Mode
@@ -1639,7 +1633,11 @@ function! eskk#filter(char) "{{{
             call eskk#call_mode_func('filter', [stash], 1)
         endif
         if !eskk#is_enabled()
-            return ''
+            " NOTE: Vim can't escape lang-mode immediately
+            " in insert-mode or commandline-mode.
+            " We have to use i_CTRL-^ .
+            let kakutei_str = buftable.generate_kakutei_str()
+            return kakutei_str . "\<C-^>"
         endif
 
         " NOTE: `buftable` may become invalid reference
@@ -1671,7 +1669,7 @@ function! s:force_disable_eskk(stash, error) "{{{
     " FIXME: It may cause inconsistency
     " to eskk status and lang options.
     " TODO: detect lang options and follow the status.
-    call s:disable_im()
+    setlocal iminsert=0 imsearch=0
 
     call eskk#logger#write_error_log_file(
     \   a:stash, a:error,
