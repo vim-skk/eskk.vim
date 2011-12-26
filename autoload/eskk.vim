@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 468))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 469))
 
 
 function! s:SID() "{{{
@@ -129,6 +129,7 @@ let s:MODE_LOCAL_KEYS = {
 \       'mode:hira:ctrl-q-key',
 \       'mode:hira:toggle-kata',
 \       'mode:hira:q-key',
+\       'mode:hira:l-key',
 \       'mode:hira:to-ascii',
 \       'mode:hira:to-zenei',
 \       'mode:hira:to-abbrev',
@@ -148,6 +149,7 @@ let s:MODE_LOCAL_KEYS = {
 \       'mode:kata:ctrl-q-key',
 \       'mode:kata:toggle-kata',
 \       'mode:kata:q-key',
+\       'mode:kata:l-key',
 \       'mode:kata:to-ascii',
 \       'mode:kata:to-zenei',
 \       'mode:kata:to-abbrev',
@@ -167,6 +169,7 @@ let s:MODE_LOCAL_KEYS = {
 \       'mode:hankata:ctrl-q-key',
 \       'mode:hankata:toggle-kata',
 \       'mode:hankata:q-key',
+\       'mode:hankata:l-key',
 \       'mode:hankata:to-ascii',
 \       'mode:hankata:to-zenei',
 \       'mode:hankata:to-abbrev',
@@ -249,26 +252,7 @@ function! s:asym_filter(stash) "{{{
 
 
     " Handle special mode-local mapping.
-    let cur_mode = eskk#get_mode()
-    let toggle_hankata = printf('mode:%s:toggle-hankata', cur_mode)
-    let ctrl_q_key = printf('mode:%s:ctrl-q-key', cur_mode)
-    let toggle_kata = printf('mode:%s:toggle-kata', cur_mode)
-    let q_key = printf('mode:%s:q-key', cur_mode)
-    let l_key = printf('mode:%s:l-key', cur_mode)
-    let to_ascii = printf('mode:%s:to-ascii', cur_mode)
-    let to_zenei = printf('mode:%s:to-zenei', cur_mode)
-    let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
-
-    for key in get(s:MODE_LOCAL_KEYS, cur_mode, []) + [
-    \   toggle_hankata,
-    \   ctrl_q_key,
-    \   toggle_kata,
-    \   q_key,
-    \   l_key,
-    \   to_ascii,
-    \   to_zenei,
-    \   to_abbrev
-    \]
+    for key in get(s:MODE_LOCAL_KEYS, eskk#get_mode(), [])
         if eskk#map#handle_special_lhs(char, key, a:stash)
             " Handled.
             return
