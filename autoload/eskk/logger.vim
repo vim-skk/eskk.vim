@@ -219,8 +219,11 @@ endfunction "}}}
 
 function! eskk#logger#warn(msg) "{{{
     echohl WarningMsg
-    echomsg a:msg
-    echohl None
+    try
+        echomsg a:msg
+    finally
+        echohl None
+    endtry
 endfunction "}}}
 function! eskk#logger#warnf(msg, ...) "{{{
     call eskk#logger#warn(call('printf', [a:msg] + a:000))
