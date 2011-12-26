@@ -69,7 +69,7 @@ let s:table_defs = {}
 " `special` means "they don't have something to do with mappings Vim knows."
 let s:eskk_mappings = {
 \   'general': {},
-\   'disable': {},
+\   'disable': {'fn': 's:handle_disable'},
 \   'sticky': {},
 \   'backspace-key': {},
 \   'escape-key': {},
@@ -1657,6 +1657,9 @@ function! eskk#filter(char) "{{{
 
         if do_filter
             call eskk#call_mode_func('filter', [stash], 1)
+        endif
+        if !eskk#is_enabled()
+            return ''
         endif
 
         " NOTE: `buftable` may become invalid reference

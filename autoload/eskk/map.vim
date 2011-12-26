@@ -17,6 +17,14 @@ delfunc s:SID
 let s:prev_normal_keys = {}
 
 
+function! s:handle_disable(stash) "{{{
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_NORMAL
+        call eskk#disable()
+        return 1
+    endif
+    return 0
+endfunction "}}}
 function! s:handle_toggle_hankata(stash) "{{{
     let phase = eskk#get_buftable().get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
