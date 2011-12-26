@@ -69,6 +69,8 @@ let s:table_defs = {}
 " `special` means "they don't have something to do with mappings Vim knows."
 let s:eskk_mappings = {
 \   'general': {},
+\   'disable': {'fn': 's:handle_disable'},
+\   'kakutei': {'fn': 's:handle_kakutei'},
 \   'sticky': {},
 \   'backspace-key': {},
 \   'escape-key': {},
@@ -110,6 +112,72 @@ let s:eskk_mappings = {
 \   'mode:ascii:to-hira': {'fn': 's:handle_toggle_hankata'},
 \   'mode:zenei:to-hira': {'fn': 's:handle_toggle_hankata'},
 \   'mode:abbrev:henkan-key': {},
+\}
+" Keys used by only its mode.
+let s:MODE_LOCAL_KEYS = {
+\   'hira': [
+\       'kakutei',
+\       'disable',
+\       'phase:cancel',
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
+\       'mode:hira:toggle-hankata',
+\       'mode:hira:ctrl-q-key',
+\       'mode:hira:toggle-kata',
+\       'mode:hira:q-key',
+\       'mode:hira:to-ascii',
+\       'mode:hira:to-zenei',
+\       'mode:hira:to-abbrev',
+\   ],
+\   'kata': [
+\       'kakutei',
+\       'disable',
+\       'phase:cancel',
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
+\       'mode:kata:toggle-hankata',
+\       'mode:kata:ctrl-q-key',
+\       'mode:kata:toggle-kata',
+\       'mode:kata:q-key',
+\       'mode:kata:to-ascii',
+\       'mode:kata:to-zenei',
+\       'mode:kata:to-abbrev',
+\   ],
+\   'hankata': [
+\       'kakutei',
+\       'disable',
+\       'phase:cancel',
+\       'phase:henkan:henkan-key',
+\       'phase:okuri:henkan-key',
+\       'phase:henkan-select:choose-next',
+\       'phase:henkan-select:choose-prev',
+\       'phase:henkan-select:next-page',
+\       'phase:henkan-select:prev-page',
+\       'phase:henkan-select:escape',
+\       'mode:hankata:toggle-hankata',
+\       'mode:hankata:ctrl-q-key',
+\       'mode:hankata:toggle-kata',
+\       'mode:hankata:q-key',
+\       'mode:hankata:to-ascii',
+\       'mode:hankata:to-zenei',
+\       'mode:hankata:to-abbrev',
+\   ],
+\   'ascii': [
+\       'mode:ascii:to-hira',
+\   ],
+\   'zenei': [
+\       'mode:zenei:to-hira',
+\   ],
 \}
 " }}}
 
@@ -192,7 +260,7 @@ function! s:asym_filter(stash) "{{{
     let to_zenei = printf('mode:%s:to-zenei', cur_mode)
     let to_abbrev = printf('mode:%s:to-abbrev', cur_mode)
 
-    for key in [
+    for key in get(s:MODE_LOCAL_KEYS, cur_mode, []) + [
     \   toggle_hankata,
     \   ctrl_q_key,
     \   toggle_kata,
@@ -540,11 +608,10 @@ function! eskk#_initialize() "{{{
         \   v:version > 703
         \   || v:version == 703 && has('patch32')
         if !ok
-            echohl WarningMsg
-            echomsg "eskk.vim: warning: Your Vim is too old."
-            \       "Please use 7.3.32 at least."
-            echohl None
-
+            call eskk#logger#warn(
+            \   "eskk.vim: warning: Your Vim is too old."
+            \   . " Please use 7.3.32 at least."
+            \)
             throw 'FINISH'
         endif
     endfunction "}}}
@@ -728,6 +795,11 @@ function! eskk#_initialize() "{{{
     " Default mappings - :EskkMap {{{
     call eskk#commands#define()
 
+    " TODO: Separate to hira:disable, kata:disable, hankata:disable ?
+    EskkMap -type=disable -unique <C-j>
+
+    EskkMap -type=kakutei -unique <C-j>
+
     EskkMap -type=sticky -unique ;
     EskkMap -type=backspace-key -unique <C-h>
     EskkMap -type=enter-key -unique <CR>
@@ -789,14 +861,6 @@ function! eskk#_initialize() "{{{
 
     EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
     " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
-    " }}}
-
-    " Map temporary key to keys to use in that mode {{{
-    call eskk#register_event(
-    \   'enter-mode',
-    \   'eskk#map#map_mode_local_keys',
-    \   []
-    \)
     " }}}
 
     " Save dictionary if modified {{{
@@ -1175,6 +1239,7 @@ function! eskk#get_default_mapped_keys() "{{{
     \   "<Down>",
     \   "<C-n>",
     \   "<C-p>",
+    \   "<C-j>",
     \]
 endfunction "}}}
 
@@ -1183,23 +1248,27 @@ function! eskk#is_enabled() "{{{
     return eskk#is_initialized()
     \   && eskk#get_current_instance().enabled
 endfunction "}}}
+function! eskk#toggle() "{{{
+    if !eskk#is_initialized()
+        call eskk#logger#warn('eskk is not initialized.')
+        return ''
+    endif
+    return eskk#is_enabled() ? eskk#disable() : eskk#enable()
+endfunction "}}}
 function! eskk#enable() "{{{
     if !eskk#is_initialized()
-        echohl WarningMsg
-        echomsg 'eskk is not initialized.'
-        echohl None
+        call eskk#logger#warn('eskk is not initialized.')
         return ''
     endif
-
-    let inst = eskk#get_current_instance()
-
     if eskk#is_enabled()
+        call eskk#logger#warn('eskk is not disable.')
         return ''
     endif
-
-    if mode() ==# 'c'
-        let &l:iminsert = 1
+    if exists('b:skk_on') && b:skk_on
+        call eskk#logger#warn('skk.vim is enabled. please disable it.')
+        return ''
     endif
+    let inst = eskk#get_current_instance()
 
     call eskk#throw_event('enable-im')
 
@@ -1210,14 +1279,10 @@ function! eskk#enable() "{{{
     " Map all lang-mode keymappings.
     call eskk#map#map_all_keys()
 
+    " Initialize mode.
     call eskk#set_mode(g:eskk#initial_mode)
 
-    " If skk.vim exists and enabled, disable it.
-    let disable_skk_vim = ''
-    if exists('g:skk_version') && exists('b:skk_on') && b:skk_on
-        let disable_skk_vim = substitute(SkkDisable(), "\<C-^>", '', '')
-    endif
-
+    " Save previous omnifunc.
     if g:eskk#enable_completion
         let inst.omnifunc_save = &l:omnifunc
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
@@ -1225,29 +1290,28 @@ function! eskk#enable() "{{{
 
     let inst.enabled = 1
     if mode() =~# '^[ic]$'
-        return disable_skk_vim . "\<C-^>"
+        " NOTE: Vim can't enter lang-mode immediately
+        " in insert-mode or commandline-mode.
+        " We have to use i_CTRL-^ .
+        setlocal imsearch=-1
+        redrawstatus
+        return "\<C-^>"
     else
-        return eskk#enable_im()
+        setlocal iminsert=1 imsearch=-1
+        redrawstatus
+        return ''
     endif
 endfunction "}}}
 function! eskk#disable() "{{{
     if !eskk#is_initialized()
-        echohl WarningMsg
-        echomsg 'eskk is not initialized.'
-        echohl None
+        call eskk#logger#warn('eskk is not initialized.')
         return ''
     endif
-
-    let inst = eskk#get_current_instance()
-    let do_unmap = a:0 != 0 ? a:1 : 0
-
     if !eskk#is_enabled()
+        call eskk#logger#warn('eskk is not enabled.')
         return ''
     endif
-
-    if mode() ==# 'c'
-        return "\<C-^>"
-    endif
+    let inst = eskk#get_current_instance()
 
     call eskk#throw_event('disable-im')
 
@@ -1258,48 +1322,23 @@ function! eskk#disable() "{{{
         let &l:omnifunc = remove(inst, 'omnifunc_save')
     endif
 
+    call eskk#unlock_neocomplcache()
+    let inst.enabled = 0
     if mode() =~# '^[ic]$'
-        let buftable = eskk#get_buftable()
-        let kakutei_str = buftable.generate_kakutei_str()
-        if !empty(buftable.get_display_str(0))
-            call buftable.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
-            call buftable.clear_all()
-            return kakutei_str
-        else
-            call eskk#unlock_neocomplcache()
-            let inst.enabled = 0
-            return kakutei_str . "\<C-^>"
-        endif
+        " NOTE: Vim can't escape lang-mode immediately
+        " in insert-mode or commandline-mode.
+        " We have to use i_CTRL-^ .
+
+        " In insert-mode, See eskk#filter() for disable handler.
+        " This path is for only commandline-mode.
+        redrawstatus
+        let kakutei_str = eskk#get_buftable().generate_kakutei_str()
+        return kakutei_str . "\<C-^>"
     else
-        call eskk#unlock_neocomplcache()
-        let inst.enabled = 0
-        return eskk#disable_im()
-    endif
-endfunction "}}}
-function! eskk#toggle() "{{{
-    if !eskk#is_initialized()
-        echohl WarningMsg
-        echomsg 'eskk is not initialized.'
-        echohl None
+        setlocal iminsert=0 imsearch=0
+        redrawstatus
         return ''
     endif
-    return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
-endfunction "}}}
-function! eskk#enable_im() "{{{
-    let &l:iminsert = s:map_exists_mode_of('l') ? 1 : 2
-    let &l:imsearch = &l:iminsert
-
-    return ''
-endfunction "}}}
-function! s:map_exists_mode_of(mode) "{{{
-    let out = eskk#util#redir_english(a:mode . 'map')
-    return index(split(out, '\n'), 'No mapping found') ==# -1
-endfunction "}}}
-function! eskk#disable_im() "{{{
-    let &l:iminsert = 0
-    let &l:imsearch = 0
-
-    return ''
 endfunction "}}}
 
 " Mode
@@ -1598,6 +1637,13 @@ function! eskk#filter(char) "{{{
         if do_filter
             call eskk#call_mode_func('filter', [stash], 1)
         endif
+        if !eskk#is_enabled()
+            " NOTE: Vim can't escape lang-mode immediately
+            " in insert-mode or commandline-mode.
+            " We have to use i_CTRL-^ .
+            let kakutei_str = buftable.generate_kakutei_str()
+            return kakutei_str . "\<C-^>"
+        endif
 
         " NOTE: `buftable` may become invalid reference
         " because `eskk#call_mode_func()` may call `eskk#set_buftable()`.
@@ -1628,7 +1674,7 @@ function! s:force_disable_eskk(stash, error) "{{{
     " FIXME: It may cause inconsistency
     " to eskk status and lang options.
     " TODO: detect lang options and follow the status.
-    call eskk#disable_im()
+    setlocal iminsert=0 imsearch=0
 
     call eskk#logger#write_error_log_file(
     \   a:stash, a:error,
