@@ -405,11 +405,13 @@ function! eskk#map#is_special_lhs(char, type) "{{{
     " when `eskk_mappings[a:type]` does not exist.
     let eskk_mappings = eskk#_get_eskk_mappings()
     return has_key(eskk_mappings, a:type)
+    \   && has_key(eskk_mappings[a:type], 'lhs')
     \   && eskk#map#key2char(eskk_mappings[a:type].lhs) ==# a:char
 endfunction "}}}
 function! eskk#map#get_special_key(type) "{{{
     let eskk_mappings = eskk#_get_eskk_mappings()
     if has_key(eskk_mappings, a:type)
+    \   && has_key(eskk_mappings[a:type], 'lhs')
         return eskk_mappings[a:type].lhs
     else
         throw eskk#internal_error(
@@ -421,6 +423,7 @@ endfunction "}}}
 function! eskk#map#get_special_map(type) "{{{
     let eskk_mappings = eskk#_get_eskk_mappings()
     if has_key(eskk_mappings, a:type)
+    \   && has_key(eskk_mappings[a:type], 'lhs')
         let map = printf('<Plug>(eskk:_noremap_%s)', a:type)
         if maparg(map, eskk#map#get_map_modes()) == ''
             " Not to remap.
