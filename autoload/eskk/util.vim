@@ -55,9 +55,26 @@ endfunction "}}}
 
 
 " Options
-function! eskk#util#set_default(var, val) "{{{
-    if !exists(a:var) || type({a:var}) != type(a:val)
-        let {a:var} = a:val
+function! eskk#util#set_default(var, Value) "{{{
+    if !exists(a:var)
+        let {a:var} = a:Value
+    elseif type({a:var}) isnot type(a:Value)
+        call eskk#logger#warn(
+        \   "'".string(a:var)."' is invalid type value. "
+        \   . "use default value...")
+        execute 'unlet' a:var
+        let {a:var} = a:Value
+    endif
+endfunction "}}}
+function! eskk#util#set_default_dict(var, dict) "{{{
+    if type(a:dict) isnot type({})
+        call eskk#logger#warn('invalid argument for eskk#util#set_default_dict('.string(a:var).', ...)')
+        return
+    endif
+    if !exists(a:var)
+        let {a:var} = a:dict
+    else
+        call extend({a:var}, a:dict, 'keep')
     endif
 endfunction "}}}
 

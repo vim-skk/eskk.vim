@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 469))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 470))
 
 
 function! s:SID() "{{{
@@ -682,10 +682,7 @@ function! eskk#_initialize() "{{{
 
     " Mode
     call eskk#util#set_default('g:eskk#initial_mode', 'hira')
-
-    if !exists('g:eskk#statusline_mode_strings')
-        let g:eskk#statusline_mode_strings =  {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'}
-    endif
+    call eskk#util#set_default_dict('g:eskk#statusline_mode_strings', {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'})
 
     " Table
     call eskk#util#set_default('g:eskk#cache_table_map', 1)
@@ -706,21 +703,18 @@ function! eskk#_initialize() "{{{
 
     " Cursor color
     call eskk#util#set_default('g:eskk#use_color_cursor', 1)
-
-    if !exists('g:eskk#cursor_color')
-        " ascii: ivory4:#8b8b83, gray:#bebebe
-        " hira: coral4:#8b3e2f, pink:#ffc0cb
-        " kata: forestgreen:#228b22, green:#00ff00
-        " abbrev: royalblue:#4169e1
-        " zenei: gold:#ffd700
-        let g:eskk#cursor_color = {
-        \   'ascii': ['#8b8b83', '#bebebe'],
-        \   'hira': ['#8b3e2f', '#ffc0cb'],
-        \   'kata': ['#228b22', '#00ff00'],
-        \   'abbrev': '#4169e1',
-        \   'zenei': '#ffd700',
-        \}
-    endif
+    " ascii: ivory4:#8b8b83, gray:#bebebe
+    " hira: coral4:#8b3e2f, pink:#ffc0cb
+    " kata: forestgreen:#228b22, green:#00ff00
+    " abbrev: royalblue:#4169e1
+    " zenei: gold:#ffd700
+    call eskk#util#set_default_dict('g:eskk#cursor_color', {
+    \   'ascii': ['#8b8b83', '#bebebe'],
+    \   'hira': ['#8b3e2f', '#ffc0cb'],
+    \   'kata': ['#228b22', '#00ff00'],
+    \   'abbrev': '#4169e1',
+    \   'zenei': '#ffd700',
+    \})
 
     " Misc.
     call eskk#util#set_default('g:eskk#egg_like_newline', 0)
@@ -731,12 +725,10 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#rom_input_style', 'skk')
     call eskk#util#set_default('g:eskk#auto_henkan_at_okuri_match', 1)
 
-    if !exists("g:eskk#set_undo_point")
-        let g:eskk#set_undo_point = {
-        \   'sticky': 1,
-        \   'kakutei': 1,
-        \}
-    endif
+    call eskk#util#set_default_dict('g:eskk#set_undo_point', {
+    \   'sticky': 1,
+    \   'kakutei': 1,
+    \})
 
     call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
