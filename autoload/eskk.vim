@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 463))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 464))
 
 
 function! s:SID() "{{{
@@ -152,7 +152,7 @@ function! eskk#create_new_instance() "{{{
     let s:eskk_instance_id += 1
 
     " Initialize instance.
-    call eskk#enable(0)
+    call eskk#enable()
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
     if s:eskk_instance_id == 0
@@ -999,15 +999,6 @@ function! eskk#_initialize() "{{{
     call s:initialize_builtin_modes()
     " }}}
 
-    " BufEnter: Map keys if enabled. {{{
-    function! s:initialize_map_all_keys_if_enabled()
-        if eskk#is_enabled()
-            call eskk#map#map_all_keys()
-        endif
-    endfunction
-    autocmd eskk BufEnter * call s:initialize_map_all_keys_if_enabled()
-    " }}}
-
     " BufEnter: Restore global option value of &iminsert, &imsearch {{{
     if !g:eskk#keep_state_beyond_buffer
         execute 'autocmd eskk BufLeave *'
@@ -1199,7 +1190,7 @@ function! eskk#is_enabled() "{{{
     return eskk#is_initialized()
     \   && eskk#get_current_instance().enabled
 endfunction "}}}
-function! eskk#enable(...) "{{{
+function! eskk#enable() "{{{
     if !eskk#is_initialized()
         echohl WarningMsg
         echomsg 'eskk is not initialized.'
@@ -1208,7 +1199,6 @@ function! eskk#enable(...) "{{{
     endif
 
     let inst = eskk#get_current_instance()
-    let do_map = a:0 != 0 ? a:1 : 1
 
     if eskk#is_enabled()
         return ''
@@ -1224,10 +1214,8 @@ function! eskk#enable(...) "{{{
     let inst.mode = ''
     call eskk#get_buftable().reset()
 
-    " Set up Mappings.
-    if do_map
-        call eskk#map#map_all_keys()
-    endif
+    " Map all lang-mode keymappings.
+    call eskk#map#map_all_keys()
 
     call eskk#set_mode(g:eskk#initial_mode)
 
@@ -1270,12 +1258,11 @@ function! eskk#disable() "{{{
 
     call eskk#throw_event('disable-im')
 
-    if do_unmap
-        call eskk#map#unmap_all_keys()
-    endif
+    " Unmap all lang-mode keymappings.
+    call eskk#map#unmap_all_keys()
 
-    if g:eskk#enable_completion && has_key(inst, 'omnifunc_save')
-        let &l:omnifunc = inst.omnifunc_save
+    if has_key(inst, 'omnifunc_save')
+        let &l:omnifunc = remove(inst, 'omnifunc_save')
     endif
 
     if mode() =~# '^[ic]$'
