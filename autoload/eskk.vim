@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 470))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 471))
 
 
 function! s:SID() "{{{
@@ -585,7 +585,7 @@ function! eskk#_initialize() "{{{
     endif
     let s:initialization_state = s:INIT_ABORT
 
-    " Check if prereq libs' versions {{{
+    " Validate Vim versions {{{
     function! s:validate_vim_version() "{{{
         let ok =
         \   v:version > 703
