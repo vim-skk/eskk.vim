@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 464))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 465))
 
 
 function! s:SID() "{{{
@@ -652,6 +652,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#max_candidates', 30)
     call eskk#util#set_default('g:eskk#start_completion_length', 3)
     call eskk#util#set_default('g:eskk#register_completed_word', 1)
+    call eskk#util#set_default('g:eskk#egg_like_newline_completion', 0)
 
     " Cursor color
     call eskk#util#set_default('g:eskk#use_color_cursor', 1)
@@ -713,14 +714,6 @@ function! eskk#_initialize() "{{{
         endfor
     endfunction
     call s:initialize_set_up_eskk_directory()
-    " }}}
-
-    " Egg like newline {{{
-    if !g:eskk#egg_like_newline
-        " Default behavior is `egg like newline`.
-        " Turns it to `Non egg like newline` during henkan phase.
-        call eskk#map#disable_egg_like_newline()
-    endif
     " }}}
 
     " g:eskk#keep_state {{{

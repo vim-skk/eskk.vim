@@ -433,45 +433,27 @@ endfunction "}}}
 
 
 " Egg like newline
-function! eskk#map#disable_egg_like_newline() "{{{
-    call eskk#register_event(
-    \   [
-    \       'enter-phase-henkan',
-    \       'enter-phase-okuri',
-    \       'enter-phase-henkan-select'
-    \   ],
-    \   eskk#util#get_local_func(
-    \       'do_lmap_non_egg_like_newline',
-    \       s:SID_PREFIX
-    \   ),
-    \   [1]
-    \)
-    call eskk#register_event(
-    \   'enter-phase-normal',
-    \   eskk#util#get_local_func(
-    \       'do_lmap_non_egg_like_newline',
-    \       s:SID_PREFIX
-    \   ),
-    \   [0]
+function! eskk#map#egg_like_newline(eln_insert, eln_compl) "{{{
+    let egg_like     = "\<Plug>(eskk:filter:<CR>)"
+    let non_egg_like = repeat(egg_like, 2)
+    call eskk#map#map(
+    \   'rbe',
+    \   '<CR>',
+    \   'eskk#map#should_disable_egg_like_newline('.a:eln_insert.','.a:eln_compl.') ? '.string(non_egg_like).' : '.string(egg_like),
+    \   'l'
     \)
 endfunction "}}}
-function! s:do_lmap_non_egg_like_newline(enable) "{{{
-    if a:enable
-        " Enable
-        if !eskk#map#has_temp_key('<CR>')
-            call eskk#map#set_up_temp_key(
-            \   '<CR>',
-            \   '<Plug>(eskk:filter:<CR>)<Plug>(eskk:filter:<CR>)'
-            \)
-        endif
-    else
-        " Disable
-        call eskk#register_temp_event(
-        \   'filter-begin',
-        \   'eskk#map#set_up_temp_key_restore',
-        \   ['<CR>']
-        \)
+function! eskk#map#should_disable_egg_like_newline(eln_insert, eln_compl) "{{{
+    if mode() ==# 'i' && pumvisible()
+        return !a:eln_compl
     endif
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
+    \   || phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
+        return !a:eln_insert
+    endif
+    return 0
 endfunction "}}}
 
 
@@ -491,6 +473,10 @@ function! eskk#map#map_all_keys(...) "{{{
             call call('eskk#map#set_up_key', [key] + a:000)
         endif
     endfor
+    " Egg like newline
+    call eskk#map#egg_like_newline(
+    \   g:eskk#egg_like_newline,
+    \   g:eskk#egg_like_newline_completion)
 
     " Map `:EskkMap -general` keys.
     let eskk_mappings = eskk#_get_eskk_mappings()
