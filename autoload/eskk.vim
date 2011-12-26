@@ -116,6 +116,7 @@ let s:eskk_mappings = {
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
 \   'hira': [
+\       'kakutei',
 \       'disable',
 \       'phase:cancel',
 \       'phase:henkan:henkan-key',
@@ -134,6 +135,7 @@ let s:MODE_LOCAL_KEYS = {
 \       'mode:hira:to-abbrev',
 \   ],
 \   'kata': [
+\       'kakutei',
 \       'disable',
 \       'phase:cancel',
 \       'phase:henkan:henkan-key',
@@ -152,6 +154,7 @@ let s:MODE_LOCAL_KEYS = {
 \       'mode:kata:to-abbrev',
 \   ],
 \   'hankata': [
+\       'kakutei',
 \       'disable',
 \       'phase:cancel',
 \       'phase:henkan:henkan-key',
@@ -605,11 +608,10 @@ function! eskk#_initialize() "{{{
         \   v:version > 703
         \   || v:version == 703 && has('patch32')
         if !ok
-            echohl WarningMsg
-            echomsg "eskk.vim: warning: Your Vim is too old."
-            \       "Please use 7.3.32 at least."
-            echohl None
-
+            call eskk#logger#warn(
+            \   "eskk.vim: warning: Your Vim is too old."
+            \   . " Please use 7.3.32 at least."
+            \)
             throw 'FINISH'
         endif
     endfunction "}}}
@@ -795,6 +797,8 @@ function! eskk#_initialize() "{{{
 
     " TODO: Separate to hira:disable, kata:disable, hankata:disable ?
     EskkMap -type=disable -unique <C-j>
+
+    EskkMap -type=kakutei -unique <C-j>
 
     EskkMap -type=sticky -unique ;
     EskkMap -type=backspace-key -unique <C-h>
@@ -1244,23 +1248,27 @@ function! eskk#is_enabled() "{{{
     return eskk#is_initialized()
     \   && eskk#get_current_instance().enabled
 endfunction "}}}
+function! eskk#toggle() "{{{
+    if !eskk#is_initialized()
+        call eskk#logger#warn('eskk is not initialized.')
+        return ''
+    endif
+    return eskk#is_enabled() ? eskk#disable() : eskk#enable()
+endfunction "}}}
 function! eskk#enable() "{{{
     if !eskk#is_initialized()
-        echohl WarningMsg
-        echomsg 'eskk is not initialized.'
-        echohl None
+        call eskk#logger#warn('eskk is not initialized.')
         return ''
     endif
-
-    let inst = eskk#get_current_instance()
-
     if eskk#is_enabled()
+        call eskk#logger#warn('eskk is not disable.')
         return ''
     endif
-
-    if mode() ==# 'c'
-        let &l:iminsert = 1
+    if exists('b:skk_on') && b:skk_on
+        call eskk#logger#warn('skk.vim is enabled. please disable it.')
+        return ''
     endif
+    let inst = eskk#get_current_instance()
 
     call eskk#throw_event('enable-im')
 
@@ -1271,14 +1279,10 @@ function! eskk#enable() "{{{
     " Map all lang-mode keymappings.
     call eskk#map#map_all_keys()
 
+    " Initialize mode.
     call eskk#set_mode(g:eskk#initial_mode)
 
-    " If skk.vim exists and enabled, disable it.
-    let disable_skk_vim = ''
-    if exists('g:skk_version') && exists('b:skk_on') && b:skk_on
-        let disable_skk_vim = substitute(SkkDisable(), "\<C-^>", '', '')
-    endif
-
+    " Save previous omnifunc.
     if g:eskk#enable_completion
         let inst.omnifunc_save = &l:omnifunc
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
@@ -1286,29 +1290,31 @@ function! eskk#enable() "{{{
 
     let inst.enabled = 1
     if mode() =~# '^[ic]$'
-        return disable_skk_vim . "\<C-^>"
+        return "\<C-^>"
     else
-        return eskk#enable_im()
+        return s:enable_im()
     endif
+endfunction "}}}
+function! s:enable_im() "{{{
+    let &l:iminsert = s:map_exists_mode_of('l') ? 1 : 2
+    let &l:imsearch = &l:iminsert
+
+    return ''
+endfunction "}}}
+function! s:map_exists_mode_of(mode) "{{{
+    let out = eskk#util#redir_english(a:mode . 'map')
+    return index(split(out, '\n'), 'No mapping found') ==# -1
 endfunction "}}}
 function! eskk#disable() "{{{
     if !eskk#is_initialized()
-        echohl WarningMsg
-        echomsg 'eskk is not initialized.'
-        echohl None
+        call eskk#logger#warn('eskk is not initialized.')
         return ''
     endif
-
-    let inst = eskk#get_current_instance()
-    let do_unmap = a:0 != 0 ? a:1 : 0
-
     if !eskk#is_enabled()
+        call eskk#logger#warn('eskk is not enabled.')
         return ''
     endif
-
-    if mode() ==# 'c'
-        return "\<C-^>"
-    endif
+    let inst = eskk#get_current_instance()
 
     call eskk#throw_event('disable-im')
 
@@ -1319,44 +1325,17 @@ function! eskk#disable() "{{{
         let &l:omnifunc = remove(inst, 'omnifunc_save')
     endif
 
+    call eskk#unlock_neocomplcache()
+    let inst.enabled = 0
     if mode() =~# '^[ic]$'
         let buftable = eskk#get_buftable()
         let kakutei_str = buftable.generate_kakutei_str()
-        if !empty(buftable.get_display_str(0))
-            call buftable.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
-            call buftable.clear_all()
-            return kakutei_str
-        else
-            call eskk#unlock_neocomplcache()
-            let inst.enabled = 0
-            return kakutei_str . "\<C-^>"
-        endif
+        return kakutei_str . "\<C-^>"
     else
-        call eskk#unlock_neocomplcache()
-        let inst.enabled = 0
-        return eskk#disable_im()
+        return s:disable_im()
     endif
 endfunction "}}}
-function! eskk#toggle() "{{{
-    if !eskk#is_initialized()
-        echohl WarningMsg
-        echomsg 'eskk is not initialized.'
-        echohl None
-        return ''
-    endif
-    return eskk#{eskk#is_enabled() ? 'disable' : 'enable'}()
-endfunction "}}}
-function! eskk#enable_im() "{{{
-    let &l:iminsert = s:map_exists_mode_of('l') ? 1 : 2
-    let &l:imsearch = &l:iminsert
-
-    return ''
-endfunction "}}}
-function! s:map_exists_mode_of(mode) "{{{
-    let out = eskk#util#redir_english(a:mode . 'map')
-    return index(split(out, '\n'), 'No mapping found') ==# -1
-endfunction "}}}
-function! eskk#disable_im() "{{{
+function! s:disable_im() "{{{
     let &l:iminsert = 0
     let &l:imsearch = 0
 
@@ -1692,7 +1671,7 @@ function! s:force_disable_eskk(stash, error) "{{{
     " FIXME: It may cause inconsistency
     " to eskk status and lang options.
     " TODO: detect lang options and follow the status.
-    call eskk#disable_im()
+    call s:disable_im()
 
     call eskk#logger#write_error_log_file(
     \   a:stash, a:error,
