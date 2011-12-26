@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 472))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 473))
 
 
 function! s:SID() "{{{
@@ -1560,16 +1560,6 @@ function! eskk#has_event(event_name) "{{{
     return
     \   !empty(get(s:event_hook_fn, a:event_name, []))
     \   || !empty(get(inst.temp_event_hook_fn, a:event_name, []))
-endfunction "}}}
-
-" Locking diff old string
-function! eskk#lock_old_str() "{{{
-    let inst = eskk#get_current_instance()
-    let inst.has_locked_old_str = 1
-endfunction "}}}
-function! eskk#unlock_old_str() "{{{
-    let inst = eskk#get_current_instance()
-    let inst.has_locked_old_str = 0
 endfunction "}}}
 
 " Filter
