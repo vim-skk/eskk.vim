@@ -12,7 +12,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-let g:savemap#version = str2nr(printf('%02d%02d%03d', 0, 2, 0))
+let g:savemap#version = str2nr(printf('%02d%02d%03d', 0, 2, 1))
 
 " Interface {{{
 
@@ -198,6 +198,15 @@ endfunction "}}}
 
 function! s:restore_map_info(map_info, is_abbr) "{{{
     if empty(a:map_info)
+        echohl WarningMsg
+        echomsg 'invalid arguments: a:map_info is empty'
+        echohl None
+        return
+    endif
+    if a:map_info.lhs ==# '' || a:map_info.rhs ==# ''
+        echohl WarningMsg
+        echomsg 'invalid arguments: either lhs or rhs is empty'
+        echohl None
         return
     endif
     for mode in s:split_maparg_modes(a:map_info.mode)
