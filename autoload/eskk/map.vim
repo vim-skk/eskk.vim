@@ -458,7 +458,7 @@ function! s:create_map(type, options, lhs, rhs, from) "{{{
     let type_st = eskk_mappings[a:type]
 
     if a:options.unique && has_key(type_st, 'lhs')
-        call eskk#util#warn(
+        call eskk#logger#warn(
         \   a:type . ': -unique is specified'
         \       . ' and mapping already exists. skip.'
         \)
@@ -474,11 +474,11 @@ function! s:create_general_map(self, options, lhs, rhs, from) "{{{
     let type_st = eskk#_get_eskk_general_mappings()
 
     if lhs == ''
-        call eskk#util#warn("lhs must not be empty string.")
+        call eskk#logger#warn("lhs must not be empty string.")
         return
     endif
     if has_key(type_st, lhs) && a:options.unique
-        call eskk#util#warn(
+        call eskk#logger#warn(
         \   a:from . ": Already mapped to '" . lhs . "'."
         \)
         return
