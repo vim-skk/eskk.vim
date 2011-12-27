@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 473))
+let g:eskk#version = str2nr(printf('%02d%02d%03d', 0, 5, 474))
 
 
 function! s:SID() "{{{
@@ -1237,7 +1237,6 @@ function! eskk#enable() "{{{
         return ''
     endif
     if eskk#is_enabled()
-        call eskk#logger#warn('eskk is not disable.')
         return ''
     endif
     if exists('b:skk_on') && b:skk_on
@@ -1284,9 +1283,6 @@ function! eskk#disable() "{{{
         return ''
     endif
     if !eskk#is_enabled()
-        if g:eskk#keep_state
-            call eskk#logger#warn('eskk is not enabled.')
-        endif
         return ''
     endif
     let inst = eskk#get_current_instance()
