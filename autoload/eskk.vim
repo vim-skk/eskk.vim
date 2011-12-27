@@ -1284,7 +1284,7 @@ function! eskk#disable() "{{{
         return ''
     endif
     if !eskk#is_enabled()
-        if !g:eskk#keep_state
+        if g:eskk#keep_state
             call eskk#logger#warn('eskk is not enabled.')
         endif
         return ''
