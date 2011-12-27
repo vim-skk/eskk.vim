@@ -1284,7 +1284,9 @@ function! eskk#disable() "{{{
         return ''
     endif
     if !eskk#is_enabled()
-        call eskk#logger#warn('eskk is not enabled.')
+        if !g:eskk#keep_state
+            call eskk#logger#warn('eskk is not enabled.')
+        endif
         return ''
     endif
     let inst = eskk#get_current_instance()
