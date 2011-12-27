@@ -900,7 +900,7 @@ function! s:Buftable_do_escape(stash) dict "{{{
     \   self.get_henkan_phase()
     \)
 
-    let kakutei_str = self.generate_kakutei_str()
+    let kakutei_str = self.get_display_str(0)
     " NOTE: This function return value is not remapped.
     let esc = eskk#map#get_special_key('escape-key')
     call eskk#util#assert(esc != '', 'esc must not be empty string')
