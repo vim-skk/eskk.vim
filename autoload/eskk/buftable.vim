@@ -563,10 +563,7 @@ function! s:Buftable_do_backspace(stash) dict "{{{
             endif
             break
         elseif !buf_str.rom_pairs.empty()
-            let p = buf_str.rom_pairs.pop()
-            if empty(p)
-                continue
-            endif
+            call buf_str.rom_pairs.pop()
             break
         elseif self.get_marker(phase) != ''
             if !self.step_back_henkan_phase()
