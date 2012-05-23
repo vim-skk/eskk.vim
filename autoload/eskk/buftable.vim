@@ -39,7 +39,7 @@ endfunction "}}}
 function! s:RomStr_append(str) dict "{{{
     let self._str .= a:str
 endfunction "}}}
-function! s:RomStr_chop() dict "{{{
+function! s:RomStr_pop() dict "{{{
     if self._str ==# ''
         return ''
     endif
@@ -59,7 +59,7 @@ let s:RomStr = {
 \   'get': eskk#util#get_local_funcref('RomStr_get', s:SID_PREFIX),
 \   'set': eskk#util#get_local_funcref('RomStr_set', s:SID_PREFIX),
 \   'append': eskk#util#get_local_funcref('RomStr_append', s:SID_PREFIX),
-\   'chop': eskk#util#get_local_funcref('RomStr_chop', s:SID_PREFIX),
+\   'pop': eskk#util#get_local_funcref('RomStr_pop', s:SID_PREFIX),
 \   'clear': eskk#util#get_local_funcref('RomStr_clear', s:SID_PREFIX),
 \   'empty': eskk#util#get_local_funcref('RomStr_empty', s:SID_PREFIX),
 \}
@@ -553,7 +553,7 @@ function! s:Buftable_do_backspace(stash) dict "{{{
     for phase in self.get_lower_phases()
         let buf_str = self.get_buf_str(phase)
         if !buf_str.rom_str.empty()
-            call buf_str.rom_str.chop()
+            call buf_str.rom_str.pop()
             if buf_str.rom_str.empty()
             \   && !buf_str.rom_pairs.empty()
             \   && !get(buf_str.rom_pairs.get(-1)[2], 'converted')
