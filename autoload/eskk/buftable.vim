@@ -545,6 +545,7 @@ function! s:Buftable_do_backspace(stash) dict "{{{
 
     " TODO:
     " "sた" => type "<BS>a" => "さ" (not "sa")
+    " "kopipw<BS>e" => "こぴpえ" (not "こぴぺ")
     " Solution:
     " - Save the flag whether "s" is converted or not
     "   to "Pair" object.
