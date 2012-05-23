@@ -553,7 +553,7 @@ function! s:Buftable_do_backspace(stash) dict "{{{
         if !buf_str.rom_str.empty()
             call buf_str.rom_str.chop()
             break
-        elseif !empty(buf_str.rom_pairs.get())
+        elseif !buf_str.rom_pairs.empty()
             let p = buf_str.rom_pairs.pop()
             if empty(p)
                 continue
