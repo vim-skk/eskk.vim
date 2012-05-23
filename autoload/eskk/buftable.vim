@@ -40,9 +40,11 @@ function! s:RomStr_append(str) dict "{{{
     let self._str .= a:str
 endfunction "}}}
 function! s:RomStr_chop() dict "{{{
-    let s = self._str
-    let s = strpart(s, 0, strlen(s) - 1)
-    let self._str = s
+    if self._str ==# ''
+        return ''
+    endif
+    let [self._str, c] = [self._str[:-2], self._str[strlen(self._str)-1]]
+    return c
 endfunction "}}}
 function! s:RomStr_clear() dict "{{{
     let self._str = ''
