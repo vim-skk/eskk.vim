@@ -67,8 +67,8 @@ let s:RomStr = {
 
 " s:RomPairs {{{
 
-function! s:RomPairs_get() dict "{{{
-    return copy(self._pairs)
+function! s:RomPairs_get(...) dict "{{{
+    return copy(a:0 ? self._pairs[a:1] : self._pairs)
 endfunction "}}}
 function! s:RomPairs_get_rom() dict "{{{
     return join(map(copy(self._pairs), 'v:val[0]'), '')
@@ -79,12 +79,17 @@ endfunction "}}}
 function! s:RomPairs_set(list_pairs) dict "{{{
     let self._pairs = a:list_pairs
 endfunction "}}}
-function! s:RomPairs_set_one_pair(rom_str, filter_str) dict "{{{
+function! s:RomPairs_set_one_pair(rom_str, filter_str, ...) dict "{{{
     let pair = [a:rom_str, a:filter_str]
+    \           + (a:0 && type(a:1) is type({}) ? [a:1] : [{}])
     let self._pairs = [pair]
 endfunction "}}}
-function! s:RomPairs_push_one_pair(rom_str, filter_str) dict "{{{
+function! s:RomPairs_push(pair) dict "{{{
+        let self._pairs += [pair]
+endfunction "}}}
+function! s:RomPairs_push_one_pair(rom_str, filter_str, ...) dict "{{{
     let pair = [a:rom_str, a:filter_str]
+    \           + (a:0 && type(a:1) is type({}) ? [a:1] : [{}])
     let self._pairs += [pair]
 endfunction "}}}
 function! s:RomPairs_pop() dict "{{{
@@ -109,6 +114,7 @@ let s:RomPairs = {
 \   'get_filter': eskk#util#get_local_funcref('RomPairs_get_filter', s:SID_PREFIX),
 \   'set': eskk#util#get_local_funcref('RomPairs_set', s:SID_PREFIX),
 \   'set_one_pair': eskk#util#get_local_funcref('RomPairs_set_one_pair', s:SID_PREFIX),
+\   'push': eskk#util#get_local_funcref('RomPairs_push', s:SID_PREFIX),
 \   'push_one_pair': eskk#util#get_local_funcref('RomPairs_push_one_pair', s:SID_PREFIX),
 \   'pop': eskk#util#get_local_funcref('RomPairs_pop', s:SID_PREFIX),
 \   'clear': eskk#util#get_local_funcref('RomPairs_clear', s:SID_PREFIX),
@@ -543,18 +549,18 @@ function! s:Buftable_do_backspace(stash) dict "{{{
         endif
     endif
 
-    " TODO:
-    " "sた" => type "<BS>a" => "さ" (not "sa")
-    " "kopipw<BS>e" => "こぴpえ" (not "こぴぺ")
-    " Solution:
-    " - Save the flag whether "s" is converted or not
-    "   to "Pair" object.
-    "
-    " Build backspaces to delete previous characters.
+    " Delete previous characters.
     for phase in self.get_lower_phases()
         let buf_str = self.get_buf_str(phase)
         if !buf_str.rom_str.empty()
             call buf_str.rom_str.chop()
+            if buf_str.rom_str.empty()
+            \   && !buf_str.rom_pairs.empty()
+            \   && !get(buf_str.rom_pairs.get(-1)[2], 'converted')
+                " Move rom_pairs data into rom_str.
+                let pair = buf_str.rom_pairs.pop()
+                call buf_str.rom_str.set(pair[0])
+            endif
             break
         elseif !buf_str.rom_pairs.empty()
             let p = buf_str.rom_pairs.pop()
@@ -600,7 +606,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
         " Do not set with `rom_str`.
         " Get henkan_result's buftable
         " and get matched rom str(s).
-        call cur_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
+        call cur_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
     else
         " No more candidates.
         if a:next
@@ -644,10 +650,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
                 if okuri_rom_str != ''
                     " Copy roms of `okuri_buf_str` to `henkan_buf_str`.
                     for okuri_matched in okuri_buf_str.rom_pairs.get()
-                        call henkan_buf_str.rom_pairs.push_one_pair(
-                        \   okuri_matched[0],
-                        \   okuri_matched[1]
-                        \)
+                        call call(henkan_buf_str.rom_pairs.push_one_pair, okuri_matched)
                     endfor
                     " Clear roms of `okuri_buf_str`.
                     call okuri_buf_str.clear()
@@ -782,9 +785,9 @@ function! s:Buftable_do_henkan_abbrev(stash, convert_at_exact_match) dict "{{{
 
         call self.clear_all()
         if a:convert_at_exact_match
-            call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
+            call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
         else
-            call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
+            call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
             call self.set_henkan_phase(
             \   g:eskk#buftable#PHASE_HENKAN_SELECT
             \)
@@ -855,9 +858,9 @@ function! s:Buftable_do_henkan_other(stash, convert_at_exact_match) dict "{{{
 
         call self.clear_all()
         if a:convert_at_exact_match
-            call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
+            call henkan_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
         else
-            call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate)
+            call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
             call self.set_henkan_phase(
             \   g:eskk#buftable#PHASE_HENKAN_SELECT
             \)
@@ -936,7 +939,8 @@ function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
             " "n" => "ん"
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str,
-            \   table.get_map(rom_str)
+            \   table.get_map(rom_str),
+            \   {'converted': 1}
             \)
             call buf_str.rom_str.clear()
         endif
@@ -971,7 +975,8 @@ function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
             \   rom_str,
             \   (!empty(table) ?
             \       table.get_map(rom_str, rom_str) :
-            \       rom_str)
+            \       rom_str),
+            \   {'converted': 1}
             \)
         endfor
         call add(r, buf_str)

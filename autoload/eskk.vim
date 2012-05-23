@@ -399,7 +399,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     if phase ==# g:eskk#buftable#PHASE_NORMAL
     \   || phase ==# g:eskk#buftable#PHASE_HENKAN
         " Set filtered string.
-        call buf_str.rom_pairs.push_one_pair(rom_str, a:table.get_map(rom_str))
+        call buf_str.rom_pairs.push_one_pair(rom_str, a:table.get_map(rom_str), {'converted': 1})
         call buf_str.rom_str.clear()
 
 
@@ -478,7 +478,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             let match_rom = henkan_rom . okuri_rom[0]
             call henkan_buf_str.rom_pairs.push_one_pair(
             \   match_rom,
-            \   a:table.get_map(match_rom)
+            \   a:table.get_map(match_rom),
+            \   {'converted': 1}
             \)
             " Push "s" to rom str.
             let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
@@ -496,7 +497,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         if a:table.has_map(okuri_buf_str.rom_str.get())
             call okuri_buf_str.rom_pairs.push_one_pair(
             \   okuri_buf_str.rom_str.get(),
-            \   a:table.get_map(okuri_buf_str.rom_str.get())
+            \   a:table.get_map(okuri_buf_str.rom_str.get()),
+            \   {'converted': 1}
             \)
             let rest = a:table.get_rest(okuri_buf_str.rom_str.get(), -1)
             if rest !=# -1
@@ -543,7 +545,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
     if map isnot NO_MAP
         " `rom_str_without_char` has the map but fail with `char`.
         " e.g.: rom_str is "nj" => "んj"
-        call buf_str.rom_pairs.push_one_pair(rom_str_without_char, map)
+        call buf_str.rom_pairs.push_one_pair(rom_str_without_char, map, {'converted': 1})
         " *** FALLTHROUGH ***
     elseif empty(rom_str_without_char)
         " No candidates started with such a character `char`.
@@ -568,7 +570,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
     unlet map
     let map = a:table.get_map(char, NO_MAP)
     if map isnot NO_MAP
-        call buf_str.rom_pairs.push_one_pair(char, map)
+        call buf_str.rom_pairs.push_one_pair(char, map, {'converted': 1})
         call buf_str.rom_str.clear()
     else
         call buf_str.rom_str.set(char)
