@@ -544,6 +544,10 @@ endfunction "}}}
 " Convert rom_str and move it to rom_pairs.
 function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
+    if empty(table)
+        return
+    endif
+
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
     for buf_str in map(phases, 'self.get_buf_str(v:val)')
@@ -573,7 +577,7 @@ function! s:Buftable_convert_rom_pairs_inplace(phases, ...) dict "{{{
 endfunction "}}}
 " Convert rom_pairs and return it.
 " If a:table is empty, do not convert rom_str
-" (Leave rom_str as rom_str)
+" (Just move rom_str to rom_pairs without conversion)
 function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
@@ -597,7 +601,9 @@ function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
     return type(a:phases) == type([]) ? r : r[0]
 endfunction "}}}
 function! s:get_current_table() "{{{
-    if g:eskk#kata_convert_to_hira_at_henkan
+    if eskk#get_mode() ==# 'abbrev'
+        return {}
+    elseif g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
         return eskk#get_mode_table('hira')
     else
