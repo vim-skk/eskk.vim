@@ -292,7 +292,7 @@ function! s:do_backspace(stash) "{{{
         call s:close_pum(a:stash)
     endif
     let buftable = eskk#get_buftable()
-    call buftable.do_backspace(a:stash)
+    call s:do_backspace(a:stash)
 endfunction "}}}
 function! s:do_escape(stash) "{{{
     call s:set_selected_item()
