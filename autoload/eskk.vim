@@ -1495,24 +1495,28 @@ function! eskk#_initialize() "{{{
         \)
         call eskk#register_mode_structure('zenei', {
         \   'filter': eskk#util#get_local_func('zenei_filter', s:SID_PREFIX),
+        \   'table': eskk#table#new_from_file('rom_to_zenei'),
         \})
         " }}}
 
         " 'hira' mode {{{
         call eskk#register_mode_structure('hira', {
         \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \   'table': eskk#table#new_from_file('rom_to_hira'),
         \})
         " }}}
 
         " 'kata' mode {{{
         call eskk#register_mode_structure('kata', {
         \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \   'table': eskk#table#new_from_file('rom_to_kata'),
         \})
         " }}}
 
         " 'hankata' mode {{{
         call eskk#register_mode_structure('hankata', {
         \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \   'table': eskk#table#new_from_file('rom_to_hankata'),
         \})
         " }}}
 
@@ -1642,21 +1646,6 @@ function! eskk#_initialize() "{{{
     " only during insert-mode.
     autocmd eskk InsertLeave *
     \   call eskk#complete#_reset_completed_candidates()
-    " }}}
-
-    " Set up s:mode_vs_table. {{{
-    function! s:set_up_mode_use_tables() "{{{
-        " NOTE: "hira_to_kata" and "kata_to_hira" are not used.
-        for [mode, table] in items({
-        \   'hira': eskk#table#new_from_file('rom_to_hira'),
-        \   'kata': eskk#table#new_from_file('rom_to_kata'),
-        \   'zenei': eskk#table#new_from_file('rom_to_zenei'),
-        \   'hankata': eskk#table#new_from_file('rom_to_hankata'),
-        \})
-            call eskk#register_mode_table(mode, table)
-        endfor
-    endfunction "}}}
-    call s:set_up_mode_use_tables()
     " }}}
 
     " Throw "eskk-initialize-post" autocmd event. {{{
@@ -1854,9 +1843,16 @@ function! eskk#is_supported_mode(mode) "{{{
     return has_key(s:available_modes, a:mode)
 endfunction "}}}
 function! eskk#register_mode_structure(mode, st) "{{{
-    if s:check_mode_structure(a:st)
-        let s:available_modes[a:mode] = a:st
-        let s:available_modes[a:mode].temp = {}
+    if !s:check_mode_structure(a:st)
+        call eskk#util#warn('eskk#register_mode_structure(): a invalid structure was given!')
+        return
+    endif
+
+    let s:available_modes[a:mode] = a:st
+    let s:available_modes[a:mode].temp = {}
+
+    if has_key(a:st, 'table')
+        call eskk#register_mode_table(a:mode, a:st.table)
     endif
 endfunction "}}}
 function! s:check_mode_structure(st) "{{{
