@@ -1482,10 +1482,9 @@ function! eskk#_initialize() "{{{
     " Register builtin-modes. {{{
     function! s:initialize_builtin_modes()
         " 'ascii' mode {{{
-        call eskk#register_mode_handler(
-        \   'ascii',
-        \   eskk#util#get_local_func('ascii_filter', s:SID_PREFIX)
-        \)
+        call eskk#register_mode_structure('ascii', {
+        \   'filter': eskk#util#get_local_func('ascii_filter', s:SID_PREFIX),
+        \})
         " }}}
 
         " 'zenei' mode {{{
@@ -1494,31 +1493,27 @@ function! eskk#_initialize() "{{{
         \   'eskk#set_begin_pos',
         \   ['.']
         \)
-        call eskk#register_mode_handler(
-        \   'zenei',
-        \   eskk#util#get_local_func('zenei_filter', s:SID_PREFIX)
-        \)
+        call eskk#register_mode_structure('zenei', {
+        \   'filter': eskk#util#get_local_func('zenei_filter', s:SID_PREFIX),
+        \})
         " }}}
 
         " 'hira' mode {{{
-        call eskk#register_mode_handler(
-        \   'hira',
-        \   eskk#util#get_local_func('asym_filter', s:SID_PREFIX)
-        \)
+        call eskk#register_mode_structure('hira', {
+        \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \})
         " }}}
 
         " 'kata' mode {{{
-        call eskk#register_mode_handler(
-        \   'kata',
-        \   eskk#util#get_local_func('asym_filter', s:SID_PREFIX)
-        \)
+        call eskk#register_mode_structure('kata', {
+        \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \})
         " }}}
 
         " 'hankata' mode {{{
-        call eskk#register_mode_handler(
-        \   'hankata',
-        \   eskk#util#get_local_func('asym_filter', s:SID_PREFIX)
-        \)
+        call eskk#register_mode_structure('hankata', {
+        \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \})
         " }}}
 
         " 'abbrev' mode {{{
@@ -1863,13 +1858,6 @@ function! eskk#register_mode_structure(mode, st) "{{{
         let s:available_modes[a:mode] = a:st
         let s:available_modes[a:mode].temp = {}
     endif
-endfunction "}}}
-function! eskk#register_mode_handler(mode, handler) "{{{
-    " even if a:handler does not have "dict" attribute,
-    " Vim does not complain with calling a:handler
-    " with dict like `call(a:handler, [], {})`.
-    " cf. eskk#call_mode_func()
-    return eskk#register_mode_structure(a:mode, {'filter': a:handler})
 endfunction "}}}
 function! s:check_mode_structure(st) "{{{
     " 'temp' will be added by eskk#register_mode_structure().
