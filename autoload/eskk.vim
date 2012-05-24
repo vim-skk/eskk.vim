@@ -1860,8 +1860,8 @@ function! eskk#register_mode_structure(mode, st) "{{{
     endif
 endfunction "}}}
 function! s:check_mode_structure(st) "{{{
-    " 'temp' will be added by eskk#register_mode_structure().
-    for key in ['filter'] " + ['temp']
+    " Check required keys.
+    for key in ['filter']
         if !has_key(a:st, key)
             call eskk#logger#warn(
             \   "s:check_mode_structure(" . string(a:mode) . "): "
@@ -1870,6 +1870,17 @@ function! s:check_mode_structure(st) "{{{
             return 0
         endif
     endfor
+
+    " Check optional keys.
+    if has_key(a:st, 'temp')
+    \   && type(a:st.table) isnot type({})
+        return 0
+    endif
+    if has_key(a:st, 'table')
+    \   && type(a:st.table) isnot type({})
+        return 0
+    endif
+
     return 1
 endfunction "}}}
 function! eskk#get_current_mode_structure() "{{{
