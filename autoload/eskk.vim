@@ -519,8 +519,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         call okuri_buf_str.rom_str.clear()
 
-        let matched = okuri_buf_str.rom_pairs.get()
-        call eskk#util#assert(!empty(matched), 'matched must not be empty.')
+        call eskk#util#assert(!okuri_buf_str.rom_pairs.empty(),
+        \                     'matched must not be empty.')
         " TODO `len(matched) == 1`: Do henkan at only the first time.
 
         if !has_rest && g:eskk#auto_henkan_at_okuri_match

@@ -718,7 +718,7 @@ function! s:Buftable_step_back_henkan_phase() dict "{{{
         \   g:eskk#buftable#PHASE_OKURI
         \)
         call self.set_henkan_phase(
-        \   !empty(okuri_buf_str.rom_pairs.get()) ?
+        \   !okuri_buf_str.rom_pairs.empty() ?
         \       g:eskk#buftable#PHASE_OKURI
         \       : g:eskk#buftable#PHASE_HENKAN
         \)
