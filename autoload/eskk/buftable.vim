@@ -563,9 +563,8 @@ function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
         endif
     endfor
 endfunction "}}}
-" Convert rom_pairs and store it to rom_pairs itself.
+" Convert *rom_str in rom_pairs* and store it to rom_pairs itself.
 " If a:table is empty, do not convert rom_str
-" (Leave rom_str as rom_str)
 function! s:Buftable_convert_rom_pairs_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
@@ -575,9 +574,8 @@ function! s:Buftable_convert_rom_pairs_inplace(phases, ...) dict "{{{
         call self.set_buf_str(p, buf_str)
     endfor
 endfunction "}}}
-" Convert rom_pairs and return it.
-" If a:table is empty, do not convert rom_str
-" (Just move rom_str to rom_pairs without conversion)
+" Convert *rom_str in rom_pairs* and return it.
+" If a:table is empty, do not convert rom_str in rom_pairs.
 function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
