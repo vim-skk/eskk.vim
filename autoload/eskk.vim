@@ -578,6 +578,132 @@ function! s:filter_rom_no_match(stash, table) "{{{
 endfunction "}}}
 
 " }}}
+function! s:ascii_filter(stash) "{{{
+    let this = eskk#get_mode_structure('ascii')
+    if eskk#map#is_special_lhs(
+    \   a:stash.char, 'mode:ascii:to-hira'
+    \)
+        call eskk#set_mode('hira')
+    else
+        if a:stash.char !=# "\<BS>"
+        \   && a:stash.char !=# "\<C-h>"
+            if a:stash.char =~# '\w'
+                if !has_key(
+                \   this.temp, 'already_set_for_this_word'
+                \)
+                    " Set start col of word.
+                    call eskk#set_begin_pos('.')
+                    let this.temp.already_set_for_this_word = 1
+                endif
+            else
+                if has_key(
+                \   this.temp, 'already_set_for_this_word'
+                \)
+                    unlet this.temp.already_set_for_this_word
+                endif
+            endif
+        endif
+
+        if eskk#has_mode_table('ascii')
+            if !has_key(this.temp, 'table')
+                let this.temp.table = eskk#get_mode_table('ascii')
+            endif
+            call a:stash.buftable.push_kakutei_str(
+            \   this.temp.table.get_map(
+            \      a:stash.char, a:stash.char
+            \   )
+            \)
+        else
+            call a:stash.buftable.push_kakutei_str(a:stash.char)
+        endif
+    endif
+endfunction "}}}
+function! s:zenei_filter(stash) "{{{
+    let this = eskk#get_mode_structure('zenei')
+    if eskk#map#is_special_lhs(
+    \   a:stash.char, 'mode:zenei:to-hira'
+    \)
+        call eskk#set_mode('hira')
+    else
+        if !has_key(this.temp, 'table')
+            let this.temp.table = eskk#get_mode_table('zenei')
+        endif
+        call a:stash.buftable.push_kakutei_str(
+        \   this.temp.table.get_map(
+        \      a:stash.char, a:stash.char
+        \   )
+        \)
+    endif
+endfunction "}}}
+function! s:abbrev_filter(stash) "{{{
+    let char = a:stash.char
+    let buftable = a:stash.buftable
+    let buf_str = buftable.get_current_buf_str()
+    let phase = buftable.get_henkan_phase()
+
+    " Handle special characters.
+    " These characters are handled regardless of current phase.
+    if eskk#map#is_special_lhs(char, 'backspace-key')
+        if buf_str.rom_str.get() == ''
+            " If backspace-key was pressed at empty string,
+            " leave abbrev mode.
+            " TODO: Back to previous mode?
+            call eskk#set_mode('hira')
+        else
+            call buftable.do_backspace(a:stash)
+        endif
+        return
+    elseif eskk#map#is_special_lhs(char, 'enter-key')
+        call buftable.do_enter(a:stash)
+        call eskk#set_mode('hira')
+        return
+    else
+        " Fall through.
+    endif
+
+    " Handle other characters.
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+        if eskk#map#is_special_lhs(
+        \   char, 'phase:henkan:henkan-key'
+        \)
+            call buftable.do_henkan(a:stash)
+        else
+            call buf_str.rom_str.append(char)
+        endif
+    elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
+        if eskk#map#is_special_lhs(
+        \   char, 'phase:henkan-select:choose-next'
+        \)
+            call buftable.choose_next_candidate(a:stash)
+            return
+        elseif eskk#map#is_special_lhs(
+        \   char, 'phase:henkan-select:choose-prev'
+        \)
+            call buftable.choose_prev_candidate(a:stash)
+            return
+        else
+            call buftable.push_kakutei_str(
+            \   buftable.get_display_str(0)
+            \)
+            call buftable.clear_all()
+            call eskk#register_temp_event(
+            \   'filter-redispatch-post',
+            \   'eskk#map#key2char',
+            \   [eskk#map#get_filter_map(a:stash.char)]
+            \)
+
+            " Leave abbrev mode.
+            " TODO: Back to previous mode?
+            call eskk#set_mode('hira')
+        endif
+    else
+        throw eskk#internal_error(
+        \   ['eskk'],
+        \   "'abbrev' mode does not support phase " . phase . "."
+        \)
+    endif
+endfunction "}}}
+
 
 " Initialization
 function! eskk#_initialize() "{{{
@@ -849,80 +975,22 @@ function! eskk#_initialize() "{{{
     " Register builtin-modes. {{{
     function! s:initialize_builtin_modes()
         " 'ascii' mode {{{
-        let dict = {}
-
-        function! dict.filter(stash)
-            let this = eskk#get_mode_structure('ascii')
-            if eskk#map#is_special_lhs(
-            \   a:stash.char, 'mode:ascii:to-hira'
-            \)
-                call eskk#set_mode('hira')
-            else
-                if a:stash.char !=# "\<BS>"
-                \   && a:stash.char !=# "\<C-h>"
-                    if a:stash.char =~# '\w'
-                        if !has_key(
-                        \   this.temp, 'already_set_for_this_word'
-                        \)
-                            " Set start col of word.
-                            call eskk#set_begin_pos('.')
-                            let this.temp.already_set_for_this_word = 1
-                        endif
-                    else
-                        if has_key(
-                        \   this.temp, 'already_set_for_this_word'
-                        \)
-                            unlet this.temp.already_set_for_this_word
-                        endif
-                    endif
-                endif
-
-                if eskk#has_mode_table('ascii')
-                    if !has_key(this.temp, 'table')
-                        let this.temp.table = eskk#get_mode_table('ascii')
-                    endif
-                    call a:stash.buftable.push_kakutei_str(
-                    \   this.temp.table.get_map(
-                    \      a:stash.char, a:stash.char
-                    \   )
-                    \)
-                else
-                    call a:stash.buftable.push_kakutei_str(a:stash.char)
-                endif
-            endif
-        endfunction
-
-        call eskk#register_mode_structure('ascii', dict)
+        call eskk#register_mode_handler(
+        \   'ascii',
+        \   eskk#util#get_local_func('ascii_filter', s:SID_PREFIX)
+        \)
         " }}}
 
         " 'zenei' mode {{{
-        let dict = {}
-
-        function! dict.filter(stash)
-            let this = eskk#get_mode_structure('zenei')
-            if eskk#map#is_special_lhs(
-            \   a:stash.char, 'mode:zenei:to-hira'
-            \)
-                call eskk#set_mode('hira')
-            else
-                if !has_key(this.temp, 'table')
-                    let this.temp.table = eskk#get_mode_table('zenei')
-                endif
-                call a:stash.buftable.push_kakutei_str(
-                \   this.temp.table.get_map(
-                \      a:stash.char, a:stash.char
-                \   )
-                \)
-            endif
-        endfunction
-
         call eskk#register_event(
         \   'enter-mode-zenei',
         \   'eskk#set_begin_pos',
         \   ['.']
         \)
-
-        call eskk#register_mode_structure('zenei', dict)
+        call eskk#register_mode_handler(
+        \   'zenei',
+        \   eskk#util#get_local_func('zenei_filter', s:SID_PREFIX)
+        \)
         " }}}
 
         " 'hira' mode {{{
@@ -949,74 +1017,7 @@ function! eskk#_initialize() "{{{
         " 'abbrev' mode {{{
         let dict = {}
 
-        function! dict.filter(stash) "{{{
-            let char = a:stash.char
-            let buftable = a:stash.buftable
-            let buf_str = buftable.get_current_buf_str()
-            let phase = buftable.get_henkan_phase()
-
-            " Handle special characters.
-            " These characters are handled regardless of current phase.
-            if eskk#map#is_special_lhs(char, 'backspace-key')
-                if buf_str.rom_str.get() == ''
-                    " If backspace-key was pressed at empty string,
-                    " leave abbrev mode.
-                    " TODO: Back to previous mode?
-                    call eskk#set_mode('hira')
-                else
-                    call buftable.do_backspace(a:stash)
-                endif
-                return
-            elseif eskk#map#is_special_lhs(char, 'enter-key')
-                call buftable.do_enter(a:stash)
-                call eskk#set_mode('hira')
-                return
-            else
-                " Fall through.
-            endif
-
-            " Handle other characters.
-            if phase ==# g:eskk#buftable#PHASE_HENKAN
-                if eskk#map#is_special_lhs(
-                \   char, 'phase:henkan:henkan-key'
-                \)
-                    call buftable.do_henkan(a:stash)
-                else
-                    call buf_str.rom_str.append(char)
-                endif
-            elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
-                if eskk#map#is_special_lhs(
-                \   char, 'phase:henkan-select:choose-next'
-                \)
-                    call buftable.choose_next_candidate(a:stash)
-                    return
-                elseif eskk#map#is_special_lhs(
-                \   char, 'phase:henkan-select:choose-prev'
-                \)
-                    call buftable.choose_prev_candidate(a:stash)
-                    return
-                else
-                    call buftable.push_kakutei_str(
-                    \   buftable.get_display_str(0)
-                    \)
-                    call buftable.clear_all()
-                    call eskk#register_temp_event(
-                    \   'filter-redispatch-post',
-                    \   'eskk#map#key2char',
-                    \   [eskk#map#get_filter_map(a:stash.char)]
-                    \)
-
-                    " Leave abbrev mode.
-                    " TODO: Back to previous mode?
-                    call eskk#set_mode('hira')
-                endif
-            else
-                throw eskk#internal_error(
-                \   ['eskk'],
-                \   "'abbrev' mode does not support phase " . phase . "."
-                \)
-            endif
-        endfunction "}}}
+        let dict.filter = eskk#util#get_local_func('abbrev_filter', s:SID_PREFIX)
         function! dict.get_init_phase() "{{{
             return g:eskk#buftable#PHASE_HENKAN
         endfunction "}}}
