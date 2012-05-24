@@ -170,7 +170,7 @@ function! s:complete(mode, base) "{{{
     if g:eskk#kata_convert_to_hira_at_completion
     \   && a:mode ==# 'kata'
         let [henkan_buf_str, okuri_buf_str] =
-        \   buftable.convert_rom_pairs(
+        \   buftable.convert_rom_all(
         \       [
         \           g:eskk#buftable#PHASE_HENKAN,
         \           g:eskk#buftable#PHASE_OKURI,

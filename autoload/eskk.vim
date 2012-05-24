@@ -781,7 +781,7 @@ function! s:do_henkan_other(stash, convert_at_exact_match) "{{{
 
     if g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
-        call buftable.convert_rom_pairs_inplace(
+        call buftable.convert_rom_all_inplace(
         \   [
         \       g:eskk#buftable#PHASE_HENKAN,
         \       g:eskk#buftable#PHASE_OKURI,
@@ -870,7 +870,7 @@ function! s:convert_roms_and_kakutei(stash, table) "{{{
     call buftable.convert_rom_str_inplace(
     \   buftable.get_henkan_phase()
     \)
-    call buftable.convert_rom_pairs_inplace([
+    call buftable.convert_rom_all_inplace([
     \   g:eskk#buftable#PHASE_NORMAL,
     \   g:eskk#buftable#PHASE_HENKAN,
     \   g:eskk#buftable#PHASE_OKURI,

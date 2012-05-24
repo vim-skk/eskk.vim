@@ -565,18 +565,18 @@ function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
 endfunction "}}}
 " Convert *rom_str in rom_pairs* and store it to rom_pairs itself.
 " If a:table is empty, do not convert rom_str
-function! s:Buftable_convert_rom_pairs_inplace(phases, ...) dict "{{{
+function! s:Buftable_convert_rom_all_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
     for p in phases
-        let buf_str = self.convert_rom_pairs(p, table)
+        let buf_str = self.convert_rom_all(p, table)
         call self.set_buf_str(p, buf_str)
     endfor
 endfunction "}}}
 " Convert *rom_str in rom_pairs* and return it.
 " If a:table is empty, do not convert rom_str in rom_pairs.
-function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
+function! s:Buftable_convert_rom_all(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
@@ -717,8 +717,8 @@ let s:Buftable = {
 \   'choose_prev_candidate': eskk#util#get_local_funcref('Buftable_choose_prev_candidate', s:SID_PREFIX),
 \   'step_back_henkan_phase': eskk#util#get_local_funcref('Buftable_step_back_henkan_phase', s:SID_PREFIX),
 \   'convert_rom_str_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_str_inplace', s:SID_PREFIX),
-\   'convert_rom_pairs_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_pairs_inplace', s:SID_PREFIX),
-\   'convert_rom_pairs': eskk#util#get_local_funcref('Buftable_convert_rom_pairs', s:SID_PREFIX),
+\   'convert_rom_all_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_all_inplace', s:SID_PREFIX),
+\   'convert_rom_all': eskk#util#get_local_funcref('Buftable_convert_rom_all', s:SID_PREFIX),
 \   'kakutei': eskk#util#get_local_funcref('Buftable_kakutei', s:SID_PREFIX),
 \   'clear_all': eskk#util#get_local_funcref('Buftable_clear_all', s:SID_PREFIX),
 \   'remove_display_str': eskk#util#get_local_funcref('Buftable_remove_display_str', s:SID_PREFIX),
