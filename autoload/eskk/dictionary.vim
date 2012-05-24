@@ -17,8 +17,13 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
     \   !empty(list),
     \   'list must not be empty. (a:line = '
     \   .string(a:line).')')
-    let key = matchstr(list[0], '^[^a-z ]\+')
-    let okuri_rom = matchstr(list[0], '[a-z]\+')
+    if list[0] =~# '^[[:alpha:]]\+'
+        let key = substitute(list[0], '\s\+$', '', '')
+        let okuri_rom = ''
+    else
+        let key = matchstr(list[0], '^[^a-z ]\+')
+        let okuri_rom = matchstr(list[0], '[a-z]\+')
+    endif
 
     let candidates = []
     for _ in list[1:]

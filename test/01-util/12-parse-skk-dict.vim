@@ -24,6 +24,14 @@ function! s:run()
     \   {'key': 'わんたんめん', 'okuri_rom_first': '', 'from_type': -1, 'input': '雲呑麺', 'annotation': ''},
     \   {'key': 'わんたんめん', 'okuri_rom_first': '', 'from_type': -1, 'input': 'ワンタン麺', 'annotation': ''},
     \]
+
+    IsDeeply eskk#dictionary#parse_skk_dict_line(
+    \   'window /ウィンドウ/ウインドウ/ウインドー/', -1
+    \), [
+    \   {'key': 'window', 'okuri_rom_first': '', 'from_type': -1, 'input': 'ウィンドウ', 'annotation': ''},
+    \   {'key': 'window', 'okuri_rom_first': '', 'from_type': -1, 'input': 'ウインドウ', 'annotation': ''},
+    \   {'key': 'window', 'okuri_rom_first': '', 'from_type': -1, 'input': 'ウインドー', 'annotation': ''},
+    \]
 endfunction
 
 call s:run()
