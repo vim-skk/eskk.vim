@@ -967,7 +967,7 @@ function! s:Buftable_convert_rom_pairs(phases, ...) dict "{{{
         let buf_str = deepcopy(self.get_buf_str(p), 1)
         let matched = buf_str.rom_pairs.get()
         call buf_str.rom_pairs.clear()
-        for [rom_str, filter_str] in matched
+        for [rom_str; _] in matched
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str,
             \   (!empty(table) ?
