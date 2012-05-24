@@ -153,8 +153,7 @@ function! s:AbstractTable_derived_from(base) dict "{{{
 endfunction "}}}
 
 function! s:AbstractTable_has_candidates(lhs_head) dict "{{{
-    let NONE = []
-    return self.get_candidates(a:lhs_head, 1, NONE) isnot NONE
+    return self.has_n_candidates(a:lhs_head, 1)
 endfunction "}}}
 function! s:AbstractTable_has_n_candidates(lhs_head, n) dict "{{{
     if a:n <= 0
