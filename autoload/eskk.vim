@@ -2120,10 +2120,7 @@ function! eskk#filter(char) "{{{
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(stash, error) "{{{
-    " FIXME: It may cause inconsistency
-    " to eskk status and lang options.
-    " TODO: detect lang options and follow the status.
-    setlocal iminsert=0 imsearch=0
+    call eskk#disable()
 
     call eskk#logger#write_error_log_file(
     \   a:stash, a:error,
