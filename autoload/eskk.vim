@@ -180,6 +180,9 @@ let s:MODE_LOCAL_KEYS = {
 \   'zenei': [
 \       'mode:zenei:to-hira',
 \   ],
+\   'abbrev': [
+\       'cancel',
+\   ],
 \}
 " }}}
 
@@ -1149,7 +1152,12 @@ function! s:abbrev_filter(stash) "{{{
 
     " Handle special characters.
     " These characters are handled regardless of current phase.
-    if eskk#map#is_special_lhs(char, 'backspace-key')
+    if eskk#map#is_special_lhs(char, 'cancel')
+        " TODO: Back to previous mode?
+        call s:do_cancel(a:stash)
+        call eskk#set_mode('hira')
+        return
+    elseif eskk#map#is_special_lhs(char, 'backspace-key')
         if buf_str.rom_str.get() == ''
             " If backspace-key was pressed at empty string,
             " leave abbrev mode.
