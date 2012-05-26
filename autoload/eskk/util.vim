@@ -144,6 +144,19 @@ function! eskk#util#mkdir_nothrow(...) "{{{
     let module = s:Vital.System.File
     return call(module.mkdir_nothrow, a:000, module)
 endfunction "}}}
+function! eskk#util#dlog(data, filename) "{{{
+    let data = type(a:data) is type([]) ?
+    \              a:data :
+    \          type(a:data) is type("") ?
+    \              split(a:data, "\n") :
+    \              0
+    if data is 0 | return | endif
+
+    " Append to filename.
+    try | let lines = readfile(a:filename)
+    catch | let lines = [] | endtry
+    call writefile(lines + data, a:filename)
+endfunction "}}}
 
 
 " Path
