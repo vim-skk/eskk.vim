@@ -656,6 +656,17 @@ function! s:Buftable_empty() dict "{{{
 endfunction "}}}
 
 
+function! s:Buftable_empty_filter_queue() dict "{{{
+    return empty(self._filter_queue)
+endfunction
+function! s:Buftable_push_filter_queue(char) dict "{{{
+    call add(self._filter_queue, a:char)
+endfunction "}}}
+function! s:Buftable_shift_filter_queue() dict "{{{
+    return remove(self._filter_queue, 0)
+endfunction "}}}
+
+
 function! s:Buftable_dump() dict "{{{
     let lines = []
     call add(lines, 'current phase: ' . self._henkan_phase)
@@ -694,6 +705,7 @@ let s:Buftable = {
 \   '_begin_pos': [],
 \   '_henkan_phase': g:eskk#buftable#PHASE_NORMAL,
 \   '_set_begin_pos_at_rewrite': 0,
+\   '_filter_queue': [],
 \
 \   'reset': eskk#util#get_local_funcref('Buftable_reset', s:SID_PREFIX),
 \   'get_buf_str': eskk#util#get_local_funcref('Buftable_get_buf_str', s:SID_PREFIX),
@@ -724,6 +736,9 @@ let s:Buftable = {
 \   'remove_display_str': eskk#util#get_local_funcref('Buftable_remove_display_str', s:SID_PREFIX),
 \   'generate_kakutei_str': eskk#util#get_local_funcref('Buftable_generate_kakutei_str', s:SID_PREFIX),
 \   'empty': eskk#util#get_local_funcref('Buftable_empty', s:SID_PREFIX),
+\   'empty_filter_queue': eskk#util#get_local_funcref('Buftable_empty_filter_queue', s:SID_PREFIX),
+\   'push_filter_queue': eskk#util#get_local_funcref('Buftable_push_filter_queue', s:SID_PREFIX),
+\   'shift_filter_queue': eskk#util#get_local_funcref('Buftable_shift_filter_queue', s:SID_PREFIX),
 \   'dump': eskk#util#get_local_funcref('Buftable_dump', s:SID_PREFIX),
 \}
 
