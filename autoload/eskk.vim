@@ -382,21 +382,13 @@ function! s:asym_filter(stash) "{{{
     \   && !eskk#map#is_special_lhs(
     \          char, 'phase:henkan-select:delete-from-dict'
     \       )
+        " NOTE: Assume "SAkujo" as "Sakujo".
         if phase !=# g:eskk#buftable#PHASE_NORMAL
         \   || buftable.get_current_buf_str().rom_str.empty()
             call s:do_sticky(a:stash)
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#map#key2char',
-            \   [eskk#map#get_filter_map(tolower(char))]
-            \)
-            return
-        else
-            " NOTE: Assume "SAkujo" as "Sakujo".
-            let stash = deepcopy(a:stash)
-            let stash.char = tolower(stash.char)
-            return s:asym_filter(stash)
         endif
+        call buftable.push_filter_queue(tolower(char))
+        return
     elseif eskk#map#is_special_lhs(char, 'escape-key')
         call s:do_escape(a:stash)
         return
@@ -462,7 +454,7 @@ function! s:asym_filter(stash) "{{{
             endif
         else
             call s:do_enter(a:stash)
-            call s:asym_filter(a:stash)
+            call buftable.push_filter_queue(char)
         endif
     else
         throw eskk#internal_error(
@@ -904,7 +896,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         call buf_str.rom_str.clear()
 
 
-        " Set rest string.
+        " Queueing rest string.
         "
         " NOTE:
         " rest must not have multibyte string.
@@ -912,16 +904,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         let rest = a:table.get_rest(rom_str, -1)
         " Assumption: 'a:table.has_map(rest)' returns false here.
         if rest !=# -1
-            " XXX:
-            "     eskk#map#get_filter_map(char)
-            " should
-            "     eskk#map#get_filter_map(eskk#util#uneval_key(char))
             for rest_char in split(rest, '\zs')
-                call eskk#register_temp_event(
-                \   'filter-redispatch-post',
-                \   'eskk#map#key2char',
-                \   [eskk#map#get_filter_map(rest_char)]
-                \)
+                call buftable.push_filter_queue(rest_char)
             endfor
         endif
 
@@ -1003,16 +987,8 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             \)
             let rest = a:table.get_rest(okuri_buf_str.rom_str.get(), -1)
             if rest !=# -1
-                " XXX:
-                "     eskk#map#get_filter_map(char)
-                " should
-                "     eskk#map#get_filter_map(eskk#util#uneval_key(char))
                 for rest_char in split(rest, '\zs')
-                    call eskk#register_temp_event(
-                    \   'filter-redispatch-post',
-                    \   'eskk#map#key2char',
-                    \   [eskk#map#get_filter_map(rest_char)]
-                    \)
+                    call buftable.push_filter_queue(rest_char)
                 endfor
                 let has_rest = 1
             endif
@@ -1192,11 +1168,7 @@ function! s:abbrev_filter(stash) "{{{
             \   buftable.get_display_str(0)
             \)
             call buftable.clear_all()
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#map#key2char',
-            \   [eskk#map#get_filter_map(a:stash.char)]
-            \)
+            call buftable.push_filter_queue(char)
 
             " Leave abbrev mode.
             " TODO: Back to previous mode?
@@ -2082,9 +2054,16 @@ function! eskk#filter(char) "{{{
         endif
 
         if do_filter
-            let inst = eskk#get_current_instance()
-            let st = eskk#get_mode_structure(inst.mode)
-            call st.filter(stash)
+            call buftable.push_filter_queue(a:char)
+            while !buftable.empty_filter_queue()
+                let stash.char = buftable.shift_filter_queue()
+                " instance (e.g., `inst.mode`) and mode structure
+                " may be different with previous call.
+                " so get it every loop.
+                let inst = eskk#get_current_instance()
+                let st = eskk#get_mode_structure(inst.mode)
+                call st.filter(stash)
+            endwhile
         endif
         if !eskk#is_enabled()
             " NOTE: Vim can't escape lang-mode immediately
