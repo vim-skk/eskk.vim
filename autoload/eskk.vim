@@ -31,14 +31,11 @@ delfunction s:SID
 "   Buffer strings for inserted, filtered and so on.
 " temp_event_hook_fn:
 "   Temporary event handler functions/arguments.
-" enabled:
-"   True if s:eskk.enable() is called.
 let s:eskk = {
 \   'mode': '',
 \   'begin_pos': [],
 \   'buftable': {},
 \   'temp_event_hook_fn': {},
-\   'enabled': 0,
 \   'formatoptions': 0,
 \}
 
@@ -1699,7 +1696,7 @@ endfunction "}}}
 " Enable/Disable IM
 function! eskk#is_enabled() "{{{
     return eskk#is_initialized()
-    \   && eskk#get_current_instance().enabled
+    \   && &iminsert is 1
 endfunction "}}}
 function! eskk#toggle() "{{{
     if !eskk#is_initialized()
@@ -1740,12 +1737,11 @@ function! eskk#enable() "{{{
         let &l:omnifunc = 'eskk#complete#eskkcomplete'
     endif
 
-    let inst.enabled = 1
     if mode() =~# '^[ic]$'
         " NOTE: Vim can't enter lang-mode immediately
         " in insert-mode or commandline-mode.
         " We have to use i_CTRL-^ .
-        setlocal imsearch=-1
+        setlocal iminsert=1 imsearch=-1
         redrawstatus
         return "\<C-^>"
     else
@@ -1774,14 +1770,11 @@ function! eskk#disable() "{{{
     endif
 
     call eskk#unlock_neocomplcache()
-    let inst.enabled = 0
     if mode() =~# '^[ic]$'
         " NOTE: Vim can't escape lang-mode immediately
         " in insert-mode or commandline-mode.
         " We have to use i_CTRL-^ .
-
-        " In insert-mode, See eskk#filter() for disable handler.
-        " This path is for only commandline-mode.
+        setlocal iminsert=0 imsearch=0
         redrawstatus
         let kakutei_str = eskk#get_buftable().generate_kakutei_str()
         return kakutei_str . "\<C-^>"
