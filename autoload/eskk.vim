@@ -246,7 +246,7 @@ endfunction "}}}
 
 " s:eskk_mappings
 function! s:handle_disable(stash) "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
+    let phase = a:stash.buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
         call eskk#disable()
         return 1
@@ -254,7 +254,7 @@ function! s:handle_disable(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_kakutei(stash) "{{{
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let phase = buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#PHASE_OKURI
@@ -267,7 +267,7 @@ function! s:handle_kakutei(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_toggle_hankata(stash) "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
+    let phase = a:stash.buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
         return 1
@@ -275,7 +275,7 @@ function! s:handle_toggle_hankata(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_toggle_kata(stash) "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
+    let phase = a:stash.buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
         return 1
@@ -283,7 +283,7 @@ function! s:handle_toggle_kata(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_ctrl_q_key(stash) "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
+    let phase = a:stash.buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#PHASE_OKURI
         call s:do_ctrl_q_key(a:stash)
@@ -292,7 +292,7 @@ function! s:handle_ctrl_q_key(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_q_key(stash) "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
+    let phase = a:stash.buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#PHASE_OKURI
         call s:do_q_key(a:stash)
@@ -301,7 +301,7 @@ function! s:handle_q_key(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_l_key(stash) "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
+    let phase = a:stash.buftable.get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#PHASE_OKURI
         call s:do_l_key(a:stash)
@@ -310,7 +310,7 @@ function! s:handle_l_key(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_to_ascii(stash) "{{{
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let phase = buftable.get_henkan_phase()
     let buf_str = buftable.get_current_buf_str()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
@@ -321,7 +321,7 @@ function! s:handle_to_ascii(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_to_zenei(stash) "{{{
-    let buftable = eskk#get_buftable()
+    let buftable = a:stash.buftable
     let phase = buftable.get_henkan_phase()
     let buf_str = buftable.get_current_buf_str()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
@@ -332,9 +332,8 @@ function! s:handle_to_zenei(stash) "{{{
     return 0
 endfunction "}}}
 function! s:handle_to_abbrev(stash) "{{{
-    let buftable = eskk#get_buftable()
-    let phase = eskk#get_buftable().get_henkan_phase()
-    let buf_str = buftable.get_current_buf_str()
+    let phase = a:stash.buftable.get_henkan_phase()
+    let buf_str = a:stash.buftable.get_current_buf_str()
     if phase ==# g:eskk#buftable#PHASE_NORMAL
     \   && buf_str.rom_str.get() == ''
         call eskk#set_mode('abbrev')
@@ -1041,7 +1040,7 @@ function! s:filter_rom_has_candidates(stash) "{{{
 endfunction "}}}
 function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
-    let buf_str = eskk#get_buftable().get_current_buf_str()
+    let buf_str = a:stash.buftable.get_current_buf_str()
     let rom_str_without_char = buf_str.rom_str.get()
 
     " TODO: Save previous (or more?) searched result
@@ -2119,7 +2118,7 @@ function! eskk#filter(char) "{{{
         return
         \   (eskk#has_event('filter-redispatch-pre') ?
         \       "\<Plug>(eskk:_filter_redispatch_pre)" : '')
-        \   . eskk#get_buftable().rewrite()
+        \   . buftable.rewrite()
         \   . (eskk#has_event('filter-redispatch-post') ?
         \       "\<Plug>(eskk:_filter_redispatch_post)" : '')
 
