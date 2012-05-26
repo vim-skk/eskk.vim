@@ -1523,9 +1523,7 @@ function! eskk#_initialize() "{{{
         let dict = {}
 
         let dict.filter = eskk#util#get_local_func('abbrev_filter', s:SID_PREFIX)
-        function! dict.get_init_phase() "{{{
-            return g:eskk#buftable#PHASE_HENKAN
-        endfunction "}}}
+        let dict.init_phase = g:eskk#buftable#PHASE_HENKAN
 
         call eskk#register_event(
         \   'enter-mode-abbrev',
@@ -1587,9 +1585,10 @@ function! eskk#_initialize() "{{{
 
     function! s:initialize_set_henkan_phase()
         let buftable = eskk#get_buftable()
+        let st = eskk#get_current_mode_structure()
         call buftable.set_henkan_phase(
-        \   (eskk#has_mode_func('get_init_phase') ?
-        \       eskk#call_mode_func('get_init_phase', [], 0)
+        \   (has_key(st, 'init_phase') ?
+        \       st.init_phase
         \       : g:eskk#buftable#PHASE_NORMAL)
         \)
     endfunction
