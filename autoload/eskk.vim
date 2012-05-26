@@ -462,11 +462,7 @@ function! s:asym_filter(stash) "{{{
             endif
         else
             call s:do_enter(a:stash)
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#map#key2char',
-            \   [eskk#map#get_filter_map(a:stash.char)]
-            \)
+            call s:asym_filter(a:stash)
         endif
     else
         throw eskk#internal_error(
@@ -573,17 +569,13 @@ function! s:do_enter(stash) "{{{
     let enter_char =
     \   eskk#map#key2char(eskk#map#get_special_map('enter-key'))
     let undo_char  =
-    \   eskk#map#key2char(eskk#map#key2char(eskk#map#get_nore_map('<C-g>u')))
+    \   eskk#map#key2char(eskk#map#get_nore_map('<C-g>u'))
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#buftable#PHASE_NORMAL
         call buftable.convert_rom_str_inplace(phase)
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#util#identity',
-        \   [enter_char]
-        \)
+        call buftable.kakutei(buftable.get_display_str(0) . "\<CR>")
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         call buftable.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
@@ -654,12 +646,12 @@ function! s:do_sticky(stash) "{{{
             call buf_str.clear()
         endif
         if get(g:eskk#set_undo_point, 'sticky', 0) && mode() ==# 'i'
+            let undo_char =
+            \   eskk#map#key2char(eskk#map#get_nore_map('<C-g>u'))
             call eskk#register_temp_event(
             \   'filter-redispatch-pre',
             \   'eskk#util#identity',
-            \   [eskk#map#key2char(
-            \       eskk#map#get_nore_map('<C-g>u')
-            \   )]
+            \   [undo_char]
             \)
         endif
         let buftable._set_begin_pos_at_rewrite = 1
