@@ -1482,7 +1482,7 @@ function! eskk#_initialize() "{{{
     function! s:initialize_builtin_modes()
         " 'ascii' mode {{{
         call eskk#register_mode_structure('ascii', {
-        \   'filter': eskk#util#get_local_func('ascii_filter', s:SID_PREFIX),
+        \   'filter': eskk#util#get_local_funcref('ascii_filter', s:SID_PREFIX),
         \})
         " }}}
 
@@ -1493,28 +1493,28 @@ function! eskk#_initialize() "{{{
         \   ['.']
         \)
         call eskk#register_mode_structure('zenei', {
-        \   'filter': eskk#util#get_local_func('zenei_filter', s:SID_PREFIX),
+        \   'filter': eskk#util#get_local_funcref('zenei_filter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_zenei'),
         \})
         " }}}
 
         " 'hira' mode {{{
         call eskk#register_mode_structure('hira', {
-        \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hira'),
         \})
         " }}}
 
         " 'kata' mode {{{
         call eskk#register_mode_structure('kata', {
-        \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_kata'),
         \})
         " }}}
 
         " 'hankata' mode {{{
         call eskk#register_mode_structure('hankata', {
-        \   'filter': eskk#util#get_local_func('asym_filter', s:SID_PREFIX),
+        \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hankata'),
         \})
         " }}}
@@ -1522,7 +1522,7 @@ function! eskk#_initialize() "{{{
         " 'abbrev' mode {{{
         let dict = {}
 
-        let dict.filter = eskk#util#get_local_func('abbrev_filter', s:SID_PREFIX)
+        let dict.filter = eskk#util#get_local_funcref('abbrev_filter', s:SID_PREFIX)
         let dict.init_phase = g:eskk#buftable#PHASE_HENKAN
 
         call eskk#register_event(
@@ -1889,26 +1889,6 @@ function! eskk#get_mode_structure(mode) "{{{
     endif
     return s:available_modes[a:mode]
 endfunction "}}}
-function! eskk#has_mode_func(func_key) "{{{
-    let inst = eskk#get_current_instance()
-    let st = eskk#get_mode_structure(inst.mode)
-    return has_key(st, a:func_key)
-endfunction "}}}
-function! eskk#call_mode_func(func_key, args, required) "{{{
-    let inst = eskk#get_current_instance()
-    let st = eskk#get_mode_structure(inst.mode)
-    if !has_key(st, a:func_key)
-        if a:required
-            throw eskk#internal_error(
-            \   ['eskk'],
-            \   "Mode '" . inst.mode . "' does not have"
-            \       . " required function key"
-            \)
-        endif
-        return
-    endif
-    return call(st[a:func_key], a:args, st)
-endfunction "}}}
 
 " Mode/Table
 function! eskk#has_current_mode_table() "{{{
@@ -2102,7 +2082,9 @@ function! eskk#filter(char) "{{{
         endif
 
         if do_filter
-            call eskk#call_mode_func('filter', [stash], 1)
+            let inst = eskk#get_current_instance()
+            let st = eskk#get_mode_structure(inst.mode)
+            call st.filter(stash)
         endif
         if !eskk#is_enabled()
             " NOTE: Vim can't escape lang-mode immediately
@@ -2113,7 +2095,7 @@ function! eskk#filter(char) "{{{
         endif
 
         " NOTE: `buftable` may become invalid reference
-        " because `eskk#call_mode_func()` may call `eskk#set_buftable()`.
+        " because `st.filter(stash)` may call `eskk#set_buftable()`.
         return
         \   (eskk#has_event('filter-redispatch-pre') ?
         \       "\<Plug>(eskk:_filter_redispatch_pre)" : '')
