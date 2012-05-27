@@ -2043,13 +2043,9 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
-    call eskk#throw_event('filter-begin')
-    call buftable.set_old_str(buftable.get_display_str())
-
     try
         let do_filter = 1
-        if g:eskk#enable_completion
-        \&& pumvisible() && mode() ==# 'i'
+        if g:eskk#enable_completion && pumvisible() && mode() ==# 'i'
             try
                 let do_filter = eskk#complete#handle_special_key(stash)
             catch
@@ -2060,8 +2056,14 @@ function! eskk#filter(char) "{{{
         endif
 
         if do_filter
+            " Push a pressed character.
             call buftable.push_filter_queue(a:char)
+            " Do loop until queue becomes empty.
             while !buftable.empty_filter_queue()
+                " Set old string. (it is used by Buftable.rewrite())
+                call buftable.set_old_str(buftable.get_display_str())
+
+                " Convert `stash.char` and make modifications to buftable.
                 let stash.char = buftable.shift_filter_queue()
                 " instance (e.g., `inst.mode`) and mode structure
                 " may be different with previous call.
@@ -2069,14 +2071,17 @@ function! eskk#filter(char) "{{{
                 let inst = eskk#get_current_instance()
                 let st = eskk#get_mode_structure(inst.mode)
                 call st.filter(stash)
+
+                " If eskk is disabled by user input,
+                " disable lang-mode and escape eskk#filter().
+                if !eskk#is_enabled()
+                    " NOTE: Vim can't escape lang-mode immediately
+                    " in insert-mode or commandline-mode.
+                    " We have to use i_CTRL-^ .
+                    let kakutei_str = buftable.generate_kakutei_str()
+                    return kakutei_str . "\<C-^>"
+                endif
             endwhile
-        endif
-        if !eskk#is_enabled()
-            " NOTE: Vim can't escape lang-mode immediately
-            " in insert-mode or commandline-mode.
-            " We have to use i_CTRL-^ .
-            let kakutei_str = buftable.generate_kakutei_str()
-            return kakutei_str . "\<C-^>"
         endif
 
         " NOTE: `buftable` may become invalid reference
