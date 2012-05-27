@@ -43,6 +43,8 @@ function! s:RomStr_pop() dict "{{{
     if self._str ==# ''
         return ''
     endif
+    " self._str only contains ascii character,
+    " so strlen(self._str) is safe.
     let [self._str, c] = [self._str[:-2], self._str[strlen(self._str)-1]]
     return c
 endfunction "}}}
