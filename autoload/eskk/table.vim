@@ -168,15 +168,21 @@ function! s:AbstractTable_has_n_candidates(lhs_head, n) dict "{{{
     return c isnot NONE && len(c) >= a:n
 endfunction "}}}
 function! s:AbstractTable_get_candidates(lhs_head, ...) dict "{{{
-    return call(
-    \   's:get_candidates',
-    \   [self, a:lhs_head] + a:000
-    \)
-endfunction "}}}
-function! s:get_candidates(table, lhs_head, ...) "{{{
-    " Search in this table.
     let candidates = eskk#util#create_data_ordered_set()
-    call candidates.append(filter(
+    call s:get_candidates(
+    \   self, a:lhs_head, candidates
+    \)
+    if !candidates.empty()
+        return candidates.to_list()
+    elseif a:0
+        return a:1
+    else
+        throw eskk#internal_error(['eskk', 'table'])
+    endif
+endfunction "}}}
+function! s:get_candidates(table, lhs_head, candidates) "{{{
+    " Search in this table.
+    call a:candidates.append(filter(
     \   keys(a:table.load()),
     \   '!stridx(v:val, a:lhs_head)'
     \))
@@ -184,23 +190,12 @@ function! s:get_candidates(table, lhs_head, ...) "{{{
     " Search in base tables.
     if a:table.is_child()
         for base in a:table._bases
-            call candidates.append(s:get_candidates(
+            call s:get_candidates(
             \   base,
             \   a:lhs_head,
-            \   []
-            \))
+            \   a:candidates
+            \)
         endfor
-    endif
-
-    if !candidates.empty()
-        return candidates.to_list()
-    endif
-
-    " No lhs_head in a:table and its base tables.
-    if a:0
-        return a:1
-    else
-        throw eskk#internal_error(['eskk', 'table'])
     endif
 endfunction "}}}
 
