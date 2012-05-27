@@ -236,7 +236,17 @@ function! s:Buftable_rewrite() dict "{{{
             return ''
         elseif inserted_str == ''
             return self.make_remove_bs()
-        elseif inserted_str != '' && stridx(old, inserted_str) == 0
+        elseif old == ''
+            " Insert a new string.
+            let inst = eskk#get_buffer_instance()
+            let inst.inserted = inserted_str
+            call eskk#map#map(
+            \   'be',
+            \   '<Plug>(eskk:expr:_inserted)',
+            \   'eskk#get_buffer_instance().inserted'
+            \)
+            return "\<Plug>(eskk:expr:_inserted)"
+        elseif stridx(old, inserted_str) == 0
             " When inserted_str == "foo", old == "foobar"
             " Remove "bar".
             return repeat(
@@ -246,7 +256,7 @@ function! s:Buftable_rewrite() dict "{{{
             \   eskk#util#mb_strlen(old)
             \       - eskk#util#mb_strlen(inserted_str)
             \)
-        elseif old != '' && stridx(inserted_str, old) == 0
+        elseif stridx(inserted_str, old) == 0
             " When inserted_str == "foobar", old == "foo"
             " Insert "bar".
             let inst.inserted =
@@ -258,15 +268,30 @@ function! s:Buftable_rewrite() dict "{{{
             \)
             return "\<Plug>(eskk:expr:_inserted)"
         else
-            " Delete current string, and insert new string.
-            let inst = eskk#get_buffer_instance()
-            let inst.inserted = inserted_str
-            call eskk#map#map(
-            \   'be',
-            \   '<Plug>(eskk:expr:_inserted)',
-            \   'eskk#get_buffer_instance().inserted'
-            \)
-            return self.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
+            let idx = eskk#util#diffidx(old, inserted_str)
+            if idx != -1
+                " When inserted_str == "foobar", old == "fool"
+                " Insert "<BS>bar".
+
+                " Remove common string.
+                let old          = strpart(old, idx)
+                let inserted_str = strpart(inserted_str, idx)
+                let bs = eskk#map#key2char(
+                \           eskk#map#get_special_map("backspace-key"))
+                return
+                \   repeat(bs, eskk#util#mb_strlen(old))
+                \ . inserted_str
+            else
+                " Delete current string, and insert new string.
+                let inst = eskk#get_buffer_instance()
+                let inst.inserted = inserted_str
+                call eskk#map#map(
+                \   'be',
+                \   '<Plug>(eskk:expr:_inserted)',
+                \   'eskk#get_buffer_instance().inserted'
+                \)
+                return self.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
+            endif
         endif
     endif
 endfunction "}}}

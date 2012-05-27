@@ -105,6 +105,13 @@ function! eskk#util#has_idx(...)
 endfunction
 
 
+" String function
+function! eskk#util#diffidx(...)
+    let module = s:Vital.Data.String
+    return call(module.diffidx, a:000, module)
+endfunction
+
+
 " Ordered Set
 function! eskk#util#create_data_ordered_set(...)
     let module = s:Vital.Data.OrderedSet
