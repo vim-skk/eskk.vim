@@ -185,14 +185,10 @@ function! s:Buftable_get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
 
-" Rewrite old string, Insert new string.
+" Remove a old string, Insert a new string.
 "
-" FIXME
-" - Current implementation depends on &backspace
+" NOTE: Current implementation depends on &backspace
 " when inserted string has newline.
-"
-" TODO Rewrite mininum string as possible
-" when old or new string become too long.
 function! s:Buftable_rewrite() dict "{{{
     let [old, new] = [self._old_str, self.get_display_str()]
 
