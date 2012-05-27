@@ -2058,15 +2058,22 @@ function! eskk#filter(char) "{{{
         if do_filter
             " Push a pressed character.
             call buftable.push_filter_queue(a:char)
-            " Do loop until queue becomes empty.
-            while !buftable.empty_filter_queue()
+            while 1
+                " Do loop until queue becomes empty.
+                " NOTE: `buftable` may be changed from previous call.
+                " so get it every loop.
+                let buftable = eskk#get_buftable()
+                if buftable.empty_filter_queue()
+                    break
+                endif
+
                 " Set old string. (it is used by Buftable.rewrite())
                 call buftable.set_old_str(buftable.get_display_str())
 
                 " Convert `stash.char` and make modifications to buftable.
                 let stash.char = buftable.shift_filter_queue()
-                " instance (e.g., `inst.mode`) and mode structure
-                " may be different with previous call.
+                " NOTE: `inst` (e.g., `inst.mode`) and `st`
+                " may be changed from previous call.
                 " so get it every loop.
                 let inst = eskk#get_current_instance()
                 let st = eskk#get_mode_structure(inst.mode)
