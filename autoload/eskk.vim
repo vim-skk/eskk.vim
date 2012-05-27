@@ -2043,6 +2043,9 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
+    " Set old string. (it is used by Buftable.rewrite())
+    call buftable.set_old_str(buftable.get_display_str())
+
     try
         let do_filter = 1
         if g:eskk#enable_completion && pumvisible() && mode() ==# 'i'
@@ -2066,9 +2069,6 @@ function! eskk#filter(char) "{{{
                 if buftable.empty_filter_queue()
                     break
                 endif
-
-                " Set old string. (it is used by Buftable.rewrite())
-                call buftable.set_old_str(buftable.get_display_str())
 
                 " Convert `stash.char` and make modifications to buftable.
                 let stash.char = buftable.shift_filter_queue()
