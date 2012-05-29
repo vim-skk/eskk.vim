@@ -1771,7 +1771,6 @@ function! eskk#disable() "{{{
         let &l:omnifunc = remove(inst, 'omnifunc_save')
     endif
 
-    call eskk#unlock_neocomplcache()
     if mode() =~# '^[ic]$'
         " NOTE: Vim can't escape lang-mode immediately
         " in insert-mode or commandline-mode.
@@ -2160,20 +2159,6 @@ function! eskk#_get_eskk_mappings() "{{{
 endfunction "}}}
 function! eskk#_get_eskk_general_mappings() "{{{
     return s:eskk_general_mappings
-endfunction "}}}
-
-" Misc.
-function! eskk#unlock_neocomplcache() "{{{
-    if eskk#is_neocomplcache_locked()
-        NeoComplCacheUnlock
-    endif
-endfunction "}}}
-function! eskk#is_neocomplcache_locked() "{{{
-    return
-    \   g:eskk#enable_completion
-    \   && exists('g:loaded_neocomplcache')
-    \   && exists(':NeoComplCacheUnlock')
-    \   && neocomplcache#is_locked()
 endfunction "}}}
 
 " Exceptions
