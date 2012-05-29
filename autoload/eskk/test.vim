@@ -11,7 +11,7 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
     " Assumption: test case (a:chars) does not contain "(eskk:" string.
 
     let ret = ''
-    for c in split(a:chars, '\zs')
+    for c in s:each_char(a:chars)
         let ret = s:emulate_char(c, ret)
     endfor
 
@@ -23,6 +23,28 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
     endif
 
     return ret
+endfunction "}}}
+
+function! s:each_char(chars) "{{{
+    let r = split(a:chars, '\zs')
+    let r = s:aggregate_backspace(r)
+    return r
+endfunction "}}}
+
+function! s:aggregate_backspace(list) "{{{
+    let list = a:list
+    let pos = -1
+    while 1
+        let pos = index(list, "\x80", pos + 1)
+        if pos is -1
+            break
+        endif
+        if list[pos+1] ==# 'k' && list[pos+2] ==# 'b'
+            unlet list[pos : pos+2]
+            call insert(list, "\<BS>", pos)
+        endif
+    endwhile
+    return list
 endfunction "}}}
 
 function! s:emulate_char(c, ret) "{{{
