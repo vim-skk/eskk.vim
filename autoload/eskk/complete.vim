@@ -438,7 +438,7 @@ function! s:get_buftable_str(with_marker, ...) "{{{
     endif
     let begin = pos[2] - 1
     let line = getline('.')[: col('.') - 2]
-    if a:0 && eskk#is_neocomplcache_locked()
+    if a:0
         " XXX:
         " when called by manual completion,
         " a:base (= a:1) is not added
