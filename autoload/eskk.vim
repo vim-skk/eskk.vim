@@ -1070,6 +1070,11 @@ function! s:filter_rom_no_match(stash, table) "{{{
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str_without_char, rom_str_without_char
             \)
+        else
+            throw eskk#internal_error(
+            \   ['eskk'],
+            \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
+            \)
         endif
         " *** FALLTHROUGH ***
     endif
