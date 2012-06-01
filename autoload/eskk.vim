@@ -576,8 +576,17 @@ function! s:do_enter(stash) "{{{
     let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#buftable#PHASE_NORMAL
-        call buftable.convert_rom_str_inplace(phase)
-        call buftable.kakutei(buftable.get_display_str(0) . "\<CR>")
+        if g:eskk#rom_input_style ==# 'skk'
+            call buftable.kakutei("\<CR>")
+        elseif g:eskk#rom_input_style ==# 'msime'
+            call buftable.convert_rom_str_inplace(phase)
+            call buftable.kakutei(buftable.get_display_str(0) . "\<CR>")
+        else
+            throw eskk#internal_error(
+            \   ['eskk'],
+            \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
+            \)
+        endif
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         call buftable.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
@@ -687,7 +696,18 @@ function! s:do_escape(stash) "{{{
     " NOTE: This function return value is not remapped.
     let esc = eskk#map#get_special_key('escape-key')
     call eskk#util#assert(esc != '', 'esc must not be empty string')
-    call buftable.push_kakutei_str(kakutei_str . eskk#map#key2char(esc))
+    let esc = eskk#map#key2char(esc)
+
+    if g:eskk#rom_input_style ==# 'skk'
+        call buftable.kakutei(esc)
+    elseif g:eskk#rom_input_style ==# 'msime'
+        call buftable.kakutei(kakutei_str . esc)
+    else
+        throw eskk#internal_error(
+        \   ['eskk'],
+        \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
+        \)
+    endif
 endfunction "}}}
 function! s:do_tab(stash) "{{{
     let buftable = a:stash.buftable
