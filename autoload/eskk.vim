@@ -1030,7 +1030,8 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let NO_MAP = []
     let map = a:table.get_map(rom_str_without_char, NO_MAP)
     if map isnot NO_MAP
-        " `rom_str_without_char` has the map but fail with `char`.
+        " `rom_str_without_char` had the map at previous eskk#filter().
+        " but fail at `char`.
         " e.g.: rom_str is "nj" => "んj"
         call buf_str.rom_pairs.push_one_pair(rom_str_without_char, map, {'converted': 1})
         " *** FALLTHROUGH ***
@@ -1040,7 +1041,8 @@ function! s:filter_rom_no_match(stash, table) "{{{
         call buf_str.rom_pairs.push_one_pair(char, char)
         return
     else
-        " `rom_str_without_char` has the candidate(s) but fail with `char`.
+        " `rom_str_without_char` had the candidate(s) at previous eskk#filter().
+        " but fail at `char`.
         if g:eskk#rom_input_style ==# 'skk'
             " rom_str is "zyk" => "k"
         elseif g:eskk#rom_input_style ==# 'msime'
