@@ -726,11 +726,8 @@ function! s:do_henkan(stash, ...) "{{{
         return
     endif
 
-    if index(
-    \   [g:eskk#buftable#PHASE_HENKAN,
-    \       g:eskk#buftable#PHASE_OKURI],
-    \   phase,
-    \) ==# -1
+    if phase isnot g:eskk#buftable#PHASE_HENKAN
+    \   && phase isnot g:eskk#buftable#PHASE_OKURI
         " TODO Add an error id like Vim
         call eskk#logger#warnf(
         \   "s:do_henkan() does not support phase %d.",
