@@ -583,7 +583,8 @@ function! s:is_egg_like(stash) "{{{
     \   || phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
         return g:eskk#egg_like_newline
     endif
-    return 0
+    " Default is <CR> once.
+    return 1
 endfunction "}}}
 function! s:_do_enter(stash) "{{{
     let buftable = a:stash.buftable
