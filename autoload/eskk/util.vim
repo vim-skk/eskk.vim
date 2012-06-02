@@ -80,43 +80,43 @@ endfunction "}}}
 
 
 " Multibyte/Encoding
-function! eskk#util#mb_strlen(...)
+function! eskk#util#mb_strlen(...) "{{{
     let module = s:Vital.Data.String
     return call(module.strchars, a:000, module)
-endfunction
-function! eskk#util#mb_chop(...)
+endfunction "}}}
+function! eskk#util#mb_chop(...) "{{{
     let module = s:Vital.Data.String
     return call(module.chop, a:000, module)
-endfunction
-function! eskk#util#iconv(...)
+endfunction "}}}
+function! eskk#util#iconv(...) "{{{
     let module = s:Vital
     return call(module.iconv, a:000, module)
-endfunction
+endfunction "}}}
 
 
 " List function
-function! eskk#util#flatten_list(...)
+function! eskk#util#flatten_list(...) "{{{
     let module = s:Vital.Data.List
     return call(module.flatten, a:000, module)
-endfunction
-function! eskk#util#has_idx(...)
+endfunction "}}}
+function! eskk#util#has_idx(...) "{{{
     let module = s:Vital.Data.List
     return call(module.has_index, a:000, module)
-endfunction
+endfunction "}}}
 
 
 " String function
-function! eskk#util#diffidx(...)
+function! eskk#util#diffidx(...) "{{{
     let module = s:Vital.Data.String
     return call(module.diffidx, a:000, module)
-endfunction
+endfunction "}}}
 
 
 " Ordered Set
-function! eskk#util#create_data_ordered_set(...)
+function! eskk#util#create_data_ordered_set(...) "{{{
     let module = s:Vital.Data.OrderedSet
     return call(module.new, a:000, module)
-endfunction
+endfunction "}}}
 
 
 " SID/Scripts
