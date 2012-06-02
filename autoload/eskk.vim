@@ -782,16 +782,12 @@ endfunction "}}}
 function! s:do_henkan_other(stash, convert_at_exact_match) "{{{
     let buftable = a:stash.buftable
     let phase = buftable.get_henkan_phase()
-    let henkan_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#PHASE_HENKAN
-    \)
-    let okuri_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#PHASE_OKURI
-    \)
-    let henkan_select_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#PHASE_HENKAN_SELECT
-    \)
 
+    " NOTE:
+    " Buftable.convert_rom_all_inplace() sets a reference not a value.
+    " calling Buftable.get_buf_str() before
+    " Buftable.convert_rom_all_inplace() will
+    " cause all return values invalid.
     if g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
         call buftable.convert_rom_all_inplace(
@@ -802,6 +798,16 @@ function! s:do_henkan_other(stash, convert_at_exact_match) "{{{
         \   eskk#get_mode_table('hira')
         \)
     endif
+
+    let henkan_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#PHASE_HENKAN
+    \)
+    let okuri_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#PHASE_OKURI
+    \)
+    let henkan_select_buf_str = buftable.get_buf_str(
+    \   g:eskk#buftable#PHASE_HENKAN_SELECT
+    \)
 
     " Convert rom_str if possible.
     call buftable.convert_rom_str_inplace([
