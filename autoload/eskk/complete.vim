@@ -53,9 +53,9 @@ function! s:eskkcomplete(findstart, base) "{{{
 
         call s:initialize_variables()
 
-        let pos = eskk#get_begin_pos()
-        call eskk#util#assert(!empty(pos), "pos is not empty")
-        return pos[2] - 1
+        let col = eskk#get_begin_col()
+        call eskk#util#assert(col ># 0, "col is not valid")
+        return col - 1
     endif
 
     return eskk#complete#do_complete(a:base)
@@ -69,8 +69,8 @@ function! eskk#complete#can_find_start() "{{{
         return 0
     endif
 
-    let pos = eskk#get_begin_pos()
-    if empty(pos)
+    let col = eskk#get_begin_col()
+    if col <=# 0
         return 0
     endif
 
@@ -284,11 +284,11 @@ function! s:do_tab(stash) "{{{
     \)
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
-    let pos = eskk#get_begin_pos()
-    if empty(pos)
+    let col = eskk#get_begin_col()
+    if col <=# 0
         return
     endif
-    if pos[2] >= col('.')
+    if col >= col('.')
         call s:close_pum(a:stash)
     endif
     let buftable = eskk#get_buftable()
@@ -431,12 +431,12 @@ function! s:get_buftable_str(with_marker, ...) "{{{
         return ''
     endif
 
-    let pos = eskk#get_begin_pos()
-    if empty(pos)
-        call eskk#logger#log("Can't get begin pos.")
+    let col = eskk#get_begin_col()
+    if col <=# 0
+        call eskk#logger#log("Can't get begin col.")
         return ''
     endif
-    let begin = pos[2] - 1
+    let begin = col - 1
     let line = getline('.')[: col('.') - 2]
     if a:0
         " XXX:

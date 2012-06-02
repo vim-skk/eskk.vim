@@ -69,10 +69,6 @@ function! s:emulate_char(c, ret) "{{{
         let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
     endif
 
-    " Remove `<Plug>(eskk:_set_begin_pos)`.
-    " it is <expr> and does not effect to result string.
-    let r = substitute(r, '(eskk:_set_begin_pos)', '', 'g')
-
     " Expand some <expr> <Plug> mappings.
     let r = substitute(
     \   r,

@@ -33,7 +33,6 @@ delfunction s:SID
 "   Temporary event handler functions/arguments.
 let s:eskk = {
 \   'mode': '',
-\   'begin_pos': [],
 \   'buftable': {},
 \   'temp_event_hook_fn': {},
 \   'formatoptions': 0,
@@ -686,7 +685,6 @@ function! s:do_sticky(stash) "{{{
             \   [undo_char]
             \)
         endif
-        let buftable._set_begin_pos_at_rewrite = 1
         call buftable.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         if !buf_str.rom_str.empty()
@@ -1122,25 +1120,6 @@ function! s:ascii_filter(stash) "{{{
     \)
         call eskk#set_mode('hira')
     else
-        if a:stash.char !=# "\<BS>"
-        \   && a:stash.char !=# "\<C-h>"
-            if a:stash.char =~# '\w'
-                if !has_key(
-                \   this.temp, 'already_set_for_this_word'
-                \)
-                    " Set start col of word.
-                    call eskk#set_begin_pos('.')
-                    let this.temp.already_set_for_this_word = 1
-                endif
-            else
-                if has_key(
-                \   this.temp, 'already_set_for_this_word'
-                \)
-                    unlet this.temp.already_set_for_this_word
-                endif
-            endif
-        endif
-
         if eskk#has_mode_table('ascii')
             if !has_key(this.temp, 'table')
                 let this.temp.table = eskk#get_mode_table('ascii')
@@ -1519,11 +1498,6 @@ function! eskk#_initialize() "{{{
         " }}}
 
         " 'zenei' mode {{{
-        call eskk#register_event(
-        \   'enter-mode-zenei',
-        \   'eskk#set_begin_pos',
-        \   ['.']
-        \)
         call eskk#register_mode_structure('zenei', {
         \   'filter': eskk#util#get_local_funcref('zenei_filter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_zenei'),
@@ -1556,12 +1530,6 @@ function! eskk#_initialize() "{{{
 
         let dict.filter = eskk#util#get_local_funcref('abbrev_filter', s:SID_PREFIX)
         let dict.init_phase = g:eskk#buftable#PHASE_HENKAN
-
-        call eskk#register_event(
-        \   'enter-mode-abbrev',
-        \   'eskk#set_begin_pos',
-        \   ['.']
-        \)
 
         call eskk#register_mode_structure('abbrev', dict)
         " }}}
@@ -1653,12 +1621,6 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " Create internal mappings. {{{
-    call eskk#map#map(
-    \   'e',
-    \   '<Plug>(eskk:_set_begin_pos)',
-    \   '[eskk#set_begin_pos("."), ""][1]',
-    \   'ic'
-    \)
     call eskk#map#map(
     \   're',
     \   '<Plug>(eskk:_filter_redispatch_pre)',
@@ -1964,17 +1926,8 @@ function! s:register_table(table) "{{{
 endfunction "}}}
 
 " Begin pos
-function! eskk#get_begin_pos() "{{{
-    let inst = eskk#get_current_instance()
-    return inst.begin_pos
-endfunction "}}}
-function! eskk#set_begin_pos(expr) "{{{
-    let inst = eskk#get_current_instance()
-    if mode() ==# 'i'
-        let inst.begin_pos = getpos(a:expr)
-    else
-        call eskk#logger#logf("called eskk from mode '%s'.", mode())
-    endif
+function! eskk#get_begin_col() "{{{
+    return eskk#get_buftable().get_begin_col()
 endfunction "}}}
 
 " Statusline
