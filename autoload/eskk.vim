@@ -566,6 +566,26 @@ function! s:do_backspace(stash) "{{{
     endfor
 endfunction "}}}
 function! s:do_enter(stash) "{{{
+    if s:is_egg_like(a:stash)
+        call s:_do_enter(a:stash)
+    else
+        call s:_do_enter(a:stash)
+        call s:_do_enter(a:stash)
+    endif
+endfunction "}}}
+function! s:is_egg_like(stash) "{{{
+    if mode() ==# 'i' && pumvisible()
+        return g:eskk#egg_like_newline_completion
+    endif
+    let phase = eskk#get_buftable().get_henkan_phase()
+    if phase ==# g:eskk#buftable#PHASE_HENKAN
+    \   || phase ==# g:eskk#buftable#PHASE_OKURI
+    \   || phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
+        return g:eskk#egg_like_newline
+    endif
+    return 0
+endfunction "}}}
+function! s:_do_enter(stash) "{{{
     let buftable = a:stash.buftable
     let phase = buftable.get_henkan_phase()
     let enter_char =

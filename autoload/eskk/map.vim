@@ -220,31 +220,6 @@ function! s:restore_normal_keys(keys) "{{{
 endfunction "}}}
 
 
-" Egg like newline
-function! s:map_egg_like_newline(eln_insert, eln_compl) "{{{
-    let egg_like     = "\<Plug>(eskk:filter:<CR>)"
-    let non_egg_like = repeat(egg_like, 2)
-    call eskk#map#map(
-    \   'rbe',
-    \   '<CR>',
-    \   'eskk#map#_should_disable_egg_like_newline('.a:eln_insert.','.a:eln_compl.') ? '.string(non_egg_like).' : '.string(egg_like),
-    \   'l'
-    \)
-endfunction "}}}
-function! eskk#map#_should_disable_egg_like_newline(eln_insert, eln_compl) "{{{
-    if mode() ==# 'i' && pumvisible()
-        return !a:eln_compl
-    endif
-    let phase = eskk#get_buftable().get_henkan_phase()
-    if phase ==# g:eskk#buftable#PHASE_HENKAN
-    \   || phase ==# g:eskk#buftable#PHASE_OKURI
-    \   || phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
-        return !a:eln_insert
-    endif
-    return 0
-endfunction "}}}
-
-
 " Functions using s:eskk_mappings
 function! eskk#map#map_all_keys(...) "{{{
     let inst = eskk#get_buffer_instance()
@@ -260,10 +235,6 @@ function! eskk#map#map_all_keys(...) "{{{
     for key in g:eskk#mapped_keys
         call call('eskk#map#set_up_key', [key] + a:000)
     endfor
-    " Egg like newline
-    call s:map_egg_like_newline(
-    \   g:eskk#egg_like_newline,
-    \   g:eskk#egg_like_newline_completion)
 
     " Map `:EskkMap -general` keys.
     let general_mappings = eskk#_get_eskk_general_mappings()
