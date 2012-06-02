@@ -659,7 +659,7 @@ endfunction "}}}
 " Returns a number greater than zero on success.
 " Returns a zero or smaller on error.
 function! s:Buftable_get_begin_col() dict "{{{
-    return col('.') - strlen(self._old_str)
+    return col('.') - strlen(self.get_display_str())
 endfunction "}}}
 
 
