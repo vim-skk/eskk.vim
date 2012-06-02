@@ -784,10 +784,9 @@ function! s:do_henkan_other(stash, convert_at_exact_match) "{{{
     let phase = buftable.get_henkan_phase()
 
     " NOTE:
-    " Buftable.convert_rom_all_inplace() sets a reference not a value.
-    " calling Buftable.get_buf_str() before
-    " Buftable.convert_rom_all_inplace() will
-    " cause all return values invalid.
+    " Buftable.convert_rom_all_inplace() sets a new reference not a value.
+    " This makes all reference values of
+    " Buftable.get_buf_str()'s return values invalid.
     if g:eskk#kata_convert_to_hira_at_henkan
     \   && eskk#get_mode() ==# 'kata'
         call buftable.convert_rom_all_inplace(
