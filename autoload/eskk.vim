@@ -1343,7 +1343,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#enable_completion', 1)
     call eskk#util#set_default('g:eskk#max_candidates', 30)
     call eskk#util#set_default('g:eskk#start_completion_length', 3)
-    call eskk#util#set_default('g:eskk#register_completed_word', 1)
+    call eskk#util#set_default('g:eskk#register_completed_word', 1)    " TODO
     call eskk#util#set_default('g:eskk#egg_like_newline_completion', 0)
 
     " Cursor color
