@@ -255,9 +255,6 @@ g:eskk#marker_jisyo_touroku			*g:eskk#marker_jisyo_touroku*
 							(Default: "?")
 	(TODO)
 
-g:eskk#marker_popup			*g:eskk#marker_popup*
-							(Default: "#")
-
 
 Completion
 -------------

@@ -260,9 +260,6 @@ g:eskk#marker_jisyo_touroku			*g:eskk#marker_jisyo_touroku*
 							(デフォルト値: "?")
 	(TODO)
 
-g:eskk#marker_popup			*g:eskk#marker_popup*
-							(デフォルト値: "#")
-
 
 補完に関する変数
 -------------

@@ -474,6 +474,32 @@ function! s:asym_filter(stash) "{{{
 endfunction "}}}
 
 " For specific characters
+
+" Handle popupmenu-keys. (:help popupmenu-keys)
+" If return string is not empty,
+" eskk#filter() pass-through the input character.
+"
+" TODO: More popupmenu-keys handling.
+function! s:do_popupmenu_keys(stash) "{{{
+    let buftable = a:stash.buftable
+    let char = a:stash.char
+
+    let selected_default =
+    \   getline('.')[eskk#get_begin_col() - 1 :] ==# buftable.get_display_str()
+
+    " Restore state if default candidate is selected.
+    if char ==# "\<CR>"
+        if selected_default
+            return ''    " Let filter function process the character.
+        else
+            call buftable.reset()
+            return char
+        endif
+    endif
+
+    " Pass-through popupmenu-keys.
+    return char
+endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let buftable = a:stash.buftable
     if buftable.get_old_str() == ''
@@ -1337,7 +1363,6 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#marker_okuri', '*')
     call eskk#util#set_default('g:eskk#marker_henkan_select', '▼')
     call eskk#util#set_default('g:eskk#marker_jisyo_touroku', '?')
-    call eskk#util#set_default('g:eskk#marker_popup', '◇')
 
     " Completion
     call eskk#util#set_default('g:eskk#enable_completion', 1)
@@ -1377,18 +1402,6 @@ function! eskk#_initialize() "{{{
 
     call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
-    " }}}
-
-    " Check global variables values. {{{
-    function! s:initialize_check_variables()
-        if g:eskk#marker_henkan ==# g:eskk#marker_popup
-            call eskk#logger#warn(
-            \   'g:eskk#marker_henkan and g:eskk#marker_popup'
-            \       . ' must be different.'
-            \)
-        endif
-    endfunction
-    call s:initialize_check_variables()
     " }}}
 
     " Set up g:eskk#directory. {{{
@@ -2047,53 +2060,47 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
+    if mode() ==# 'i' && pumvisible()
+        let r = s:do_popupmenu_keys(stash)
+        if r !=# ''
+            return r
+        endif
+    endif
+
     " Set old string. (it is used by Buftable.rewrite())
     call buftable.set_old_str(buftable.get_display_str())
 
     try
-        let do_filter = 1
-        if g:eskk#enable_completion && pumvisible() && mode() ==# 'i'
-            try
-                let do_filter = eskk#complete#handle_special_key(stash)
-            catch
-                call eskk#logger#log_exception(
-                \   'eskk#complete#handle_special_key()'
-                \)
-            endtry
-        endif
+        " Push a pressed character.
+        call buftable.push_filter_queue(a:char)
+        while 1
+            " Do loop until queue becomes empty.
+            " NOTE: `buftable` may be changed from previous call.
+            " so get it every loop.
+            let buftable = eskk#get_buftable()
+            if buftable.empty_filter_queue()
+                break
+            endif
 
-        if do_filter
-            " Push a pressed character.
-            call buftable.push_filter_queue(a:char)
-            while 1
-                " Do loop until queue becomes empty.
-                " NOTE: `buftable` may be changed from previous call.
-                " so get it every loop.
-                let buftable = eskk#get_buftable()
-                if buftable.empty_filter_queue()
-                    break
-                endif
+            " Convert `stash.char` and make modifications to buftable.
+            let stash.char = buftable.shift_filter_queue()
+            " NOTE: `inst` (e.g., `inst.mode`) and `st`
+            " may be changed from previous call.
+            " so get it every loop.
+            let inst = eskk#get_current_instance()
+            let st = eskk#get_mode_structure(inst.mode)
+            call st.filter(stash)
 
-                " Convert `stash.char` and make modifications to buftable.
-                let stash.char = buftable.shift_filter_queue()
-                " NOTE: `inst` (e.g., `inst.mode`) and `st`
-                " may be changed from previous call.
-                " so get it every loop.
-                let inst = eskk#get_current_instance()
-                let st = eskk#get_mode_structure(inst.mode)
-                call st.filter(stash)
-
-                " If eskk is disabled by user input,
-                " disable lang-mode and escape eskk#filter().
-                if !eskk#is_enabled()
-                    " NOTE: Vim can't escape lang-mode immediately
-                    " in insert-mode or commandline-mode.
-                    " We have to use i_CTRL-^ .
-                    let kakutei_str = buftable.generate_kakutei_str()
-                    return kakutei_str . "\<C-^>"
-                endif
-            endwhile
-        endif
+            " If eskk is disabled by user input,
+            " disable lang-mode and escape eskk#filter().
+            if !eskk#is_enabled()
+                " NOTE: Vim can't escape lang-mode immediately
+                " in insert-mode or commandline-mode.
+                " We have to use i_CTRL-^ .
+                let kakutei_str = buftable.generate_kakutei_str()
+                return kakutei_str . "\<C-^>"
+            endif
+        endwhile
 
         " NOTE: `buftable` may become invalid reference
         " because `st.filter(stash)` may call `eskk#set_buftable()`.
