@@ -490,14 +490,16 @@ function! s:do_popupmenu_keys(stash) "{{{
     " Restore state if default candidate is selected.
     if char ==# "\<CR>"
         if selected_default
-            return ''    " Let filter function process the character.
+            " Let filter function process the character.
+            return ''
         else
+            " Insert selected candidate by pum.
             call buftable.reset()
             return char
         endif
     endif
 
-    " Pass-through popupmenu-keys.
+    " Pass-through.
     return char
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
