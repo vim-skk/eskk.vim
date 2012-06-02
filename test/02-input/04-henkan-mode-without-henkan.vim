@@ -8,20 +8,26 @@ set cpo&vim
 
 
 
+function! s:egg_like_newline() "{{{
+    return g:eskk#egg_like_newline ? "\<CR>" : "\<CR>\<CR>"
+endfunction "}}}
+
 function! s:do_test() "{{{
+    let cr = g:eskk#egg_like_newline ? '' : "\<CR>"
     for [l, r] in [
-    \   [";a\<CR>", 'あ'],
-    \   [";sa\<CR>", 'さ'],
-    \   [" ;sa\<CR>", ' さ'],
-    \   [";sa\<CR> ", 'さ '],
-    \   [" ;na\<CR>", ' な'],
-    \   [" ;nna\<CR>", ' んあ'],
-    \   [" ;nnna\<CR>", ' んな'],
-    \   [";na\<CR> ", 'な '],
-    \   [";tty\<CR>", 'っty'],
-    \   [" ;ka\<CR>", ' か'],
-    \   [";&ka\<CR>", '&か'],
+    \   [";a\<CR>", 'あ'.cr],
+    \   [";sa\<CR>", 'さ'.cr],
+    \   [" ;sa\<CR>", ' さ'.cr],
+    \   [";sa\<CR> ", 'さ'.cr.' '],
+    \   [" ;na\<CR>", ' な'.cr],
+    \   [" ;nna\<CR>", ' んあ'.cr],
+    \   [" ;nnna\<CR>", ' んな'.cr],
+    \   [";na\<CR> ", 'な'.cr.' '],
+    \   [";tty\<CR>", 'っty'.cr],
+    \   [" ;ka\<CR>", ' か'.cr],
+    \   [";&ka\<CR>", '&か'.cr],
     \]
+        Diag 'g:eskk#egg_like_newline = ' . g:eskk#egg_like_newline
         Is eskk#test#emulate_filter_keys(l), r,
         \   string(l).' => '.string(r)
     endfor
@@ -47,8 +53,13 @@ function! s:run() "{{{
     \   . 'please report if you met a prompt message '
     \   . 'during this test.'
 
-    call s:create_map_and_test('<C-g>', 'foo')
-    call s:create_map_and_test('<C-g>u', 'bar')
+    let save_eln = g:eskk#egg_like_newline
+    for eln in [1,0]
+        let g:eskk#egg_like_newline = eln
+        call s:create_map_and_test('<C-g>', 'foo')
+        call s:create_map_and_test('<C-g>u', 'bar')
+    endfor
+    let g:eskk#egg_like_newline = save_eln
 
     Diag script . ' - done.'
 endfunction "}}}

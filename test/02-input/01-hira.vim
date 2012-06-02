@@ -8,7 +8,12 @@ set cpo&vim
 
 
 
+function! s:egg_like_newline()
+    return g:eskk#egg_like_newline ? "\<CR>" : "\<CR>\<CR>"
+endfunction
+
 function! s:run()
+    let save_eln = g:eskk#egg_like_newline
     for [l, r] in [
     \   ['', ''],
     \   ['a', 'あ'],
@@ -18,8 +23,8 @@ function! s:run()
     \   ['kanji', 'かんじ'],
     \   ['kannji', 'かんじ'],
     \   ['kannnji', 'かんんじ'],
-    \   ["kanjin\<CR>", "かんじん\<CR>"],
-    \   ["kannjin\<CR>", "かんじん\<CR>"],
+    \   ["kanjin\<CR>", "かんじん" . s:egg_like_newline()],
+    \   ["kannjin\<CR>", "かんじん" . s:egg_like_newline()],
     \   ['kanjinn', "かんじん"],
     \   ['kannjinn', "かんじん"],
     \   ["hoge\<BS>", "ほ"],
@@ -31,9 +36,14 @@ function! s:run()
     \   [" \<C-h>", ""],
     \   [" \<C-h>\<C-h>", "\<C-h>"],
     \]
+        let g:eskk#egg_like_newline = 1
+        Is eskk#test#emulate_filter_keys(l), r,
+        \   string(l).' => '.string(r)
+        let g:eskk#egg_like_newline = 0
         Is eskk#test#emulate_filter_keys(l), r,
         \   string(l).' => '.string(r)
     endfor
+    let g:eskk#egg_like_newline = save_eln
 endfunction
 
 call s:run()
