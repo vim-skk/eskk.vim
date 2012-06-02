@@ -58,7 +58,7 @@ function! s:eskkcomplete(findstart, base) "{{{
         return pos[2] - 1
     endif
 
-    return s:MODE_FUNC_TABLE[eskk#get_mode()](a:base)
+    return eskk#complete#do_complete(a:base)
 endfunction "}}}
 function! eskk#complete#can_find_start() "{{{
     if !has_key(s:MODE_FUNC_TABLE, eskk#get_mode())
