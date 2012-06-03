@@ -640,22 +640,22 @@ function! s:do_backspace(stash) "{{{
     endfor
 endfunction "}}}
 function! s:do_enter(stash) "{{{
-    if s:is_egg_like(a:stash)
+    let times = s:get_enter_repeat_times(a:stash)
+    for _ in range(times)
         call s:_do_enter(a:stash)
-    else
-        call s:_do_enter(a:stash)
-        call s:_do_enter(a:stash)
-    endif
+    endfor
 endfunction "}}}
-function! s:is_egg_like(stash) "{{{
+function! s:get_enter_repeat_times(stash) "{{{
     if mode() ==# 'i' && pumvisible()
-        return g:eskk#egg_like_newline_completion
+        " if mode() ==# 'i' && pumvisible() && a:stash.char ==# "\<CR>" ,
+        " s:handle_popupmenu_keys() already closed pum.
+        return g:eskk#egg_like_newline_completion ? 0 : 1
     endif
     let phase = eskk#get_buftable().get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#PHASE_OKURI
     \   || phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
-        return g:eskk#egg_like_newline
+        return g:eskk#egg_like_newline ? 1 : 2
     endif
     " Default is <CR> once.
     return 1
