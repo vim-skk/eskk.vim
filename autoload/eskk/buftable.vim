@@ -26,7 +26,6 @@ let [
 \] = range(4)
 " }}}
 
-" Functions {{{
 
 " s:RomStr {{{
 
@@ -124,8 +123,6 @@ let s:RomPairs = {
 \}
 
 " }}}
-
-
 
 " s:BufferString {{{
 function! s:BufferString_get_input_rom() dict "{{{
@@ -768,6 +765,7 @@ let s:Buftable = {
 " }}}
 
 " }}}
+
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo
