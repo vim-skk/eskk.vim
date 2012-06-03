@@ -33,7 +33,6 @@ delfunction s:SID
 "   Temporary event handler functions/arguments.
 let s:eskk = {
 \   'mode': '',
-\   'begin_pos': [],
 \   'buftable': {},
 \   'temp_event_hook_fn': {},
 \   'formatoptions': 0,
@@ -353,6 +352,14 @@ function! s:asym_filter(stash) "{{{
     let phase = buftable.get_henkan_phase()
 
 
+    " Handle popupmenu-keys.
+    if mode() ==# 'i' && pumvisible()
+    \   && s:handle_popupmenu_keys(a:stash)
+        " Handled.
+        return
+    endif
+
+
     " Handle special mode-local mapping.
     for key in get(s:MODE_LOCAL_KEYS, eskk#get_mode(), [])
         if eskk#map#handle_special_lhs(char, key, a:stash)
@@ -475,6 +482,84 @@ function! s:asym_filter(stash) "{{{
 endfunction "}}}
 
 " For specific characters
+
+" Handle popupmenu-keys. (:help popupmenu-keys)
+" If return value is 1, eskk does not filter a char.
+" If return value is 0, eskk processes and insert a string.
+function! s:handle_popupmenu_keys(stash) "{{{
+    let buftable = a:stash.buftable
+    let char = a:stash.char
+
+    let inserted_str = buftable.get_inserted_str()
+    let selected_default = inserted_str ==# buftable.get_display_str()
+
+    if char ==# "\<CR>" || char ==# "\<Tab>"
+        call s:kakutei_pum(a:stash)
+        return 0
+    elseif char ==# "\<Space>"
+        if selected_default
+            call s:close_pum(a:stash)
+        else
+            call s:kakutei_pum(a:stash)
+            return 0
+        endif
+        return 0
+    elseif char ==# "\<BS>" || char ==# "\<C-h>"
+        if !selected_default
+            call s:kakutei_pum(a:stash)
+        endif
+        return 0
+    elseif char ==# "\<C-y>"
+        call s:kakutei_pum(a:stash)
+        return 1
+    elseif char ==# "\<C-e>"
+        " FIXME: wrongly removes one character before preedit.
+        let disp = buftable.get_display_str(0)
+        call buftable.reset()
+        call buftable.set_old_str(inserted_str)
+        call buftable.kakutei(disp)
+        return 1
+    else
+        let POPUP_CHAR_TO_KEY = {
+        \   "\<PageUp>": "<PageUp>",
+        \   "\<PageDown>": "<PageDown>",
+        \   "\<Up>": "<Up>",
+        \   "\<Down>": "<Down>",
+        \   "\<C-n>": "<C-n>",
+        \   "\<C-p>": "<C-p>",
+        \}
+        if has_key(POPUP_CHAR_TO_KEY, char)
+            let key = POPUP_CHAR_TO_KEY[char]
+            call eskk#register_temp_event(
+            \   'filter-redispatch-pre',
+            \   'eskk#util#identity',
+            \   [eskk#map#key2char(eskk#map#get_nore_map(key))]
+            \)
+            return 1
+        endif
+    endif
+
+    " Let filter function process the character.
+    if !selected_default
+        call s:kakutei_pum(a:stash)
+    endif
+    return 0
+endfunction "}}}
+function! s:kakutei_pum(stash) "{{{
+    " Let Buftable not rewrite a buffer.
+    " (eskk abandons a management of preedit)
+    call a:stash.buftable.reset()
+    " Close popup.
+    call s:close_pum(a:stash)
+endfunction "}}}
+function! s:close_pum(stash) "{{{
+    " Close popup.
+    call eskk#register_temp_event(
+    \   'filter-redispatch-pre',
+    \   'eskk#util#identity',
+    \   [eskk#map#key2char(eskk#map#get_nore_map("<C-y>"))]
+    \)
+endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let buftable = a:stash.buftable
     if buftable.get_old_str() == ''
@@ -566,22 +651,22 @@ function! s:do_backspace(stash) "{{{
     endfor
 endfunction "}}}
 function! s:do_enter(stash) "{{{
-    if s:is_egg_like(a:stash)
+    let times = s:get_enter_repeat_times(a:stash)
+    for _ in range(times)
         call s:_do_enter(a:stash)
-    else
-        call s:_do_enter(a:stash)
-        call s:_do_enter(a:stash)
-    endif
+    endfor
 endfunction "}}}
-function! s:is_egg_like(stash) "{{{
+function! s:get_enter_repeat_times(stash) "{{{
     if mode() ==# 'i' && pumvisible()
-        return g:eskk#egg_like_newline_completion
+        " if mode() ==# 'i' && pumvisible() && a:stash.char ==# "\<CR>" ,
+        " s:handle_popupmenu_keys() already closed pum.
+        return g:eskk#egg_like_newline_completion ? 0 : 1
     endif
     let phase = eskk#get_buftable().get_henkan_phase()
     if phase ==# g:eskk#buftable#PHASE_HENKAN
     \   || phase ==# g:eskk#buftable#PHASE_OKURI
     \   || phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
-        return g:eskk#egg_like_newline
+        return g:eskk#egg_like_newline ? 1 : 2
     endif
     " Default is <CR> once.
     return 1
@@ -686,7 +771,6 @@ function! s:do_sticky(stash) "{{{
             \   [undo_char]
             \)
         endif
-        let buftable._set_begin_pos_at_rewrite = 1
         call buftable.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
     elseif phase ==# g:eskk#buftable#PHASE_HENKAN
         if !buf_str.rom_str.empty()
@@ -1122,25 +1206,6 @@ function! s:ascii_filter(stash) "{{{
     \)
         call eskk#set_mode('hira')
     else
-        if a:stash.char !=# "\<BS>"
-        \   && a:stash.char !=# "\<C-h>"
-            if a:stash.char =~# '\w'
-                if !has_key(
-                \   this.temp, 'already_set_for_this_word'
-                \)
-                    " Set start col of word.
-                    call eskk#set_begin_pos('.')
-                    let this.temp.already_set_for_this_word = 1
-                endif
-            else
-                if has_key(
-                \   this.temp, 'already_set_for_this_word'
-                \)
-                    unlet this.temp.already_set_for_this_word
-                endif
-            endif
-        endif
-
         if eskk#has_mode_table('ascii')
             if !has_key(this.temp, 'table')
                 let this.temp.table = eskk#get_mode_table('ascii')
@@ -1358,13 +1423,12 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#marker_okuri', '*')
     call eskk#util#set_default('g:eskk#marker_henkan_select', '▼')
     call eskk#util#set_default('g:eskk#marker_jisyo_touroku', '?')
-    call eskk#util#set_default('g:eskk#marker_popup', '◇')
 
     " Completion
     call eskk#util#set_default('g:eskk#enable_completion', 1)
     call eskk#util#set_default('g:eskk#max_candidates', 30)
     call eskk#util#set_default('g:eskk#start_completion_length', 3)
-    call eskk#util#set_default('g:eskk#register_completed_word', 1)
+    call eskk#util#set_default('g:eskk#register_completed_word', 1)    " TODO
     call eskk#util#set_default('g:eskk#egg_like_newline_completion', 0)
 
     " Cursor color
@@ -1398,18 +1462,6 @@ function! eskk#_initialize() "{{{
 
     call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
-    " }}}
-
-    " Check global variables values. {{{
-    function! s:initialize_check_variables()
-        if g:eskk#marker_henkan ==# g:eskk#marker_popup
-            call eskk#logger#warn(
-            \   'g:eskk#marker_henkan and g:eskk#marker_popup'
-            \       . ' must be different.'
-            \)
-        endif
-    endfunction
-    call s:initialize_check_variables()
     " }}}
 
     " Set up g:eskk#directory. {{{
@@ -1519,11 +1571,6 @@ function! eskk#_initialize() "{{{
         " }}}
 
         " 'zenei' mode {{{
-        call eskk#register_event(
-        \   'enter-mode-zenei',
-        \   'eskk#set_begin_pos',
-        \   ['.']
-        \)
         call eskk#register_mode_structure('zenei', {
         \   'filter': eskk#util#get_local_funcref('zenei_filter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_zenei'),
@@ -1556,12 +1603,6 @@ function! eskk#_initialize() "{{{
 
         let dict.filter = eskk#util#get_local_funcref('abbrev_filter', s:SID_PREFIX)
         let dict.init_phase = g:eskk#buftable#PHASE_HENKAN
-
-        call eskk#register_event(
-        \   'enter-mode-abbrev',
-        \   'eskk#set_begin_pos',
-        \   ['.']
-        \)
 
         call eskk#register_mode_structure('abbrev', dict)
         " }}}
@@ -1653,12 +1694,6 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " Create internal mappings. {{{
-    call eskk#map#map(
-    \   'e',
-    \   '<Plug>(eskk:_set_begin_pos)',
-    \   '[eskk#set_begin_pos("."), ""][1]',
-    \   'ic'
-    \)
     call eskk#map#map(
     \   're',
     \   '<Plug>(eskk:_filter_redispatch_pre)',
@@ -1963,20 +1998,6 @@ function! s:register_table(table) "{{{
     endif
 endfunction "}}}
 
-" Begin pos
-function! eskk#get_begin_pos() "{{{
-    let inst = eskk#get_current_instance()
-    return inst.begin_pos
-endfunction "}}}
-function! eskk#set_begin_pos(expr) "{{{
-    let inst = eskk#get_current_instance()
-    if mode() ==# 'i'
-        let inst.begin_pos = getpos(a:expr)
-    else
-        call eskk#logger#logf("called eskk from mode '%s'.", mode())
-    endif
-endfunction "}}}
-
 " Statusline
 function! eskk#statusline(...) "{{{
     return eskk#is_enabled()
@@ -2094,53 +2115,41 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
+
     " Set old string. (it is used by Buftable.rewrite())
     call buftable.set_old_str(buftable.get_display_str())
 
     try
-        let do_filter = 1
-        if g:eskk#enable_completion && pumvisible() && mode() ==# 'i'
-            try
-                let do_filter = eskk#complete#handle_special_key(stash)
-            catch
-                call eskk#logger#log_exception(
-                \   'eskk#complete#handle_special_key()'
-                \)
-            endtry
-        endif
+        " Push a pressed character.
+        call buftable.push_filter_queue(a:char)
+        while 1
+            " Do loop until queue becomes empty.
+            " NOTE: `buftable` may be changed from previous call.
+            " so get it every loop.
+            let buftable = eskk#get_buftable()
+            if buftable.empty_filter_queue()
+                break
+            endif
 
-        if do_filter
-            " Push a pressed character.
-            call buftable.push_filter_queue(a:char)
-            while 1
-                " Do loop until queue becomes empty.
-                " NOTE: `buftable` may be changed from previous call.
-                " so get it every loop.
-                let buftable = eskk#get_buftable()
-                if buftable.empty_filter_queue()
-                    break
-                endif
+            " Convert `stash.char` and make modifications to buftable.
+            let stash.char = buftable.shift_filter_queue()
+            " NOTE: `inst` (e.g., `inst.mode`) and `st`
+            " may be changed from previous call.
+            " so get it every loop.
+            let inst = eskk#get_current_instance()
+            let st = eskk#get_mode_structure(inst.mode)
+            call st.filter(stash)
 
-                " Convert `stash.char` and make modifications to buftable.
-                let stash.char = buftable.shift_filter_queue()
-                " NOTE: `inst` (e.g., `inst.mode`) and `st`
-                " may be changed from previous call.
-                " so get it every loop.
-                let inst = eskk#get_current_instance()
-                let st = eskk#get_mode_structure(inst.mode)
-                call st.filter(stash)
-
-                " If eskk is disabled by user input,
-                " disable lang-mode and escape eskk#filter().
-                if !eskk#is_enabled()
-                    " NOTE: Vim can't escape lang-mode immediately
-                    " in insert-mode or commandline-mode.
-                    " We have to use i_CTRL-^ .
-                    let kakutei_str = buftable.generate_kakutei_str()
-                    return kakutei_str . "\<C-^>"
-                endif
-            endwhile
-        endif
+            " If eskk is disabled by user input,
+            " disable lang-mode and escape eskk#filter().
+            if !eskk#is_enabled()
+                " NOTE: Vim can't escape lang-mode immediately
+                " in insert-mode or commandline-mode.
+                " We have to use i_CTRL-^ .
+                let kakutei_str = buftable.generate_kakutei_str()
+                return kakutei_str . "\<C-^>"
+            endif
+        endwhile
 
         " NOTE: `buftable` may become invalid reference
         " because `st.filter(stash)` may call `eskk#set_buftable()`.

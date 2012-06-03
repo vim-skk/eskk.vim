@@ -17,15 +17,11 @@ delfunc s:SID
 
 " Variables
 "
-" The handlers for popup-menu's keys. (:help popupmenu-keys)
-let s:POPUP_FUNC_TABLE = {}
 " The handlers for all keys in each mode.
 " used by eskk#complete#eskkcomplete().
 let s:MODE_FUNC_TABLE = {}
 " The previously completed candidates in each mode.
 let s:completed_candidates = {}
-" The flag whether a candidate is selected.
-let s:completion_selected = 0
 
 
 
@@ -51,11 +47,9 @@ function! s:eskkcomplete(findstart, base) "{{{
             return -1
         endif
 
-        call s:initialize_variables()
-
-        let pos = eskk#get_begin_pos()
-        call eskk#util#assert(!empty(pos), "pos is not empty")
-        return pos[2] - 1
+        let buftable = eskk#get_buftable()
+        let r = buftable.get_begin_col() - 1
+        return r
     endif
 
     return eskk#complete#do_complete(a:base)
@@ -65,16 +59,12 @@ function! eskk#complete#can_find_start() "{{{
         return 0
     endif
 
-    if !s:has_marker()
-        return 0
-    endif
-
-    let pos = eskk#get_begin_pos()
-    if empty(pos)
-        return 0
-    endif
-
     let buftable = eskk#get_buftable()
+    let col = buftable.get_begin_col()
+    if col <=# 0
+        return 0
+    endif
+
     let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
     if buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_HENKAN
     \   && buf_str.empty()
@@ -153,9 +143,6 @@ function! s:MODE_FUNC_TABLE.abbrev(base) "{{{
     return s:complete("abbrev", a:base)
 endfunction "}}}
 
-function! s:initialize_variables() "{{{
-    let s:completion_selected = 0
-endfunction "}}}
 function! s:complete(mode, base) "{{{
     let buftable = eskk#get_buftable()
     let disp = buftable.get_display_str(1, 0)    " with marker, no rom_str.
@@ -189,9 +176,6 @@ function! s:complete(mode, base) "{{{
     let okuri     = okuri_buf_str.rom_pairs.get_filter()
     let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
 
-    let filter_str = s:get_buftable_str(0, a:base)
-    let marker = g:eskk#marker_popup
-
     let candidates = dict.search_all_candidates(key, okuri, okuri_rom)
     if empty(candidates)
         return s:skip_complete()
@@ -203,7 +187,7 @@ function! s:complete(mode, base) "{{{
         if do_list_okuri_candidates
             if c.okuri_rom_first !=# ''
                 call add(list, {
-                \   'word': marker . c.input,
+                \   'word': c.input,
                 \   'abbr': c.input
                 \           . (get(c, 'annotation', '') !=# '' ?
                 \               '; ' . c.annotation : ''),
@@ -214,7 +198,7 @@ function! s:complete(mode, base) "{{{
         endif
 
         call add(list, {
-        \   'word': marker . c.input,
+        \   'word': c.input,
         \   'abbr': c.input
         \           . (get(c, 'annotation', '') !=# '' ?
         \               '; ' . c.annotation : ''),
@@ -222,252 +206,10 @@ function! s:complete(mode, base) "{{{
         \})
     endfor
 
-    if !empty(list)
-        call s:set_completed_candidates(disp, list)
-    endif
+    call s:set_completed_candidates(disp, list)
+
     return list
 endfunction "}}}
-
-
-
-" Handler for the key while popup displayed.
-function! eskk#complete#handle_special_key(stash) "{{{
-    if has_key(s:POPUP_FUNC_TABLE, a:stash.char)
-        call call(s:POPUP_FUNC_TABLE[a:stash.char], [a:stash])
-        return 0
-    else
-        return 1
-    endif
-endfunction "}}}
-
-" s:POPUP_FUNC_TABLE (:help popupmenu-keys)
-function! s:close_pum_pre(stash) "{{{
-    let adjusted = s:adjust_candidate(a:stash, '<C-y>')
-    if !adjusted
-        call s:close_pum(a:stash)
-    endif
-endfunction "}}}
-function! s:close_pum(stash) "{{{
-    call s:set_selected_item()
-
-    call eskk#register_temp_event(
-    \   'filter-redispatch-pre',
-    \   'eskk#map#key2char',
-    \   [eskk#map#get_nore_map('<C-y>')]
-    \)
-endfunction "}}}
-function! s:do_enter_pre(stash) "{{{
-    let adjusted = s:adjust_candidate(a:stash, '<CR>')
-    if !adjusted
-        call s:do_enter(a:stash)
-    endif
-endfunction "}}}
-function! s:do_enter(stash) "{{{
-    call s:set_selected_item()
-
-    call eskk#register_temp_event(
-    \   'filter-redispatch-pre',
-    \   'eskk#map#key2char',
-    \   [eskk#map#get_nore_map('<C-y>')]
-    \)
-    call eskk#register_temp_event(
-    \   'filter-redispatch-post',
-    \   'eskk#map#key2char',
-    \   [eskk#map#get_filter_map('<CR>')]
-    \)
-endfunction "}}}
-function! s:do_tab(stash) "{{{
-    call eskk#register_temp_event(
-    \   'filter-redispatch-post',
-    \   'eskk#map#key2char',
-    \   [eskk#map#get_nore_map('<C-n>')]
-    \)
-endfunction "}}}
-function! s:do_backspace(stash) "{{{
-    let pos = eskk#get_begin_pos()
-    if empty(pos)
-        return
-    endif
-    if pos[2] >= col('.')
-        call s:close_pum(a:stash)
-    endif
-    let buftable = eskk#get_buftable()
-    call s:do_backspace(a:stash)
-endfunction "}}}
-function! s:do_escape(stash) "{{{
-    call s:set_selected_item()
-
-    call eskk#register_temp_event(
-    \   'filter-redispatch-post',
-    \   'eskk#map#key2char',
-    \   [eskk#map#get_nore_map('<C-y>')]
-    \)
-    call eskk#register_temp_event(
-    \   'filter-redispatch-post',
-    \   'eskk#map#key2char',
-    \   [eskk#map#get_filter_map('<Esc>')]
-    \)
-endfunction "}}}
-function! s:select_item(stash) "{{{
-    let s:completion_selected = 1
-    let buftable = eskk#get_buftable()
-    call buftable.push_kakutei_str(a:stash.char)
-endfunction "}}}
-function! s:identity(stash) "{{{
-    let buftable = eskk#get_buftable()
-    call buftable.push_kakutei_str(a:stash.char)
-endfunction "}}}
-function! s:nop(stash) "{{{
-endfunction "}}}
-function! s:cant_override(stash) "{{{
-    throw eskk#internal_error(
-    \   ['eskk', 'complete'],
-    \   "This key should be overriden so never reach here."
-    \)
-endfunction "}}}
-
-" CUI, GUI can't supersede: <C-n>, <C-p>, <C-l>
-" only CUI can't supersede: <PageUp>, <PageDown>, <Up>, <down>
-let s:POPUP_FUNC_TABLE = {
-\   "\<CR>" : function('s:do_enter_pre'),
-\   "\<C-y>" : function('s:close_pum_pre'),
-\   "\<C-l>" : function('s:cant_override'),
-\   "\<C-e>" : function('s:identity'),
-\   "\<PageUp>" : function(has('gui_running') ?
-\                       's:nop' : 's:cant_override'),
-\   "\<PageDown>" : function(has('gui_running') ?
-\                       's:nop' : 's:cant_override'),
-\   "\<Up>" : function(has('gui_running') ?
-\                       's:select_item' : 's:cant_override'),
-\   "\<Down>" : function(has('gui_running') ?
-\                       's:select_item' : 's:cant_override'),
-\   "\<Tab>" : function('s:do_tab'),
-\   "\<C-n>" : function('s:cant_override'),
-\   "\<C-p>" : function('s:cant_override'),
-\   "\<C-h>" : function('s:do_backspace'),
-\   "\<BS>" : function('s:do_backspace'),
-\   "\<Esc>" : function('s:do_escape'),
-\}
-
-function! s:adjust_candidate(stash, recall_key) "{{{
-    if s:completion_selected
-        let s:completion_selected = 0
-        " Insert selected item.
-        let buftable = eskk#get_buftable()
-        call buftable.push_kakutei_str("\<C-n>\<C-p>")
-        " Call `s:close_pum()` at next time.
-        call eskk#register_temp_event(
-        \   'filter-redispatch-post',
-        \   'eskk#map#key2char',
-        \   [eskk#map#get_filter_map(a:recall_key)]
-        \)
-        return 1
-    else
-        return 0
-    endif
-endfunction "}}}
-function! s:set_selected_item() "{{{
-    " Get selected item from pum and set to buftable.
-
-    let buftable = eskk#get_buftable()
-    let filter_str = s:get_buftable_str(0)
-    if filter_str =~# '[^a-z][a-z]$'
-        let [filter_str, rom_str] = [
-        \   substitute(filter_str, '.$', '', ''),
-        \   substitute(filter_str, '.*\(.\)$', '\1', '')
-        \]
-    else
-        let rom_str = ''
-    endif
-
-    let henkan_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#PHASE_HENKAN
-    \)
-    let okuri_buf_str = buftable.get_buf_str(
-    \   g:eskk#buftable#PHASE_OKURI
-    \)
-
-    " Register a new word.
-    if g:eskk#register_completed_word
-        " e.g.: key = 'じどうほ', okuri = '', okuri_rom = '',
-        " c.key = 'じどうほかん', c.input = '自動補完'
-        let key = henkan_buf_str.rom_pairs.get_filter()
-        let okuri = okuri_buf_str.rom_pairs.get_filter()
-        let okuri_rom = okuri_buf_str.rom_pairs.get_rom()
-        let dict = eskk#get_skk_dict()
-        for c in dict.search_all_candidates(key, okuri, okuri_rom)
-            if c.input ==# filter_str
-                let word =
-                \   eskk#dictionary#candidate2registered_word(c, c.key, okuri, okuri_rom)
-                call dict.remember_word(word)
-                break
-            endif
-        endfor
-    endif
-
-    " Set henkan_buf_str
-    call henkan_buf_str.clear()
-    for char in split(filter_str, '\zs')
-        " XXX
-        call henkan_buf_str.rom_pairs.push_one_pair(char, char)
-    endfor
-    " Set okuri_buf_str
-    call okuri_buf_str.clear()
-    if rom_str !=# ''
-        call okuri_buf_str.rom_str.set(rom_str)
-        call buftable.set_henkan_phase(
-        \       g:eskk#buftable#PHASE_OKURI)
-    else
-        call buftable.set_henkan_phase(
-        \       g:eskk#buftable#PHASE_HENKAN)
-    endif
-    " Update old string.
-    call buftable.set_old_str(s:get_buftable_str(1))
-
-    call s:initialize_variables()
-endfunction "}}}
-function! s:get_buftable_str(with_marker, ...) "{{{
-    if col('.') == 1
-        return ''
-    endif
-
-    let pos = eskk#get_begin_pos()
-    if empty(pos)
-        call eskk#logger#log("Can't get begin pos.")
-        return ''
-    endif
-    let begin = pos[2] - 1
-    let line = getline('.')[: col('.') - 2]
-    if a:0
-        " XXX:
-        " when called by manual completion,
-        " a:base (= a:1) is not added
-        " to getline('.')'s return value.
-        let line .= a:1
-    endif
-
-    if !a:with_marker && s:has_marker()
-        if line[begin : begin + strlen(g:eskk#marker_popup) - 1]
-        \   ==# g:eskk#marker_popup
-            let begin += strlen(g:eskk#marker_popup)
-        elseif line[begin : begin + strlen(g:eskk#marker_henkan) - 1]
-        \   ==# g:eskk#marker_henkan
-            let begin += strlen(g:eskk#marker_henkan)
-        else
-            call eskk#util#assert(0, '404: marker not found')
-        endif
-    endif
-
-    return strpart(line, begin)
-endfunction "}}}
-function! s:has_marker() "{{{
-    let phase = eskk#get_buftable().get_henkan_phase()
-    return
-    \   eskk#get_mode() =~# '^\%(hira\|kata\)$'
-    \   && (phase is g:eskk#buftable#PHASE_HENKAN
-    \       || phase is g:eskk#buftable#PHASE_OKURI)
-endfunction "}}}
-
 
 
 " Restore 'cpoptions' {{{

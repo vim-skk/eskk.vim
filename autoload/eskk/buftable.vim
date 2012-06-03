@@ -194,47 +194,62 @@ function! s:Buftable_rewrite() dict "{{{
     let kakutei = self._kakutei_str
     let self._kakutei_str = ''
 
-    let set_begin_pos =
-    \   self._set_begin_pos_at_rewrite
-    \   && self._henkan_phase ==# g:eskk#buftable#PHASE_HENKAN
-    let self._set_begin_pos_at_rewrite = 0
+    let inserted_str = kakutei . new
 
     let inst = eskk#get_buffer_instance()
-    if set_begin_pos
-        " 1. Delete current string
-        " 2. Set begin pos
-        " 3. Insert new string
 
-        if kakutei != ''
-            let inst.inserted_kakutei = kakutei
-            call eskk#map#map(
-            \   'be',
-            \   '<Plug>(eskk:expr:_inserted_kakutei)',
-            \   'eskk#get_buffer_instance().inserted_kakutei'
-            \)
-        endif
-        if new != ''
-            let inst.inserted_new = new
-            call eskk#map#map(
-            \   'be',
-            \   '<Plug>(eskk:expr:_inserted_new)',
-            \   'eskk#get_buffer_instance().inserted_new'
-            \)
-        endif
 
-        return
-        \   self.make_remove_bs()
-        \   . (kakutei != '' ? "\<Plug>(eskk:expr:_inserted_kakutei)" : '')
-        \   . "\<Plug>(eskk:_set_begin_pos)"
-        \   . (new != '' ? "\<Plug>(eskk:expr:_inserted_new)" : '')
+    if old ==# inserted_str
+        return ''
+    elseif inserted_str == ''
+        return self.make_remove_bs()
+    elseif old == ''
+        " Insert a new string.
+        let inst = eskk#get_buffer_instance()
+        let inst.inserted = inserted_str
+        call eskk#map#map(
+        \   'be',
+        \   '<Plug>(eskk:expr:_inserted)',
+        \   'eskk#get_buffer_instance().inserted'
+        \)
+        return "\<Plug>(eskk:expr:_inserted)"
+    elseif stridx(old, inserted_str) == 0
+        " When inserted_str == "foo", old == "foobar"
+        " Remove "bar".
+        return repeat(
+        \   eskk#map#key2char(
+        \       eskk#map#get_special_map("backspace-key")
+        \   ),
+        \   eskk#util#mb_strlen(old)
+        \       - eskk#util#mb_strlen(inserted_str)
+        \)
+    elseif stridx(inserted_str, old) == 0
+        " When inserted_str == "foobar", old == "foo"
+        " Insert "bar".
+        let inst.inserted =
+        \   strpart(inserted_str, strlen(old))
+        call eskk#map#map(
+        \   'be',
+        \   '<Plug>(eskk:expr:_inserted)',
+        \   'eskk#get_buffer_instance().inserted'
+        \)
+        return "\<Plug>(eskk:expr:_inserted)"
     else
-        let inserted_str = kakutei . new
-        if old ==# inserted_str
-            return ''
-        elseif inserted_str == ''
-            return self.make_remove_bs()
-        elseif old == ''
-            " Insert a new string.
+        let idx = eskk#util#diffidx(old, inserted_str)
+        if idx != -1
+            " When inserted_str == "foobar", old == "fool"
+            " Insert "<BS>bar".
+
+            " Remove common string.
+            let old          = strpart(old, idx)
+            let inserted_str = strpart(inserted_str, idx)
+            let bs = eskk#map#key2char(
+            \           eskk#map#get_special_map("backspace-key"))
+            return
+            \   repeat(bs, eskk#util#mb_strlen(old))
+            \ . inserted_str
+        else
+            " Delete current string, and insert new string.
             let inst = eskk#get_buffer_instance()
             let inst.inserted = inserted_str
             call eskk#map#map(
@@ -242,53 +257,7 @@ function! s:Buftable_rewrite() dict "{{{
             \   '<Plug>(eskk:expr:_inserted)',
             \   'eskk#get_buffer_instance().inserted'
             \)
-            return "\<Plug>(eskk:expr:_inserted)"
-        elseif stridx(old, inserted_str) == 0
-            " When inserted_str == "foo", old == "foobar"
-            " Remove "bar".
-            return repeat(
-            \   eskk#map#key2char(
-            \       eskk#map#get_special_map("backspace-key")
-            \   ),
-            \   eskk#util#mb_strlen(old)
-            \       - eskk#util#mb_strlen(inserted_str)
-            \)
-        elseif stridx(inserted_str, old) == 0
-            " When inserted_str == "foobar", old == "foo"
-            " Insert "bar".
-            let inst.inserted =
-            \   strpart(inserted_str, strlen(old))
-            call eskk#map#map(
-            \   'be',
-            \   '<Plug>(eskk:expr:_inserted)',
-            \   'eskk#get_buffer_instance().inserted'
-            \)
-            return "\<Plug>(eskk:expr:_inserted)"
-        else
-            let idx = eskk#util#diffidx(old, inserted_str)
-            if idx != -1
-                " When inserted_str == "foobar", old == "fool"
-                " Insert "<BS>bar".
-
-                " Remove common string.
-                let old          = strpart(old, idx)
-                let inserted_str = strpart(inserted_str, idx)
-                let bs = eskk#map#key2char(
-                \           eskk#map#get_special_map("backspace-key"))
-                return
-                \   repeat(bs, eskk#util#mb_strlen(old))
-                \ . inserted_str
-            else
-                " Delete current string, and insert new string.
-                let inst = eskk#get_buffer_instance()
-                let inst.inserted = inserted_str
-                call eskk#map#map(
-                \   'be',
-                \   '<Plug>(eskk:expr:_inserted)',
-                \   'eskk#get_buffer_instance().inserted'
-                \)
-                return self.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
-            endif
+            return self.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
         endif
     endif
 endfunction "}}}
@@ -372,6 +341,10 @@ function! s:get_henkan_select_display_str(this, with_marker, with_rom_str) "{{{
     \       : '')
     \   . buf_str.rom_pairs.get_filter()
     \   . (a:with_rom_str ? buf_str.rom_str.get() : '')
+endfunction "}}}
+
+function! s:Buftable_get_inserted_str() dict "{{{
+    return getline('.')[self.get_begin_col() - 1 :]
 endfunction "}}}
 
 
@@ -687,6 +660,13 @@ function! s:Buftable_shift_filter_queue() dict "{{{
 endfunction "}}}
 
 
+" Returns a number greater than zero on success.
+" Returns a zero or smaller on error.
+function! s:Buftable_get_begin_col() dict "{{{
+    return col('.') - strlen(self.get_display_str())
+endfunction "}}}
+
+
 function! s:Buftable_dump() dict "{{{
     let lines = []
     call add(lines, 'current phase: ' . self._henkan_phase)
@@ -722,9 +702,7 @@ let s:Buftable = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
-\   '_begin_pos': [],
 \   '_henkan_phase': g:eskk#buftable#PHASE_NORMAL,
-\   '_set_begin_pos_at_rewrite': 0,
 \   '_filter_queue': [],
 \
 \   'reset': eskk#util#get_local_funcref('Buftable_reset', s:SID_PREFIX),
@@ -737,6 +715,7 @@ let s:Buftable = {
 \   'make_remove_bs': eskk#util#get_local_funcref('Buftable_make_remove_bs', s:SID_PREFIX),
 \   'has_changed': eskk#util#get_local_funcref('Buftable_has_changed', s:SID_PREFIX),
 \   'get_display_str': eskk#util#get_local_funcref('Buftable_get_display_str', s:SID_PREFIX),
+\   'get_inserted_str': eskk#util#get_local_funcref('Buftable_get_inserted_str', s:SID_PREFIX),
 \   'get_henkan_phase': eskk#util#get_local_funcref('Buftable_get_henkan_phase', s:SID_PREFIX),
 \   'set_henkan_phase': eskk#util#get_local_funcref('Buftable_set_henkan_phase', s:SID_PREFIX),
 \   'get_phase_name': eskk#util#get_local_funcref('Buftable_get_phase_name', s:SID_PREFIX),
@@ -759,6 +738,7 @@ let s:Buftable = {
 \   'empty_filter_queue': eskk#util#get_local_funcref('Buftable_empty_filter_queue', s:SID_PREFIX),
 \   'push_filter_queue': eskk#util#get_local_funcref('Buftable_push_filter_queue', s:SID_PREFIX),
 \   'shift_filter_queue': eskk#util#get_local_funcref('Buftable_shift_filter_queue', s:SID_PREFIX),
+\   'get_begin_col': eskk#util#get_local_funcref('Buftable_get_begin_col', s:SID_PREFIX),
 \   'dump': eskk#util#get_local_funcref('Buftable_dump', s:SID_PREFIX),
 \}
 
