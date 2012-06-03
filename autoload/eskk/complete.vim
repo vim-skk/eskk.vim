@@ -47,7 +47,8 @@ function! s:eskkcomplete(findstart, base) "{{{
             return -1
         endif
 
-        let r = eskk#get_begin_col() - 1
+        let buftable = eskk#get_buftable()
+        let r = buftable.get_begin_col() - 1
         return r
     endif
 
@@ -58,12 +59,12 @@ function! eskk#complete#can_find_start() "{{{
         return 0
     endif
 
-    let col = eskk#get_begin_col()
+    let buftable = eskk#get_buftable()
+    let col = buftable.get_begin_col()
     if col <=# 0
         return 0
     endif
 
-    let buftable = eskk#get_buftable()
     let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
     if buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_HENKAN
     \   && buf_str.empty()

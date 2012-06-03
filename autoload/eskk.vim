@@ -1998,11 +1998,6 @@ function! s:register_table(table) "{{{
     endif
 endfunction "}}}
 
-" Begin pos
-function! eskk#get_begin_col() "{{{
-    return eskk#get_buftable().get_begin_col()
-endfunction "}}}
-
 " Statusline
 function! eskk#statusline(...) "{{{
     return eskk#is_enabled()
