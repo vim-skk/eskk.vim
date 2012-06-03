@@ -207,10 +207,10 @@ let [
 
 
 
-function! s:HenkanResult_new(key, okuri_rom, okuri, buftable) "{{{
+function! s:HenkanResult_new(key, okuri_rom, okuri, preedit) "{{{
     let obj = deepcopy(s:HenkanResult)
     let obj = extend(obj, {
-    \    'buftable': a:buftable,
+    \    'preedit': a:preedit,
     \    '_key': a:key,
     \    '_okuri_rom': a:okuri_rom,
     \    '_okuri': a:okuri,
@@ -511,11 +511,11 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
                 " No more pages. Register new word.
                 let dict = eskk#get_skk_dict()
                 let input = dict.remember_word_prompt(self)[0]
-                let henkan_buf_str = self.buftable.get_buf_str(
-                \   g:eskk#buftable#PHASE_HENKAN
+                let henkan_buf_str = self.preedit.get_buf_str(
+                \   g:eskk#preedit#PHASE_HENKAN
                 \)
-                let okuri_buf_str = self.buftable.get_buf_str(
-                \   g:eskk#buftable#PHASE_OKURI
+                let okuri_buf_str = self.preedit.get_buf_str(
+                \   g:eskk#preedit#PHASE_OKURI
                 \)
                 return [
                 \   (input != '' ?
@@ -726,7 +726,7 @@ endfunction "}}}
 
 
 let s:HenkanResult = {
-\   'buftable': {},
+\   'preedit': {},
 \   '_key': '',
 \   '_okuri_rom': '',
 \   '_okuri': '',
@@ -1201,12 +1201,12 @@ endfunction "}}}
 " This actually just sets "self._current_henkan_result"
 " which is "s:HenkanResult"'s instance.
 " This is interface so s:HenkanResult is implementation.
-function! s:Dictionary_refer(buftable, key, okuri, okuri_rom) dict "{{{
+function! s:Dictionary_refer(preedit, key, okuri, okuri_rom) dict "{{{
     let hr = s:HenkanResult_new(
     \   a:key,
     \   a:okuri_rom,
     \   a:okuri,
-    \   deepcopy(a:buftable, 1),
+    \   deepcopy(a:preedit, 1),
     \)
     let self._current_henkan_result = hr
     " s:HenkanResult.update_candidates() may throw

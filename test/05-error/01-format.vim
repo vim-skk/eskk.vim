@@ -13,7 +13,7 @@ function! s:run()
     \   ['eskk#dictionary#look_up_error',
     \       ['could not look up my clarinet'],
     \       '^eskk: dictionary look up error: could not look up my clarinet'],
-    \   ['eskk#buftable#invalid_henkan_phase_value_error',
+    \   ['eskk#preedit#invalid_henkan_phase_value_error',
     \       [1],
     \       "^eskk: invalid henkan phase value '1'"],
     \   ['eskk#dictionary#parse_error',

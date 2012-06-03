@@ -16,10 +16,10 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
     endfor
 
     " For convenience.
-    let clear_buftable = a:0 ? a:1 : 1
-    if clear_buftable
-        let buftable = eskk#get_buftable()
-        call buftable.clear_all()
+    let clear_preedit = a:0 ? a:1 : 1
+    if clear_preedit
+        let preedit = eskk#get_preedit()
+        call preedit.clear_all()
     endif
 
     return ret

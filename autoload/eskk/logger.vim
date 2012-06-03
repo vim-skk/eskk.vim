@@ -105,9 +105,9 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
 
     call add(lines, '')
 
-    call add(lines, '--- buftable ---')
-    let lines += a:stash.buftable.dump()
-    call add(lines, '--- buftable ---')
+    call add(lines, '--- preedit ---')
+    let lines += a:stash.preedit.dump()
+    call add(lines, '--- preedit ---')
 
     call add(lines, '')
 

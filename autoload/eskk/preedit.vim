@@ -19,10 +19,10 @@ delfunc s:SID
 " 2: Waiting for okurigana.
 " 3: Choosing henkan candidates.
 let [
-\   g:eskk#buftable#PHASE_NORMAL,
-\   g:eskk#buftable#PHASE_HENKAN,
-\   g:eskk#buftable#PHASE_OKURI,
-\   g:eskk#buftable#PHASE_HENKAN_SELECT
+\   g:eskk#preedit#PHASE_NORMAL,
+\   g:eskk#preedit#PHASE_HENKAN,
+\   g:eskk#preedit#PHASE_OKURI,
+\   g:eskk#preedit#PHASE_HENKAN_SELECT
 \] = range(4)
 " }}}
 
@@ -151,36 +151,36 @@ let s:BufferString = {
 unlet s:RomStr s:RomPairs
 " }}}
 
-" s:Buftable {{{
+" s:Preedit {{{
 
-function! eskk#buftable#new() "{{{
-    return deepcopy(s:Buftable)
+function! eskk#preedit#new() "{{{
+    return deepcopy(s:Preedit)
 endfunction "}}}
 
-function! s:Buftable_reset() dict "{{{
-    let obj = deepcopy(s:Buftable)
+function! s:Preedit_reset() dict "{{{
+    let obj = deepcopy(s:Preedit)
     for k in keys(obj)
         let self[k] = obj[k]
     endfor
 endfunction "}}}
 
-function! s:Buftable_get_buf_str(henkan_phase) dict "{{{
+function! s:Preedit_get_buf_str(henkan_phase) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
     return self._table[a:henkan_phase]
 endfunction "}}}
-function! s:Buftable_get_current_buf_str() dict "{{{
+function! s:Preedit_get_current_buf_str() dict "{{{
     return self.get_buf_str(self._henkan_phase)
 endfunction "}}}
-function! s:Buftable_set_buf_str(henkan_phase, buf_str) dict "{{{
+function! s:Preedit_set_buf_str(henkan_phase, buf_str) dict "{{{
     call s:validate_table_idx(self._table, a:henkan_phase)
     let self._table[a:henkan_phase] = a:buf_str
 endfunction "}}}
 
 
-function! s:Buftable_set_old_str(str) dict "{{{
+function! s:Preedit_set_old_str(str) dict "{{{
     let self._old_str = a:str
 endfunction "}}}
-function! s:Buftable_get_old_str() dict "{{{
+function! s:Preedit_get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
 
@@ -188,7 +188,7 @@ endfunction "}}}
 "
 " NOTE: Current implementation depends on &backspace
 " when inserted string has newline.
-function! s:Buftable_rewrite() dict "{{{
+function! s:Preedit_rewrite() dict "{{{
     let old = self._old_str
     let new = self._kakutei_str . self.get_display_str()
     let self._kakutei_str = ''
@@ -258,33 +258,33 @@ function! s:Buftable_rewrite() dict "{{{
         endif
     endif
 endfunction "}}}
-function! s:Buftable_make_remove_bs() dict "{{{
+function! s:Preedit_make_remove_bs() dict "{{{
     return repeat(
     \   eskk#map#key2char(eskk#map#get_special_map("backspace-key")),
     \   eskk#util#mb_strlen(self._old_str),
     \)
 endfunction "}}}
 
-function! s:Buftable_get_display_str(...) dict "{{{
+function! s:Preedit_get_display_str(...) dict "{{{
     let with_marker  = get(a:000, 0, 1)
     let with_rom_str = get(a:000, 1, 1)
     let phase = self._henkan_phase
 
-    if phase ==# g:eskk#buftable#PHASE_NORMAL
+    if phase ==# g:eskk#preedit#PHASE_NORMAL
         return s:get_normal_display_str(self, with_rom_str)
-    elseif phase ==# g:eskk#buftable#PHASE_HENKAN
+    elseif phase ==# g:eskk#preedit#PHASE_HENKAN
         return s:get_henkan_display_str(self, with_marker, with_rom_str)
-    elseif phase ==# g:eskk#buftable#PHASE_OKURI
+    elseif phase ==# g:eskk#preedit#PHASE_OKURI
         return s:get_okuri_display_str(self, with_marker, with_rom_str)
-    elseif phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
+    elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         return s:get_henkan_select_display_str(self, with_marker, with_rom_str)
     else
-        throw eskk#internal_error(['eskk', 'buftable'])
+        throw eskk#internal_error(['eskk', 'preedit'])
     endif
 endfunction "}}}
 function! s:get_normal_display_str(this, with_rom_str) "{{{
     let buf_str = a:this.get_buf_str(
-    \   g:eskk#buftable#PHASE_NORMAL
+    \   g:eskk#preedit#PHASE_NORMAL
     \)
     return
     \   buf_str.rom_pairs.get_filter()
@@ -292,48 +292,48 @@ function! s:get_normal_display_str(this, with_rom_str) "{{{
 endfunction "}}}
 function! s:get_henkan_display_str(this, with_marker, with_rom_str) "{{{
     let buf_str = a:this.get_buf_str(
-    \   g:eskk#buftable#PHASE_HENKAN
+    \   g:eskk#preedit#PHASE_HENKAN
     \)
     return
     \   (a:with_marker ?
-    \       a:this.get_marker(g:eskk#buftable#PHASE_HENKAN)
+    \       a:this.get_marker(g:eskk#preedit#PHASE_HENKAN)
     \       : '')
     \   . buf_str.rom_pairs.get_filter()
     \   . (a:with_rom_str ? buf_str.rom_str.get() : '')
 endfunction "}}}
 function! s:get_okuri_display_str(this, with_marker, with_rom_str) "{{{
     let buf_str = a:this.get_buf_str(
-    \   g:eskk#buftable#PHASE_OKURI
+    \   g:eskk#preedit#PHASE_OKURI
     \)
     return
     \   s:get_henkan_display_str(a:this, a:with_marker, a:with_rom_str)
     \   . (a:with_marker ?
-    \       a:this.get_marker(g:eskk#buftable#PHASE_OKURI)
+    \       a:this.get_marker(g:eskk#preedit#PHASE_OKURI)
     \       : '')
     \   . buf_str.rom_pairs.get_filter()
     \   . (a:with_rom_str ? buf_str.rom_str.get() : '')
 endfunction "}}}
 function! s:get_henkan_select_display_str(this, with_marker, with_rom_str) "{{{
     let buf_str = a:this.get_buf_str(
-    \   g:eskk#buftable#PHASE_HENKAN_SELECT
+    \   g:eskk#preedit#PHASE_HENKAN_SELECT
     \)
     return
     \   (a:with_marker ?
-    \       a:this.get_marker(g:eskk#buftable#PHASE_HENKAN_SELECT)
+    \       a:this.get_marker(g:eskk#preedit#PHASE_HENKAN_SELECT)
     \       : '')
     \   . buf_str.rom_pairs.get_filter()
     \   . (a:with_rom_str ? buf_str.rom_str.get() : '')
 endfunction "}}}
 
-function! s:Buftable_get_inserted_str() dict "{{{
+function! s:Preedit_get_inserted_str() dict "{{{
     return getline('.')[self.get_begin_col() - 1 :]
 endfunction "}}}
 
 
-function! s:Buftable_get_henkan_phase() dict "{{{
+function! s:Preedit_get_henkan_phase() dict "{{{
     return self._henkan_phase
 endfunction "}}}
-function! s:Buftable_set_henkan_phase(henkan_phase) dict "{{{
+function! s:Preedit_set_henkan_phase(henkan_phase) dict "{{{
     if a:henkan_phase ==# self._henkan_phase
         return
     endif
@@ -350,7 +350,7 @@ function! s:Buftable_set_henkan_phase(henkan_phase) dict "{{{
 endfunction "}}}
 
 
-function! s:Buftable_get_phase_name(phase) dict "{{{
+function! s:Preedit_get_phase_name(phase) dict "{{{
     return [
     \   'normal',
     \   'henkan',
@@ -361,21 +361,21 @@ function! s:Buftable_get_phase_name(phase) dict "{{{
 endfunction "}}}
 
 
-function! s:Buftable_get_lower_phases() dict "{{{
+function! s:Preedit_get_lower_phases() dict "{{{
     return reverse(range(
-    \   g:eskk#buftable#PHASE_NORMAL,
+    \   g:eskk#preedit#PHASE_NORMAL,
     \   self._henkan_phase
     \))
 endfunction "}}}
-function! s:Buftable_get_all_phases() dict "{{{
+function! s:Preedit_get_all_phases() dict "{{{
     return range(
-    \   g:eskk#buftable#PHASE_NORMAL,
-    \   g:eskk#buftable#PHASE_HENKAN_SELECT
+    \   g:eskk#preedit#PHASE_NORMAL,
+    \   g:eskk#preedit#PHASE_HENKAN_SELECT
     \)
 endfunction "}}}
 
 
-function! s:Buftable_get_marker(henkan_phase) dict "{{{
+function! s:Preedit_get_marker(henkan_phase) dict "{{{
     let table = [
     \    '',
     \    g:eskk#marker_henkan,
@@ -386,31 +386,31 @@ function! s:Buftable_get_marker(henkan_phase) dict "{{{
     call s:validate_table_idx(table, a:henkan_phase)
     return table[a:henkan_phase]
 endfunction "}}}
-function! s:Buftable_get_current_marker() dict "{{{
+function! s:Preedit_get_current_marker() dict "{{{
     return self.get_marker(self.get_henkan_phase())
 endfunction "}}}
 
 
-function! s:Buftable_push_kakutei_str(str) dict "{{{
+function! s:Preedit_push_kakutei_str(str) dict "{{{
     let self._kakutei_str .= a:str
 endfunction "}}}
 
-function! s:Buftable_choose_next_candidate(stash) dict "{{{
+function! s:Preedit_choose_next_candidate(stash) dict "{{{
     return s:get_next_candidate(self, a:stash, 1)
 endfunction "}}}
-function! s:Buftable_choose_prev_candidate(stash) dict "{{{
+function! s:Preedit_choose_prev_candidate(stash) dict "{{{
     return s:get_next_candidate(self, a:stash, 0)
 endfunction "}}}
 function! s:get_next_candidate(this, stash, next) "{{{
     let cur_buf_str = a:this.get_current_buf_str()
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
-    let prev_buftable = henkan_result.buftable
+    let prev_preedit = henkan_result.preedit
     let rom_str = cur_buf_str.rom_pairs.get_rom()
 
     call eskk#util#assert(
     \   a:this.get_henkan_phase()
-    \       ==# g:eskk#buftable#PHASE_HENKAN_SELECT,
+    \       ==# g:eskk#preedit#PHASE_HENKAN_SELECT,
     \   "current phase is henkan select phase."
     \)
 
@@ -420,7 +420,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
         " Set candidate.
         " FIXME:
         " Do not set with `rom_str`.
-        " Get henkan_result's buftable
+        " Get henkan_result's preedit
         " and get matched rom str(s).
         call cur_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
     else
@@ -436,12 +436,12 @@ function! s:get_next_candidate(this, stash, next) "{{{
                 call a:this.kakutei(input . okuri)
             endif
         else
-            " Restore previous buftable state
-            let henkan_buf_str = prev_buftable.get_buf_str(
-            \   g:eskk#buftable#PHASE_HENKAN
+            " Restore previous preedit state
+            let henkan_buf_str = prev_preedit.get_buf_str(
+            \   g:eskk#preedit#PHASE_HENKAN
             \)
-            let okuri_buf_str = prev_buftable.get_buf_str(
-            \   g:eskk#buftable#PHASE_OKURI
+            let okuri_buf_str = prev_preedit.get_buf_str(
+            \   g:eskk#preedit#PHASE_OKURI
             \)
             let okuri_rom_str = okuri_buf_str.rom_pairs.get_rom()
             if g:eskk#revert_henkan_style ==# 'okuri-one'
@@ -457,8 +457,8 @@ function! s:get_next_candidate(this, stash, next) "{{{
                 if okuri_rom_str != ''
                     " Clear roms of `okuri_buf_str`.
                     call okuri_buf_str.clear()
-                    call prev_buftable.set_henkan_phase(
-                    \   g:eskk#buftable#PHASE_HENKAN
+                    call prev_preedit.set_henkan_phase(
+                    \   g:eskk#preedit#PHASE_HENKAN
                     \)
                 endif
             elseif g:eskk#revert_henkan_style ==# 'concat-okuri'
@@ -470,54 +470,54 @@ function! s:get_next_candidate(this, stash, next) "{{{
                     endfor
                     " Clear roms of `okuri_buf_str`.
                     call okuri_buf_str.clear()
-                    call prev_buftable.set_henkan_phase(
-                    \   g:eskk#buftable#PHASE_HENKAN
+                    call prev_preedit.set_henkan_phase(
+                    \   g:eskk#preedit#PHASE_HENKAN
                     \)
                 endif
             else
                 throw eskk#internal_error(
-                \   ['eskk', 'buftable'],
+                \   ['eskk', 'preedit'],
                 \   "This will never be reached"
                 \)
             endif
 
-            call eskk#set_buftable(prev_buftable)
+            call eskk#set_preedit(prev_preedit)
         endif
     endif
 endfunction "}}}
-function! s:Buftable_step_back_henkan_phase() dict "{{{
+function! s:Preedit_step_back_henkan_phase() dict "{{{
     let phase   = self.get_henkan_phase()
     let buf_str = self.get_current_buf_str()
 
-    if phase ==# g:eskk#buftable#PHASE_HENKAN_SELECT
+    if phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         call buf_str.clear()
         let okuri_buf_str = self.get_buf_str(
-        \   g:eskk#buftable#PHASE_OKURI
+        \   g:eskk#preedit#PHASE_OKURI
         \)
         call self.set_henkan_phase(
         \   !okuri_buf_str.rom_pairs.empty() ?
-        \       g:eskk#buftable#PHASE_OKURI
-        \       : g:eskk#buftable#PHASE_HENKAN
+        \       g:eskk#preedit#PHASE_OKURI
+        \       : g:eskk#preedit#PHASE_HENKAN
         \)
         return 1
-    elseif phase ==# g:eskk#buftable#PHASE_OKURI
+    elseif phase ==# g:eskk#preedit#PHASE_OKURI
         call buf_str.clear()
-        call self.set_henkan_phase(g:eskk#buftable#PHASE_HENKAN)
+        call self.set_henkan_phase(g:eskk#preedit#PHASE_HENKAN)
         return 1    " stepped.
-    elseif phase ==# g:eskk#buftable#PHASE_HENKAN
+    elseif phase ==# g:eskk#preedit#PHASE_HENKAN
         call buf_str.clear()
-        call self.set_henkan_phase(g:eskk#buftable#PHASE_NORMAL)
+        call self.set_henkan_phase(g:eskk#preedit#PHASE_NORMAL)
         return 1    " stepped.
-    elseif phase ==# g:eskk#buftable#PHASE_NORMAL
+    elseif phase ==# g:eskk#preedit#PHASE_NORMAL
         return 0    " failed.
     else
-        throw eskk#internal_error(['eskk', 'buftable'])
+        throw eskk#internal_error(['eskk', 'preedit'])
     endif
 endfunction "}}}
 
 
 " Convert rom_str and move it to rom_pairs.
-function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
+function! s:Preedit_convert_rom_str_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     if empty(table)
         return
@@ -540,7 +540,7 @@ function! s:Buftable_convert_rom_str_inplace(phases, ...) dict "{{{
 endfunction "}}}
 " Convert *rom_str in rom_pairs* and store it to rom_pairs itself.
 " If a:table is empty, do not convert rom_str
-function! s:Buftable_convert_rom_all_inplace(phases, ...) dict "{{{
+function! s:Preedit_convert_rom_all_inplace(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
@@ -551,7 +551,7 @@ function! s:Buftable_convert_rom_all_inplace(phases, ...) dict "{{{
 endfunction "}}}
 " Convert *rom_str in rom_pairs* and return it.
 " If a:table is empty, do not convert rom_str in rom_pairs.
-function! s:Buftable_convert_rom_all(phases, ...) dict "{{{
+function! s:Preedit_convert_rom_all(phases, ...) dict "{{{
     let table = a:0 ? a:1 : s:get_current_table()
     let phases = type(a:phases) == type([]) ?
     \               a:phases : [a:phases]
@@ -584,24 +584,24 @@ function! s:get_current_table() "{{{
     endif
 endfunction "}}}
 
-function! s:Buftable_kakutei(str) dict "{{{
+function! s:Preedit_kakutei(str) dict "{{{
     if a:str !=# ''
         call self.push_kakutei_str(a:str)
     endif
     call self.clear_all()
     call self.set_henkan_phase(
-    \   g:eskk#buftable#PHASE_NORMAL
+    \   g:eskk#preedit#PHASE_NORMAL
     \)
 endfunction "}}}
 
-function! s:Buftable_clear_all() dict "{{{
+function! s:Preedit_clear_all() dict "{{{
     for phase in self.get_all_phases()
         let buf_str = self.get_buf_str(phase)
         call buf_str.clear()
     endfor
 endfunction "}}}
 
-function! s:Buftable_remove_display_str() dict "{{{
+function! s:Preedit_remove_display_str() dict "{{{
     let current_str = self.get_display_str()
 
     " NOTE: This function return value is not remapped.
@@ -613,12 +613,12 @@ function! s:Buftable_remove_display_str() dict "{{{
     \   eskk#util#mb_strlen(current_str)
     \)
 endfunction "}}}
-function! s:Buftable_generate_kakutei_str() dict "{{{
+function! s:Preedit_generate_kakutei_str() dict "{{{
     return self.remove_display_str() . self.get_display_str(0)
 endfunction "}}}
 
 
-function! s:Buftable_empty() dict "{{{
+function! s:Preedit_empty() dict "{{{
     for buf_str in map(
     \   self.get_all_phases(),
     \   'self.get_buf_str(v:val)'
@@ -631,25 +631,25 @@ function! s:Buftable_empty() dict "{{{
 endfunction "}}}
 
 
-function! s:Buftable_empty_filter_queue() dict "{{{
+function! s:Preedit_empty_filter_queue() dict "{{{
     return empty(self._filter_queue)
 endfunction
-function! s:Buftable_push_filter_queue(char) dict "{{{
+function! s:Preedit_push_filter_queue(char) dict "{{{
     call add(self._filter_queue, a:char)
 endfunction "}}}
-function! s:Buftable_shift_filter_queue() dict "{{{
+function! s:Preedit_shift_filter_queue() dict "{{{
     return remove(self._filter_queue, 0)
 endfunction "}}}
 
 
 " Returns a number greater than zero on success.
 " Returns a zero or smaller on error.
-function! s:Buftable_get_begin_col() dict "{{{
+function! s:Preedit_get_begin_col() dict "{{{
     return col('.') - strlen(self.get_display_str())
 endfunction "}}}
 
 
-function! s:Buftable_dump() dict "{{{
+function! s:Preedit_dump() dict "{{{
     let lines = []
     call add(lines, 'current phase: ' . self._henkan_phase)
     for phase in self.get_all_phases()
@@ -664,18 +664,18 @@ endfunction "}}}
 
 function! s:validate_table_idx(table, henkan_phase) "{{{
     if !eskk#util#has_idx(a:table, a:henkan_phase)
-        throw eskk#buftable#invalid_henkan_phase_value_error(a:henkan_phase)
+        throw eskk#preedit#invalid_henkan_phase_value_error(a:henkan_phase)
     endif
 endfunction "}}}
-function! eskk#buftable#invalid_henkan_phase_value_error(henkan_phase) "{{{
+function! eskk#preedit#invalid_henkan_phase_value_error(henkan_phase) "{{{
     return eskk#util#build_error(
-    \   ["eskk", "buftable"],
+    \   ["eskk", "preedit"],
     \   ["invalid henkan phase value '" . a:henkan_phase . "'"]
     \)
 endfunction "}}}
 
 
-let s:Buftable = {
+let s:Preedit = {
 \   '_table': [
 \       deepcopy(s:BufferString),
 \       deepcopy(s:BufferString),
@@ -684,43 +684,43 @@ let s:Buftable = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
-\   '_henkan_phase': g:eskk#buftable#PHASE_NORMAL,
+\   '_henkan_phase': g:eskk#preedit#PHASE_NORMAL,
 \   '_filter_queue': [],
 \
-\   'reset': eskk#util#get_local_funcref('Buftable_reset', s:SID_PREFIX),
-\   'get_buf_str': eskk#util#get_local_funcref('Buftable_get_buf_str', s:SID_PREFIX),
-\   'get_current_buf_str': eskk#util#get_local_funcref('Buftable_get_current_buf_str', s:SID_PREFIX),
-\   'set_buf_str': eskk#util#get_local_funcref('Buftable_set_buf_str', s:SID_PREFIX),
-\   'set_old_str': eskk#util#get_local_funcref('Buftable_set_old_str', s:SID_PREFIX),
-\   'get_old_str': eskk#util#get_local_funcref('Buftable_get_old_str', s:SID_PREFIX),
-\   'rewrite': eskk#util#get_local_funcref('Buftable_rewrite', s:SID_PREFIX),
-\   'make_remove_bs': eskk#util#get_local_funcref('Buftable_make_remove_bs', s:SID_PREFIX),
-\   'get_display_str': eskk#util#get_local_funcref('Buftable_get_display_str', s:SID_PREFIX),
-\   'get_inserted_str': eskk#util#get_local_funcref('Buftable_get_inserted_str', s:SID_PREFIX),
-\   'get_henkan_phase': eskk#util#get_local_funcref('Buftable_get_henkan_phase', s:SID_PREFIX),
-\   'set_henkan_phase': eskk#util#get_local_funcref('Buftable_set_henkan_phase', s:SID_PREFIX),
-\   'get_phase_name': eskk#util#get_local_funcref('Buftable_get_phase_name', s:SID_PREFIX),
-\   'get_lower_phases': eskk#util#get_local_funcref('Buftable_get_lower_phases', s:SID_PREFIX),
-\   'get_all_phases': eskk#util#get_local_funcref('Buftable_get_all_phases', s:SID_PREFIX),
-\   'get_marker': eskk#util#get_local_funcref('Buftable_get_marker', s:SID_PREFIX),
-\   'get_current_marker': eskk#util#get_local_funcref('Buftable_get_current_marker', s:SID_PREFIX),
-\   'push_kakutei_str': eskk#util#get_local_funcref('Buftable_push_kakutei_str', s:SID_PREFIX),
-\   'choose_next_candidate': eskk#util#get_local_funcref('Buftable_choose_next_candidate', s:SID_PREFIX),
-\   'choose_prev_candidate': eskk#util#get_local_funcref('Buftable_choose_prev_candidate', s:SID_PREFIX),
-\   'step_back_henkan_phase': eskk#util#get_local_funcref('Buftable_step_back_henkan_phase', s:SID_PREFIX),
-\   'convert_rom_str_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_str_inplace', s:SID_PREFIX),
-\   'convert_rom_all_inplace': eskk#util#get_local_funcref('Buftable_convert_rom_all_inplace', s:SID_PREFIX),
-\   'convert_rom_all': eskk#util#get_local_funcref('Buftable_convert_rom_all', s:SID_PREFIX),
-\   'kakutei': eskk#util#get_local_funcref('Buftable_kakutei', s:SID_PREFIX),
-\   'clear_all': eskk#util#get_local_funcref('Buftable_clear_all', s:SID_PREFIX),
-\   'remove_display_str': eskk#util#get_local_funcref('Buftable_remove_display_str', s:SID_PREFIX),
-\   'generate_kakutei_str': eskk#util#get_local_funcref('Buftable_generate_kakutei_str', s:SID_PREFIX),
-\   'empty': eskk#util#get_local_funcref('Buftable_empty', s:SID_PREFIX),
-\   'empty_filter_queue': eskk#util#get_local_funcref('Buftable_empty_filter_queue', s:SID_PREFIX),
-\   'push_filter_queue': eskk#util#get_local_funcref('Buftable_push_filter_queue', s:SID_PREFIX),
-\   'shift_filter_queue': eskk#util#get_local_funcref('Buftable_shift_filter_queue', s:SID_PREFIX),
-\   'get_begin_col': eskk#util#get_local_funcref('Buftable_get_begin_col', s:SID_PREFIX),
-\   'dump': eskk#util#get_local_funcref('Buftable_dump', s:SID_PREFIX),
+\   'reset': eskk#util#get_local_funcref('Preedit_reset', s:SID_PREFIX),
+\   'get_buf_str': eskk#util#get_local_funcref('Preedit_get_buf_str', s:SID_PREFIX),
+\   'get_current_buf_str': eskk#util#get_local_funcref('Preedit_get_current_buf_str', s:SID_PREFIX),
+\   'set_buf_str': eskk#util#get_local_funcref('Preedit_set_buf_str', s:SID_PREFIX),
+\   'set_old_str': eskk#util#get_local_funcref('Preedit_set_old_str', s:SID_PREFIX),
+\   'get_old_str': eskk#util#get_local_funcref('Preedit_get_old_str', s:SID_PREFIX),
+\   'rewrite': eskk#util#get_local_funcref('Preedit_rewrite', s:SID_PREFIX),
+\   'make_remove_bs': eskk#util#get_local_funcref('Preedit_make_remove_bs', s:SID_PREFIX),
+\   'get_display_str': eskk#util#get_local_funcref('Preedit_get_display_str', s:SID_PREFIX),
+\   'get_inserted_str': eskk#util#get_local_funcref('Preedit_get_inserted_str', s:SID_PREFIX),
+\   'get_henkan_phase': eskk#util#get_local_funcref('Preedit_get_henkan_phase', s:SID_PREFIX),
+\   'set_henkan_phase': eskk#util#get_local_funcref('Preedit_set_henkan_phase', s:SID_PREFIX),
+\   'get_phase_name': eskk#util#get_local_funcref('Preedit_get_phase_name', s:SID_PREFIX),
+\   'get_lower_phases': eskk#util#get_local_funcref('Preedit_get_lower_phases', s:SID_PREFIX),
+\   'get_all_phases': eskk#util#get_local_funcref('Preedit_get_all_phases', s:SID_PREFIX),
+\   'get_marker': eskk#util#get_local_funcref('Preedit_get_marker', s:SID_PREFIX),
+\   'get_current_marker': eskk#util#get_local_funcref('Preedit_get_current_marker', s:SID_PREFIX),
+\   'push_kakutei_str': eskk#util#get_local_funcref('Preedit_push_kakutei_str', s:SID_PREFIX),
+\   'choose_next_candidate': eskk#util#get_local_funcref('Preedit_choose_next_candidate', s:SID_PREFIX),
+\   'choose_prev_candidate': eskk#util#get_local_funcref('Preedit_choose_prev_candidate', s:SID_PREFIX),
+\   'step_back_henkan_phase': eskk#util#get_local_funcref('Preedit_step_back_henkan_phase', s:SID_PREFIX),
+\   'convert_rom_str_inplace': eskk#util#get_local_funcref('Preedit_convert_rom_str_inplace', s:SID_PREFIX),
+\   'convert_rom_all_inplace': eskk#util#get_local_funcref('Preedit_convert_rom_all_inplace', s:SID_PREFIX),
+\   'convert_rom_all': eskk#util#get_local_funcref('Preedit_convert_rom_all', s:SID_PREFIX),
+\   'kakutei': eskk#util#get_local_funcref('Preedit_kakutei', s:SID_PREFIX),
+\   'clear_all': eskk#util#get_local_funcref('Preedit_clear_all', s:SID_PREFIX),
+\   'remove_display_str': eskk#util#get_local_funcref('Preedit_remove_display_str', s:SID_PREFIX),
+\   'generate_kakutei_str': eskk#util#get_local_funcref('Preedit_generate_kakutei_str', s:SID_PREFIX),
+\   'empty': eskk#util#get_local_funcref('Preedit_empty', s:SID_PREFIX),
+\   'empty_filter_queue': eskk#util#get_local_funcref('Preedit_empty_filter_queue', s:SID_PREFIX),
+\   'push_filter_queue': eskk#util#get_local_funcref('Preedit_push_filter_queue', s:SID_PREFIX),
+\   'shift_filter_queue': eskk#util#get_local_funcref('Preedit_shift_filter_queue', s:SID_PREFIX),
+\   'get_begin_col': eskk#util#get_local_funcref('Preedit_get_begin_col', s:SID_PREFIX),
+\   'dump': eskk#util#get_local_funcref('Preedit_dump', s:SID_PREFIX),
 \}
 
 " }}}

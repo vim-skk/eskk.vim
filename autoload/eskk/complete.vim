@@ -47,8 +47,8 @@ function! s:eskkcomplete(findstart, base) "{{{
             return -1
         endif
 
-        let buftable = eskk#get_buftable()
-        let r = buftable.get_begin_col() - 1
+        let preedit = eskk#get_preedit()
+        let r = preedit.get_begin_col() - 1
         return r
     endif
 
@@ -59,14 +59,14 @@ function! eskk#complete#can_find_start() "{{{
         return 0
     endif
 
-    let buftable = eskk#get_buftable()
-    let col = buftable.get_begin_col()
+    let preedit = eskk#get_preedit()
+    let col = preedit.get_begin_col()
     if col <=# 0
         return 0
     endif
 
-    let buf_str = buftable.get_buf_str(buftable.get_henkan_phase())
-    if buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_HENKAN
+    let buf_str = preedit.get_buf_str(preedit.get_henkan_phase())
+    if preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_HENKAN
     \   && buf_str.empty()
         return 0
     endif
@@ -87,7 +87,7 @@ function! eskk#complete#_reset_completed_candidates() "{{{
 endfunction "}}}
 function! s:skip_complete() "{{{
     return s:get_completed_candidates(
-    \   eskk#get_buftable().get_display_str(1, 0),
+    \   eskk#get_preedit().get_display_str(1, 0),
     \   []
     \)
 endfunction "}}}
@@ -123,8 +123,8 @@ function! s:MODE_FUNC_TABLE.hira(base) "{{{
     if a:base =~ '\a$'
         return s:skip_complete()
     endif
-    let mb_str = eskk#get_buftable().get_buf_str(
-    \   g:eskk#buftable#PHASE_HENKAN
+    let mb_str = eskk#get_preedit().get_buf_str(
+    \   g:eskk#preedit#PHASE_HENKAN
     \).rom_pairs.get_filter()
     let length = eskk#util#mb_strlen(mb_str)
     if length < g:eskk#start_completion_length
@@ -144,8 +144,8 @@ function! s:MODE_FUNC_TABLE.abbrev(base) "{{{
 endfunction "}}}
 
 function! s:complete(mode, base) "{{{
-    let buftable = eskk#get_buftable()
-    let disp = buftable.get_display_str(1, 0)    " with marker, no rom_str.
+    let preedit = eskk#get_preedit()
+    let disp = preedit.get_display_str(1, 0)    " with marker, no rom_str.
     if s:has_completed_candidates(disp)
         return s:skip_complete()
     endif
@@ -157,19 +157,19 @@ function! s:complete(mode, base) "{{{
     if g:eskk#kata_convert_to_hira_at_completion
     \   && a:mode ==# 'kata'
         let [henkan_buf_str, okuri_buf_str] =
-        \   buftable.convert_rom_all(
+        \   preedit.convert_rom_all(
         \       [
-        \           g:eskk#buftable#PHASE_HENKAN,
-        \           g:eskk#buftable#PHASE_OKURI,
+        \           g:eskk#preedit#PHASE_HENKAN,
+        \           g:eskk#preedit#PHASE_OKURI,
         \       ],
         \       eskk#get_mode_table('hira')
         \   )
     else
-        let henkan_buf_str = buftable.get_buf_str(
-        \   g:eskk#buftable#PHASE_HENKAN
+        let henkan_buf_str = preedit.get_buf_str(
+        \   g:eskk#preedit#PHASE_HENKAN
         \)
-        let okuri_buf_str = buftable.get_buf_str(
-        \   g:eskk#buftable#PHASE_OKURI
+        let okuri_buf_str = preedit.get_buf_str(
+        \   g:eskk#preedit#PHASE_OKURI
         \)
     endif
     let key       = henkan_buf_str.rom_pairs.get_filter()
@@ -182,7 +182,7 @@ function! s:complete(mode, base) "{{{
     endif
 
     let do_list_okuri_candidates =
-    \   buftable.get_henkan_phase() ==# g:eskk#buftable#PHASE_OKURI
+    \   preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_OKURI
     for c in candidates
         if do_list_okuri_candidates
             if c.okuri_rom_first !=# ''
