@@ -352,6 +352,14 @@ function! s:asym_filter(stash) "{{{
     let phase = buftable.get_henkan_phase()
 
 
+    " Handle popupmenu-keys.
+    if mode() ==# 'i' && pumvisible()
+    \   && s:handle_popupmenu_keys(a:stash)
+        " Handled.
+        return
+    endif
+
+
     " Handle special mode-local mapping.
     for key in get(s:MODE_LOCAL_KEYS, eskk#get_mode(), [])
         if eskk#map#handle_special_lhs(char, key, a:stash)
@@ -476,31 +484,70 @@ endfunction "}}}
 " For specific characters
 
 " Handle popupmenu-keys. (:help popupmenu-keys)
-" If return string is not empty,
-" eskk#filter() pass-through the input character.
-"
-" TODO: More popupmenu-keys handling.
-function! s:do_popupmenu_keys(stash) "{{{
+" If return value is 1, eskk does not filter a char.
+" If return value is 0, eskk processes and insert a string.
+function! s:handle_popupmenu_keys(stash) "{{{
     let buftable = a:stash.buftable
     let char = a:stash.char
 
-    let selected_default =
-    \   getline('.')[eskk#get_begin_col() - 1 :] ==# buftable.get_display_str()
+    let inserted_str = getline('.')[eskk#get_begin_col() - 1 :]
+    let selected_default = inserted_str ==# buftable.get_display_str()
 
-    " Restore state if default candidate is selected.
-    if char ==# "\<CR>"
-        if selected_default
-            " Let filter function process the character.
-            return ''
-        else
-            " Insert selected candidate by pum.
-            call buftable.reset()
-            return char
+    if char ==# "\<CR>" || char ==# "\<Space>"
+    \   || char ==# "\<Tab>"
+        call s:kakutei_pum(a:stash)
+        return 0
+    elseif char ==# "\<BS>" || char ==# "\<C-h>"
+        if !selected_default
+            call s:kakutei_pum(a:stash)
+        endif
+        return 0
+    elseif char ==# "\<C-y>"
+        call s:kakutei_pum(a:stash)
+        return 1
+    elseif char ==# "\<C-e>"
+        " FIXME: wrongly removes one character before preedit.
+        let disp = buftable.get_display_str(0)
+        call buftable.reset()
+        call buftable.set_old_str(inserted_str)
+        call buftable.kakutei(disp)
+        return 1
+    else
+        let POPUP_CHAR_TO_KEY = {
+        \   "\<PageUp>": "<PageUp>",
+        \   "\<PageDown>": "<PageDown>",
+        \   "\<Up>": "<Up>",
+        \   "\<Down>": "<Down>",
+        \   "\<C-n>": "<C-n>",
+        \   "\<C-p>": "<C-p>",
+        \}
+        if has_key(POPUP_CHAR_TO_KEY, char)
+            let key = POPUP_CHAR_TO_KEY[char]
+            call eskk#register_temp_event(
+            \   'filter-redispatch-pre',
+            \   'eskk#util#identity',
+            \   [eskk#map#key2char(eskk#map#get_nore_map(key))]
+            \)
+            return 1
         endif
     endif
 
-    " Pass-through.
-    return char
+    " Let filter function process the character.
+    if !selected_default
+        call s:kakutei_pum(a:stash)
+    endif
+    return 0
+endfunction "}}}
+function! s:kakutei_pum(stash) "{{{
+    " Let Buftable not rewrite a buffer.
+    " (eskk abandons a management of preedit)
+    call a:stash.buftable.reset()
+
+    call eskk#register_temp_event(
+    \   'filter-redispatch-pre',
+    \   'eskk#util#identity',
+    \   [eskk#map#key2char(eskk#map#get_nore_map("<C-y>"))]
+    \)
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let buftable = a:stash.buftable
@@ -2062,12 +2109,6 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
-    if mode() ==# 'i' && pumvisible()
-        let r = s:do_popupmenu_keys(stash)
-        if r !=# ''
-            return r
-        endif
-    endif
 
     " Set old string. (it is used by Buftable.rewrite())
     call buftable.set_old_str(buftable.get_display_str())
