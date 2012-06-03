@@ -343,6 +343,10 @@ function! s:get_henkan_select_display_str(this, with_marker, with_rom_str) "{{{
     \   . (a:with_rom_str ? buf_str.rom_str.get() : '')
 endfunction "}}}
 
+function! s:Buftable_get_inserted_str() dict "{{{
+    return getline('.')[self.get_begin_col() - 1 :]
+endfunction "}}}
+
 
 function! s:Buftable_get_henkan_phase() dict "{{{
     return self._henkan_phase
@@ -711,6 +715,7 @@ let s:Buftable = {
 \   'make_remove_bs': eskk#util#get_local_funcref('Buftable_make_remove_bs', s:SID_PREFIX),
 \   'has_changed': eskk#util#get_local_funcref('Buftable_has_changed', s:SID_PREFIX),
 \   'get_display_str': eskk#util#get_local_funcref('Buftable_get_display_str', s:SID_PREFIX),
+\   'get_inserted_str': eskk#util#get_local_funcref('Buftable_get_inserted_str', s:SID_PREFIX),
 \   'get_henkan_phase': eskk#util#get_local_funcref('Buftable_get_henkan_phase', s:SID_PREFIX),
 \   'set_henkan_phase': eskk#util#get_local_funcref('Buftable_set_henkan_phase', s:SID_PREFIX),
 \   'get_phase_name': eskk#util#get_local_funcref('Buftable_get_phase_name', s:SID_PREFIX),

@@ -490,7 +490,7 @@ function! s:handle_popupmenu_keys(stash) "{{{
     let buftable = a:stash.buftable
     let char = a:stash.char
 
-    let inserted_str = getline('.')[eskk#get_begin_col() - 1 :]
+    let inserted_str = buftable.get_inserted_str()
     let selected_default = inserted_str ==# buftable.get_display_str()
 
     if char ==# "\<CR>" || char ==# "\<Tab>"
