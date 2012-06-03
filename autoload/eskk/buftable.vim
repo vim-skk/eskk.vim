@@ -265,21 +265,6 @@ function! s:Buftable_make_remove_bs() dict "{{{
     \)
 endfunction "}}}
 
-function! s:Buftable_has_changed() dict "{{{
-    let kakutei = self._kakutei_str
-    if kakutei != ''
-        return 1
-    endif
-
-    let [old, new] = [self._old_str, self.get_display_str()]
-    let inserted_str = kakutei . new
-    if old !=# inserted_str
-        return 1
-    endif
-
-    return 0
-endfunction "}}}
-
 function! s:Buftable_get_display_str(...) dict "{{{
     let with_marker  = get(a:000, 0, 1)
     let with_rom_str = get(a:000, 1, 1)
@@ -706,7 +691,6 @@ let s:Buftable = {
 \   'get_old_str': eskk#util#get_local_funcref('Buftable_get_old_str', s:SID_PREFIX),
 \   'rewrite': eskk#util#get_local_funcref('Buftable_rewrite', s:SID_PREFIX),
 \   'make_remove_bs': eskk#util#get_local_funcref('Buftable_make_remove_bs', s:SID_PREFIX),
-\   'has_changed': eskk#util#get_local_funcref('Buftable_has_changed', s:SID_PREFIX),
 \   'get_display_str': eskk#util#get_local_funcref('Buftable_get_display_str', s:SID_PREFIX),
 \   'get_henkan_phase': eskk#util#get_local_funcref('Buftable_get_henkan_phase', s:SID_PREFIX),
 \   'set_henkan_phase': eskk#util#get_local_funcref('Buftable_set_henkan_phase', s:SID_PREFIX),
