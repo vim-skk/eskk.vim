@@ -189,45 +189,42 @@ endfunction "}}}
 " NOTE: Current implementation depends on &backspace
 " when inserted string has newline.
 function! s:Buftable_rewrite() dict "{{{
-    let [old, new] = [self._old_str, self.get_display_str()]
-
-    let kakutei = self._kakutei_str
+    let old = self._old_str
+    let new = self._kakutei_str . self.get_display_str()
     let self._kakutei_str = ''
-
-    let inserted_str = kakutei . new
 
     let inst = eskk#get_buffer_instance()
 
 
-    if old ==# inserted_str
+    if old ==# new
         return ''
-    elseif inserted_str == ''
+    elseif new == ''
         return self.make_remove_bs()
     elseif old == ''
         " Insert a new string.
         let inst = eskk#get_buffer_instance()
-        let inst.inserted = inserted_str
+        let inst.inserted = new
         call eskk#map#map(
         \   'be',
         \   '<Plug>(eskk:expr:_inserted)',
         \   'eskk#get_buffer_instance().inserted'
         \)
         return "\<Plug>(eskk:expr:_inserted)"
-    elseif stridx(old, inserted_str) == 0
-        " When inserted_str == "foo", old == "foobar"
+    elseif stridx(old, new) == 0
+        " When new == "foo", old == "foobar"
         " Remove "bar".
         return repeat(
         \   eskk#map#key2char(
         \       eskk#map#get_special_map("backspace-key")
         \   ),
         \   eskk#util#mb_strlen(old)
-        \       - eskk#util#mb_strlen(inserted_str)
+        \       - eskk#util#mb_strlen(new)
         \)
-    elseif stridx(inserted_str, old) == 0
-        " When inserted_str == "foobar", old == "foo"
+    elseif stridx(new, old) == 0
+        " When new == "foobar", old == "foo"
         " Insert "bar".
         let inst.inserted =
-        \   strpart(inserted_str, strlen(old))
+        \   strpart(new, strlen(old))
         call eskk#map#map(
         \   'be',
         \   '<Plug>(eskk:expr:_inserted)',
@@ -235,23 +232,23 @@ function! s:Buftable_rewrite() dict "{{{
         \)
         return "\<Plug>(eskk:expr:_inserted)"
     else
-        let idx = eskk#util#diffidx(old, inserted_str)
+        let idx = eskk#util#diffidx(old, new)
         if idx != -1
-            " When inserted_str == "foobar", old == "fool"
+            " When new == "foobar", old == "fool"
             " Insert "<BS>bar".
 
             " Remove common string.
-            let old          = strpart(old, idx)
-            let inserted_str = strpart(inserted_str, idx)
+            let old = strpart(old, idx)
+            let new = strpart(new, idx)
             let bs = eskk#map#key2char(
             \           eskk#map#get_special_map("backspace-key"))
             return
             \   repeat(bs, eskk#util#mb_strlen(old))
-            \ . inserted_str
+            \ . new
         else
             " Delete current string, and insert new string.
             let inst = eskk#get_buffer_instance()
-            let inst.inserted = inserted_str
+            let inst.inserted = new
             call eskk#map#map(
             \   'be',
             \   '<Plug>(eskk:expr:_inserted)',
