@@ -493,9 +493,16 @@ function! s:handle_popupmenu_keys(stash) "{{{
     let inserted_str = getline('.')[eskk#get_begin_col() - 1 :]
     let selected_default = inserted_str ==# buftable.get_display_str()
 
-    if char ==# "\<CR>" || char ==# "\<Space>"
-    \   || char ==# "\<Tab>"
+    if char ==# "\<CR>" || char ==# "\<Tab>"
         call s:kakutei_pum(a:stash)
+        return 0
+    elseif char ==# "\<Space>"
+        if selected_default
+            call s:close_pum(a:stash)
+        else
+            call s:kakutei_pum(a:stash)
+            return 0
+        endif
         return 0
     elseif char ==# "\<BS>" || char ==# "\<C-h>"
         if !selected_default
@@ -542,7 +549,11 @@ function! s:kakutei_pum(stash) "{{{
     " Let Buftable not rewrite a buffer.
     " (eskk abandons a management of preedit)
     call a:stash.buftable.reset()
-
+    " Close popup.
+    call s:close_pum(a:stash)
+endfunction "}}}
+function! s:close_pum(stash) "{{{
+    " Close popup.
     call eskk#register_temp_event(
     \   'filter-redispatch-pre',
     \   'eskk#util#identity',
