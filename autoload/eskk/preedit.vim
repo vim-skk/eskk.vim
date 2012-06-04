@@ -336,11 +336,6 @@ function! s:get_henkan_select_display_str(this, with_marker, with_rom_str) "{{{
     \   . (a:with_rom_str ? buf_str.rom_str.get() : '')
 endfunction "}}}
 
-function! s:Preedit_get_inserted_str() dict "{{{
-    let [begin, end] = self.get_preedit_range()
-    return getline('.')[begin : end]
-endfunction "}}}
-
 
 function! s:Preedit_get_henkan_phase() dict "{{{
     return self._henkan_phase
@@ -723,7 +718,6 @@ let s:Preedit = {
 \   'get_old_col': eskk#util#get_local_funcref('Preedit_get_old_col', s:SID_PREFIX),
 \   'rewrite': eskk#util#get_local_funcref('Preedit_rewrite', s:SID_PREFIX),
 \   'get_display_str': eskk#util#get_local_funcref('Preedit_get_display_str', s:SID_PREFIX),
-\   'get_inserted_str': eskk#util#get_local_funcref('Preedit_get_inserted_str', s:SID_PREFIX),
 \   'get_henkan_phase': eskk#util#get_local_funcref('Preedit_get_henkan_phase', s:SID_PREFIX),
 \   'set_henkan_phase': eskk#util#get_local_funcref('Preedit_set_henkan_phase', s:SID_PREFIX),
 \   'get_phase_name': eskk#util#get_local_funcref('Preedit_get_phase_name', s:SID_PREFIX),

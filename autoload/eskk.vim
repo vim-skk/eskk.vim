@@ -491,7 +491,13 @@ function! s:handle_popupmenu_keys(stash) "{{{
     let preedit = a:stash.preedit
     let char = a:stash.char
 
-    let inserted_str = preedit.get_inserted_str()
+    let range = preedit.get_preedit_range()
+    if empty(range)
+        return 0
+    endif
+    let [begin, end] = range
+
+    let inserted_str = preedit.get_old_line()[begin : end]
     let selected_default = inserted_str ==# preedit.get_display_str()
 
     if char ==# "\<CR>" || char ==# "\<Tab>"
