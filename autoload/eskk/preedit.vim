@@ -218,7 +218,7 @@ function! s:Preedit_rewrite() dict "{{{
     call self.set_old_col(
     \   self.get_old_col()
     \   - bs_num
-    \   + eskk#util#mb_strlen(inserted))
+    \   + strlen(inserted))
 
     if inserted !=# ''
         let inst = eskk#get_buffer_instance()
