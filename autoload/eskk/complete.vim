@@ -47,9 +47,7 @@ function! s:eskkcomplete(findstart, base) "{{{
             return -1
         endif
 
-        let preedit = eskk#get_preedit()
-        let r = preedit.get_begin_col() - 1
-        return r
+        return eskk#get_preedit().get_begin_col() - 1
     endif
 
     return eskk#complete#do_complete(a:base)
