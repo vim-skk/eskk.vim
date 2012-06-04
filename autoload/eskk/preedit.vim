@@ -183,6 +183,18 @@ endfunction "}}}
 function! s:Preedit_get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
+function! s:Preedit_set_old_line(line) dict "{{{
+    let self._old_line = a:line
+endfunction "}}}
+function! s:Preedit_get_old_line() dict "{{{
+    return self._old_line
+endfunction "}}}
+function! s:Preedit_set_old_col(col) dict "{{{
+    let self._old_col = a:col
+endfunction "}}}
+function! s:Preedit_get_old_col() dict "{{{
+    return self._old_col
+endfunction "}}}
 
 " Remove a old string, Insert a new string.
 "
@@ -195,6 +207,18 @@ function! s:Preedit_rewrite() dict "{{{
     let old = self._old_str
     let new = self._kakutei_str . self.get_display_str()
     let self._kakutei_str = ''
+
+    " Update old line.
+    let [begin, end] = self.get_preedit_range()
+    call self.set_old_line(substitute(
+    \   self.get_old_line(),
+    \   '.\{'.begin.'}\zs.\{'.(end-begin+1).'}',
+    \   '', ''))
+    " Update old col.
+    call self.set_old_col(
+    \   self.get_old_col()
+    \   - bs_num
+    \   + eskk#util#mb_strlen(inserted))
 
     if inserted !=# ''
         let inst = eskk#get_buffer_instance()
@@ -682,6 +706,8 @@ let s:Preedit = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
+\   '_old_line': '',
+\   '_old_col': -1,
 \   '_henkan_phase': g:eskk#preedit#PHASE_NORMAL,
 \   '_filter_queue': [],
 \
@@ -691,6 +717,10 @@ let s:Preedit = {
 \   'set_buf_str': eskk#util#get_local_funcref('Preedit_set_buf_str', s:SID_PREFIX),
 \   'set_old_str': eskk#util#get_local_funcref('Preedit_set_old_str', s:SID_PREFIX),
 \   'get_old_str': eskk#util#get_local_funcref('Preedit_get_old_str', s:SID_PREFIX),
+\   'set_old_line': eskk#util#get_local_funcref('Preedit_set_old_line', s:SID_PREFIX),
+\   'get_old_line': eskk#util#get_local_funcref('Preedit_get_old_line', s:SID_PREFIX),
+\   'set_old_col': eskk#util#get_local_funcref('Preedit_set_old_col', s:SID_PREFIX),
+\   'get_old_col': eskk#util#get_local_funcref('Preedit_get_old_col', s:SID_PREFIX),
 \   'rewrite': eskk#util#get_local_funcref('Preedit_rewrite', s:SID_PREFIX),
 \   'get_display_str': eskk#util#get_local_funcref('Preedit_get_display_str', s:SID_PREFIX),
 \   'get_inserted_str': eskk#util#get_local_funcref('Preedit_get_inserted_str', s:SID_PREFIX),

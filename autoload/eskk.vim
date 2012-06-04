@@ -2118,6 +2118,8 @@ function! eskk#filter(char) "{{{
 
     " Set old string. (it is used by Preedit.rewrite())
     call preedit.set_old_str(preedit.get_display_str())
+    call preedit.set_old_line(getline('.'))
+    call preedit.set_old_col(col('.'))
 
     try
         " Push a pressed character.
