@@ -1284,9 +1284,6 @@ function! s:Dictionary_forget_word(word) dict "{{{
     endif
 
     call self.remove_registered_word(a:word)
-    if self._registered_words.empty()
-        let self._registered_words_modified = 0
-    endif
 
     if !empty(self._current_henkan_result)
         call self._current_henkan_result.reset()
@@ -1328,8 +1325,8 @@ function! s:Dictionary_is_modified() dict "{{{
     " No need to check system dictionary.
     " Because it is immutable.
     return
-    \   !self._registered_words.empty()
-    \   || self._user_dict._is_modified
+    \   self._user_dict._is_modified
+    \   || !self._registered_words.empty()
 endfunction "}}}
 
 " Write to user dictionary.
@@ -1488,7 +1485,6 @@ let s:Dictionary = {
 \   '_user_dict': {},
 \   '_system_dict': {},
 \   '_registered_words': {},
-\   '_registered_words_modified': 0,
 \   '_current_henkan_result': {},
 \
 \   'refer': eskk#util#get_local_funcref('Dictionary_refer', s:SID_PREFIX),
