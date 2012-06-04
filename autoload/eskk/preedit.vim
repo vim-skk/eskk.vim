@@ -313,7 +313,8 @@ function! s:get_henkan_select_display_str(this, with_marker, with_rom_str) "{{{
 endfunction "}}}
 
 function! s:Preedit_get_inserted_str() dict "{{{
-    return getline('.')[self.get_begin_col() - 1 :]
+    let [begin, end] = self.get_preedit_range()
+    return getline('.')[begin : end]
 endfunction "}}}
 
 
@@ -636,7 +637,13 @@ endfunction "}}}
 " 2. during eskk#filter()
 " 3. after eskk#filter() (neocomplcache)
 function! s:Preedit_get_begin_col() dict "{{{
-    return col('.') - strlen(self.get_old_str())
+    return self.get_preedit_range()[0] + 1
+endfunction "}}}
+
+function! s:Preedit_get_preedit_range() dict "{{{
+    let begin = col('.') - strlen(self.get_old_str()) - 1
+    let end = begin + strlen(self.get_old_str()) - 1
+    return [begin, end]
 endfunction "}}}
 
 
@@ -710,6 +717,7 @@ let s:Preedit = {
 \   'push_filter_queue': eskk#util#get_local_funcref('Preedit_push_filter_queue', s:SID_PREFIX),
 \   'shift_filter_queue': eskk#util#get_local_funcref('Preedit_shift_filter_queue', s:SID_PREFIX),
 \   'get_begin_col': eskk#util#get_local_funcref('Preedit_get_begin_col', s:SID_PREFIX),
+\   'get_preedit_range': eskk#util#get_local_funcref('Preedit_get_preedit_range', s:SID_PREFIX),
 \   'dump': eskk#util#get_local_funcref('Preedit_dump', s:SID_PREFIX),
 \}
 
