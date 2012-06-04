@@ -644,6 +644,10 @@ endfunction "}}}
 
 " Returns a number greater than zero on success.
 " Returns a zero or smaller on error.
+" XXX: begin col of when?
+" 1. before eskk#filter()
+" 2. during eskk#filter()
+" 3. after eskk#filter() (neocomplcache)
 function! s:Preedit_get_begin_col() dict "{{{
     return col('.') - strlen(self.get_old_str())
 endfunction "}}}
