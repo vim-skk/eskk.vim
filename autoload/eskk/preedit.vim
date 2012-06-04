@@ -645,7 +645,7 @@ endfunction "}}}
 " Returns a number greater than zero on success.
 " Returns a zero or smaller on error.
 function! s:Preedit_get_begin_col() dict "{{{
-    return col('.') - strlen(self.get_display_str())
+    return col('.') - strlen(self.get_old_str())
 endfunction "}}}
 
 
