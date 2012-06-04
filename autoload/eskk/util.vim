@@ -110,6 +110,27 @@ function! eskk#util#diffidx(...) "{{{
     let module = s:Vital.Data.String
     return call(module.diffidx, a:000, module)
 endfunction "}}}
+function! eskk#util#split_byte_range(s, begin, end) "{{{
+    let s     = a:s
+    let begin = a:begin
+    let end   = a:end
+
+    if end < begin
+        return []
+    endif
+
+    let len   = strlen(s)
+    let begin = begin <# 0 ? 0 :
+    \           (begin >=# len ? len - 1 : begin)
+    let end   = end   <# 0 ? 0 :
+    \           (end   >=# len ? len - 1 : end  )
+
+    return [
+    \   (begin >=# 1 ? s[: begin-1] : ''),
+    \   s[begin : end],
+    \   (end < strlen(s) - 1 ? s[end+1 :] : ''),
+    \]
+endfunction "}}}
 
 
 " Ordered Set

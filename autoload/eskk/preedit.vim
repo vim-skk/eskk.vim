@@ -203,17 +203,25 @@ endfunction "}}}
 function! s:Preedit_rewrite() dict "{{{
     let [bs_num, inserted] =
     \   call('s:calculate_rewrite', [], self)
-
-    let old = self._old_str
-    let new = self._kakutei_str . self.get_display_str()
     let self._kakutei_str = ''
 
     " Update old line.
-    let [begin, end] = self.get_preedit_range()
-    call self.set_old_line(substitute(
-    \   self.get_old_line(),
-    \   '.\{'.begin.'}\zs.\{'.(end-begin+1).'}',
-    \   '', ''))
+    let range = self.get_preedit_range()
+    if !empty(range)
+        let [begin, end] = range
+        let old_line = self.get_old_line()
+        let [left, middle, right] =
+        \   eskk#util#split_byte_range(old_line, begin, end)
+
+        " Chop last `bs_num` character(s).
+        let left .= middle
+        let left = substitute(left, '.\{'.bs_num.'}$', '', '')
+        " Append `new`.
+        let left .= inserted
+
+        call self.set_old_line(left . right)
+    endif
+
     " Update old col.
     call self.set_old_col(
     \   self.get_old_col()
@@ -656,12 +664,17 @@ endfunction "}}}
 " 2. during eskk#filter()
 " 3. after eskk#filter() (neocomplcache)
 function! s:Preedit_get_begin_col() dict "{{{
-    return self.get_preedit_range()[0] + 1
+    return self.get_old_col() - strlen(self.get_old_str())
 endfunction "}}}
 
 function! s:Preedit_get_preedit_range() dict "{{{
-    let begin = col('.') - strlen(self.get_old_str()) - 1
-    let end = begin + strlen(self.get_old_str()) - 1
+    if self.get_old_str() ==# ''
+        return []
+    endif
+    let begin = self.get_begin_col() - 1
+    let end   = begin + strlen(self.get_old_str()) - 1
+    call eskk#util#assert(begin >=# 0, 'begin >=# 0')
+    call eskk#util#assert(begin <=# end, 'begin <=# end')
     return [begin, end]
 endfunction "}}}
 
