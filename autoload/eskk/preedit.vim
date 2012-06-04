@@ -189,48 +189,50 @@ endfunction "}}}
 " NOTE: Current implementation depends on &backspace
 " when inserted string has newline.
 function! s:Preedit_rewrite() dict "{{{
+    let [bs_num, inserted] =
+    \   call('s:calculate_rewrite', [], self)
+
     let old = self._old_str
     let new = self._kakutei_str . self.get_display_str()
     let self._kakutei_str = ''
 
-    let inst = eskk#get_buffer_instance()
+    if inserted !=# ''
+        let inst = eskk#get_buffer_instance()
+        let inst.inserted = inserted
+        call eskk#map#map(
+        \   'be',
+        \   '<Plug>(eskk:expr:_inserted)',
+        \   'eskk#get_buffer_instance().inserted'
+        \)
+    endif
+    let bs = eskk#map#key2char(
+    \           eskk#map#get_special_map("backspace-key"))
+    return repeat(bs, bs_num)
+    \   . (inserted !=# '' ? "\<Plug>(eskk:expr:_inserted)" : '')
+endfunction "}}}
+function! s:calculate_rewrite() dict "{{{
+    let old = self._old_str
+    let new = self._kakutei_str . self.get_display_str()
 
 
     if old ==# new
-        return ''
+        return [0, '']
     elseif new == ''
-        return self.make_remove_bs()
+        return [eskk#util#mb_strlen(old), '']
     elseif old == ''
         " Insert a new string.
-        let inst = eskk#get_buffer_instance()
-        let inst.inserted = new
-        call eskk#map#map(
-        \   'be',
-        \   '<Plug>(eskk:expr:_inserted)',
-        \   'eskk#get_buffer_instance().inserted'
-        \)
-        return "\<Plug>(eskk:expr:_inserted)"
+        return [0, new]
     elseif stridx(old, new) == 0
         " When new == "foo", old == "foobar"
         " Remove "bar".
-        return repeat(
-        \   eskk#map#key2char(
-        \       eskk#map#get_special_map("backspace-key")
-        \   ),
+        let bs_num =
         \   eskk#util#mb_strlen(old)
         \       - eskk#util#mb_strlen(new)
-        \)
+        return [bs_num, '']
     elseif stridx(new, old) == 0
         " When new == "foobar", old == "foo"
         " Insert "bar".
-        let inst.inserted =
-        \   strpart(new, strlen(old))
-        call eskk#map#map(
-        \   'be',
-        \   '<Plug>(eskk:expr:_inserted)',
-        \   'eskk#get_buffer_instance().inserted'
-        \)
-        return "\<Plug>(eskk:expr:_inserted)"
+        return [0, strpart(new, strlen(old))]
     else
         let idx = eskk#util#diffidx(old, new)
         if idx != -1
@@ -242,27 +244,12 @@ function! s:Preedit_rewrite() dict "{{{
             let new = strpart(new, idx)
             let bs = eskk#map#key2char(
             \           eskk#map#get_special_map("backspace-key"))
-            return
-            \   repeat(bs, eskk#util#mb_strlen(old))
-            \ . new
+            return [eskk#util#mb_strlen(old), new]
         else
             " Delete current string, and insert new string.
-            let inst = eskk#get_buffer_instance()
-            let inst.inserted = new
-            call eskk#map#map(
-            \   'be',
-            \   '<Plug>(eskk:expr:_inserted)',
-            \   'eskk#get_buffer_instance().inserted'
-            \)
-            return self.make_remove_bs() . "\<Plug>(eskk:expr:_inserted)"
+            return [eskk#util#mb_strlen(old), new]
         endif
     endif
-endfunction "}}}
-function! s:Preedit_make_remove_bs() dict "{{{
-    return repeat(
-    \   eskk#map#key2char(eskk#map#get_special_map("backspace-key")),
-    \   eskk#util#mb_strlen(self._old_str),
-    \)
 endfunction "}}}
 
 function! s:Preedit_get_display_str(...) dict "{{{
@@ -698,7 +685,6 @@ let s:Preedit = {
 \   'set_old_str': eskk#util#get_local_funcref('Preedit_set_old_str', s:SID_PREFIX),
 \   'get_old_str': eskk#util#get_local_funcref('Preedit_get_old_str', s:SID_PREFIX),
 \   'rewrite': eskk#util#get_local_funcref('Preedit_rewrite', s:SID_PREFIX),
-\   'make_remove_bs': eskk#util#get_local_funcref('Preedit_make_remove_bs', s:SID_PREFIX),
 \   'get_display_str': eskk#util#get_local_funcref('Preedit_get_display_str', s:SID_PREFIX),
 \   'get_inserted_str': eskk#util#get_local_funcref('Preedit_get_inserted_str', s:SID_PREFIX),
 \   'get_henkan_phase': eskk#util#get_local_funcref('Preedit_get_henkan_phase', s:SID_PREFIX),
