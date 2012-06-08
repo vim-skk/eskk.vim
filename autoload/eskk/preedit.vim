@@ -685,8 +685,8 @@ function! s:Preedit_get_preedit_range() dict "{{{
     endif
     let begin = self.get_begin_col() - 1
     let end   = begin + strlen(self.get_old_str()) - 1
-    call eskk#util#assert(begin >=# 0, 'begin >=# 0')
-    call eskk#util#assert(begin <=# end, 'begin <=# end')
+    call eskk#util#assert(begin >=# 0, 'begin >=# 0: begin = '.begin)
+    call eskk#util#assert(begin <=# end, 'begin <=# end: begin = '.begin.', end = '.end)
     return [begin, end]
 endfunction "}}}
 
