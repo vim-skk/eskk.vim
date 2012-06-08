@@ -234,7 +234,7 @@ function! s:Preedit_rewrite() dict "{{{
     " Update old col.
     call self.set_old_col(
     \   self.get_old_col()
-    \   - bs_num
+    \   - bs_num * 3
     \   + strlen(inserted))
 
     if inserted !=# ''
