@@ -2183,8 +2183,6 @@ function! eskk#filter(char) "{{{
         if preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_NORMAL
             call preedit.get_current_buf_str().rom_pairs.clear()
         endif
-        " Set old string.
-        call preedit.set_old_str(preedit.get_display_str())
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(stash, error) "{{{

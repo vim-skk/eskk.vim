@@ -237,6 +237,9 @@ function! s:Preedit_rewrite() dict "{{{
     \   - bs_num * 3
     \   + strlen(inserted))
 
+    " Update old string.
+    call self.set_old_str(self.get_display_str())
+
     if inserted !=# ''
         let inst = eskk#get_buffer_instance()
         let inst.inserted = inserted
