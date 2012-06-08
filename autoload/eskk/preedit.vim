@@ -183,26 +183,15 @@ endfunction "}}}
 function! s:Preedit_get_old_str() dict "{{{
     return self._old_str
 endfunction "}}}
-function! s:Preedit_set_old_line(line) dict "{{{
-    let self._old_line = a:line
-endfunction "}}}
-function! s:Preedit_get_old_line() dict "{{{
-    if self._old_line is -1
-        let self._old_line = getline('.')
+
+function! s:Preedit_get_inserted_str() dict "{{{
+    if self.get_old_str() ==# ''
+        return ''
     endif
-    return self._old_line
-endfunction "}}}
-function! s:Preedit_set_old_col(col) dict "{{{
-    let self._old_col =
-    \   a:col <=# 0 ? 1 :
-    \   a:col ># col('$') ? col('$') :
-    \   a:col
-endfunction "}}}
-function! s:Preedit_get_old_col() dict "{{{
-    if self._old_col is -1
-        let self._old_col = col('.')
-    endif
-    return self._old_col
+    let begin = self.get_begin_col() - 1
+    let end   = begin + strlen(self.get_old_str()) - 1
+    " FIXME: while completion, somethies getline('.') lacks a:base string.
+    return getline('.')[begin : end]
 endfunction "}}}
 
 " Remove a old string, Insert a new string.
@@ -213,32 +202,6 @@ function! s:Preedit_rewrite() dict "{{{
     let [bs_num, inserted] =
     \   call('s:calculate_rewrite', [], self)
     let self._kakutei_str = ''
-
-    " Update old line.
-    let range = self.get_preedit_range()
-    if !empty(range)
-        let [begin, end] = range
-        let old_line = self.get_old_line()
-        let [left, middle, right] =
-        \   eskk#util#split_byte_range(old_line, begin, end)
-
-        " Chop last `bs_num` character(s).
-        let left .= middle
-        let left = substitute(left, '.\{'.bs_num.'}$', '', '')
-        " Append `new`.
-        let left .= inserted
-
-        call self.set_old_line(left . right)
-    endif
-
-    " Update old col.
-    call self.set_old_col(
-    \   self.get_old_col()
-    \   - bs_num * 3
-    \   + strlen(inserted))
-
-    " Update old string.
-    call self.set_old_str(self.get_display_str())
 
     if inserted !=# ''
         let inst = eskk#get_buffer_instance()
@@ -669,25 +632,28 @@ function! s:Preedit_shift_filter_queue() dict "{{{
 endfunction "}}}
 
 
-" Returns a number greater than zero on success.
-" Returns a zero or smaller on error.
 " XXX: begin col of when?
 " 1. before eskk#filter()
 " 2. during eskk#filter()
 " 3. after eskk#filter() (neocomplcache)
-function! s:Preedit_get_begin_col() dict "{{{
-    return self.get_old_col() - strlen(self.get_old_str())
+function! s:Preedit_set_begin_col(col) dict "{{{
+    let self._begin_col = a:col
 endfunction "}}}
-
-function! s:Preedit_get_preedit_range() dict "{{{
-    if self.get_old_str() ==# ''
-        return []
+function! s:Preedit_get_begin_col() dict "{{{
+    if self._henkan_phase is g:eskk#preedit#PHASE_NORMAL
+        throw eskk#util#build_error(
+        \   ['eskk', 'preedit'],
+        \   'internal error: Preedit.get_begin_col()'
+        \       . ' must not be called in normal phase.'
+        \)
     endif
-    let begin = self.get_begin_col() - 1
-    let end   = begin + strlen(self.get_old_str()) - 1
-    call eskk#util#assert(begin >=# 0, 'begin >=# 0: begin = '.begin)
-    call eskk#util#assert(begin <=# end, 'begin <=# end: begin = '.begin.', end = '.end)
-    return [begin, end]
+    if self._begin_col <=# 0
+        throw eskk#util#build_error(
+        \   ['eskk', 'preedit'],
+        \   'internal error: begin col is invalid.'
+        \)
+    endif
+    return self._begin_col
 endfunction "}}}
 
 
@@ -726,8 +692,7 @@ let s:Preedit = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
-\   '_old_line': -1,
-\   '_old_col': -1,
+\   '_begin_col': -1,
 \   '_henkan_phase': g:eskk#preedit#PHASE_NORMAL,
 \   '_filter_queue': [],
 \
@@ -737,10 +702,7 @@ let s:Preedit = {
 \   'set_buf_str': eskk#util#get_local_funcref('Preedit_set_buf_str', s:SID_PREFIX),
 \   'set_old_str': eskk#util#get_local_funcref('Preedit_set_old_str', s:SID_PREFIX),
 \   'get_old_str': eskk#util#get_local_funcref('Preedit_get_old_str', s:SID_PREFIX),
-\   'set_old_line': eskk#util#get_local_funcref('Preedit_set_old_line', s:SID_PREFIX),
-\   'get_old_line': eskk#util#get_local_funcref('Preedit_get_old_line', s:SID_PREFIX),
-\   'set_old_col': eskk#util#get_local_funcref('Preedit_set_old_col', s:SID_PREFIX),
-\   'get_old_col': eskk#util#get_local_funcref('Preedit_get_old_col', s:SID_PREFIX),
+\   'get_inserted_str': eskk#util#get_local_funcref('Preedit_get_inserted_str', s:SID_PREFIX),
 \   'rewrite': eskk#util#get_local_funcref('Preedit_rewrite', s:SID_PREFIX),
 \   'get_display_str': eskk#util#get_local_funcref('Preedit_get_display_str', s:SID_PREFIX),
 \   'get_henkan_phase': eskk#util#get_local_funcref('Preedit_get_henkan_phase', s:SID_PREFIX),
@@ -766,7 +728,7 @@ let s:Preedit = {
 \   'push_filter_queue': eskk#util#get_local_funcref('Preedit_push_filter_queue', s:SID_PREFIX),
 \   'shift_filter_queue': eskk#util#get_local_funcref('Preedit_shift_filter_queue', s:SID_PREFIX),
 \   'get_begin_col': eskk#util#get_local_funcref('Preedit_get_begin_col', s:SID_PREFIX),
-\   'get_preedit_range': eskk#util#get_local_funcref('Preedit_get_preedit_range', s:SID_PREFIX),
+\   'set_begin_col': eskk#util#get_local_funcref('Preedit_set_begin_col', s:SID_PREFIX),
 \   'dump': eskk#util#get_local_funcref('Preedit_dump', s:SID_PREFIX),
 \}
 

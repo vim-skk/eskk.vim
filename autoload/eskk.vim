@@ -491,13 +491,7 @@ function! s:handle_popupmenu_keys(stash) "{{{
     let preedit = a:stash.preedit
     let char = a:stash.char
 
-    let range = preedit.get_preedit_range()
-    if empty(range)
-        return 0
-    endif
-    let [begin, end] = range
-
-    let inserted_str = preedit.get_old_line()[begin : end]
+    let inserted_str = preedit.get_inserted_str()
     let selected_default = inserted_str ==# preedit.get_display_str()
 
     if char ==# "\<CR>" || char ==# "\<Tab>"
@@ -778,6 +772,7 @@ function! s:do_sticky(stash) "{{{
             \   [undo_char]
             \)
         endif
+        call preedit.set_begin_col(col('.'))
         call preedit.set_henkan_phase(g:eskk#preedit#PHASE_HENKAN)
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN
         if !buf_str.rom_str.empty()
@@ -2125,8 +2120,6 @@ function! eskk#filter(char) "{{{
 
     " Set old string. (it is used by Preedit.rewrite())
     call preedit.set_old_str(preedit.get_display_str())
-    call preedit.set_old_line(getline('.'))
-    call preedit.set_old_col(col('.'))
 
     try
         " Push a pressed character.
@@ -2183,6 +2176,8 @@ function! eskk#filter(char) "{{{
         if preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_NORMAL
             call preedit.get_current_buf_str().rom_pairs.clear()
         endif
+        " Set old string. (it is used by Preedit.rewrite())
+        call preedit.set_old_str(preedit.get_display_str())
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(stash, error) "{{{
