@@ -187,12 +187,21 @@ function! s:Preedit_set_old_line(line) dict "{{{
     let self._old_line = a:line
 endfunction "}}}
 function! s:Preedit_get_old_line() dict "{{{
+    if self._old_line is -1
+        let self._old_line = getline('.')
+    endif
     return self._old_line
 endfunction "}}}
 function! s:Preedit_set_old_col(col) dict "{{{
-    let self._old_col = a:col
+    let self._old_col =
+    \   a:col <=# 0 ? 1 :
+    \   a:col ># col('$') ? col('$') :
+    \   a:col
 endfunction "}}}
 function! s:Preedit_get_old_col() dict "{{{
+    if self._old_col is -1
+        let self._old_col = col('.')
+    endif
     return self._old_col
 endfunction "}}}
 
@@ -714,7 +723,7 @@ let s:Preedit = {
 \   ],
 \   '_kakutei_str': '',
 \   '_old_str': '',
-\   '_old_line': '',
+\   '_old_line': -1,
 \   '_old_col': -1,
 \   '_henkan_phase': g:eskk#preedit#PHASE_NORMAL,
 \   '_filter_queue': [],
