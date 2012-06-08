@@ -43,7 +43,7 @@ endif
 function! eskk#util#assert(cond, msg) "{{{
     if !a:cond
         throw eskk#util#build_error(
-        \   ['eskk', 'error'],
+        \   ['eskk', 'util'],
         \   ['assertion failed', a:msg]
         \)
     endif
