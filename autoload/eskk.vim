@@ -545,7 +545,7 @@ endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let preedit = a:stash.preedit
     if preedit.get_old_str() == ''
-        call preedit.push_kakutei_str("\<BS>")
+        call preedit.push_kakutei_str("\<C-h>")
         return
     endif
 
