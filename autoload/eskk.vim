@@ -514,7 +514,6 @@ function! s:handle_popupmenu_keys(stash) "{{{
         call s:kakutei_pum(a:stash)
         return 1
     elseif char ==# "\<C-e>"
-        " FIXME: wrongly removes one character before preedit.
         let disp = preedit.get_display_str(0)
         call preedit.reset()
         call preedit.set_old_str(inserted_str)
