@@ -1274,10 +1274,12 @@ function! s:check_accidental_char(input) "{{{
         \   "'".strtrans(a:input)."' contains unprintable character."
         \ . " Do you really want to register? (yes/no):")
         return answer =~? '^y\%[es]$'
-    elseif a:input =~# '^[ 　]*$'
+    elseif a:input =~# '[ 　]'
+        let msg = a:input =~# '^[ 　]*$' ?
+        \   'empty string was input.' :
+        \   "'".strtrans(a:input)."' contains space(s)."
         let answer = eskk#util#input(
-        \   "empty string was input."
-        \ . " Do you really want to register? (yes/no):")
+        \   msg . " Do you really want to register? (yes/no):")
         return answer =~? '^y\%[es]$'
     else
         return 1
