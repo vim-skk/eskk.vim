@@ -509,7 +509,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
             else
                 " No more pages. Register new word.
                 let dict = eskk#get_skk_dict()
-                let input = dict.remember_word_prompt(self)[0]
+                let input = dict.remember_word_prompt_hr(self)[0]
                 let henkan_buf_str = self.preedit.get_buf_str(
                 \   g:eskk#preedit#PHASE_HENKAN
                 \)
@@ -717,7 +717,7 @@ function! s:HenkanResult_update_rank() dict "{{{
     " Move self to the first.
     let dict = eskk#get_skk_dict()
     call dict.forget_word(rw)
-    call dict.remember_word(rw)
+    call dict.remember_word_rw(rw)
 endfunction "}}}
 
 
@@ -1215,11 +1215,14 @@ function! s:Dictionary_refer(preedit, key, okuri, okuri_rom) dict "{{{
 endfunction "}}}
 
 " Register new word (registered word) at command-line.
-function! s:Dictionary_remember_word_prompt(henkan_result) dict "{{{
+function! s:Dictionary_remember_word_prompt_hr(henkan_result) dict "{{{
     let key       = a:henkan_result.get_key()
     let okuri     = a:henkan_result.get_okuri()
     let okuri_rom = a:henkan_result.get_okuri_rom()
-
+    return self.remember_word_prompt(key, okuri, okuri_rom)
+endfunction "}}}
+function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
+    let [key, okuri, okuri_rom] = [a:key, a:okuri, a:okuri_rom]
 
     " Save `&imsearch`.
     let save_imsearch = &l:imsearch
@@ -1259,9 +1262,7 @@ function! s:Dictionary_remember_word_prompt(henkan_result) dict "{{{
         let [input, annotation] =
         \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
         let annotation = substitute(annotation, '^;', '', '')
-        call self.remember_word(
-        \       s:registered_word_new(
-        \           input, key, okuri, okuri_rom, annotation))
+        call self.remember_word(input, key, okuri, okuri_rom, annotation)
     endif
 
     call s:clear_command_line()
@@ -1283,7 +1284,11 @@ function! s:Dictionary_forget_word(word) dict "{{{
 endfunction "}}}
 
 " Add registered word.
-function! s:Dictionary_remember_word(word) dict "{{{
+function! s:Dictionary_remember_word(input, key, okuri, okuri_rom, annotation) dict "{{{
+    let word = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom, a:annotation)
+    return self.remember_word_rw(word)
+endfunction "}}}
+function! s:Dictionary_remember_word_rw(word) dict "{{{
     call self._registered_words.unshift(a:word)
 
     if self._registered_words.size() >= g:eskk#dictionary_save_count
@@ -1477,9 +1482,11 @@ let s:Dictionary = {
 \
 \   'refer': eskk#util#get_local_funcref('Dictionary_refer', s:SID_PREFIX),
 \   'remember_word_prompt': eskk#util#get_local_funcref('Dictionary_remember_word_prompt', s:SID_PREFIX),
+\   'remember_word_prompt_hr': eskk#util#get_local_funcref('Dictionary_remember_word_prompt_hr', s:SID_PREFIX),
 \   'forget_all_words': eskk#util#get_local_funcref('Dictionary_forget_all_words', s:SID_PREFIX),
 \   'forget_word': eskk#util#get_local_funcref('Dictionary_forget_word', s:SID_PREFIX),
 \   'remember_word': eskk#util#get_local_funcref('Dictionary_remember_word', s:SID_PREFIX),
+\   'remember_word_rw': eskk#util#get_local_funcref('Dictionary_remember_word_rw', s:SID_PREFIX),
 \   'get_registered_words': eskk#util#get_local_funcref('Dictionary_get_registered_words', s:SID_PREFIX),
 \   'remove_registered_word': eskk#util#get_local_funcref('Dictionary_remove_registered_word', s:SID_PREFIX),
 \   'is_modified': eskk#util#get_local_funcref('Dictionary_is_modified', s:SID_PREFIX),

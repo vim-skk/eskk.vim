@@ -846,7 +846,7 @@ function! s:do_henkan_abbrev(stash, convert_at_exact_match) "{{{
     catch /^eskk: dictionary look up error/
         " No candidates.
         let [input, hira, okuri] =
-        \   dict.remember_word_prompt(
+        \   dict.remember_word_prompt_hr(
         \      dict.get_henkan_result()
         \   )
         if input != ''
@@ -929,7 +929,7 @@ function! s:do_henkan_other(stash, convert_at_exact_match) "{{{
     catch /^eskk: dictionary look up error/
         " No candidates.
         let [input, hira, okuri] =
-        \   dict.remember_word_prompt(
+        \   dict.remember_word_prompt_hr(
         \      dict.get_henkan_result()
         \   )
         if input != ''

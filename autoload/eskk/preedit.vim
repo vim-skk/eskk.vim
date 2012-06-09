@@ -415,7 +415,7 @@ function! s:get_next_candidate(this, stash, next) "{{{
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
             let [input, hira, okuri] =
-            \   dict.remember_word_prompt(
+            \   dict.remember_word_prompt_hr(
             \      dict.get_henkan_result()
             \   )
             if input != ''
