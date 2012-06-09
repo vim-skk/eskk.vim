@@ -263,14 +263,14 @@ function! eskk#map#handle_special_lhs(char, type, stash) "{{{
     \   && has_key(eskk_mappings[a:type], 'fn')
     \   && call(eskk_mappings[a:type].fn, [a:stash])
 endfunction "}}}
-function! s:create_map(type, options, lhs, rhs, from) "{{{
+function! s:create_map(type, options, lhs, rhs) "{{{
     let lhs = a:lhs
     let rhs = a:rhs
 
     let eskk_mappings = eskk#_get_eskk_mappings()
     if !has_key(eskk_mappings, a:type)
         call eskk#logger#warn(
-        \   a:from . ": unknown type '" . a:type . "'."
+        \   "EskkMap: unknown type '" . a:type . "'."
         \)
         return
     endif
@@ -278,15 +278,14 @@ function! s:create_map(type, options, lhs, rhs, from) "{{{
 
     if a:options.unique && has_key(type_st, 'lhs')
         call eskk#logger#warn(
-        \   a:type . ': -unique is specified'
-        \       . ' and mapping already exists. skip.'
+        \   'EskkMap: ' . a:type . ': the mapping already exists.'
         \)
         return
     endif
     let type_st.options = a:options
     let type_st.lhs = lhs
 endfunction "}}}
-function! s:create_general_map(self, options, lhs, rhs, from) "{{{
+function! s:create_general_map(self, options, lhs, rhs) "{{{
     let self = a:self
     let lhs = a:lhs
     let rhs = a:rhs
@@ -298,7 +297,7 @@ function! s:create_general_map(self, options, lhs, rhs, from) "{{{
     endif
     if has_key(type_st, lhs) && a:options.unique
         call eskk#logger#warn(
-        \   a:from . ": Already mapped to '" . lhs . "'."
+        \   'EskkMap: ' . lhs . ': the mapping already exists.'
         \)
         return
     endif
@@ -408,7 +407,6 @@ function! eskk#map#_cmd_eskk_map(args) "{{{
         \   options,
         \   lhs,
         \   rhs,
-        \   'EskkMap'
         \)
     else
         call s:create_map(
@@ -416,7 +414,6 @@ function! eskk#map#_cmd_eskk_map(args) "{{{
         \   options,
         \   lhs,
         \   rhs,
-        \   'EskkMap'
         \)
     endif
 endfunction "}}}
