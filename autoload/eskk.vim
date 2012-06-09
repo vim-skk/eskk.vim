@@ -1434,7 +1434,6 @@ function! eskk#_initialize() "{{{
     " Default mappings - :EskkMap {{{
     call eskk#commands#define()
 
-    " TODO: Separate to hira:disable, kata:disable, hankata:disable ?
     EskkMap -type=disable -unique <C-j>
 
     EskkMap -type=kakutei -unique <C-j>
