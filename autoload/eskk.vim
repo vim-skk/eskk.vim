@@ -259,7 +259,7 @@ function! s:handle_kakutei(stash) "{{{
     \   || phase ==# g:eskk#preedit#PHASE_OKURI
     \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         if !empty(preedit.get_display_str(0))
-            call s:do_enter(a:stash)
+            call s:do_enter_no_egglike(a:stash)
             return 1
         endif
     endif
@@ -471,7 +471,7 @@ function! s:asym_filter(stash) "{{{
                 endif
             endif
         else
-            call s:do_enter(a:stash)
+            call s:do_enter_no_egglike(a:stash)
             call preedit.push_filter_queue(char)
         endif
     else
@@ -654,7 +654,7 @@ endfunction "}}}
 function! s:do_enter(stash) "{{{
     let times = s:get_enter_repeat_times(a:stash)
     for _ in range(times)
-        call s:_do_enter(a:stash)
+        call s:do_enter_no_egglike(a:stash)
     endfor
 endfunction "}}}
 function! s:get_enter_repeat_times(stash) "{{{
@@ -672,7 +672,7 @@ function! s:get_enter_repeat_times(stash) "{{{
     " Default is <CR> once.
     return 1
 endfunction "}}}
-function! s:_do_enter(stash) "{{{
+function! s:do_enter_no_egglike(stash) "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     let enter_char =
@@ -782,7 +782,7 @@ function! s:do_sticky(stash) "{{{
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
         " nop
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
-        call s:do_enter(a:stash)
+        call s:do_enter_no_egglike(a:stash)
         call s:do_sticky(a:stash)
     else
         throw eskk#internal_error(['eskk', 'preedit'])
