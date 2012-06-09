@@ -1275,10 +1275,6 @@ endfunction "}}}
 
 " Clear given registered word.
 function! s:Dictionary_forget_word(word) dict "{{{
-    if !self._registered_words.has(a:word)
-        return
-    endif
-
     call self.remove_registered_word(a:word)
 
     if !empty(self._current_henkan_result)
@@ -1288,10 +1284,6 @@ endfunction "}}}
 
 " Add registered word.
 function! s:Dictionary_remember_word(word) dict "{{{
-    if self._registered_words.has(a:word)
-        return
-    endif
-
     call self._registered_words.unshift(a:word)
 
     if self._registered_words.size() >= g:eskk#dictionary_save_count
