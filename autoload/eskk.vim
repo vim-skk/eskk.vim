@@ -211,7 +211,6 @@ function! eskk#initialize_instance() "{{{
     let s:eskk_instance_id = 0
 endfunction "}}}
 function! eskk#create_new_instance() "{{{
-    " TODO: CoW
     if s:eskk_instance_id != len(s:eskk_instances) - 1
         throw eskk#internal_error(['eskk'], "mismatch values between s:eskk_instance_id and s:eskk_instances")
     endif
@@ -805,11 +804,6 @@ function! s:do_henkan(stash, ...) "{{{
 
     if phase isnot g:eskk#preedit#PHASE_HENKAN
     \   && phase isnot g:eskk#preedit#PHASE_OKURI
-        " TODO Add an error id like Vim
-        call eskk#logger#warnf(
-        \   "s:do_henkan() does not support phase %d.",
-        \   phase
-        \)
         return
     endif
 
@@ -1107,7 +1101,6 @@ function! s:filter_rom_exact_match(stash, table) "{{{
 
         call eskk#util#assert(!okuri_buf_str.rom_pairs.empty(),
         \                     'matched must not be empty.')
-        " TODO `len(matched) == 1`: Do henkan at only the first time.
 
         if !has_rest && g:eskk#auto_henkan_at_okuri_match
             call s:do_henkan(a:stash)
@@ -1122,9 +1115,6 @@ function! s:filter_rom_no_match(stash, table) "{{{
     let char = a:stash.char
     let buf_str = a:stash.preedit.get_current_buf_str()
     let rom_str_without_char = buf_str.rom_str.get()
-
-    " TODO: Save previous (or more?) searched result
-    " with map/candidates of rom_str.
 
     let NO_MAP = []
     let map = a:table.get_map(rom_str_without_char, NO_MAP)
@@ -1159,7 +1149,6 @@ function! s:filter_rom_no_match(stash, table) "{{{
     endif
 
     " Handle `char`.
-    " TODO: Can do it recursively?
     unlet map
     let map = a:table.get_map(char, NO_MAP)
     if map isnot NO_MAP
@@ -1218,7 +1207,6 @@ function! s:abbrev_filter(stash) "{{{
     " Handle special characters.
     " These characters are handled regardless of current phase.
     if eskk#map#is_special_lhs(char, 'cancel')
-        " TODO: Back to previous mode?
         call s:do_cancel(a:stash)
         call eskk#set_mode('hira')
         return
@@ -1226,7 +1214,6 @@ function! s:abbrev_filter(stash) "{{{
         if buf_str.rom_str.get() == ''
             " If backspace-key was pressed at empty string,
             " leave abbrev mode.
-            " TODO: Back to previous mode?
             call eskk#set_mode('hira')
         else
             call s:do_backspace(a:stash)
@@ -1268,7 +1255,6 @@ function! s:abbrev_filter(stash) "{{{
             call preedit.push_filter_queue(char)
 
             " Leave abbrev mode.
-            " TODO: Back to previous mode?
             call eskk#set_mode('hira')
         endif
     else
@@ -1400,7 +1386,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#enable_completion', 1)
     call eskk#util#set_default('g:eskk#max_candidates', 30)
     call eskk#util#set_default('g:eskk#start_completion_length', 3)
-    call eskk#util#set_default('g:eskk#register_completed_word', 1)    " TODO
+    call eskk#util#set_default('g:eskk#register_completed_word', 1)
     call eskk#util#set_default('g:eskk#egg_like_newline_completion', 0)
 
     " Cursor color

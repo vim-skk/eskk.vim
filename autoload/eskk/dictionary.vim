@@ -606,7 +606,7 @@ endfunction "}}}
 " - self._candidates
 " - SKK dictionary
 " -- User dictionary
-" -- TODO: System dictionary (skk-ignore-dic-word) (Issue #86)
+" -- System dictionary (TODO: skk-ignore-dic-word. see #86)
 function! s:HenkanResult_delete_from_dict() dict "{{{
     try
         return self.do_delete_from_dict()

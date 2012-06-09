@@ -266,7 +266,6 @@ function! s:get_map(table, lhs, index, ...) "{{{
         for base in a:table._bases
             let r = s:get_map(base, a:lhs, a:index, not_found)
             if r isnot not_found
-                " TODO: cache here
                 return r
             endif
         endfor
@@ -293,11 +292,6 @@ endfunction "}}}
 
 function! s:AbstractTable_load() dict "{{{
     if has_key(self, '_bases')
-        " TODO: after initializing base tables,
-        " this object has no need to have base references.
-        " because they can ("should", curerntly) be
-        " obtained from s:table_defs in autoload/eskk.vim
-        " (it can be considered as flyweight object for all tables)
         for base in self._bases
             call s:do_initialize(base)
         endfor
