@@ -45,7 +45,7 @@ function! s:create_default_mapopt() "{{{
     \   'buffer': 0,
     \   'expr': 0,
     \   'silent': 0,
-    \   'unique': 0,
+    \   'unique': 1,
     \   'noremap': 1,
     \   'map-if': '1',
     \}
@@ -375,6 +375,8 @@ function! s:parse_options(args) "{{{
             let type = value
         elseif has_key(opt, optname)
             let opt[optname] = value
+        elseif optname ==# 'no-unique'
+            let opt.unique = 0
         elseif optname ==# 'remap'
             let opt.noremap = 0
         else
