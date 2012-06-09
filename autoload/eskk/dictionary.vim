@@ -1258,7 +1258,7 @@ function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
     endtry
 
 
-    if input != ''
+    if input != '' && s:check_accidental_char(input)
         let [input, annotation] =
         \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
         let annotation = substitute(annotation, '^;', '', '')
@@ -1267,6 +1267,21 @@ function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
 
     call s:clear_command_line()
     return [input, key, okuri]
+endfunction "}}}
+function! s:check_accidental_char(input) "{{{
+    if a:input !=# strtrans(a:input)
+        let answer = eskk#util#input(
+        \   "'".strtrans(a:input)."' contains unprintable character."
+        \ . " Do you really want to register? (yes/no):")
+        return answer =~? '^y\%[es]$'
+    elseif a:input =~# '^\s*$'
+        let answer = eskk#util#input(
+        \   "empty string was input."
+        \ . " Do you really want to register? (yes/no):")
+        return answer =~? '^y\%[es]$'
+    else
+        return 1
+    endif
 endfunction "}}}
 
 " Clear all registered words.
