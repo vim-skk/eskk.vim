@@ -52,7 +52,7 @@ function! s:create_default_mapopt() "{{{
 endfunction "}}}
 
 function! eskk#map#get_map_modes() "{{{
-    " XXX: :lmap can't remap to :lmap. It's Vim's bug.
+    " :lmap can't remap to :lmap. It's Vim's bug.
     "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
     " So I use :map! mappings for 'fallback' of :lmap.
 

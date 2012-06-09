@@ -648,10 +648,6 @@ function! s:Preedit_push_filter_post_char(char) dict "{{{
 endfunction "}}}
 
 
-" XXX: begin col of when?
-" 1. before eskk#filter()
-" 2. during eskk#filter()
-" 3. after eskk#filter() (neocomplcache)
 function! s:Preedit_set_begin_col(col) dict "{{{
     let self._begin_col = a:col
 endfunction "}}}

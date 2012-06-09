@@ -1032,8 +1032,6 @@ function! s:filter_rom_exact_match(stash, table) "{{{
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
         " Enter phase henkan select with henkan.
 
-        " XXX Write test and refactoring.
-        "
         " Input: "SesSi"
         " Convert from:
         "   henkan buf str:

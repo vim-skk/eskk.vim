@@ -74,7 +74,6 @@ function! s:delete_candidate_from_line(line, candidate) "{{{
     let candidates =
     \   eskk#dictionary#parse_skk_dict_line(
     \       a:line, a:candidate.from_type)
-    " XXX: Should we see `a:candidate.annotation`?
     let not_match =
     \   '!(v:val.input ==# a:candidate.input'
     \   . '&& v:val.key ==# a:candidate.key'
