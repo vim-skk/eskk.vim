@@ -1493,9 +1493,9 @@ function! eskk#_initialize() "{{{
 
     EskkMap -type=mode:abbrev:henkan-key -unique <Space>
 
-    EskkMap -remap -unique <C-^> <Plug>(eskk:toggle)
+    EskkMap -expr -unique <C-^> eskk#toggle()
 
-    EskkMap -remap <BS> <Plug>(eskk:filter:<C-h>)
+    EskkMap -expr <BS> eskk#filter("\<C-h>")
 
     EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
     " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
@@ -2116,8 +2116,7 @@ function! s:force_disable_eskk(stash, error) "{{{
     " Vim does not disable IME
     " when changing the value of &iminsert and/or &imsearch.
     " so do it manually.
-    call eskk#map#map('b', '<Plug>(eskk:_reenter_insert_mode)', '<esc>i')
-    return "\<Plug>(eskk:_reenter_insert_mode)"
+    return "\<Esc>i"
 endfunction "}}}
 
 " g:eskk#use_color_cursor

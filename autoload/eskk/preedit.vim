@@ -203,21 +203,13 @@ function! s:Preedit_rewrite() dict "{{{
     \   call('s:calculate_rewrite', [], self)
     let self._kakutei_str = ''
 
-    if inserted !=# ''
-        let inst = eskk#get_buffer_instance()
-        let inst.inserted = inserted
-        call eskk#map#map(
-        \   'be',
-        \   '<Plug>(eskk:expr:_inserted)',
-        \   'eskk#get_buffer_instance().inserted'
-        \)
-    endif
     let filter =
     \   repeat("\<C-h>", bs_num)
-    \   . (inserted !=# '' ? "\<Plug>(eskk:expr:_inserted)" : '')
+    \   . inserted
 
     let filter_pre = self._filter_pre
     let self._filter_pre = ''
+
     let filter_post = self._filter_post
     let self._filter_post = ''
 
