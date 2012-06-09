@@ -230,13 +230,6 @@ g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
 	\	'hankata': 'ｧｱ',
 	\	'abbrev': 'aあ'
 	\}
-<
-
-Table
---------
-
-g:eskk#cache_table_map			*g:eskk#cache_table_map*
-							(Default: 1)
 
 
 Markers

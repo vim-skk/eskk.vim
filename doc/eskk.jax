@@ -235,13 +235,6 @@ g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
 	\	'hankata': 'ｧｱ',
 	\	'abbrev': 'aあ'
 	\}
-<
-
-テーブルに関する変数
---------
-
-g:eskk#cache_table_map			*g:eskk#cache_table_map*
-							(デフォルト値: 1)
 
 
 マーカーに関する変数

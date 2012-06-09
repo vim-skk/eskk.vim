@@ -204,6 +204,7 @@ let [
 \   s:MAP_INDEX,
 \   s:REST_INDEX
 \] = range(2)
+let s:ENABLE_CACHE_MAP = 1
 
 function! s:AbstractTable_has_map(lhs) dict "{{{
     let not_found = {}
@@ -231,7 +232,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
     endif
 
     let data = a:table.load()
-    if g:eskk#cache_table_map
+    if s:ENABLE_CACHE_MAP
     \   && has_key(a:table._cached_maps, a:lhs)
         if a:table._cached_maps[a:lhs][a:index] != ''
             return a:table._cached_maps[a:lhs][a:index]
@@ -244,7 +245,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
         if has_key(data, a:lhs)
         \   && eskk#util#has_idx(data[a:lhs], a:index)
         \   && data[a:lhs][a:index] != ''
-            if g:eskk#cache_table_map
+            if s:ENABLE_CACHE_MAP
                 let a:table._cached_maps[a:lhs] = data[a:lhs]
             endif
             return data[a:lhs][a:index]
@@ -253,7 +254,7 @@ function! s:get_map(table, lhs, index, ...) "{{{
         if has_key(data, a:lhs)
             if data[a:lhs].method ==# 'add'
             \   && data[a:lhs].data[a:index] != ''
-                if g:eskk#cache_table_map
+                if s:ENABLE_CACHE_MAP
                     let a:table._cached_maps[a:lhs] = data[a:lhs].data
                 endif
                 return data[a:lhs].data[a:index]

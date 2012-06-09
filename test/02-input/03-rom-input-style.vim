@@ -68,23 +68,13 @@ endfunction
 
 function! s:run()
     let rom_input_style = g:eskk#rom_input_style
-    let cache_table_map = g:eskk#cache_table_map
 
     try
-        Diag 'let g:eskk#cache_table_map = 0'
-        let g:eskk#cache_table_map = 0
-        call s:do_test_skk()
-        call s:do_test_msime()
-        call s:do_test_quickmatch()
-
-        Diag 'let g:eskk#cache_table_map = 1'
-        let g:eskk#cache_table_map = 1
         call s:do_test_skk()
         call s:do_test_msime()
         call s:do_test_quickmatch()
     finally
         let g:eskk#rom_input_style = rom_input_style
-        let g:eskk#cache_table_map = cache_table_map
     endtry
 endfunction
 

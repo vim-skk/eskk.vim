@@ -1371,9 +1371,6 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#initial_mode', 'hira')
     call eskk#util#set_default_dict('g:eskk#statusline_mode_strings', {'hira': 'あ', 'kata': 'ア', 'ascii': 'aA', 'zenei': 'ａ', 'hankata': 'ｧｱ', 'abbrev': 'aあ'})
 
-    " Table
-    call eskk#util#set_default('g:eskk#cache_table_map', 1)
-
     " Markers
     call eskk#util#set_default('g:eskk#marker_henkan', '▽')
     call eskk#util#set_default('g:eskk#marker_okuri', '*')
