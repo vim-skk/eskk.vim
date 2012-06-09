@@ -212,10 +212,8 @@ function! s:Preedit_rewrite() dict "{{{
         \   'eskk#get_buffer_instance().inserted'
         \)
     endif
-    let bs = eskk#map#key2char(
-    \           eskk#map#get_special_map("backspace-key"))
     let filter =
-    \   repeat(bs, bs_num)
+    \   repeat("\<BS>", bs_num)
     \   . (inserted !=# '' ? "\<Plug>(eskk:expr:_inserted)" : '')
 
     let filter_pre = self._filter_pre
@@ -257,8 +255,6 @@ function! s:calculate_rewrite() dict "{{{
             " Remove common string.
             let old = strpart(old, idx)
             let new = strpart(new, idx)
-            let bs = eskk#map#key2char(
-            \           eskk#map#get_special_map("backspace-key"))
             return [eskk#util#mb_strlen(old), new]
         else
             " Delete current string, and insert new string.
@@ -602,12 +598,8 @@ endfunction "}}}
 function! s:Preedit_remove_display_str() dict "{{{
     let current_str = self.get_display_str()
 
-    " NOTE: This function return value is not remapped.
-    let bs = eskk#map#get_special_key('backspace-key')
-    call eskk#util#assert(bs != '', 'bs must not be empty string')
-
     return repeat(
-    \   eskk#map#key2char(bs),
+    \   "\<BS>",
     \   eskk#util#mb_strlen(current_str)
     \)
 endfunction "}}}
