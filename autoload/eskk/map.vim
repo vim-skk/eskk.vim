@@ -58,41 +58,6 @@ function! eskk#map#get_map_modes() "{{{
 
     return 'ic'
 endfunction "}}}
-function! eskk#map#get_filter_map(key) "{{{
-    " NOTE:
-    " a:key is escaped. So when a:key is '<C-a>', return value is
-    "   `<Plug>(eskk:filter:<C-a>)`
-    " not
-    "   `<Plug>(eskk:filter:^A)` (^A is control character)
-
-    let lhs = printf('<Plug>(eskk:filter:%s)', a:key)
-    if maparg(lhs, eskk#map#get_map_modes()) != ''
-        return lhs
-    endif
-
-    call eskk#map#map('re', lhs, 'eskk#filter(' . string(a:key) . ')')
-
-    return lhs
-endfunction "}}}
-function! eskk#map#get_nore_map(key, ...) "{{{
-    " NOTE:
-    " a:key is escaped. So when a:key is '<C-a>', return value is
-    "   `<Plug>(eskk:filter:<C-a>)`
-    " not
-    "   `<Plug>(eskk:filter:^A)` (^A is control character)
-
-    let [rhs, key] = [a:key, a:key]
-
-    let lhs = printf('<Plug>(eskk:noremap:%s)', key)
-    if maparg(lhs, 'icl') != ''
-        return lhs
-    endif
-
-    let options = a:0 ? substitute(a:1, 'r', '', 'g') : ''
-    call eskk#map#map(options, lhs, rhs)
-
-    return lhs
-endfunction "}}}
 
 function! eskk#map#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
@@ -120,9 +85,9 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
 endfunction "}}}
 function! eskk#map#set_up_key(key, ...) "{{{
     call eskk#map#map(
-    \   'rb' . (a:0 ? a:1 : ''),
+    \   'be' . (a:0 ? a:1 : ''),
     \   a:key,
-    \   eskk#map#get_filter_map(a:key),
+    \   'eskk#filter('.string(eskk#map#key2char(a:key)).')',
     \   'l'
     \)
 endfunction "}}}
@@ -283,23 +248,6 @@ function! eskk#map#get_special_key(type) "{{{
     if has_key(eskk_mappings, a:type)
     \   && has_key(eskk_mappings[a:type], 'lhs')
         return eskk_mappings[a:type].lhs
-    else
-        throw eskk#internal_error(
-        \   ['eskk', 'preedit'],
-        \   "Unknown map type: " . a:type
-        \)
-    endif
-endfunction "}}}
-function! eskk#map#get_special_map(type) "{{{
-    let eskk_mappings = eskk#_get_eskk_mappings()
-    if has_key(eskk_mappings, a:type)
-    \   && has_key(eskk_mappings[a:type], 'lhs')
-        let map = printf('<Plug>(eskk:_noremap_%s)', a:type)
-        if maparg(map, eskk#map#get_map_modes()) == ''
-            " Not to remap.
-            call eskk#map#map('', map, eskk_mappings[a:type].lhs)
-        endif
-        return map
     else
         throw eskk#internal_error(
         \   ['eskk', 'preedit'],

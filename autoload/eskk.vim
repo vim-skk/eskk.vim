@@ -545,11 +545,7 @@ endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let preedit = a:stash.preedit
     if preedit.get_old_str() == ''
-        call preedit.push_kakutei_str(
-        \   eskk#map#key2char(
-        \      eskk#map#get_special_key('backspace-key')
-        \   )
-        \)
+        call preedit.push_kakutei_str("\<C-h>")
         return
     endif
 
@@ -730,9 +726,7 @@ function! s:do_sticky(stash) "{{{
             call buf_str.clear()
         endif
         if get(g:eskk#set_undo_point, 'sticky', 0) && mode() ==# 'i'
-            let undo_char =
-            \   eskk#map#key2char(eskk#map#get_nore_map('<C-g>u'))
-            call preedit.push_filter_pre_char(undo_char)
+            call preedit.push_filter_pre_char("\<C-g>u")
         endif
         call preedit.set_begin_col(col('.'))
         call preedit.set_henkan_phase(g:eskk#preedit#PHASE_HENKAN)
@@ -769,15 +763,11 @@ function! s:do_escape(stash) "{{{
     \)
 
     let kakutei_str = preedit.get_display_str(0)
-    " NOTE: This function return value is not remapped.
-    let esc = eskk#map#get_special_key('escape-key')
-    call eskk#util#assert(esc != '', 'esc must not be empty string')
-    let esc = eskk#map#key2char(esc)
 
     if g:eskk#rom_input_style ==# 'skk'
-        call preedit.kakutei(esc)
+        call preedit.kakutei("\<Esc>")
     elseif g:eskk#rom_input_style ==# 'msime'
-        call preedit.kakutei(kakutei_str . esc)
+        call preedit.kakutei(kakutei_str . "\<Esc>")
     else
         throw eskk#internal_error(
         \   ['eskk'],
@@ -1441,7 +1431,6 @@ function! eskk#_initialize() "{{{
     " Default mappings - :EskkMap {{{
     call eskk#commands#define()
 
-    " TODO: Separate to hira:disable, kata:disable, hankata:disable ?
     EskkMap -type=disable -unique <C-j>
 
     EskkMap -type=kakutei -unique <C-j>
@@ -1501,9 +1490,9 @@ function! eskk#_initialize() "{{{
 
     EskkMap -type=mode:abbrev:henkan-key -unique <Space>
 
-    EskkMap -remap -unique <C-^> <Plug>(eskk:toggle)
+    EskkMap -expr -unique <C-^> eskk#toggle()
 
-    EskkMap -remap <BS> <Plug>(eskk:filter:<C-h>)
+    EskkMap -expr <BS> eskk#filter("\<C-h>")
 
     EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
     " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
@@ -2124,8 +2113,7 @@ function! s:force_disable_eskk(stash, error) "{{{
     " Vim does not disable IME
     " when changing the value of &iminsert and/or &imsearch.
     " so do it manually.
-    call eskk#map#map('b', '<Plug>(eskk:_reenter_insert_mode)', '<esc>i')
-    return "\<Plug>(eskk:_reenter_insert_mode)"
+    return "\<Esc>i"
 endfunction "}}}
 
 " g:eskk#use_color_cursor

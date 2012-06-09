@@ -203,23 +203,13 @@ function! s:Preedit_rewrite() dict "{{{
     \   call('s:calculate_rewrite', [], self)
     let self._kakutei_str = ''
 
-    if inserted !=# ''
-        let inst = eskk#get_buffer_instance()
-        let inst.inserted = inserted
-        call eskk#map#map(
-        \   'be',
-        \   '<Plug>(eskk:expr:_inserted)',
-        \   'eskk#get_buffer_instance().inserted'
-        \)
-    endif
-    let bs = eskk#map#key2char(
-    \           eskk#map#get_special_map("backspace-key"))
     let filter =
-    \   repeat(bs, bs_num)
-    \   . (inserted !=# '' ? "\<Plug>(eskk:expr:_inserted)" : '')
+    \   repeat("\<C-h>", bs_num)
+    \   . inserted
 
     let filter_pre = self._filter_pre
     let self._filter_pre = ''
+
     let filter_post = self._filter_post
     let self._filter_post = ''
 
@@ -252,13 +242,11 @@ function! s:calculate_rewrite() dict "{{{
         let idx = eskk#util#diffidx(old, new)
         if idx != -1
             " When new == "foobar", old == "fool"
-            " Insert "<BS>bar".
+            " Insert "<C-h>bar".
 
             " Remove common string.
             let old = strpart(old, idx)
             let new = strpart(new, idx)
-            let bs = eskk#map#key2char(
-            \           eskk#map#get_special_map("backspace-key"))
             return [eskk#util#mb_strlen(old), new]
         else
             " Delete current string, and insert new string.
@@ -602,12 +590,8 @@ endfunction "}}}
 function! s:Preedit_remove_display_str() dict "{{{
     let current_str = self.get_display_str()
 
-    " NOTE: This function return value is not remapped.
-    let bs = eskk#map#get_special_key('backspace-key')
-    call eskk#util#assert(bs != '', 'bs must not be empty string')
-
     return repeat(
-    \   eskk#map#key2char(bs),
+    \   "\<C-h>",
     \   eskk#util#mb_strlen(current_str)
     \)
 endfunction "}}}

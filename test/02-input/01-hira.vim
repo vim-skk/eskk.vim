@@ -35,6 +35,8 @@ function! s:run()
     \   ["a\<C-h>\<C-h>", "\<C-h>"],
     \   [" \<C-h>", ""],
     \   [" \<C-h>\<C-h>", "\<C-h>"],
+    \   [" \<BS>", ""],
+    \   [" \<BS>\<BS>", "\<C-h>"],
     \]
         let g:eskk#egg_like_newline = 1
         Is eskk#test#emulate_filter_keys(l), r,
