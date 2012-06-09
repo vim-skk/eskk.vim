@@ -1274,7 +1274,7 @@ function! s:check_accidental_char(input) "{{{
         \   "'".strtrans(a:input)."' contains unprintable character."
         \ . " Do you really want to register? (yes/no):")
         return answer =~? '^y\%[es]$'
-    elseif a:input =~# '^\s*$'
+    elseif a:input =~# '^[ 　]*$'
         let answer = eskk#util#input(
         \   "empty string was input."
         \ . " Do you really want to register? (yes/no):")
