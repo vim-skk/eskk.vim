@@ -519,24 +519,11 @@ function! s:handle_popupmenu_keys(stash) "{{{
         call preedit.set_old_str(inserted_str)
         call preedit.kakutei(disp)
         return 1
-    else
-        let POPUP_CHAR_TO_KEY = {
-        \   "\<PageUp>": "<PageUp>",
-        \   "\<PageDown>": "<PageDown>",
-        \   "\<Up>": "<Up>",
-        \   "\<Down>": "<Down>",
-        \   "\<C-n>": "<C-n>",
-        \   "\<C-p>": "<C-p>",
-        \}
-        if has_key(POPUP_CHAR_TO_KEY, char)
-            let key = POPUP_CHAR_TO_KEY[char]
-            call eskk#register_temp_event(
-            \   'filter-redispatch-pre',
-            \   'eskk#util#identity',
-            \   [eskk#map#key2char(eskk#map#get_nore_map(key))]
-            \)
-            return 1
-        endif
+    elseif char ==# "\<PageUp>" || char ==# "\<PageDown>"
+    \   || char ==# "\<Up>"     || char ==# "\<Down>"
+    \   || char ==# "\<C-n>"    || char ==# "\<C-p>"
+        call preedit.push_filter_pre_char(char)
+        return 1
     endif
 
     " Let filter function process the character.
@@ -554,11 +541,7 @@ function! s:kakutei_pum(stash) "{{{
 endfunction "}}}
 function! s:close_pum(stash) "{{{
     " Close popup.
-    call eskk#register_temp_event(
-    \   'filter-redispatch-pre',
-    \   'eskk#util#identity',
-    \   [eskk#map#key2char(eskk#map#get_nore_map("<C-y>"))]
-    \)
+    call a:stash.preedit.push_filter_pre_char("\<C-y>")
 endfunction "}}}
 function! s:do_backspace(stash) "{{{
     let preedit = a:stash.preedit
@@ -674,10 +657,7 @@ endfunction "}}}
 function! s:do_enter_no_egglike(stash) "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
-    let enter_char =
-    \   eskk#map#key2char(eskk#map#get_special_map('enter-key'))
-    let undo_char  =
-    \   eskk#map#key2char(eskk#map#get_nore_map('<C-g>u'))
+    let undo_char = "\<C-g>u"
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
 
@@ -696,11 +676,7 @@ function! s:do_enter_no_egglike(stash) "{{{
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN
         call preedit.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#util#identity',
-            \   [undo_char]
-            \)
+            call preedit.push_filter_post_char(undo_char)
         endif
 
         if !empty(henkan_result)
@@ -713,11 +689,7 @@ function! s:do_enter_no_egglike(stash) "{{{
         \   [g:eskk#preedit#PHASE_HENKAN, phase]
         \)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#util#identity',
-            \   [undo_char]
-            \)
+            call preedit.push_filter_post_char(undo_char)
         endif
 
         if !empty(henkan_result)
@@ -728,11 +700,7 @@ function! s:do_enter_no_egglike(stash) "{{{
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         call preedit.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
-            call eskk#register_temp_event(
-            \   'filter-redispatch-post',
-            \   'eskk#util#identity',
-            \   [undo_char]
-            \)
+            call preedit.push_filter_post_char(undo_char)
         endif
 
         if !empty(henkan_result)
@@ -765,11 +733,7 @@ function! s:do_sticky(stash) "{{{
         if get(g:eskk#set_undo_point, 'sticky', 0) && mode() ==# 'i'
             let undo_char =
             \   eskk#map#key2char(eskk#map#get_nore_map('<C-g>u'))
-            call eskk#register_temp_event(
-            \   'filter-redispatch-pre',
-            \   'eskk#util#identity',
-            \   [undo_char]
-            \)
+            call preedit.push_filter_pre_char(undo_char)
         endif
         call preedit.set_begin_col(col('.'))
         call preedit.set_henkan_phase(g:eskk#preedit#PHASE_HENKAN)
@@ -1701,19 +1665,6 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
-    " Create internal mappings. {{{
-    call eskk#map#map(
-    \   're',
-    \   '<Plug>(eskk:_filter_redispatch_pre)',
-    \   'join(eskk#throw_event("filter-redispatch-pre"), "")'
-    \)
-    call eskk#map#map(
-    \   're',
-    \   '<Plug>(eskk:_filter_redispatch_post)',
-    \   'join(eskk#throw_event("filter-redispatch-post"), "")'
-    \)
-    " }}}
-
     " Reset s:completed_candidates in autoload/eskk/complete.vim {{{
     " s:completed_candidates should have non-empty value
     " only during insert-mode.
@@ -2161,12 +2112,7 @@ function! eskk#filter(char) "{{{
 
         " NOTE: `preedit` may become invalid reference
         " because `st.filter(stash)` may call `eskk#set_preedit()`.
-        return
-        \   (eskk#has_event('filter-redispatch-pre') ?
-        \       "\<Plug>(eskk:_filter_redispatch_pre)" : '')
-        \   . preedit.rewrite()
-        \   . (eskk#has_event('filter-redispatch-post') ?
-        \       "\<Plug>(eskk:_filter_redispatch_post)" : '')
+        return eskk#get_preedit().rewrite()
 
     catch
         " Detect fatal error. disable eskk...

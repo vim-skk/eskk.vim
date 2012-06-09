@@ -214,8 +214,16 @@ function! s:Preedit_rewrite() dict "{{{
     endif
     let bs = eskk#map#key2char(
     \           eskk#map#get_special_map("backspace-key"))
-    return repeat(bs, bs_num)
+    let filter =
+    \   repeat(bs, bs_num)
     \   . (inserted !=# '' ? "\<Plug>(eskk:expr:_inserted)" : '')
+
+    let filter_pre = self._filter_pre
+    let self._filter_pre = ''
+    let filter_post = self._filter_post
+    let self._filter_post = ''
+
+    return filter_pre . filter . filter_post
 endfunction "}}}
 function! s:calculate_rewrite() dict "{{{
     let old = self._old_str
@@ -632,6 +640,14 @@ function! s:Preedit_shift_filter_queue() dict "{{{
 endfunction "}}}
 
 
+function! s:Preedit_push_filter_pre_char(char) dict "{{{
+    let self._filter_pre .= a:char
+endfunction "}}}
+function! s:Preedit_push_filter_post_char(char) dict "{{{
+    let self._filter_post .= a:char
+endfunction "}}}
+
+
 " XXX: begin col of when?
 " 1. before eskk#filter()
 " 2. during eskk#filter()
@@ -695,6 +711,8 @@ let s:Preedit = {
 \   '_begin_col': -1,
 \   '_henkan_phase': g:eskk#preedit#PHASE_NORMAL,
 \   '_filter_queue': [],
+\   '_filter_pre': '',
+\   '_filter_post': '',
 \
 \   'reset': eskk#util#get_local_funcref('Preedit_reset', s:SID_PREFIX),
 \   'get_buf_str': eskk#util#get_local_funcref('Preedit_get_buf_str', s:SID_PREFIX),
@@ -727,6 +745,8 @@ let s:Preedit = {
 \   'empty_filter_queue': eskk#util#get_local_funcref('Preedit_empty_filter_queue', s:SID_PREFIX),
 \   'push_filter_queue': eskk#util#get_local_funcref('Preedit_push_filter_queue', s:SID_PREFIX),
 \   'shift_filter_queue': eskk#util#get_local_funcref('Preedit_shift_filter_queue', s:SID_PREFIX),
+\   'push_filter_pre_char': eskk#util#get_local_funcref('Preedit_push_filter_pre_char', s:SID_PREFIX),
+\   'push_filter_post_char': eskk#util#get_local_funcref('Preedit_push_filter_post_char', s:SID_PREFIX),
 \   'get_begin_col': eskk#util#get_local_funcref('Preedit_get_begin_col', s:SID_PREFIX),
 \   'set_begin_col': eskk#util#get_local_funcref('Preedit_set_begin_col', s:SID_PREFIX),
 \   'dump': eskk#util#get_local_funcref('Preedit_dump', s:SID_PREFIX),

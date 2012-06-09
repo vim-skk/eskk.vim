@@ -55,20 +55,6 @@ function! s:emulate_char(c, ret) "{{{
     " NOTE: "\<Plug>" cannot be substituted by substitute().
     let r = s:remove_all_ctrl_chars(r, "\<Plug>")
 
-    " Remove `<Plug>(eskk:_filter_redispatch_pre)` beforehand.
-    let pre = ''
-    if r =~# '(eskk:_filter_redispatch_pre)'
-        let pre = maparg('<Plug>(eskk:_filter_redispatch_pre)', mapmode)
-        let r = substitute(r, '(eskk:_filter_redispatch_pre)', '', '')
-    endif
-
-    " Remove `<Plug>(eskk:_filter_redispatch_post)` beforehand.
-    let post = ''
-    if r =~# '(eskk:_filter_redispatch_post)'
-        let post = maparg('<Plug>(eskk:_filter_redispatch_post)', mapmode)
-        let r = substitute(r, '(eskk:_filter_redispatch_post)', '', '')
-    endif
-
     " Expand some <expr> <Plug> mappings.
     let r = substitute(
     \   r,
@@ -87,37 +73,8 @@ function! s:emulate_char(c, ret) "{{{
 
     let [r, ret] = s:emulate_backspace(r, ret)
 
-    " Handle `<Plug>(eskk:_filter_redispatch_pre)`.
-    if pre != ''
-        let _ = eval(pre)
-        let _ = s:remove_all_ctrl_chars(r, "\<Plug>")
-        let [_, ret] = s:emulate_filter_char(_, ret)
-        let _ = substitute(
-        \   _,
-        \   '(eskk:[^()]\+)',
-        \   '\=s:get_raw_map("<Plug>".submatch(0), mapmode)',
-        \   'g'
-        \)
-        let ret .= _
-        let ret .= maparg(eval(pre), mapmode)
-    endif
-
     " Handle rewritten text.
     let ret .= r
-
-    " Handle `<Plug>(eskk:_filter_redispatch_post)`.
-    if post != ''
-        let _ = eval(post)
-        let _ = s:remove_all_ctrl_chars(_, "\<Plug>")
-        let [_, ret] = s:emulate_filter_char(_, ret)
-        let _ = substitute(
-        \   _,
-        \   '(eskk:[^()]\+)',
-        \   '\=s:get_raw_map("<Plug>".submatch(0), mapmode)',
-        \   'g'
-        \)
-        let ret .= _
-    endif
 
     return ret
 endfunction "}}}
