@@ -87,7 +87,7 @@ function! eskk#map#set_up_key(key, ...) "{{{
     call eskk#map#map(
     \   'be' . (a:0 ? a:1 : ''),
     \   a:key,
-    \   'eskk#filter('.string(eskk#map#key2char(a:key)).')',
+    \   'eskk#filter(eskk#map#key2char('.string(a:key).'))',
     \   'l'
     \)
 endfunction "}}}
