@@ -19,17 +19,6 @@ let s:prev_normal_keys = {}
 
 " Utilities
 
-function! s:create_default_mapopt() "{{{
-    return {
-    \   'buffer': 0,
-    \   'expr': 0,
-    \   'silent': 0,
-    \   'unique': 1,
-    \   'noremap': 1,
-    \   'map-if': '1',
-    \}
-endfunction "}}}
-
 function! eskk#map#get_map_modes() "{{{
     " :lmap can't remap to :lmap. It's Vim's bug.
     "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
@@ -37,7 +26,6 @@ function! eskk#map#get_map_modes() "{{{
 
     return 'ic'
 endfunction "}}}
-
 function! eskk#map#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
         call eskk#logger#logstrf(
@@ -102,7 +90,7 @@ function! eskk#map#map_from_maparg_dict(dict) "{{{
 endfunction "}}}
 
 
-" g:eskk#keep_state
+" g:eskk#keep_state, g:eskk#keep_state_beyond_buffer
 function! eskk#map#save_normal_keys() "{{{
     let s:prev_normal_keys = s:save_normal_keys()
     call s:unmap_normal_keys()
@@ -287,7 +275,7 @@ function! s:create_general_map(self, options, lhs, rhs) "{{{
 endfunction "}}}
 
 
-" :EskkMap - Ex command for s:create_map()
+" :EskkMap
 function! s:skip_white(args) "{{{
     return substitute(a:args, '^\s*', '', '')
 endfunction "}}}
@@ -366,6 +354,16 @@ function! s:parse_options(args) "{{{
     endwhile
 
     return [opt, type, args]
+endfunction "}}}
+function! s:create_default_mapopt() "{{{
+    return {
+    \   'buffer': 0,
+    \   'expr': 0,
+    \   'silent': 0,
+    \   'unique': 1,
+    \   'noremap': 1,
+    \   'map-if': '1',
+    \}
 endfunction "}}}
 function! eskk#map#cmd_eskk_map_invalid_args(...) "{{{
     return eskk#util#build_error(
