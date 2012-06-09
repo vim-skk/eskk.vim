@@ -718,6 +718,20 @@ function! s:do_sticky(stash) "{{{
     \   g:eskk#preedit#PHASE_OKURI
     \])
 
+    let henkan_buf_str = preedit.get_buf_str(
+    \   g:eskk#preedit#PHASE_HENKAN
+    \)
+    let okuri_buf_str = preedit.get_buf_str(
+    \   g:eskk#preedit#PHASE_OKURI
+    \)
+    if g:eskk#fix_extra_okuri
+    \   && !henkan_buf_str.rom_str.empty()
+    \   && phase ==# g:eskk#preedit#PHASE_HENKAN
+        call okuri_buf_str.rom_str.set(henkan_buf_str.rom_str.get())
+        call henkan_buf_str.rom_str.clear()
+        call preedit.set_henkan_phase(g:eskk#preedit#PHASE_OKURI)
+    endif
+
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         if !buf_str.rom_str.empty()
         \   || !buf_str.rom_pairs.empty()
