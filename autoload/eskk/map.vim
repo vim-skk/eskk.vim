@@ -19,27 +19,6 @@ let s:prev_normal_keys = {}
 
 " Utilities
 
-function! s:split_to_keys(lhs)  "{{{
-    " From arpeggio.vim
-    "
-    " Assumption: Special keys such as <C-u>
-    " are escaped with < and >, i.e.,
-    " a:lhs doesn't directly contain any escape sequences.
-    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
-endfunction "}}}
-function! eskk#map#key2char(key) "{{{
-    if stridx(a:key, '<') ==# -1    " optimization
-        return a:key
-    endif
-    return join(
-    \   map(
-    \       s:split_to_keys(a:key),
-    \       'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
-    \   ),
-    \   ''
-    \)
-endfunction "}}}
-
 function! s:create_default_mapopt() "{{{
     return {
     \   'buffer': 0,
@@ -87,7 +66,7 @@ function! eskk#map#set_up_key(key, ...) "{{{
     call eskk#map#map(
     \   'be' . (a:0 ? a:1 : ''),
     \   a:key,
-    \   'eskk#filter(eskk#map#key2char('.string(a:key).'))',
+    \   'eskk#filter(eskk#util#key2char('.string(a:key).'))',
     \   'l'
     \)
 endfunction "}}}
@@ -241,7 +220,7 @@ function! eskk#map#is_special_lhs(char, type) "{{{
     let eskk_mappings = eskk#_get_eskk_mappings()
     return has_key(eskk_mappings, a:type)
     \   && has_key(eskk_mappings[a:type], 'lhs')
-    \   && eskk#map#key2char(eskk_mappings[a:type].lhs) ==# a:char
+    \   && eskk#util#key2char(eskk_mappings[a:type].lhs) ==# a:char
 endfunction "}}}
 function! eskk#map#get_special_key(type) "{{{
     let eskk_mappings = eskk#_get_eskk_mappings()

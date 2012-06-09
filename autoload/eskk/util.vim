@@ -222,6 +222,26 @@ function! eskk#util#is_mode_char(...) "{{{
     let module = s:Vital.Mapping
     return call(module.is_mode_char, a:000, module)
 endfunction "}}}
+function! eskk#util#key2char(key) "{{{
+    if stridx(a:key, '<') ==# -1    " optimization
+        return a:key
+    endif
+    return join(
+    \   map(
+    \       s:split_to_keys(a:key),
+    \       'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
+    \   ),
+    \   ''
+    \)
+endfunction "}}}
+function! s:split_to_keys(lhs)  "{{{
+    " From arpeggio.vim
+    "
+    " Assumption: Special keys such as <C-u>
+    " are escaped with < and >, i.e.,
+    " a:lhs doesn't directly contain any escape sequences.
+    return split(a:lhs, '\(<[^<>]\+>\|.\)\zs')
+endfunction "}}}
 
 
 " Misc.
