@@ -8,14 +8,11 @@ set cpo&vim
 
 
 function! eskk#test#emulate_filter_keys(chars, ...) "{{{
-    " Assumption: test case (a:chars) does not contain "(eskk:" string.
-
     let ret = ''
     for c in s:each_char(a:chars)
         let ret = s:emulate_char(c, ret)
     endfor
 
-    " For convenience.
     let clear_preedit = a:0 ? a:1 : 1
     if clear_preedit
         let preedit = eskk#get_preedit()
@@ -30,7 +27,6 @@ function! s:each_char(chars) "{{{
     let r = s:aggregate_backspace(r)
     return r
 endfunction "}}}
-
 function! s:aggregate_backspace(list) "{{{
     let list = a:list
     let pos = -1
@@ -46,36 +42,22 @@ function! s:aggregate_backspace(list) "{{{
     endwhile
     return list
 endfunction "}}}
+function! s:remove_ctrl_char(s, ctrl_char) "{{{
+    let s = a:s
+    let pos = stridx(s, a:ctrl_char)
+    if pos != -1
+        let before = strpart(s, 0, pos)
+        let after  = strpart(s, pos + strlen(a:ctrl_char))
+        let s = before . after
+    endif
+    return [s, pos]
+endfunction "}}}
 
 function! s:emulate_char(c, ret) "{{{
-    let mapmode = eskk#map#get_map_modes()
     let c = a:c
     let ret = a:ret
     let r = eskk#filter(c)
-    " NOTE: "\<Plug>" cannot be substituted by substitute().
-    let r = s:remove_all_ctrl_chars(r, "\<Plug>")
-
-    " Expand some <expr> <Plug> mappings.
-    let r = substitute(
-    \   r,
-    \   '(eskk:expr:[^()]\+)',
-    \   '\=eval(s:get_raw_map("<Plug>".submatch(0), mapmode))',
-    \   'g'
-    \)
-
-    " Expand normal <Plug> mappings.
-    let r = substitute(
-    \   r,
-    \   '(eskk:[^()]\+)',
-    \   '\=s:get_raw_map("<Plug>".submatch(0), mapmode)',
-    \   'g'
-    \)
-
-    let [r, ret] = s:emulate_backspace(r, ret)
-
-    " Handle rewritten text.
-    let ret .= r
-
+    let ret = s:emulate_backspace(r, ret)
     return ret
 endfunction "}}}
 function! s:emulate_backspace(r, ret) "{{{
@@ -102,7 +84,8 @@ function! s:emulate_backspace(r, ret) "{{{
             endif
         endwhile
     endfor
-    return [r, ret]
+    " Handle rewritten text.
+    return ret . r
 endfunction "}}}
 function! s:emulate_filter_char(r, ret) "{{{
     let r = a:r
@@ -120,30 +103,6 @@ function! s:emulate_filter_char(r, ret) "{{{
         let r .= _
     endwhile
     return [r, ret]
-endfunction "}}}
-
-function! s:get_raw_map(...) "{{{
-    return eskk#map#key2char(call('maparg', a:000))
-endfunction "}}}
-function! s:remove_all_ctrl_chars(s, ctrl_char) "{{{
-    let s = a:s
-    while 1
-        let [s, pos] = s:remove_ctrl_char(s, a:ctrl_char)
-        if pos == -1
-            break
-        endif
-    endwhile
-    return s
-endfunction "}}}
-function! s:remove_ctrl_char(s, ctrl_char) "{{{
-    let s = a:s
-    let pos = stridx(s, a:ctrl_char)
-    if pos != -1
-        let before = strpart(s, 0, pos)
-        let after  = strpart(s, pos + strlen(a:ctrl_char))
-        let s = before . after
-    endif
-    return [s, pos]
 endfunction "}}}
 
 
