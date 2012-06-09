@@ -1258,7 +1258,7 @@ function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
     endtry
 
 
-    if input != '' && s:check_accidental_char(input)
+    if input != '' && s:check_accidental_input(input)
         let [input, annotation] =
         \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
         let annotation = substitute(annotation, '^;', '', '')
@@ -1268,7 +1268,7 @@ function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
     call s:clear_command_line()
     return [input, key, okuri]
 endfunction "}}}
-function! s:check_accidental_char(input) "{{{
+function! s:check_accidental_input(input) "{{{
     if a:input !=# strtrans(a:input)
         let answer = eskk#util#input(
         \   "'".strtrans(a:input)."' contains unprintable character."
