@@ -689,9 +689,6 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         return 0
     endtry
     " Write to dictionary.
-    "
-    " FIXME: Lose data written between above
-    " `dict.get_user_dict().update_lines()` call and here.
     call dict.update_dictionary(1, 0)
 
     return 1

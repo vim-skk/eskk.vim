@@ -1634,7 +1634,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " InsertLeave: Restore &backspace value {{{
-    " FIXME: Due to current implementation,
+    " NOTE: Due to current implementation,
     " s:preedit.rewrite() assumes that &backspace contains "eol".
     if &l:backspace !~# '\<eol\>'
         setlocal backspace+=eol

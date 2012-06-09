@@ -40,7 +40,6 @@ function! eskk#map#key2char(key) "{{{
     \)
 endfunction "}}}
 
-" FIXME: Make a class for these functions.
 function! s:create_default_mapopt() "{{{
     return {
     \   'buffer': 0,
