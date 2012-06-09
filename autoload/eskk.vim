@@ -783,6 +783,13 @@ function! s:do_sticky(stash) "{{{
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         call s:do_enter_no_egglike(a:stash)
         call s:do_sticky(a:stash)
+        " Wrong begin col was set by s:do_sticky(). so fix it.
+        "
+        " "▼漢字" => "漢字" (by s:do_enter_no_egglike())
+        " s:do_sticky() uses col('.') .
+        " inserted string here is "▼漢字". (col('.') is pointing after the string)
+        " but I want to set begin col after "漢字".
+        call preedit.set_begin_col(preedit.get_begin_col() - strlen(g:eskk#marker_henkan_select))
     else
         throw eskk#internal_error(['eskk', 'preedit'])
     endif
