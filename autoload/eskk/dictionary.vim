@@ -1258,7 +1258,10 @@ function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
     endtry
 
 
-    if input != '' && s:check_accidental_input(input)
+    if input != ''
+        if !s:check_accidental_input(input)
+            return self.remember_word_prompt(key, okuri, okuri_rom)
+        endif
         let [input, annotation] =
         \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
         let annotation = substitute(annotation, '^;', '', '')
