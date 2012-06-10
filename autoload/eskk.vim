@@ -964,6 +964,65 @@ function! s:filter_rom(stash, table) "{{{
     let buf_str = preedit.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
 
+    if preedit.get_henkan_phase() is g:eskk#preedit#PHASE_OKURI
+        return s:filter_rom_okuri(a:stash, a:table)
+    elseif a:table.has_n_candidates(rom_str, 2)
+        " Has candidates but not match.
+        return s:filter_rom_has_candidates(a:stash)
+    elseif a:table.has_map(rom_str)
+        " Match!
+        return s:filter_rom_exact_match(a:stash, a:table)
+    else
+        " No candidates.
+        return s:filter_rom_no_match(a:stash, a:table)
+    endif
+endfunction "}}}
+function! s:filter_rom_okuri(stash, table) "{{{
+    " Input: "SesS"
+    " Convert from:
+    "   char: "s"
+    "   henkan buf str:
+    "     filter str: "せ"
+    "     rom str   : "s"
+    "   okuri buf str:
+    "     filter str: ""
+    "     rom str   : "s"
+    " Convert to:
+    "   henkan buf str:
+    "     filter str: "せっ"
+    "     rom str   : ""
+    "   okuri buf str:
+    "     filter str: ""
+    "     rom str   : "s"
+    " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
+
+    let char = a:stash.char
+    let preedit = a:stash.preedit
+    let henkan_buf_str = preedit.get_buf_str(
+    \   g:eskk#preedit#PHASE_HENKAN
+    \)
+    let okuri_buf_str = preedit.get_buf_str(
+    \   g:eskk#preedit#PHASE_OKURI
+    \)
+    let rom_str = henkan_buf_str.rom_str.get() . char
+    if !henkan_buf_str.rom_str.empty()
+    \   && okuri_buf_str.rom_str.empty()
+    \   && a:table.has_map(rom_str)
+        call henkan_buf_str.rom_str.clear()
+        call henkan_buf_str.rom_pairs.push_one_pair(
+        \   rom_str,
+        \   a:table.get_map(rom_str),
+        \   {'converted': 1}
+        \)
+        let rest = a:table.get_rest(rom_str, -1)
+        if rest !=# -1
+            call okuri_buf_str.rom_str.set(rest)
+        endif
+
+        return
+    endif
+
+    let rom_str = okuri_buf_str.rom_str.get() . char
     if a:table.has_n_candidates(rom_str, 2)
         " Has candidates but not match.
         return s:filter_rom_has_candidates(a:stash)
@@ -1020,77 +1079,23 @@ function! s:filter_rom_exact_match(stash, table) "{{{
             call s:do_henkan(a:stash, 1)
         endif
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
-        " Enter phase henkan select with henkan.
+        call eskk#util#assert(
+        \   a:table.has_map(rom_str),
+        \   'a:table.has_map(rom_str) ==# 1')
 
-        " Input: "SesSi"
-        " Convert from:
-        "   henkan buf str:
-        "     filter str: "せ"
-        "     rom str   : "s"
-        "   okuri buf str:
-        "     filter str: "し"
-        "     rom str   : "si"
-        " to:
-        "   henkan buf str:
-        "     filter str: "せっ"
-        "     rom str   : ""
-        "   okuri buf str:
-        "     filter str: "し"
-        "     rom str   : "si"
-        " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
-        let henkan_buf_str = preedit.get_buf_str(
-        \   g:eskk#preedit#PHASE_HENKAN
+        call buf_str.rom_str.clear()
+
+        call buf_str.rom_pairs.push_one_pair(
+        \   rom_str,
+        \   a:table.get_map(rom_str),
+        \   {'converted': 1}
         \)
-        let okuri_buf_str = preedit.get_buf_str(
-        \   g:eskk#preedit#PHASE_OKURI
-        \)
-        let henkan_select_buf_str = preedit.get_buf_str(
-        \   g:eskk#preedit#PHASE_HENKAN_SELECT
-        \)
-        let henkan_rom = henkan_buf_str.rom_str.get()
-        let okuri_rom  = okuri_buf_str.rom_str.get()
-        if henkan_rom != '' && a:table.has_map(henkan_rom . okuri_rom[0])
-            " Push "っ".
-            let match_rom = henkan_rom . okuri_rom[0]
-            call henkan_buf_str.rom_pairs.push_one_pair(
-            \   match_rom,
-            \   a:table.get_map(match_rom),
-            \   {'converted': 1}
-            \)
-            " Push "s" to rom str.
-            let rest = a:table.get_rest(henkan_rom . okuri_rom[0], -1)
-            if rest !=# -1
-                call okuri_buf_str.rom_str.set(
-                \   rest . okuri_rom[1:]
-                \)
-            endif
-        endif
-
-        call eskk#util#assert(char != '', 'char must not be empty')
-        call okuri_buf_str.rom_str.append(char)
-
-        let has_rest = 0
-        if a:table.has_map(okuri_buf_str.rom_str.get())
-            call okuri_buf_str.rom_pairs.push_one_pair(
-            \   okuri_buf_str.rom_str.get(),
-            \   a:table.get_map(okuri_buf_str.rom_str.get()),
-            \   {'converted': 1}
-            \)
-            let rest = a:table.get_rest(okuri_buf_str.rom_str.get(), -1)
-            if rest !=# -1
-                for rest_char in split(rest, '\zs')
-                    call preedit.push_filter_queue(rest_char)
-                endfor
-                let has_rest = 1
-            endif
-        endif
-
-        call okuri_buf_str.rom_str.clear()
-
-        call eskk#util#assert(!okuri_buf_str.rom_pairs.empty(),
-        \                     'matched must not be empty.')
-
-        if !has_rest && g:eskk#auto_henkan_at_okuri_match
+        let rest = a:table.get_rest(buf_str.rom_str.get(), -1)
+        if rest !=# -1
+            for rest_char in split(rest, '\zs')
+                call preedit.push_filter_queue(rest_char)
+            endfor
+        elseif g:eskk#auto_henkan_at_okuri_match
             call s:do_henkan(a:stash)
         endif
     endif
