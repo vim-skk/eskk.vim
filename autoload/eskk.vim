@@ -1579,7 +1579,7 @@ function! eskk#_initialize() "{{{
         " 'hankata' mode {{{
         call eskk#register_mode_structure('hankata', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
-        \   'asym_expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
+        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hankata'),
         \})
         " }}}
