@@ -1523,13 +1523,6 @@ function! eskk#_initialize() "{{{
     EskkMap -type=mode:zenei:to-hira -unique <C-j>
 
     EskkMap -type=mode:abbrev:henkan-key -unique <Space>
-
-    EskkMap -expr -unique <C-^> eskk#toggle()
-
-    EskkMap -expr <BS> eskk#filter("\<C-h>")
-
-    EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
-    " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
     " Save dictionary if modified {{{
