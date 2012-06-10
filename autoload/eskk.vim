@@ -1275,12 +1275,6 @@ function! s:asym_expand_char(stash) "{{{
         "               (!buf_str.rom_str.empty() && buf_str.rom_pairs.empty())
         "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
         "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "
-        " Assume "SaKu" as "SaKu":
-        "   S => phase: 0, rom_str: '', rom_pairs: ''
-        "   a => phase: 1, rom_str: 's', rom_pairs: ''
-        "   K => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "   u => phase: 2, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
         let buf_str = a:stash.preedit.get_current_buf_str()
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             return [tolower(char)]
