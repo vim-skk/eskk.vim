@@ -1271,6 +1271,14 @@ function! s:asym_expand_char(stash) "{{{
         return [char]
     endif
 endfunction "}}}
+function! s:abbrev_expand_char(stash) "{{{
+    let char = a:stash.char
+    if char ==# "\<BS>"
+        return ["\<C-h>"]
+    else
+        return [char]
+    endif
+endfunction "}}}
 
 
 " Initialization
@@ -1565,6 +1573,7 @@ function! eskk#_initialize() "{{{
         " 'abbrev' mode {{{
         let dict = {}
 
+        let dict.expand_char = eskk#util#get_local_funcref('abbrev_expand_char', s:SID_PREFIX)
         let dict.filter = eskk#util#get_local_funcref('abbrev_filter', s:SID_PREFIX)
         let dict.init_phase = g:eskk#preedit#PHASE_HENKAN
 
