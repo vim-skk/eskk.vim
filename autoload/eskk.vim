@@ -371,7 +371,7 @@ function! s:asym_filter(stash) "{{{
 
     " Handle specific characters.
     " These characters are handled regardless of current phase.
-    if char ==# "\<BS>" || char ==# "\<C-h>"
+    if char ==# "\<C-h>"
         call s:do_backspace(a:stash)
         return
     elseif eskk#map#is_special_lhs(char, 'enter-key')
@@ -1285,6 +1285,17 @@ function! s:abbrev_filter(stash) "{{{
     endif
 endfunction "}}}
 
+" Preprocessor
+function! s:asym_expand_char(char) "{{{
+    if a:char =~# '^[A-Z]$'
+        return [';', tolower(a:char)]
+    elseif a:char ==# "\<BS>"
+        return ["\<C-h>"]
+    else
+        return [a:char]
+    endif
+endfunction "}}}
+
 
 " Initialization
 function! eskk#_initialize() "{{{
@@ -1554,6 +1565,7 @@ function! eskk#_initialize() "{{{
         " 'hira' mode {{{
         call eskk#register_mode_structure('hira', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hira'),
         \})
         " }}}
@@ -1561,6 +1573,7 @@ function! eskk#_initialize() "{{{
         " 'kata' mode {{{
         call eskk#register_mode_structure('kata', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_kata'),
         \})
         " }}}
@@ -1568,6 +1581,7 @@ function! eskk#_initialize() "{{{
         " 'hankata' mode {{{
         call eskk#register_mode_structure('hankata', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+        \   'asym_expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hankata'),
         \})
         " }}}
@@ -2057,6 +2071,7 @@ endfunction "}}}
 " Filter
 function! eskk#filter(char) "{{{
     let inst = eskk#get_current_instance()
+    let st = eskk#get_mode_structure(inst.mode)
     let preedit = eskk#get_preedit()
     let stash = {
     \   'char': a:char,
@@ -2082,7 +2097,11 @@ function! eskk#filter(char) "{{{
 
     try
         " Push a pressed character.
-        call preedit.push_filter_queue(a:char)
+        for c in has_key(st, 'expand_char') ?
+        \           st.expand_char(a:char) : [a:char]
+            call preedit.push_filter_queue(c)
+        endfor
+
         while 1
             " Do loop until queue becomes empty.
             " NOTE: `preedit` may be changed from previous call.
