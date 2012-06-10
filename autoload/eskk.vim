@@ -371,7 +371,7 @@ function! s:asym_filter(stash) "{{{
 
     " Handle specific characters.
     " These characters are handled regardless of current phase.
-    if eskk#map#is_special_lhs(char, 'backspace-key')
+    if char ==# "\<BS>" || char ==# "\<C-h>"
         call s:do_backspace(a:stash)
         return
     elseif eskk#map#is_special_lhs(char, 'enter-key')
