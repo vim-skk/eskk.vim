@@ -383,29 +383,6 @@ function! s:asym_filter(stash) "{{{
     elseif eskk#map#is_special_lhs(char, 'cancel')
         call s:do_cancel(a:stash)
         return
-    elseif char =~# '^[A-Z]$'
-    \   && !eskk#map#is_special_lhs(
-    \          char, 'phase:henkan-select:delete-from-dict'
-    \       )
-        " Treat uppercase "A" in "SAkujo" as lowercase.
-        "
-        " Assume "SAkujo" as "Sakujo":
-        "   S => phase: 0, rom_str: '', rom_pairs: ''
-        "   A => phase: 1, rom_str: 's', rom_pairs: ''
-        "               (!buf_str.rom_str.empty() && buf_str.rom_pairs.empty())
-        "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "
-        " Assume "SaKu" as "SaKu":
-        "   S => phase: 0, rom_str: '', rom_pairs: ''
-        "   a => phase: 1, rom_str: 's', rom_pairs: ''
-        "   K => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "   u => phase: 2, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        if buf_str.rom_str.empty() || !buf_str.rom_pairs.empty()
-            call s:do_sticky(a:stash)
-        endif
-        call preedit.push_filter_queue(tolower(char))
-        return
     elseif eskk#map#is_special_lhs(char, 'escape-key')
         call s:do_escape(a:stash)
         return
@@ -1290,7 +1267,26 @@ function! s:asym_expand_char(stash) "{{{
     let char = a:stash.char
     " 'X' is the key for a registeration.
     if char !=# 'X' && char =~# '^[A-Z]$'
-        return [';', tolower(char)]
+        " Treat uppercase "A" in "SAkujo" as lowercase.
+        "
+        " Assume "SAkujo" as "Sakujo":
+        "   S => phase: 0, rom_str: '', rom_pairs: ''
+        "   A => phase: 1, rom_str: 's', rom_pairs: ''
+        "               (!buf_str.rom_str.empty() && buf_str.rom_pairs.empty())
+        "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
+        "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
+        "
+        " Assume "SaKu" as "SaKu":
+        "   S => phase: 0, rom_str: '', rom_pairs: ''
+        "   a => phase: 1, rom_str: 's', rom_pairs: ''
+        "   K => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
+        "   u => phase: 2, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
+        let buf_str = a:stash.preedit.get_current_buf_str()
+        if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
+            return [tolower(char)]
+        else
+            return [';', tolower(char)]
+        endif
     elseif char ==# "\<BS>"
         return ["\<C-h>"]
     else
