@@ -1256,8 +1256,11 @@ endfunction "}}}
 " Preprocessor
 function! s:asym_expand_char(stash) "{{{
     let char = a:stash.char
-    " 'X' is the key for a registeration.
-    if char !=# 'X' && char =~# '^[A-Z]$'
+    " 'X' is phase:henkan-select:delete-from-dict
+    " 'L' is mode:{hira,kata,hankata}:to-zenei
+    if char ==# 'X' || char ==# 'L'
+        return [char]
+    elseif char =~# '^[A-Z]$'
         " Treat uppercase "A" in "SAkujo" as lowercase.
         "
         " Assume "SAkujo" as "Sakujo":
