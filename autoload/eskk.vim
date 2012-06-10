@@ -402,8 +402,6 @@ function! s:asym_filter(stash) "{{{
     elseif char ==# "\<Tab>"
         call s:do_tab(a:stash)
         return
-    else
-        " Fall through.
     endif
 
 
@@ -576,9 +574,7 @@ function! s:do_backspace(stash) "{{{
             let buf_str = preedit.get_buf_str(
             \   g:eskk#preedit#PHASE_HENKAN
             \)
-            if filter_str ==# buf_str.rom_pairs.get_filter()
-                " Fall through.
-            else
+            if filter_str !=# buf_str.rom_pairs.get_filter()
                 call buf_str.rom_pairs.set(p)
                 return
             endif
@@ -1223,8 +1219,6 @@ function! s:abbrev_filter(stash) "{{{
         call s:do_enter(a:stash)
         call eskk#set_mode('hira')
         return
-    else
-        " Fall through.
     endif
 
     " Handle other characters.
