@@ -374,19 +374,19 @@ function! s:asym_filter(stash) "{{{
     if char ==# "\<C-h>"
         call s:do_backspace(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'enter-key')
+    elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'sticky')
+    elseif char ==# ';'
         call s:do_sticky(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'cancel')
+    elseif char ==# "\<C-g>"
         call s:do_cancel(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'escape-key')
+    elseif char ==# "\<Esc>"
         call s:do_escape(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'tab')
+    elseif char ==# "\<Tab>"
         call s:do_tab(a:stash)
         return
     else
@@ -398,31 +398,25 @@ function! s:asym_filter(stash) "{{{
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         return s:filter_rom(a:stash, eskk#get_current_mode_table())
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN
-        if eskk#map#is_special_lhs(char, 'phase:henkan:henkan-key')
+        if char ==# ' '
             call s:do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, eskk#get_current_mode_table())
         endif
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
-        if eskk#map#is_special_lhs(char, 'phase:okuri:henkan-key')
+        if char ==# ' '
             call s:do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, eskk#get_current_mode_table())
         endif
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
-        if eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-next'
-        \)
+        if char ==# ' '
             call preedit.choose_next_candidate(a:stash)
             return
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-prev'
-        \)
+        elseif char ==# 'x'
             call preedit.choose_prev_candidate(a:stash)
             return
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:delete-from-dict'
-        \)
+        elseif char ==# 'X'
             let henkan_result = eskk#get_skk_dict().get_henkan_result()
             if !empty(henkan_result)
                 let prev_preedit =
@@ -1159,9 +1153,7 @@ endfunction "}}}
 " }}}
 function! s:ascii_filter(stash) "{{{
     let this = eskk#get_mode_structure('ascii')
-    if eskk#map#is_special_lhs(
-    \   a:stash.char, 'mode:ascii:to-hira'
-    \)
+    if a:stash.char ==# "\<C-j>"
         call eskk#set_mode('hira')
     else
         if eskk#has_mode_table('ascii')
@@ -1180,9 +1172,7 @@ function! s:ascii_filter(stash) "{{{
 endfunction "}}}
 function! s:zenei_filter(stash) "{{{
     let this = eskk#get_mode_structure('zenei')
-    if eskk#map#is_special_lhs(
-    \   a:stash.char, 'mode:zenei:to-hira'
-    \)
+    if a:stash.char ==# "\<C-j>"
         call eskk#set_mode('hira')
     else
         if !has_key(this.temp, 'table')
@@ -1203,11 +1193,11 @@ function! s:abbrev_filter(stash) "{{{
 
     " Handle special characters.
     " These characters are handled regardless of current phase.
-    if eskk#map#is_special_lhs(char, 'cancel')
+    if char ==# "\<C-g>"
         call s:do_cancel(a:stash)
         call eskk#set_mode('hira')
         return
-    elseif eskk#map#is_special_lhs(char, 'backspace-key')
+    elseif char ==# "\<C-h>"
         if buf_str.rom_str.get() == ''
             " If backspace-key was pressed at empty string,
             " leave abbrev mode.
@@ -1216,7 +1206,7 @@ function! s:abbrev_filter(stash) "{{{
             call s:do_backspace(a:stash)
         endif
         return
-    elseif eskk#map#is_special_lhs(char, 'enter-key')
+    elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
         call eskk#set_mode('hira')
         return
@@ -1226,22 +1216,16 @@ function! s:abbrev_filter(stash) "{{{
 
     " Handle other characters.
     if phase ==# g:eskk#preedit#PHASE_HENKAN
-        if eskk#map#is_special_lhs(
-        \   char, 'phase:henkan:henkan-key'
-        \)
+        if char ==# ' '
             call s:do_henkan(a:stash)
         else
             call buf_str.rom_str.append(char)
         endif
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
-        if eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-next'
-        \)
+        if char ==# ' '
             call preedit.choose_next_candidate(a:stash)
             return
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-prev'
-        \)
+        elseif char ==# 'x'
             call preedit.choose_prev_candidate(a:stash)
             return
         else
