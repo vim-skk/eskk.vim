@@ -86,7 +86,7 @@ function! s:RomPairs_set_one_pair(rom_str, filter_str, ...) dict "{{{
     let self._pairs = [pair]
 endfunction "}}}
 function! s:RomPairs_push(pair) dict "{{{
-        let self._pairs += [pair]
+    let self._pairs += [a:pair]
 endfunction "}}}
 function! s:RomPairs_push_one_pair(rom_str, filter_str, ...) dict "{{{
     let pair = [a:rom_str, a:filter_str]
