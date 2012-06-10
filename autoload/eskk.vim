@@ -978,7 +978,7 @@ function! s:filter_rom(stash, table) "{{{
     endif
 endfunction "}}}
 function! s:filter_rom_okuri(stash, table) "{{{
-    " Input: "SesS"
+    " Input #1: "SesS"
     " Convert from:
     "   char: "s"
     "   henkan buf str:
@@ -986,7 +986,7 @@ function! s:filter_rom_okuri(stash, table) "{{{
     "     rom str   : "s"
     "   okuri buf str:
     "     filter str: ""
-    "     rom str   : "s"
+    "     rom str   : ""
     " Convert to:
     "   henkan buf str:
     "     filter str: "せっ"
@@ -995,6 +995,23 @@ function! s:filter_rom_okuri(stash, table) "{{{
     "     filter str: ""
     "     rom str   : "s"
     " (http://d.hatena.ne.jp/tyru/20100320/eskk_rom_to_hira)
+    "
+    " Input #2: "KikO"
+    " Convert from:
+    "   char: "o"
+    "   henkan buf str:
+    "     filter str: "き"
+    "     rom str   : "k"
+    "   okuri buf str:
+    "     filter str: ""
+    "     rom str   : ""
+    " Convert to:
+    "   henkan buf str:
+    "     filter str: "き"
+    "     rom str   : ""
+    "   okuri buf str:
+    "     filter str: "こ"
+    "     rom str   : ""
 
     let char = a:stash.char
     let preedit = a:stash.preedit
@@ -1005,6 +1022,7 @@ function! s:filter_rom_okuri(stash, table) "{{{
     \   g:eskk#preedit#PHASE_OKURI
     \)
     let rom_str = henkan_buf_str.rom_str.get() . char
+    " Input #1.
     if !henkan_buf_str.rom_str.empty()
     \   && okuri_buf_str.rom_str.empty()
     \   && a:table.has_map(rom_str)
@@ -1017,6 +1035,15 @@ function! s:filter_rom_okuri(stash, table) "{{{
         let rest = a:table.get_rest(rom_str, -1)
         if rest !=# -1
             call okuri_buf_str.rom_str.set(rest)
+        elseif g:eskk#fix_extra_okuri
+        \   && a:table.has_map(okuri_buf_str.rom_str.get() . char)
+            " Input #2.
+            call okuri_buf_str.rom_pairs.push(
+            \   henkan_buf_str.rom_pairs.pop()
+            \)
+            if g:eskk#auto_henkan_at_okuri_match
+                call s:do_henkan(a:stash)
+            endif
         endif
 
         return
