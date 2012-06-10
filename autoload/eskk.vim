@@ -339,6 +339,19 @@ function! s:handle_to_abbrev(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! s:is_mode_local_char(char, type) "{{{
+    " NOTE: This function must not show error
+    " when `s:eskk_mappings[a:type]` does not exist.
+    return has_key(s:eskk_mappings, a:type)
+    \   && has_key(s:eskk_mappings[a:type], 'lhs')
+    \   && eskk#util#key2char(s:eskk_mappings[a:type].lhs) ==# a:char
+endfunction "}}}
+function! s:handle_mode_local_char(char, type, stash) "{{{
+    return s:is_mode_local_char(a:char, a:type)
+    \   && has_key(s:eskk_mappings, a:type)
+    \   && has_key(s:eskk_mappings[a:type], 'fn')
+    \   && call(s:eskk_mappings[a:type].fn, [a:stash])
+endfunction "}}}
 
 
 
@@ -362,7 +375,7 @@ function! s:asym_filter(stash) "{{{
 
     " Handle special mode-local mapping.
     for key in get(s:MODE_LOCAL_KEYS, eskk#get_mode(), [])
-        if eskk#map#handle_special_lhs(char, key, a:stash)
+        if s:handle_mode_local_char(char, key, a:stash)
             " Handled.
             return
         endif
