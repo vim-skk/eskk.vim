@@ -1216,7 +1216,7 @@ function! s:abbrev_filter(stash) "{{{
         endif
         return
     elseif char ==# "\<CR>"
-        call s:do_enter(a:stash)
+        call s:do_enter_no_egglike(a:stash)
         call eskk#set_mode('hira')
         return
     endif
