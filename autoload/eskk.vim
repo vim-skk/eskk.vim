@@ -1287,7 +1287,8 @@ endfunction "}}}
 
 " Preprocessor
 function! s:asym_expand_char(char) "{{{
-    if a:char =~# '^[A-Z]$'
+    " 'X' is the key for a registeration.
+    if a:char !=# 'X' && a:char =~# '^[A-Z]$'
         return [';', tolower(a:char)]
     elseif a:char ==# "\<BS>"
         return ["\<C-h>"]
