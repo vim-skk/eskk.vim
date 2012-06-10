@@ -202,34 +202,6 @@ function! eskk#map#unmap_all_keys() "{{{
     call inst.prev_lang_keys.restore()
     unlet inst.prev_lang_keys
 endfunction "}}}
-function! eskk#map#is_special_lhs(char, type) "{{{
-    " NOTE: This function must not show error
-    " when `eskk_mappings[a:type]` does not exist.
-    let eskk_mappings = eskk#_get_eskk_mappings()
-    return has_key(eskk_mappings, a:type)
-    \   && has_key(eskk_mappings[a:type], 'lhs')
-    \   && eskk#util#key2char(eskk_mappings[a:type].lhs) ==# a:char
-endfunction "}}}
-function! eskk#map#get_special_key(type) "{{{
-    let eskk_mappings = eskk#_get_eskk_mappings()
-    if has_key(eskk_mappings, a:type)
-    \   && has_key(eskk_mappings[a:type], 'lhs')
-        return eskk_mappings[a:type].lhs
-    else
-        throw eskk#internal_error(
-        \   ['eskk', 'preedit'],
-        \   "Unknown map type: " . a:type
-        \)
-    endif
-endfunction "}}}
-function! eskk#map#handle_special_lhs(char, type, stash) "{{{
-    let eskk_mappings = eskk#_get_eskk_mappings()
-    return
-    \   eskk#map#is_special_lhs(a:char, a:type)
-    \   && has_key(eskk_mappings, a:type)
-    \   && has_key(eskk_mappings[a:type], 'fn')
-    \   && call(eskk_mappings[a:type].fn, [a:stash])
-endfunction "}}}
 function! s:create_map(type, options, lhs, rhs) "{{{
     let lhs = a:lhs
     let rhs = a:rhs

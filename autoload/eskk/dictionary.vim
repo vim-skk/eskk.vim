@@ -497,13 +497,9 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
         endtry
 
 
-        if eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:escape'
-        \)
+        if char ==# "\<C-g>"
             return a:fallback
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:next-page'
-        \)
+        elseif char ==# ' '
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
             else
@@ -522,9 +518,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
                 \   okuri_buf_str.rom_pairs.get_filter()
                 \]
             endif
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:prev-page'
-        \)
+        elseif char ==# 'x'
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else

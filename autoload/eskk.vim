@@ -339,6 +339,19 @@ function! s:handle_to_abbrev(stash) "{{{
     endif
     return 0
 endfunction "}}}
+function! s:is_mode_local_char(char, type) "{{{
+    " NOTE: This function must not show error
+    " when `s:eskk_mappings[a:type]` does not exist.
+    return has_key(s:eskk_mappings, a:type)
+    \   && has_key(s:eskk_mappings[a:type], 'lhs')
+    \   && eskk#util#key2char(s:eskk_mappings[a:type].lhs) ==# a:char
+endfunction "}}}
+function! s:handle_mode_local_char(char, type, stash) "{{{
+    return s:is_mode_local_char(a:char, a:type)
+    \   && has_key(s:eskk_mappings, a:type)
+    \   && has_key(s:eskk_mappings[a:type], 'fn')
+    \   && call(s:eskk_mappings[a:type].fn, [a:stash])
+endfunction "}}}
 
 
 
@@ -362,7 +375,7 @@ function! s:asym_filter(stash) "{{{
 
     " Handle special mode-local mapping.
     for key in get(s:MODE_LOCAL_KEYS, eskk#get_mode(), [])
-        if eskk#map#handle_special_lhs(char, key, a:stash)
+        if s:handle_mode_local_char(char, key, a:stash)
             " Handled.
             return
         endif
@@ -371,49 +384,24 @@ function! s:asym_filter(stash) "{{{
 
     " Handle specific characters.
     " These characters are handled regardless of current phase.
-    if char ==# "\<BS>" || char ==# "\<C-h>"
+    if char ==# "\<C-h>"
         call s:do_backspace(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'enter-key')
+    elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'sticky')
+    elseif char ==# ';'
         call s:do_sticky(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'cancel')
+    elseif char ==# "\<C-g>"
         call s:do_cancel(a:stash)
         return
-    elseif char =~# '^[A-Z]$'
-    \   && !eskk#map#is_special_lhs(
-    \          char, 'phase:henkan-select:delete-from-dict'
-    \       )
-        " Treat uppercase "A" in "SAkujo" as lowercase.
-        "
-        " Assume "SAkujo" as "Sakujo":
-        "   S => phase: 0, rom_str: '', rom_pairs: ''
-        "   A => phase: 1, rom_str: 's', rom_pairs: ''
-        "               (!buf_str.rom_str.empty() && buf_str.rom_pairs.empty())
-        "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "
-        " Assume "SaKu" as "SaKu":
-        "   S => phase: 0, rom_str: '', rom_pairs: ''
-        "   a => phase: 1, rom_str: 's', rom_pairs: ''
-        "   K => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        "   u => phase: 2, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
-        if buf_str.rom_str.empty() || !buf_str.rom_pairs.empty()
-            call s:do_sticky(a:stash)
-        endif
-        call preedit.push_filter_queue(tolower(char))
-        return
-    elseif eskk#map#is_special_lhs(char, 'escape-key')
+    elseif char ==# "\<Esc>"
         call s:do_escape(a:stash)
         return
-    elseif eskk#map#is_special_lhs(char, 'tab')
+    elseif char ==# "\<Tab>"
         call s:do_tab(a:stash)
         return
-    else
-        " Fall through.
     endif
 
 
@@ -421,31 +409,25 @@ function! s:asym_filter(stash) "{{{
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         return s:filter_rom(a:stash, eskk#get_current_mode_table())
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN
-        if eskk#map#is_special_lhs(char, 'phase:henkan:henkan-key')
+        if char ==# ' '
             call s:do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, eskk#get_current_mode_table())
         endif
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
-        if eskk#map#is_special_lhs(char, 'phase:okuri:henkan-key')
+        if char ==# ' '
             call s:do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, eskk#get_current_mode_table())
         endif
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
-        if eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-next'
-        \)
+        if char ==# ' '
             call preedit.choose_next_candidate(a:stash)
             return
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-prev'
-        \)
+        elseif char ==# 'x'
             call preedit.choose_prev_candidate(a:stash)
             return
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:delete-from-dict'
-        \)
+        elseif char ==# 'X'
             let henkan_result = eskk#get_skk_dict().get_henkan_result()
             if !empty(henkan_result)
                 let prev_preedit =
@@ -592,9 +574,7 @@ function! s:do_backspace(stash) "{{{
             let buf_str = preedit.get_buf_str(
             \   g:eskk#preedit#PHASE_HENKAN
             \)
-            if filter_str ==# buf_str.rom_pairs.get_filter()
-                " Fall through.
-            else
+            if filter_str !=# buf_str.rom_pairs.get_filter()
                 call buf_str.rom_pairs.set(p)
                 return
             endif
@@ -1182,9 +1162,7 @@ endfunction "}}}
 " }}}
 function! s:ascii_filter(stash) "{{{
     let this = eskk#get_mode_structure('ascii')
-    if eskk#map#is_special_lhs(
-    \   a:stash.char, 'mode:ascii:to-hira'
-    \)
+    if a:stash.char ==# "\<C-j>"
         call eskk#set_mode('hira')
     else
         if eskk#has_mode_table('ascii')
@@ -1203,9 +1181,7 @@ function! s:ascii_filter(stash) "{{{
 endfunction "}}}
 function! s:zenei_filter(stash) "{{{
     let this = eskk#get_mode_structure('zenei')
-    if eskk#map#is_special_lhs(
-    \   a:stash.char, 'mode:zenei:to-hira'
-    \)
+    if a:stash.char ==# "\<C-j>"
         call eskk#set_mode('hira')
     else
         if !has_key(this.temp, 'table')
@@ -1226,11 +1202,11 @@ function! s:abbrev_filter(stash) "{{{
 
     " Handle special characters.
     " These characters are handled regardless of current phase.
-    if eskk#map#is_special_lhs(char, 'cancel')
+    if char ==# "\<C-g>"
         call s:do_cancel(a:stash)
         call eskk#set_mode('hira')
         return
-    elseif eskk#map#is_special_lhs(char, 'backspace-key')
+    elseif char ==# "\<C-h>"
         if buf_str.rom_str.get() == ''
             " If backspace-key was pressed at empty string,
             " leave abbrev mode.
@@ -1239,32 +1215,24 @@ function! s:abbrev_filter(stash) "{{{
             call s:do_backspace(a:stash)
         endif
         return
-    elseif eskk#map#is_special_lhs(char, 'enter-key')
-        call s:do_enter(a:stash)
+    elseif char ==# "\<CR>"
+        call s:do_enter_no_egglike(a:stash)
         call eskk#set_mode('hira')
         return
-    else
-        " Fall through.
     endif
 
     " Handle other characters.
     if phase ==# g:eskk#preedit#PHASE_HENKAN
-        if eskk#map#is_special_lhs(
-        \   char, 'phase:henkan:henkan-key'
-        \)
+        if char ==# ' '
             call s:do_henkan(a:stash)
         else
             call buf_str.rom_str.append(char)
         endif
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
-        if eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-next'
-        \)
+        if char ==# ' '
             call preedit.choose_next_candidate(a:stash)
             return
-        elseif eskk#map#is_special_lhs(
-        \   char, 'phase:henkan-select:choose-prev'
-        \)
+        elseif char ==# 'x'
             call preedit.choose_prev_candidate(a:stash)
             return
         else
@@ -1282,6 +1250,43 @@ function! s:abbrev_filter(stash) "{{{
         \   ['eskk'],
         \   "'abbrev' mode does not support phase " . phase . "."
         \)
+    endif
+endfunction "}}}
+
+" Preprocessor
+function! s:asym_expand_char(stash) "{{{
+    let char = a:stash.char
+    " 'X' is phase:henkan-select:delete-from-dict
+    " 'L' is mode:{hira,kata,hankata}:to-zenei
+    if char ==# 'X' || char ==# 'L'
+        return [char]
+    elseif char =~# '^[A-Z]$'
+        " Treat uppercase "A" in "SAkujo" as lowercase.
+        "
+        " Assume "SAkujo" as "Sakujo":
+        "   S => phase: 0, rom_str: '', rom_pairs: ''
+        "   A => phase: 1, rom_str: 's', rom_pairs: ''
+        "               (!buf_str.rom_str.empty() && buf_str.rom_pairs.empty())
+        "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
+        "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
+        let buf_str = a:stash.preedit.get_current_buf_str()
+        if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
+            return [tolower(char)]
+        else
+            return [';', tolower(char)]
+        endif
+    elseif char ==# "\<BS>"
+        return ["\<C-h>"]
+    else
+        return [char]
+    endif
+endfunction "}}}
+function! s:abbrev_expand_char(stash) "{{{
+    let char = a:stash.char
+    if char ==# "\<BS>"
+        return ["\<C-h>"]
+    else
+        return [char]
     endif
 endfunction "}}}
 
@@ -1521,13 +1526,6 @@ function! eskk#_initialize() "{{{
     EskkMap -type=mode:zenei:to-hira -unique <C-j>
 
     EskkMap -type=mode:abbrev:henkan-key -unique <Space>
-
-    EskkMap -expr -unique <C-^> eskk#toggle()
-
-    EskkMap -expr <BS> eskk#filter("\<C-h>")
-
-    EskkMap -map-if="mode() ==# 'i'" -unique <Esc>
-    " silent! EskkMap -map-if="mode() ==# 'i'" -unique <C-c>
     " }}}
 
     " Save dictionary if modified {{{
@@ -1554,6 +1552,7 @@ function! eskk#_initialize() "{{{
         " 'hira' mode {{{
         call eskk#register_mode_structure('hira', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hira'),
         \})
         " }}}
@@ -1561,6 +1560,7 @@ function! eskk#_initialize() "{{{
         " 'kata' mode {{{
         call eskk#register_mode_structure('kata', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_kata'),
         \})
         " }}}
@@ -1568,6 +1568,7 @@ function! eskk#_initialize() "{{{
         " 'hankata' mode {{{
         call eskk#register_mode_structure('hankata', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hankata'),
         \})
         " }}}
@@ -1575,6 +1576,7 @@ function! eskk#_initialize() "{{{
         " 'abbrev' mode {{{
         let dict = {}
 
+        let dict.expand_char = eskk#util#get_local_funcref('abbrev_expand_char', s:SID_PREFIX)
         let dict.filter = eskk#util#get_local_funcref('abbrev_filter', s:SID_PREFIX)
         let dict.init_phase = g:eskk#preedit#PHASE_HENKAN
 
@@ -2057,6 +2059,7 @@ endfunction "}}}
 " Filter
 function! eskk#filter(char) "{{{
     let inst = eskk#get_current_instance()
+    let st = eskk#get_mode_structure(inst.mode)
     let preedit = eskk#get_preedit()
     let stash = {
     \   'char': a:char,
@@ -2082,7 +2085,11 @@ function! eskk#filter(char) "{{{
 
     try
         " Push a pressed character.
-        call preedit.push_filter_queue(a:char)
+        for c in has_key(st, 'expand_char') ?
+        \           st.expand_char(stash) : [a:char]
+            call preedit.push_filter_queue(c)
+        endfor
+
         while 1
             " Do loop until queue becomes empty.
             " NOTE: `preedit` may be changed from previous call.
