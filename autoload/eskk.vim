@@ -1286,14 +1286,15 @@ function! s:abbrev_filter(stash) "{{{
 endfunction "}}}
 
 " Preprocessor
-function! s:asym_expand_char(char) "{{{
+function! s:asym_expand_char(stash) "{{{
+    let char = a:stash.char
     " 'X' is the key for a registeration.
-    if a:char !=# 'X' && a:char =~# '^[A-Z]$'
-        return [';', tolower(a:char)]
-    elseif a:char ==# "\<BS>"
+    if char !=# 'X' && char =~# '^[A-Z]$'
+        return [';', tolower(char)]
+    elseif char ==# "\<BS>"
         return ["\<C-h>"]
     else
-        return [a:char]
+        return [char]
     endif
 endfunction "}}}
 
@@ -2099,7 +2100,7 @@ function! eskk#filter(char) "{{{
     try
         " Push a pressed character.
         for c in has_key(st, 'expand_char') ?
-        \           st.expand_char(a:char) : [a:char]
+        \           st.expand_char(stash) : [a:char]
             call preedit.push_filter_queue(c)
         endfor
 
