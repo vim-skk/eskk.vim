@@ -1036,12 +1036,12 @@ function! s:filter_rom_okuri(stash, table) "{{{
         if rest !=# -1
             call okuri_buf_str.rom_str.set(rest)
         elseif g:eskk#fix_extra_okuri
-        \   && a:table.has_map(okuri_buf_str.rom_str.get() . char)
             " Input #2.
             call okuri_buf_str.rom_pairs.push(
             \   henkan_buf_str.rom_pairs.pop()
             \)
             if g:eskk#auto_henkan_at_okuri_match
+            \   && a:table.has_map(okuri_buf_str.rom_str.get() . char)
                 call s:do_henkan(a:stash)
             endif
         endif
