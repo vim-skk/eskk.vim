@@ -492,7 +492,11 @@ function! s:handle_popupmenu_keys(stash) "{{{
         endif
         return 0
     elseif char ==# "\<C-y>"
-        call s:kakutei_pum(a:stash)
+        if selected_default
+            call s:close_pum(a:stash)
+        else
+            call s:kakutei_pum(a:stash)
+        endif
         return 1
     elseif char ==# "\<C-e>"
         let disp = preedit.get_display_str(0)
