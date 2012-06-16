@@ -14,13 +14,21 @@ endfunction
 
 function! s:run()
     let save_eln = g:eskk#egg_like_newline
+    let save_ris = g:eskk#rom_input_style
     try
-        let g:eskk#egg_like_newline = 1
-        call s:do_test()
-        let g:eskk#egg_like_newline = 0
-        call s:do_test()
+        for [g:eskk#egg_like_newline, g:eskk#rom_input_style] in [
+        \   [0, 'skk'],
+        \   [1, 'skk'],
+        \   [0, 'msime'],
+        \   [1, 'msime'],
+        \]
+            Diag 'g:eskk#egg_like_newline = '.g:eskk#egg_like_newline
+            \   . ', g:eskk#rom_input_style = '.string(g:eskk#rom_input_style)
+            call s:do_test()
+        endfor
     finally
         let g:eskk#egg_like_newline = save_eln
+        let g:eskk#rom_input_style  = save_ris
     endtry
 endfunction
 
