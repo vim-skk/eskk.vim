@@ -1331,14 +1331,7 @@ function! eskk#_initialize() "{{{
     augroup END
     " }}}
 
-    " Throw "eskk-initialize-pre" autocmd event. {{{
-    " NOTE: If no "User eskk-initialize-pre" events,
-    " Vim complains like "No matching autocommands".
-    autocmd eskk User eskk-initialize-pre :
-    doautocmd User eskk-initialize-pre
-    " }}}
-
-    " Global Variables {{{
+    " Global Variables (do setup before eskk-initialize-pre) {{{
 
     " Debug
     call eskk#util#set_default('g:eskk#debug', 0)
@@ -1441,6 +1434,13 @@ function! eskk#_initialize() "{{{
 
     call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
+    " }}}
+
+    " Throw "eskk-initialize-pre" autocmd event. {{{
+    " NOTE: If no "User eskk-initialize-pre" events,
+    " Vim complains like "No matching autocommands".
+    autocmd eskk User eskk-initialize-pre :
+    doautocmd User eskk-initialize-pre
     " }}}
 
     " Set up g:eskk#directory. {{{
