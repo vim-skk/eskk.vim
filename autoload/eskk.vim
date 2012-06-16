@@ -475,8 +475,16 @@ function! s:handle_popupmenu_keys(stash) "{{{
     let inserted_str = preedit.get_inserted_str()
     let selected_default = inserted_str ==# preedit.get_display_str()
 
+    " NOTE: Do not call s:kakutei_pum() on 'selected_default ==# 1'.
+
     if char ==# "\<CR>" || char ==# "\<Tab>"
-        call s:kakutei_pum(a:stash)
+        " Close popup and insert 'char'.
+        if selected_default
+            call s:do_enter_no_egglike(a:stash)
+            call s:close_pum(a:stash)
+        else
+            call s:kakutei_pum(a:stash)
+        endif
         return 0
     elseif char ==# "\<Space>"
         if selected_default
