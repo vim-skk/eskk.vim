@@ -448,6 +448,20 @@ eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
         call eskk#register_mode_table('hira', t)
     endfunction
 
+
+    " http://subtech.g.hatena.ne.jp/motemen/20110527/1306485690
+    " のeskkでの設定例。
+    " この方法はg:eskk#rom_input_styleが"skk"でないと
+    " 最後のzが残ってしまう。
+    autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
+    function! s:eskk_initial_pre() "{{{
+        for [orgtable, mode] in [['rom_to_hira', 'hira'], ['rom_to_kata', 'kata']]
+            let t = eskk#table#new(orgtable.'*', orgtable)
+            call t.add_map('zw', 'w', 'z')
+            call eskk#register_mode_table(mode, t)
+        endfor
+    endfunction "}}}
+
 }}}
 ==============================================================================
 モード					*eskk-modes* {{{

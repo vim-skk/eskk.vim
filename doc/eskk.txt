@@ -452,6 +452,20 @@ You can define the own alphabet tables like the following.
         call eskk#register_mode_table('hira', t)
     endfunction
 
+
+    " http://subtech.g.hatena.ne.jp/motemen/20110527/1306485690
+    " in eskk config.
+    " NOTE: This config remains the last character "z"
+    " if g:eskk#rom_input_style is not "skk".
+    autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
+    function! s:eskk_initial_pre() "{{{
+        for [orgtable, mode] in [['rom_to_hira', 'hira'], ['rom_to_kata', 'kata']]
+            let t = eskk#table#new(orgtable.'*', orgtable)
+            call t.add_map('zw', 'w', 'z')
+            call eskk#register_mode_table(mode, t)
+        endfor
+    endfunction "}}}
+
 }}}
 ==============================================================================
 MODES					*eskk-modes* {{{
