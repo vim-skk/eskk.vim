@@ -1097,7 +1097,7 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         \   a:table.get_map(rom_str),
         \   {'converted': 1}
         \)
-        let rest = a:table.get_rest(buf_str.rom_str.get(), -1)
+        let rest = a:table.get_rest(rom_str, -1)
         if rest !=# -1
             for rest_char in split(rest, '\zs')
                 call preedit.push_filter_queue(rest_char)
