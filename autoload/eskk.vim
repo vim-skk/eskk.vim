@@ -645,17 +645,8 @@ function! s:do_enter_egglike(stash) "{{{
     let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-        if g:eskk#rom_input_style ==# 'skk'
-            call preedit.kakutei("\<CR>")
-        elseif g:eskk#rom_input_style ==# 'msime'
-            call preedit.convert_rom_str_inplace(phase)
-            call preedit.kakutei(preedit.get_display_str(0) . "\<CR>")
-        else
-            throw eskk#internal_error(
-            \   ['eskk'],
-            \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
-            \)
-        endif
+        call preedit.convert_rom_str_inplace(phase)
+        call preedit.kakutei(preedit.get_display_str(0) . "\<CR>")
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN
         call preedit.convert_rom_str_inplace(phase)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
