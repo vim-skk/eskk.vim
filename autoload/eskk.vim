@@ -508,9 +508,6 @@ function! s:handle_popupmenu_keys(stash) "{{{
     endif
 
     " Let filter function process the character.
-    if !selected_default
-        call s:kakutei_pum(a:stash)
-    endif
     return 0
 endfunction "}}}
 function! s:kakutei_pum(stash) "{{{
