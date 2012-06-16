@@ -483,7 +483,6 @@ function! s:handle_popupmenu_keys(stash) "{{{
             call s:close_pum(a:stash)
         else
             call s:kakutei_pum(a:stash)
-            return 0
         endif
         return 0
     elseif char ==# "\<BS>" || char ==# "\<C-h>"
