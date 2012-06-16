@@ -628,7 +628,7 @@ function! s:get_enter_repeat_times(stash) "{{{
         " s:handle_popupmenu_keys() already closed pum.
         return g:eskk#egg_like_newline_completion ? 0 : 1
     endif
-    let phase = eskk#get_preedit().get_henkan_phase()
+    let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
     \   || phase ==# g:eskk#preedit#PHASE_OKURI
     \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
