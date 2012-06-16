@@ -741,18 +741,18 @@ function! s:do_escape(stash) "{{{
     \   preedit.get_henkan_phase()
     \)
 
-    let kakutei_str = preedit.get_display_str(0)
-
     if g:eskk#rom_input_style ==# 'skk'
-        call preedit.kakutei("\<Esc>")
+        let with_rom_str = 0
     elseif g:eskk#rom_input_style ==# 'msime'
-        call preedit.kakutei(kakutei_str . "\<Esc>")
+        let with_rom_str = 1
     else
         throw eskk#internal_error(
         \   ['eskk'],
         \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
         \)
     endif
+    let kakutei_str = preedit.get_display_str(0, with_rom_str)
+    call preedit.kakutei(kakutei_str . "\<Esc>")
 endfunction "}}}
 function! s:do_tab(stash) "{{{
     let preedit = a:stash.preedit
@@ -1737,6 +1737,7 @@ function! eskk#get_default_mapped_keys() "{{{
     \   "<C-p>",
     \   "<C-j>",
     \   "<C-g>",
+    \   "<Esc>",
     \]
 endfunction "}}}
 
