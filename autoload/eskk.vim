@@ -258,7 +258,7 @@ function! s:handle_kakutei(stash) "{{{
     \   || phase ==# g:eskk#preedit#PHASE_OKURI
     \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         if !empty(preedit.get_display_str(0))
-            call s:do_enter_no_egglike(a:stash)
+            call s:do_enter_egglike(a:stash)
             return 1
         endif
     endif
@@ -452,7 +452,7 @@ function! s:asym_filter(stash) "{{{
                 endif
             endif
         else
-            call s:do_enter_no_egglike(a:stash)
+            call s:do_enter_egglike(a:stash)
             call preedit.push_filter_queue(char)
         endif
     else
@@ -480,7 +480,7 @@ function! s:handle_popupmenu_keys(stash) "{{{
     if char ==# "\<CR>" || char ==# "\<Tab>"
         " Close popup and insert 'char'.
         if selected_default
-            call s:do_enter_no_egglike(a:stash)
+            call s:do_enter_egglike(a:stash)
             call s:close_pum(a:stash)
         else
             call s:kakutei_pum(a:stash)
@@ -619,7 +619,7 @@ endfunction "}}}
 function! s:do_enter(stash) "{{{
     let times = s:get_enter_repeat_times(a:stash)
     for _ in range(times)
-        call s:do_enter_no_egglike(a:stash)
+        call s:do_enter_egglike(a:stash)
     endfor
 endfunction "}}}
 function! s:get_enter_repeat_times(stash) "{{{
@@ -637,7 +637,7 @@ function! s:get_enter_repeat_times(stash) "{{{
     " Default is <CR> once.
     return 1
 endfunction "}}}
-function! s:do_enter_no_egglike(stash) "{{{
+function! s:do_enter_egglike(stash) "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     let undo_char = "\<C-g>u"
@@ -726,11 +726,11 @@ function! s:do_sticky(stash) "{{{
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
         " nop
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
-        call s:do_enter_no_egglike(a:stash)
+        call s:do_enter_egglike(a:stash)
         call s:do_sticky(a:stash)
         " Wrong begin col was set by s:do_sticky(). so fix it.
         "
-        " "▼漢字" => "漢字" (by s:do_enter_no_egglike())
+        " "▼漢字" => "漢字" (by s:do_enter_egglike())
         " s:do_sticky() uses col('.') .
         " inserted string here is "▼漢字". (col('.') is pointing after the string)
         " but I want to set begin col after "漢字".
@@ -1224,7 +1224,7 @@ function! s:abbrev_filter(stash) "{{{
         endif
         return
     elseif char ==# "\<CR>"
-        call s:do_enter_no_egglike(a:stash)
+        call s:do_enter_egglike(a:stash)
         call eskk#set_mode('hira')
         return
     endif
