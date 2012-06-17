@@ -1442,12 +1442,10 @@ function! eskk#_initialize() "{{{
 
     " Set up g:eskk#directory. {{{
     function! s:initialize_set_up_eskk_directory()
-        let dir = expand(g:eskk#directory)
-        for d in [dir, eskk#util#join_path(dir, 'log')]
-            if !isdirectory(d) && !eskk#util#mkdir_nothrow(d)
-                call eskk#logger#logf("can't create directory '%s'.", d)
-            endif
-        endfor
+        let dir = eskk#util#join_path(expand(g:eskk#directory), 'log')
+        if !eskk#util#mkdir_nothrow(dir, 'p')
+            call eskk#logger#logf("can't create directory '%s'.", dir)
+        endif
     endfunction
     call s:initialize_set_up_eskk_directory()
     " }}}
