@@ -1785,11 +1785,11 @@ function! eskk#enable() "{{{
         " NOTE: Vim can't enter lang-mode immediately
         " in insert-mode or commandline-mode.
         " We have to use i_CTRL-^ .
-        setlocal iminsert=1 imsearch=-1
+        setlocal iminsert=1 imsearch=1
         redrawstatus
         return "\<C-^>"
     else
-        setlocal iminsert=1 imsearch=-1
+        setlocal iminsert=1 imsearch=1
         redrawstatus
         return ''
     endif
