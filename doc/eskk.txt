@@ -372,9 +372,6 @@ g:eskk#debug_out		*g:eskk#debug_out*
 <
 	If "cmdline", output to command-line.
 
-g:eskk#version			*g:eskk#version*
-	Current version number string.
-
 }}}
 ------------------------------------------------------------------------------
 COMMANDS					*eskk-commands* {{{

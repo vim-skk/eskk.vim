@@ -40,10 +40,6 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     call add(lines, strftime('%c'))
     call add(lines, '')
 
-    call add(lines, '--- g:eskk#version ---')
-    call add(lines, printf('g:eskk#version = %s', string(g:eskk#version)))
-    call add(lines, '--- g:eskk#version ---')
-
     call add(lines, '--- char ---')
     call add(lines, printf('char: %s(%d)', string(a:stash.char), char2nr(a:stash.char)))
     call add(lines, printf('mode(): %s', mode()))
