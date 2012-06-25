@@ -50,7 +50,9 @@ function! eskk#util#assert(cond, msg) "{{{
 endfunction "}}}
 function! eskk#util#build_error(from, msg_list) "{{{
     let file = 'autoload/' . join(a:from, '/') . '.vim'
-    return 'eskk: ' . join(a:msg_list, ': ') . ' (at ' . file . ')'
+    let msg = type(a:msg_list) is type([]) ?
+    \           join(a:msg_list, ': ') : a:msg_list
+    return 'eskk: ' . msg . ' (at ' . file . ')'
 endfunction "}}}
 
 
