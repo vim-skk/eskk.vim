@@ -254,10 +254,8 @@ function! s:handle_kakutei(stash) "{{{
     if phase ==# g:eskk#preedit#PHASE_HENKAN
     \   || phase ==# g:eskk#preedit#PHASE_OKURI
     \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
-        if !empty(preedit.get_display_str(0))
-            call s:do_enter_egglike(a:stash)
-            return 1
-        endif
+        call s:do_enter_egglike(a:stash)
+        return 1
     endif
     return 0
 endfunction "}}}
