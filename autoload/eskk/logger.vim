@@ -41,7 +41,8 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     call add(lines, '')
 
     call add(lines, '--- char ---')
-    call add(lines, printf('char: %s(%d)', string(a:stash.char), char2nr(a:stash.char)))
+    let char = get(a:stash, 'char', '')
+    call add(lines, printf('char: %s(%d)', string(char), char2nr(char)))
     call add(lines, printf('mode(): %s', mode()))
     call add(lines, '--- char ---')
 
@@ -102,7 +103,11 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     call add(lines, '')
 
     call add(lines, '--- preedit ---')
-    let lines += a:stash.preedit.dump()
+    if has_key(a:stash, 'preedit')
+        let lines += a:stash.preedit.dump()
+    else
+        let lines += ['(no preedit)']
+    endif
     call add(lines, '--- preedit ---')
 
     call add(lines, '')

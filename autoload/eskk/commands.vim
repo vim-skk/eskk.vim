@@ -41,7 +41,7 @@ function! s:cmd_update_dictionary(silent) "{{{
         call dict.update_dictionary(verbose)
     catch
         call eskk#logger#write_error_log_file(
-        \   '',
+        \   {},
         \   eskk#util#build_error(
         \       ['eskk', 'commands'],
         \       ['error occurred while :'
