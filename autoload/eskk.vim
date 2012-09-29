@@ -723,7 +723,9 @@ function! s:do_sticky(stash) "{{{
         " s:do_sticky() uses col('.') .
         " inserted string here is "▼漢字". (col('.') is pointing after the string)
         " but I want to set begin col after "漢字".
-        call preedit.set_begin_col(preedit.get_begin_col() - strlen(g:eskk#marker_henkan_select))
+        let begin_col = preedit.get_begin_col()
+        call eskk#util#assert(begin_col ># 0, 'begin_col ># 0')
+        call preedit.set_begin_col(begin_col - strlen(g:eskk#marker_henkan_select))
     else
         throw eskk#internal_error(['eskk', 'preedit'])
     endif

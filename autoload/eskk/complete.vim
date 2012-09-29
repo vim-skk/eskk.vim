@@ -46,8 +46,11 @@ function! s:eskkcomplete(findstart, base) "{{{
         if !eskk#complete#can_find_start()
             return -1
         endif
-
-        return eskk#get_preedit().get_begin_col() - 1
+        let begin_col = eskk#get_preedit().get_begin_col()
+        if begin_col <=# 0
+            return -1
+        endif
+        return begin_col - 1
     endif
 
     return eskk#complete#do_complete(a:base)

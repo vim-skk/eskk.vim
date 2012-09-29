@@ -643,12 +643,6 @@ function! s:Preedit_get_begin_col() dict "{{{
         \       . ' must not be called in normal phase.'
         \)
     endif
-    if self._begin_col <=# 0
-        throw eskk#util#build_error(
-        \   ['eskk', 'preedit'],
-        \   'internal error: begin col is invalid.'
-        \)
-    endif
     return self._begin_col
 endfunction "}}}
 
