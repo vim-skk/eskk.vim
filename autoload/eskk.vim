@@ -1755,10 +1755,9 @@ function! eskk#enable() "{{{
         call eskk#logger#warn('eskk is not initialized.')
         return ''
     endif
-    " Allow to call eskk#enable() twice.
-    " if eskk#is_enabled()
-    "     return ''
-    " endif
+    if eskk#is_enabled()
+        return ''
+    endif
     if exists('b:skk_on') && b:skk_on
         call eskk#logger#warn('skk.vim is enabled. please disable it.')
         return ''
@@ -1801,10 +1800,9 @@ function! eskk#disable() "{{{
         call eskk#logger#warn('eskk is not initialized.')
         return ''
     endif
-    " Allow to call eskk#enable() twice.
-    " if !eskk#is_enabled()
-    "     return ''
-    " endif
+    if !eskk#is_enabled()
+        return ''
+    endif
     let inst = eskk#get_current_instance()
 
     call eskk#throw_event('disable-im')
@@ -1814,6 +1812,8 @@ function! eskk#disable() "{{{
 
     if has_key(inst, 'omnifunc_save')
         let &l:omnifunc = remove(inst, 'omnifunc_save')
+    elseif &l:omnifunc ==# 'eskk#complete#eskkcomplete'
+        let &l:omnifunc = ''
     endif
 
     if mode() =~# '^[ic]$'
