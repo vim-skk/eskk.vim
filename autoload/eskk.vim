@@ -212,11 +212,14 @@ function! eskk#create_new_instance() "{{{
         throw eskk#internal_error(['eskk'], "mismatch values between s:eskk_instance_id and s:eskk_instances")
     endif
 
-    " Create and push the instance.
+    " Deactivate a current instance.
+    call eskk#disable()
+
+    " Create and push a new instance.
     call add(s:eskk_instances, s:eskk_new())
     let s:eskk_instance_id += 1
 
-    " Initialize instance.
+    " Activate the new instance.
     call eskk#enable()
 endfunction "}}}
 function! eskk#destroy_current_instance() "{{{
