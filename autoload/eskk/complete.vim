@@ -25,20 +25,20 @@ let s:completed_candidates = {}
 
 
 
-" Complete function.
+" Complete Function
 function! eskk#complete#eskkcomplete(findstart, base) "{{{
-    " Complete function should not throw exception.
+    if !eskk#is_enabled()
+        return s:skip_complete(a:findstart)
+    endif
+
+    " Complete Function should not throw exception.
     try
         return s:eskkcomplete(a:findstart, a:base)
     catch
         redraw
         call eskk#logger#log_exception('s:eskkcomplete()')
 
-        if a:findstart
-            return -1
-        else
-            return s:skip_complete()
-        endif
+        return s:skip_complete(a:findstart)
     endtry
 endfunction "}}}
 function! s:eskkcomplete(findstart, base) "{{{
@@ -53,6 +53,10 @@ function! s:eskkcomplete(findstart, base) "{{{
     return eskk#complete#do_complete(a:base)
 endfunction "}}}
 function! eskk#complete#can_find_start() "{{{
+    if !eskk#is_enabled()
+        return 0
+    endif
+
     if !has_key(s:MODE_FUNC_TABLE, eskk#get_mode())
         return 0
     endif
@@ -83,11 +87,16 @@ endfunction "}}}
 function! eskk#complete#_reset_completed_candidates() "{{{
     let s:completed_candidates = {}
 endfunction "}}}
-function! s:skip_complete() "{{{
-    return s:get_completed_candidates(
-    \   eskk#get_preedit().get_display_str(1, 0),
-    \   []
-    \)
+function! s:skip_complete(...) "{{{
+    let findstart = get(a:000, 0, 0)
+    if findstart
+        return -1
+    else
+        return s:get_completed_candidates(
+        \   eskk#get_preedit().get_display_str(1, 0),
+        \   []
+        \)
+    endif
 endfunction "}}}
 function! s:has_completed_candidates(display_str) "{{{
     let NOTFOUND = {}
