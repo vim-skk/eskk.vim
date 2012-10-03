@@ -1343,7 +1343,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#directory', '~/.eskk')
 
     " Dictionary
-    for [s:varname, s:default] in [
+    for [varname, default] in [
     \   ['g:eskk#dictionary', {
     \       'path': "~/.skk-jisyo",
     \       'sorted': 0,
@@ -1355,23 +1355,23 @@ function! eskk#_initialize() "{{{
     \       'encoding': 'euc-jp',
     \   }],
     \]
-        if exists(s:varname)
-            if type({s:varname}) == type("")
-                let s:default.path = {s:varname}
-                unlet {s:varname}
-                let {s:varname} = s:default
-            elseif type({s:varname}) == type({})
-                call extend({s:varname}, s:default, "keep")
+        if exists(varname)
+            if type({varname}) == type("")
+                let default.path = {varname}
+                unlet {varname}
+                let {varname} = default
+            elseif type({varname}) == type({})
+                call extend({varname}, default, "keep")
             else
                 call eskk#logger#warn(
-                \   s:varname . "'s type is either String or Dictionary."
+                \   varname . "'s type is either String or Dictionary."
                 \)
             endif
         else
-            let {s:varname} = s:default
+            let {varname} = default
         endif
+        let {varname}.path = {varname}.path
     endfor
-    unlet! s:varname s:default
 
     call eskk#util#set_default('g:eskk#backup_dictionary', g:eskk#dictionary.path . '.BAK')
     call eskk#util#set_default('g:eskk#auto_save_dictionary_at_exit', 1)
