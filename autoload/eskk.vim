@@ -1373,6 +1373,17 @@ function! eskk#_initialize() "{{{
         let {varname}.path = expand({varname}.path)
     endfor
 
+    " Show warning if dictionary does not exist.
+    for dict in [g:eskk#dictionary, g:eskk#large_dictionary]
+        if !filereadable(dict.path)
+            call eskk#logger#warnf(
+            \   "Cannot read SKK dictionary: %s", dict.path
+            \)
+            sleep 1
+        endif
+    endfor
+
+
     call eskk#util#set_default('g:eskk#backup_dictionary', g:eskk#dictionary.path . '.BAK')
     call eskk#util#set_default('g:eskk#auto_save_dictionary_at_exit', 1)
 
