@@ -1345,7 +1345,7 @@ function! eskk#_initialize() "{{{
     " Dictionary
     for [varname, default] in [
     \   ['g:eskk#dictionary', {
-    \       'path': "~/.skk-jisyo",
+    \       'path': expand("~/.skk-jisyo"),
     \       'sorted': 0,
     \       'encoding': 'utf-8',
     \   }],
@@ -1370,7 +1370,7 @@ function! eskk#_initialize() "{{{
         else
             let {varname} = default
         endif
-        let {varname}.path = {varname}.path
+        let {varname}.path = expand({varname}.path)
     endfor
 
     call eskk#util#set_default('g:eskk#backup_dictionary', g:eskk#dictionary.path . '.BAK')

@@ -792,7 +792,7 @@ function! s:PhysicalDict_new(path, sorted, encoding) "{{{
     let obj = extend(
     \   deepcopy(s:PhysicalDict),
     \   {
-    \       'path': expand(a:path),
+    \       'path': a:path,
     \       'sorted': a:sorted,
     \       'encoding': a:encoding,
     \   },
