@@ -20,11 +20,7 @@ let s:prev_normal_keys = {}
 " Utilities
 
 function! eskk#map#get_map_modes() "{{{
-    " :lmap can't remap to :lmap. It's Vim's bug.
-    "   http://groups.google.com/group/vim_dev/browse_thread/thread/17a1273eb82d682d/
-    " So I use :map! mappings for 'fallback' of :lmap.
-
-    return 'ic'
+    return 'l'
 endfunction "}}}
 function! eskk#map#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
@@ -55,7 +51,7 @@ function! eskk#map#set_up_key(key, ...) "{{{
     \   'be' . (a:0 ? a:1 : ''),
     \   a:key,
     \   'eskk#filter(eskk#util#key2char('.string(a:key).'))',
-    \   'l'
+    \   eskk#map#get_map_modes()
     \)
 endfunction "}}}
 function! eskk#map#unmap(options, lhs, modes) "{{{
@@ -152,19 +148,17 @@ endfunction "}}}
 
 
 " Functions using s:eskk_mappings
-function! eskk#map#map_all_keys(...) "{{{
+function! eskk#map#map_all_keys() "{{{
     let inst = eskk#get_buffer_instance()
     if has_key(inst, 'prev_lang_keys')
         return
     endif
     let inst.prev_lang_keys = savemap#save_map('l')
 
-    lmapclear <buffer>
-    lmapclear
-
     " Map mapped keys.
     for key in g:eskk#mapped_keys
-        call call('eskk#map#set_up_key', [key] + a:000)
+        " Map with <unique>
+        silent! call eskk#map#set_up_key(key, 'u')
     endfor
 
     " Map `:EskkMap -general` keys.
