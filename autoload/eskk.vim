@@ -1772,6 +1772,8 @@ function! eskk#enable() "{{{
         return ''
     endif
     if eskk#is_enabled()
+        " Initialize mode.
+        call eskk#set_mode(g:eskk#initial_mode)
         return ''
     endif
     if exists('b:skk_on') && b:skk_on
