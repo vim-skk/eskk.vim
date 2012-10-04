@@ -196,9 +196,6 @@ function! eskk#map#unmap_all_keys() "{{{
         return
     endif
 
-    lmapclear <buffer>
-    lmapclear
-
     call inst.prev_lang_keys.restore()
     unlet inst.prev_lang_keys
 endfunction "}}}
