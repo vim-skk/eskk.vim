@@ -186,7 +186,7 @@ function! s:make_map_info(mode, lhs, is_abbr) "{{{
     \   'normal': {},
     \}
 
-    let info = maparg(a:lhs, a:mode, a:is_abbr, 1)
+    let info = s:maparg(a:lhs, a:mode, a:is_abbr, 1)
     if empty(info)
         " No such a mapping for a:lhs
     elseif info.buffer
@@ -194,7 +194,7 @@ function! s:make_map_info(mode, lhs, is_abbr) "{{{
         let r.buffer = info
         " Also save a non-<buffer> mapping if it exists.
         call s:do_unmap_silently(a:mode, a:lhs, a:is_abbr, 1)
-        let r.normal = maparg(a:lhs, a:mode, a:is_abbr, 1)
+        let r.normal = s:maparg(a:lhs, a:mode, a:is_abbr, 1)
         call s:restore_map_info(r.buffer, a:is_abbr)
     else
         " non-<buffer>
@@ -306,6 +306,14 @@ function! s:match_map_info_compare(map_info, map_info_name, options, option_name
         \   :  check ==# BUFFER ? match_buffer
         \   :  match_normal
     endif
+endfunction "}}}
+
+function! s:maparg(...) "{{{
+    let info = call('maparg', a:000)
+    if has_key(info, 'lhs')
+        let info.lhs = substitute(info.lhs, '|', '<Bar>', 'g')
+    endif
+    return info
 endfunction "}}}
 
 function! s:convert_maparg_options(maparg) "{{{
