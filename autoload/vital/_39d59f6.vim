@@ -3,22 +3,31 @@ let s:self_version = expand('<sfile>:t:r')
 let s:loaded = {}
 
 function! s:import(name, ...)
-  let module = {}
-  let debug = 0
+  let target = {}
+  let functions = []
   for a in a:000
     if type(a) == type({})
-      let module = a
-    elseif type(a) == type(0)
-      let debug = a
+      let target = a
+    elseif type(a) == type([])
+      let functions = a
     endif
     unlet a
   endfor
-  return extend(module, s:_import(a:name, s:_scripts(), debug), 'keep')
+  let module = s:_import(a:name, s:_scripts())
+  if empty(functions)
+    call extend(target, module, 'keep')
+  else
+    for f in functions
+      if has_key(module, f) && !has_key(target, f)
+        let target[f] = module[f]
+      endif
+    endfor
+  endif
+  return target
 endfunction
 
 function! s:load(...) dict
   let scripts = s:_scripts()
-  let debug = has_key(self, 'debug') && self.debug
   for arg in a:000
     let [name; as] = type(arg) == type([]) ? arg[: 1] : [arg, arg]
     let target = split(join(as, ''), '\W\+')
@@ -37,7 +46,7 @@ function! s:load(...) dict
     endwhile
 
     if exists('dict')
-      call extend(dict, s:_import(name, scripts, debug))
+      call extend(dict, s:_import(name, scripts))
     endif
     unlet arg
   endfor
@@ -48,9 +57,9 @@ function! s:unload()
   let s:loaded = {}
 endfunction
 
-function! s:_import(name, scripts, debug)
+function! s:_import(name, scripts)
   if type(a:name) == type(0)
-    return s:_build_module(a:name, a:debug)
+    return s:_build_module(a:name)
   endif
   if a:name =~# '^[^A-Z]' || a:name =~# '\W[^A-Z]'
     throw 'vital: module name must start with capital letter: ' . a:name
@@ -73,11 +82,14 @@ function! s:_import(name, scripts, debug)
       source `=path`
     catch /^Vim\%((\a\+)\)\?:E484/
       throw 'vital: module not found: ' . a:name
+    catch /^Vim\%((\a\+)\)\?:E127/
+      " Ignore.
     endtry
+
     let sid = len(a:scripts) + 1  " We expect that the file newly read is +1.
     let a:scripts[path] = sid
   endif
-  return s:_build_module(sid, a:debug)
+  return s:_build_module(sid)
 endfunction
 
 function! s:_scripts()
@@ -96,7 +108,8 @@ if filereadable(expand('<sfile>:r') . '.VIM')
     " Note: On windows, vim can't expand path names from 8.3 formats.
     " So if getting full path via <sfile> and $HOME was set as 8.3 format,
     " vital load duplicated scripts. Below's :~ avoid this issue.
-    return tolower(resolve(fnamemodify(a:path, ':p:~:gs?[\\/]\+?/?')))
+    return tolower(fnamemodify(resolve(fnamemodify(
+    \              a:path, ':p:gs?[\\/]\+?/?')), ':~'))
   endfunction
 else
   function! s:_unify_path(path)
@@ -104,7 +117,7 @@ else
   endfunction
 endif
 
-function! s:_build_module(sid, debug)
+function! s:_build_module(sid)
   if has_key(s:loaded, a:sid)
     return copy(s:loaded[a:sid])
   endif
@@ -130,7 +143,7 @@ function! s:_build_module(sid, debug)
       " FIXME: Show an error message for debug.
     endtry
   endif
-  if !a:debug
+  if !get(g:, 'vital_debug', 0)
     call filter(module, 'v:key =~# "^\\a"')
   endif
   let s:loaded[a:sid] = module
@@ -145,5 +158,5 @@ function! s:_redir(cmd)
 endfunction
 
 function! vital#{s:self_version}#new()
-  return s:_import('', s:_scripts(), 0).load(['Prelude', ''])
+  return s:_import('', s:_scripts()).load(['Prelude', ''])
 endfunction

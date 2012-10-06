@@ -2,7 +2,11 @@
 
 let s:save_cpo = &cpo
 set cpo&vim
-let s:V = vital#{expand('<sfile>:h:h:t:r')}#new()
+
+function! s:_vital_loaded(V)
+  let s:V = a:V
+  let s:L = s:V.import('Data.List')
+endfunction
 
 function! s:_vital_depends()
   return ['Data.List']
@@ -56,19 +60,25 @@ function! s:scan(str, pattern)
 endfunction
 
 " Split to two elements of List. ([left, right])
-" e.g.: s:split_leftright('neocomplcache', 'compl') returns ['neo', 'cache']
-function! s:split_leftright(haystack, needle)
-  let ERROR = ['', '']
-  if a:haystack ==# '' || a:needle ==# ''
-    return ERROR
-  endif
-  let idx = stridx(a:haystack, a:needle)
-  if idx ==# -1
-    return ERROR
-  endif
-  let left  = idx ==# 0 ? '' : a:haystack[: idx - 1]
-  let right = a:haystack[idx + strlen(a:needle) :]
+" e.g.: s:split3('neocomplcache', 'compl') returns ['neo', 'compl', 'cache']
+function! s:split_leftright(expr, pattern)
+  let [left, _, right] = s:split3(a:expr, a:pattern)
   return [left, right]
+endfunction
+
+function! s:split3(expr, pattern)
+  let ERROR = ['', '', '']
+  if a:expr ==# '' || a:pattern ==# ''
+    return ERROR
+  endif
+  let begin = match(a:expr, a:pattern)
+  if begin is -1
+    return ERROR
+  endif
+  let end   = matchend(a:expr, a:pattern)
+  let left  = begin <=# 0 ? '' : a:expr[: begin - 1]
+  let right = a:expr[end :]
+  return [left, a:expr[begin : end-1], right]
 endfunction
 
 " Slices into strings determines the number of substrings.
@@ -115,8 +125,6 @@ endfunction
 " even if a:str contains multibyte character(s).
 " s:strchars(str) {{{
 if exists('*strchars')
-  " TODO: Why can't I write like this?
-  " let s:strchars = function('strchars')
   function! s:strchars(str)
     return strchars(a:str)
   endfunction
@@ -159,8 +167,7 @@ function! s:_split_by_wcswitdh(body, x)
 endfunction
 
 function! s:wrap(str)
-  let L = s:V.import('Data.List')
-  return L.concat(
+  return s:L.concat(
         \ map(split(a:str, '\r\?\n'), 's:_split_by_wcswitdh(v:val, &columns - 1)'))
 endfunction
 
@@ -211,5 +218,6 @@ function! s:diffidx(a, b)
 endfunction
 
 let &cpo = s:save_cpo
+unlet s:save_cpo
 
 " vim:set et ts=2 sts=2 sw=2 tw=0:

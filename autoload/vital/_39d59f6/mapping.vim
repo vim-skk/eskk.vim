@@ -99,11 +99,13 @@ function! s:__get_map_command(type, mode, dict, lhs, rhs)
   endif
 
   let noremap = get(a:dict, 'noremap', 0)
+  let lhs = substitute(a:lhs, '\V|', '<Bar>', 'g')
+  let rhs = substitute(a:rhs, '\V|', '<Bar>', 'g')
   return join([
   \   a:mode . (noremap ? 'nore' : '') . a:type,
   \   s:options_dict2raw(a:dict),
-  \   a:lhs,
-  \   a:rhs,
+  \   lhs,
+  \   rhs,
   \])
 endfunction
 
@@ -122,10 +124,11 @@ function! s:__get_unmap_command(type, mode, dict, lhs)
     return ''
   endif
 
+  let lhs = substitute(a:lhs, '\V|', '<Bar>', 'g')
   return join([
   \   a:mode . a:type,
   \   s:options_dict2raw(a:dict),
-  \   a:lhs,
+  \   lhs,
   \])
 endfunction
 
@@ -145,5 +148,6 @@ endfunction
 
 
 let &cpo = s:save_cpo
+unlet s:save_cpo
 
 " vim:set et ts=2 sts=2 sw=2 tw=0:
