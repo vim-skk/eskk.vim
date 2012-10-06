@@ -34,12 +34,11 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
 
     let dict = eskk#util#mapopt_chars2dict(a:options)
     let modes = a:0 ? a:1 : eskk#map#get_map_modes()
-    let lhs = a:lhs ==# '|' ? '<Bar>' : a:lhs
     for mode in split(modes, '\zs')
         if !eskk#util#is_mode_char(mode)
             continue
         endif
-        let mapcmd = eskk#util#get_map_command(mode, dict, lhs, a:rhs)
+        let mapcmd = eskk#util#get_map_command(mode, dict, a:lhs, a:rhs)
         try
             execute mapcmd
         catch
@@ -48,7 +47,6 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
     endfor
 endfunction "}}}
 function! eskk#map#set_up_key(key, ...) "{{{
-    let key = a:key ==# '|' ? '<Bar>' : a:key
     call eskk#map#map(
     \   'be' . (a:0 ? a:1 : ''),
     \   key,
