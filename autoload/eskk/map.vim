@@ -39,6 +39,9 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
             continue
         endif
         let mapcmd = eskk#util#get_map_command(mode, dict, a:lhs, a:rhs)
+        if dict.unique
+            let mapcmd = 'silent! '.mapcmd
+        endif
         try
             execute mapcmd
         catch
@@ -158,7 +161,7 @@ function! eskk#map#map_all_keys() "{{{
     " Map mapped keys.
     for key in g:eskk#mapped_keys
         " Map with <unique>
-        silent! call eskk#map#set_up_key(key, 'u')
+        call eskk#map#set_up_key(key, 'u')
     endfor
 
     " Map `:EskkMap -general` keys.
