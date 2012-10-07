@@ -49,7 +49,7 @@ endfunction "}}}
 function! eskk#map#set_up_key(key, ...) "{{{
     call eskk#map#map(
     \   'be' . (a:0 ? a:1 : ''),
-    \   key,
+    \   a:key,
     \   'eskk#filter(eskk#util#key2char('.string(a:key).'))',
     \   eskk#map#get_map_modes()
     \)
