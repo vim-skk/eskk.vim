@@ -163,8 +163,34 @@ function! eskk#map#map_all_keys() "{{{
 
     " Map mapped keys.
     for key in g:eskk#mapped_keys
-        " Map with <unique>
-        call eskk#map#set_up_key(key, 'u')
+        let rhs = maparg(key, eskk#map#get_map_modes())
+        if stridx(rhs, '<Plug>(eskk:disable)') isnot -1
+            " execute 'EskkMap -type=disable' key
+            call s:create_map(
+            \   'disable',
+            \   s:create_default_mapopt(),
+            \   key,
+            \   '',
+            \)
+        elseif stridx(rhs, '<Plug>(eskk:enable)') isnot -1
+            " execute 'EskkMap -type=enable' key
+            call s:create_map(
+            \   'enable',
+            \   s:create_default_mapopt(),
+            \   key,
+            \   '',
+            \)
+        elseif stridx(rhs, '<Plug>(eskk:toggle)') isnot -1
+            " execute 'EskkMap -type=toggle' key
+            call s:create_map(
+            \   'toggle',
+            \   s:create_default_mapopt(),
+            \   key,
+            \   '',
+            \)
+        endif
+        " Overwrite 'key'.
+        call eskk#map#set_up_key(key)
     endfor
 
     " Map `:EskkMap -general` keys.

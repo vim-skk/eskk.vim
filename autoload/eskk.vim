@@ -62,6 +62,8 @@ let s:table_defs = {}
 let s:eskk_general_mappings = {}
 let s:eskk_mappings = {
 \   'disable': {'fn': eskk#util#get_local_func('handle_disable', s:SID_PREFIX)},
+\   'enable': {'fn': eskk#util#get_local_func('handle_enable', s:SID_PREFIX)},
+\   'toggle': {'fn': eskk#util#get_local_func('handle_toggle', s:SID_PREFIX)},
 \   'kakutei': {'fn': eskk#util#get_local_func('handle_kakutei', s:SID_PREFIX)},
 \   'sticky': {},
 \   'backspace-key': {},
@@ -110,6 +112,8 @@ let s:MODE_LOCAL_KEYS = {
 \   'hira': [
 \       'kakutei',
 \       'disable',
+\       'enable',
+\       'toggle',
 \       'cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
@@ -130,6 +134,8 @@ let s:MODE_LOCAL_KEYS = {
 \   'kata': [
 \       'kakutei',
 \       'disable',
+\       'enable',
+\       'toggle',
 \       'cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
@@ -150,6 +156,8 @@ let s:MODE_LOCAL_KEYS = {
 \   'hankata': [
 \       'kakutei',
 \       'disable',
+\       'enable',
+\       'toggle',
 \       'cancel',
 \       'phase:henkan:henkan-key',
 \       'phase:okuri:henkan-key',
@@ -247,6 +255,22 @@ function! s:handle_disable(stash) "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         call eskk#disable()
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_enable(stash) "{{{
+    let phase = a:stash.preedit.get_henkan_phase()
+    if phase ==# g:eskk#preedit#PHASE_NORMAL
+        call eskk#enable()
+        return 1
+    endif
+    return 0
+endfunction "}}}
+function! s:handle_toggle(stash) "{{{
+    let phase = a:stash.preedit.get_henkan_phase()
+    if phase ==# g:eskk#preedit#PHASE_NORMAL
+        call eskk#toggle()
         return 1
     endif
     return 0
@@ -1479,8 +1503,6 @@ function! eskk#_initialize() "{{{
 
     " Default mappings - :EskkMap {{{
     call eskk#commands#define()
-
-    EskkMap -type=disable -unique <C-j>
 
     EskkMap -type=kakutei -unique <C-j>
 
