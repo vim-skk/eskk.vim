@@ -372,8 +372,8 @@ function! s:asym_filter(stash) "{{{
 
 
     " Handle special mode-local mapping.
-    for key in get(s:MODE_LOCAL_KEYS, eskk#get_mode(), [])
-        if s:handle_mode_local_char(char, key, a:stash)
+    for type in get(s:MODE_LOCAL_KEYS, eskk#get_mode(), [])
+        if s:handle_mode_local_char(char, type, a:stash)
             " Handled.
             return
         endif

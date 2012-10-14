@@ -22,6 +22,9 @@ let s:prev_normal_keys = {}
 function! eskk#map#get_map_modes() "{{{
     return 'l'
 endfunction "}}}
+function! s:get_map_rhs(key) "{{{
+    return 'eskk#filter(eskk#util#key2char('.string(a:key).'))'
+endfunction "}}}
 function! eskk#map#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
         call eskk#logger#logstrf(
@@ -53,7 +56,7 @@ function! eskk#map#set_up_key(key, ...) "{{{
     call eskk#map#map(
     \   'be' . (a:0 ? a:1 : ''),
     \   a:key,
-    \   'eskk#filter(eskk#util#key2char('.string(a:key).'))',
+    \   s:get_map_rhs(a:key),
     \   eskk#map#get_map_modes()
     \)
 endfunction "}}}
