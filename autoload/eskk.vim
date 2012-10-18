@@ -2172,7 +2172,8 @@ function! eskk#filter(char) "{{{
 
     finally
         if preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_NORMAL
-            call preedit.get_current_buf_str().rom_pairs.clear()
+            let cur_buf_str = preedit.get_current_buf_str()
+            call cur_buf_str.rom_pairs.clear()
         endif
         " Set old string. (it is used by Preedit.rewrite())
         call preedit.set_old_str(preedit.get_display_str())
