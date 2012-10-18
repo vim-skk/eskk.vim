@@ -1629,7 +1629,12 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " InsertEnter: Clear preedit. {{{
-    autocmd eskk InsertEnter * call eskk#get_preedit().reset()
+    function! s:reset_preedit()
+        " avoid :call bug when chained by dot after function call.
+        let preedit = eskk#get_preedit()
+        call preedit.reset()
+    endfunction
+    autocmd eskk InsertEnter * call s:reset_preedit()
     " }}}
 
     " InsertLeave: g:eskk#convert_at_exact_match {{{
@@ -1808,7 +1813,8 @@ function! eskk#enable() "{{{
 
     " Clear current variable states.
     let inst.mode = ''
-    call eskk#get_preedit().reset()
+    let preedit = eskk#get_preedit()
+    call preedit.reset()
 
     " Map all lang-mode keymappings.
     call eskk#map#map_all_keys()

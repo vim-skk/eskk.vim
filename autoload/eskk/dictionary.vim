@@ -677,7 +677,8 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
         let i += 1
     endwhile
     try
-        call dict.get_user_dict().set_lines(lines)
+        let user_dict = dict.get_user_dict()
+        call user_dict.set_lines(lines)
     catch /^eskk: parse error/
         return 0
     endtry

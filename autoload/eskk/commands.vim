@@ -31,7 +31,8 @@ function! eskk#commands#define() "{{{
 endfunction "}}}
 
 function! s:cmd_forget_registered_words() "{{{
-    call eskk#get_skk_dict().forget_all_words()
+    let skk_dict = eskk#get_skk_dict()
+    call skk_dict.forget_all_words()
 endfunction "}}}
 
 function! s:cmd_update_dictionary(silent) "{{{
