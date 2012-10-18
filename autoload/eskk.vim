@@ -421,9 +421,6 @@ function! s:asym_filter(stash) "{{{
     elseif char ==# "\<Esc>"
         call s:do_escape(a:stash)
         return
-    elseif char ==# "\<Tab>"
-        call s:do_tab(a:stash)
-        return
     endif
 
 
@@ -780,14 +777,6 @@ function! s:do_escape(stash) "{{{
     endif
     let kakutei_str = preedit.get_display_str(0, with_rom_str)
     call preedit.kakutei(kakutei_str . "\<Esc>")
-endfunction "}}}
-function! s:do_tab(stash) "{{{
-    let preedit = a:stash.preedit
-    let buf_str  = preedit.get_current_buf_str()
-    call buf_str.rom_str.append(s:get_tab_raw_str())
-endfunction "}}}
-function! s:get_tab_raw_str() "{{{
-    return &l:expandtab ? repeat(' ', &tabstop) : "\<Tab>"
 endfunction "}}}
 function! s:do_henkan(stash, ...) "{{{
     let preedit = a:stash.preedit
