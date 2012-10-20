@@ -337,7 +337,7 @@ function! s:parse_options(args) "{{{
             let type = value
         elseif has_key(opt, optname)
             let opt[optname] = value
-        elseif optname ==# 'no-unique'
+        elseif optname ==# 'force'
             let opt.unique = 0
         elseif optname ==# 'remap'
             let opt.noremap = 0
