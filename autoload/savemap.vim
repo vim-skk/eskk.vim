@@ -117,8 +117,6 @@ function! s:MapDict_new(is_abbr) "{{{
     let obj = {}
     let obj.__is_abbr = a:is_abbr
     let obj.__map_info = []
-    let obj.__saved_normal_modes = {}
-    let obj.__saved_buffer_modes = {}
     let obj.restore = s:local_func('MapDict_restore')
     let obj.add_map_info = s:local_func('MapDict_add_map_info')
     let obj.has_abbr = s:local_func('MapDict_has_abbr')
@@ -127,14 +125,6 @@ function! s:MapDict_new(is_abbr) "{{{
 endfunction "}}}
 
 function! s:MapDict_restore() dict "{{{
-    " Clear current mappings.
-    for mode in keys(self.__saved_normal_modes)
-        execute mode.'mapclear'
-    endfor
-    for mode in keys(self.__saved_buffer_modes)
-        execute mode.'mapclear <buffer>'
-    endfor
-
     for d in self.__map_info
         call s:restore_map_info(d.normal, self.__is_abbr)
         call s:restore_map_info(d.buffer, self.__is_abbr)
@@ -142,16 +132,6 @@ function! s:MapDict_restore() dict "{{{
 endfunction "}}}
 
 function! s:MapDict_add_map_info(map_info) dict "{{{
-    if has_key(a:map_info, 'normal')
-        for mode in s:split_maparg_modes(get(a:map_info.normal, 'mode', ''))
-            let self.__saved_normal_modes[mode] = 1
-        endfor
-    endif
-    if has_key(a:map_info, 'buffer')
-        for mode in s:split_maparg_modes(get(a:map_info.buffer, 'mode', ''))
-            let self.__saved_buffer_modes[mode] = 1
-        endfor
-    endif
     call add(self.__map_info, a:map_info)
 endfunction "}}}
 
