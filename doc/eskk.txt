@@ -524,6 +524,17 @@ Or skkdic-expr2 in skktools also may help you:
 And, if it was caused by eskk,
 I'm pleased if you report the bug.
 
+Q. Can't enable eskk by <C-j>.
+A. Maybe other plugins overwrites <C-j> mapping.
+":verbose imap <C-j>" shows what plugin has been mapped to <C-j>.
+
+You can choose one from the followings:
+1. Uninstall a plugin which overwrote <C-j>.
+2. Overwrite <C-j> again by eskk mapping. (like the following code)
+>
+	autocmd VimEnter * imap <C-j> <Plug>(eskk:toggle)
+	autocmd VimEnter * cmap <C-j> <Plug>(eskk:toggle)
+
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
