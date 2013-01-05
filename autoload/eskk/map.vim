@@ -100,7 +100,7 @@ endfunction "}}}
 function! eskk#map#restore_normal_keys() "{{{
     call s:restore_normal_keys(s:prev_normal_keys)
     let s:prev_normal_keys = {}
-    call s:map_normal_keys()
+    " call s:map_normal_keys()
 endfunction "}}}
 function! s:get_normal_keys() "{{{
     return split('iIaAoOcCsSR', '\zs')
