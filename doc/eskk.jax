@@ -38,8 +38,8 @@ Changelog			|eskk-changelog|
 ==============================================================================
 概要						*eskk-introduction* {{{
 
-|eskk| はVimでパワフルなIM環境を実現することを目指して作られた、
-まったく新しいプラグインです。
+|eskk| (extended-skk)はVim上でパワフルなIM環境を実現することを目指して作られ
+た、まったく新しいプラグインです。
 
 私達はskk.vimというプラグインもメンテナンスしています。
 (もしあなたがインストールしていれば |skk| で見られるはずです)
@@ -49,6 +49,13 @@ Changelog			|eskk-changelog|
 そこで私達はeskkを開発することを決めました。
 
 eskkは拡張された、そしてさらなる拡張性を秘めたマルチバイト環境を提供します。
+
+eskkで実装されている独自機能は主に以下が挙げられます。
+
+* |neocomplcache| と連携した補完機能
+* 改良された改行時の挙動
+* モードに応じて、カーソルの色を変更する
+* ...
 
 }}}
 ==============================================================================
@@ -67,10 +74,11 @@ eskkは拡張された、そしてさらなる拡張性を秘めたマルチバ�
 
 	SKK辞書が変更されていたら (1つ以上の単語が登録されていれば)
 	ユーザ辞書に保存する。
-	|:EskkUpdateDictionary| や |eskk#update_dictionary()| のキーマッピング版。
+	|:EskkUpdateDictionary| や |eskk#update_dictionary()| のキーマッピング
+	版。
 
 
-デフォルトキーマッピング				*eskk-default-keymappings*
+デフォルトキーマッピング			*eskk-default-keymappings*
 ----------------------
 <C-j> => <Plug>(eskk:toggle)   (icl)
 
@@ -83,16 +91,16 @@ eskkが作るディレクトリに関する変数
 -------------------------------------
 
 g:eskk#directory			*g:eskk#directory*
-							(デフォルト値: "~/.eskk")
-	このディレクトリに様々なeskkに関する
-	ファイルやディレクトリが作成されていく。
+						(デフォルト値: "~/.eskk")
+	このディレクトリに様々なeskkに関するファイルやディレクトリが作成され
+	る。
 
 
 SKK辞書に関する変数
 ------------------
 
 g:eskk#dictionary			*g:eskk#dictionary*
-							(デフォルト値: 下を参照)
+						(デフォルト値: 下を参照)
 	ユーザ辞書の情報。
 
 	この変数の定義は：
@@ -117,7 +125,7 @@ g:eskk#dictionary			*g:eskk#dictionary*
 
 
 g:eskk#large_dictionary		*g:eskk#large_dictionary*
-							(デフォルト値: 下を参照)
+						(デフォルト値: 下を参照)
 	システム辞書の情報。
 
 	この変数の定義は:
@@ -139,11 +147,12 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 				\	'encoding': 'euc-jp',
 				\}
 
-g:eskk#backup_dictionary	*g:eskk#backup_dictionary*
-							(デフォルト値: g:eskk#dictionary.path . ".BAK")
-	(TODO)
+g:eskk#backup_dictionary		*g:eskk#backup_dictionary*
+			(デフォルト値: g:eskk#dictionary.path . ".BAK")
+	システム辞書をバックアップする時に使用するファイル名を指定する。
 
-g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
+					*g:eskk#auto_save_dictionary_at_exit*
+g:eskk#auto_save_dictionary_at_exit
 							(デフォルト値: 1)
 	もし真なら1つ以上の単語が登録されていたら、
 	Vimの終了時 (|VimLeave|) に自動的にユーザ辞書へ保存する。
@@ -158,18 +167,19 @@ g:eskk#dictionary_save_count		*g:eskk#dictionary_save_count*
 漢字変換、アノテーションに関する変数
 -----------------------------------------
 
-g:eskk#select_cand_keys		*g:eskk#select_cand_keys*
-							(デフォルト値: "asdfjkl")
+g:eskk#select_cand_keys			*g:eskk#select_cand_keys*
+						(デフォルト値: "asdfjkl")
 	|eskk-select-candidates| で候補を選択するキー。
 	キーは各文字をつなげた文字列として与えられる。
 
-g:eskk#show_candidates_count	*g:eskk#show_candidates_count*
+g:eskk#show_candidates_count		*g:eskk#show_candidates_count*
 							(デフォルト値: 4)
 	|eskk-henkan-select-phase| において、
 	もしユーザが変換キーをタイプした回数がこの値を上回るなら、
 	|eskk-select-candidates| に移る。
 
-g:eskk#kata_convert_to_hira_at_henkan	*g:eskk#kata_convert_to_hira_at_henkan*
+				*g:eskk#kata_convert_to_hira_at_henkan*
+g:eskk#kata_convert_to_hira_at_henkan
 							(Default: 1)
 	SKK辞書にはひらがなと変換候補のペアしか載っていないため、
 	|eskk-kata-mode|でカタカナを入力しても変換できない。
@@ -178,7 +188,8 @@ g:eskk#kata_convert_to_hira_at_henkan	*g:eskk#kata_convert_to_hira_at_henkan*
 	よって|eskk-kata-mode|であってもSKK辞書から候補を見つけ出し、
 	無事変換することができる。
 
-g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_completion*
+				*g:eskk#kata_convert_to_hira_at_completion*
+g:eskk#kata_convert_to_hira_at_completion
 							(Default: 1)
 	|g:eskk#kata_convert_to_hira_at_henkan|と同じだが、
 	これは補完候補に対してのみ働く。
@@ -198,31 +209,33 @@ g:eskk#kakutei_when_unique_candidate	*g:eskk#kakutei_when_unique_candidate*
 
 g:eskk#no_default_mappings		*g:eskk#no_default_mappings*
 							(デフォルト値: 0)
-	もし真なら、eskkは デフォルトキーマッピング (|eskk-default-keymappings|)
-	を用意しない。
+	もし真なら、eskkは デフォルトキーマッピング
+	(|eskk-default-keymappings|) をマッピングしない。
 
-g:eskk#dont_map_default_if_already_mapped	*g:eskk#dont_map_default_if_already_mapped*
+				*g:eskk#dont_map_default_if_already_mapped*
+g:eskk#dont_map_default_if_already_mapped
 							(デフォルト値: 1)
-	もし真でデフォルトキーマッピングがマッピングされていたら、
+	もし真なら、デフォルトキーマッピングがマッピングされていたら、
 	マッピングしない。
 
 g:eskk#mapped_keys				*g:eskk#mapped_keys*
-							(デフォルト値: eskk#get_default_mapped_keys())
+				(デフォルト値: eskk#get_default_mapped_keys())
 	(keycodeではなく) |key-notation| の文字列を含むリスト。
 	|eskk#get_default_mapped_keys()| の値参照。
-	"|"を含めたい場合、"<Bar>"と書く必要があることに気を付けること。
+	Note: この変数の値に"|"を含めたい場合、"<Bar>"と書く必要があることに気
+	を付けること。
 
 
 モードに関する変数
 -------
 
-g:eskk#initial_mode			*g:eskk#initial_mode*
+g:eskk#initial_mode				*g:eskk#initial_mode*
 							(デフォルト値: "hira")
 	|eskk#enable()| が呼ばれた時、
 	eskkはこの値をモードの初期値とする。
 
-g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
-							(デフォルト値: 下を参照)
+g:eskk#statusline_mode_strings		*g:eskk#statusline_mode_strings*
+						(デフォルト値: 下を参照)
 	|'statusline'| に表示される現在のモードの文字列。
 	これは |eskk#get_stl()| の返り値を変える。
 
@@ -240,10 +253,10 @@ g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
 マーカーに関する変数
 ----------
 
-g:eskk#marker_henkan			*g:eskk#marker_henkan*
+g:eskk#marker_henkan				*g:eskk#marker_henkan*
 							(デフォルト値: "▽")
 
-g:eskk#marker_okuri			*g:eskk#marker_okuri*
+g:eskk#marker_okuri				*g:eskk#marker_okuri*
 							(デフォルト値: "*")
 
 g:eskk#marker_henkan_select			*g:eskk#marker_henkan_select*
@@ -257,18 +270,22 @@ g:eskk#marker_jisyo_touroku			*g:eskk#marker_jisyo_touroku*
 補完に関する変数
 -------------
 
-g:eskk#enable_completion		*g:eskk#enable_completion*
+g:eskk#enable_completion			*g:eskk#enable_completion*
 							(デフォルト値: 1)
+	もし真なら、eskk組み込みの補完機能を有効にする。
+	|neocomplcache|がインストールされている場合、変換時に自動補完が有効に
+	なる。
 
-g:eskk#max_candidates			*g:eskk#max_candidates*
+g:eskk#max_candidates				*g:eskk#max_candidates*
 							(デフォルト値: 30)
+	eskkの補完時に表示される候補の数を指定する。
 
-g:eskk#start_completion_length			*g:eskk#start_completion_length*
+g:eskk#start_completion_length		*g:eskk#start_completion_length*
 							(デフォルト値: 3)
 	指定された文字数(バイト数ではない)が入力されるまで
 	補完をしない。(補完関数を実行しても常に空のリストを返す)
 
-g:eskk#register_completed_word			*g:eskk#register_completed_word*
+g:eskk#register_completed_word		*g:eskk#register_completed_word*
 							(デフォルト値: 1)
 	もし真なら、補完時に決定した候補を自動的に辞書登録する。
 	補完については |eskk-completion| 参照。
@@ -279,9 +296,14 @@ g:eskk#register_completed_word			*g:eskk#register_completed_word*
 
 g:eskk#use_color_cursor			*g:eskk#use_color_cursor*
 							(デフォルト値: 1)
+	もし真ならeskkが有効になっているとき、モードを切り替えたときにカーソル
+	の色を変更する。
+	Note: 現在の実装では、この機能はGUIのVim上でしか動作しない。
 
 g:eskk#cursor_color			*g:eskk#cursor_color*
 							(デフォルト値: 下を参照)
+	eskkが有効になっているときのカーソルの色を指定する。
+
 	デフォルト値は： >
     " ascii: ivory4:#8b8b83, gray:#bebebe
     " hira: coral4:#8b3e2f, pink:#ffc0cb
@@ -300,13 +322,13 @@ g:eskk#cursor_color			*g:eskk#cursor_color*
 その他の変数
 --------
 
-g:eskk#egg_like_newline			*g:eskk#egg_like_newline*
+g:eskk#egg_like_newline				*g:eskk#egg_like_newline*
 							(デフォルト値: 0)
 
 g:eskk#egg_like_newline_completion	*g:eskk#egg_like_newline_completion*
 							(デフォルト値: 0)
 
-g:eskk#keep_state			*g:eskk#keep_state*
+g:eskk#keep_state				*g:eskk#keep_state*
 							(デフォルト値: 0)
 
 g:eskk#keep_state_beyond_buffer		*g:eskk#keep_state_beyond_buffer*
@@ -315,13 +337,13 @@ g:eskk#keep_state_beyond_buffer		*g:eskk#keep_state_beyond_buffer*
 g:eskk#revert_henkan_style			*g:eskk#revert_henkan_style*
 							(デフォルト値: "okuri")
 
-g:eskk#delete_implies_kakutei			*g:eskk#delete_implies_kakutei*
+g:eskk#delete_implies_kakutei		*g:eskk#delete_implies_kakutei*
 							(デフォルト値: 0)
 
 g:eskk#rom_input_style			*g:eskk#rom_input_style*
 							(デフォルト値: "skk")
 
-g:eskk#auto_henkan_at_okuri_match			*g:eskk#auto_henkan_at_okuri_match*
+g:eskk#auto_henkan_at_okuri_match	*g:eskk#auto_henkan_at_okuri_match*
 							(デフォルト値: 1)
 
 g:eskk#set_undo_point				*g:eskk#set_undo_point*
@@ -344,28 +366,25 @@ g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 							(デフォルト値: 0)
 
 
-
-
-
 デバッグ用変数
 ----------------------
 
-NOTE: ここで挙げた変数は開発者専用である。
-よって仕様が変わる可能性が高いので注意。
+Note: ここで挙げた変数は開発者専用である。
+よって仕様が変わる可能性が高いので使用する場合は注意すること。
 
 
-g:eskk#debug			*g:eskk#debug*
+g:eskk#debug					*g:eskk#debug*
 						(デフォルト値: 0)
 	もし真なら、デバッグメッセージをコマンドラインか
 	ログファイルに出力する。
 	どちらに出力するかは|g:eskk#debug_out|で変更することができる。
 
-g:eskk#debug_wait_ms	*g:eskk#debug_wait_ms*
+g:eskk#debug_wait_ms				*g:eskk#debug_wait_ms*
 						(デフォルト値: 0)
 	もしこの変数が0より大きければ、
 	指定時間 |:sleep| する。(ミリ秒)
 
-g:eskk#debug_out		*g:eskk#debug_out*
+g:eskk#debug_out				*g:eskk#debug_out*
 						(デフォルト値: "file")
 	"file" か "cmdline" のどちらか。
 	"file" なら >
@@ -377,46 +396,46 @@ g:eskk#debug_out		*g:eskk#debug_out*
 ------------------------------------------------------------------------------
 コマンド					*eskk-commands* {{{
 
-:EskkMap						*:EskkMap*
-:EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
+:EskkMap					*:EskkMap*
+:EskkForgetRegisteredWords			*:EskkForgetRegisteredWords*
 	辞書登録した単語を全て消去する。
 
-:EskkUpdateDictionary			*:EskkUpdateDictionary*
+:EskkUpdateDictionary				*:EskkUpdateDictionary*
 	辞書登録した単語などを辞書に書き込む。
 
 :EskkFixDictionary[!] [{path}]			*:EskkFixDictionary*
-	壊れたSKK辞書を修正します。
-	[!]をつけると確認のプロンプトを出しません。
-	{path}が省略された場合はユーザ辞書を修正します。
+	壊れたSKK辞書を修正する。
+	[!]をつけると確認のプロンプトを出さない。
+	{path}が省略された場合はユーザ辞書を修正する。
 
-:EskkReload						*:EskkReload*
-	読み込まれた全てのautoloadスクリプトを再読み込みする。
+:EskkReload					*:EskkReload*
+	eskk の読み込まれた全てのautoloadスクリプトを再読み込みする。
 	まだ読み込まれていないautoloadスクリプトには何もしない。
 	例: autoload/eskk.vim, autoload/eskk/table.vim
-
 
 }}}
 ------------------------------------------------------------------------------
 関数					*eskk-functions* {{{
 
-eskk#enable()			*eskk#enable()*
-eskk#disable()			*eskk#disable()*
-eskk#toggle()			*eskk#toggle()*
-	Enable, Disable, Toggle eskk.
-	This works also in |Normal-mode|, and of course |mapmode-ic|.
+eskk#enable()					*eskk#enable()*
+eskk#disable()					*eskk#disable()*
+eskk#toggle()					*eskk#toggle()*
+	それぞれ、eskkを有効化する、無効化する、状態をトグルする関数である。
+	これらの関数は|Normal-mode|、|mapmode-ic|中で有効である。
 
-eskk#is_enabled()			*eskk#is_enabled()*
-	Return true if eskk was enabled, false if disabled,
+eskk#is_enabled()				*eskk#is_enabled()*
+	eskkが有効になっている場合、真を返す。
 
-eskk#get_mode()			*eskk#get_mode()*
-	Return String of current mode.
-	NOTE: This may return invalid value if |eskk#is_enabled()| returns false.
+eskk#get_mode()					*eskk#get_mode()*
+	現在のeskkのモードを文字列形式で返す。
+	Note: この関数はeskkが有効でないとき(|eskk#is_enabled()|が偽の値を返す
+	状態のとき)、動作は保証されない。
 
 eskk#update_dictionary()		*eskk#update_dictionary()*
-	See |:EskkUpdateDictionary|.
+	|:EskkUpdateDictionary|を参照せよ。
 
-eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
-	Default value of |g:eskk#mapped_keys|.
+eskk#get_default_mapped_keys()		*eskk#get_default_mapped_keys()*
+	この関数は|g:eskk#mapped_keys|のデフォルト値を返す。
 
 }}}
 }}}
@@ -502,6 +521,8 @@ zeneiモード				*eskk-zenei-mode* {{{
 }}}
 ==============================================================================
 補完				*eskk-completion* {{{
+
+Todo
 }}}
 ==============================================================================
 FAQ					*eskk-faq* {{{
@@ -523,12 +544,14 @@ skktoolsのskkdic-expr2などでも直すことが可能のようです。
 
 Q. <C-j>でeskkがオンになりません。
 A. 他のプラグインと干渉している可能性があります。
-「:verbose imap <C-j>」を実行するとどのプラグインによってマッピングされたかを表示できます。
+「:verbose imap <C-j>」を実行すると、どのプラグインによってマッピングされたか
+を表示できます。
 
 解決策は3つあります。
 1. eskkをアンインストールする (それをすてるなんてとんでもない！)
 2. マッピングを上書きしたプラグインをアンインストールする
-3. <Plug>(eskk:toggle)を別のキーにマッピングする。(次の設定を.vimrcに記載してください)
+3. |<Plug>(eskk:toggle)|を別のキーにマッピングする。(次の設定を.vimrcに記載し
+てください)
 >
 	autocmd VimEnter * imap <C-j> <Plug>(eskk:toggle)
 	autocmd VimEnter * cmap <C-j> <Plug>(eskk:toggle)
@@ -536,6 +559,21 @@ A. 他のプラグインと干渉している可能性があります。
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
+
+現在判明している問題については、
+https://github.com/tyru/eskk.vim/issues を参照せよ。
+
+特に優先度が高いと思われるものについて、以下に示す。
+
+* ドキュメンテーションの改善
+
+* 時々eskkが謎のエラーを吐く場合がある
+
+* 変換時に学習されない
+https://github.com/tyru/eskk.vim/issues/164
+
+* "the mapping already exists" の警告メッセージが表示される
+
 }}}
 ==============================================================================
 CHANGELOG						*eskk-changelog* {{{
