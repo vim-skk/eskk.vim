@@ -48,6 +48,12 @@ due to Vim 6 compatible code.
 eskk provides enhanced and extendable platform
 such as multibyte text in Vim.
 
+The remarkable features of eskk is:
+
+* Auto-completion with |neocomplcache|
+* Improved behavior when a newline inserted
+* Change the cursor's color in each |eskk-modes|
+
 }}}
 ==============================================================================
 INTERFACE				*eskk-interface* {{{
@@ -63,9 +69,10 @@ KEYMAPPINGS					*eskk-keymappings* {{{
 
 <Plug>(eskk:save-dictionary) (n)		*<Plug>(eskk:save-dictionary)*
 
-	Save SKK dictionary if it's modified.
-	(one or more new words are registered)
-	This is keymapping version of|:EskkUpdateDictionary|,  |eskk#update_dictionary()|.
+	Save SKK dictionary if it's modified
+	(one or more new words are registered).
+	This is keymapping version of
+	|:EskkUpdateDictionary|, and |eskk#update_dictionary()|.
 
 
 Default keymappings				*eskk-default-keymappings*
@@ -82,9 +89,8 @@ Directory that eskk creates
 
 g:eskk#directory			*g:eskk#directory*
 							(Default: "~/.eskk")
-	Under this directory,
-	misc. directories/files about eskk
-	will be created.
+	eskk creates many kinds of directories/files
+	under this directory.
 
 SKK dicitionary
 ------------------
@@ -102,9 +108,8 @@ g:eskk#dictionary			*g:eskk#dictionary*
 				\	'encoding': 'utf-8',
 				\}
 <			Dictionary:
-				Keep user settings
-				and extend missing keys of {value}
-				by "not defined" value.
+				Keep user settings,
+				and set default values to missing keys.
 		not defined: >
 				let g:eskk#dictionary = {
 				\	'path': "~/.skk-jisyo",
@@ -126,9 +131,8 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 				\	'encoding': 'euc-jp',
 				\}
 <			Dictionary:
-				Keep user settings
-				and extend missing keys of {value}
-				by "not defined" value.
+				Keep user settings,
+				and set default values to missing keys.
 		not defined: >
 				let g:eskk#large_dictionary = {
 				\	'path': "/usr/local/share/skk/SKK-JISYO.L",
@@ -138,7 +142,7 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 
 g:eskk#backup_dictionary	*g:eskk#backup_dictionary*
 							(Default: g:eskk#dictionary.path . ".BAK")
-	(TODO)
+	Filename used when eskk makes backup of user dictionary.
 
 g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
 							(Default: 1)
@@ -178,6 +182,7 @@ g:eskk#kata_convert_to_hira_at_completion	*g:eskk#kata_convert_to_hira_at_comple
 							(Default: 1)
 	Same as |g:eskk#kata_convert_to_hira_at_henkan|,
 	But this works at |eskk-completion|.
+	See |eskk-completion| for the details.
 
 g:eskk#show_annotation			*g:eskk#show_annotation*
 							(Default: 0)
@@ -185,7 +190,7 @@ g:eskk#show_annotation			*g:eskk#show_annotation*
 
 g:eskk#kakutei_when_unique_candidate	*g:eskk#kakutei_when_unique_candidate*
 							(Default: 0)
-	If true, at kanji-conversion, if the candidate is only one,
+	If true, at kanji-conversion, and the number of candidates is only one,
 	automatically do kakutei.
 
 
@@ -237,12 +242,15 @@ Markers
 
 g:eskk#marker_henkan			*g:eskk#marker_henkan*
 							(Default: "▽")
+	(TODO: doc)
 
 g:eskk#marker_okuri			*g:eskk#marker_okuri*
 							(Default: "*")
+	(TODO: doc)
 
 g:eskk#marker_henkan_select			*g:eskk#marker_henkan_select*
 							(Default: "▼")
+	(TODO: doc)
 
 g:eskk#marker_jisyo_touroku			*g:eskk#marker_jisyo_touroku*
 							(Default: "?")
@@ -254,17 +262,21 @@ Completion
 
 g:eskk#enable_completion		*g:eskk#enable_completion*
 							(Default: 0)
+	If true, enables eskk's completion feature.
+	When |neocomplcache| is installed,
+	auto-completion feature is enabled.
 
 g:eskk#max_candidates			*g:eskk#max_candidates*
 							(Default: 30)
+	The max number of candidates displayed on completion menu.
 
 						*g:eskk#start_completion_length*
 g:eskk#start_completion_length
 							(Default: 3)
 	Skip completion until input characters' (not bytes)
-	length becomes larger than the option value.
+	length becomes larger than this value.
 	("Skip completion" means, if completion function
-	was invoked, always returns empty list)
+	was invoked, always returns an empty list)
 
 g:eskk#register_completed_word			*g:eskk#register_completed_word*
 							(デフォルト値: 1)
@@ -276,9 +288,14 @@ Cursor color
 
 g:eskk#use_color_cursor			*g:eskk#use_color_cursor*
 							(Default: 1)
+	If true, and eskk is enabled,
+	change the cursor's color when switching |eskk-modes|.
+	Note: Currently, the feature only works in GUI version.
 
 g:eskk#cursor_color			*g:eskk#cursor_color*
 							(Default: See below)
+	The cursor's color when eskk is enabled.
+
 	Default value is: >
     " ascii: ivory4:#8b8b83, gray:#bebebe
     " hira: coral4:#8b3e2f, pink:#ffc0cb
@@ -299,41 +316,50 @@ Misc.
 
 g:eskk#egg_like_newline			*g:eskk#egg_like_newline*
 							(Default: 0)
+	(TODO: doc)
 
 g:eskk#egg_like_newline_completion	*g:eskk#egg_like_newline_completion*
 							(Default: 0)
+	(TODO: doc)
 
 g:eskk#keep_state			*g:eskk#keep_state*
 							(Default: 0)
+	(TODO: doc)
 
 g:eskk#keep_state_beyond_buffer		*g:eskk#keep_state_beyond_buffer*
 							(Default: 0)
+	(TODO: doc)
 
 g:eskk#revert_henkan_style			*g:eskk#revert_henkan_style*
 							(Default: "okuri")
+	(TODO: doc)
 
 g:eskk#delete_implies_kakutei			*g:eskk#delete_implies_kakutei*
 							(Default: 0)
+	(TODO: doc)
 
 g:eskk#rom_input_style			*g:eskk#rom_input_style*
 							(Default: "skk")
+	(TODO: doc)
 
 g:eskk#auto_henkan_at_okuri_match			*g:eskk#auto_henkan_at_okuri_match*
 							(Default: 1)
+	(TODO: doc)
 
 g:eskk#set_undo_point				*g:eskk#set_undo_point*
 							(Default: See below)
+	(TODO: doc)
+
 	Default value is: >
 	let g:eskk#set_undo_point = {
 	\	'sticky': 1,
 	\	'kakutei': 1,
 	\}
 <
-g:eskk#context_control				*g:eskk#context_control*
-							(Default: [])
-
 g:eskk#fix_extra_okuri				*g:eskk#fix_extra_okuri*
 							(Default: 1)
+	(TODO: doc)
+
 	 >
 	▽おくr {henkan-key}
 <
@@ -342,6 +368,7 @@ g:eskk#fix_extra_okuri				*g:eskk#fix_extra_okuri*
 <
 g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 							(Default: 0)
+	(TODO: doc)
 
 
 
@@ -351,7 +378,7 @@ Debugging variables
 ----------------------
 
 NOTE: These variables is developer use only.
-Please note that these variables may change its behavior.
+Please note that these variables may change the meaning at any time.
 
 
 g:eskk#debug			*g:eskk#debug*
@@ -377,6 +404,10 @@ g:eskk#debug_out		*g:eskk#debug_out*
 COMMANDS					*eskk-commands* {{{
 
 :EskkMap						*:EskkMap*
+	This Ex command is internal-use only at this time.
+	In near feature, user can be going to define mappings
+	when only eskk is enabled.
+
 :EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
 	Forget all registered words.
 
@@ -385,13 +416,13 @@ COMMANDS					*eskk-commands* {{{
 
 :EskkFixDictionary[!] [{path}]			*:EskkFixDictionary*
 	Fix broken SKK dictionary.
-	If [!] was given, do not show the prompt as confirmation.
-	If {path} is omitted, user dictionary is fixed.
+	If [!] was given, do not show the confirmation prompt.
+	If {path} is omitted, user dictionary will be fixed.
 
 :EskkReload						*:EskkReload*
 	Reload all autoload scripts of eskk.
-	Do nothing for autoload scripts which have been not loaded yet.
 	e.g.: autoload/eskk.vim, autoload/eskk/table.vim
+	Do nothing for autoload scripts which have been not loaded yet.
 
 }}}
 ------------------------------------------------------------------------------
@@ -414,7 +445,7 @@ eskk#update_dictionary()		*eskk#update_dictionary()*
 	See |:EskkUpdateDictionary|.
 
 eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
-	Default value of |g:eskk#mapped_keys|.
+	Return default value of |g:eskk#mapped_keys|.
 
 }}}
 }}}
@@ -506,6 +537,9 @@ HENKAN SELECT PHASE			*eskk-henkan-select-phase* {{{
 }}}
 ==============================================================================
 COMPLETION				*eskk-completion* {{{
+
+(TODO: doc)
+
 }}}
 ==============================================================================
 FAQ					*eskk-faq* {{{
@@ -538,6 +572,21 @@ You can choose one from the followings:
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
+
+See this issue for known problems:
+https://github.com/tyru/eskk.vim/issues
+
+Here is the high priority problems:
+
+* Improve documentation
+
+* sometimes eskk vomits unknown errors
+
+* eskk does not learn a new word
+https://github.com/tyru/eskk.vim/issues/164
+
+* eskk displays warning message "the mapping already exists"
+
 }}}
 ==============================================================================
 CHANGELOG						*eskk-changelog* {{{

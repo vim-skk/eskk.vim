@@ -52,10 +52,9 @@ eskkは拡張された、そしてさらなる拡張性を秘めたマルチバ�
 
 eskkで実装されている独自機能は主に以下が挙げられます。
 
-* |neocomplcache| と連携した補完機能
+* |neocomplcache| と連携した自動補完機能
 * 改良された改行時の挙動
-* モードに応じて、カーソルの色を変更する
-* ...
+* eskkのモード(|eskk-modes|)に応じて、カーソルの色を変更する
 
 }}}
 ==============================================================================
@@ -113,8 +112,8 @@ g:eskk#dictionary			*g:eskk#dictionary*
 				\}
 <			辞書型なら：
 				ユーザの辞書型を保存しながら
-				「定義していなかったら」の値で
-				補う形で追加していく
+				定義していないキーには
+				デフォルト値を補う形で追加していく。
 		定義していなかったら： >
 				let g:eskk#dictionary = {
 				\	'path': "~/.skk-jisyo",
@@ -138,8 +137,8 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 				\}
 <			辞書型なら:
 				ユーザの辞書型を保存しながら
-				「定義していなかったら」の値で
-				補う形で追加していく
+				定義していないキーには
+				デフォルト値を補う形で追加していく。
 		定義していなかったら: >
 				let g:eskk#large_dictionary = {
 				\	'path': "/usr/local/share/skk/SKK-JISYO.L",
@@ -149,7 +148,7 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 
 g:eskk#backup_dictionary		*g:eskk#backup_dictionary*
 			(デフォルト値: g:eskk#dictionary.path . ".BAK")
-	システム辞書をバックアップする時に使用するファイル名を指定する。
+	ユーザ辞書をバックアップする時に使用するファイル名を指定する。
 
 					*g:eskk#auto_save_dictionary_at_exit*
 g:eskk#auto_save_dictionary_at_exit
@@ -255,12 +254,15 @@ g:eskk#statusline_mode_strings		*g:eskk#statusline_mode_strings*
 
 g:eskk#marker_henkan				*g:eskk#marker_henkan*
 							(デフォルト値: "▽")
+	(TODO: doc)
 
 g:eskk#marker_okuri				*g:eskk#marker_okuri*
 							(デフォルト値: "*")
+	(TODO: doc)
 
 g:eskk#marker_henkan_select			*g:eskk#marker_henkan_select*
 							(デフォルト値: "▼")
+	(TODO: doc)
 
 g:eskk#marker_jisyo_touroku			*g:eskk#marker_jisyo_touroku*
 							(デフォルト値: "?")
@@ -324,30 +326,40 @@ g:eskk#cursor_color			*g:eskk#cursor_color*
 
 g:eskk#egg_like_newline				*g:eskk#egg_like_newline*
 							(デフォルト値: 0)
+	(TODO: doc)
 
 g:eskk#egg_like_newline_completion	*g:eskk#egg_like_newline_completion*
 							(デフォルト値: 0)
+	(TODO: doc)
 
 g:eskk#keep_state				*g:eskk#keep_state*
 							(デフォルト値: 0)
+	(TODO: doc)
 
 g:eskk#keep_state_beyond_buffer		*g:eskk#keep_state_beyond_buffer*
 							(デフォルト値: 0)
+	(TODO: doc)
 
 g:eskk#revert_henkan_style			*g:eskk#revert_henkan_style*
 							(デフォルト値: "okuri")
+	(TODO: doc)
 
 g:eskk#delete_implies_kakutei		*g:eskk#delete_implies_kakutei*
 							(デフォルト値: 0)
+	(TODO: doc)
 
 g:eskk#rom_input_style			*g:eskk#rom_input_style*
 							(デフォルト値: "skk")
+	(TODO: doc)
 
 g:eskk#auto_henkan_at_okuri_match	*g:eskk#auto_henkan_at_okuri_match*
 							(デフォルト値: 1)
+	(TODO: doc)
 
 g:eskk#set_undo_point				*g:eskk#set_undo_point*
 							(デフォルト値: 下を参照)
+	(TODO: doc)
+
 	デフォルト値は： >
 	let g:eskk#set_undo_point = {
 	\	'sticky': 1,
@@ -356,14 +368,18 @@ g:eskk#set_undo_point				*g:eskk#set_undo_point*
 <
 g:eskk#fix_extra_okuri				*g:eskk#fix_extra_okuri*
 							(デフォルト値: 1)
+	(TODO: doc)
+
 	 >
 	▽おくr {henkan-key}
 <
 	 >
 	▽おく*r
-
+<
 g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 							(デフォルト値: 0)
+	(TODO: doc)
+
 
 
 デバッグ用変数
@@ -413,8 +429,8 @@ g:eskk#debug_out				*g:eskk#debug_out*
 
 :EskkReload					*:EskkReload*
 	|eskk| の読み込まれた全てのautoloadスクリプトを再読み込みする。
-	まだ読み込まれていないautoloadスクリプトには何もしない。
 	例: autoload/eskk.vim, autoload/eskk/table.vim
+	まだ読み込まれていないautoloadスクリプトには何もしない。
 
 }}}
 ------------------------------------------------------------------------------
@@ -435,7 +451,7 @@ eskk#get_mode()					*eskk#get_mode()*
 	状態のとき)、動作は保証されない。
 
 eskk#update_dictionary()		*eskk#update_dictionary()*
-	|:EskkUpdateDictionary|を参照せよ。
+	|:EskkUpdateDictionary|を参照。
 
 eskk#get_default_mapped_keys()		*eskk#get_default_mapped_keys()*
 	この関数は|g:eskk#mapped_keys|のデフォルト値を返す。
@@ -525,7 +541,8 @@ zeneiモード				*eskk-zenei-mode* {{{
 ==============================================================================
 補完				*eskk-completion* {{{
 
-Todo
+(TODO: doc)
+
 }}}
 ==============================================================================
 FAQ					*eskk-faq* {{{
