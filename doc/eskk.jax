@@ -38,7 +38,7 @@ Changelog			|eskk-changelog|
 ==============================================================================
 概要						*eskk-introduction* {{{
 
-|eskk| (extended-skk)はVim上でパワフルなIM環境を実現することを目指して作られ
+|eskk| はVim上でパワフルなIM環境を実現することを目指して作られ
 た、まったく新しいプラグインです。
 
 私達はskk.vimというプラグインもメンテナンスしています。
@@ -154,7 +154,7 @@ g:eskk#backup_dictionary		*g:eskk#backup_dictionary*
 					*g:eskk#auto_save_dictionary_at_exit*
 g:eskk#auto_save_dictionary_at_exit
 							(デフォルト値: 1)
-	もし真なら1つ以上の単語が登録されていたら、
+	もし真なら、1つ以上の単語が登録されていた場合、
 	Vimの終了時 (|VimLeave|) に自動的にユーザ辞書へ保存する。
 
 g:eskk#dictionary_save_count		*g:eskk#dictionary_save_count*
@@ -201,7 +201,7 @@ g:eskk#show_annotation			*g:eskk#show_annotation*
 
 g:eskk#kakutei_when_unique_candidate	*g:eskk#kakutei_when_unique_candidate*
 							(デフォルト値: 0)
-	もし真なら、漢字変換した時に候補が1つの場合自動的に確定する。
+	もし真なら、漢字変換した時に候補が1つの場合、自動的に確定する。
 
 
 キーマッピングに関する変数
@@ -215,7 +215,7 @@ g:eskk#no_default_mappings		*g:eskk#no_default_mappings*
 				*g:eskk#dont_map_default_if_already_mapped*
 g:eskk#dont_map_default_if_already_mapped
 							(デフォルト値: 1)
-	もし真なら、デフォルトキーマッピングがマッピングされていたら、
+	もし真なら、デフォルトキーマッピングが存在する場合
 	マッピングしない。
 
 g:eskk#mapped_keys				*g:eskk#mapped_keys*
@@ -278,7 +278,7 @@ g:eskk#enable_completion			*g:eskk#enable_completion*
 
 g:eskk#max_candidates				*g:eskk#max_candidates*
 							(デフォルト値: 30)
-	eskkの補完時に表示される候補の数を指定する。
+	eskkの補完時に表示される候補の最大数を指定する。
 
 g:eskk#start_completion_length		*g:eskk#start_completion_length*
 							(デフォルト値: 3)
@@ -296,7 +296,7 @@ g:eskk#register_completed_word		*g:eskk#register_completed_word*
 
 g:eskk#use_color_cursor			*g:eskk#use_color_cursor*
 							(デフォルト値: 1)
-	もし真ならeskkが有効になっているとき、モードを切り替えたときにカーソル
+	もし真なら、eskkが有効になっている場合、モードを切り替えたときにカーソル
 	の色を変更する。
 	Note: 現在の実装では、この機能はGUIのVim上でしか動作しない。
 
@@ -397,6 +397,9 @@ g:eskk#debug_out				*g:eskk#debug_out*
 コマンド					*eskk-commands* {{{
 
 :EskkMap					*:EskkMap*
+	今の所、内部的に使われているExコマンド。
+	将来はこのExコマンドによってeskk有効時のマッピングを定義できる予定。
+
 :EskkForgetRegisteredWords			*:EskkForgetRegisteredWords*
 	辞書登録した単語を全て消去する。
 
@@ -409,7 +412,7 @@ g:eskk#debug_out				*g:eskk#debug_out*
 	{path}が省略された場合はユーザ辞書を修正する。
 
 :EskkReload					*:EskkReload*
-	eskk の読み込まれた全てのautoloadスクリプトを再読み込みする。
+	|eskk| の読み込まれた全てのautoloadスクリプトを再読み込みする。
 	まだ読み込まれていないautoloadスクリプトには何もしない。
 	例: autoload/eskk.vim, autoload/eskk/table.vim
 
