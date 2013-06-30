@@ -53,7 +53,7 @@ endfunction "}}}
 
 " Returns line (String) which includes a:candidate.
 " If invalid arguments were given, returns empty string.
-function! s:add_candidate_to_line(line, candidate) "{{{
+function! s:insert_candidate_to_line(line, candidate) "{{{
     if a:line =~# '^\s*;'
         return ''
     endif
@@ -817,7 +817,7 @@ function! s:PhysicalDict_get_lines_copy() dict "{{{
     return lines
 endfunction "}}}
 
-function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
+function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
     if a:registered_words.empty()
         return self.update_lines()
     endif
@@ -840,7 +840,7 @@ function! s:PhysicalDict_get_updated_lines(registered_words) dict "{{{
             \   . ' (index = '.index.')'
             \)
             let lines[index] =
-            \   s:add_candidate_to_line(l, candidate)
+            \   s:insert_candidate_to_line(l, candidate)
         else
             " If the line does not exists, add new line.
             let l = s:make_line_from_candidates([candidate])
@@ -1125,7 +1125,7 @@ let s:PhysicalDict = {
 \
 \   'get_lines': eskk#util#get_local_funcref('PhysicalDict_get_lines', s:SID_PREFIX),
 \   'get_lines_copy': eskk#util#get_local_funcref('PhysicalDict_get_lines_copy', s:SID_PREFIX),
-\   'get_updated_lines': eskk#util#get_local_funcref('PhysicalDict_get_updated_lines', s:SID_PREFIX),
+\   'make_updated_lines': eskk#util#get_local_funcref('PhysicalDict_make_updated_lines', s:SID_PREFIX),
 \   'update_lines': eskk#util#get_local_funcref('PhysicalDict_update_lines', s:SID_PREFIX),
 \   'update_lines_copy': eskk#util#get_local_funcref('PhysicalDict_update_lines_copy', s:SID_PREFIX),
 \   'set_lines': eskk#util#get_local_funcref('PhysicalDict_set_lines', s:SID_PREFIX),
@@ -1364,7 +1364,7 @@ function! s:Dictionary_update_dictionary(...) dict "{{{
         call self._user_dict.update_lines()
     endif
     call self.write_lines(
-    \   self._user_dict.get_updated_lines(
+    \   self._user_dict.make_updated_lines(
     \       self._registered_words
     \   ),
     \   verbose
