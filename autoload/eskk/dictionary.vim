@@ -60,7 +60,8 @@ function! s:add_candidate_to_line(line, candidate) "{{{
     let candidates =
     \   eskk#dictionary#parse_skk_dict_line(
     \       a:line, a:candidate.from_type)
-    call add(candidates, a:candidate)
+    call insert(candidates, a:candidate)
+    let candidates = eskk#util#uniq(candidates)
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
 

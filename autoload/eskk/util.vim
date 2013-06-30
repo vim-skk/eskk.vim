@@ -105,6 +105,10 @@ function! eskk#util#has_idx(...) "{{{
     let module = s:Vital.Data.List
     return call(module.has_index, a:000, module)
 endfunction "}}}
+function! eskk#util#uniq(...) "{{{
+    let module = s:Vital.Data.List
+    return call(module.uniq, a:000, module)
+endfunction "}}}
 
 
 " String function
