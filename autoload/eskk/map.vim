@@ -358,7 +358,7 @@ function! s:create_default_mapopt() "{{{
     \   'buffer': 0,
     \   'expr': 0,
     \   'silent': 0,
-    \   'unique': 1,
+    \   'unique': 0,
     \   'noremap': 1,
     \   'map-if': '1',
     \}
