@@ -1269,7 +1269,7 @@ function! s:abbrev_filter(stash) "{{{
 endfunction "}}}
 
 " Preprocessor
-function! s:asym_expand_char(stash) "{{{
+function! s:asym_prefilter(stash) "{{{
     let char = a:stash.char
     " 'X' is phase:henkan-select:delete-from-dict
     " 'L' is mode:{hira,kata,hankata}:to-zenei
@@ -1296,7 +1296,7 @@ function! s:asym_expand_char(stash) "{{{
         return [char]
     endif
 endfunction "}}}
-function! s:abbrev_expand_char(stash) "{{{
+function! s:abbrev_prefilter(stash) "{{{
     let char = a:stash.char
     if char ==# "\<BS>"
         return ["\<C-h>"]
@@ -1575,7 +1575,7 @@ function! eskk#_initialize() "{{{
         " 'hira' mode {{{
         call eskk#register_mode_structure('hira', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
-        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
+        \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hira'),
         \})
         " }}}
@@ -1583,7 +1583,7 @@ function! eskk#_initialize() "{{{
         " 'kata' mode {{{
         call eskk#register_mode_structure('kata', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
-        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
+        \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_kata'),
         \})
         " }}}
@@ -1591,7 +1591,7 @@ function! eskk#_initialize() "{{{
         " 'hankata' mode {{{
         call eskk#register_mode_structure('hankata', {
         \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
-        \   'expand_char': eskk#util#get_local_funcref('asym_expand_char', s:SID_PREFIX),
+        \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
         \   'table': eskk#table#new_from_file('rom_to_hankata'),
         \})
         " }}}
@@ -1599,7 +1599,7 @@ function! eskk#_initialize() "{{{
         " 'abbrev' mode {{{
         let dict = {}
 
-        let dict.expand_char = eskk#util#get_local_funcref('abbrev_expand_char', s:SID_PREFIX)
+        let dict.prefilter = eskk#util#get_local_funcref('abbrev_prefilter', s:SID_PREFIX)
         let dict.filter = eskk#util#get_local_funcref('abbrev_filter', s:SID_PREFIX)
         let dict.init_phase = g:eskk#preedit#PHASE_HENKAN
 
@@ -2117,8 +2117,8 @@ function! eskk#filter(char) "{{{
 
     try
         " Push a pressed character.
-        for c in has_key(st, 'expand_char') ?
-        \           st.expand_char(stash) : [a:char]
+        for c in has_key(st, 'prefilter') ?
+        \           st.prefilter(stash) : [a:char]
             call preedit.push_filter_queue(c)
         endfor
 
