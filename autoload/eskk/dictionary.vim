@@ -782,10 +782,10 @@ function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
     let ari_lnum = self.okuri_ari_idx + 1
     let nasi_lnum = self.okuri_nasi_idx + 1
     for word in reverse(a:registered_words.to_list())
-        " Search the line which has `w`.
-        let [l, index] = self.search_candidate(w.key, w.okuri_rom)
+        " Search the line which has `word`.
+        let [l, index] = self.search_candidate(word.key, word.okuri_rom)
         if index >=# 0
-            " If the line exists, add `w` to the line.
+            " If the line exists, add `word` to the line.
             call eskk#util#assert(
             \   l != '',
             \   'line must not be empty string'
@@ -801,7 +801,7 @@ function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
             \   'line must not be empty string'
             \   . ' (index = '.index.')'
             \)
-            if w.okuri_rom !=# ''
+            if word.okuri_rom !=# ''
                 call insert(lines, l, ari_lnum)
                 let nasi_lnum += 1
             else
