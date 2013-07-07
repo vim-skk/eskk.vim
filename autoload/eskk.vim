@@ -389,7 +389,8 @@ function! s:asym_filter(stash) "{{{
 
 
     " Handle popupmenu-keys.
-    if mode() ==# 'i' && pumvisible()
+    if g:eskk#enable_completion &&
+    \   mode() ==# 'i' && pumvisible()
     \   && phase is g:eskk#preedit#PHASE_HENKAN
     \   && s:handle_popupmenu_keys(a:stash)
         " Handled.
