@@ -185,6 +185,8 @@ let s:MODE_LOCAL_KEYS = {
 \       'cancel',
 \   ],
 \}
+" The number of 'eskk#filter()' was called.
+let s:filter_count = 0
 " }}}
 
 
@@ -2171,6 +2173,12 @@ function! eskk#filter(char) "{{{
         endif
         " Set old string. (it is used by Preedit.rewrite())
         call preedit.set_old_str(preedit.get_display_str())
+        " Write debug log file each times 20 keys were pressed.
+        let s:filter_count += 1
+        if s:filter_count >=# 20
+            call eskk#logger#write_debug_log_file()
+            let s:filter_count = 0
+        endif
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(stash, error) "{{{
