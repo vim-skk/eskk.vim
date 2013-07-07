@@ -129,6 +129,10 @@ function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) "
     \}
 endfunction "}}}
 
+function! eskk#dictionary#_candidate_identifier(candidate) "{{{
+    return a:candidate.input
+endfunction "}}}
+
 " }}}
 
 
@@ -1356,10 +1360,6 @@ function! s:Dictionary_write_lines(lines, verbose) dict "{{{
         \   . self._user_dict.path . "'."
         \)
     endtry
-endfunction "}}}
-
-function! eskk#dictionary#_candidate_identifier(candidate) "{{{
-    return a:candidate.input
 endfunction "}}}
 
 " Reduce the losses of creating instance.
