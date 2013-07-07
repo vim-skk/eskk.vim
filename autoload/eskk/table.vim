@@ -293,16 +293,41 @@ function! s:get_map_not_found(table, lhs, index, rest_args) "{{{
 endfunction "}}}
 
 function! s:AbstractTable_load() dict "{{{
-    if has_key(self, '_bases')
-        for base in self._bases
-            if a:table._from_file
-                call self.add_from_dict(eskk#table#{self._name}#load())
+    if self._loaded
+        return self._data
+    endif
+
+    for base in get(self, '_bases', [])
+        call call('s:AbstractTable_load', [], base)
+    endfor
+
+    if self._from_file
+        call self.add_from_dict(eskk#table#{self._name}#load())
+    elseif !self.is_base()
+        " Check if any of base tables have all mappings
+        " which self has.
+        for lhs in keys(self._data)
+            if self._data[lhs].method !=# 'remove'
+                continue
+            endif
+            let has_lhs = 0
+            for base in self._bases
+                if base.has_map(lhs)
+                    let has_lhs = 1
+                    break
+                endif
+            endfor
+            if !has_lhs
+                call eskk#logger#warnf(
+                \   "Table(%s) removes map '%s' but "
+                \   . "any of base tables don't have the mapping.",
+                \   lhs
+                \)
             endif
         endfor
     endif
-    if a:table._from_file
-        call self.add_from_dict(eskk#table#{self._name}#load())
-    endif
+    let self._loaded = 1
+
     return self._data
 endfunction "}}}
 function! s:AbstractTable_get_mappings() dict "{{{
@@ -329,6 +354,7 @@ let s:AbstractTable = {
 \   '_data': {},
 \   '_cached_maps': {},
 \   '_from_file': 0,
+\   '_loaded': 0,
 \
 \   'get_all_base_tables': eskk#util#get_local_funcref('AbstractTable_get_all_base_tables', s:SID_PREFIX),
 \   'derived_from': eskk#util#get_local_funcref('AbstractTable_derived_from', s:SID_PREFIX),
