@@ -33,6 +33,7 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
             \   a:from_type,
             \   _[: semicolon - 1],
             \   key,
+            \   '',
             \   okuri_rom[0],
             \   _[semicolon + 1 :]
             \)
@@ -41,6 +42,7 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
             \   a:from_type,
             \   _,
             \   key,
+            \   '',
             \   okuri_rom[0],
             \   ''
             \)
@@ -78,7 +80,7 @@ function! s:delete_candidate_from_line(line, candidate) "{{{
     let not_match =
     \   '!(v:val.input ==# a:candidate.input'
     \   . '&& v:val.key ==# a:candidate.key'
-    \   . '&& v:val.okuri_rom_first ==# a:candidate.okuri_rom_first)'
+    \   . '&& v:val.okuri_rom ==# a:candidate.okuri_rom)'
     call filter(candidates, not_match)
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
@@ -93,7 +95,7 @@ function! s:make_line_from_candidates(candidates) "{{{
     \   . '(v:val.annotation ==# "" ? "" : '
     \   . '";" . v:val.annotation)'
     return
-    \   c.key . c.okuri_rom_first . ' '
+    \   c.key . c.okuri_rom . ' '
     \   . '/'.join(map(copy(a:candidates), make_string), '/').'/'
 endfunction "}}}
 
@@ -116,34 +118,9 @@ let [
 \   s:CANDIDATE_FROM_REGISTERED_WORDS
 \] = range(3)
 
-function! s:candidate_new(from_type, input, key, okuri_rom_first, annotation) "{{{
+function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) "{{{
     return {
     \   'from_type': a:from_type,
-    \   'input': a:input,
-    \   'key': a:key,
-    \   'okuri_rom_first': a:okuri_rom_first,
-    \   'annotation': a:annotation,
-    \}
-endfunction "}}}
-
-function! eskk#dictionary#candidate2registered_word(candidate, key, okuri, okuri_rom) "{{{
-    return s:registered_word_new(
-    \   a:candidate.input,
-    \   a:key,
-    \   a:okuri,
-    \   a:okuri_rom,
-    \   a:candidate.annotation
-    \)
-endfunction "}}}
-
-" }}}
-
-" s:RegisteredWord {{{
-" s:RegisteredWord is the word registered by
-" s:Dictionary.remember_word_prompt().
-
-function! s:registered_word_new(input, key, okuri, okuri_rom, annotation) "{{{
-    return {
     \   'input': a:input,
     \   'key': a:key,
     \   'okuri': a:okuri,
@@ -151,21 +128,6 @@ function! s:registered_word_new(input, key, okuri, okuri_rom, annotation) "{{{
     \   'annotation': a:annotation,
     \}
 endfunction "}}}
-
-function! eskk#dictionary#_registered_word_identifier(rw) "{{{
-    return join(map(
-    \   ['input', 'key', 'okuri', 'okuri_rom'], 'a:rw[v:val]'), ';')
-endfunction "}}}
-
-function! s:registered_word2candidate(rw, from_type)
-    return s:candidate_new(
-    \   a:from_type,
-    \   a:rw.input,
-    \   a:rw.key,
-    \   a:rw.okuri_rom[0],
-    \   a:rw.annotation
-    \)
-endfunction
 
 " }}}
 
@@ -357,13 +319,8 @@ function! s:HenkanResult_get_candidates() dict "{{{
 
         " Merge registered words.
         if !empty(registered)
-            for rw in registered
-                call self._candidates.push(
-                \   s:registered_word2candidate(
-                \       rw,
-                \       s:CANDIDATE_FROM_REGISTERED_WORDS
-                \   )
-                \)
+            for word in registered
+                call self._candidates.push(word)
             endfor
         endif
 
@@ -379,14 +336,14 @@ function! s:HenkanResult_get_candidates() dict "{{{
             \   'user dict: `candidates` is not empty.'
             \)
             let key = candidates[0].key
-            let okuri_rom_first = candidates[0].okuri_rom_first
+            let okuri_rom = candidates[0].okuri_rom
             call eskk#util#assert(
             \   key ==# self._key,
             \   "user dict:".string(key)." ==# ".string(self._key)
             \)
             call eskk#util#assert(
-            \   okuri_rom_first ==# self._okuri_rom[0],
-            \   "user dict:".string(okuri_rom_first)." ==# ".string(self._okuri_rom)
+            \   okuri_rom ==# self._okuri_rom[0],
+            \   "user dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
             \)
 
             for c in candidates
@@ -406,14 +363,14 @@ function! s:HenkanResult_get_candidates() dict "{{{
             \   'system dict: `candidates` is not empty.'
             \)
             let key = candidates[0].key
-            let okuri_rom_first = candidates[0].okuri_rom_first
+            let okuri_rom = candidates[0].okuri_rom
             call eskk#util#assert(
             \   key ==# self._key,
             \   "system dict:".string(key)." ==# ".string(self._key)
             \)
             call eskk#util#assert(
-            \   okuri_rom_first ==# self._okuri_rom[0],
-            \   "system dict:".string(okuri_rom_first)." ==# ".string(self._okuri_rom)
+            \   okuri_rom ==# self._okuri_rom[0],
+            \   "system dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
             \)
 
             for c in candidates
@@ -703,17 +660,11 @@ function! s:HenkanResult_update_rank() dict "{{{
     if !eskk#util#has_idx(candidates, candidates_index)
         return
     endif
-    let rw = eskk#dictionary#candidate2registered_word(
-    \   candidates[candidates_index],
-    \   self._key,
-    \   self._okuri,
-    \   self._okuri_rom,
-    \)
 
     " Move self to the first.
     let dict = eskk#get_skk_dict()
-    call dict.forget_word(rw)
-    call dict.remember_word_rw(rw)
+    call dict.forget_word(candidates[candidates_index])
+    call dict.remember_word(candidates[candidates_index])
 endfunction "}}}
 
 
@@ -826,12 +777,9 @@ function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
     " Check if self._user_dict really does not have registered words.
     let ari_lnum = self.okuri_ari_idx + 1
     let nasi_lnum = self.okuri_nasi_idx + 1
-    for w in reverse(a:registered_words.to_list())
+    for word in reverse(a:registered_words.to_list())
         " Search the line which has `w`.
         let [l, index] = self.search_candidate(w.key, w.okuri_rom)
-        let candidate =
-        \   s:registered_word2candidate(w,
-        \       s:CANDIDATE_FROM_REGISTERED_WORDS)
         if index >=# 0
             " If the line exists, add `w` to the line.
             call eskk#util#assert(
@@ -840,10 +788,10 @@ function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
             \   . ' (index = '.index.')'
             \)
             let lines[index] =
-            \   s:insert_candidate_to_line(l, candidate)
+            \   s:insert_candidate_to_line(l, word)
         else
             " If the line does not exists, add new line.
-            let l = s:make_line_from_candidates([candidate])
+            let l = s:make_line_from_candidates([word])
             call eskk#util#assert(
             \   l !=# '',
             \   'line must not be empty string'
@@ -1180,7 +1128,7 @@ function! s:Dictionary_new(...) "{{{
     \       ),
     \       '_registered_words': eskk#util#create_data_ordered_set(
     \           {'Fn_identifier':
-    \               'eskk#dictionary#_registered_word_identifier'}
+    \               'eskk#dictionary#_candidate_identifier'}
     \       ),
     \   },
     \   'force'
@@ -1212,13 +1160,19 @@ endfunction "}}}
 
 " Register new word (registered word) at command-line.
 function! s:Dictionary_remember_word_prompt_hr(henkan_result) dict "{{{
-    let key       = a:henkan_result.get_key()
-    let okuri     = a:henkan_result.get_okuri()
-    let okuri_rom = a:henkan_result.get_okuri_rom()
-    return self.remember_word_prompt(key, okuri, okuri_rom)
+    let unused = ''
+    let word = s:candidate_new(
+    \   unused,
+    \   unused,
+    \   a:henkan_result.get_key(),
+    \   a:henkan_result.get_okuri(),
+    \   a:henkan_result.get_okuri_rom(),
+    \   unused,
+    \)
+    return self.remember_word_prompt(word)
 endfunction "}}}
-function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
-    let [key, okuri, okuri_rom] = [a:key, a:okuri, a:okuri_rom]
+function! s:Dictionary_remember_word_prompt(word) dict "{{{
+    let [key, okuri, okuri_rom] = [a:word.key, a:word.okuri, a:word.okuri_rom]
 
     " Save `&imsearch`.
     let save_imsearch = &l:imsearch
@@ -1256,12 +1210,15 @@ function! s:Dictionary_remember_word_prompt(key, okuri, okuri_rom) dict "{{{
 
     if input != ''
         if !s:check_accidental_input(input)
-            return self.remember_word_prompt(key, okuri, okuri_rom)
+            return self.remember_word_prompt(a:word)
         endif
         let [input, annotation] =
         \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
         let annotation = substitute(annotation, '^;', '', '')
-        call self.remember_word(input, key, okuri, okuri_rom, annotation)
+        let word = s:candidate_new(
+        \   s:CANDIDATE_FROM_REGISTERED_WORDS,
+        \   input, key, okuri, okuri_rom, annotation)
+        call self.remember_word(word)
     endif
 
     call s:clear_command_line()
@@ -1300,11 +1257,7 @@ function! s:Dictionary_forget_word(word) dict "{{{
 endfunction "}}}
 
 " Add registered word.
-function! s:Dictionary_remember_word(input, key, okuri, okuri_rom, annotation) dict "{{{
-    let word = s:registered_word_new(a:input, a:key, a:okuri, a:okuri_rom, a:annotation)
-    return self.remember_word_rw(word)
-endfunction "}}}
-function! s:Dictionary_remember_word_rw(word) dict "{{{
+function! s:Dictionary_remember_word(word) dict "{{{
     call self._registered_words.unshift(a:word)
 
     if self._registered_words.size() >= g:eskk#dictionary_save_count
@@ -1428,14 +1381,9 @@ function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) dict "{{{
     call candidates.clear()
     let max_count = g:eskk#max_candidates
 
-    for rw in self._registered_words.to_list()
-        if rw.key ==# key && rw.okuri_rom[0] ==# okuri_rom[0]
-            call candidates.push(
-            \   s:registered_word2candidate(
-            \       rw,
-            \       s:CANDIDATE_FROM_REGISTERED_WORDS,
-            \   )
-            \)
+    for word in self._registered_words.to_list()
+        if word.key ==# key && word.okuri_rom[0] ==# okuri_rom[0]
+            call candidates.push(word)
             if candidates.size() >= max_count
                 break
             endif
@@ -1502,7 +1450,6 @@ let s:Dictionary = {
 \   'forget_all_words': eskk#util#get_local_funcref('Dictionary_forget_all_words', s:SID_PREFIX),
 \   'forget_word': eskk#util#get_local_funcref('Dictionary_forget_word', s:SID_PREFIX),
 \   'remember_word': eskk#util#get_local_funcref('Dictionary_remember_word', s:SID_PREFIX),
-\   'remember_word_rw': eskk#util#get_local_funcref('Dictionary_remember_word_rw', s:SID_PREFIX),
 \   'get_registered_words': eskk#util#get_local_funcref('Dictionary_get_registered_words', s:SID_PREFIX),
 \   'remove_registered_word': eskk#util#get_local_funcref('Dictionary_remove_registered_word', s:SID_PREFIX),
 \   'is_modified': eskk#util#get_local_funcref('Dictionary_is_modified', s:SID_PREFIX),
