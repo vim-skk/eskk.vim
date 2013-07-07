@@ -379,16 +379,11 @@ function! s:DiffTable_add_map(lhs, map, ...) dict "{{{
 endfunction "}}}
 
 function! s:DiffTable_remove_map(lhs) dict "{{{
-    if has_key(self._data, a:lhs)
-        unlet self._data[a:lhs]
-    else
-        " Assumpiton: It must be a lhs of bases.
-        " One of base tables must have this lhs.
-        " No way to check if this lhs is base one,
-        " because .load() is called lazily
-        " for saving memory.
-        let self._data[a:lhs] = {'method': 'remove'}
-    endif
+    " Assumpiton: It must be a lhs of bases.
+    " One of base tables must have this lhs.
+    " TODO: Check if any of base tables have this lhs
+    " at eskk#table#new().
+    let self._data[a:lhs] = {'method': 'remove'}
 endfunction "}}}
 
 let s:DiffTable = extend(
