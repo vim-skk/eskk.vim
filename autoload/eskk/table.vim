@@ -22,6 +22,7 @@ set cpo&vim
 "       'lhs2': ['map2', 'rest2'],
 "       ...
 "   },
+"   '_from_file': 0,
 " }
 "
 " s:DiffTable = {
@@ -36,6 +37,7 @@ set cpo&vim
 "       eskk#table#new(),
 "       ...
 "   ],
+"   '_from_file': 0,
 " }
 
 
@@ -121,11 +123,10 @@ function! eskk#table#invalid_arguments_error(table_name) "{{{
 endfunction "}}}
 
 function! eskk#table#new_from_file(table_name) "{{{
-    let obj = eskk#table#new(a:table_name)
-    function obj.initialize()
-        call self.add_from_dict(eskk#table#{self._name}#load())
-    endfunction
-    return obj
+    return extend(
+    \   eskk#table#new(a:table_name),
+    \   {'_from_file': 1}
+    \)
 endfunction "}}}
 
 function! s:AbstractTable_get_all_base_tables() dict "{{{
@@ -294,20 +295,18 @@ endfunction "}}}
 function! s:AbstractTable_load() dict "{{{
     if has_key(self, '_bases')
         for base in self._bases
-            call s:do_initialize(base)
+            if a:table._from_file
+                call self.add_from_dict(eskk#table#{self._name}#load())
+            endif
         endfor
     endif
-    call s:do_initialize(self)
+    if a:table._from_file
+        call self.add_from_dict(eskk#table#{self._name}#load())
+    endif
     return self._data
 endfunction "}}}
 function! s:AbstractTable_get_mappings() dict "{{{
     return self._data
-endfunction "}}}
-function! s:do_initialize(table) "{{{
-    if has_key(a:table, 'initialize')
-        call a:table.initialize()
-        unlet a:table.initialize
-    endif
 endfunction "}}}
 
 function! s:AbstractTable_is_base() dict "{{{
@@ -329,6 +328,7 @@ let s:AbstractTable = {
 \   '_name': '',
 \   '_data': {},
 \   '_cached_maps': {},
+\   '_from_file': 0,
 \
 \   'get_all_base_tables': eskk#util#get_local_funcref('AbstractTable_get_all_base_tables', s:SID_PREFIX),
 \   'derived_from': eskk#util#get_local_funcref('AbstractTable_derived_from', s:SID_PREFIX),
