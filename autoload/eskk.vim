@@ -1639,45 +1639,6 @@ function! eskk#_initialize() "{{{
     autocmd eskk InsertLeave * call s:clear_real_matched_pairs()
     " }}}
 
-    " Event: enter-mode {{{
-    call eskk#register_event(
-    \   'enter-mode',
-    \   'eskk#set_cursor_color',
-    \   []
-    \)
-
-    function! s:initialize_clear_preedit()
-        let preedit = eskk#get_preedit()
-        call preedit.clear_all()
-    endfunction
-    call eskk#register_event(
-    \   'enter-mode',
-    \   eskk#util#get_local_func(
-    \       'initialize_clear_preedit',
-    \       s:SID_PREFIX
-    \   ),
-    \   []
-    \)
-
-    function! s:initialize_set_henkan_phase()
-        let preedit = eskk#get_preedit()
-        let st = eskk#get_current_mode_structure()
-        call preedit.set_henkan_phase(
-        \   (has_key(st, 'init_phase') ?
-        \       st.init_phase
-        \       : g:eskk#preedit#PHASE_NORMAL)
-        \)
-    endfunction
-    call eskk#register_event(
-    \   'enter-mode',
-    \   eskk#util#get_local_func(
-    \       'initialize_set_henkan_phase',
-    \       s:SID_PREFIX
-    \   ),
-    \   []
-    \)
-    " }}}
-
     " InsertLeave: Restore &backspace value {{{
     " NOTE: Due to current implementation,
     " s:preedit.rewrite() assumes that &backspace contains "eol".
@@ -1724,8 +1685,6 @@ function! eskk#_initialize() "{{{
             endif
         endif
     endfunction
-    call eskk#register_event('enable-im', eskk#util#get_local_func('save_restore_formatoptions', s:SID_PREFIX), [1])
-    call eskk#register_event('disable-im', eskk#util#get_local_func('save_restore_formatoptions', s:SID_PREFIX), [0])
     " }}}
 
     let s:initialization_state = s:INIT_DONE
@@ -1796,7 +1755,10 @@ function! eskk#enable() "{{{
     endif
     let inst = eskk#get_current_instance()
 
-    call eskk#throw_event('enable-im')
+    if type(inst.formatoptions) is type(0)
+        let inst.formatoptions = &l:formatoptions
+        let &l:formatoptions = ''
+    endif
 
     " Clear current variable states.
     let inst.mode = ''
@@ -1838,7 +1800,10 @@ function! eskk#disable() "{{{
     endif
     let inst = eskk#get_current_instance()
 
-    call eskk#throw_event('disable-im')
+    if type(inst.formatoptions) is type("")
+        let &l:formatoptions = inst.formatoptions
+        let inst.formatoptions = 0
+    endif
 
     " Unmap all lang-mode keymappings.
     call eskk#map#unmap_all_keys()
@@ -1877,15 +1842,24 @@ function! eskk#set_mode(next_mode) "{{{
         return
     endif
 
-    call eskk#throw_event('leave-mode-' . inst.mode)
-    call eskk#throw_event('leave-mode')
-
     " Change mode.
     let prev_mode = inst.mode
     let inst.mode = a:next_mode
 
-    call eskk#throw_event('enter-mode-' . inst.mode)
-    call eskk#throw_event('enter-mode')
+    " Set cursor color.
+    call eskk#set_cursor_color()
+
+    " Clear preedit.
+    let preedit = eskk#get_preedit()
+    call preedit.clear_all()
+
+    " Set initial henkan phase.
+    let st = eskk#get_current_mode_structure()
+    call preedit.set_henkan_phase(
+    \   (has_key(st, 'init_phase') ?
+    \       st.init_phase
+    \       : g:eskk#preedit#PHASE_NORMAL)
+    \)
 
     " For &statusline.
     redrawstatus
@@ -2024,38 +1998,6 @@ function! eskk#set_preedit(preedit) "{{{
     \   empty(inst.preedit) ? '' : inst.preedit.get_old_str()
     \)
     let inst.preedit = a:preedit
-endfunction "}}}
-
-" Event
-function! eskk#register_event(event_names, Fn, head_args, ...) "{{{
-    return s:register_event(
-    \   s:event_hook_fn,
-    \   a:event_names,
-    \   a:Fn,
-    \   a:head_args,
-    \   (a:0 ? a:1 : -1)
-    \)
-endfunction "}}}
-function! s:register_event(st, event_names, Fn, head_args, inst) "{{{
-    let event_names = type(a:event_names) == type([]) ?
-    \                   a:event_names : [a:event_names]
-    for name in event_names
-        if !has_key(a:st, name)
-            let a:st[name] = []
-        endif
-        call add(
-        \   a:st[name],
-        \   [a:Fn, a:head_args]
-        \       + (type(a:inst) == type({}) ? [a:inst] : [])
-        \)
-    endfor
-endfunction "}}}
-function! eskk#throw_event(event_name) "{{{
-    let events = copy(get(s:event_hook_fn, a:event_name, []))
-    return map(events, 'call("call", v:val)')
-endfunction "}}}
-function! eskk#has_event(event_name) "{{{
-    return !empty(get(s:event_hook_fn, a:event_name, []))
 endfunction "}}}
 
 " Filter

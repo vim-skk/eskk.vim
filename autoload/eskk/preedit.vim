@@ -326,13 +326,7 @@ function! s:Preedit_set_henkan_phase(henkan_phase) dict "{{{
 
     call s:validate_table_idx(self._table, a:henkan_phase)
 
-    call eskk#throw_event(
-    \   'leave-phase-' . self.get_phase_name(self._henkan_phase)
-    \)
     let self._henkan_phase = a:henkan_phase
-    call eskk#throw_event(
-    \   'enter-phase-' . self.get_phase_name(self._henkan_phase)
-    \)
 endfunction "}}}
 
 
