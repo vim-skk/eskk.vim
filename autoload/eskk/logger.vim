@@ -180,26 +180,11 @@ function! eskk#logger#log(msg) "{{{
     if !g:eskk#debug
         return
     endif
-    if !eskk#is_initialized()
-        call eskk#register_temp_event(
-        \   'enable-im',
-        \   'eskk#logger#log',
-        \   [a:msg]
-        \)
-        return
-    endif
-
-    redraw
 
     let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    if g:eskk#debug_out =~# '^\%(file\|both\)$'
-        call add(s:warning_messages, msg)
-    endif
-    if g:eskk#debug_out =~# '^\%(cmdline\|both\)$'
-        call eskk#logger#warn(msg)
-    endif
+    call add(s:warning_messages, msg)
 
-    if g:eskk#debug_wait_ms !=# 0
+    if eskk#is_initialized() && g:eskk#debug_wait_ms ># 0
         execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}

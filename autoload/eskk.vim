@@ -26,12 +26,9 @@ delfunction s:SID
 "   Current mode.
 " preedit:
 "   Buffer strings for inserted, filtered and so on.
-" temp_event_hook_fn:
-"   Temporary event handler functions/arguments.
 let s:eskk = {
 \   'mode': '',
 \   'preedit': {},
-\   'temp_event_hook_fn': {},
 \   'formatoptions': 0,
 \}
 
@@ -1355,7 +1352,6 @@ function! eskk#_initialize() "{{{
     " Debug
     call eskk#util#set_default('g:eskk#debug', 0)
     call eskk#util#set_default('g:eskk#debug_wait_ms', 0)
-    call eskk#util#set_default('g:eskk#debug_out', 'both')
     call eskk#util#set_default('g:eskk#directory', '~/.eskk')
 
     " Dictionary
@@ -2040,16 +2036,6 @@ function! eskk#register_event(event_names, Fn, head_args, ...) "{{{
     \   (a:0 ? a:1 : -1)
     \)
 endfunction "}}}
-function! eskk#register_temp_event(event_names, Fn, head_args, ...) "{{{
-    let inst = eskk#get_current_instance()
-    return s:register_event(
-    \   inst.temp_event_hook_fn,
-    \   a:event_names,
-    \   a:Fn,
-    \   a:head_args,
-    \   (a:0 ? a:1 : -1)
-    \)
-endfunction "}}}
 function! s:register_event(st, event_names, Fn, head_args, inst) "{{{
     let event_names = type(a:event_names) == type([]) ?
     \                   a:event_names : [a:event_names]
@@ -2065,29 +2051,11 @@ function! s:register_event(st, event_names, Fn, head_args, inst) "{{{
     endfor
 endfunction "}}}
 function! eskk#throw_event(event_name) "{{{
-    let inst = eskk#get_current_instance()
-    let ret        = []
-    let event      = get(s:event_hook_fn, a:event_name, [])
-    let temp_event = get(inst.temp_event_hook_fn, a:event_name, [])
-    let all_events = event + temp_event
-    if empty(all_events)
-        return []
-    endif
-
-    while !empty(all_events)
-        call add(ret, call('call', remove(all_events, 0)))
-    endwhile
-
-    " Clear temporary hooks.
-    let inst.temp_event_hook_fn[a:event_name] = []
-
-    return ret
+    let events = copy(get(s:event_hook_fn, a:event_name, []))
+    return map(events, 'call("call", v:val)')
 endfunction "}}}
 function! eskk#has_event(event_name) "{{{
-    let inst = eskk#get_current_instance()
-    return
-    \   !empty(get(s:event_hook_fn, a:event_name, []))
-    \   || !empty(get(inst.temp_event_hook_fn, a:event_name, []))
+    return !empty(get(s:event_hook_fn, a:event_name, []))
 endfunction "}}}
 
 " Filter
