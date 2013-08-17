@@ -3,11 +3,12 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:is_windows = has('win16') || has('win32') || has('win64')
+let s:is_unix = has('unix')
+let s:is_windows = has("win16") || has("win95") || has("win32") || has("win64")
 let s:is_cygwin = has('win32unix')
 let s:is_mac = !s:is_windows && !s:is_cygwin
       \ && (has('mac') || has('macunix') || has('gui_macvim') ||
-      \   (!executable('xdg-open') && system('uname') =~? '^darwin'))
+      \   (!isdirectory('/proc') && executable('sw_vers')))
 
 " Open a file.
 function! s:open(filename) "{{{
@@ -28,7 +29,7 @@ function! s:open(filename) "{{{
           \ shellescape(filename)))
   elseif exists('$KDE_FULL_SESSION') && $KDE_FULL_SESSION ==# 'true'
     " KDE.
-    call system(printf('%s %s &', 'kioclien exec',
+    call system(printf('%s %s &', 'kioclient exec',
           \ shellescape(filename)))
   elseif exists('$GNOME_DESKTOP_SESSION_ID')
     " GNOME.
@@ -50,19 +51,19 @@ endfunction "}}}
 
 
 " Move a file.
-" Dispatch s:move_file_exe() or s:move_file_pure().
-function! s:move_file(src, dest) "{{{
+" Dispatch s:move_exe() or s:move_vim().
+function! s:move(src, dest) "{{{
   if executable('mv')
-    return s:move_file_exe(a:src, a:dest)
+    return s:move_exe(a:src, a:dest)
   else
-    return s:move_file_pure(a:src, a:dest)
+    return s:move_vim(a:src, a:dest)
   endif
 endfunction "}}}
 
 " Move a file.
-" Implemented by 'mv' executable.
+" Implemented by external program.
 " TODO: Support non-*nix like system.
-function! s:move_file_exe(src, dest)
+function! s:move_exe(src, dest)
   if !executable('mv') | return 0 | endif
   silent execute '!mv' shellescape(a:src) shellescape(a:dest)
   if v:shell_error
@@ -73,24 +74,24 @@ endfunction
 
 " Move a file.
 " Implemented by pure vimscript.
-function! s:move_file_pure(src, dest) "{{{
+function! s:move_vim(src, dest) "{{{
   return !rename(a:src, a:dest)
 endfunction "}}}
 
 " Copy a file.
-" Dispatch s:copy_file_exe() or s:copy_file_pure().
-function! s:copy_file(src, dest) "{{{
+" Dispatch s:copy_exe() or s:copy_vim().
+function! s:copy(src, dest) "{{{
   if executable('cp')
-    return s:copy_file_exe(a:src, a:dest)
+    return s:copy_exe(a:src, a:dest)
   else
-    return s:copy_file_pure(a:src, a:dest)
+    return s:copy_vim(a:src, a:dest)
   endif
 endfunction "}}}
 
 " Copy a file.
-" Implemented by 'cp' executable.
+" Implemented by external program.
 " TODO: Support non-*nix like system.
-function! s:copy_file_exe(src, dest)
+function! s:copy_exe(src, dest)
   if !executable('cp') | return 0 | endif
   silent execute '!cp' shellescape(a:src) shellescape(a:dest)
   if v:shell_error
@@ -101,7 +102,7 @@ endfunction
 
 " Copy a file.
 " Implemented by pure vimscript.
-function! s:copy_file_pure(src, dest) "{{{
+function! s:copy_vim(src, dest) "{{{
   let ret = writefile(readfile(a:src, "b"), a:dest, "b")
   if ret == -1
     return 0
@@ -113,41 +114,45 @@ endfunction "}}}
 " Returns true if success.
 " Returns false if failure.
 function! s:mkdir_nothrow(...) "{{{
-  try
-    call call('mkdir', a:000)
-    return 1
-  catch
-    return 0
-  endtry
+  silent! return call('mkdir', a:000)
 endfunction "}}}
 
 
-" rmdir recursively.
-function! s:rmdir(path, ...)
-  let flags = a:0 ? a:1 : ''
-  if exists("*rmdir")
-    return call('rmdir', [a:path] + a:000)
-  elseif has("unix")
-    let option = ''
-    let option .= flags =~# 'f' ? ' -f' : ''
-    let option .= flags =~# 'r' ? ' -r' : ''
-    let ret = system("/bin/rm" . option . ' ' . shellescape(a:path) . ' 2>&1')
-  elseif has("win32") || has("win95") || has("win64") || has("win16")
-    let option = ''
-    if &shell =~? "sh$"
-      let option .= flags =~# 'f' ? ' -f' : ''
-      let option .= flags =~# 'r' ? ' -r' : ''
-      let ret = system("/bin/rm" . option . ' ' . shellescape(a:path))
-    else
-      let option .= flags =~# 'f' ? ' /Q' : ''
-      let option .= flags =~# 'r' ? ' /S' : ''
-      let ret = system("rmdir" . option . ' "' . a:path . '"')
+" Delete a file/directory.
+if s:is_unix
+  function! s:rmdir(path, ...)
+    let flags = a:0 ? a:1 : ''
+    let cmd = flags =~# 'r' ? 'rm -r' : 'rmdir'
+    let cmd .= flags =~# 'f' && cmd ==# 'rm -r' ? ' -f' : ''
+    let ret = system(cmd . ' ' . shellescape(a:path))
+    if v:shell_error
+      throw substitute(iconv(ret, 'char', &encoding), '\n', '', 'g')
     endif
-  endif
-  if v:shell_error
-    throw substitute(iconv(ret, 'char', &encoding), '\n', '', 'g')
-  endif
-endfunction
+  endfunction
+
+elseif s:is_windows
+  function! s:rmdir(path, ...)
+    let flags = a:0 ? a:1 : ''
+    if &shell =~? "sh$"
+      let cmd = flags =~# 'r' ? 'rm -r' : 'rmdir'
+      let cmd .= flags =~# 'f' && cmd ==# 'rm -r' ? ' -f' : ''
+      let ret = system(cmd . ' ' . shellescape(a:path))
+    else
+      " 'f' flag does not make sense.
+      let cmd = 'rmdir /Q'
+      let cmd .= flags =~# 'r' ? ' /S' : ''
+      let ret = system(cmd . ' "' . a:path . '"')
+    endif
+    if v:shell_error
+      throw substitute(iconv(ret, 'char', &encoding), '\n', '', 'g')
+    endif
+  endfunction
+
+else
+  function! s:rmdir(path, ...)
+    throw 'vital: System.File.rmdir(): your platform is not supported'
+  endfunction
+endif
 
 
 let &cpo = s:save_cpo

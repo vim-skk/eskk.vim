@@ -11,11 +11,11 @@ let s:is_windows = has('win16') || has('win32') || has('win64')
 let s:is_cygwin = has('win32unix')
 let s:is_mac = !s:is_windows && !s:is_cygwin
       \ && (has('mac') || has('macunix') || has('gui_macvim') ||
-      \   (!executable('xdg-open') && system('uname') =~? '^darwin'))
+      \   (!isdirectory('/proc') && executable('sw_vers')))
 
 " Get the directory separator.
 function! s:separator()
-  return !exists('+shellslash') || &shellslash ? '/' : '\'
+  return fnamemodify('.', ':p')[-1 :]
 endfunction
 
 " Get the path separator.
@@ -107,13 +107,17 @@ endfunction
 " Check if the path is absolute path.
 if s:is_windows
   function! s:is_absolute(path)
-    return a:path =~? '^[a-z]:[/\]'
+    return a:path =~? '^[a-z]:[/\\]'
   endfunction
 else
   function! s:is_absolute(path)
     return a:path[0] ==# '/'
   endfunction
 endif
+
+function! s:is_relative(path)
+  return !s:is_absolute(a:path)
+endfunction
 
 " Return the parent directory of the path.
 " NOTE: fnamemodify(path, ':h') does not return the parent directory
@@ -128,6 +132,22 @@ function! s:dirname(path)
   endif
 
   let path = fnamemodify(path, ':h')
+  return path
+endfunction
+
+" Return the basename of the path.
+" NOTE: fnamemodify(path, ':h') does not return basename
+" when path[-1] is the separator.
+function! s:basename(path)
+  let path = a:path
+  let orig = a:path
+
+  let path = s:remove_last_separator(path)
+  if path == ''
+    return orig    " root directory
+  endif
+
+  let path = fnamemodify(path, ':t')
   return path
 endfunction
 
