@@ -172,7 +172,7 @@ function! eskk#util#move_file(src, dest) "{{{
     return s:Vital.System.File.move_file(a:src, a:dest)
 endfunction "}}}
 function! eskk#util#copy_file(src, dest) "{{{
-    return s:Vital.System.File.copy_file(a:src, a:dest)
+    return s:Vital.System.File.copy(a:src, a:dest)
 endfunction "}}}
 function! eskk#util#mkdir_nothrow(...) "{{{
     let module = s:Vital.System.File
