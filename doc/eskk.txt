@@ -224,7 +224,7 @@ g:eskk#statusline_mode_strings	*g:eskk#statusline_mode_strings*
 							(Default: See below)
 	Current mode's strings at |'statusline'|.
 	Statusline string of modes.
-	This changes |eskk#get_stl()|'s return value.
+	This changes |eskk#statusline()|'s return value.
 
 	Default value is: >
 	let g:eskk#statusline_mode_strings = {

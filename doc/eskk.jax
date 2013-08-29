@@ -236,7 +236,7 @@ g:eskk#initial_mode				*g:eskk#initial_mode*
 g:eskk#statusline_mode_strings		*g:eskk#statusline_mode_strings*
 						(デフォルト値: 下を参照)
 	|'statusline'| に表示される現在のモードの文字列。
-	これは |eskk#get_stl()| の返り値を変える。
+	これは |eskk#statusline()| の返り値を変える。
 
 	デフォルト値は： >
 	let g:eskk#statusline_mode_strings = {
