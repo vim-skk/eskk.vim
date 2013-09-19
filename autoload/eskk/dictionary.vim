@@ -641,7 +641,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     try
         let user_dict = dict.get_user_dict()
         call user_dict.set_lines(lines)
-    catch /^eskk: parse error/
+    catch /^eskk: .* parse error/
         return 0
     endtry
     " Write to dictionary.
@@ -820,21 +820,35 @@ function! s:PhysicalDict_update_lines() dict "{{{
     endif
 
     try
-        unlockvar 1 self._content_lines
-        let self._content_lines  = readfile(self.path)
-        lockvar 1 self._content_lines
-        call self.parse_lines()
-
-        let self._ftime_at_set = getftime(self.path)
+        call self.update_lines_main()
     catch /E484:/    " Can't open file
         call eskk#logger#logf("Can't read '%s'!", self.path)
-    catch /^eskk: parse error/
-        call eskk#logger#log_exception('s:PhysicalDict.update_lines()')
-        let self.okuri_ari_idx = -1
-        let self.okuri_nasi_idx = -1
+    catch /^eskk: .* parse error/
+        " Try :EskkFixDictionary.
+        silent execute 'EskkFixDictionary!' fnameescape(self.path)
+
+        try
+            call self.update_lines_main()
+        catch /E484:/    " Can't open file
+            call eskk#logger#logf("Can't read '%s'!", self.path)
+        catch /^eskk: .* parse error/
+            " Possible bug.
+            call eskk#logger#log_exception('s:PhysicalDict.update_lines()')
+            let self.okuri_ari_idx = -1
+            let self.okuri_nasi_idx = -1
+        endtry
     endtry
 
     return self._content_lines
+endfunction "}}}
+
+function! s:PhysicalDict_update_lines_main() dict "{{{
+    unlockvar 1 self._content_lines
+    let self._content_lines  = readfile(self.path)
+    lockvar 1 self._content_lines
+    call self.parse_lines()
+
+    let self._ftime_at_set = getftime(self.path)
 endfunction "}}}
 
 function! s:PhysicalDict_update_lines_copy() dict "{{{
@@ -852,7 +866,7 @@ function! s:PhysicalDict_set_lines(lines) dict "{{{
         call self.parse_lines()
         let self._ftime_at_set = localtime()
         let self._is_modified = 1
-    catch /^eskk: parse error/
+    catch /^eskk: .* parse error/
         call eskk#logger#log_exception('s:PhysicalDict.set_lines()')
         let self.okuri_ari_idx = -1
         let self.okuri_nasi_idx = -1
@@ -1079,6 +1093,7 @@ let s:PhysicalDict = {
 \   'get_lines_copy': eskk#util#get_local_funcref('PhysicalDict_get_lines_copy', s:SID_PREFIX),
 \   'make_updated_lines': eskk#util#get_local_funcref('PhysicalDict_make_updated_lines', s:SID_PREFIX),
 \   'update_lines': eskk#util#get_local_funcref('PhysicalDict_update_lines', s:SID_PREFIX),
+\   'update_lines_main': eskk#util#get_local_funcref('PhysicalDict_update_lines_main', s:SID_PREFIX),
 \   'update_lines_copy': eskk#util#get_local_funcref('PhysicalDict_update_lines_copy', s:SID_PREFIX),
 \   'set_lines': eskk#util#get_local_funcref('PhysicalDict_set_lines', s:SID_PREFIX),
 \   'parse_lines': eskk#util#get_local_funcref('PhysicalDict_parse_lines', s:SID_PREFIX),
