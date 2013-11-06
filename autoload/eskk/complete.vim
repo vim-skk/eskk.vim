@@ -44,11 +44,13 @@ endfunction "}}}
 function! s:eskkcomplete(findstart, base) "{{{
     if a:findstart
         if !eskk#complete#can_find_start()
-            return -1
+            return (v:version > 703 || v:version == 703 && has('patch519')) ?
+                    \ -3 : -1
         endif
         let begin_col = eskk#get_preedit().get_begin_col()
         if begin_col <=# 0
-            return -1
+            return (v:version > 703 || v:version == 703 && has('patch519')) ?
+                    \ -3 : -1
         endif
         return begin_col - 1
     endif
@@ -93,7 +95,8 @@ endfunction "}}}
 function! s:skip_complete(...) "{{{
     let findstart = get(a:000, 0, 0)
     if findstart
-        return -1
+        return (v:version > 703 || v:version == 703 && has('patch519')) ?
+                    \ -3 : -1
     else
         return s:get_completed_candidates(
         \   eskk#get_preedit().get_display_str(1, 0),
