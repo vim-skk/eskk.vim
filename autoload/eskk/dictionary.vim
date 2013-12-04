@@ -34,7 +34,7 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
             \   _[: semicolon - 1],
             \   key,
             \   '',
-            \   okuri_rom[0],
+            \   okuri_rom,
             \   _[semicolon + 1 :]
             \)
         else
@@ -43,7 +43,7 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
             \   _,
             \   key,
             \   '',
-            \   okuri_rom[0],
+            \   okuri_rom,
             \   ''
             \)
         endif
@@ -125,7 +125,7 @@ function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) "
     \   'input': a:input,
     \   'key': a:key,
     \   'okuri': a:okuri,
-    \   'okuri_rom': a:okuri_rom,
+    \   'okuri_rom': a:okuri_rom[0],
     \   'annotation': a:annotation,
     \}
 endfunction "}}}
@@ -179,7 +179,7 @@ function! s:HenkanResult_new(key, okuri_rom, okuri, preedit) "{{{
     let obj = extend(obj, {
     \    'preedit': a:preedit,
     \    '_key': a:key,
-    \    '_okuri_rom': a:okuri_rom,
+    \    '_okuri_rom': a:okuri_rom[0],
     \    '_okuri': a:okuri,
     \}, 'force')
     call obj.reset()
@@ -292,7 +292,7 @@ function! s:HenkanResult_get_candidates() dict "{{{
         let registered = filter(
         \   copy(dict.get_registered_words()),
         \   'v:val.key ==# self._key '
-        \       . '&& v:val.okuri_rom[0] ==# self._okuri_rom[0]'
+        \       . '&& v:val.okuri_rom ==# self._okuri_rom'
         \)
 
         " Look up from dictionaries.
@@ -594,7 +594,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
     " Check user input.
     let input = eskk#util#input(
     \   'Really purge? '
-    \   . self._key . self._okuri_rom[0]
+    \   . self._key . self._okuri_rom
     \   . ' /'
     \   . del_cand.input
     \   . (get(del_cand, 'annotation', '') !=# '' ?
@@ -931,7 +931,7 @@ endfunction "}}}
 function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
     let has_okuri = a:okuri_rom != ''
-    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '')
+    let needle = a:key_filter . (has_okuri ? a:okuri_rom : '')
 
     " self.is_valid() loads whole lines if it does not have,
     " so `self` can check the lines.
@@ -998,7 +998,7 @@ endfunction "}}}
 " Returns [line_string, idx] matching the candidate.
 function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
     let has_okuri = a:okuri_rom != ''
-    let needle = a:key_filter . (has_okuri ? a:okuri_rom[0] : '') . ' '
+    let needle = a:key_filter . (has_okuri ? a:okuri_rom : '') . ' '
 
     if !self.is_valid()
         return ['', -1]
@@ -1400,7 +1400,7 @@ function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) dict "{{{
     let max_count = g:eskk#max_candidates
 
     for word in self._registered_words.to_list()
-        if word.key ==# key && word.okuri_rom[0] ==# okuri_rom[0]
+        if word.key ==# key && word.okuri_rom ==# okuri_rom
             call candidates.push(word)
             if candidates.size() >= max_count
                 break
