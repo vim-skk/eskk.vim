@@ -188,8 +188,8 @@ function! eskk#logger#log(msg) "{{{
         execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}
-function! eskk#logger#logf(fmt, ...) "{{{
-    call eskk#logger#log(call('printf', [a:fmt] + a:000))
+function! eskk#logger#logf(...) "{{{
+    call eskk#logger#log(call('printf', a:000))
 endfunction "}}}
 function! eskk#logger#logstrf(fmt, ...) "{{{
     return call(
@@ -221,16 +221,16 @@ function! eskk#logger#warn(msg) "{{{
     call s:echomsg('WarningMsg', a:msg)
     call eskk#logger#log(a:msg)
 endfunction "}}}
-function! eskk#logger#warnf(msg, ...) "{{{
-    call eskk#logger#warn(call('printf', [a:msg] + a:000))
+function! eskk#logger#warnf(...) "{{{
+    call eskk#logger#warn(call('printf', a:000))
 endfunction "}}}
 
 function! eskk#logger#error(msg) "{{{
     call s:echomsg('ErrorMsg', a:msg)
     call eskk#logger#log(a:msg)
 endfunction "}}}
-function! eskk#logger#errorf(msg, ...) "{{{
-    call eskk#logger#error(call('printf', [a:msg] + a:000))
+function! eskk#logger#errorf(...) "{{{
+    call eskk#logger#error(call('printf', a:000))
 endfunction "}}}
 
 
