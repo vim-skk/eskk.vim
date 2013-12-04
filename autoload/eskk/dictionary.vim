@@ -118,6 +118,7 @@ let [
 \   s:CANDIDATE_FROM_REGISTERED_WORDS
 \] = range(3)
 
+" e.g.) {key}[{okuri_rom}] /{input};{annotation}/
 function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) "{{{
     return {
     \   'from_type': a:from_type,
