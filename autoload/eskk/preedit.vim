@@ -199,18 +199,13 @@ endfunction "}}}
 " NOTE: Current implementation depends on &backspace
 " when inserted string has newline.
 function! s:Preedit_rewrite() dict "{{{
-    let [bs_num, inserted] =
-    \   call('s:calculate_rewrite', [], self)
-    let self._kakutei_str = ''
-
-    let filter =
-    \   repeat("\<C-h>", bs_num)
-    \   . inserted
-
+    let [bs_num, inserted] = call('s:calculate_rewrite', [], self)
+    let filter = repeat("\<C-h>", bs_num) . inserted
     let filter_pre = self._filter_pre
-    let self._filter_pre = ''
-
     let filter_post = self._filter_post
+
+    let self._kakutei_str = ''
+    let self._filter_pre = ''
     let self._filter_post = ''
 
     return filter_pre . filter . filter_post
@@ -219,7 +214,9 @@ function! s:calculate_rewrite() dict "{{{
     let old = self._old_str
     let new = self._kakutei_str . self.get_display_str()
 
-
+    " Handle some simple cases.
+    " Don't use high-level diff algorithm
+    " to waste calculation time.
     if old ==# new
         return [0, '']
     elseif new == ''
