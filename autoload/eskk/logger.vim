@@ -203,22 +203,31 @@ function! eskk#logger#log_exception(what) "{{{
     call eskk#logger#log('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
 
-function! eskk#logger#warn(msg) "{{{
-    echohl WarningMsg
+function! eskk#logger#warnlog(msg) "{{{
+    call eskk#logger#warn(a:msg)
+    call eskk#logger#log(a:msg)
+endfunction "}}}
+
+function! s:echomsg(hl, msg) "{{{
+    execute 'echohl' a:hl
     try
         echomsg a:msg
     finally
         echohl None
     endtry
 endfunction "}}}
+
+function! eskk#logger#warn(msg) "{{{
+    call s:echomsg('WarningMsg', a:msg)
+    call eskk#logger#log(a:msg)
+endfunction "}}}
 function! eskk#logger#warnf(msg, ...) "{{{
     call eskk#logger#warn(call('printf', [a:msg] + a:000))
 endfunction "}}}
 
 function! eskk#logger#error(msg) "{{{
-    echohl ErrorMsg
-    echomsg a:msg
-    echohl None
+    call s:echomsg('ErrorMsg', a:msg)
+    call eskk#logger#log(a:msg)
 endfunction "}}}
 function! eskk#logger#errorf(msg, ...) "{{{
     call eskk#logger#error(call('printf', [a:msg] + a:000))
