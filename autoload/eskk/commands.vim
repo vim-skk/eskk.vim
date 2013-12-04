@@ -127,11 +127,11 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
                 " comment
                 continue
             endif
-            if okuri_ari.match_and_add(line, '^\(\S\+[a-z]\)[ \t]\+\(.\+\)')
+            if okuri_ari.match_and_add(line, '^\([^ \ta-z]\+[a-z]\)[a-z]*[ \t]\+\(.\+\)')
                 continue
             endif
 
-            call okuri_nasi.match_and_add(line, '^\(\S\+[^a-z]\)[ \t]\+\(.\+\)')
+            call okuri_nasi.match_and_add(line, '^\([^ \ta-z]\+\)[ \t]\+\(.\+\)')
         endfor
 
         try
