@@ -27,10 +27,10 @@ function! s:get_map_rhs(key) "{{{
 endfunction "}}}
 function! eskk#map#map(options, lhs, rhs, ...) "{{{
     if a:lhs == '' || a:rhs == ''
-        call eskk#logger#logstrf(
+        call eskk#logger#warnf(
         \   'lhs or rhs is empty: lhs = %s, rhs = %s',
-        \   a:lhs,
-        \   a:rhs
+        \   string(a:lhs),
+        \   string(a:rhs)
         \)
         return
     endif
@@ -62,7 +62,10 @@ function! eskk#map#set_up_key(key, ...) "{{{
 endfunction "}}}
 function! eskk#map#unmap(options, lhs, modes) "{{{
     if a:lhs == ''
-        call eskk#logger#logstrf('lhs is empty: lhs = %s', a:lhs)
+        call eskk#logger#warnf(
+        \   'lhs is empty: lhs = %s',
+        \   string(a:lhs),
+        \)
         return
     endif
 

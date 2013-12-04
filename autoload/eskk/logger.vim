@@ -161,7 +161,7 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        call eskk#logger#logf("Cannot write to log file '%s'.", log_file)
+        call s:do_logf("Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight
@@ -176,7 +176,7 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     endtry
 endfunction "}}}
 
-function! eskk#logger#log(msg) "{{{
+function! s:do_log(msg) "{{{
     if !g:eskk#debug
         return
     endif
@@ -188,24 +188,19 @@ function! eskk#logger#log(msg) "{{{
         execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}
-function! eskk#logger#logf(...) "{{{
-    call eskk#logger#log(call('printf', a:000))
+function! s:do_logf(...) "{{{
+    call s:do_log(call('printf', a:000))
 endfunction "}}}
-function! eskk#logger#logstrf(fmt, ...) "{{{
-    return call(
-    \   'eskk#logger#logf',
-    \   [a:fmt] + map(copy(a:000), 'string(v:val)')
-    \)
-endfunction "}}}
+
 function! eskk#logger#log_exception(what) "{{{
-    call eskk#logger#log("'" . a:what . "' threw exception")
-    call eskk#logger#log('v:exception = ' . string(v:exception))
-    call eskk#logger#log('v:throwpoint = ' . string(v:throwpoint))
+    call s:do_log("'" . a:what . "' threw exception")
+    call s:do_log('v:exception = ' . string(v:exception))
+    call s:do_log('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
 
 function! eskk#logger#warnlog(msg) "{{{
     call eskk#logger#warn(a:msg)
-    call eskk#logger#log(a:msg)
+    call s:do_log(a:msg)
 endfunction "}}}
 
 function! s:echomsg(hl, msg) "{{{
@@ -219,7 +214,7 @@ endfunction "}}}
 
 function! eskk#logger#warn(msg) "{{{
     call s:echomsg('WarningMsg', a:msg)
-    call eskk#logger#log(a:msg)
+    call s:do_log(a:msg)
 endfunction "}}}
 function! eskk#logger#warnf(...) "{{{
     call eskk#logger#warn(call('printf', a:000))
@@ -227,7 +222,7 @@ endfunction "}}}
 
 function! eskk#logger#error(msg) "{{{
     call s:echomsg('ErrorMsg', a:msg)
-    call eskk#logger#log(a:msg)
+    call s:do_log(a:msg)
 endfunction "}}}
 function! eskk#logger#errorf(...) "{{{
     call eskk#logger#error(call('printf', a:000))

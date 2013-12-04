@@ -1474,7 +1474,7 @@ function! eskk#_initialize() "{{{
         let dir = eskk#util#join_path(expand(g:eskk#directory), 'log')
         call eskk#util#mkdir_nothrow(dir, 'p')
         if !isdirectory(dir)
-            call eskk#logger#logf("can't create directory '%s'.", dir)
+            call eskk#logger#errorf("can't create directory '%s'.", dir)
         endif
     endfunction
     call s:initialize_set_up_eskk_directory()
@@ -1833,10 +1833,10 @@ endfunction "}}}
 function! eskk#set_mode(next_mode) "{{{
     let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:next_mode)
-        call eskk#logger#log(
+        call eskk#logger#warn(
         \   "mode '" . a:next_mode . "' is not supported."
         \)
-        call eskk#logger#log(
+        call eskk#logger#warn(
         \   's:available_modes = ' . string(s:available_modes)
         \)
         return
