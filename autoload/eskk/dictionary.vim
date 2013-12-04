@@ -824,6 +824,8 @@ function! s:PhysicalDict_update_lines() dict "{{{
     catch /E484:/    " Can't open file
         call eskk#logger#logf("Can't read '%s'!", self.path)
     catch /^eskk: .* parse error/
+        call eskk#logger#warn("SKK dictionary is broken, trying to fix...: " . v:exception)
+
         " Try :EskkFixDictionary.
         silent execute 'EskkFixDictionary!' fnameescape(self.path)
 
