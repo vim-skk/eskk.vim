@@ -2019,9 +2019,21 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
-
-    " Set old string. (it is used by Preedit.rewrite())
-    call preedit.set_old_str(preedit.get_display_str())
+    " Detect invalid rewrite; which means
+    " preedit's display string and
+    " inserted string in buffer are not same.
+    let old_str = preedit.get_display_str()
+    let colidx = col('.')-2
+    if preedit.get_henkan_phase() > g:eskk#preedit#PHASE_NORMAL &&
+    \   old_str !=# getline('.')[colidx-strlen(old_str)+1 : colidx]
+        call eskk#logger#warn('invalid rewrite of buffer was detected.'
+        \                   . ' reset preedit status...')
+        sleep 1
+        call preedit.reset()
+        return ''
+    endif
+    " Set old display string. (it is used by Preedit.rewrite())
+    call preedit.set_old_str(old_str)
 
     try
         " Push a pressed character.
