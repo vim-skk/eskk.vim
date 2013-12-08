@@ -7,6 +7,13 @@ set cpo&vim
 " }}}
 
 
+let s:LOG_NONE = 0
+let s:LOG_ERROR = 1
+let s:LOG_WARN = 2
+let s:LOG_INFO = 3
+let s:LOG_DEBUG = 4
+
+
 let s:warning_messages = []
 
 function! eskk#logger#write_debug_log_file() "{{{
@@ -161,7 +168,7 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        call s:do_logf("Cannot write to log file '%s'.", log_file)
+        call eskk#logger#error("Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight
@@ -176,31 +183,30 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     endtry
 endfunction "}}}
 
-function! s:do_log(msg) "{{{
-    if !g:eskk#debug
-        return
+function! s:do_log(level, hl, msg) "{{{
+    let msg = printf('[%s]::%s', strftime('%c'), a:msg)
+    " g:eskk#log_cmdline_level
+    if g:eskk#log_cmdline_level >= a:level
+        call s:echomsg(a:hl, msg)
+    endif
+    " g:eskk#log_file_level
+    if g:eskk#log_file_level >= a:level
+        call add(s:warning_messages, msg)
     endif
 
-    let msg = printf('[%s]::%s', strftime('%c'), a:msg)
-    call add(s:warning_messages, msg)
-
+    " g:eskk#debug_wait_ms
     if eskk#is_initialized() && g:eskk#debug_wait_ms ># 0
         execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}
-function! s:do_logf(...) "{{{
-    call s:do_log(call('printf', a:000))
+function! s:do_logf(level, hl, ...) "{{{
+    call s:do_log(a:level, a:hl, call('printf', a:000))
 endfunction "}}}
 
 function! eskk#logger#log_exception(what) "{{{
-    call s:do_log("'" . a:what . "' threw exception")
-    call s:do_log('v:exception = ' . string(v:exception))
-    call s:do_log('v:throwpoint = ' . string(v:throwpoint))
-endfunction "}}}
-
-function! eskk#logger#warnlog(msg) "{{{
-    call eskk#logger#warn(a:msg)
-    call s:do_log(a:msg)
+    call eskk#logger#warn("'" . a:what . "' threw exception")
+    call eskk#logger#warn('v:exception = ' . string(v:exception))
+    call eskk#logger#warn('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
 
 function! s:echomsg(hl, msg) "{{{
@@ -213,19 +219,21 @@ function! s:echomsg(hl, msg) "{{{
 endfunction "}}}
 
 function! eskk#logger#warn(msg) "{{{
-    call s:echomsg('WarningMsg', a:msg)
-    call s:do_log(a:msg)
+    call s:do_log(s:LOG_WARN, 'WarningMsg', a:msg)
 endfunction "}}}
 function! eskk#logger#warnf(...) "{{{
     call eskk#logger#warn(call('printf', a:000))
 endfunction "}}}
 
 function! eskk#logger#error(msg) "{{{
-    call s:echomsg('ErrorMsg', a:msg)
-    call s:do_log(a:msg)
+    call s:do_log(s:LOG_ERROR, 'ErrorMsg', a:msg)
 endfunction "}}}
 function! eskk#logger#errorf(...) "{{{
     call eskk#logger#error(call('printf', a:000))
+endfunction "}}}
+
+function! eskk#logger#info(msg) "{{{
+    call s:do_log(s:LOG_INFO, 'WarningMsg', a:msg)
 endfunction "}}}
 
 

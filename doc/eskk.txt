@@ -383,21 +383,38 @@ Please note that these variables may change the meaning at any time.
 
 g:eskk#debug			*g:eskk#debug*
 						(Default: 0)
-	If true, output debugging messages to command-line or file.
-	|g:eskk#debug_out| changes which to output.
+	This variable influences the initial values of
+	|g:eskk#log_cmdline_level| and |g:eskk#log_file_level|.
+	See |g:eskk#log_cmdline_level| and
+	|g:eskk#log_file_level| for the details.
+	NOTE: This variable is deprecated.
+	Use |g:eskk#log_cmdline_level| and
+	|g:eskk#log_file_level| instead.
 
 g:eskk#debug_wait_ms	*g:eskk#debug_wait_ms*
 						(Default: 0)
 	If this variable is greater than 0,
 	Do |:sleep| for this value (millisecond).
 
-g:eskk#debug_out		*g:eskk#debug_out*
-						(Default: "file")
-	The value is "file" or "cmdline".
-	If "file", log file is created at: >
-	{g:eskk#directory}/log/debug.log
-<
-	If "cmdline", output to command-line.
+g:eskk#log_cmdline_level				*g:eskk#log_cmdline_level*
+						(Default: 2 if |g:eskk#debug| is true, 0 otherwise)
+	Set log level for messages to command-line.
+	See below for the meaning.
+	0	No output.
+	1	Show only error message.
+	2	Show error,warning message.
+	3	Show error,warning,info message.
+	4	Show error,warning,info,debug message.
+
+g:eskk#log_file_level				*g:eskk#log_file_level*
+						(Default: 2 if |g:eskk#debug| is true, 0 otherwise)
+	Set log level for messages to log file.
+	See |g:eskk#log_cmdline_level| for the meaning.
+
+	|eskk| writes log when:
+	- CursorHold
+	- VimLeavePre
+	- each times 20 keys were pressed
 
 }}}
 ------------------------------------------------------------------------------

@@ -1346,7 +1346,10 @@ function! eskk#_initialize() "{{{
     " Global Variables (do setup before eskk-initialize-pre) {{{
 
     " Debug
-    call eskk#util#set_default('g:eskk#debug', 0)
+    call eskk#util#set_default('g:eskk#log_cmdline_level',
+    \   get(g:, 'eskk#debug', 0) ? 2 : 0)
+    call eskk#util#set_default('g:eskk#log_file_level',
+    \   get(g:, 'eskk#debug', 0) ? 2 : 0)
     call eskk#util#set_default('g:eskk#debug_wait_ms', 0)
     call eskk#util#set_default('g:eskk#directory', '~/.eskk')
 
@@ -1646,7 +1649,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " Logging event {{{
-    if g:eskk#debug
+    if g:eskk#log_cmdline_level > 0 || g:eskk#log_file_level > 0
         autocmd eskk CursorHold,VimLeavePre *
         \            call eskk#logger#write_debug_log_file()
     endif
@@ -2028,6 +2031,9 @@ function! eskk#filter(char) "{{{
     \   old_str !=# getline('.')[colidx-strlen(old_str)+1 : colidx]
         call eskk#logger#warn('invalid rewrite of buffer was detected.'
         \                   . ' reset preedit status...')
+        for l in preedit.dump()
+            call eskk#logger#info(l)
+        endfor
         sleep 1
         call preedit.reset()
         return ''

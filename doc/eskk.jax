@@ -391,22 +391,37 @@ Note: ここで挙げた変数は開発者専用である。
 
 g:eskk#debug					*g:eskk#debug*
 						(デフォルト値: 0)
-	もし真なら、デバッグメッセージをコマンドラインか
-	ログファイルに出力する。
-	どちらに出力するかは|g:eskk#debug_out|で変更することができる。
+	もし真なら、|g:eskk#log_cmdline_level|と
+	|g:eskk#log_file_level|の初期値が違ってくる。
+	詳しくは|g:eskk#log_cmdline_level|と|g:eskk#log_file_level|を参照。
+	NOTE: この変数は廃止予定される。
+	|g:eskk#log_cmdline_level|と|g:eskk#log_file_level|
+	を使うこと。
 
 g:eskk#debug_wait_ms				*g:eskk#debug_wait_ms*
 						(デフォルト値: 0)
 	もしこの変数が0より大きければ、
 	指定時間 |:sleep| する。(ミリ秒)
 
-g:eskk#debug_out				*g:eskk#debug_out*
-						(デフォルト値: "file")
-	"file" か "cmdline" のどちらか。
-	"file" なら >
-	{g:eskk#directory}/log/debug.log
-<	に作られる。
-	"cmdline" ならコマンドラインに出力される。
+g:eskk#log_cmdline_level				*g:eskk#log_cmdline_level*
+						(デフォルト値: g:eskk#debugが真なら2、偽なら0)
+	コマンドラインに表示するログレベルを設定する。
+	数値の意味は以下の通り。
+	0	何も出力しない
+	1	エラーのみ出力する
+	2	エラー、警告のみ出力する
+	3	エラー、警告、情報のみ出力する
+	4	エラー、警告、情報、デバッグのみ出力する
+
+g:eskk#log_file_level				*g:eskk#log_file_level*
+						(デフォルト値: g:eskk#debugが真なら2、偽なら0)
+	ログファイルに書き込むログレベルを設定する。
+	数値の意味については|g:eskk#log_cmdline_level|を参照。
+
+	ログファイルへは次のタイミングで書きこまれる。
+	- CursorHold
+	- VimLeavePre
+	- eskk経由で20キー押される度
 
 }}}
 ------------------------------------------------------------------------------
