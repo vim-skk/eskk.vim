@@ -628,11 +628,11 @@ function! s:Preedit_set_begin_col(col) dict "{{{
 endfunction "}}}
 function! s:Preedit_get_begin_col() dict "{{{
     if self._henkan_phase is g:eskk#preedit#PHASE_NORMAL
-        throw eskk#util#build_error(
-        \   ['eskk', 'preedit'],
+        call eskk#logger#warnf(
         \   'internal error: Preedit.get_begin_col()'
-        \       . ' must not be called in normal phase.'
-        \)
+        \       . ' current phase is "%d", '
+        \       . 'but it must not be called in normal phase.',
+        \   self._henkan_phase)
     endif
     return self._begin_col
 endfunction "}}}
