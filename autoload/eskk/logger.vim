@@ -12,6 +12,13 @@ let s:LOG_ERROR = 1
 let s:LOG_WARN = 2
 let s:LOG_INFO = 3
 let s:LOG_DEBUG = 4
+let s:LEVEL_STR_TABLE = {
+\   s:LOG_NONE : "",
+\   s:LOG_ERROR : "ERROR",
+\   s:LOG_WARN : "WARN",
+\   s:LOG_INFO : "INFO",
+\   s:LOG_DEBUG : "DEBUG",
+\}
 
 
 let s:warning_messages = []
@@ -184,7 +191,8 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
 endfunction "}}}
 
 function! s:do_log(level, hl, msg) "{{{
-    let msg = printf('[%s]::%s', strftime('%c'), a:msg)
+    let msg = printf('[%s] [%s] %s',
+    \           strftime('%c'), s:LEVEL_STR_TABLE[a:level], a:msg)
     " g:eskk#log_cmdline_level
     if g:eskk#log_cmdline_level >= a:level
         call s:echomsg(a:hl, msg)
