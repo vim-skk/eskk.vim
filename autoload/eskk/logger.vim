@@ -138,7 +138,8 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
 
     if executable('uname')
         call add(lines, "--- Operating System ---")
-        call add(lines, printf('"uname -a" = %s', system('uname -a')))
+        let uname = substitute(system('uname -a'), '\n\+$', '', '')
+        call add(lines, printf('"uname -a" = %s', uname))
         call add(lines, "--- Operating System ---")
         call add(lines, '')
     endif
