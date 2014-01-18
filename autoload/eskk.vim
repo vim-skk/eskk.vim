@@ -2038,8 +2038,6 @@ function! eskk#filter(char) "{{{
                 call eskk#logger#info(l)
             endfor
 
-            let g:eskkmap = maparg('j', 'l', 0, 1)
-
             sleep 1
             call preedit.reset()
             return ''
