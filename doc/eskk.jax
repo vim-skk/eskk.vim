@@ -413,6 +413,9 @@ g:eskk#log_cmdline_level				*g:eskk#log_cmdline_level*
 	3	エラー、警告、情報のみ出力する
 	4	エラー、警告、情報、デバッグのみ出力する
 
+	また現在は、エラーが起きた時はエラー用のログファイルに
+	出力しているので、この変数で制御できるエラー出力は存在しない。
+
 g:eskk#log_file_level				*g:eskk#log_file_level*
 						(デフォルト値: g:eskk#debugが真なら2、偽なら0)
 	ログファイルに書き込むログレベルを設定する。

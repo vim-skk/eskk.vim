@@ -406,6 +406,11 @@ g:eskk#log_cmdline_level				*g:eskk#log_cmdline_level*
 	3	Show error,warning,info message.
 	4	Show error,warning,info,debug message.
 
+	Currently, there are no error messages
+	to be controlled.
+	Because eskk creates an dedicated error log file
+	when error occurred.
+
 g:eskk#log_file_level				*g:eskk#log_file_level*
 						(Default: 2 if |g:eskk#debug| is true, 0 otherwise)
 	Set log level for messages to log file.
