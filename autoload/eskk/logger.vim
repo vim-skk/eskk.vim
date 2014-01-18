@@ -176,6 +176,11 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
+        for line in lines
+            redraw
+            echomsg line
+        endfor
+        redraw
         call eskk#logger#warnf("Cannot write to log file '%s'.", log_file)
     endtry
 
