@@ -2023,6 +2023,9 @@ function! eskk#filter(char) "{{{
         \)
     endif
 
+    " Log pressed char.
+    call eskk#logger#debug('eskk#filter(): char = ' . string(a:char))
+
     " Detect invalid rewrite; which means
     " preedit's display string and
     " inserted string in buffer are not same.

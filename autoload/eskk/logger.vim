@@ -243,6 +243,13 @@ function! eskk#logger#info(msg) "{{{
     call s:do_log(s:LOG_INFO, 'WarningMsg', a:msg)
 endfunction "}}}
 
+function! eskk#logger#debug(msg) "{{{
+    call s:do_log(s:LOG_DEBUG, 'Debug', a:msg)
+endfunction "}}}
+function! eskk#logger#debugf(...) "{{{
+    call eskk#logger#debug(call('printf', a:000))
+endfunction "}}}
+
 
 
 " Restore 'cpoptions' {{{
