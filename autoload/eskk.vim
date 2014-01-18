@@ -1473,7 +1473,8 @@ function! eskk#_initialize() "{{{
         let dir = eskk#util#join_path(expand(g:eskk#directory), 'log')
         call eskk#util#mkdir_nothrow(dir, 'p')
         if !isdirectory(dir)
-            call eskk#logger#errorf("can't create directory '%s'.", dir)
+            call eskk#logger#write_error_log_file(
+            \       {}, printf("can't create directory '%s'.", dir))
         endif
     endfunction
     call s:initialize_set_up_eskk_directory()

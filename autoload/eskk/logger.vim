@@ -176,13 +176,13 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
         call writefile(lines, log_file)
         let write_success = 1
     catch
-        call eskk#logger#error("Cannot write to log file '%s'.", log_file)
+        call eskk#logger#warnf("Cannot write to log file '%s'.", log_file)
     endtry
 
     let save_cmdheight = &cmdheight
     setlocal cmdheight=3
     try
-        call eskk#logger#errorf(
+        call eskk#logger#warnf(
         \   "Error!! See %s for details.",
         \   (write_success ? string(log_file) : ':messages')
         \)
@@ -232,13 +232,6 @@ function! eskk#logger#warn(msg) "{{{
 endfunction "}}}
 function! eskk#logger#warnf(...) "{{{
     call eskk#logger#warn(call('printf', a:000))
-endfunction "}}}
-
-function! eskk#logger#error(msg) "{{{
-    call s:do_log(s:LOG_ERROR, 'ErrorMsg', a:msg)
-endfunction "}}}
-function! eskk#logger#errorf(...) "{{{
-    call eskk#logger#error(call('printf', a:000))
 endfunction "}}}
 
 function! eskk#logger#info(msg) "{{{
