@@ -48,7 +48,7 @@ function! s:common_head(strs)
     return a:strs[0]
   endif
   let strs = len == 2 ? a:strs : sort(copy(a:strs))
-  let pat = substitute(strs[0], '.', '[\0]', 'g')
+  let pat = substitute(strs[0], '.', '\="[" . escape(submatch(0), "^\\") . "]"', 'g')
   return pat == '' ? '' : matchstr(strs[-1], '^\%[' . pat . ']')
 endfunction
 
@@ -224,6 +224,10 @@ function! s:dstring(expr)
   let x = substitute(string(a:expr), "^'\\|'$", '', 'g')
   let x = substitute(x, "''", "'", 'g')
   return printf('"%s"', escape(x, '"'))
+endfunction
+
+function! s:lines(str)
+  return split(a:str, '\r\?\n')
 endfunction
 
 let &cpo = s:save_cpo
