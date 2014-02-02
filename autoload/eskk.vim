@@ -2101,6 +2101,7 @@ function! eskk#filter(char) "{{{
         \)
 
     finally
+        " In normal phase, clear rom_pairs each time.
         if preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_NORMAL
             let cur_buf_str = preedit.get_current_buf_str()
             call cur_buf_str.rom_pairs.clear()
