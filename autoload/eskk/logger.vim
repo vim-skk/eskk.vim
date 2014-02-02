@@ -197,8 +197,9 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
 endfunction "}}}
 
 function! s:do_log(level, hl, msg) "{{{
-    let msg = printf('[%s] [%s] %s',
-    \           strftime('%c'), s:LEVEL_STR_TABLE[a:level], a:msg)
+    let msg = printf('[%s] [%s] [%s] %s',
+    \           v:servername, strftime('%c'),
+    \           s:LEVEL_STR_TABLE[a:level], a:msg)
     " g:eskk#log_cmdline_level
     if g:eskk#log_cmdline_level >= a:level
         call s:echomsg(a:hl, msg)
