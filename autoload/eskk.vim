@@ -2002,55 +2002,55 @@ endfunction "}}}
 
 " Filter
 function! eskk#filter(char) "{{{
-    let inst = eskk#get_current_instance()
-    let st = eskk#get_mode_structure(inst.mode)
-    let preedit = eskk#get_preedit()
-    let stash = {
-    \   'char': a:char,
-    \   'preedit': preedit,
-    \}
-
-    " Check irregular circumstance.
-    if !eskk#is_supported_mode(inst.mode)
-        " Detect fatal error. disable eskk...
-        return s:force_disable_eskk(
-        \   stash,
-        \   eskk#util#build_error(
-        \       ['eskk'],
-        \       ['current mode is not supported: '
-        \           . string(inst.mode)]
-        \   )
-        \)
-    endif
-
-    " Log pressed char.
-    call eskk#logger#debug('eskk#filter(): char = ' . string(a:char))
-
-    " Detect invalid rewrite; which means
-    " preedit's display string and
-    " inserted string in buffer are not same.
-    let old_str = preedit.get_display_str()
-    if mode() ==# 'i'
-        let colidx = col('.')-2
-        let inserted_str = getline('.')[colidx-strlen(old_str)+1 : colidx]
-        if preedit.get_henkan_phase() > g:eskk#preedit#PHASE_NORMAL &&
-        \   old_str !=# inserted_str
-            call eskk#logger#warn('invalid rewrite of buffer was detected.'
-            \                   . ' reset preedit status...: '
-            \                   . string([old_str, inserted_str]))
-            for l in preedit.dump()
-                call eskk#logger#info(l)
-            endfor
-
-            sleep 1
-            call preedit.reset()
-            return ''
-        endif
-    endif
-    " Set old display string. (it is used by Preedit.rewrite())
-    call preedit.set_old_str(old_str)
-
     try
+        let inst = eskk#get_current_instance()
+        let st = eskk#get_mode_structure(inst.mode)
+        let preedit = eskk#get_preedit()
+        let stash = {
+        \   'char': a:char,
+        \   'preedit': preedit,
+        \}
+
+        " Check irregular circumstance.
+        if !eskk#is_supported_mode(inst.mode)
+            " Detect fatal error. disable eskk...
+            return s:force_disable_eskk(
+            \   stash,
+            \   eskk#util#build_error(
+            \       ['eskk'],
+            \       ['current mode is not supported: '
+            \           . string(inst.mode)]
+            \   )
+            \)
+        endif
+
+        " Log pressed char.
+        call eskk#logger#debug('eskk#filter(): char = ' . string(a:char))
+
+        " Detect invalid rewrite; which means
+        " preedit's display string and
+        " inserted string in buffer are not same.
+        let old_str = preedit.get_display_str()
+        if mode() ==# 'i'
+            let colidx = col('.')-2
+            let inserted_str = getline('.')[colidx-strlen(old_str)+1 : colidx]
+            if preedit.get_henkan_phase() > g:eskk#preedit#PHASE_NORMAL &&
+            \   old_str !=# inserted_str
+                call eskk#logger#warn('invalid rewrite of buffer was detected.'
+                \                   . ' reset preedit status...: '
+                \                   . string([old_str, inserted_str]))
+                for l in preedit.dump()
+                    call eskk#logger#info(l)
+                endfor
+
+                sleep 1
+                call preedit.reset()
+                return ''
+            endif
+        endif
+        " Set old display string. (it is used by Preedit.rewrite())
+        call preedit.set_old_str(old_str)
+
         " Push a pressed character.
         for c in has_key(st, 'prefilter') ?
         \           st.prefilter(stash) : [a:char]
