@@ -1689,6 +1689,12 @@ function! eskk#_initialize() "{{{
     endfunction
     " }}}
 
+    " Log startup/shutdown info. {{{
+    call eskk#logger#debug('----- eskk.vim was started. -----')
+    autocmd eskk VimLeavePre *
+    \       call eskk#logger#debug('----- Vim is exiting... -----')
+    " }}}
+
     let s:initialization_state = s:INIT_DONE
 endfunction "}}}
 function! eskk#is_initialized() "{{{
