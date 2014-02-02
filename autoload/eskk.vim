@@ -184,6 +184,8 @@ let s:MODE_LOCAL_KEYS = {
 \}
 " The number of 'eskk#filter()' was called.
 let s:filter_count = 0
+" Nested count
+let s:filter_nested_count = 0
 " }}}
 
 
@@ -2003,6 +2005,8 @@ endfunction "}}}
 " Filter
 function! eskk#filter(char) "{{{
     try
+        let s:filter_nested_count += 1
+
         let inst = eskk#get_current_instance()
         let st = eskk#get_mode_structure(inst.mode)
         let preedit = eskk#get_preedit()
@@ -2025,7 +2029,7 @@ function! eskk#filter(char) "{{{
         endif
 
         " Log pressed char.
-        call eskk#logger#debug('eskk#filter(): char = ' . string(a:char))
+        call eskk#logger#debug('eskk#filter(): char = ' . string(a:char) . ', nested count = ' . s:filter_nested_count)
 
         " Detect invalid rewrite; which means
         " preedit's display string and
@@ -2114,6 +2118,8 @@ function! eskk#filter(char) "{{{
             call eskk#logger#write_debug_log_file()
             let s:filter_count = 0
         endif
+        " Nested count
+        let s:filter_nested_count -= 1
     endtry
 endfunction "}}}
 function! s:force_disable_eskk(stash, error) "{{{
