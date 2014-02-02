@@ -1651,13 +1651,6 @@ function! eskk#_initialize() "{{{
     endif
     " }}}
 
-    " Logging event {{{
-    if g:eskk#log_cmdline_level > 0 || g:eskk#log_file_level > 0
-        autocmd eskk CursorHold,VimLeavePre *
-        \            call eskk#logger#write_debug_log_file()
-    endif
-    " }}}
-
     " Reset s:completed_candidates in autoload/eskk/complete.vim {{{
     " s:completed_candidates should have non-empty value
     " only during insert-mode.
@@ -1693,6 +1686,12 @@ function! eskk#_initialize() "{{{
     call eskk#logger#debug('----- eskk.vim was started. -----')
     autocmd eskk VimLeavePre *
     \       call eskk#logger#debug('----- Vim is exiting... -----')
+    " }}}
+
+    " Flush log. {{{
+    " NOTE: This auto-command must be at the end of eskk#_initialize().
+    autocmd eskk CursorHold,VimLeavePre *
+    \            call eskk#logger#write_debug_log_file()
     " }}}
 
     let s:initialization_state = s:INIT_DONE
