@@ -824,7 +824,7 @@ function! s:PhysicalDict_update_lines() dict "{{{
         call self.update_lines_main()
     catch /E484:/    " Can't open file
         call eskk#logger#write_error_log_file(
-        \   printf("Can't read '%s'!", self.path))
+        \   {}, printf("Can't read '%s'!", self.path))
     catch /^eskk: .* parse error/
         call eskk#logger#warn(
         \   "SKK dictionary is broken, trying to fix...: " . v:exception)
@@ -836,7 +836,7 @@ function! s:PhysicalDict_update_lines() dict "{{{
             call self.update_lines_main()
         catch /E484:/    " Can't open file
             call eskk#logger#write_error_log_file(
-            \   printf("Can't read '%s'!", self.path))
+            \   {}, printf("Can't read '%s'!", self.path))
         catch /^eskk: .* parse error/
             " Possible bug.
             call eskk#logger#log_exception('s:PhysicalDict.update_lines()')
