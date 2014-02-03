@@ -44,7 +44,8 @@ function! eskk#logger#write_debug_log_file() "{{{
     endtry
 endfunction "}}}
 function! eskk#logger#write_error_log_file(stash, ...) "{{{
-    let v_exception = a:0 ? a:1 : v:exception
+    let v_exception = type(a:stash) == type('') ? a:stash :
+          \ a:0 ? a:1 : v:exception
 
     let lines = []
 
@@ -54,16 +55,17 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     call add(lines, strftime('%c'))
     call add(lines, '')
 
-    call add(lines, '--- char ---')
-    let char = get(a:stash, 'char', '')
-    call add(lines, printf('char: %s(%d)', string(char), char2nr(char)))
-    call add(lines, printf('mode(): %s', mode()))
-    call add(lines, '--- char ---')
-
-    call add(lines, '')
+    if type(a:stash) != type('')
+      call add(lines, '--- char ---')
+      let char = get(a:stash, 'char', '')
+      call add(lines, printf('char: %s(%d)', string(char), char2nr(char)))
+      call add(lines, printf('mode(): %s', mode()))
+      call add(lines, '--- char ---')
+      call add(lines, '')
+    endif
 
     call add(lines, '--- exception ---')
-    if v_exception =~# '^eskk:'
+    if v_exception =~# '^eskk:' || type(a:stash) == type('')
         call add(lines, 'exception type: eskk exception')
         call add(lines, printf('v:exception: %s', v_exception))
     else
