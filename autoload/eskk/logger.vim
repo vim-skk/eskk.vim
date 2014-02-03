@@ -118,15 +118,16 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
 
     call add(lines, '')
 
-    call add(lines, '--- preedit ---')
-    if has_key(a:stash, 'preedit')
+    if type(a:stash) != type('')
+      call add(lines, '--- preedit ---')
+      if has_key(a:stash, 'preedit')
         let lines += a:stash.preedit.dump()
-    else
+      else
         let lines += ['(no preedit)']
+      endif
+      call add(lines, '--- preedit ---')
+      call add(lines, '')
     endif
-    call add(lines, '--- preedit ---')
-
-    call add(lines, '')
 
     call add(lines, "--- Vim's :version ---")
     redir => output
