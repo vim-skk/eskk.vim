@@ -31,6 +31,10 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return s:skip_complete(a:findstart)
     endif
 
+    call eskk#logger#debug('eskk#complete#eskkcomplete(): '
+    \                    . 'a:findstart = ' . a:findstart
+    \                    . ', a:base = ' . string(a:base))
+
     " Complete Function should not throw exception.
     try
         return s:eskkcomplete(a:findstart, a:base)
