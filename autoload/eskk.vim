@@ -2036,23 +2036,26 @@ function! eskk#filter(char) "{{{
         " preedit's display string and
         " inserted string in buffer are not same.
         let old_str = preedit.get_display_str()
-        if mode() ==# 'i'
-            let colidx = col('.')-2
-            let inserted_str = getline('.')[colidx-strlen(old_str)+1 : colidx]
-            if preedit.get_henkan_phase() > g:eskk#preedit#PHASE_NORMAL &&
-            \   old_str !=# inserted_str
-                call eskk#logger#warn('invalid rewrite of buffer was detected.'
-                \                   . ' reset preedit status...: '
-                \                   . string([old_str, inserted_str]))
-                for l in preedit.dump()
-                    call eskk#logger#info(l)
-                endfor
 
-                sleep 1
-                call preedit.reset()
-                return ''
-            endif
-        endif
+        " FIXME: Disable temporarily.
+        " if mode() ==# 'i'
+        "     let colidx = col('.')-2
+        "     let inserted_str = getline('.')[colidx-strlen(old_str)+1 : colidx]
+        "     if preedit.get_henkan_phase() > g:eskk#preedit#PHASE_NORMAL &&
+        "     \   old_str !=# inserted_str
+        "         call eskk#logger#warn('invalid rewrite of buffer was detected.'
+        "         \                   . ' reset preedit status...: '
+        "         \                   . string([old_str, inserted_str]))
+        "         for l in preedit.dump()
+        "             call eskk#logger#info(l)
+        "         endfor
+        "
+        "         sleep 1
+        "         call preedit.reset()
+        "         return ''
+        "     endif
+        " endif
+
         " Set old display string. (it is used by Preedit.rewrite())
         call preedit.set_old_str(old_str)
 
