@@ -279,7 +279,7 @@ g:eskk#start_completion_length
 	was invoked, always returns an empty list)
 
 g:eskk#register_completed_word			*g:eskk#register_completed_word*
-							(デフォルト値: 1)
+							(Default: 1)
 	If true, register selected word at |eskk-completion|.
 
 
