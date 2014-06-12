@@ -292,6 +292,10 @@ g:eskk#register_completed_word		*g:eskk#register_completed_word*
 	もし真なら、補完時に決定した候補を自動的に辞書登録する。
 	補完については |eskk-completion| 参照。
 
+g:eskk#tab_select_completion			*g:eskk#tab_select_completion*
+							(デフォルト値: 0)
+	もし真なら、<Tab> キーで次の候補を選択する。
+
 
 カーソルの色に関する変数
 ---------------

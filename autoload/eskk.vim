@@ -497,6 +497,12 @@ function! s:handle_popupmenu_keys(stash) "{{{
     " NOTE: Do not call s:kakutei_pum() on 'selected_default ==# 1'.
 
     if char ==# "\<CR>" || char ==# "\<Tab>"
+        if char ==# "\<Tab>" && g:eskk#tab_select_completion
+            " Select next candidate
+            call preedit.push_filter_pre_char("\<C-n>")
+            return 1
+        endif
+
         " Close popup and insert 'char'.
         if selected_default
             call s:do_enter_egglike(a:stash)
@@ -1427,6 +1433,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#start_completion_length', 3)
     call eskk#util#set_default('g:eskk#register_completed_word', 1)
     call eskk#util#set_default('g:eskk#egg_like_newline_completion', 0)
+    call eskk#util#set_default('g:eskk#tab_select_completion', 0)
 
     " Cursor color
     call eskk#util#set_default('g:eskk#use_color_cursor', 1)

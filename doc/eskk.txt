@@ -282,6 +282,9 @@ g:eskk#register_completed_word			*g:eskk#register_completed_word*
 							(Default: 1)
 	If true, register selected word at |eskk-completion|.
 
+g:eskk#tab_select_completion			*g:eskk#tab_select_completion*
+							(Default: 0)
+	If true, you can select next candidate by <Tab> key.
 
 Cursor color
 ---------------
