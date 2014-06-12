@@ -261,7 +261,7 @@ Completion
 -------------
 
 g:eskk#enable_completion		*g:eskk#enable_completion*
-							(Default: 0)
+							(Default: 1)
 	If true, enables eskk's completion feature.
 	When |neocomplcache| is installed,
 	auto-completion feature is enabled.

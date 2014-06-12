@@ -302,8 +302,8 @@ g:eskk#tab_select_completion			*g:eskk#tab_select_completion*
 
 g:eskk#use_color_cursor			*g:eskk#use_color_cursor*
 							(デフォルト値: 1)
-	もし真なら、eskkが有効になっている場合、モードを切り替えたときにカーソル
-	の色を変更する。
+	もし真なら、eskkが有効になっている場合、モードを切り替えたときにカーソ
+	ルの色を変更する。
 	Note: 現在の実装では、この機能はGUIのVim上でしか動作しない。
 
 g:eskk#cursor_color			*g:eskk#cursor_color*
@@ -408,7 +408,8 @@ g:eskk#debug_wait_ms				*g:eskk#debug_wait_ms*
 	指定時間 |:sleep| する。(ミリ秒)
 
 g:eskk#log_cmdline_level				*g:eskk#log_cmdline_level*
-						(デフォルト値: g:eskk#debugが真なら2、偽なら0)
+						(デフォルト値: g:eskk#debugが
+						真なら2、偽なら0)
 	コマンドラインに表示するログレベルを設定する。
 	数値の意味は以下の通り。
 	0	何も出力しない
@@ -421,7 +422,8 @@ g:eskk#log_cmdline_level				*g:eskk#log_cmdline_level*
 	出力しているので、この変数で制御できるエラー出力は存在しない。
 
 g:eskk#log_file_level				*g:eskk#log_file_level*
-						(デフォルト値: g:eskk#debugが真なら2、偽なら0)
+						(デフォルト値: g:eskk#debugが
+						真なら2、偽なら0)
 	ログファイルに書き込むログレベルを設定する。
 	数値の意味については|g:eskk#log_cmdline_level|を参照。
 
