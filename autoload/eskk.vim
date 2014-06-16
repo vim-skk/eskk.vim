@@ -1363,6 +1363,7 @@ function! eskk#_initialize() "{{{
     \       'host': "",
     \       'portnum': -1,
     \       'encoding': '',
+    \       'timeout': 500,
     \   })
 
     " Dictionary

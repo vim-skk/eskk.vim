@@ -298,12 +298,21 @@ function! s:HenkanResult_get_candidates() dict "{{{
         " Look up from dictionaries.
         let user_dict = dict.get_user_dict()
         let system_dict = dict.get_system_dict()
+        let server_dict = dict.get_server_dict()
         let user_dict_result =
         \   user_dict.search_candidate(
         \       self._key, self._okuri_rom)
-        let system_dict_result =
-        \   system_dict.search_candidate(
-        \       self._key, self._okuri_rom)
+
+        " Look up from server.
+        let server_result = server_dict.lookup(self._key)
+        if server_result != ''
+            let system_dict_result = [self._key .' ' . server_result, 0]
+        else
+            let system_dict_result =
+                        \   system_dict.search_candidate(
+                        \       self._key, self._okuri_rom)
+        endif
+        " echomsg string(system_dict_result)
 
         if user_dict_result[1] ==# -1
         \   && system_dict_result[1] ==# -1
@@ -320,7 +329,7 @@ function! s:HenkanResult_get_candidates() dict "{{{
         endif
 
         " NOTE: The order is important.
-        " registered word, user dictionary, system dictionary.
+        " registered word, user dictionary, server, system dictionary.
 
         " Merge registered words.
         if !empty(registered)
@@ -1125,13 +1134,14 @@ let s:PhysicalDict = {
 "   Character encoding of server.
 "
 
-function! s:ServerDict_new(host, portnum, encoding) "{{{
+function! s:ServerDict_new(host, portnum, encoding, timeout) "{{{
     let obj = extend(
     \   deepcopy(s:ServerDict),
     \   {
     \       'host': a:host,
     \       'portnum': a:portnum,
     \       'encoding': a:encoding,
+    \       'timeout': a:timeout,
     \   },
     \   'force'
     \)
@@ -1149,23 +1159,22 @@ function! s:ServerDict_init() dict "{{{
     endif
 endfunction "}}}
 
-function! s:ServerDict_lookup(word) dict "{{{
-    return self.request('1', a:word)
-endfunction "}}}
-
-function! s:ServerDict_complete(word) dict "{{{
-    return self.request('4', a:word)
-endfunction "}}}
-
-function! s:ServerDict_request(command, word) dict "{{{
+function! s:ServerDict_request(command, key) dict "{{{
     if empty(self._socket)
         return ''
     endif
 
     try
-        call self._socket.send(printf('%s%s%s\n',
-        \ a:command, a:word, (a:word[-1] != ' ' ? ' ' : '')))
-        let result = self._socket.read_line()
+        let key = a:key
+        if self.encoding != ''
+            let key = iconv(key, &encoding, self.encoding)
+        endif
+        call self._socket.write(printf("%s%s%s\n",
+        \ a:command, key, (key[-1] != ' ' ? ' ' : '')))
+        let result = self._socket.read_line(-1, self.timeout)
+        if self.encoding != ''
+            let result = iconv(result, self.encoding, &encoding)
+        endif
     catch
         call self._socket.close()
         return ''
@@ -1173,14 +1182,24 @@ function! s:ServerDict_request(command, word) dict "{{{
 
     return result == '' ? '' : result[1:]
 endfunction "}}}
+function! s:ServerDict_lookup(key) dict "{{{
+    return self.request('1', a:key)
+endfunction "}}}
+function! s:ServerDict_complete(key) dict "{{{
+    return self.request('4', a:key)
+endfunction "}}}
 
 let s:ServerDict = {
 \   '_socket': {},
 \   'host': '',
 \   'portnum': -1,
 \   'encoding': '',
+\   'timeout': -1,
 \
 \   'init': eskk#util#get_local_funcref('ServerDict_init', s:SID_PREFIX),
+\   'request': eskk#util#get_local_funcref('ServerDict_request', s:SID_PREFIX),
+\   'lookup': eskk#util#get_local_funcref('ServerDict_lookup', s:SID_PREFIX),
+\   'complete': eskk#util#get_local_funcref('ServerDict_complete', s:SID_PREFIX),
 \}
 
 " }}}
@@ -1228,6 +1247,7 @@ function! s:Dictionary_new(...) "{{{
     \           server_dict.host,
     \           server_dict.portnum,
     \           server_dict.encoding,
+    \           server_dict.timeout,
     \       ),
     \       '_registered_words': eskk#util#create_data_ordered_set(
     \           {'Fn_identifier':
@@ -1530,6 +1550,10 @@ endfunction "}}}
 function! s:Dictionary_get_system_dict() dict "{{{
     return self._system_dict
 endfunction "}}}
+" Getter for self._server_dict
+function! s:Dictionary_get_server_dict() dict "{{{
+    return self._server_dict
+endfunction "}}}
 
 " Clear self._current_henkan_result
 function! s:Dictionary_clear_henkan_result() dict "{{{
@@ -1558,6 +1582,7 @@ let s:Dictionary = {
 \   'get_henkan_result': eskk#util#get_local_funcref('Dictionary_get_henkan_result', s:SID_PREFIX),
 \   'get_user_dict': eskk#util#get_local_funcref('Dictionary_get_user_dict', s:SID_PREFIX),
 \   'get_system_dict': eskk#util#get_local_funcref('Dictionary_get_system_dict', s:SID_PREFIX),
+\   'get_server_dict': eskk#util#get_local_funcref('Dictionary_get_server_dict', s:SID_PREFIX),
 \   'clear_henkan_result': eskk#util#get_local_funcref('Dictionary_clear_henkan_result', s:SID_PREFIX),
 \}
 
