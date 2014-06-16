@@ -304,13 +304,15 @@ function! s:HenkanResult_get_candidates() dict "{{{
         \       self._key, self._okuri_rom)
 
         " Look up from server.
-        let server_result = server_dict.lookup(self._key)
+        " Note: skk server does not support okuri.
+        let server_result = self._okuri_rom == '' ?
+        \ server_dict.lookup(self._key) : ''
         if server_result != ''
             let system_dict_result = [self._key .' ' . server_result, 0]
         else
             let system_dict_result =
-                        \   system_dict.search_candidate(
-                        \       self._key, self._okuri_rom)
+            \   system_dict.search_candidate(
+            \       self._key, self._okuri_rom)
         endif
         " echomsg string(system_dict_result)
 
