@@ -1113,6 +1113,78 @@ let s:PhysicalDict = {
 
 " }}}
 
+" s:ServerDict {{{
+"
+" host:
+"   Host name/address.
+"
+" portnum:
+"   Port number.
+"
+" encoding:
+"   Character encoding of server.
+"
+
+function! s:ServerDict_new(host, portnum, encoding) "{{{
+    let obj = extend(
+    \   deepcopy(s:ServerDict),
+    \   {
+    \       'host': a:host,
+    \       'portnum': a:portnum,
+    \       'encoding': a:encoding,
+    \   },
+    \   'force'
+    \)
+    call obj.init()
+    return obj
+endfunction "}}}
+
+
+
+" Initialize server.
+function! s:ServerDict_init() dict "{{{
+    if eskk#util#has_vimproc()
+    \ && vimproc#host_exists(self.host) && self.portnum > 0
+        let self._socket = vimproc#socket_open(self.host, self.portnum)
+    endif
+endfunction "}}}
+
+function! s:ServerDict_lookup(word) dict "{{{
+    return self.request('1', a:word)
+endfunction "}}}
+
+function! s:ServerDict_complete(word) dict "{{{
+    return self.request('4', a:word)
+endfunction "}}}
+
+function! s:ServerDict_request(command, word) dict "{{{
+    if empty(self._socket)
+        return ''
+    endif
+
+    try
+        call self._socket.send(printf('%s%s%s\n',
+        \ a:command, a:word, (a:word[-1] != ' ' ? ' ' : '')))
+        let result = self._socket.read_line()
+    catch
+        call self._socket.close()
+        return ''
+    endtry
+
+    return result == '' ? '' : result[1:]
+endfunction "}}}
+
+let s:ServerDict = {
+\   '_socket': {},
+\   'host': '',
+\   'portnum': -1,
+\   'encoding': '',
+\
+\   'init': eskk#util#get_local_funcref('ServerDict_init', s:SID_PREFIX),
+\}
+
+" }}}
+
 " s:Dictionary {{{
 "
 " This behaves like one file dictionary.
@@ -1138,6 +1210,7 @@ endfunction "}}}
 function! s:Dictionary_new(...) "{{{
     let user_dict = get(a:000, 0, g:eskk#directory)
     let system_dict = get(a:000, 1, g:eskk#large_dictionary)
+    let server_dict = get(a:000, 2, g:eskk#server)
     return extend(
     \   deepcopy(s:Dictionary),
     \   {
@@ -1150,6 +1223,11 @@ function! s:Dictionary_new(...) "{{{
     \           system_dict.path,
     \           system_dict.sorted,
     \           system_dict.encoding,
+    \       ),
+    \       '_server_dict': s:ServerDict_new(
+    \           server_dict.host,
+    \           server_dict.portnum,
+    \           server_dict.encoding,
     \       ),
     \       '_registered_words': eskk#util#create_data_ordered_set(
     \           {'Fn_identifier':
