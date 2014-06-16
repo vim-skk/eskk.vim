@@ -52,7 +52,7 @@ eskkは拡張された、そしてさらなる拡張性を秘めたマルチバ�
 
 eskkで実装されている独自機能は主に以下が挙げられます。
 
-* |neocomplcache| と連携した自動補完機能
+* |neocomplcache|, |neocomplete| と連携した自動補完機能
 * 改良された改行時の挙動
 * eskkのモード(|eskk-modes|)に応じて、カーソルの色を変更する
 
@@ -275,8 +275,8 @@ g:eskk#marker_jisyo_touroku			*g:eskk#marker_jisyo_touroku*
 g:eskk#enable_completion			*g:eskk#enable_completion*
 							(デフォルト値: 1)
 	もし真なら、eskk組み込みの補完機能を有効にする。
-	|neocomplcache|がインストールされている場合、変換時に自動補完が有効に
-	なる。
+	|neocomplcache|, |neocomplete| がインストールされている場合、変換時に
+	自動補完が有効になる。
 
 g:eskk#max_candidates				*g:eskk#max_candidates*
 							(デフォルト値: 30)

@@ -50,7 +50,7 @@ such as multibyte text in Vim.
 
 The remarkable features of eskk is:
 
-* Auto-completion with |neocomplcache|
+* Auto-completion with |neocomplcache|, |neocomplete|
 * Improved behavior when a newline inserted
 * Change the cursor's color in each |eskk-modes|
 
@@ -263,7 +263,7 @@ Completion
 g:eskk#enable_completion		*g:eskk#enable_completion*
 							(Default: 1)
 	If true, enables eskk's completion feature.
-	When |neocomplcache| is installed,
+	When |neocomplcache| or |neocomplete| is installed,
 	auto-completion feature is enabled.
 
 g:eskk#max_candidates			*g:eskk#max_candidates*
