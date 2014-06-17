@@ -1359,12 +1359,7 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#debug_wait_ms', 0)
     call eskk#util#set_default('g:eskk#directory', '~/.eskk')
 
-    call eskk#util#set_default('g:eskk#server', {
-    \       'host': "",
-    \       'port': -1,
-    \       'encoding': '',
-    \       'timeout': 500,
-    \   })
+    call eskk#util#set_default('g:eskk#server', {})
 
     " Dictionary
     for [varname, default] in [

@@ -1139,17 +1139,8 @@ let s:PhysicalDict = {
 "   Timeout of server connection
 "
 
-function! s:ServerDict_new(host, port, encoding, timeout) "{{{
-    let obj = extend(
-    \   deepcopy(s:ServerDict),
-    \   {
-    \       'host': a:host,
-    \       'port': a:port,
-    \       'encoding': a:encoding,
-    \       'timeout': a:timeout,
-    \   },
-    \   'force'
-    \)
+function! s:ServerDict_new(server) "{{{
+    let obj = extend(deepcopy(s:ServerDict), a:server, 'force')
     call obj.init()
     return obj
 endfunction "}}}
@@ -1210,9 +1201,9 @@ endfunction "}}}
 let s:ServerDict = {
 \   '_socket': {},
 \   'host': '',
-\   'port': -1,
-\   'encoding': '',
-\   'timeout': -1,
+\   'port': 1178,
+\   'encoding': 'euc-jp',
+\   'timeout': 1000,
 \
 \   'init': eskk#util#get_local_funcref('ServerDict_init', s:SID_PREFIX),
 \   'request': eskk#util#get_local_funcref('ServerDict_request', s:SID_PREFIX),
@@ -1261,12 +1252,7 @@ function! s:Dictionary_new(...) "{{{
     \           system_dict.sorted,
     \           system_dict.encoding,
     \       ),
-    \       '_server_dict': s:ServerDict_new(
-    \           server_dict.host,
-    \           server_dict.port,
-    \           server_dict.encoding,
-    \           server_dict.timeout,
-    \       ),
+    \       '_server_dict': s:ServerDict_new(server_dict),
     \       '_registered_words': eskk#util#create_data_ordered_set(
     \           {'Fn_identifier':
     \               'eskk#dictionary#_candidate_identifier'}
