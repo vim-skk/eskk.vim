@@ -162,6 +162,7 @@ g:eskk#server					*g:eskk#server*
 				let g:eskk#server = {
 				\	'host': 'localhost',
 				\	'port': 55100,
+				\	'type': 'notfound',
 				\}
 
 				" Use yaskkserv
