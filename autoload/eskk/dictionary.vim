@@ -303,16 +303,26 @@ function! s:HenkanResult_get_candidates() dict "{{{
         \   user_dict.search_candidate(
         \       self._key, self._okuri_rom)
 
-        " Look up from server.
+        " Look up from server and system dictionary.
         " Note: skk server does not support okuri.
-        let server_result = self._okuri_rom == '' ?
-        \ server_dict.lookup(self._key) : ''
-        if server_result != ''
-            let system_dict_result = [self._key .' ' . server_result, 0]
+        if server_dict.type ==# 'dictionary'
+            let system_dict_result =
+            \   server_dict.search_candidate(
+            \       self._key, self._okuri_rom)
+            if system_dict_result[1] ==# -1
+                let system_dict_result =
+                \   system_dict.search_candidate(
+                \       self._key, self._okuri_rom)
+            endif
         else
             let system_dict_result =
             \   system_dict.search_candidate(
             \       self._key, self._okuri_rom)
+            if system_dict_result[1] ==# -1
+                let system_dict_result =
+                \   server_dict.search_candidate(
+                \       self._key, self._okuri_rom)
+            endif
         endif
         " echomsg string(system_dict_result)
 
@@ -1138,6 +1148,10 @@ let s:PhysicalDict = {
 " timeout:
 "   Timeout of server connection
 "
+" type:
+"   "dictionary" -> Use server instead of system ditionary
+"   "notfound" -> Use server if not found in system ditionary
+"
 
 function! s:ServerDict_new(server) "{{{
     let obj = extend(deepcopy(s:ServerDict), a:server, 'force')
@@ -1197,6 +1211,11 @@ endfunction "}}}
 function! s:ServerDict_complete(key) dict "{{{
     return self.request('4', a:key)
 endfunction "}}}
+function! s:ServerDict_search_candidate(key, okuri_rom) dict "{{{
+    let result = a:okuri_rom == '' ?
+                \ self.lookup(a:key) : ''
+    return result != '' ? [a:key .' ' . result, 0] : ['', -1]
+endfunction "}}}
 
 let s:ServerDict = {
 \   '_socket': {},
@@ -1204,11 +1223,13 @@ let s:ServerDict = {
 \   'port': 1178,
 \   'encoding': 'euc-jp',
 \   'timeout': 1000,
+\   'type': 'dictionary',
 \
 \   'init': eskk#util#get_local_funcref('ServerDict_init', s:SID_PREFIX),
 \   'request': eskk#util#get_local_funcref('ServerDict_request', s:SID_PREFIX),
 \   'lookup': eskk#util#get_local_funcref('ServerDict_lookup', s:SID_PREFIX),
 \   'complete': eskk#util#get_local_funcref('ServerDict_complete', s:SID_PREFIX),
+\   'search_candidate': eskk#util#get_local_funcref('ServerDict_search_candidate', s:SID_PREFIX),
 \}
 
 " }}}

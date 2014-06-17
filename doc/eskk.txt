@@ -154,6 +154,7 @@ g:eskk#server					*g:eskk#server*
 				\	'port': 1178,
 				\	'encoding': 'euc-jp',
 				\	'timeout': 1000,
+				\	'type': 'dictionary',
 				\}
 
 				" Example.
@@ -161,16 +162,12 @@ g:eskk#server					*g:eskk#server*
 				let g:eskk#server = {
 				\	'host': 'localhost',
 				\	'port': 55100,
-				\	'encoding': 'euc-jp',
-				\	'timeout': 1000,
 				\}
 
 				" Use yaskkserv
 				let g:eskk#server = {
 				\	'host': 'localhost',
 				\	'port': 1178,
-				\	'encoding': 'euc-jp',
-				\	'timeout': 1000,
 				\}
 
 g:eskk#backup_dictionary	*g:eskk#backup_dictionary*
