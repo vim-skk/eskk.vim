@@ -1155,10 +1155,16 @@ endfunction "}}}
 
 " Initialize server.
 function! s:ServerDict_init() dict "{{{
-    if eskk#util#has_vimproc()
-    \ && vimproc#host_exists(self.host) && self.portnum > 0
-        let self._socket = vimproc#socket_open(self.host, self.portnum)
+    if !eskk#util#has_vimproc()
+    \ || vimproc#host_exists(self.host) || self.portnum <= 0
+        return
     endif
+
+    try
+        let self._socket = vimproc#socket_open(self.host, self.portnum)
+    catch
+        call eskk#logger#warn('server initialization failed.')
+    endtry
 endfunction "}}}
 
 function! s:ServerDict_request(command, key) dict "{{{
