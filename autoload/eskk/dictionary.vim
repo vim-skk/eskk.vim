@@ -1040,25 +1040,9 @@ function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) di
         let max = len(a:whole_lines) - 1
     endif
 
-    if a:has_okuri
-        while max - min > a:limit
-            let mid = (min + max) / 2
-            if a:needle >=# a:whole_lines[mid]
-                let max = mid
-            else
-                let min = mid
-            endif
-        endwhile
-    else
-        while max - min > a:limit
-            let mid = (min + max) / 2
-            if a:needle >=# a:whole_lines[mid]
-                let min = mid
-            else
-                let max = mid
-            endif
-        endwhile
-    endif
+    let [min, max] = call((a:has_okuri ?
+    \     's:vim_search_binary_okuri' : 's:vim_search_binary'),
+    \     [a:whole_lines, a:needle, a:limit, min, max])
 
     " NOTE: min, max: Give index number, not lnum.
     return self.search_linear(
@@ -1075,6 +1059,39 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
     call eskk#util#assert(min <=# max, min.' <=# '.max)
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
 
+    return s:vim_search_linear(a:whole_lines, a:needle, min, max)
+endfunction "}}}
+
+" vim versions
+function! s:vim_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
+    let min = a:min
+    let max = a:max
+    while max - min > a:limit
+        let mid = (min + max) / 2
+        if a:needle >=# a:whole_lines[mid]
+            let max = mid
+        else
+            let min = mid
+        endif
+    endwhile
+    return [min, max]
+endfunction"}}}
+function! s:vim_search_binary(whole_lines, needle, limit, min, max) "{{{
+    let min = a:min
+    let max = a:max
+    while max - min > a:limit
+        let mid = (min + max) / 2
+        if a:needle >=# a:whole_lines[mid]
+            let min = mid
+        else
+            let max = mid
+        endif
+    endwhile
+    return [min, max]
+endfunction"}}}
+function! s:vim_search_linear(whole_lines, needle, min, max) "{{{
+    let min = a:min
+    let max = a:max
     while min <=# max
         if stridx(a:whole_lines[min], a:needle) == 0
             return [a:whole_lines[min], min]
@@ -1082,7 +1099,18 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
         let min += 1
     endwhile
     return ['', -1]
-endfunction "}}}
+endfunction"}}}
+
+" if_lua versions
+function! s:lua_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
+    return [min, max]
+endfunction"}}}
+function! s:lua_search_binary(whole_lines, needle, limit, min, max) "{{{
+    return [min, max]
+endfunction"}}}
+function! s:lua_search_linear(whole_lines, needle, min, max) "{{{
+    
+endfunction"}}}
 
 
 let s:PhysicalDict = {
