@@ -1195,7 +1195,7 @@ function! s:ServerDict_request(command, key) dict "{{{
         return ''
     endtry
 
-    return result == '' ? '' : result[1:]
+    return result == '' || result[0] ==# '4' ? '' : result[1:]
 endfunction "}}}
 function! s:ServerDict_lookup(key) dict "{{{
     return self.request('1', a:key)
