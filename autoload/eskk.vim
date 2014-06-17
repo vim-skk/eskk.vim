@@ -1361,7 +1361,7 @@ function! eskk#_initialize() "{{{
 
     call eskk#util#set_default('g:eskk#server', {
     \       'host': "",
-    \       'portnum': -1,
+    \       'port': -1,
     \       'encoding': '',
     \       'timeout': 500,
     \   })

@@ -1129,19 +1129,22 @@ let s:PhysicalDict = {
 " host:
 "   Host name/address.
 "
-" portnum:
+" port:
 "   Port number.
 "
 " encoding:
 "   Character encoding of server.
 "
+" timeout:
+"   Timeout of server connection
+"
 
-function! s:ServerDict_new(host, portnum, encoding, timeout) "{{{
+function! s:ServerDict_new(host, port, encoding, timeout) "{{{
     let obj = extend(
     \   deepcopy(s:ServerDict),
     \   {
     \       'host': a:host,
-    \       'portnum': a:portnum,
+    \       'port': a:port,
     \       'encoding': a:encoding,
     \       'timeout': a:timeout,
     \   },
@@ -1156,12 +1159,12 @@ endfunction "}}}
 " Initialize server.
 function! s:ServerDict_init() dict "{{{
     if !eskk#util#has_vimproc()
-    \ || vimproc#host_exists(self.host) || self.portnum <= 0
+    \ || !vimproc#host_exists(self.host) || self.port <= 0
         return
     endif
 
     try
-        let self._socket = vimproc#socket_open(self.host, self.portnum)
+        let self._socket = vimproc#socket_open(self.host, self.port)
     catch
         call eskk#logger#warn('server initialization failed.')
     endtry
@@ -1207,7 +1210,7 @@ endfunction "}}}
 let s:ServerDict = {
 \   '_socket': {},
 \   'host': '',
-\   'portnum': -1,
+\   'port': -1,
 \   'encoding': '',
 \   'timeout': -1,
 \
@@ -1260,7 +1263,7 @@ function! s:Dictionary_new(...) "{{{
     \       ),
     \       '_server_dict': s:ServerDict_new(
     \           server_dict.host,
-    \           server_dict.portnum,
+    \           server_dict.port,
     \           server_dict.encoding,
     \           server_dict.timeout,
     \       ),
