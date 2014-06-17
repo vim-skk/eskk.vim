@@ -1183,6 +1183,13 @@ function! s:ServerDict_request(command, key) dict "{{{
         if self.encoding != ''
             let result = iconv(result, self.encoding, &encoding)
         endif
+
+        if result == ''
+            " Reset.
+            call self._socket.write("0\n")
+            call self._socket.close()
+            call self.init()
+        endif
     catch
         call self._socket.close()
         return ''
