@@ -1040,8 +1040,9 @@ function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) di
         let max = len(a:whole_lines) - 1
     endif
 
-    let [min, max] = call((a:has_okuri ?
-    \     's:vim_search_binary_okuri' : 's:vim_search_binary'),
+    let prefix = (has('lua') ? 'lua' : 'vim')
+    let [min, max] = call(printf('s:%s_search_binary%s',
+    \         prefix, (a:has_okuri ? '_okuri' : '')),
     \     [a:whole_lines, a:needle, a:limit, min, max])
 
     " NOTE: min, max: Give index number, not lnum.
@@ -1059,7 +1060,9 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
     call eskk#util#assert(min <=# max, min.' <=# '.max)
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
 
-    return s:vim_search_linear(a:whole_lines, a:needle, min, max)
+    let prefix = (has('lua') ? 'lua' : 'vim')
+    return call('s:'.prefix.'_search_linear',
+    \     [a:whole_lines, a:needle, min, max])
 endfunction "}}}
 
 " vim versions
@@ -1103,13 +1106,77 @@ endfunction"}}}
 
 " if_lua versions
 function! s:lua_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
-    return [min, max]
+lua << EOF
+    do
+        local whole_lines = vim.eval('a:whole_lines')
+        local needle = vim.eval('a:needle')
+        local limit = vim.eval('a:limit')
+        local min = vim.eval('a:min')
+        local max = vim.eval('a:max')
+
+        while max - min > limit do
+            local mid = (min + max) / 2
+            if needle >= whole_lines[mid] then
+                max = mid
+            else
+                min = mid
+            end
+        end
+
+        vim.command('let min = ' .. min)
+        vim.command('let max = ' .. max)
+    end
+EOF
+    return [float2nr(min), float2nr(max)]
 endfunction"}}}
 function! s:lua_search_binary(whole_lines, needle, limit, min, max) "{{{
-    return [min, max]
+lua << EOF
+    do
+        local whole_lines = vim.eval('a:whole_lines')
+        local needle = vim.eval('a:needle')
+        local limit = vim.eval('a:limit')
+        local min = vim.eval('a:min')
+        local max = vim.eval('a:max')
+
+        while max - min > limit do
+            local mid = (min + max) / 2
+            if needle >= whole_lines[mid] then
+                min = mid
+            else
+                max = mid
+            end
+        end
+
+        vim.command('let min = ' .. min)
+        vim.command('let max = ' .. max)
+    end
+EOF
+    return [float2nr(min), float2nr(max)]
 endfunction"}}}
 function! s:lua_search_linear(whole_lines, needle, min, max) "{{{
-    
+    let needle = '^' . substitute(a:needle,
+                \ '[%\[\]().*+?^$-]', '%\0', 'g')
+    let ret = ['', -1]
+
+lua << EOF
+    do
+        local whole_lines = vim.eval('a:whole_lines')
+        local needle = vim.eval('needle')
+        local min = vim.eval('a:min')
+        local max = vim.eval('a:max')
+
+        for i = min, max do
+            if string.find(whole_lines[i], needle, 1) ~= nil then
+                local ret = vim.eval('ret')
+                ret[0] = whole_lines[i]
+                vim.command('let ret[1] = float2nr(' .. i ..')')
+                break
+            end
+        end
+    end
+EOF
+
+    return ret
 endfunction"}}}
 
 
