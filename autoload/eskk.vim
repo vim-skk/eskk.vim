@@ -1359,7 +1359,15 @@ function! eskk#_initialize() "{{{
     call eskk#util#set_default('g:eskk#debug_wait_ms', 0)
     call eskk#util#set_default('g:eskk#directory', '~/.eskk')
 
-    call eskk#util#set_default('g:eskk#server', {})
+    if exists('g:eskk#server') && !eskk#util#has_vimproc()
+        call eskk#logger#warn(
+        \   "eskk.vim: warning: cannot use skkserv " .
+        \   "because vimproc is not installed."
+        \)
+        let g:eskk#server = {}
+    else
+        call eskk#util#set_default('g:eskk#server', {})
+    endif
 
     " Dictionary
     for [varname, default] in [
