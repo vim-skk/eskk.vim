@@ -1186,7 +1186,7 @@ function! s:ServerDict_request(command, key) dict "{{{
             let key = iconv(key, &encoding, self.encoding)
         endif
         call self._socket.write(printf("%s%s%s\n",
-        \ a:command, key, (key[-1] != ' ' ? ' ' : '')))
+        \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
         let result = self._socket.read_line(-1, self.timeout)
         if self.encoding != ''
             let result = iconv(result, self.encoding, &encoding)
