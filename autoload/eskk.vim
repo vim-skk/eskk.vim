@@ -1317,26 +1317,15 @@ function! eskk#_initialize() "{{{
     let s:initialization_state = s:INIT_ABORT
 
     " Validate Vim versions {{{
-    function! s:validate_vim_version() "{{{
-        let ok =
-        \   v:version > 703
-        \   || v:version == 703 && has('patch32')
-        if !ok
-            call eskk#logger#warn(
-            \   "eskk.vim: warning: Your Vim is too old."
-            \   . " Please use 7.3.32 at least."
-            \)
-            throw 'FINISH'
-        endif
-    endfunction "}}}
-
-    try
-        call s:validate_vim_version()
-    catch /^FINISH\C$/
+    if v:version < 703 || v:version == 703 && !has('patch32')
+        call eskk#logger#warn(
+        \   "eskk.vim: warning: Your Vim is too old."
+        \   . " Please use 7.3.32 at least."
+        \)
         " do not initialize eskk
         " if user doesn't fill requirements!
         return
-    endtry
+    endif
     " }}}
 
     " Create the first eskk instance. {{{
