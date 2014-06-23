@@ -146,7 +146,7 @@ g:eskk#server					*g:eskk#server*
 	Note: |vimproc| is required.
 
 	This variable value is:
-<			Dictionary:
+			Dictionary:
 				Keep user settings,
 				and set default values to missing keys. >
 				let g:eskk#server = {
