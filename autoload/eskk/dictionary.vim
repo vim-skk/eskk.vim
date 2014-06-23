@@ -324,7 +324,6 @@ function! s:HenkanResult_get_candidates() dict "{{{
                 \       self._key, self._okuri_rom)
             endif
         endif
-        " echomsg string(system_dict_result)
 
         if user_dict_result[1] ==# -1
         \   && system_dict_result[1] ==# -1
