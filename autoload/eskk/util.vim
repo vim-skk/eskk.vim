@@ -17,6 +17,7 @@ delfunc s:SID
 
 " Load the vital of eskk.
 let s:Vital = vital#of('eskk.vim')
+call s:Vital.load('Prelude')
 call s:Vital.load('Data.OrderedSet')
 call s:Vital.load('Data.List')
 call s:Vital.load('Data.String')
@@ -37,6 +38,10 @@ else
     endfunction
 endif
 " }}}
+function! eskk#util#has_vimproc(...) "{{{
+    let module = s:Vital.Prelude
+    return call(module.has_vimproc, a:000, module)
+endfunction "}}}
 
 
 " Assert, Error

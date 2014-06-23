@@ -146,6 +146,38 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 				\	'encoding': 'euc-jp',
 				\}
 
+g:eskk#server					*g:eskk#server*
+						(デフォルト値: 下を参照)
+	Skkserv のサーバ情報
+	Note: この機能を使用するためには、|vimproc| が必要。
+
+	この変数の定義は:
+			辞書型なら:
+				ユーザの辞書型を保存しながら
+				定義していないキーには
+				デフォルト値を補う形で追加していく。 >
+				let g:eskk#server = {
+				\	'host': '',
+				\	'port': 1178,
+				\	'encoding': 'euc-jp',
+				\	'timeout': 1000,
+				\	'type': 'dictionary',
+				\}
+
+				" Example.
+				" Use google-ime-skk
+				let g:eskk#server = {
+				\	'host': 'localhost',
+				\	'port': 55100,
+				\	'type': 'notfound',
+				\}
+
+				" Use yaskkserv
+				let g:eskk#server = {
+				\	'host': 'localhost',
+				\	'port': 1178,
+				\}
+
 g:eskk#backup_dictionary		*g:eskk#backup_dictionary*
 			(デフォルト値: g:eskk#dictionary.path . ".BAK")
 	ユーザ辞書をバックアップする時に使用するファイル名を指定する。

@@ -298,12 +298,32 @@ function! s:HenkanResult_get_candidates() dict "{{{
         " Look up from dictionaries.
         let user_dict = dict.get_user_dict()
         let system_dict = dict.get_system_dict()
+        let server_dict = dict.get_server_dict()
         let user_dict_result =
         \   user_dict.search_candidate(
         \       self._key, self._okuri_rom)
-        let system_dict_result =
-        \   system_dict.search_candidate(
-        \       self._key, self._okuri_rom)
+
+        " Look up from server and system dictionary.
+        " Note: skk server does not support okuri.
+        if server_dict.type ==# 'dictionary'
+            let system_dict_result =
+            \   server_dict.search_candidate(
+            \       self._key, self._okuri_rom)
+            if system_dict_result[1] ==# -1
+                let system_dict_result =
+                \   system_dict.search_candidate(
+                \       self._key, self._okuri_rom)
+            endif
+        else
+            let system_dict_result =
+            \   system_dict.search_candidate(
+            \       self._key, self._okuri_rom)
+            if system_dict_result[1] ==# -1
+                let system_dict_result =
+                \   server_dict.search_candidate(
+                \       self._key, self._okuri_rom)
+            endif
+        endif
 
         if user_dict_result[1] ==# -1
         \   && system_dict_result[1] ==# -1
@@ -320,7 +340,7 @@ function! s:HenkanResult_get_candidates() dict "{{{
         endif
 
         " NOTE: The order is important.
-        " registered word, user dictionary, system dictionary.
+        " registered word, user dictionary, server, system dictionary.
 
         " Merge registered words.
         if !empty(registered)
@@ -1113,6 +1133,106 @@ let s:PhysicalDict = {
 
 " }}}
 
+" s:ServerDict {{{
+"
+" host:
+"   Host name/address.
+"
+" port:
+"   Port number.
+"
+" encoding:
+"   Character encoding of server.
+"
+" timeout:
+"   Timeout of server connection
+"
+" type:
+"   "dictionary" -> Use server instead of system ditionary
+"   "notfound" -> Use server if not found in system ditionary
+"
+
+function! s:ServerDict_new(server) "{{{
+    let obj = extend(deepcopy(s:ServerDict), a:server, 'force')
+    call obj.init()
+    return obj
+endfunction "}}}
+
+
+
+" Initialize server.
+function! s:ServerDict_init() dict "{{{
+    if !eskk#util#has_vimproc()
+    \ || !vimproc#host_exists(self.host) || self.port <= 0
+        return
+    endif
+
+    try
+        let self._socket = vimproc#socket_open(self.host, self.port)
+    catch
+        call eskk#logger#warn('server initialization failed.')
+    endtry
+endfunction "}}}
+
+function! s:ServerDict_request(command, key) dict "{{{
+    if empty(self._socket)
+        return ''
+    endif
+
+    try
+        let key = a:key
+        if self.encoding != ''
+            let key = iconv(key, &encoding, self.encoding)
+        endif
+        call self._socket.write(printf("%s%s%s\n",
+        \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
+        let result = self._socket.read_line(-1, self.timeout)
+        if self.encoding != ''
+            let result = iconv(result, self.encoding, &encoding)
+        endif
+
+        if result == ''
+            " Reset.
+            call self._socket.write("0\n")
+            call self._socket.close()
+            call self.init()
+        endif
+    catch
+        call self._socket.close()
+        return ''
+    endtry
+
+    return result == '' || result[0] ==# '4' ? '' : result[1:]
+endfunction "}}}
+function! s:ServerDict_lookup(key) dict "{{{
+    return self.request('1', a:key)
+endfunction "}}}
+function! s:ServerDict_complete(key) dict "{{{
+    return self.request('4', a:key)
+endfunction "}}}
+function! s:ServerDict_search_candidate(key, okuri_rom) dict "{{{
+    let result = a:okuri_rom == '' ?
+                \ self.lookup(a:key) : ''
+    return result != '' ? [a:key .' ' . result, 0] : ['', -1]
+endfunction "}}}
+
+let s:ServerDict = {
+\   '_socket': {},
+\   'host': '',
+\   'port': 1178,
+\   'encoding': 'euc-jp',
+\   'timeout': 1000,
+\   'type': 'dictionary',
+\
+\   'init': eskk#util#get_local_funcref('ServerDict_init', s:SID_PREFIX),
+\   'request': eskk#util#get_local_funcref('ServerDict_request', s:SID_PREFIX),
+\   'lookup': eskk#util#get_local_funcref('ServerDict_lookup', s:SID_PREFIX),
+\   'complete': eskk#util#get_local_funcref('ServerDict_complete', s:SID_PREFIX),
+\   'search_candidate': eskk#util#get_local_funcref('ServerDict_search_candidate', s:SID_PREFIX),
+\}
+
+" }}}
+
 " s:Dictionary {{{
 "
 " This behaves like one file dictionary.
@@ -1138,6 +1258,7 @@ endfunction "}}}
 function! s:Dictionary_new(...) "{{{
     let user_dict = get(a:000, 0, g:eskk#directory)
     let system_dict = get(a:000, 1, g:eskk#large_dictionary)
+    let server_dict = get(a:000, 2, g:eskk#server)
     return extend(
     \   deepcopy(s:Dictionary),
     \   {
@@ -1151,6 +1272,7 @@ function! s:Dictionary_new(...) "{{{
     \           system_dict.sorted,
     \           system_dict.encoding,
     \       ),
+    \       '_server_dict': s:ServerDict_new(server_dict),
     \       '_registered_words': eskk#util#create_data_ordered_set(
     \           {'Fn_identifier':
     \               'eskk#dictionary#_candidate_identifier'}
@@ -1452,6 +1574,10 @@ endfunction "}}}
 function! s:Dictionary_get_system_dict() dict "{{{
     return self._system_dict
 endfunction "}}}
+" Getter for self._server_dict
+function! s:Dictionary_get_server_dict() dict "{{{
+    return self._server_dict
+endfunction "}}}
 
 " Clear self._current_henkan_result
 function! s:Dictionary_clear_henkan_result() dict "{{{
@@ -1480,6 +1606,7 @@ let s:Dictionary = {
 \   'get_henkan_result': eskk#util#get_local_funcref('Dictionary_get_henkan_result', s:SID_PREFIX),
 \   'get_user_dict': eskk#util#get_local_funcref('Dictionary_get_user_dict', s:SID_PREFIX),
 \   'get_system_dict': eskk#util#get_local_funcref('Dictionary_get_system_dict', s:SID_PREFIX),
+\   'get_server_dict': eskk#util#get_local_funcref('Dictionary_get_server_dict', s:SID_PREFIX),
 \   'clear_henkan_result': eskk#util#get_local_funcref('Dictionary_clear_henkan_result', s:SID_PREFIX),
 \}
 

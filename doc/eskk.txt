@@ -140,6 +140,37 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 				\	'encoding': 'euc-jp',
 				\}
 
+g:eskk#server					*g:eskk#server*
+							(Default: See below)
+	Skkserv information.
+	Note: |vimproc| is required.
+
+	This variable value is:
+			Dictionary:
+				Keep user settings,
+				and set default values to missing keys. >
+				let g:eskk#server = {
+				\	'host': '',
+				\	'port': 1178,
+				\	'encoding': 'euc-jp',
+				\	'timeout': 1000,
+				\	'type': 'dictionary',
+				\}
+
+				" Example.
+				" Use google-ime-skk
+				let g:eskk#server = {
+				\	'host': 'localhost',
+				\	'port': 55100,
+				\	'type': 'notfound',
+				\}
+
+				" Use yaskkserv
+				let g:eskk#server = {
+				\	'host': 'localhost',
+				\	'port': 1178,
+				\}
+
 g:eskk#backup_dictionary	*g:eskk#backup_dictionary*
 							(Default: g:eskk#dictionary.path . ".BAK")
 	Filename used when eskk makes backup of user dictionary.
