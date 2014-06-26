@@ -1060,25 +1060,10 @@ function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) di
         let max = len(a:whole_lines) - 1
     endif
 
-    if a:has_okuri
-        while max - min > a:limit
-            let mid = (min + max) / 2
-            if a:needle >=# a:whole_lines[mid]
-                let max = mid
-            else
-                let min = mid
-            endif
-        endwhile
-    else
-        while max - min > a:limit
-            let mid = (min + max) / 2
-            if a:needle >=# a:whole_lines[mid]
-                let min = mid
-            else
-                let max = mid
-            endif
-        endwhile
-    endif
+    let prefix = (has('lua') ? 'lua' : 'vim')
+    let [min, max] = call(printf('s:%s_search_binary%s',
+    \         prefix, (a:has_okuri ? '_okuri' : '')),
+    \     [a:whole_lines, a:needle, a:limit, min, max])
 
     " NOTE: min, max: Give index number, not lnum.
     return self.search_linear(
@@ -1095,6 +1080,41 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
     call eskk#util#assert(min <=# max, min.' <=# '.max)
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
 
+    let prefix = (has('lua') ? 'lua' : 'vim')
+    return call('s:'.prefix.'_search_linear',
+    \     [a:whole_lines, a:needle, min, max])
+endfunction "}}}
+
+" vim versions
+function! s:vim_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
+    let min = a:min
+    let max = a:max
+    while max - min > a:limit
+        let mid = (min + max) / 2
+        if a:needle >=# a:whole_lines[mid]
+            let max = mid
+        else
+            let min = mid
+        endif
+    endwhile
+    return [min, max]
+endfunction"}}}
+function! s:vim_search_binary(whole_lines, needle, limit, min, max) "{{{
+    let min = a:min
+    let max = a:max
+    while max - min > a:limit
+        let mid = (min + max) / 2
+        if a:needle >=# a:whole_lines[mid]
+            let min = mid
+        else
+            let max = mid
+        endif
+    endwhile
+    return [min, max]
+endfunction"}}}
+function! s:vim_search_linear(whole_lines, needle, min, max) "{{{
+    let min = a:min
+    let max = a:max
     while min <=# max
         if stridx(a:whole_lines[min], a:needle) == 0
             return [a:whole_lines[min], min]
@@ -1102,7 +1122,80 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
         let min += 1
     endwhile
     return ['', -1]
-endfunction "}}}
+endfunction"}}}
+
+" if_lua versions
+function! s:lua_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
+lua << EOF
+    do
+        local whole_lines = vim.eval('a:whole_lines')
+        local needle = vim.eval('a:needle')
+        local limit = vim.eval('a:limit')
+        local min = vim.eval('a:min')
+        local max = vim.eval('a:max')
+
+        while max - min > limit do
+            local mid = (min + max) / 2
+            if needle >= whole_lines[mid] then
+                max = mid
+            else
+                min = mid
+            end
+        end
+
+        vim.command('let min = ' .. min)
+        vim.command('let max = ' .. max)
+    end
+EOF
+    return [float2nr(min), float2nr(max)]
+endfunction"}}}
+function! s:lua_search_binary(whole_lines, needle, limit, min, max) "{{{
+lua << EOF
+    do
+        local whole_lines = vim.eval('a:whole_lines')
+        local needle = vim.eval('a:needle')
+        local limit = vim.eval('a:limit')
+        local min = vim.eval('a:min')
+        local max = vim.eval('a:max')
+
+        while max - min > limit do
+            local mid = (min + max) / 2
+            if needle >= whole_lines[mid] then
+                min = mid
+            else
+                max = mid
+            end
+        end
+
+        vim.command('let min = ' .. min)
+        vim.command('let max = ' .. max)
+    end
+EOF
+    return [float2nr(min), float2nr(max)]
+endfunction"}}}
+function! s:lua_search_linear(whole_lines, needle, min, max) "{{{
+    let ret = ['', -1]
+
+lua << EOF
+    do
+        local whole_lines = vim.eval('a:whole_lines')
+        local needle = vim.eval('a:needle')
+        local min = vim.eval('a:min')
+        local max = vim.eval('a:max')
+
+        for i = min, max do
+            if (string.find(whole_lines[i], needle, 1, true)) == 1 then
+                local ret = vim.eval('ret')
+                ret[0] = whole_lines[i]
+                vim.command('let ret[1] = float2nr(' .. i ..')')
+                break
+            end
+        end
+    end
+EOF
+
+    return ret
+endfunction"}}}
 
 
 let s:PhysicalDict = {
