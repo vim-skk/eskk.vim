@@ -306,27 +306,27 @@ function! s:HenkanResult_get_candidates() dict "{{{
         " Look up from server and system dictionary.
         " Note: skk server does not support okuri.
         if server_dict.type ==# 'dictionary'
-            let system_dict_result =
+            let main_dict_result =
             \   server_dict.search_candidate(
             \       self._key, self._okuri_rom)
-            if system_dict_result[1] ==# -1
-                let system_dict_result =
+            if main_dict_result[1] ==# -1
+                let main_dict_result =
                 \   system_dict.search_candidate(
                 \       self._key, self._okuri_rom)
             endif
         else
-            let system_dict_result =
+            let main_dict_result =
             \   system_dict.search_candidate(
             \       self._key, self._okuri_rom)
-            if system_dict_result[1] ==# -1
-                let system_dict_result =
+            if main_dict_result[1] ==# -1
+                let main_dict_result =
                 \   server_dict.search_candidate(
                 \       self._key, self._okuri_rom)
             endif
         endif
 
         if user_dict_result[1] ==# -1
-        \   && system_dict_result[1] ==# -1
+        \   && main_dict_result[1] ==# -1
         \   && empty(registered)
             let self._status = g:eskk#dictionary#HR_NO_RESULT
             throw eskk#dictionary#look_up_error(
@@ -343,68 +343,39 @@ function! s:HenkanResult_get_candidates() dict "{{{
         " registered word, user dictionary, server, system dictionary.
 
         " Merge registered words.
-        if !empty(registered)
-            for word in registered
-                call self._candidates.push(word)
-            endfor
-        endif
+        call self._candidates.append(registered)
 
-        " Merge user dictionary.
-        if user_dict_result[1] !=# -1
-            let candidates =
-            \   eskk#dictionary#parse_skk_dict_line(
-            \       user_dict_result[0],
-            \       s:CANDIDATE_FROM_USER_DICT
-            \   )
-            call eskk#util#assert(
-            \   !empty(candidates),
-            \   'user dict: `candidates` is not empty.'
-            \)
-            let key = candidates[0].key
-            let okuri_rom = candidates[0].okuri_rom
-            call eskk#util#assert(
-            \   key ==# self._key,
-            \   "user dict:".string(key)." ==# ".string(self._key)
-            \)
-            call eskk#util#assert(
-            \   okuri_rom ==# self._okuri_rom[0],
-            \   "user dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
-            \)
+        " Merge dictionaries(user, large, skkserv).
+        for [result, from_type] in [
+        \   [user_dict_result, s:CANDIDATE_FROM_USER_DICT],
+        \   [main_dict_result, s:CANDIDATE_FROM_SYSTEM_DICT],
+        \]
+            if result[1] !=# -1
+                let candidates =
+                \   eskk#dictionary#parse_skk_dict_line(result[0], from_type)
+                call eskk#util#assert(
+                \   !empty(candidates),
+                \   (result is user_dict_result ? "user" : "system")
+                \   . ' dict: `candidates` is not empty.'
+                \)
+                let key = candidates[0].key
+                let okuri_rom = candidates[0].okuri_rom
+                call eskk#util#assert(
+                \   key ==# self._key,
+                \   (result is user_dict_result ? "user" : "system")
+                \   . " dict:".string(key)." ==# ".string(self._key)
+                \)
+                call eskk#util#assert(
+                \   okuri_rom ==# self._okuri_rom[0],
+                \   (result is user_dict_result ? "user" : "system")
+                \   . " dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
+                \)
 
-            for c in candidates
-                call self._candidates.push(c)
-            endfor
-        endif
-
-        " Merge system dictionary.
-        if system_dict_result[1] !=# -1
-            let candidates =
-            \   eskk#dictionary#parse_skk_dict_line(
-            \       system_dict_result[0],
-            \       s:CANDIDATE_FROM_SYSTEM_DICT
-            \   )
-            call eskk#util#assert(
-            \   !empty(candidates),
-            \   'system dict: `candidates` is not empty.'
-            \)
-            let key = candidates[0].key
-            let okuri_rom = candidates[0].okuri_rom
-            call eskk#util#assert(
-            \   key ==# self._key,
-            \   "system dict:".string(key)." ==# ".string(self._key)
-            \)
-            call eskk#util#assert(
-            \   okuri_rom ==# self._okuri_rom[0],
-            \   "system dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
-            \)
-
-            for c in candidates
-                call self._candidates.push(c)
-            endfor
-        endif
+                call self._candidates.append(candidates)
+            endif
+        endfor
 
         let self._status = g:eskk#dictionary#HR_GOT_RESULT
-
         return self._candidates.to_list()
     else
         return []
