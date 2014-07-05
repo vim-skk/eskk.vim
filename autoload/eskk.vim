@@ -1498,62 +1498,63 @@ function! eskk#_initialize() "{{{
     " Default mappings - :EskkMap {{{
     call eskk#commands#define()
 
-    EskkMap -type=kakutei -unique <C-j>
+    EskkMap -type=kakutei <C-j>
 
-    EskkMap -type=sticky -unique ;
-    EskkMap -type=backspace-key -unique <C-h>
-    EskkMap -type=enter-key -unique <CR>
-    EskkMap -type=escape-key -unique <Esc>
-    EskkMap -type=tab -unique <Tab>
+    EskkMap -type=sticky ;
+    EskkMap -type=general Q ;
+    EskkMap -type=backspace-key <C-h>
+    EskkMap -type=enter-key <CR>
+    EskkMap -type=escape-key <Esc>
+    EskkMap -type=tab <Tab>
 
-    EskkMap -type=cancel -unique <C-g>
+    EskkMap -type=cancel <C-g>
 
-    EskkMap -type=phase:henkan:henkan-key -unique <Space>
+    EskkMap -type=phase:henkan:henkan-key <Space>
 
-    EskkMap -type=phase:okuri:henkan-key -unique <Space>
+    EskkMap -type=phase:okuri:henkan-key <Space>
 
-    EskkMap -type=phase:henkan-select:choose-next -unique <Space>
-    EskkMap -type=phase:henkan-select:choose-prev -unique x
+    EskkMap -type=phase:henkan-select:choose-next <Space>
+    EskkMap -type=phase:henkan-select:choose-prev x
 
-    EskkMap -type=phase:henkan-select:next-page -unique <Space>
-    EskkMap -type=phase:henkan-select:prev-page -unique x
+    EskkMap -type=phase:henkan-select:next-page <Space>
+    EskkMap -type=phase:henkan-select:prev-page x
 
-    EskkMap -type=phase:henkan-select:escape -unique <C-g>
+    EskkMap -type=phase:henkan-select:escape <C-g>
 
-    EskkMap -type=phase:henkan-select:delete-from-dict -unique X
+    EskkMap -type=phase:henkan-select:delete-from-dict X
 
-    EskkMap -type=mode:hira:toggle-hankata -unique <C-q>
-    EskkMap -type=mode:hira:ctrl-q-key -unique <C-q>
-    EskkMap -type=mode:hira:toggle-kata -unique q
-    EskkMap -type=mode:hira:q-key -unique q
-    EskkMap -type=mode:hira:l-key -unique l
-    EskkMap -type=mode:hira:to-ascii -unique l
-    EskkMap -type=mode:hira:to-zenei -unique L
-    EskkMap -type=mode:hira:to-abbrev -unique /
+    EskkMap -type=mode:hira:toggle-hankata <C-q>
+    EskkMap -type=mode:hira:ctrl-q-key <C-q>
+    EskkMap -type=mode:hira:toggle-kata q
+    EskkMap -type=mode:hira:q-key q
+    EskkMap -type=mode:hira:l-key l
+    EskkMap -type=mode:hira:to-ascii l
+    EskkMap -type=mode:hira:to-zenei L
+    EskkMap -type=mode:hira:to-abbrev /
 
-    EskkMap -type=mode:kata:toggle-hankata -unique <C-q>
-    EskkMap -type=mode:kata:ctrl-q-key -unique <C-q>
-    EskkMap -type=mode:kata:toggle-kata -unique q
-    EskkMap -type=mode:kata:q-key -unique q
-    EskkMap -type=mode:kata:l-key -unique l
-    EskkMap -type=mode:kata:to-ascii -unique l
-    EskkMap -type=mode:kata:to-zenei -unique L
-    EskkMap -type=mode:kata:to-abbrev -unique /
+    EskkMap -type=mode:kata:toggle-hankata <C-q>
+    EskkMap -type=mode:kata:ctrl-q-key <C-q>
+    EskkMap -type=mode:kata:toggle-kata q
+    EskkMap -type=mode:kata:q-key q
+    EskkMap -type=mode:kata:l-key l
+    EskkMap -type=mode:kata:to-ascii l
+    EskkMap -type=mode:kata:to-zenei L
+    EskkMap -type=mode:kata:to-abbrev /
 
-    EskkMap -type=mode:hankata:toggle-hankata -unique <C-q>
-    EskkMap -type=mode:hankata:ctrl-q-key -unique <C-q>
-    EskkMap -type=mode:hankata:toggle-kata -unique q
-    EskkMap -type=mode:hankata:q-key -unique q
-    EskkMap -type=mode:hankata:l-key -unique l
-    EskkMap -type=mode:hankata:to-ascii -unique l
-    EskkMap -type=mode:hankata:to-zenei -unique L
-    EskkMap -type=mode:hankata:to-abbrev -unique /
+    EskkMap -type=mode:hankata:toggle-hankata <C-q>
+    EskkMap -type=mode:hankata:ctrl-q-key <C-q>
+    EskkMap -type=mode:hankata:toggle-kata q
+    EskkMap -type=mode:hankata:q-key q
+    EskkMap -type=mode:hankata:l-key l
+    EskkMap -type=mode:hankata:to-ascii l
+    EskkMap -type=mode:hankata:to-zenei L
+    EskkMap -type=mode:hankata:to-abbrev /
 
-    EskkMap -type=mode:ascii:to-hira -unique <C-j>
+    EskkMap -type=mode:ascii:to-hira <C-j>
 
-    EskkMap -type=mode:zenei:to-hira -unique <C-j>
+    EskkMap -type=mode:zenei:to-hira <C-j>
 
-    EskkMap -type=mode:abbrev:henkan-key -unique <Space>
+    EskkMap -type=mode:abbrev:henkan-key <Space>
     " }}}
 
     " Save dictionary if modified {{{
