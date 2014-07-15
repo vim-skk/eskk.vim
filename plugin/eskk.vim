@@ -39,24 +39,24 @@ endif
 
 
 if !g:eskk#no_default_mappings
-    function! s:do_map(rhs, mode)
+    function! s:hasmapto(rhs, mode)
         let map_default_even_if_already_mapped = !g:eskk#dont_map_default_if_already_mapped
         return
         \   map_default_even_if_already_mapped
         \   || !hasmapto(a:rhs, a:mode)
     endfunction
 
-    if s:do_map('<Plug>(eskk:toggle)', 'i')
+    if s:hasmapto('<Plug>(eskk:toggle)', 'i')
         silent! imap <unique> <C-j>   <Plug>(eskk:toggle)
     endif
-    if s:do_map('<Plug>(eskk:toggle)', 'c')
+    if s:hasmapto('<Plug>(eskk:toggle)', 'c')
         silent! cmap <unique> <C-j>   <Plug>(eskk:toggle)
     endif
-    if s:do_map('<Plug>(eskk:toggle)', 'l')
+    if s:hasmapto('<Plug>(eskk:toggle)', 'l')
         silent! lmap <unique> <C-j>   <Plug>(eskk:toggle)
     endif
 
-    delfunc s:do_map
+    delfunc s:hasmapto
 endif
 
 " }}}
