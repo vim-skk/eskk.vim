@@ -303,26 +303,19 @@ function! s:HenkanResult_get_candidates() dict "{{{
         \   user_dict.search_candidate(
         \       self._key, self._okuri_rom)
 
+        let NOTFOUND = ['', -1]
+        let main_dict_result = NOTFOUND
         " Look up from server and system dictionary.
         " Note: skk server does not support okuri.
-        if server_dict.type ==# 'dictionary'
+        if !empty(server_dict) && server_dict.type ==# 'dictionary'
             let main_dict_result =
             \   server_dict.search_candidate(
             \       self._key, self._okuri_rom)
-            if main_dict_result[1] ==# -1
-                let main_dict_result =
-                \   system_dict.search_candidate(
-                \       self._key, self._okuri_rom)
-            endif
-        else
+        endif
+        if main_dict_result[1] ==# -1
             let main_dict_result =
             \   system_dict.search_candidate(
             \       self._key, self._okuri_rom)
-            if main_dict_result[1] ==# -1
-                let main_dict_result =
-                \   server_dict.search_candidate(
-                \       self._key, self._okuri_rom)
-            endif
         endif
 
         if user_dict_result[1] ==# -1
@@ -1336,7 +1329,8 @@ function! s:Dictionary_new(...) "{{{
     \           system_dict.sorted,
     \           system_dict.encoding,
     \       ),
-    \       '_server_dict': s:ServerDict_new(server_dict),
+    \       '_server_dict': (!empty(g:eskk#server) ?
+    \                           s:ServerDict_new(server_dict) : {}),
     \       '_registered_words': eskk#util#create_data_ordered_set(
     \           {'Fn_identifier':
     \               'eskk#dictionary#_candidate_identifier'}
