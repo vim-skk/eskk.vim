@@ -81,57 +81,23 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             return
         endif
 
-        " Fix dictionary lines.
-        let lambda = {
-        \   'hira_vs_candidates': {},
-        \   'key_order' : [],
-        \}
-        function lambda.match_and_add(line, pattern)
-            let m = matchlist(a:line, a:pattern)
-            if !empty(m)
-                let [hira, kanji] = m[1:2]
-                if !has_key(self.hira_vs_candidates, hira)
-                    let self.hira_vs_candidates[hira] = eskk#util#create_data_ordered_set()
-                    call add(self.key_order, hira)
+        " NOTE: okuri_nasi includes abbrev candidates.
+        let okuri_ari = s:Collector.new(
+        \   '^\([^ \ta-z]\+[a-z]\)[a-z]*[ \t]\+\(.\+\)')
+        let okuri_nasi = s:Collector.new(
+        \   '^\([^ \t]\+\)[ \t]\+\(.\+\)')
+
+        let lines = readfile(path)
+        let comment = '^\s*;'
+        for line in lines
+            if line =~# comment
+                continue
+            endif
+            for collector in [okuri_ari, okuri_nasi]
+                if collector.add_matching_line(line)
+                    break
                 endif
-                for c in split(kanji, '/')
-                    " Remove the empty annotation.
-                    let c = substitute(c, ';$', '', '')
-                    " Skip the empty candidate.
-                    if c == ''
-                        continue
-                    endif
-                    " Add a candidate to self.hira_vs_candidates[hira].
-                    call self.hira_vs_candidates[hira].push(c)
-                endfor
-                return 1
-            else
-                return 0
-            endif
-        endfunction
-        function lambda.get_candidates()
-            return
-            \   map(
-            \       map(
-            \           copy(self.key_order),
-            \           '[v:val, self.hira_vs_candidates[v:val]]'
-            \       ),
-            \       'v:val[0] . " /" . join(v:val[1].to_list(), "/") . "/"'
-            \   )
-        endfunction
-
-        let okuri_ari = deepcopy(lambda)
-        let okuri_nasi = deepcopy(lambda)
-        for line in readfile(path)
-            if line =~ '^\s*;'
-                " comment
-                continue
-            endif
-            if okuri_ari.match_and_add(line, '^\([^ \ta-z]\+[a-z]\)[a-z]*[ \t]\+\(.\+\)')
-                continue
-            endif
-
-            call okuri_nasi.match_and_add(line, '^\([^ \ta-z]\+\)[ \t]\+\(.\+\)')
+            endfor
         endfor
 
         try
@@ -149,9 +115,62 @@ function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
             \   . fnamemodify(path, ':~')
             \   . "'."
             \)
+            call eskk#logger#warn("Cause: " . v:exception)
         endtry
     endif
 endfunction "}}}
+
+
+" s:Collector {{{
+
+let s:Collector = {
+\   'hira_vs_candidates': {},
+\   'key_order' : [],
+\   'pattern' : '',
+\}
+
+function s:Collector.new(pattern)
+    let obj = deepcopy(self)
+    let obj.pattern = a:pattern
+    return obj
+endfunction
+
+function s:Collector.add_matching_line(line)
+    let m = matchlist(a:line, self.pattern)
+    if !empty(m)
+        let [hira, kanji] = m[1:2]
+        if !has_key(self.hira_vs_candidates, hira)
+            let self.hira_vs_candidates[hira] = eskk#util#create_data_ordered_set()
+            call add(self.key_order, hira)
+        endif
+        for c in split(kanji, '/')
+            " Remove the empty annotation.
+            let c = substitute(c, ';$', '', '')
+            " Skip the empty candidate.
+            if c == ''
+                continue
+            endif
+            " Add a candidate to self.hira_vs_candidates[hira].
+            call self.hira_vs_candidates[hira].push(c)
+        endfor
+        return 1
+    else
+        return 0
+    endif
+endfunction
+
+function s:Collector.get_candidates()
+    return
+    \   map(
+    \       map(
+    \           copy(self.key_order),
+    \           '[v:val, self.hira_vs_candidates[v:val]]'
+    \       ),
+    \       'v:val[0] . " /" . join(v:val[1].to_list(), "/") . "/"'
+    \   )
+endfunction
+
+" }}}
 
 
 " Restore 'cpoptions' {{{
