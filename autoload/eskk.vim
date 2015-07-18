@@ -516,7 +516,6 @@ function! s:handle_popupmenu_keys(stash) "{{{
         if selected_default && !noinsert
             call s:close_pum(a:stash)
         else
-            echomsg 'hoge'
             call s:kakutei_pum(a:stash)
         endif
         return 0
