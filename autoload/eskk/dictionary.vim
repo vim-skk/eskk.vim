@@ -960,7 +960,6 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
     else
         let lines = []
         let start = 1
-        let end = len(whole_lines)
         while 1
             let [line, idx] = self.search_linear(
             \   whole_lines,
@@ -975,9 +974,6 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
 
             call add(lines, line)
             let start = idx + 1
-            if start >= end
-                break
-            endif
         endwhile
 
         return map(
@@ -1045,7 +1041,9 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
     let min = get(a:000, 0, self[min_which])
     let max = get(a:000, 1, len(a:whole_lines) - 1)
 
-    call eskk#util#assert(min <=# max, min.' <=# '.max)
+    if min > max
+        return ['', -1]
+    endif
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
 
     let prefix = (has('lua') ? 'lua' : 'vim')
