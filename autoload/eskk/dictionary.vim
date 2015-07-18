@@ -960,6 +960,7 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
     else
         let lines = []
         let start = 1
+        let end = len(whole_lines)
         while 1
             let [line, idx] = self.search_linear(
             \   whole_lines,
@@ -974,6 +975,9 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
 
             call add(lines, line)
             let start = idx + 1
+            if start >= end
+                break
+            endif
         endwhile
 
         return map(
