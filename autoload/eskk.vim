@@ -493,6 +493,7 @@ function! s:handle_popupmenu_keys(stash) "{{{
 
     let inserted_str = preedit.get_inserted_str()
     let selected_default = inserted_str ==# preedit.get_display_str()
+    let noinsert = &completeopt =~# 'noinsert'
 
     " NOTE: Do not call s:kakutei_pum() on 'selected_default ==# 1'.
 
@@ -504,7 +505,7 @@ function! s:handle_popupmenu_keys(stash) "{{{
         endif
 
         " Close popup and insert 'char'.
-        if selected_default
+        if selected_default && !noinsert
             call s:do_enter_egglike(a:stash)
             call s:close_pum(a:stash)
         else
@@ -512,9 +513,10 @@ function! s:handle_popupmenu_keys(stash) "{{{
         endif
         return 0
     elseif char ==# "\<Space>"
-        if selected_default
+        if selected_default && !noinsert
             call s:close_pum(a:stash)
         else
+            echomsg 'hoge'
             call s:kakutei_pum(a:stash)
         endif
         return 0
