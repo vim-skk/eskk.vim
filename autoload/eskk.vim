@@ -513,7 +513,10 @@ function! s:handle_popupmenu_keys(stash) "{{{
         endif
         return 0
     elseif char ==# "\<Space>"
-        if selected_default && !noinsert
+        if selected_default
+            if noinsert
+                call preedit.push_filter_pre_char("\<C-e>")
+            endif
             call s:close_pum(a:stash)
         else
             call s:kakutei_pum(a:stash)
