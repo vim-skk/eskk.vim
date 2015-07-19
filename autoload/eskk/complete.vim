@@ -22,6 +22,8 @@ delfunc s:SID
 let s:MODE_FUNC_TABLE = {}
 " The previously completed candidates in each mode.
 let s:completed_candidates = {}
+" The previously completed dictionary word items.
+let s:completed_items = []
 
 
 
@@ -100,6 +102,22 @@ endfunction "}}}
 
 function! eskk#complete#_reset_completed_candidates() abort "{{{
     let s:completed_candidates = {}
+endfunction "}}}
+function! eskk#complete#_add_completed_candidates() abort "{{{
+    if empty(v:completed_item)
+        return
+    endif
+
+    let items = filter(copy(s:completed_items),
+                \ 'v:val.input ==# v:completed_item.word')
+    if empty(items)
+        return
+    endif
+
+    " Move self to the first.
+    let dict = eskk#get_skk_dict()
+    call dict.forget_word(items[0])
+    call dict.remember_word(items[0])
 endfunction "}}}
 function! s:skip_complete(...) abort "{{{
     let findstart = get(a:000, 0, 0)
@@ -229,6 +247,7 @@ function! s:complete(mode, ...) abort "{{{
     endfor
 
     call s:set_completed_candidates(disp, list)
+    let s:completed_items = candidates
 
     return list
 endfunction "}}}
