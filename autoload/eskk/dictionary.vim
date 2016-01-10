@@ -1096,12 +1096,12 @@ lua << EOF
     do
         local whole_lines = vim.eval('a:whole_lines')
         local needle = vim.eval('a:needle')
-        local limit = vim.eval('a:limit')
-        local min = vim.eval('a:min')
-        local max = vim.eval('a:max')
+        local limit = vim.eval('a:limit+0')
+        local min = vim.eval('a:min+0')
+        local max = vim.eval('a:max+0')
 
         while max - min > limit do
-            local mid = (min + max) / 2
+            local mid = math.floor((min + max) / 2)
             if needle >= whole_lines[mid] then
                 max = mid
             else
@@ -1120,12 +1120,12 @@ lua << EOF
     do
         local whole_lines = vim.eval('a:whole_lines')
         local needle = vim.eval('a:needle')
-        local limit = vim.eval('a:limit')
-        local min = vim.eval('a:min')
-        local max = vim.eval('a:max')
+        local limit = vim.eval('a:limit+0')
+        local min = vim.eval('a:min+0')
+        local max = vim.eval('a:max+0')
 
         while max - min > limit do
-            local mid = (min + max) / 2
+            local mid = math.floor((min + max) / 2)
             if needle >= whole_lines[mid] then
                 min = mid
             else
