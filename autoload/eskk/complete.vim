@@ -165,7 +165,7 @@ function! s:MODE_FUNC_TABLE.abbrev(base) "{{{
     return s:complete("abbrev", a:base)
 endfunction "}}}
 
-function! s:complete(mode, base) "{{{
+function! s:complete(mode, ...) "{{{
     let preedit = eskk#get_preedit()
     let disp = preedit.get_display_str(1, 0)    " with marker, no rom_str.
     if s:has_completed_candidates(disp)

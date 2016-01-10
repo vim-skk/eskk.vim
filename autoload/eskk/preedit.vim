@@ -372,13 +372,17 @@ function! s:Preedit_push_kakutei_str(str) dict "{{{
     let self._kakutei_str .= a:str
 endfunction "}}}
 
+" @vimlint(EVL102, 1, a:stash)
 function! s:Preedit_choose_next_candidate(stash) dict "{{{
-    return s:get_next_candidate(self, a:stash, 1)
+    return s:get_next_candidate(self, 1)
 endfunction "}}}
+" @vimlint(EVL102, 0, a:stash)
+" @vimlint(EVL102, 1, a:stash)
 function! s:Preedit_choose_prev_candidate(stash) dict "{{{
-    return s:get_next_candidate(self, a:stash, 0)
+    return s:get_next_candidate(self, 0)
 endfunction "}}}
-function! s:get_next_candidate(this, stash, next) "{{{
+" @vimlint(EVL102, 0, a:stash)
+function! s:get_next_candidate(this, next) "{{{
     let cur_buf_str = a:this.get_current_buf_str()
     let dict = eskk#get_skk_dict()
     let henkan_result = dict.get_henkan_result()
@@ -405,10 +409,11 @@ function! s:get_next_candidate(this, stash, next) "{{{
         if a:next
             " Register new word when it advanced or backed current result index,
             " And tried to step at last candidates but failed.
-            let [input, hira, okuri] =
+            let result =
             \   dict.remember_word_prompt_hr(
             \      dict.get_henkan_result()
             \   )
+            let [input, okuri] = [result[0], result[2]]
             if input != ''
                 call a:this.kakutei(input . okuri)
             endif
@@ -537,7 +542,7 @@ function! s:Preedit_convert_rom_all(phases, ...) dict "{{{
         let buf_str = deepcopy(self.get_buf_str(p), 1)
         let matched = buf_str.rom_pairs.get()
         call buf_str.rom_pairs.clear()
-        for [rom_str; _] in matched
+        for rom_str in map(copy(matched), 'v:val[0]')
             call buf_str.rom_pairs.push_one_pair(
             \   rom_str,
             \   (!empty(table) ?

@@ -381,7 +381,6 @@ endfunction "}}}
 function! s:asym_filter(stash) "{{{
     let char = a:stash.char
     let preedit = a:stash.preedit
-    let buf_str = a:stash.preedit.get_current_buf_str()
     let phase = preedit.get_henkan_phase()
 
 
@@ -832,10 +831,11 @@ function! s:do_henkan_abbrev(stash, convert_at_exact_match) "{{{
         endif
     catch /^eskk: dictionary look up error/
         " No candidates.
-        let [input, hira, okuri] =
+        let result =
         \   dict.remember_word_prompt_hr(
         \      dict.get_henkan_result()
         \   )
+        let [input, okuri] = [result[0], result[2]]
         if input != ''
             call preedit.kakutei(input . okuri)
         endif
@@ -1857,18 +1857,13 @@ function! eskk#set_mode(next_mode) "{{{
         \)
         return
     endif
-
     " Change mode.
-    let prev_mode = inst.mode
     let inst.mode = a:next_mode
-
     " Set cursor color.
     call eskk#set_cursor_color()
-
     " Clear preedit.
     let preedit = eskk#get_preedit()
     call preedit.clear_all()
-
     " Set initial henkan phase.
     let st = eskk#get_current_mode_structure()
     call preedit.set_henkan_phase(
@@ -1876,7 +1871,6 @@ function! eskk#set_mode(next_mode) "{{{
     \       st.init_phase
     \       : g:eskk#preedit#PHASE_NORMAL)
     \)
-
     " For &statusline.
     redrawstatus
 endfunction "}}}
@@ -1888,7 +1882,7 @@ function! eskk#is_supported_mode(mode) "{{{
     return has_key(s:available_modes, a:mode)
 endfunction "}}}
 function! eskk#register_mode_structure(mode, st) "{{{
-    if !s:check_mode_structure(a:st)
+    if !s:check_mode_structure(a:mode, a:st)
         call eskk#util#warn('eskk#register_mode_structure(): a invalid structure was given!')
         return
     endif
@@ -1900,12 +1894,13 @@ function! eskk#register_mode_structure(mode, st) "{{{
         call eskk#register_mode_table(a:mode, a:st.table)
     endif
 endfunction "}}}
-function! s:check_mode_structure(st) "{{{
+function! s:check_mode_structure(mode, st) "{{{
     " Check required keys.
     for key in ['filter']
         if !has_key(a:st, key)
             call eskk#logger#warn(
-            \   "s:check_mode_structure(" . string(a:mode) . "): "
+            \   "s:check_mode_structure(): "
+            \       . string(a:mode) . ": "
             \       . string(key) . " is not present in structure"
             \)
             return 0
@@ -1928,7 +1923,6 @@ function! eskk#get_current_mode_structure() "{{{
     return eskk#get_mode_structure(eskk#get_mode())
 endfunction "}}}
 function! eskk#get_mode_structure(mode) "{{{
-    let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:mode)
         call eskk#logger#warn(
         \   "mode '" . a:mode . "' is not available."

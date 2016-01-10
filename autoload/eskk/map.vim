@@ -231,9 +231,8 @@ function! eskk#map#unmap_all_keys() "{{{
     call inst.prev_lang_keys.restore()
     unlet inst.prev_lang_keys
 endfunction "}}}
-function! s:create_map(type, options, lhs, rhs) "{{{
+function! s:create_map(type, options, lhs, ...) "{{{
     let lhs = a:lhs
-    let rhs = a:rhs
 
     let eskk_mappings = eskk#_get_eskk_mappings()
     if !has_key(eskk_mappings, a:type)
@@ -253,8 +252,7 @@ function! s:create_map(type, options, lhs, rhs) "{{{
     let type_st.options = a:options
     let type_st.lhs = lhs
 endfunction "}}}
-function! s:create_general_map(self, options, lhs, rhs) "{{{
-    let self = a:self
+function! s:create_general_map(options, lhs, rhs) "{{{
     let lhs = a:lhs
     let rhs = a:rhs
     let type_st = eskk#_get_eskk_general_mappings()
@@ -310,7 +308,7 @@ function! s:parse_options_get_optargs(args) "{{{
         let rest = s:parse_one_arg_from_q_args(a)[1]
         return ['--', '', rest]
     endif
-    let a = a[1:]
+    let a = substitute(a, '^--\?', '', '')
     if a !~# '^'.OPT_CHARS.'\+'
         throw eskk#map#cmd_eskk_map_invalid_args(
         \   "':EskkMap' argument's key must be word."
@@ -319,7 +317,7 @@ function! s:parse_options_get_optargs(args) "{{{
 
     if a =~# '^'.OPT_CHARS.'\+='    " key has a value.
         let r = '^\('.OPT_CHARS.'\+\)='.'\C'
-        let [m, optname; _] = matchlist(a, r)
+        let [m, optname] = matchlist(a, r)[0:1]
         let rest = strpart(a, strlen(m))
         let [value, rest] = s:parse_string_from_q_args(rest)
         return [optname, value, rest]
@@ -383,7 +381,6 @@ function! eskk#map#_cmd_eskk_map(args) "{{{
 
     if type ==# 'general'
         call s:create_general_map(
-        \   eskk#get_current_instance(),
         \   options,
         \   lhs,
         \   rhs,

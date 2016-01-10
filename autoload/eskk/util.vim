@@ -16,8 +16,9 @@ delfunc s:SID
 
 
 " Load the vital of eskk.
-let s:Vital = vital#of('eskk.vim')
+let s:Vital = vital#of('eskk')
 call s:Vital.load('Prelude')
+call s:Vital.load('Process')
 call s:Vital.load('Data.OrderedSet')
 call s:Vital.load('Data.List')
 call s:Vital.load('Data.String')
@@ -39,7 +40,7 @@ else
 endif
 " }}}
 function! eskk#util#has_vimproc(...) "{{{
-    let module = s:Vital.Prelude
+    let module = s:Vital.Process
     return call(module.has_vimproc, a:000, module)
 endfunction "}}}
 
@@ -96,7 +97,7 @@ function! eskk#util#mb_chop(...) "{{{
     return call(module.chop, a:000, module)
 endfunction "}}}
 function! eskk#util#iconv(...) "{{{
-    let module = s:Vital
+    let module = s:Vital.Process
     return call(module.iconv, a:000, module)
 endfunction "}}}
 
@@ -110,9 +111,9 @@ function! eskk#util#has_idx(...) "{{{
     let module = s:Vital.Data.List
     return call(module.has_index, a:000, module)
 endfunction "}}}
-function! eskk#util#uniq(...) "{{{
+function! eskk#util#uniq_by(...) "{{{
     let module = s:Vital.Data.List
-    return call(module.uniq, a:000, module)
+    return call(module.uniq_by, a:000, module)
 endfunction "}}}
 
 
@@ -260,11 +261,11 @@ function! eskk#util#identity(value) "{{{
     return a:value
 endfunction "}}}
 function! eskk#util#getchar(...) "{{{
-    let module = s:Vital
+    let module = s:Vital.Prelude
     return call(module.getchar_safe, a:000, module)
 endfunction "}}}
 function! eskk#util#input(...) "{{{
-    let module = s:Vital
+    let module = s:Vital.Prelude
     return call(module.input_safe, a:000, module)
 endfunction "}}}
 function! eskk#util#redir_english(excmd) "{{{

@@ -63,7 +63,8 @@ function! s:insert_candidate_to_line(line, candidate) "{{{
     \   eskk#dictionary#parse_skk_dict_line(
     \       a:line, a:candidate.from_type)
     call insert(candidates, a:candidate)
-    let candidates = eskk#util#uniq(candidates)
+    let candidates = eskk#util#uniq_by(
+    \   candidates, 'eskk#dictionary#_candidate_identifier(v:val)')
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
 
@@ -370,20 +371,22 @@ function! s:HenkanResult_get_candidates() dict "{{{
 
         let self._status = g:eskk#dictionary#HR_GOT_RESULT
         return self._candidates.to_list()
+
+    " This routine makes error when using completion.
+    " elseif self._status ==# g:eskk#dictionary#HR_NO_RESULT
+    "     throw eskk#dictionary#look_up_error(
+    "     \   "Can't look up '"
+    "     \   . g:eskk#marker_henkan
+    "     \   . self._key
+    "     \   . g:eskk#marker_okuri
+    "     \   . self._okuri_rom
+    "     \   . "' in dictionaries."
+    "     \)
+    " else
+    "     throw eskk#internal_error(['eskk', 'dictionary'])
+
     else
         return []
-
-    elseif self._status ==# g:eskk#dictionary#HR_NO_RESULT
-        throw eskk#dictionary#look_up_error(
-        \   "Can't look up '"
-        \   . g:eskk#marker_henkan
-        \   . self._key
-        \   . g:eskk#marker_okuri
-        \   . self._okuri_rom
-        \   . "' in dictionaries."
-        \)
-    else
-        throw eskk#internal_error(['eskk', 'dictionary'])
     endif
 endfunction "}}}
 
@@ -399,7 +402,6 @@ endfunction "}}}
 function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
     " Select candidates by getchar()'s character.
     let words = copy(self.get_candidates())
-    let word_num_per_page = len(split(g:eskk#select_cand_keys, '\zs'))
     let page_index = 0
     let pages = []
 
@@ -929,7 +931,7 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
     let whole_lines = self.get_lines()
     let converted = eskk#util#iconv(needle, &l:encoding, self.encoding)
     if self.sorted
-        let [line, idx] = self.search_binary(
+        let [_, idx] = self.search_binary(
         \   whole_lines,
         \   converted,
         \   has_okuri,
@@ -982,6 +984,7 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
         \)
     endif
 endfunction "}}}
+
 " Returns [line_string, idx] matching the candidate.
 function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
     let has_okuri = a:okuri_rom != ''
@@ -1011,6 +1014,7 @@ function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
         return ['', -1]
     endif
 endfunction "}}}
+
 " Returns [line_string, idx] matching the candidate.
 function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) dict "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
@@ -1034,6 +1038,7 @@ function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) di
     \   a:whole_lines, a:needle, a:has_okuri, min, max
     \)
 endfunction "}}}
+
 " Returns [line_string, idx] matching the candidate.
 function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
@@ -1065,6 +1070,7 @@ function! s:vim_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
     endwhile
     return [min, max]
 endfunction"}}}
+
 function! s:vim_search_binary(whole_lines, needle, limit, min, max) "{{{
     let min = a:min
     let max = a:max
@@ -1078,6 +1084,7 @@ function! s:vim_search_binary(whole_lines, needle, limit, min, max) "{{{
     endwhile
     return [min, max]
 endfunction"}}}
+
 function! s:vim_search_linear(whole_lines, needle, min, max) "{{{
     let min = a:min
     let max = a:max
@@ -1091,6 +1098,8 @@ function! s:vim_search_linear(whole_lines, needle, min, max) "{{{
 endfunction"}}}
 
 " if_lua versions
+" @vimlint(EVL101, 1, l:min)
+" @vimlint(EVL101, 1, l:max)
 function! s:lua_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
 lua << EOF
     do
@@ -1115,6 +1124,11 @@ lua << EOF
 EOF
     return [float2nr(min), float2nr(max)]
 endfunction"}}}
+" @vimlint(EVL101, 0, l:min)
+" @vimlint(EVL101, 0, l:max)
+
+" @vimlint(EVL101, 1, l:min)
+" @vimlint(EVL101, 1, l:max)
 function! s:lua_search_binary(whole_lines, needle, limit, min, max) "{{{
 lua << EOF
     do
@@ -1139,6 +1153,9 @@ lua << EOF
 EOF
     return [float2nr(min), float2nr(max)]
 endfunction"}}}
+" @vimlint(EVL101, 0, l:min)
+" @vimlint(EVL101, 0, l:max)
+
 function! s:lua_search_linear(whole_lines, needle, min, max) "{{{
     let ret = ['', -1]
 
@@ -1570,9 +1587,9 @@ let s:dict_search_candidates = eskk#util#create_data_ordered_set(
 \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
 \)
 " Search candidates matching with arguments.
+" @vimlint(EVL102, 1, a:okuri)
 function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) dict "{{{
     let key = a:key
-    let okuri = a:okuri
     let okuri_rom = a:okuri_rom
 
     if key == ''
@@ -1620,6 +1637,7 @@ function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) dict "{{{
 
     return candidates.to_list()
 endfunction "}}}
+" @vimlint(EVL102, 0, a:okuri)
 
 
 " Getter for self._current_henkan_result
