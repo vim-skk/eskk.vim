@@ -761,8 +761,12 @@ function! s:do_sticky(stash) "{{{
 endfunction "}}}
 function! s:do_cancel(stash) "{{{
     let preedit = a:stash.preedit
-    call preedit.set_henkan_phase(g:eskk#preedit#PHASE_NORMAL)
-    call preedit.clear_all()
+    if mode() ==# 'c'
+        call preedit.push_filter_pre_char("\<Esc>")
+    else
+        call preedit.set_henkan_phase(g:eskk#preedit#PHASE_NORMAL)
+        call preedit.clear_all()
+    endif
 endfunction "}}}
 function! s:do_escape(stash) "{{{
     let preedit = a:stash.preedit
