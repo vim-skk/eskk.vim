@@ -22,8 +22,10 @@ let s:source = {
       \}
 
 function! s:source.get_complete_position(context) abort "{{{
-    if !eskk#is_enabled() || eskk#get_preedit().get_henkan_phase() ==#
+    if !eskk#is_enabled()
+                \ || eskk#get_preedit().get_henkan_phase() ==#
                 \             g:eskk#preedit#PHASE_NORMAL
+                \ || a:context['input'] =~ '\w$'
         return -1
     endif
     return eskk#complete#eskkcomplete(1, '')
