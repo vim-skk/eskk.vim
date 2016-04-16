@@ -354,15 +354,19 @@ function! s:parse_options(args) "{{{
 
     return [opt, type, args]
 endfunction "}}}
+let s:DEFAULT_MAPOPT = {
+\   'buffer': 0,
+\   'expr': 0,
+\   'silent': 0,
+\   'unique': 1,
+\   'noremap': 1,
+\   'map-if': '1',
+\}
+if v:version >=# 703 && has('patch1264')
+    let s:DEFAULT_MAPOPT['nowait'] = 1
+endif
 function! s:create_default_mapopt() "{{{
-    return {
-    \   'buffer': 0,
-    \   'expr': 0,
-    \   'silent': 0,
-    \   'unique': 1,
-    \   'noremap': 1,
-    \   'map-if': '1',
-    \}
+    return copy(s:DEFAULT_MAPOPT)
 endfunction "}}}
 function! eskk#map#cmd_eskk_map_invalid_args(...) "{{{
     return eskk#util#build_error(
