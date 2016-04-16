@@ -20,20 +20,26 @@ NEW BSD LICENSE {{{
 ==============================================================================
 CONTENTS						*eskk-contents*
 
-概要		|eskk-introduction|
+概要					|eskk-introduction|
 インターフェース			|eskk-interface|
-  キーマッピング		|eskk-keymappings|
-  変数			|eskk-variables|
-  コマンド			|eskk-commands|
-  関数			|eskk-functions|
-アルファベットテーブル			|eskk-alphabet-table|
-モード				|eskk-modes|
+  キーマッピング			|eskk-keymappings|
+  変数					|eskk-variables|
+  コマンド				|eskk-commands|
+  関数					|eskk-functions|
+Hooks					|eskk-hooks|
+  initialize-pre			|eskk-initialize-pre|
+    アルファベットテーブルの登録	|eskk-alphabet-table|
+  initialize-post			|eskk-initialize-post|
+  enable-pre				|eskk-enable-pre|
+  enable-post				|eskk-enable-post|
+  disable-pre				|eskk-disable-pre|
+  disable-post				|eskk-disable-post|
+モード					|eskk-modes|
 フェーズ				|eskk-phases|
-補完			|eskk-completion|
+補完					|eskk-completion|
 FAQ					|eskk-faq|
-TODO				|eskk-todo|
-Changelog			|eskk-changelog|
-
+TODO					|eskk-todo|
+Changelog				|eskk-changelog|
 
 ==============================================================================
 概要						*eskk-introduction* {{{
@@ -515,10 +521,21 @@ eskk#get_default_mapped_keys()		*eskk#get_default_mapped_keys()*
 }}}
 }}}
 ==============================================================================
-アルファベットテーブル					*eskk-alphabet-table* {{{
+HOOKS						*eskk-hooks* {{{
 
-次のようにしてアルファベット変換テーブルを定義することができる。
+eskk ではいくつかフックの仕組みを提供している。
 
+eskk-initialize-pre				*eskk-initialize-pre*
+-------------------
+
+このフックは最初にeskkが有効化される前に一度だけ実行される。
+毎回有効化された時点で行いたい場合は|eskk-enable-pre|フックを参照。
+
+アルファベットテーブルの登録			*eskk-alphabet-table*
+----------------------------
+
+|eskk-initialize-pre|フックを利用して次のようにアルファベット変換テーブルを
+定義することができる。
 >
     autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
     function! s:eskk_initial_pre()
@@ -539,19 +556,44 @@ eskk#get_default_mapped_keys()		*eskk#get_default_mapped_keys()*
         call eskk#register_mode_table('hira', t)
     endfunction
 
-
     " http://subtech.g.hatena.ne.jp/motemen/20110527/1306485690
     " のeskkでの設定例。
     " この方法はg:eskk#rom_input_styleが"skk"でないと
     " 最後のzが残ってしまう。
     autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
-    function! s:eskk_initial_pre() "{{{
+    function! s:eskk_initial_pre()
         for [orgtable, mode] in [['rom_to_hira', 'hira'], ['rom_to_kata', 'kata']]
             let t = eskk#table#new(orgtable.'*', orgtable)
             call t.add_map('zw', 'w', 'z')
             call eskk#register_mode_table(mode, t)
         endfor
-    endfunction "}}}
+    endfunction
+<
+eskk-initialize-post			*eskk-initialize-post*
+--------------------
+
+このフックは最初にeskkが有効化された後に一度だけ実行される。
+毎回有効化された時点で行いたい場合は|eskk-enable-post|フックを参照。
+
+eskk-enable-pre				*eskk-enable-pre*
+---------------
+
+このフックはeskkが有効化される前に毎回実行される。
+
+eskk-enable-post			*eskk-enable-post*
+----------------
+
+このフックはeskkが有効化された後に毎回実行される。
+
+eskk-disable-pre			*eskk-disable-pre*
+----------------
+
+このフックはeskkが無効化される前に毎回実行される。
+
+eskk-disable-post			*eskk-disable-post*
+-----------------
+
+このフックはeskkが無効化された後に毎回実行される。
 
 }}}
 ==============================================================================

@@ -1478,8 +1478,9 @@ function! eskk#_initialize() "{{{
     " Throw "eskk-initialize-pre" autocmd event. {{{
     " NOTE: If no "User eskk-initialize-pre" events,
     " Vim complains like "No matching autocommands".
-    autocmd eskk User eskk-initialize-pre :
-    doautocmd User eskk-initialize-pre
+    if exists('#User#eskk-initialize-pre')
+        doautocmd User eskk-initialize-pre
+    endif
     " }}}
 
     " Set up g:eskk#directory. {{{
@@ -1674,8 +1675,9 @@ function! eskk#_initialize() "{{{
     " Throw "eskk-initialize-post" autocmd event. {{{
     " NOTE: If no "User eskk-initialize-post" events,
     " Vim complains like "No matching autocommands".
-    autocmd eskk User eskk-initialize-post :
-    doautocmd User eskk-initialize-post
+    if exists('#User#eskk-initialize-post')
+        doautocmd User eskk-initialize-post
+    endif
     " }}}
 
     " Save/Restore 'formatoptions'. {{{
@@ -1773,6 +1775,10 @@ function! eskk#enable() "{{{
         call eskk#logger#warn('skk.vim is enabled. please disable it.')
         return ''
     endif
+
+    if exists('#User#eskk-enable-pre')
+        doautocmd User eskk-enable-pre
+    endif
     let inst = eskk#get_current_instance()
 
     if type(inst.formatoptions) is type(0)
@@ -1803,12 +1809,16 @@ function! eskk#enable() "{{{
         " We have to use i_CTRL-^ .
         setlocal iminsert=1 imsearch=1
         redrawstatus
-        return "\<C-^>"
+        let ret = "\<C-^>"
     else
         setlocal iminsert=1 imsearch=1
         redrawstatus
-        return ''
+        let ret = ''
     endif
+    if exists('#User#eskk-enable-post')
+        doautocmd User eskk-enable-post
+    endif
+    return ret
 endfunction "}}}
 function! eskk#disable() "{{{
     if !eskk#is_initialized()
@@ -1817,6 +1827,10 @@ function! eskk#disable() "{{{
     endif
     if !eskk#is_enabled()
         return ''
+    endif
+
+    if exists('#User#eskk-disable-pre')
+        doautocmd User eskk-disable-pre
     endif
     let inst = eskk#get_current_instance()
 
@@ -1841,12 +1855,16 @@ function! eskk#disable() "{{{
         setlocal iminsert=0 imsearch=0
         redrawstatus
         let kakutei_str = eskk#get_preedit().generate_kakutei_str()
-        return kakutei_str . "\<C-^>"
+        let ret = kakutei_str . "\<C-^>"
     else
         setlocal iminsert=0 imsearch=0
         redrawstatus
-        return ''
+        let ret = ''
     endif
+    if exists('#User#eskk-disable-post')
+        doautocmd User eskk-disable-post
+    endif
+    return ret
 endfunction "}}}
 
 " Mode

@@ -20,13 +20,21 @@ NEW BSD LICENSE {{{
 ==============================================================================
 CONTENTS						*eskk-contents*
 
-Introduction		|eskk-introduction|
+Introduction			|eskk-introduction|
 Interface			|eskk-interface|
-  Keymappings		|eskk-keymappings|
+  Keymappings			|eskk-keymappings|
   Variables			|eskk-variables|
   Commands			|eskk-commands|
   Functions			|eskk-functions|
-Alphabet table		|eskk-alphabet-table|
+Hooks				|eskk-hooks|
+  initialize-pre		|eskk-initialize-pre|
+    Register alphabet table	|eskk-alphabet-table|
+  initialize-post		|eskk-initialize-post|
+  enable-pre			|eskk-enable-pre|
+  enable-post			|eskk-enable-post|
+  disable-pre			|eskk-disable-pre|
+  disable-post			|eskk-disable-post|
+Alphabet table			|eskk-alphabet-table|
 Modes				|eskk-modes|
 Phases				|eskk-phases|
 Completion			|eskk-completion|
@@ -506,11 +514,23 @@ eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
 }}}
 }}}
 ==============================================================================
-ALPHABET TABLE					*eskk-alphabet-table* {{{
+HOOKS						*eskk-hooks* {{{
 
-You can define the own alphabet tables like the following.
+eskk provides hooks mechanism.
 
->
+eskk-initialize-pre				*eskk-initialize-pre*
+-------------------
+
+This hook is executed once before eskk is initialized.
+If you want to do something each time before eskk is enabled,
+see |eskk-enable-pre| hook.
+
+Alphabet table					*eskk-alphabet-table*
+--------------
+
+Using |eskk-initialize-pre|, you can define the own alphabet tables
+like the following: >
+
     autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
     function! s:eskk_initial_pre()
         " User can be allowed to modify
@@ -536,19 +556,47 @@ You can define the own alphabet tables like the following.
         call eskk#register_mode_table('hira', t)
     endfunction
 
-
     " http://subtech.g.hatena.ne.jp/motemen/20110527/1306485690
     " in eskk config.
     " NOTE: This config remains the last character "z"
     " if g:eskk#rom_input_style is not "skk".
     autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
-    function! s:eskk_initial_pre() "{{{
+    function! s:eskk_initial_pre()
         for [orgtable, mode] in [['rom_to_hira', 'hira'], ['rom_to_kata', 'kata']]
             let t = eskk#table#new(orgtable.'*', orgtable)
             call t.add_map('zw', 'w', 'z')
             call eskk#register_mode_table(mode, t)
         endfor
-    endfunction "}}}
+    endfunction
+<
+eskk-initialize-post			*eskk-initialize-post*
+--------------------
+
+This hook is executed once after eskk is initialized.
+If you want to do something each time after eskk is enabled,
+see |eskk-enable-post| hook.
+
+eskk-enable-pre				*eskk-enable-pre*
+---------------
+
+This hook is executed each time before eskk is enabled.
+
+eskk-enable-post			*eskk-enable-post*
+----------------
+
+This hook is executed each time after eskk is enabled.
+
+eskk-disable-pre			*eskk-disable-pre*
+----------------
+
+This hook is executed each time before eskk is disabled.
+
+eskk-disable-post			*eskk-disable-post*
+-----------------
+
+This hook is executed each time after eskk is disabled.
+
+
 
 }}}
 ==============================================================================
