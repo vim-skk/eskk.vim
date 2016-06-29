@@ -1695,6 +1695,7 @@ function! eskk#_initialize() "{{{
             endif
         endif
     endfunction
+    autocmd eskk InsertLeave * call s:save_restore_formatoptions(0)
     " }}}
 
     " Log startup/shutdown info. {{{
@@ -1781,10 +1782,7 @@ function! eskk#enable() "{{{
     endif
     let inst = eskk#get_current_instance()
 
-    if type(inst.formatoptions) is type(0)
-        let inst.formatoptions = &l:formatoptions
-        let &l:formatoptions = ''
-    endif
+    call s:save_restore_formatoptions(1)
 
     " Clear current variable states.
     let inst.mode = ''
@@ -1834,10 +1832,7 @@ function! eskk#disable() "{{{
     endif
     let inst = eskk#get_current_instance()
 
-    if type(inst.formatoptions) is type("")
-        let &l:formatoptions = inst.formatoptions
-        let inst.formatoptions = 0
-    endif
+    call s:save_restore_formatoptions(0)
 
     " Unmap all lang-mode keymappings.
     call eskk#map#unmap_all_keys()
