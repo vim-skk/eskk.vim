@@ -1457,6 +1457,9 @@ function! eskk#_initialize() "{{{
     \   'zenei': '#ffd700',
     \})
 
+    " Lua
+    call eskk#util#set_default('g:eskk#disable_if_lua', 0)
+
     " Misc.
     call eskk#util#set_default('g:eskk#egg_like_newline', 0)
     call eskk#util#set_default('g:eskk#keep_state', 0)
@@ -2179,6 +2182,11 @@ function! eskk#set_cursor_color() "{{{
     elseif type(color) == type("") && color != ''
         execute 'highlight lCursor guibg=' . color
     endif
+endfunction "}}}
+
+" Lua
+function! eskk#has_if_lua() abort "{{{
+    return !g:eskk#disable_if_lua && has('lua')
 endfunction "}}}
 
 " Mapping
