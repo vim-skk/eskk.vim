@@ -1028,7 +1028,7 @@ function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) di
         let max = len(a:whole_lines) - 1
     endif
 
-    let prefix = (has('lua') ? 'lua' : 'vim')
+    let prefix = (eskk#has_if_lua() ? 'lua' : 'vim')
     let [min, max] = call(printf('s:%s_search_binary%s',
     \         prefix, (a:has_okuri ? '_okuri' : '')),
     \     [a:whole_lines, a:needle, a:limit, min, max])
@@ -1051,7 +1051,7 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
     endif
     call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
 
-    let prefix = (has('lua') ? 'lua' : 'vim')
+    let prefix = (eskk#has_if_lua() ? 'lua' : 'vim')
     return call('s:'.prefix.'_search_linear',
     \     [a:whole_lines, a:needle, min, max])
 endfunction "}}}
