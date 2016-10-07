@@ -1108,6 +1108,9 @@ lua << EOF
         local limit = vim.eval('a:limit+0')
         local min = vim.eval('a:min+0')
         local max = vim.eval('a:max+0')
+        local loc = os.setlocale(nil, 'collate')
+
+        os.setlocale('C', 'collate')
 
         while max - min > limit do
             local mid = math.floor((min + max) / 2)
@@ -1117,6 +1120,8 @@ lua << EOF
                 min = mid
             end
         end
+
+        os.setlocale(loc, 'collate')
 
         vim.command('let min = ' .. min)
         vim.command('let max = ' .. max)
@@ -1137,6 +1142,9 @@ lua << EOF
         local limit = vim.eval('a:limit+0')
         local min = vim.eval('a:min+0')
         local max = vim.eval('a:max+0')
+        local loc = os.setlocale(nil, 'collate')
+
+        os.setlocale('C', 'collate')
 
         while max - min > limit do
             local mid = math.floor((min + max) / 2)
@@ -1146,6 +1154,8 @@ lua << EOF
                 max = mid
             end
         end
+
+        os.setlocale(loc, 'collate')
 
         vim.command('let min = ' .. min)
         vim.command('let max = ' .. max)
