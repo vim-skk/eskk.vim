@@ -1,4 +1,4 @@
-*eskk.txt* *eskk* eskk.vim
+*eskk.txt* eskk.vim
 
 Author:
   tyru <tyru.exe@gmail.com>
