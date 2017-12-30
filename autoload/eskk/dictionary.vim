@@ -1248,16 +1248,10 @@ endfunction "}}}
 
 " Initialize server.
 function! s:ServerDict_init() dict "{{{
-    if !eskk#util#has_vimproc()
-    \ || !vimproc#host_exists(self.host) || self.port <= 0
-        return
-    endif
-
-    try
-        let self._socket = vimproc#socket_open(self.host, self.port)
-    catch
-        call eskk#logger#warn('server initialization failed.')
-    endtry
+    self._socket = ch_open(self.host, self.port, {'mode': 'nl', 'timeout': self.timeout})
+    if ch_status(self_socket) == "fail"
+		call eskk#logger#warn('server initialization failed.')
+	endif
 endfunction "}}}
 
 function! s:ServerDict_request(command, key) dict "{{{
@@ -1270,21 +1264,20 @@ function! s:ServerDict_request(command, key) dict "{{{
         if self.encoding != ''
             let key = iconv(key, &encoding, self.encoding)
         endif
-        call self._socket.write(printf("%s%s%s\n",
+        let result = ch_evalraw(self._socket, printf("%s%s%s\n",
         \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
-        let result = self._socket.read_line(-1, self.timeout)
         if self.encoding != ''
             let result = iconv(result, self.encoding, &encoding)
         endif
 
         if result == ''
             " Reset.
-            call self._socket.write("0\n")
-            call self._socket.close()
+            call ch_evalraw("0\n")
+            call ch_close(self._socket)
             call self.init()
         endif
     catch
-        call self._socket.close()
+        call ch_close(self._socket)
         return ''
     endtry
 
