@@ -1298,7 +1298,7 @@ function! s:ServerDict_request(command, key) dict "{{{
                 call self._socket.write("0\n")
                 call self._socket.close()
             endif
-            self.init()
+            call self.init()
         endif
     catch
         if has('channel')
