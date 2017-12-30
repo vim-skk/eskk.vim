@@ -1292,7 +1292,7 @@ function! s:ServerDict_request(command, key) dict "{{{
         if result == ''
             " Reset.
             if has('channel')
-                call ch_evalraw("0\n")
+                call ch_evalraw(self._socket, "0\n")
                 call ch_close(self._socket)
             else
                 call self._socket.write("0\n")
