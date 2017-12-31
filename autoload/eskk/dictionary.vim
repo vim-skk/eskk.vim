@@ -1248,7 +1248,7 @@ endfunction "}}}
 
 " Initialize server.
 function! s:ServerDict_init() dict "{{{
-    if has('channel')
+    if has('channel') && !has('nvim')
         let self._socket = ch_open(printf("%s:%s", self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
         if ch_status(self._socket) == "fail"
             call eskk#logger#warn('server initialization failed.')
@@ -1277,7 +1277,7 @@ function! s:ServerDict_request(command, key) dict "{{{
         if self.encoding != ''
             let key = iconv(key, &encoding, self.encoding)
         endif
-        if has('channel')
+        if has('channel') && !has('nvim')
             let result = ch_evalraw(self._socket, printf("%s%s%s\n",
             \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
         else
@@ -1291,7 +1291,7 @@ function! s:ServerDict_request(command, key) dict "{{{
 
         if result == ''
             " Reset.
-            if has('channel')
+            if has('channel') && !has('nvim')
                 call ch_evalraw(self._socket, "0\n")
                 call ch_close(self._socket)
             else
@@ -1301,7 +1301,7 @@ function! s:ServerDict_request(command, key) dict "{{{
             call self.init()
         endif
     catch
-        if has('channel')
+        if has('channel') && !has('nvim')
              call ch_close(self._socket)
         else
              call self._socket.close()
