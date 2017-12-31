@@ -151,7 +151,7 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 g:eskk#server					*g:eskk#server*
 							(Default: See below)
 	Skkserv information.
-	Note: |vimproc| is required.
+	Note: |channel| or |vimproc| is required.
 
 	This variable value is:
 			Dictionary:

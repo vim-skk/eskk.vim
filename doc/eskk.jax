@@ -155,7 +155,7 @@ g:eskk#large_dictionary		*g:eskk#large_dictionary*
 g:eskk#server					*g:eskk#server*
 						(デフォルト値: 下を参照)
 	Skkserv のサーバ情報
-	Note: この機能を使用するためには、|vimproc| が必要。
+	Note: この機能を使用するためには、|channel|か|vimproc| が必要。
 
 	この変数の定義は:
 			辞書型なら:
