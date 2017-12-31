@@ -1248,16 +1248,23 @@ endfunction "}}}
 
 " Initialize server.
 function! s:ServerDict_init() dict "{{{
-    if !eskk#util#has_vimproc()
-    \ || !vimproc#host_exists(self.host) || self.port <= 0
-        return
-    endif
+    if has('channel')
+        let self._socket = ch_open(printf("%s:%s", self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
+        if ch_status(self._socket) == "fail"
+            call eskk#logger#warn('server initialization failed.')
+        endif
+    else
+        if !eskk#util#has_vimproc()
+            \ || !vimproc#host_exists(self.host) || self.port <= 0
+                return
+        endif
 
-    try
-        let self._socket = vimproc#socket_open(self.host, self.port)
-    catch
-        call eskk#logger#warn('server initialization failed.')
-    endtry
+        try
+            let self._socket = vimproc#socket_open(self.host, self.port)
+        catch
+            call eskk#logger#warn('server initialization failed.')
+        endtry
+    endif
 endfunction "}}}
 
 function! s:ServerDict_request(command, key) dict "{{{
@@ -1270,21 +1277,35 @@ function! s:ServerDict_request(command, key) dict "{{{
         if self.encoding != ''
             let key = iconv(key, &encoding, self.encoding)
         endif
-        call self._socket.write(printf("%s%s%s\n",
-        \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
-        let result = self._socket.read_line(-1, self.timeout)
+        if has('channel')
+            let result = ch_evalraw(self._socket, printf("%s%s%s\n",
+            \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
+        else
+            call self._socket.write(printf("%s%s%s\n",
+            \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
+            let result = self._socket.read_line(-1, self.timeout)
+        endif
         if self.encoding != ''
             let result = iconv(result, self.encoding, &encoding)
         endif
 
         if result == ''
             " Reset.
-            call self._socket.write("0\n")
-            call self._socket.close()
+            if has('channel')
+                call ch_evalraw(self._socket, "0\n")
+                call ch_close(self._socket)
+            else
+                call self._socket.write("0\n")
+                call self._socket.close()
+            endif
             call self.init()
         endif
     catch
-        call self._socket.close()
+        if has('channel')
+             call ch_close(self._socket)
+        else
+             call self._socket.close()
+        endif
         return ''
     endtry
 
