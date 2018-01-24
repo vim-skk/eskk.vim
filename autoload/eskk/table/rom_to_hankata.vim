@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! eskk#table#rom_to_hankata#load()
+function! eskk#table#rom_to_hankata#load() abort
     return {
     \   'a': ['ｱ', ''],
     \   'bb': ['ｯ', 'b'],

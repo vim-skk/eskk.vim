@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! eskk#table#rom_to_kata#load()
+function! eskk#table#rom_to_kata#load() abort
     return {
     \   'a': ['ア', ''],
     \   'bb': ['ッ', 'b'],

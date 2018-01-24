@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! eskk#table#hira_to_kata#load()
+function! eskk#table#hira_to_kata#load() abort
     return {
     \   'あ': ['ア', ''],
     \   'ば': ['バ', ''],

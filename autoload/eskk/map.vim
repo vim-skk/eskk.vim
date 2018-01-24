@@ -7,7 +7,7 @@ set cpo&vim
 " }}}
 
 
-function! s:SID() "{{{
+function! s:SID() abort "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 let s:SID_PREFIX = s:SID()
@@ -19,13 +19,13 @@ let s:prev_normal_keys = {}
 
 " Utilities
 
-function! eskk#map#get_map_modes() "{{{
+function! eskk#map#get_map_modes() abort "{{{
     return 'l'
 endfunction "}}}
-function! s:get_map_rhs(key) "{{{
+function! s:get_map_rhs(key) abort "{{{
     return 'eskk#filter(eskk#util#key2char('.string(a:key).'))'
 endfunction "}}}
-function! eskk#map#map(options, lhs, rhs, ...) "{{{
+function! eskk#map#map(options, lhs, rhs, ...) abort "{{{
     if a:lhs == '' || a:rhs == ''
         call eskk#logger#warnf(
         \   'lhs or rhs is empty: lhs = %s, rhs = %s',
@@ -52,7 +52,7 @@ function! eskk#map#map(options, lhs, rhs, ...) "{{{
         endtry
     endfor
 endfunction "}}}
-function! eskk#map#set_up_key(key, ...) "{{{
+function! eskk#map#set_up_key(key, ...) abort "{{{
     call eskk#map#map(
     \   'be' . (a:0 ? a:1 : ''),
     \   a:key,
@@ -60,7 +60,7 @@ function! eskk#map#set_up_key(key, ...) "{{{
     \   eskk#map#get_map_modes()
     \)
 endfunction "}}}
-function! eskk#map#unmap(options, lhs, modes) "{{{
+function! eskk#map#unmap(options, lhs, modes) abort "{{{
     if a:lhs == ''
         call eskk#logger#warnf(
         \   'lhs is empty: lhs = %s',
@@ -82,7 +82,7 @@ function! eskk#map#unmap(options, lhs, modes) "{{{
         endtry
     endfor
 endfunction "}}}
-function! eskk#map#map_from_maparg_dict(dict) "{{{
+function! eskk#map#map_from_maparg_dict(dict) abort "{{{
     if type(a:dict) !=# type({}) || empty(a:dict)
         " The mapping does not exist.
         return
@@ -96,19 +96,19 @@ endfunction "}}}
 
 
 " g:eskk#keep_state, g:eskk#keep_state_beyond_buffer
-function! eskk#map#save_normal_keys() "{{{
+function! eskk#map#save_normal_keys() abort "{{{
     let s:prev_normal_keys = s:save_normal_keys()
     call s:unmap_normal_keys()
 endfunction "}}}
-function! eskk#map#restore_normal_keys() "{{{
+function! eskk#map#restore_normal_keys() abort "{{{
     call s:restore_normal_keys(s:prev_normal_keys)
     let s:prev_normal_keys = {}
     " call s:map_normal_keys()
 endfunction "}}}
-function! s:get_normal_keys() "{{{
+function! s:get_normal_keys() abort "{{{
     return split('iIaAoOcCsSR', '\zs')
 endfunction "}}}
-function! s:map_normal_keys() "{{{
+function! s:map_normal_keys() abort "{{{
     " From s:SkkMapNormal() in plugin/skk.vim
 
     let calling_hook_fn =
@@ -118,12 +118,12 @@ function! s:map_normal_keys() "{{{
         call eskk#map#map('seb', key, printf(calling_hook_fn, string(key)), 'n')
     endfor
 endfunction "}}}
-function! s:do_normal_key(key, iminsert, imsearch) "{{{
+function! s:do_normal_key(key, iminsert, imsearch) abort "{{{
     let &l:iminsert = a:iminsert
     let &l:imsearch = a:imsearch
     return a:key
 endfunction "}}}
-function! s:unmap_normal_keys() "{{{
+function! s:unmap_normal_keys() abort "{{{
     for key in s:get_normal_keys()
         " Exists <buffer> mapping.
         if get(maparg(key, 'n', 0, 1), 'buffer')
@@ -131,7 +131,7 @@ function! s:unmap_normal_keys() "{{{
         endif
     endfor
 endfunction "}}}
-function! s:save_normal_keys() "{{{
+function! s:save_normal_keys() abort "{{{
     if !savemap#supported_version()
         return {}
     endif
@@ -140,7 +140,7 @@ function! s:save_normal_keys() "{{{
     for key in s:get_normal_keys()
         let keys.info[key] = savemap#save_map('n', key)
     endfor
-    function! keys.restore()
+    function! keys.restore() abort
         for map in values(self.info)
             if has_key(map, 'restore')
                 call map.restore()
@@ -149,7 +149,7 @@ function! s:save_normal_keys() "{{{
     endfunction
     return keys
 endfunction "}}}
-function! s:restore_normal_keys(keys) "{{{
+function! s:restore_normal_keys(keys) abort "{{{
     if has_key(a:keys, 'restore')
         call a:keys.restore()
     endif
@@ -157,7 +157,7 @@ endfunction "}}}
 
 
 " Functions using s:eskk_mappings
-function! eskk#map#map_all_keys() "{{{
+function! eskk#map#map_all_keys() abort "{{{
     let inst = eskk#get_buffer_instance()
     if has_key(inst, 'prev_lang_keys')
         return
@@ -219,7 +219,7 @@ function! eskk#map#map_all_keys() "{{{
         endif
     endfor
 endfunction "}}}
-function! eskk#map#unmap_all_keys() "{{{
+function! eskk#map#unmap_all_keys() abort "{{{
     let inst = eskk#get_buffer_instance()
     if !has_key(inst, 'prev_lang_keys')
         return
@@ -231,7 +231,7 @@ function! eskk#map#unmap_all_keys() "{{{
     call inst.prev_lang_keys.restore()
     unlet inst.prev_lang_keys
 endfunction "}}}
-function! s:create_map(type, options, lhs, ...) "{{{
+function! s:create_map(type, options, lhs, ...) abort "{{{
     let lhs = a:lhs
 
     let eskk_mappings = eskk#_get_eskk_mappings()
@@ -252,7 +252,7 @@ function! s:create_map(type, options, lhs, ...) "{{{
     let type_st.options = a:options
     let type_st.lhs = lhs
 endfunction "}}}
-function! s:create_general_map(options, lhs, rhs) "{{{
+function! s:create_general_map(options, lhs, rhs) abort "{{{
     let lhs = a:lhs
     let rhs = a:rhs
     let type_st = eskk#_get_eskk_general_mappings()
@@ -275,16 +275,16 @@ endfunction "}}}
 
 
 " :EskkMap
-function! s:skip_white(args) "{{{
+function! s:skip_white(args) abort "{{{
     return substitute(a:args, '^\s*', '', '')
 endfunction "}}}
-function! s:parse_one_arg_from_q_args(args) "{{{
+function! s:parse_one_arg_from_q_args(args) abort "{{{
     let arg = s:skip_white(a:args)
     let head = matchstr(arg, '^.\{-}[^\\]\ze\([ \t]\|$\)')
     let rest = strpart(arg, strlen(head))
     return [head, rest]
 endfunction "}}}
-function! s:parse_string_from_q_args(args) "{{{
+function! s:parse_string_from_q_args(args) abort "{{{
     let arg = s:skip_white(a:args)
     if arg =~# '^[''"]'    " If arg is string-ish, just eval(it).
         let regexp_string = '^\(''\).\{-}[^''\\]\1'
@@ -297,7 +297,7 @@ function! s:parse_string_from_q_args(args) "{{{
         return s:parse_one_arg_from_q_args(a:args)
     endif
 endfunction "}}}
-function! s:parse_options_get_optargs(args) "{{{
+function! s:parse_options_get_optargs(args) abort "{{{
     let OPT_CHARS = '[A-Za-z0-9\-]'
     let a = s:skip_white(a:args)
 
@@ -327,7 +327,7 @@ function! s:parse_options_get_optargs(args) "{{{
         return [m, 1, rest]
     endif
 endfunction "}}}
-function! s:parse_options(args) "{{{
+function! s:parse_options(args) abort "{{{
     let args = a:args
     let type = 'general'
     let opt = s:create_default_mapopt()
@@ -365,16 +365,16 @@ let s:DEFAULT_MAPOPT = {
 if v:version >=# 703 && has('patch1264')
     let s:DEFAULT_MAPOPT['nowait'] = 1
 endif
-function! s:create_default_mapopt() "{{{
+function! s:create_default_mapopt() abort "{{{
     return copy(s:DEFAULT_MAPOPT)
 endfunction "}}}
-function! eskk#map#cmd_eskk_map_invalid_args(...) "{{{
+function! eskk#map#cmd_eskk_map_invalid_args(...) abort "{{{
     return eskk#util#build_error(
     \   ['eskk', 'mappings'],
     \   [':EskkMap argument parse error'] + a:000
     \)
 endfunction "}}}
-function! eskk#map#_cmd_eskk_map(args) "{{{
+function! eskk#map#_cmd_eskk_map(args) abort "{{{
     let [options, type, args] = s:parse_options(a:args)
 
     " Get lhs.

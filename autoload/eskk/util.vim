@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! s:SID() "{{{
+function! s:SID() abort "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 let s:SID_PREFIX = s:SID()
@@ -30,23 +30,23 @@ call s:Vital.load('Mapping')
 " Environment
 " function! eskk#util#is_mswin() {{{
 if has('win16') || has('win32') || has('win64') || has('win95')
-    function! eskk#util#is_mswin()
+    function! eskk#util#is_mswin() abort
         return 1
     endfunction
 else
-    function! eskk#util#is_mswin()
+    function! eskk#util#is_mswin() abort
         return 0
     endfunction
 endif
 " }}}
-function! eskk#util#has_vimproc(...) "{{{
+function! eskk#util#has_vimproc(...) abort "{{{
     let module = s:Vital.Process
     return call(module.has_vimproc, a:000, module)
 endfunction "}}}
 
 
 " Assert, Error
-function! eskk#util#assert(cond, msg) "{{{
+function! eskk#util#assert(cond, msg) abort "{{{
     if !a:cond
         throw eskk#util#build_error(
         \   ['eskk', 'util'],
@@ -54,7 +54,7 @@ function! eskk#util#assert(cond, msg) "{{{
         \)
     endif
 endfunction "}}}
-function! eskk#util#build_error(from, msg_list) "{{{
+function! eskk#util#build_error(from, msg_list) abort "{{{
     let file = 'autoload/' . join(a:from, '/') . '.vim'
     let msg = type(a:msg_list) is type([]) ?
     \           join(a:msg_list, ': ') : a:msg_list
@@ -63,7 +63,7 @@ endfunction "}}}
 
 
 " Options
-function! eskk#util#set_default(var, Value) "{{{
+function! eskk#util#set_default(var, Value) abort "{{{
     if !exists(a:var)
         let {a:var} = a:Value
     elseif type({a:var}) isnot type(a:Value)
@@ -74,7 +74,7 @@ function! eskk#util#set_default(var, Value) "{{{
         let {a:var} = a:Value
     endif
 endfunction "}}}
-function! eskk#util#set_default_dict(var, dict) "{{{
+function! eskk#util#set_default_dict(var, dict) abort "{{{
     if type(a:dict) isnot type({})
         call eskk#logger#warn('invalid argument for eskk#util#set_default_dict('.string(a:var).', ...)')
         return
@@ -88,41 +88,41 @@ endfunction "}}}
 
 
 " Multibyte/Encoding
-function! eskk#util#mb_strlen(...) "{{{
+function! eskk#util#mb_strlen(...) abort "{{{
     let module = s:Vital.Data.String
     return call(module.strchars, a:000, module)
 endfunction "}}}
-function! eskk#util#mb_chop(...) "{{{
+function! eskk#util#mb_chop(...) abort "{{{
     let module = s:Vital.Data.String
     return call(module.chop, a:000, module)
 endfunction "}}}
-function! eskk#util#iconv(...) "{{{
+function! eskk#util#iconv(...) abort "{{{
     let module = s:Vital.Process
     return call(module.iconv, a:000, module)
 endfunction "}}}
 
 
 " List function
-function! eskk#util#flatten_list(...) "{{{
+function! eskk#util#flatten_list(...) abort "{{{
     let module = s:Vital.Data.List
     return call(module.flatten, a:000, module)
 endfunction "}}}
-function! eskk#util#has_idx(...) "{{{
+function! eskk#util#has_idx(...) abort "{{{
     let module = s:Vital.Data.List
     return call(module.has_index, a:000, module)
 endfunction "}}}
-function! eskk#util#uniq_by(...) "{{{
+function! eskk#util#uniq_by(...) abort "{{{
     let module = s:Vital.Data.List
     return call(module.uniq_by, a:000, module)
 endfunction "}}}
 
 
 " String function
-function! eskk#util#diffidx(...) "{{{
+function! eskk#util#diffidx(...) abort "{{{
     let module = s:Vital.Data.String
     return call(module.diffidx, a:000, module)
 endfunction "}}}
-function! eskk#util#split_byte_range(s, begin, end) "{{{
+function! eskk#util#split_byte_range(s, begin, end) abort "{{{
     let s     = a:s
     let begin = a:begin
     let end   = a:end
@@ -146,21 +146,21 @@ endfunction "}}}
 
 
 " Ordered Set
-function! eskk#util#create_data_ordered_set(...) "{{{
+function! eskk#util#create_data_ordered_set(...) abort "{{{
     let module = s:Vital.Data.OrderedSet
     return call(module.new, a:000, module)
 endfunction "}}}
 
 
 " SID/Scripts
-function! eskk#util#get_local_funcref(funcname, sid) "{{{
+function! eskk#util#get_local_funcref(funcname, sid) abort "{{{
     return function(eskk#util#get_local_func(a:funcname, a:sid))
 endfunction "}}}
-function! eskk#util#get_local_func(funcname, sid) "{{{
+function! eskk#util#get_local_func(funcname, sid) abort "{{{
     " :help <SID>
     return printf('<SNR>%d_%s', a:sid, a:funcname)
 endfunction "}}}
-function! eskk#util#get_loaded_scripts(regex) "{{{
+function! eskk#util#get_loaded_scripts(regex) abort "{{{
     let output = eskk#util#redir_english('scriptnames')
     let scripts = []
     for line in split(output, '\n')
@@ -174,17 +174,17 @@ endfunction "}}}
 
 
 " Filesystem
-function! eskk#util#move_file(src, dest) "{{{
+function! eskk#util#move_file(src, dest) abort "{{{
     return s:Vital.System.File.move_file(a:src, a:dest)
 endfunction "}}}
-function! eskk#util#copy_file(src, dest) "{{{
+function! eskk#util#copy_file(src, dest) abort "{{{
     return s:Vital.System.File.copy(a:src, a:dest)
 endfunction "}}}
-function! eskk#util#mkdir_nothrow(...) "{{{
+function! eskk#util#mkdir_nothrow(...) abort "{{{
     let module = s:Vital.System.File
     return call(module.mkdir_nothrow, a:000, module)
 endfunction "}}}
-function! eskk#util#dlog(data, filename) "{{{
+function! eskk#util#dlog(data, filename) abort "{{{
     let data = type(a:data) is type([]) ?
     \              a:data :
     \          type(a:data) is type("") ?
@@ -200,41 +200,41 @@ endfunction "}}}
 
 
 " Path
-function! eskk#util#join_path(...) "{{{
+function! eskk#util#join_path(...) abort "{{{
     let module = s:Vital.System.Filepath
     return call(module.join, a:000, module)
 endfunction "}}}
-function! eskk#util#globpath(pat) "{{{
+function! eskk#util#globpath(pat) abort "{{{
     return split(globpath(&runtimepath, a:pat), '\n')
 endfunction "}}}
 
 
 " Mapping
-function! eskk#util#mapopt_chars2raw(...) "{{{
+function! eskk#util#mapopt_chars2raw(...) abort "{{{
     let module = s:Vital.Mapping
     return call(module.options_chars2raw, a:000, module)
 endfunction "}}}
-function! eskk#util#mapopt_chars2dict(...) "{{{
+function! eskk#util#mapopt_chars2dict(...) abort "{{{
     let module = s:Vital.Mapping
     return call(module.options_chars2dict, a:000, module)
 endfunction "}}}
-function! eskk#util#mapopt_dict2chars(...) "{{{
+function! eskk#util#mapopt_dict2chars(...) abort "{{{
     let module = s:Vital.Mapping
     return call(module.options_dict2chars, a:000, module)
 endfunction "}}}
-function! eskk#util#get_map_command(...) "{{{
+function! eskk#util#get_map_command(...) abort "{{{
     let module = s:Vital.Mapping
     return call(module.get_map_command, a:000, module)
 endfunction "}}}
-function! eskk#util#get_unmap_command(...) "{{{
+function! eskk#util#get_unmap_command(...) abort "{{{
     let module = s:Vital.Mapping
     return call(module.get_unmap_command, a:000, module)
 endfunction "}}}
-function! eskk#util#is_mode_char(...) "{{{
+function! eskk#util#is_mode_char(...) abort "{{{
     let module = s:Vital.Mapping
     return call(module.is_mode_char, a:000, module)
 endfunction "}}}
-function! eskk#util#key2char(key) "{{{
+function! eskk#util#key2char(key) abort "{{{
     if stridx(a:key, '<') ==# -1    " optimization
         return a:key
     endif
@@ -246,7 +246,7 @@ function! eskk#util#key2char(key) "{{{
     \   ''
     \)
 endfunction "}}}
-function! s:split_to_keys(lhs)  "{{{
+function! s:split_to_keys(lhs) abort  "{{{
     " From arpeggio.vim
     "
     " Assumption: Special keys such as <C-u>
@@ -257,18 +257,18 @@ endfunction "}}}
 
 
 " Misc.
-function! eskk#util#identity(value) "{{{
+function! eskk#util#identity(value) abort "{{{
     return a:value
 endfunction "}}}
-function! eskk#util#getchar(...) "{{{
+function! eskk#util#getchar(...) abort "{{{
     let module = s:Vital.Prelude
     return call(module.getchar_safe, a:000, module)
 endfunction "}}}
-function! eskk#util#input(...) "{{{
+function! eskk#util#input(...) abort "{{{
     let module = s:Vital.Prelude
     return call(module.input_safe, a:000, module)
 endfunction "}}}
-function! eskk#util#redir_english(excmd) "{{{
+function! eskk#util#redir_english(excmd) abort "{{{
     let save_lang = v:lang
     lang messages C
     try

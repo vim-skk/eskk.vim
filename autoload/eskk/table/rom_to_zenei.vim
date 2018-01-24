@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! eskk#table#rom_to_zenei#load()
+function! eskk#table#rom_to_zenei#load() abort
     return {
     \   ' ': ['　', ''],
     \   '!': ['！', ''],

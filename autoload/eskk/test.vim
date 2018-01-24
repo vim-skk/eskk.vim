@@ -7,7 +7,7 @@ set cpo&vim
 " }}}
 
 
-function! eskk#test#emulate_filter_keys(chars, ...) "{{{
+function! eskk#test#emulate_filter_keys(chars, ...) abort "{{{
     let ret = ''
     for c in s:each_char(a:chars)
         let ret = s:emulate_char(c, ret)
@@ -22,12 +22,12 @@ function! eskk#test#emulate_filter_keys(chars, ...) "{{{
     return ret
 endfunction "}}}
 
-function! s:each_char(chars) "{{{
+function! s:each_char(chars) abort "{{{
     let r = split(a:chars, '\zs')
     let r = s:aggregate_backspace(r)
     return r
 endfunction "}}}
-function! s:aggregate_backspace(list) "{{{
+function! s:aggregate_backspace(list) abort "{{{
     let list = a:list
     let pos = -1
     while 1
@@ -42,7 +42,7 @@ function! s:aggregate_backspace(list) "{{{
     endwhile
     return list
 endfunction "}}}
-function! s:remove_ctrl_char(s, ctrl_char) "{{{
+function! s:remove_ctrl_char(s, ctrl_char) abort "{{{
     let s = a:s
     let pos = stridx(s, a:ctrl_char)
     if pos != -1
@@ -53,14 +53,14 @@ function! s:remove_ctrl_char(s, ctrl_char) "{{{
     return [s, pos]
 endfunction "}}}
 
-function! s:emulate_char(c, ret) "{{{
+function! s:emulate_char(c, ret) abort "{{{
     let c = a:c
     let ret = a:ret
     let r = eskk#filter(c)
     let ret = s:emulate_backspace(r, ret)
     return ret
 endfunction "}}}
-function! s:emulate_backspace(r, ret) "{{{
+function! s:emulate_backspace(r, ret) abort "{{{
     let r = a:r
     let ret = a:ret
     for bs in ["\<BS>", "\<C-h>"]
@@ -87,7 +87,7 @@ function! s:emulate_backspace(r, ret) "{{{
     " Handle rewritten text.
     return ret . r
 endfunction "}}}
-function! s:emulate_filter_char(r, ret) "{{{
+function! s:emulate_filter_char(r, ret) abort "{{{
     let r = a:r
     let ret = a:ret
     while 1
