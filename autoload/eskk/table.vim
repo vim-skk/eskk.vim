@@ -235,7 +235,7 @@ function! s:get_map(table, lhs, index, ...) abort "{{{
     let data = a:table.load()
     if s:ENABLE_CACHE_MAP
     \   && has_key(a:table._cached_maps, a:lhs)
-        if a:table._cached_maps[a:lhs][a:index] != ''
+        if a:table._cached_maps[a:lhs][a:index] !=# ''
             return a:table._cached_maps[a:lhs][a:index]
         else
             return s:get_map_not_found(a:table, a:lhs, a:index, a:000)
@@ -245,7 +245,7 @@ function! s:get_map(table, lhs, index, ...) abort "{{{
     if a:table.is_base()
         if has_key(data, a:lhs)
         \   && eskk#util#has_idx(data[a:lhs], a:index)
-        \   && data[a:lhs][a:index] != ''
+        \   && data[a:lhs][a:index] !=# ''
             if s:ENABLE_CACHE_MAP
                 let a:table._cached_maps[a:lhs] = data[a:lhs]
             endif
@@ -254,7 +254,7 @@ function! s:get_map(table, lhs, index, ...) abort "{{{
     else
         if has_key(data, a:lhs)
             if data[a:lhs].method ==# 'add'
-            \   && data[a:lhs].data[a:index] != ''
+            \   && data[a:lhs].data[a:index] !=# ''
                 if s:ENABLE_CACHE_MAP
                     let a:table._cached_maps[a:lhs] = data[a:lhs].data
                 endif

@@ -70,7 +70,7 @@ function! s:emulate_backspace(r, ret) abort "{{{
                 break
             endif
             if pos ==# 0
-                if ret == ''
+                if ret ==# ''
                     let r = bs . r
                     break
                 else

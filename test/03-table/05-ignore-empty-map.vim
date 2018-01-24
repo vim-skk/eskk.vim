@@ -39,7 +39,7 @@ function! s:run() "{{{
 
         " Empty maps are treated as like
         " those are not registered.
-        if map != ''
+        if map !=# ''
             Ok table.has_map(lhs)
             Is table.get_map(lhs, -1), map
         else
@@ -47,7 +47,7 @@ function! s:run() "{{{
             Is table.get_map(lhs, -1), -1
         endif
 
-        if rest != ''
+        if rest !=# ''
             Ok table.has_rest(lhs)
             Is table.get_rest(lhs, -1), rest
         else

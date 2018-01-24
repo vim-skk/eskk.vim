@@ -52,7 +52,7 @@ function! s:cmd_update_dictionary(silent) abort "{{{
 endfunction "}}}
 
 function! s:cmd_fix_dictionary(path, skip_prompt) abort "{{{
-    let path = a:path != '' ? a:path :
+    let path = a:path !=# '' ? a:path :
     \          exists('g:eskk#dictionary.path') ? g:eskk#dictionary.path : ''
     let path = expand(path)
     if !filereadable(path)
@@ -147,7 +147,7 @@ function s:Collector.add_matching_line(line) abort
             " Remove the empty annotation.
             let c = substitute(c, ';$', '', '')
             " Skip the empty candidate.
-            if c == ''
+            if c ==# ''
                 continue
             endif
             " Add a candidate to self.hira_vs_candidates[hira].

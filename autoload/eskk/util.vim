@@ -165,7 +165,7 @@ function! eskk#util#get_loaded_scripts(regex) abort "{{{
     let scripts = []
     for line in split(output, '\n')
         let path = matchstr(line, '^ *\d\+: \+\zs.\+$')
-        if path != '' && path =~# a:regex
+        if path !=# '' && path =~# a:regex
             call add(scripts, path)
         endif
     endfor
@@ -241,7 +241,7 @@ function! eskk#util#key2char(key) abort "{{{
     return join(
     \   map(
     \       s:split_to_keys(a:key),
-    \       'v:val =~ "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
+    \       'v:val =~# "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
     \   ),
     \   ''
     \)

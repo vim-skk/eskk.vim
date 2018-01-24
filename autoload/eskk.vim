@@ -333,7 +333,7 @@ function! s:handle_to_ascii(stash) abort "{{{
     let phase = preedit.get_henkan_phase()
     let buf_str = preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() == ''
+    \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('ascii')
         return 1
     endif
@@ -344,7 +344,7 @@ function! s:handle_to_zenei(stash) abort "{{{
     let phase = preedit.get_henkan_phase()
     let buf_str = preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() == ''
+    \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('zenei')
         return 1
     endif
@@ -354,7 +354,7 @@ function! s:handle_to_abbrev(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     let buf_str = a:stash.preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() == ''
+    \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('abbrev')
         return 1
     endif
@@ -565,7 +565,7 @@ function! s:close_pum(stash) abort "{{{
 endfunction "}}}
 function! s:do_backspace(stash) abort "{{{
     let preedit = a:stash.preedit
-    if preedit.get_old_str() == ''
+    if preedit.get_old_str() ==# ''
         call preedit.push_kakutei_str("\<C-h>")
         return
     endif
@@ -636,7 +636,7 @@ function! s:do_backspace(stash) abort "{{{
         elseif !buf_str.rom_pairs.empty()
             call buf_str.rom_pairs.pop()
             break
-        elseif preedit.get_marker(phase) != ''
+        elseif preedit.get_marker(phase) !=# ''
             if !preedit.step_back_henkan_phase()
                 let msg = "Normal phase's marker is empty, "
                 \       . "and other phases *should* be able to change "
@@ -840,7 +840,7 @@ function! s:do_henkan_abbrev(stash, convert_at_exact_match) abort "{{{
         \      dict.get_henkan_result()
         \   )
         let [input, okuri] = [result[0], result[2]]
-        if input != ''
+        if input !=# ''
             call preedit.kakutei(input . okuri)
         endif
     endtry
@@ -923,7 +923,7 @@ function! s:do_henkan_other(stash, convert_at_exact_match) abort "{{{
         \   dict.remember_word_prompt_hr(
         \      dict.get_henkan_result()
         \   )
-        if input != ''
+        if input !=# ''
             call preedit.kakutei(input . okuri)
         endif
     endtry
@@ -1232,7 +1232,7 @@ function! s:abbrev_filter(stash) abort "{{{
         call eskk#set_mode('hira')
         return
     elseif char ==# "\<C-h>"
-        if buf_str.rom_str.get() == ''
+        if buf_str.rom_str.get() ==# ''
             " If backspace-key was pressed at empty string,
             " leave abbrev mode.
             call eskk#set_mode('hira')
@@ -1646,7 +1646,7 @@ function! eskk#_initialize() abort "{{{
 
     " InsertLeave: g:eskk#convert_at_exact_match {{{
     function! s:clear_real_matched_pairs() abort "{{{
-        if !eskk#is_enabled() || eskk#get_mode() == ''
+        if !eskk#is_enabled() || eskk#get_mode() ==# ''
             return
         endif
 
@@ -2179,7 +2179,7 @@ function! eskk#set_cursor_color() abort "{{{
     let color = g:eskk#cursor_color[eskk_mode]
     if type(color) == type([]) && len(color) >= 2
         execute 'highlight lCursor guibg=' . color[&background ==# 'light' ? 0 : 1]
-    elseif type(color) == type("") && color != ''
+    elseif type(color) == type("") && color !=# ''
         execute 'highlight lCursor guibg=' . color
     endif
 endfunction "}}}

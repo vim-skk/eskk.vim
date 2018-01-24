@@ -26,7 +26,7 @@ function! s:get_map_rhs(key) abort "{{{
     return 'eskk#filter(eskk#util#key2char('.string(a:key).'))'
 endfunction "}}}
 function! eskk#map#map(options, lhs, rhs, ...) abort "{{{
-    if a:lhs == '' || a:rhs == ''
+    if a:lhs ==# '' || a:rhs ==# ''
         call eskk#logger#warnf(
         \   'lhs or rhs is empty: lhs = %s, rhs = %s',
         \   string(a:lhs),
@@ -61,7 +61,7 @@ function! eskk#map#set_up_key(key, ...) abort "{{{
     \)
 endfunction "}}}
 function! eskk#map#unmap(options, lhs, modes) abort "{{{
-    if a:lhs == ''
+    if a:lhs ==# ''
         call eskk#logger#warnf(
         \   'lhs is empty: lhs = %s',
         \   string(a:lhs),
@@ -202,7 +202,7 @@ function! eskk#map#map_all_keys() abort "{{{
         if !eval(opt.options['map-if'])
             continue
         endif
-        if opt.rhs == ''
+        if opt.rhs ==# ''
             call eskk#map#set_up_key(
             \   key,
             \   eskk#util#mapopt_dict2chars(opt.options)
@@ -257,7 +257,7 @@ function! s:create_general_map(options, lhs, rhs) abort "{{{
     let rhs = a:rhs
     let type_st = eskk#_get_eskk_general_mappings()
 
-    if lhs == ''
+    if lhs ==# ''
         call eskk#logger#warn("lhs must not be empty string.")
         return
     endif
@@ -332,7 +332,7 @@ function! s:parse_options(args) abort "{{{
     let type = 'general'
     let opt = s:create_default_mapopt()
 
-    while args != ''
+    while args !=# ''
         let [optname, value, args] = s:parse_options_get_optargs(args)
         if optname ==# '--'
             break

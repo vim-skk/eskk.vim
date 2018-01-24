@@ -152,7 +152,7 @@ function! s:get_all_lhs(mode, is_abbr) abort "{{{
     let uniq = {}
     for l in split(output, '\n')
         let m = matchstr(l, '^.\s\+\zs\S\+')
-        if m != '' && !has_key(uniq, m)
+        if m !=# '' && !has_key(uniq, m)
             call add(r, m)
             let uniq[m] = 1
         endif
@@ -185,7 +185,7 @@ function! s:make_map_info(mode, lhs, is_abbr) abort "{{{
 endfunction "}}}
 
 function! s:do_unmap_silently(mode, lhs, is_abbr, is_buffer) abort "{{{
-    if a:mode == '' || a:lhs == ''
+    if a:mode ==# '' || a:lhs ==# ''
         return
     endif
     " Even if no such a mapping for a:lhs,

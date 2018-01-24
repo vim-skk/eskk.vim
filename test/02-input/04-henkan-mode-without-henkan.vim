@@ -44,7 +44,7 @@ function! s:create_map_and_test(lhs, rhs) "{{{
 endfunction "}}}
 
 function! s:run() "{{{
-    if globpath(&rtp, 'autoload/savemap.vim') == ''
+    if globpath(&rtp, 'autoload/savemap.vim') ==# ''
         Skip "you must install savemap.vim to run this test."
     endif
 

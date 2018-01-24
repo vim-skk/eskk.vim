@@ -462,7 +462,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
                 \   g:eskk#preedit#PHASE_OKURI
                 \)
                 return [
-                \   (input != '' ?
+                \   (input !=# '' ?
                 \       input : henkan_buf_str.rom_pairs.get_filter()),
                 \   okuri_buf_str.rom_pairs.get_filter()
                 \]
@@ -774,7 +774,7 @@ function! s:PhysicalDict_make_updated_lines(registered_words) abort dict "{{{
         if index >=# 0
             " If the line exists, add `word` to the line.
             call eskk#util#assert(
-            \   l != '',
+            \   l !=# '',
             \   'line must not be empty string'
             \   . ' (index = '.index.')'
             \)
@@ -919,7 +919,7 @@ endfunction "}}}
 " Returns all lines matching the candidate.
 function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) abort dict "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
-    let has_okuri = a:okuri_rom != ''
+    let has_okuri = a:okuri_rom !=# ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom : '')
 
     " self.is_valid() loads whole lines if it does not have,
@@ -987,7 +987,7 @@ endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
 function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) abort dict "{{{
-    let has_okuri = a:okuri_rom != ''
+    let has_okuri = a:okuri_rom !=# ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom : '') . ' '
 
     if !self.is_valid()
@@ -1250,7 +1250,7 @@ endfunction "}}}
 function! s:ServerDict_init() abort dict "{{{
     if has('channel')
         let self._socket = ch_open(printf("%s:%s", self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
-        if ch_status(self._socket) == "fail"
+        if ch_status(self._socket) ==# "fail"
             call eskk#logger#warn('server initialization failed.')
         endif
     else
@@ -1274,22 +1274,22 @@ function! s:ServerDict_request(command, key) abort dict "{{{
 
     try
         let key = a:key
-        if self.encoding != ''
+        if self.encoding !=# ''
             let key = iconv(key, &encoding, self.encoding)
         endif
         if has('channel')
             let result = ch_evalraw(self._socket, printf("%s%s%s\n",
-            \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
+            \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
         else
             call self._socket.write(printf("%s%s%s\n",
-            \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
+            \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
             let result = self._socket.read_line(-1, self.timeout)
         endif
-        if self.encoding != ''
+        if self.encoding !=# ''
             let result = iconv(result, self.encoding, &encoding)
         endif
 
-        if result == ''
+        if result ==# ''
             " Reset.
             if has('channel')
                 call ch_evalraw(self._socket, "0\n")
@@ -1309,7 +1309,7 @@ function! s:ServerDict_request(command, key) abort dict "{{{
         return ''
     endtry
 
-    return result == '' || result[0] ==# '4' ? '' : result[1:]
+    return result ==# '' || result[0] ==# '4' ? '' : result[1:]
 endfunction "}}}
 function! s:ServerDict_lookup(key) abort dict "{{{
     return self.request('1', a:key)
@@ -1318,9 +1318,9 @@ function! s:ServerDict_complete(key) abort dict "{{{
     return self.request('4', a:key)
 endfunction "}}}
 function! s:ServerDict_search_candidate(key, okuri_rom) abort dict "{{{
-    let result = a:okuri_rom == '' ?
+    let result = a:okuri_rom ==# '' ?
                 \ self.lookup(a:key) : ''
-    return result != '' ? [a:key .' ' . result, 0] : ['', -1]
+    return result !=# '' ? [a:key .' ' . result, 0] : ['', -1]
 endfunction "}}}
 
 let s:ServerDict = {
@@ -1436,7 +1436,7 @@ function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
     " Create new eskk instance.
     call eskk#create_new_instance()
 
-    if okuri == ''
+    if okuri ==# ''
         let prompt = printf('%s ', key)
     else
         let prompt = printf('%s%s%s ', key, g:eskk#marker_okuri, okuri)
@@ -1463,7 +1463,7 @@ function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
     endtry
 
 
-    if input != ''
+    if input !=# ''
         if !s:check_accidental_input(input)
             return self.remember_word_prompt(a:word)
         endif
@@ -1623,7 +1623,7 @@ function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) abort dict "
     let key = a:key
     let okuri_rom = a:okuri_rom
 
-    if key == ''
+    if key ==# ''
         return []
     endif
 

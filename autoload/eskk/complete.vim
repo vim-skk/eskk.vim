@@ -129,7 +129,7 @@ function! s:get_completed_candidates(display_str, else) abort "{{{
     \)
 endfunction "}}}
 function! s:set_completed_candidates(display_str, candidates) abort "{{{
-    if a:display_str == ''    " empty string cannot be a key of dictionary.
+    if a:display_str ==# ''    " empty string cannot be a key of dictionary.
         return
     endif
     let mode = eskk#get_mode()
@@ -142,7 +142,7 @@ endfunction "}}}
 " s:MODE_FUNC_TABLE
 function! s:MODE_FUNC_TABLE.hira(base) abort "{{{
     " Do not complete while inputting rom string.
-    if a:base =~ '\a$'
+    if a:base =~# '\a$'
         return s:skip_complete()
     endif
     let mb_str = eskk#get_preedit().get_buf_str(

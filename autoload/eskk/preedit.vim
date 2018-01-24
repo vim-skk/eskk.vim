@@ -219,9 +219,9 @@ function! s:calculate_rewrite() abort dict "{{{
     " to waste calculation time.
     if old ==# new
         return [0, '']
-    elseif new == ''
+    elseif new ==# ''
         return [eskk#util#mb_strlen(old), '']
-    elseif old == ''
+    elseif old ==# ''
         " Insert a new string.
         return [0, new]
     elseif stridx(old, new) == 0
@@ -414,7 +414,7 @@ function! s:get_next_candidate(this, next) abort "{{{
             \      dict.get_henkan_result()
             \   )
             let [input, okuri] = [result[0], result[2]]
-            if input != ''
+            if input !=# ''
                 call a:this.kakutei(input . okuri)
             endif
         else
@@ -428,7 +428,7 @@ function! s:get_next_candidate(this, next) abort "{{{
             let okuri_rom_str = okuri_buf_str.rom_pairs.get_rom()
             if g:eskk#revert_henkan_style ==# 'okuri-one'
                 " "▼書く" => "▽か*k"
-                if okuri_rom_str != ''
+                if okuri_rom_str !=# ''
                     call okuri_buf_str.rom_str.set(okuri_rom_str[0])
                     call okuri_buf_str.rom_pairs.clear()
                 endif
@@ -436,7 +436,7 @@ function! s:get_next_candidate(this, next) abort "{{{
                 " "▼書く" => "▽か*く"
             elseif g:eskk#revert_henkan_style ==# 'delete-okuri'
                 " "▼書く" => "▽か"
-                if okuri_rom_str != ''
+                if okuri_rom_str !=# ''
                     " Clear roms of `okuri_buf_str`.
                     call okuri_buf_str.clear()
                     call prev_preedit.set_henkan_phase(
@@ -445,7 +445,7 @@ function! s:get_next_candidate(this, next) abort "{{{
                 endif
             elseif g:eskk#revert_henkan_style ==# 'concat-okuri'
                 " "▼書く" => "▽かく"
-                if okuri_rom_str != ''
+                if okuri_rom_str !=# ''
                     " Copy roms of `okuri_buf_str` to `henkan_buf_str`.
                     for okuri_matched in okuri_buf_str.rom_pairs.get()
                         call call(henkan_buf_str.rom_pairs.push_one_pair, okuri_matched)

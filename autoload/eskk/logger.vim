@@ -85,12 +85,12 @@ function! eskk#logger#write_error_log_file(stash, ...) abort "{{{
     function o['a'](arg) abort
         let a:arg.stacktrace =
         \   matchstr(v:throwpoint, '\C'.'^function \zs\S\+\ze, ')
-        return a:arg.stacktrace != ''
+        return a:arg.stacktrace !=# ''
     endfunction
 
     function o['b'](arg) abort
         let a:arg.funcname = get(split(a:arg.stacktrace, '\.\.'), -1, '')
-        return a:arg.funcname != ''
+        return a:arg.funcname !=# ''
     endfunction
 
     function o['c'](arg) abort
