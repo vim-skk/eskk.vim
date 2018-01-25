@@ -16,19 +16,19 @@ let g:savemap#version = str2nr(printf('%02d%02d%03d', 0, 2, 4))
 
 " Interface {{{
 
-function! savemap#load() "{{{
+function! savemap#load() abort "{{{
     " dummy function to load this script
 endfunction "}}}
 
-function! savemap#save_map(...) "{{{
+function! savemap#save_map(...) abort "{{{
     return call('s:save_map', [0] + a:000)
 endfunction "}}}
 
-function! savemap#save_abbr(...) "{{{
+function! savemap#save_abbr(...) abort "{{{
     return call('s:save_map', [1] + a:000)
 endfunction "}}}
 
-function! savemap#supported_version() "{{{
+function! savemap#supported_version() abort "{{{
     return v:version > 703 || v:version == 703 && has('patch32')
 endfunction "}}}
 
@@ -36,19 +36,19 @@ endfunction "}}}
 
 " Implementation {{{
 
-function! s:SID() "{{{
+function! s:SID() abort "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 let s:SID_PREFIX = s:SID()
 delfunc s:SID
 
-function! s:local_func(name) "{{{
+function! s:local_func(name) abort "{{{
     return function('<SNR>' . s:SID_PREFIX . '_' . a:name)
 endfunction "}}}
 
 
 
-function! s:save_map(is_abbr, arg, ...) "{{{
+function! s:save_map(is_abbr, arg, ...) abort "{{{
     if !savemap#supported_version()
         return {}
     endif
@@ -113,7 +113,7 @@ function! s:save_map(is_abbr, arg, ...) "{{{
     return map_dict
 endfunction "}}}
 
-function! s:MapDict_new(is_abbr) "{{{
+function! s:MapDict_new(is_abbr) abort "{{{
     let obj = {}
     let obj.__is_abbr = a:is_abbr
     let obj.__map_info = []
@@ -124,26 +124,26 @@ function! s:MapDict_new(is_abbr) "{{{
     return obj
 endfunction "}}}
 
-function! s:MapDict_restore() dict "{{{
+function! s:MapDict_restore() abort dict "{{{
     for d in self.__map_info
         call s:restore_map_info(d.normal, self.__is_abbr)
         call s:restore_map_info(d.buffer, self.__is_abbr)
     endfor
 endfunction "}}}
 
-function! s:MapDict_add_map_info(map_info) dict "{{{
+function! s:MapDict_add_map_info(map_info) abort dict "{{{
     call add(self.__map_info, a:map_info)
 endfunction "}}}
 
-function! s:MapDict_has_abbr() dict "{{{
+function! s:MapDict_has_abbr() abort dict "{{{
     return self.__is_abbr
 endfunction "}}}
 
-function! s:MapDict_get_map_info() dict "{{{
+function! s:MapDict_get_map_info() abort dict "{{{
     return self.__map_info
 endfunction "}}}
 
-function! s:get_all_lhs(mode, is_abbr) "{{{
+function! s:get_all_lhs(mode, is_abbr) abort "{{{
     redir => output
     silent execute a:mode . (a:is_abbr ? 'abbr' : 'map')
     redir END
@@ -152,7 +152,7 @@ function! s:get_all_lhs(mode, is_abbr) "{{{
     let uniq = {}
     for l in split(output, '\n')
         let m = matchstr(l, '^.\s\+\zs\S\+')
-        if m != '' && !has_key(uniq, m)
+        if m !=# '' && !has_key(uniq, m)
             call add(r, m)
             let uniq[m] = 1
         endif
@@ -160,7 +160,7 @@ function! s:get_all_lhs(mode, is_abbr) "{{{
     return r
 endfunction "}}}
 
-function! s:make_map_info(mode, lhs, is_abbr) "{{{
+function! s:make_map_info(mode, lhs, is_abbr) abort "{{{
     let r = {
     \   'buffer': {},
     \   'normal': {},
@@ -184,8 +184,8 @@ function! s:make_map_info(mode, lhs, is_abbr) "{{{
     return r
 endfunction "}}}
 
-function! s:do_unmap_silently(mode, lhs, is_abbr, is_buffer) "{{{
-    if a:mode == '' || a:lhs == ''
+function! s:do_unmap_silently(mode, lhs, is_abbr, is_buffer) abort "{{{
+    if a:mode ==# '' || a:lhs ==# ''
         return
     endif
     " Even if no such a mapping for a:lhs,
@@ -196,7 +196,7 @@ function! s:do_unmap_silently(mode, lhs, is_abbr, is_buffer) "{{{
     \   a:lhs
 endfunction "}}}
 
-function! s:restore_map_info(map_info, is_abbr) "{{{
+function! s:restore_map_info(map_info, is_abbr) abort "{{{
     if empty(a:map_info)
         return
     endif
@@ -216,37 +216,37 @@ function! s:restore_map_info(map_info, is_abbr) "{{{
     endfor
 endfunction "}}}
 
-function! s:match_map_info_regexp(map_info, map_info_name, options, option_name) "{{{
+function! s:match_map_info_regexp(map_info, map_info_name, options, option_name) abort "{{{
     return s:match_map_info_compare(
     \   a:map_info, a:map_info_name,
     \   a:options, a:option_name,
     \   function('s:compare_map_info_regexp'))
 endfunction "}}}
-function! s:compare_map_info_regexp(map_info, option) "{{{
+function! s:compare_map_info_regexp(map_info, option) abort "{{{
     return a:map_info =~# a:option
 endfunction "}}}
 
-function! s:match_map_info_string(map_info, map_info_name, options, option_name) "{{{
+function! s:match_map_info_string(map_info, map_info_name, options, option_name) abort "{{{
     return s:match_map_info_compare(
     \   a:map_info, a:map_info_name,
     \   a:options, a:option_name,
     \   function('s:compare_map_info_string'))
 endfunction "}}}
-function! s:compare_map_info_string(map_info, option) "{{{
+function! s:compare_map_info_string(map_info, option) abort "{{{
     return a:map_info ==# a:option
 endfunction "}}}
 
-function! s:match_map_info_bool(map_info, map_info_name, options, option_name) "{{{
+function! s:match_map_info_bool(map_info, map_info_name, options, option_name) abort "{{{
     return s:match_map_info_compare(
     \   a:map_info, a:map_info_name,
     \   a:options, a:option_name,
     \   function('s:compare_map_info_bool'))
 endfunction "}}}
-function! s:compare_map_info_bool(map_info, option) "{{{
+function! s:compare_map_info_bool(map_info, option) abort "{{{
     return !!a:map_info == !!a:option
 endfunction "}}}
 
-function! s:match_map_info_compare(map_info, map_info_name, options, option_name, compare) "{{{
+function! s:match_map_info_compare(map_info, map_info_name, options, option_name, compare) abort "{{{
     " When a:options.buffer was given and 1,
     " check only <buffer> mapping.
     " When a:options.buffer was given and 0,
@@ -288,7 +288,7 @@ function! s:match_map_info_compare(map_info, map_info_name, options, option_name
     endif
 endfunction "}}}
 
-function! s:maparg(...) "{{{
+function! s:maparg(...) abort "{{{
     let info = call('maparg', a:000)
     if has_key(info, 'lhs')
         let info.lhs = substitute(info.lhs, '|', '<Bar>', 'g')
@@ -296,14 +296,14 @@ function! s:maparg(...) "{{{
     return info
 endfunction "}}}
 
-function! s:convert_maparg_options(maparg) "{{{
+function! s:convert_maparg_options(maparg) abort "{{{
     return join(map(
     \   ['silent', 'expr', 'buffer'],
     \   'a:maparg[v:val] ? "<" . v:val . ">" : ""'
     \), '')
 endfunction "}}}
 
-function! s:split_maparg_modes(modes) "{{{
+function! s:split_maparg_modes(modes) abort "{{{
     let h = {}
     for _ in split(a:modes, '\zs')
         if _ ==# ' '

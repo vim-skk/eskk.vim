@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! eskk#commands#define() "{{{
+function! eskk#commands#define() abort "{{{
     command!
     \   -nargs=+
     \   EskkMap
@@ -30,12 +30,12 @@ function! eskk#commands#define() "{{{
     \   call s:cmd_fix_dictionary(<q-args>, <bang>0)
 endfunction "}}}
 
-function! s:cmd_forget_registered_words() "{{{
+function! s:cmd_forget_registered_words() abort "{{{
     let skk_dict = eskk#get_skk_dict()
     call skk_dict.forget_all_words()
 endfunction "}}}
 
-function! s:cmd_update_dictionary(silent) "{{{
+function! s:cmd_update_dictionary(silent) abort "{{{
     try
         let verbose = !a:silent
         let dict = eskk#get_skk_dict()
@@ -51,8 +51,8 @@ function! s:cmd_update_dictionary(silent) "{{{
     endtry
 endfunction "}}}
 
-function! s:cmd_fix_dictionary(path, skip_prompt) "{{{
-    let path = a:path != '' ? a:path :
+function! s:cmd_fix_dictionary(path, skip_prompt) abort "{{{
+    let path = a:path !=# '' ? a:path :
     \          exists('g:eskk#dictionary.path') ? g:eskk#dictionary.path : ''
     let path = expand(path)
     if !filereadable(path)
@@ -129,13 +129,13 @@ let s:Collector = {
 \   'pattern' : '',
 \}
 
-function s:Collector.new(pattern)
+function s:Collector.new(pattern) abort
     let obj = deepcopy(self)
     let obj.pattern = a:pattern
     return obj
 endfunction
 
-function s:Collector.add_matching_line(line)
+function s:Collector.add_matching_line(line) abort
     let m = matchlist(a:line, self.pattern)
     if !empty(m)
         let [hira, kanji] = m[1:2]
@@ -147,7 +147,7 @@ function s:Collector.add_matching_line(line)
             " Remove the empty annotation.
             let c = substitute(c, ';$', '', '')
             " Skip the empty candidate.
-            if c == ''
+            if c ==# ''
                 continue
             endif
             " Add a candidate to self.hira_vs_candidates[hira].
@@ -159,7 +159,7 @@ function s:Collector.add_matching_line(line)
     endif
 endfunction
 
-function s:Collector.get_candidates()
+function s:Collector.get_candidates() abort
     return
     \   map(
     \       map(

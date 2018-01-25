@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! eskk#table#rom_to_hira#load()
+function! eskk#table#rom_to_hira#load() abort
     return {
     \   'a': ['あ', ''],
     \   'bb': ['っ', 'b'],

@@ -11,7 +11,7 @@ set cpo&vim
 " Utility functions {{{
 
 " Returns [key, okuri_rom, candidates] which line contains.
-function! eskk#dictionary#parse_skk_dict_line(line, from_type) "{{{
+function! eskk#dictionary#parse_skk_dict_line(line, from_type) abort "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(
     \   !empty(list),
@@ -55,7 +55,7 @@ endfunction "}}}
 
 " Returns line (String) which includes a:candidate.
 " If invalid arguments were given, returns empty string.
-function! s:insert_candidate_to_line(line, candidate) "{{{
+function! s:insert_candidate_to_line(line, candidate) abort "{{{
     if a:line =~# '^\s*;'
         return ''
     endif
@@ -70,7 +70,7 @@ endfunction "}}}
 
 " Returns line (String) which DOES NOT includes a:candidate.
 " If invalid arguments were given, returns empty string.
-function! s:delete_candidate_from_line(line, candidate) "{{{
+function! s:delete_candidate_from_line(line, candidate) abort "{{{
     if a:line =~# '^\s*;'
         return ''
     endif
@@ -85,7 +85,7 @@ function! s:delete_candidate_from_line(line, candidate) "{{{
     call filter(candidates, not_match)
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
-function! s:make_line_from_candidates(candidates) "{{{
+function! s:make_line_from_candidates(candidates) abort "{{{
     if type(a:candidates) isnot type([])
     \   || empty(a:candidates)
         return ''
@@ -101,7 +101,7 @@ function! s:make_line_from_candidates(candidates) "{{{
 endfunction "}}}
 
 
-function! s:clear_command_line() "{{{
+function! s:clear_command_line() abort "{{{
     redraw
     echo ''
 endfunction "}}}
@@ -120,7 +120,7 @@ let [
 \] = range(3)
 
 " e.g.) {key}[{okuri_rom}] /{input};{annotation}/
-function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) "{{{
+function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) abort "{{{
     return {
     \   'from_type': a:from_type,
     \   'input': a:input,
@@ -131,14 +131,14 @@ function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) "
     \}
 endfunction "}}}
 
-function! eskk#dictionary#_candidate_identifier(candidate) "{{{
+function! eskk#dictionary#_candidate_identifier(candidate) abort "{{{
     return a:candidate.input
 endfunction "}}}
 
 " }}}
 
 
-function! s:SID() "{{{
+function! s:SID() abort "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 let s:SID_PREFIX = s:SID()
@@ -175,7 +175,7 @@ let [
 
 
 
-function! s:HenkanResult_new(key, okuri_rom, okuri, preedit) "{{{
+function! s:HenkanResult_new(key, okuri_rom, okuri, preedit) abort "{{{
     let obj = deepcopy(s:HenkanResult)
     let obj = extend(obj, {
     \    'preedit': a:preedit,
@@ -190,7 +190,7 @@ endfunction "}}}
 " After calling this function,
 " s:HenkanResult.get_candidates() will look up dictionary again.
 " So call this function when you modified SKK dictionary file.
-function! s:HenkanResult_reset() dict "{{{
+function! s:HenkanResult_reset() abort dict "{{{
     let self._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
     let self._candidates = eskk#util#create_data_ordered_set(
     \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
@@ -201,7 +201,7 @@ endfunction "}}}
 
 " Forward/Back self._candidates_index safely
 " Returns true value when succeeded / false value when failed
-function! s:HenkanResult_advance(advance) dict "{{{
+function! s:HenkanResult_advance(advance) abort dict "{{{
     try
         if !self.advance_index(a:advance)
             return 0    " Can't forward/back anymore...
@@ -215,7 +215,7 @@ function! s:HenkanResult_advance(advance) dict "{{{
     endtry
 endfunction "}}}
 " Advance self._candidates_index
-function! s:HenkanResult_advance_index(advance) dict "{{{
+function! s:HenkanResult_advance_index(advance) abort dict "{{{
     " Remove cache before changing `self` states,
     " because the cache depends on those states.
     call self.remove_cache()
@@ -242,7 +242,7 @@ endfunction "}}}
 " but this function asks to user in command-line
 " when `self._candidates_index >= g:eskk#show_candidates_count`.
 " @throws eskk#dictionary#look_up_error()
-function! s:HenkanResult_update_candidate_prompt() dict "{{{
+function! s:HenkanResult_update_candidate_prompt() abort dict "{{{
     let max_count = g:eskk#show_candidates_count >= 0 ?
     \                   g:eskk#show_candidates_count : 0
     if self._candidates_index >= max_count
@@ -271,7 +271,7 @@ function! s:HenkanResult_update_candidate_prompt() dict "{{{
 endfunction "}}}
 " Set current candidate.
 " @throws eskk#dictionary#look_up_error()
-function! s:HenkanResult_update_candidate() dict "{{{
+function! s:HenkanResult_update_candidate() abort dict "{{{
     let candidates = self.get_candidates()
     let [self._candidate, self._candidate_okuri] =
     \   [
@@ -282,7 +282,7 @@ endfunction "}}}
 
 " Returns List of candidates.
 " @throws eskk#dictionary#look_up_error()
-function! s:HenkanResult_get_candidates() dict "{{{
+function! s:HenkanResult_get_candidates() abort dict "{{{
     if self._status ==# g:eskk#dictionary#HR_GOT_RESULT
         return self._candidates.to_list()
 
@@ -390,7 +390,7 @@ function! s:HenkanResult_get_candidates() dict "{{{
     endif
 endfunction "}}}
 
-function! eskk#dictionary#look_up_error(msg) "{{{
+function! eskk#dictionary#look_up_error(msg) abort "{{{
     return eskk#util#build_error(
     \   ['eskk', 'dictionary'],
     \   ['dictionary look up error', a:msg]
@@ -399,7 +399,7 @@ endfunction "}}}
 
 " Select candidate from command-line.
 " @throws eskk#dictionary#look_up_error()
-function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
+function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict "{{{
     " Select candidates by getchar()'s character.
     let words = copy(self.get_candidates())
     let page_index = 0
@@ -462,7 +462,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
                 \   g:eskk#preedit#PHASE_OKURI
                 \)
                 return [
-                \   (input != '' ?
+                \   (input !=# '' ?
                 \       input : henkan_buf_str.rom_pairs.get_filter()),
                 \   okuri_buf_str.rom_pairs.get_filter()
                 \]
@@ -491,7 +491,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) dict "{{{
 endfunction "}}}
 
 " Clear cache of current candidate.
-function! s:HenkanResult_remove_cache() dict "{{{
+function! s:HenkanResult_remove_cache() abort dict "{{{
     let self._candidate       = ''
     let self._candidate_okuri = ''
 endfunction "}}}
@@ -500,37 +500,37 @@ endfunction "}}}
 " Returns candidate String.
 " if optional {with_okuri} arguments are supplied,
 " returns candidate String with okuri.
-function! s:HenkanResult_get_current_candidate(...) dict "{{{
+function! s:HenkanResult_get_current_candidate(...) abort dict "{{{
     let with_okuri = a:0 ? a:1 : 1
     return self._candidate
     \   . (with_okuri ? self._candidate_okuri : '')
 endfunction "}}}
 " Getter for self._key
-function! s:HenkanResult_get_key() dict "{{{
+function! s:HenkanResult_get_key() abort dict "{{{
     return self._key
 endfunction "}}}
 " Getter for self._okuri
-function! s:HenkanResult_get_okuri() dict "{{{
+function! s:HenkanResult_get_okuri() abort dict "{{{
     return self._okuri
 endfunction "}}}
 " Getter for self._okuri_rom
-function! s:HenkanResult_get_okuri_rom() dict "{{{
+function! s:HenkanResult_get_okuri_rom() abort dict "{{{
     return self._okuri_rom
 endfunction "}}}
 " Getter for self._status
-function! s:HenkanResult_get_status() dict "{{{
+function! s:HenkanResult_get_status() abort dict "{{{
     return self._status
 endfunction "}}}
 
 " Forward current candidate index number (self._candidates_index)
-function! s:HenkanResult_forward() dict "{{{
+function! s:HenkanResult_forward() abort dict "{{{
     return self.advance(1)
 endfunction "}}}
 " Back current candidate index number (self._candidates_index)
-function! s:HenkanResult_back() dict "{{{
+function! s:HenkanResult_back() abort dict "{{{
     return self.advance(0)
 endfunction "}}}
-function! s:HenkanResult_has_next() dict "{{{
+function! s:HenkanResult_has_next() abort dict "{{{
     try
         let candidates = self.get_candidates()
         let idx = self._candidates_index
@@ -549,7 +549,7 @@ endfunction "}}}
 " - SKK dictionary
 " -- User dictionary
 " -- System dictionary (TODO: skk-ignore-dic-word. see #86)
-function! s:HenkanResult_delete_from_dict() dict "{{{
+function! s:HenkanResult_delete_from_dict() abort dict "{{{
     try
         return self.do_delete_from_dict()
     finally
@@ -557,7 +557,7 @@ function! s:HenkanResult_delete_from_dict() dict "{{{
         call dict.clear_henkan_result()
     endtry
 endfunction "}}}
-function! s:HenkanResult_do_delete_from_dict() dict "{{{
+function! s:HenkanResult_do_delete_from_dict() abort dict "{{{
     " Check if `self` can get candidates.
     try
         let candidates = self.get_candidates()
@@ -638,7 +638,7 @@ function! s:HenkanResult_do_delete_from_dict() dict "{{{
 endfunction "}}}
 
 " Move this henkan result to the first of self._registered_words.
-function! s:HenkanResult_update_rank() dict "{{{
+function! s:HenkanResult_update_rank() abort dict "{{{
     try
         let candidates = self.get_candidates()
     catch /^eskk: dictionary look up error/
@@ -732,7 +732,7 @@ let s:HenkanResult = {
 "   Otherwise, lines were not changed.
 
 
-function! s:PhysicalDict_new(path, sorted, encoding) "{{{
+function! s:PhysicalDict_new(path, sorted, encoding) abort "{{{
     let obj = extend(
     \   deepcopy(s:PhysicalDict),
     \   {
@@ -749,17 +749,17 @@ endfunction "}}}
 
 
 " Get List of whole lines of dictionary.
-function! s:PhysicalDict_get_lines() dict "{{{
+function! s:PhysicalDict_get_lines() abort dict "{{{
     return self._content_lines
 endfunction "}}}
 
-function! s:PhysicalDict_get_lines_copy() dict "{{{
+function! s:PhysicalDict_get_lines_copy() abort dict "{{{
     let lines = copy(self.get_lines())
     unlockvar 1 lines
     return lines
 endfunction "}}}
 
-function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
+function! s:PhysicalDict_make_updated_lines(registered_words) abort dict "{{{
     if a:registered_words.empty()
         return self.update_lines()
     endif
@@ -774,7 +774,7 @@ function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
         if index >=# 0
             " If the line exists, add `word` to the line.
             call eskk#util#assert(
-            \   l != '',
+            \   l !=# '',
             \   'line must not be empty string'
             \   . ' (index = '.index.')'
             \)
@@ -800,7 +800,7 @@ function! s:PhysicalDict_make_updated_lines(registered_words) dict "{{{
     return lines
 endfunction "}}}
 
-function! s:PhysicalDict_update_lines() dict "{{{
+function! s:PhysicalDict_update_lines() abort dict "{{{
     if self._ftime_at_set isnot -1
     \   && self._ftime_at_set >=# getftime(self.path)
         return self._content_lines
@@ -834,7 +834,7 @@ function! s:PhysicalDict_update_lines() dict "{{{
     return self._content_lines
 endfunction "}}}
 
-function! s:PhysicalDict_update_lines_main() dict "{{{
+function! s:PhysicalDict_update_lines_main() abort dict "{{{
     unlockvar 1 self._content_lines
     let self._content_lines  = readfile(self.path)
     lockvar 1 self._content_lines
@@ -843,14 +843,14 @@ function! s:PhysicalDict_update_lines_main() dict "{{{
     let self._ftime_at_set = getftime(self.path)
 endfunction "}}}
 
-function! s:PhysicalDict_update_lines_copy() dict "{{{
+function! s:PhysicalDict_update_lines_copy() abort dict "{{{
     let lines = copy(self.update_lines())
     unlockvar 1 lines
     return lines
 endfunction "}}}
 
 " Set List of whole lines of dictionary.
-function! s:PhysicalDict_set_lines(lines) dict "{{{
+function! s:PhysicalDict_set_lines(lines) abort dict "{{{
     try
         unlockvar 1 self._content_lines
         let self._content_lines  = a:lines
@@ -867,7 +867,7 @@ endfunction "}}}
 
 " - Validate List of whole lines of dictionary.
 " - Set self.okuri_ari_idx, self.okuri_nasi_idx.
-function! s:PhysicalDict_parse_lines() dict "{{{
+function! s:PhysicalDict_parse_lines() abort dict "{{{
     let self.okuri_ari_idx  = index(
     \   self._content_lines,
     \   ';; okuri-ari entries.'
@@ -895,7 +895,7 @@ function! s:PhysicalDict_parse_lines() dict "{{{
     endif
 endfunction "}}}
 
-function! eskk#dictionary#parse_error(msg) "{{{
+function! eskk#dictionary#parse_error(msg) abort "{{{
     return eskk#util#build_error(
     \   ['eskk', 'dictionary'],
     \   ["SKK dictionary parse error", a:msg]
@@ -904,22 +904,22 @@ endfunction "}}}
 
 " Returns true value if "self.okuri_ari_idx" and
 " "self.okuri_nasi_idx" is valid range.
-function! s:PhysicalDict_is_valid() dict "{{{
+function! s:PhysicalDict_is_valid() abort dict "{{{
     " Succeeded to parse SKK dictionary.
     return self.okuri_ari_idx >= 0
     \   && self.okuri_nasi_idx >= 0
 endfunction "}}}
 
 " Set false to `self._is_modified`.
-function! s:PhysicalDict_clear_modified_flags() dict "{{{
+function! s:PhysicalDict_clear_modified_flags() abort dict "{{{
     let self._is_modified = 0
 endfunction "}}}
 
 
 " Returns all lines matching the candidate.
-function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict "{{{
+function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) abort dict "{{{
     let limit = a:0 ? a:1 : -1    " No limit by default.
-    let has_okuri = a:okuri_rom != ''
+    let has_okuri = a:okuri_rom !=# ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom : '')
 
     " self.is_valid() loads whole lines if it does not have,
@@ -986,8 +986,8 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) dict 
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
-function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
-    let has_okuri = a:okuri_rom != ''
+function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) abort dict "{{{
+    let has_okuri = a:okuri_rom !=# ''
     let needle = a:key_filter . (has_okuri ? a:okuri_rom : '') . ' '
 
     if !self.is_valid()
@@ -1016,7 +1016,7 @@ function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) dict "{{{
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
-function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) dict "{{{
+function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) abort dict "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     " NOTE: min, max, mid are index number. not lnum.
 
@@ -1040,7 +1040,7 @@ function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) di
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
-function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict "{{{
+function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) abort dict "{{{
     " Assumption: `a:needle` is encoded to dictionary file encoding.
     let min_which = a:has_okuri ? 'okuri_ari_idx' : 'okuri_nasi_idx'
     let min = get(a:000, 0, self[min_which])
@@ -1057,7 +1057,7 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) dict
 endfunction "}}}
 
 " vim versions
-function! s:vim_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
+function! s:vim_search_binary_okuri(whole_lines, needle, limit, min, max) abort "{{{
     let min = a:min
     let max = a:max
     while max - min > a:limit
@@ -1071,7 +1071,7 @@ function! s:vim_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
     return [min, max]
 endfunction"}}}
 
-function! s:vim_search_binary(whole_lines, needle, limit, min, max) "{{{
+function! s:vim_search_binary(whole_lines, needle, limit, min, max) abort "{{{
     let min = a:min
     let max = a:max
     while max - min > a:limit
@@ -1085,7 +1085,7 @@ function! s:vim_search_binary(whole_lines, needle, limit, min, max) "{{{
     return [min, max]
 endfunction"}}}
 
-function! s:vim_search_linear(whole_lines, needle, min, max) "{{{
+function! s:vim_search_linear(whole_lines, needle, min, max) abort "{{{
     let min = a:min
     let max = a:max
     while min <=# max
@@ -1100,7 +1100,7 @@ endfunction"}}}
 " if_lua versions
 " @vimlint(EVL101, 1, l:min)
 " @vimlint(EVL101, 1, l:max)
-function! s:lua_search_binary_okuri(whole_lines, needle, limit, min, max) "{{{
+function! s:lua_search_binary_okuri(whole_lines, needle, limit, min, max) abort "{{{
 lua << EOF
     do
         local whole_lines = vim.eval('a:whole_lines')
@@ -1134,7 +1134,7 @@ endfunction"}}}
 
 " @vimlint(EVL101, 1, l:min)
 " @vimlint(EVL101, 1, l:max)
-function! s:lua_search_binary(whole_lines, needle, limit, min, max) "{{{
+function! s:lua_search_binary(whole_lines, needle, limit, min, max) abort "{{{
 lua << EOF
     do
         local whole_lines = vim.eval('a:whole_lines')
@@ -1166,7 +1166,7 @@ endfunction"}}}
 " @vimlint(EVL101, 0, l:min)
 " @vimlint(EVL101, 0, l:max)
 
-function! s:lua_search_linear(whole_lines, needle, min, max) "{{{
+function! s:lua_search_linear(whole_lines, needle, min, max) abort "{{{
     let ret = ['', -1]
 
 lua << EOF
@@ -1238,7 +1238,7 @@ let s:PhysicalDict = {
 "   "notfound" -> Use server if not found in system ditionary
 "
 
-function! s:ServerDict_new(server) "{{{
+function! s:ServerDict_new(server) abort "{{{
     let obj = extend(deepcopy(s:ServerDict), a:server, 'force')
     call obj.init()
     return obj
@@ -1247,10 +1247,10 @@ endfunction "}}}
 
 
 " Initialize server.
-function! s:ServerDict_init() dict "{{{
+function! s:ServerDict_init() abort dict "{{{
     if has('channel')
         let self._socket = ch_open(printf("%s:%s", self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
-        if ch_status(self._socket) == "fail"
+        if ch_status(self._socket) ==# "fail"
             call eskk#logger#warn('server initialization failed.')
         endif
     else
@@ -1267,29 +1267,29 @@ function! s:ServerDict_init() dict "{{{
     endif
 endfunction "}}}
 
-function! s:ServerDict_request(command, key) dict "{{{
+function! s:ServerDict_request(command, key) abort dict "{{{
     if empty(self._socket)
         return ''
     endif
 
     try
         let key = a:key
-        if self.encoding != ''
+        if self.encoding !=# ''
             let key = iconv(key, &encoding, self.encoding)
         endif
         if has('channel')
             let result = ch_evalraw(self._socket, printf("%s%s%s\n",
-            \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
+            \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
         else
             call self._socket.write(printf("%s%s%s\n",
-            \ a:command, key, (key[strlen(key)-1] != ' ' ? ' ' : '')))
+            \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
             let result = self._socket.read_line(-1, self.timeout)
         endif
-        if self.encoding != ''
+        if self.encoding !=# ''
             let result = iconv(result, self.encoding, &encoding)
         endif
 
-        if result == ''
+        if result ==# ''
             " Reset.
             if has('channel')
                 call ch_evalraw(self._socket, "0\n")
@@ -1309,18 +1309,18 @@ function! s:ServerDict_request(command, key) dict "{{{
         return ''
     endtry
 
-    return result == '' || result[0] ==# '4' ? '' : result[1:]
+    return result ==# '' || result[0] ==# '4' ? '' : result[1:]
 endfunction "}}}
-function! s:ServerDict_lookup(key) dict "{{{
+function! s:ServerDict_lookup(key) abort dict "{{{
     return self.request('1', a:key)
 endfunction "}}}
-function! s:ServerDict_complete(key) dict "{{{
+function! s:ServerDict_complete(key) abort dict "{{{
     return self.request('4', a:key)
 endfunction "}}}
-function! s:ServerDict_search_candidate(key, okuri_rom) dict "{{{
-    let result = a:okuri_rom == '' ?
+function! s:ServerDict_search_candidate(key, okuri_rom) abort dict "{{{
+    let result = a:okuri_rom ==# '' ?
                 \ self.lookup(a:key) : ''
-    return result != '' ? [a:key .' ' . result, 0] : ['', -1]
+    return result !=# '' ? [a:key .' ' . result, 0] : ['', -1]
 endfunction "}}}
 
 let s:ServerDict = {
@@ -1358,11 +1358,11 @@ let s:ServerDict = {
 "   Current henkan result.
 
 
-function! eskk#dictionary#new(...) "{{{
+function! eskk#dictionary#new(...) abort "{{{
     return call(function('s:Dictionary_new'), a:000)
 endfunction "}}}
 
-function! s:Dictionary_new(...) "{{{
+function! s:Dictionary_new(...) abort "{{{
     let user_dict = get(a:000, 0, g:eskk#directory)
     let system_dict = get(a:000, 1, g:eskk#large_dictionary)
     let server_dict = get(a:000, 2, g:eskk#server)
@@ -1396,7 +1396,7 @@ endfunction "}}}
 " This actually just sets "self._current_henkan_result"
 " which is "s:HenkanResult"'s instance.
 " This is interface so s:HenkanResult is implementation.
-function! s:Dictionary_refer(preedit, key, okuri, okuri_rom) dict "{{{
+function! s:Dictionary_refer(preedit, key, okuri, okuri_rom) abort dict "{{{
     let hr = s:HenkanResult_new(
     \   a:key,
     \   a:okuri_rom,
@@ -1414,7 +1414,7 @@ function! s:Dictionary_refer(preedit, key, okuri, okuri_rom) dict "{{{
 endfunction "}}}
 
 " Register new word (registered word) at command-line.
-function! s:Dictionary_remember_word_prompt_hr(henkan_result) dict "{{{
+function! s:Dictionary_remember_word_prompt_hr(henkan_result) abort dict "{{{
     let unused = ''
     let word = s:candidate_new(
     \   unused,
@@ -1426,7 +1426,7 @@ function! s:Dictionary_remember_word_prompt_hr(henkan_result) dict "{{{
     \)
     return self.remember_word_prompt(word)
 endfunction "}}}
-function! s:Dictionary_remember_word_prompt(word) dict "{{{
+function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
     let [key, okuri, okuri_rom] = [a:word.key, a:word.okuri, a:word.okuri_rom]
 
     " Save `&imsearch`.
@@ -1436,7 +1436,7 @@ function! s:Dictionary_remember_word_prompt(word) dict "{{{
     " Create new eskk instance.
     call eskk#create_new_instance()
 
-    if okuri == ''
+    if okuri ==# ''
         let prompt = printf('%s ', key)
     else
         let prompt = printf('%s%s%s ', key, g:eskk#marker_okuri, okuri)
@@ -1463,7 +1463,7 @@ function! s:Dictionary_remember_word_prompt(word) dict "{{{
     endtry
 
 
-    if input != ''
+    if input !=# ''
         if !s:check_accidental_input(input)
             return self.remember_word_prompt(a:word)
         endif
@@ -1479,7 +1479,7 @@ function! s:Dictionary_remember_word_prompt(word) dict "{{{
     call s:clear_command_line()
     return [input, key, okuri]
 endfunction "}}}
-function! s:check_accidental_input(input) "{{{
+function! s:check_accidental_input(input) abort "{{{
     if a:input !=# strtrans(a:input)
         let answer = eskk#util#input(
         \   "'".strtrans(a:input)."' contains unprintable character."
@@ -1498,12 +1498,12 @@ function! s:check_accidental_input(input) "{{{
 endfunction "}}}
 
 " Clear all registered words.
-function! s:Dictionary_forget_all_words() dict "{{{
+function! s:Dictionary_forget_all_words() abort dict "{{{
     call self._registered_words.clear()
 endfunction "}}}
 
 " Clear given registered word.
-function! s:Dictionary_forget_word(word) dict "{{{
+function! s:Dictionary_forget_word(word) abort dict "{{{
     call self.remove_registered_word(a:word)
 
     if !empty(self._current_henkan_result)
@@ -1512,7 +1512,7 @@ function! s:Dictionary_forget_word(word) dict "{{{
 endfunction "}}}
 
 " Add registered word.
-function! s:Dictionary_remember_word(word) dict "{{{
+function! s:Dictionary_remember_word(word) abort dict "{{{
     call self._registered_words.unshift(a:word)
 
     if self._registered_words.size() >= g:eskk#dictionary_save_count
@@ -1525,12 +1525,12 @@ function! s:Dictionary_remember_word(word) dict "{{{
 endfunction "}}}
 
 " Get List of registered words.
-function! s:Dictionary_get_registered_words() dict "{{{
+function! s:Dictionary_get_registered_words() abort dict "{{{
     return self._registered_words.to_list()
 endfunction "}}}
 
 " Remove registered word matching with arguments values.
-function! s:Dictionary_remove_registered_word(word) dict "{{{
+function! s:Dictionary_remove_registered_word(word) abort dict "{{{
     return self._registered_words.remove(a:word)
 endfunction "}}}
 
@@ -1538,7 +1538,7 @@ endfunction "}}}
 " or user dictionary's lines are
 " modified by "s:PhysicalDict.set_lines()".
 " If this value is false, s:Dictionary.update_dictionary() does nothing.
-function! s:Dictionary_is_modified() dict "{{{
+function! s:Dictionary_is_modified() abort dict "{{{
     " No need to check system dictionary.
     " Because it is immutable.
     return
@@ -1548,7 +1548,7 @@ endfunction "}}}
 
 " Write to user dictionary.
 " By default, This function is executed at VimLeavePre.
-function! s:Dictionary_update_dictionary(...) dict "{{{
+function! s:Dictionary_update_dictionary(...) abort dict "{{{
     let verbose      = get(a:000, 0, 1)
     let do_update_lines = get(a:000, 1, 1)
     if !self.is_modified()
@@ -1582,7 +1582,7 @@ function! s:Dictionary_update_dictionary(...) dict "{{{
     " Load changed lines.
     call self._user_dict.update_lines()
 endfunction "}}}
-function! s:Dictionary_write_lines(lines, verbose) dict "{{{
+function! s:Dictionary_write_lines(lines, verbose) abort dict "{{{
     let lines = a:lines
 
     let save_msg =
@@ -1619,11 +1619,11 @@ let s:dict_search_candidates = eskk#util#create_data_ordered_set(
 \)
 " Search candidates matching with arguments.
 " @vimlint(EVL102, 1, a:okuri)
-function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) dict "{{{
+function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) abort dict "{{{
     let key = a:key
     let okuri_rom = a:okuri_rom
 
-    if key == ''
+    if key ==# ''
         return []
     endif
 
@@ -1672,24 +1672,24 @@ endfunction "}}}
 
 
 " Getter for self._current_henkan_result
-function! s:Dictionary_get_henkan_result() dict "{{{
+function! s:Dictionary_get_henkan_result() abort dict "{{{
     return self._current_henkan_result
 endfunction "}}}
 " Getter for self._user_dict
-function! s:Dictionary_get_user_dict() dict "{{{
+function! s:Dictionary_get_user_dict() abort dict "{{{
     return self._user_dict
 endfunction "}}}
 " Getter for self._system_dict
-function! s:Dictionary_get_system_dict() dict "{{{
+function! s:Dictionary_get_system_dict() abort dict "{{{
     return self._system_dict
 endfunction "}}}
 " Getter for self._server_dict
-function! s:Dictionary_get_server_dict() dict "{{{
+function! s:Dictionary_get_server_dict() abort dict "{{{
     return self._server_dict
 endfunction "}}}
 
 " Clear self._current_henkan_result
-function! s:Dictionary_clear_henkan_result() dict "{{{
+function! s:Dictionary_clear_henkan_result() abort dict "{{{
     let self._current_henkan_result = {}
 endfunction "}}}
 

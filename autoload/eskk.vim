@@ -8,7 +8,7 @@ set cpo&vim
 " }}}
 
 
-function! s:SID() "{{{
+function! s:SID() abort "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 let s:SID_PREFIX = s:SID()
@@ -188,17 +188,17 @@ let s:filter_count = 0
 
 
 
-function! eskk#load() "{{{
+function! eskk#load() abort "{{{
     runtime! plugin/eskk.vim
 endfunction "}}}
 
 
 
 " Instance
-function! s:eskk_new() "{{{
+function! s:eskk_new() abort "{{{
     return deepcopy(s:eskk, 1)
 endfunction "}}}
-function! eskk#get_current_instance() "{{{
+function! eskk#get_current_instance() abort "{{{
     try
         return s:eskk_instances[s:eskk_instance_id]
     catch
@@ -210,11 +210,11 @@ function! eskk#get_current_instance() "{{{
         return s:eskk_instances[s:eskk_instance_id]
     endtry
 endfunction "}}}
-function! eskk#initialize_instance() "{{{
+function! eskk#initialize_instance() abort "{{{
     let s:eskk_instances = [s:eskk_new()]
     let s:eskk_instance_id = 0
 endfunction "}}}
-function! eskk#create_new_instance() "{{{
+function! eskk#create_new_instance() abort "{{{
     if s:eskk_instance_id != len(s:eskk_instances) - 1
         throw eskk#internal_error(['eskk'], "mismatch values between s:eskk_instance_id and s:eskk_instances")
     endif
@@ -229,7 +229,7 @@ function! eskk#create_new_instance() "{{{
     " Activate the new instance.
     call eskk#enable()
 endfunction "}}}
-function! eskk#destroy_current_instance() "{{{
+function! eskk#destroy_current_instance() abort "{{{
     if s:eskk_instance_id == 0
         throw eskk#internal_error(['eskk'], "No more instances.")
     endif
@@ -241,7 +241,7 @@ function! eskk#destroy_current_instance() "{{{
     call remove(s:eskk_instances, s:eskk_instance_id)
     let s:eskk_instance_id -= 1
 endfunction "}}}
-function! eskk#get_buffer_instance() "{{{
+function! eskk#get_buffer_instance() abort "{{{
     if !exists('b:eskk')
         let b:eskk = {}
     endif
@@ -250,7 +250,7 @@ endfunction "}}}
 
 
 " s:eskk_mappings
-function! s:handle_disable(stash) "{{{
+function! s:handle_disable(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         call eskk#disable()
@@ -258,7 +258,7 @@ function! s:handle_disable(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_enable(stash) "{{{
+function! s:handle_enable(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         call eskk#enable()
@@ -266,7 +266,7 @@ function! s:handle_enable(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_toggle(stash) "{{{
+function! s:handle_toggle(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         call eskk#toggle()
@@ -274,7 +274,7 @@ function! s:handle_toggle(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_kakutei(stash) "{{{
+function! s:handle_kakutei(stash) abort "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
@@ -285,7 +285,7 @@ function! s:handle_kakutei(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_toggle_hankata(stash) "{{{
+function! s:handle_toggle_hankata(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'hankata' ? 'hira' : 'hankata')
@@ -293,7 +293,7 @@ function! s:handle_toggle_hankata(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_toggle_kata(stash) "{{{
+function! s:handle_toggle_kata(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         call eskk#set_mode(eskk#get_mode() ==# 'kata' ? 'hira' : 'kata')
@@ -301,7 +301,7 @@ function! s:handle_toggle_kata(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_ctrl_q_key(stash) "{{{
+function! s:handle_ctrl_q_key(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
     \   || phase ==# g:eskk#preedit#PHASE_OKURI
@@ -310,7 +310,7 @@ function! s:handle_ctrl_q_key(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_q_key(stash) "{{{
+function! s:handle_q_key(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
     \   || phase ==# g:eskk#preedit#PHASE_OKURI
@@ -319,7 +319,7 @@ function! s:handle_q_key(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_l_key(stash) "{{{
+function! s:handle_l_key(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
     \   || phase ==# g:eskk#preedit#PHASE_OKURI
@@ -328,46 +328,46 @@ function! s:handle_l_key(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:handle_to_ascii(stash) "{{{
+function! s:handle_to_ascii(stash) abort "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     let buf_str = preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() == ''
+    \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('ascii')
         return 1
     endif
     return 0
 endfunction "}}}
-function! s:handle_to_zenei(stash) "{{{
+function! s:handle_to_zenei(stash) abort "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     let buf_str = preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() == ''
+    \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('zenei')
         return 1
     endif
     return 0
 endfunction "}}}
-function! s:handle_to_abbrev(stash) "{{{
+function! s:handle_to_abbrev(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     let buf_str = a:stash.preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() == ''
+    \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('abbrev')
         return 1
     endif
     return 0
 endfunction "}}}
-function! s:is_mode_local_char(char, type) "{{{
+function! s:is_mode_local_char(char, type) abort "{{{
     " NOTE: This function must not show error
     " when `s:eskk_mappings[a:type]` does not exist.
     return has_key(s:eskk_mappings, a:type)
     \   && has_key(s:eskk_mappings[a:type], 'lhs')
     \   && eskk#util#key2char(s:eskk_mappings[a:type].lhs) ==# a:char
 endfunction "}}}
-function! s:handle_mode_local_char(char, type, stash) "{{{
+function! s:handle_mode_local_char(char, type, stash) abort "{{{
     return s:is_mode_local_char(a:char, a:type)
     \   && has_key(s:eskk_mappings, a:type)
     \   && has_key(s:eskk_mappings[a:type], 'fn')
@@ -378,7 +378,7 @@ endfunction "}}}
 
 " Filter
 " s:asym_filter {{{
-function! s:asym_filter(stash) "{{{
+function! s:asym_filter(stash) abort "{{{
     let char = a:stash.char
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
@@ -486,7 +486,7 @@ endfunction "}}}
 " Handle popupmenu-keys. (:help popupmenu-keys)
 " If return value is 1, eskk does not filter a char.
 " If return value is 0, eskk processes and insert a string.
-function! s:handle_popupmenu_keys(stash) "{{{
+function! s:handle_popupmenu_keys(stash) abort "{{{
     let preedit = a:stash.preedit
     let char = a:stash.char
 
@@ -552,20 +552,20 @@ function! s:handle_popupmenu_keys(stash) "{{{
     endif
     return 0
 endfunction "}}}
-function! s:kakutei_pum(stash) "{{{
+function! s:kakutei_pum(stash) abort "{{{
     " Let Preedit not rewrite a buffer.
     " (eskk abandons a management of preedit)
     call a:stash.preedit.reset()
     " Close popup.
     call s:close_pum(a:stash)
 endfunction "}}}
-function! s:close_pum(stash) "{{{
+function! s:close_pum(stash) abort "{{{
     " Close popup.
     call a:stash.preedit.push_filter_pre_char("\<C-y>")
 endfunction "}}}
-function! s:do_backspace(stash) "{{{
+function! s:do_backspace(stash) abort "{{{
     let preedit = a:stash.preedit
-    if preedit.get_old_str() == ''
+    if preedit.get_old_str() ==# ''
         call preedit.push_kakutei_str("\<C-h>")
         return
     endif
@@ -636,7 +636,7 @@ function! s:do_backspace(stash) "{{{
         elseif !buf_str.rom_pairs.empty()
             call buf_str.rom_pairs.pop()
             break
-        elseif preedit.get_marker(phase) != ''
+        elseif preedit.get_marker(phase) !=# ''
             if !preedit.step_back_henkan_phase()
                 let msg = "Normal phase's marker is empty, "
                 \       . "and other phases *should* be able to change "
@@ -647,13 +647,13 @@ function! s:do_backspace(stash) "{{{
         endif
     endfor
 endfunction "}}}
-function! s:do_enter(stash) "{{{
+function! s:do_enter(stash) abort "{{{
     let times = s:get_enter_repeat_times(a:stash)
     for _ in range(times)
         call s:do_enter_egglike(a:stash)
     endfor
 endfunction "}}}
-function! s:get_enter_repeat_times(stash) "{{{
+function! s:get_enter_repeat_times(stash) abort "{{{
     if mode() ==# 'i' && pumvisible()
         " if mode() ==# 'i' && pumvisible() && a:stash.char ==# "\<CR>" ,
         " s:handle_popupmenu_keys() already closed pum.
@@ -668,7 +668,7 @@ function! s:get_enter_repeat_times(stash) "{{{
     " Default is <CR> once.
     return 1
 endfunction "}}}
-function! s:do_enter_egglike(stash) "{{{
+function! s:do_enter_egglike(stash) abort "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     let undo_char = "\<C-g>u"
@@ -717,7 +717,7 @@ function! s:do_enter_egglike(stash) "{{{
         throw eskk#internal_error(['eskk', 'preedit'])
     endif
 endfunction "}}}
-function! s:do_sticky(stash) "{{{
+function! s:do_sticky(stash) abort "{{{
     let preedit = a:stash.preedit
     let phase   = preedit.get_henkan_phase()
     let buf_str = preedit.get_current_buf_str()
@@ -759,7 +759,7 @@ function! s:do_sticky(stash) "{{{
         throw eskk#internal_error(['eskk', 'preedit'])
     endif
 endfunction "}}}
-function! s:do_cancel(stash) "{{{
+function! s:do_cancel(stash) abort "{{{
     let preedit = a:stash.preedit
     if mode() ==# 'c'
         call preedit.push_filter_pre_char("\<Esc>")
@@ -768,7 +768,7 @@ function! s:do_cancel(stash) "{{{
         call preedit.clear_all()
     endif
 endfunction "}}}
-function! s:do_escape(stash) "{{{
+function! s:do_escape(stash) abort "{{{
     let preedit = a:stash.preedit
     call preedit.convert_rom_str_inplace(
     \   preedit.get_henkan_phase()
@@ -787,7 +787,7 @@ function! s:do_escape(stash) "{{{
     let kakutei_str = preedit.get_display_str(0, with_rom_str)
     call preedit.kakutei(kakutei_str . "\<Esc>")
 endfunction "}}}
-function! s:do_henkan(stash, ...) "{{{
+function! s:do_henkan(stash, ...) abort "{{{
     let preedit = a:stash.preedit
     let convert_at_exact_match = a:0 ? a:1 : 0
     let phase = preedit.get_henkan_phase()
@@ -807,7 +807,7 @@ function! s:do_henkan(stash, ...) "{{{
         call s:do_henkan_other(a:stash, convert_at_exact_match)
     endif
 endfunction "}}}
-function! s:do_henkan_abbrev(stash, convert_at_exact_match) "{{{
+function! s:do_henkan_abbrev(stash, convert_at_exact_match) abort "{{{
     let preedit = a:stash.preedit
     let henkan_buf_str = preedit.get_buf_str(
     \   g:eskk#preedit#PHASE_HENKAN
@@ -840,12 +840,12 @@ function! s:do_henkan_abbrev(stash, convert_at_exact_match) "{{{
         \      dict.get_henkan_result()
         \   )
         let [input, okuri] = [result[0], result[2]]
-        if input != ''
+        if input !=# ''
             call preedit.kakutei(input . okuri)
         endif
     endtry
 endfunction "}}}
-function! s:do_henkan_other(stash, convert_at_exact_match) "{{{
+function! s:do_henkan_other(stash, convert_at_exact_match) abort "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
 
@@ -923,12 +923,12 @@ function! s:do_henkan_other(stash, convert_at_exact_match) "{{{
         \   dict.remember_word_prompt_hr(
         \      dict.get_henkan_result()
         \   )
-        if input != ''
+        if input !=# ''
             call preedit.kakutei(input . okuri)
         endif
     endtry
 endfunction "}}}
-function! s:do_ctrl_q_key(stash) "{{{
+function! s:do_ctrl_q_key(stash) abort "{{{
     return s:convert_roms_and_kakutei(
     \   a:stash,
     \   (eskk#get_mode() ==# 'hira' ?
@@ -936,7 +936,7 @@ function! s:do_ctrl_q_key(stash) "{{{
     \       eskk#get_mode_table('hira'))
     \)
 endfunction "}}}
-function! s:do_q_key(stash) "{{{
+function! s:do_q_key(stash) abort "{{{
     return s:convert_roms_and_kakutei(
     \   a:stash,
     \   (eskk#get_mode() ==# 'hira' ?
@@ -944,12 +944,12 @@ function! s:do_q_key(stash) "{{{
     \       eskk#get_mode_table('hira'))
     \)
 endfunction "}}}
-function! s:do_l_key(stash) "{{{
+function! s:do_l_key(stash) abort "{{{
     " s:convert_roms_and_kakutei() does not convert rom_str
     " if it received empty dictionary.
     return s:convert_roms_and_kakutei(a:stash, {})
 endfunction "}}}
-function! s:convert_roms_and_kakutei(stash, table) "{{{
+function! s:convert_roms_and_kakutei(stash, table) abort "{{{
     let preedit = a:stash.preedit
     call preedit.convert_rom_str_inplace(
     \   preedit.get_henkan_phase()
@@ -963,7 +963,7 @@ function! s:convert_roms_and_kakutei(stash, table) "{{{
 endfunction "}}}
 
 " For other characters
-function! s:filter_rom(stash, table) "{{{
+function! s:filter_rom(stash, table) abort "{{{
     let char = a:stash.char
     let preedit = a:stash.preedit
     let buf_str = preedit.get_current_buf_str()
@@ -982,7 +982,7 @@ function! s:filter_rom(stash, table) "{{{
         return s:filter_rom_no_match(a:stash, a:table)
     endif
 endfunction "}}}
-function! s:filter_rom_okuri(stash, table) "{{{
+function! s:filter_rom_okuri(stash, table) abort "{{{
     " Input #1: "SesS"
     " Convert from:
     "   char: "s"
@@ -1066,7 +1066,7 @@ function! s:filter_rom_okuri(stash, table) "{{{
         return s:filter_rom_no_match(a:stash, a:table)
     endif
 endfunction "}}}
-function! s:filter_rom_exact_match(stash, table) "{{{
+function! s:filter_rom_exact_match(stash, table) abort "{{{
     let char = a:stash.char
     let preedit = a:stash.preedit
     let buf_str = preedit.get_current_buf_str()
@@ -1132,11 +1132,11 @@ function! s:filter_rom_exact_match(stash, table) "{{{
         endif
     endif
 endfunction "}}}
-function! s:filter_rom_has_candidates(stash) "{{{
+function! s:filter_rom_has_candidates(stash) abort "{{{
     let buf_str  = a:stash.preedit.get_current_buf_str()
     call buf_str.rom_str.append(a:stash.char)
 endfunction "}}}
-function! s:filter_rom_no_match(stash, table) "{{{
+function! s:filter_rom_no_match(stash, table) abort "{{{
     let char = a:stash.char
     let buf_str = a:stash.preedit.get_current_buf_str()
     let rom_str_without_char = buf_str.rom_str.get()
@@ -1185,7 +1185,7 @@ function! s:filter_rom_no_match(stash, table) "{{{
 endfunction "}}}
 
 " }}}
-function! s:ascii_filter(stash) "{{{
+function! s:ascii_filter(stash) abort "{{{
     let this = eskk#get_mode_structure('ascii')
     if a:stash.char ==# "\<C-j>"
         call eskk#set_mode('hira')
@@ -1204,7 +1204,7 @@ function! s:ascii_filter(stash) "{{{
         endif
     endif
 endfunction "}}}
-function! s:zenei_filter(stash) "{{{
+function! s:zenei_filter(stash) abort "{{{
     let this = eskk#get_mode_structure('zenei')
     if a:stash.char ==# "\<C-j>"
         call eskk#set_mode('hira')
@@ -1219,7 +1219,7 @@ function! s:zenei_filter(stash) "{{{
         \)
     endif
 endfunction "}}}
-function! s:abbrev_filter(stash) "{{{
+function! s:abbrev_filter(stash) abort "{{{
     let char = a:stash.char
     let preedit = a:stash.preedit
     let buf_str = preedit.get_current_buf_str()
@@ -1232,7 +1232,7 @@ function! s:abbrev_filter(stash) "{{{
         call eskk#set_mode('hira')
         return
     elseif char ==# "\<C-h>"
-        if buf_str.rom_str.get() == ''
+        if buf_str.rom_str.get() ==# ''
             " If backspace-key was pressed at empty string,
             " leave abbrev mode.
             call eskk#set_mode('hira')
@@ -1279,7 +1279,7 @@ function! s:abbrev_filter(stash) "{{{
 endfunction "}}}
 
 " Preprocessor
-function! s:asym_prefilter(stash) "{{{
+function! s:asym_prefilter(stash) abort "{{{
     let char = a:stash.char
     " 'X' is phase:henkan-select:delete-from-dict
     " 'L' is mode:{hira,kata,hankata}:to-zenei
@@ -1306,7 +1306,7 @@ function! s:asym_prefilter(stash) "{{{
         return [char]
     endif
 endfunction "}}}
-function! s:abbrev_prefilter(stash) "{{{
+function! s:abbrev_prefilter(stash) abort "{{{
     let char = a:stash.char
     if char ==# "\<BS>"
         return ["\<C-h>"]
@@ -1317,7 +1317,7 @@ endfunction "}}}
 
 
 " Initialization
-function! eskk#_initialize() "{{{
+function! eskk#_initialize() abort "{{{
     if s:initialization_state ==# s:INIT_DONE
     \   || s:initialization_state ==# s:INIT_ABORT
         return
@@ -1487,7 +1487,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " Set up g:eskk#directory. {{{
-    function! s:initialize_set_up_eskk_directory()
+    function! s:initialize_set_up_eskk_directory() abort
         let dir = eskk#util#join_path(expand(g:eskk#directory), 'log')
         call eskk#util#mkdir_nothrow(dir, 'p')
         if !isdirectory(dir)
@@ -1576,7 +1576,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " Register builtin-modes. {{{
-    function! s:initialize_builtin_modes()
+    function! s:initialize_builtin_modes() abort
         " 'ascii' mode {{{
         call eskk#register_mode_structure('ascii', {
         \   'filter': eskk#util#get_local_funcref('ascii_filter', s:SID_PREFIX),
@@ -1636,7 +1636,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " InsertEnter: Clear preedit. {{{
-    function! s:reset_preedit()
+    function! s:reset_preedit() abort
         " avoid :call bug when chained by dot after function call.
         let preedit = eskk#get_preedit()
         call preedit.reset()
@@ -1645,8 +1645,8 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " InsertLeave: g:eskk#convert_at_exact_match {{{
-    function! s:clear_real_matched_pairs() "{{{
-        if !eskk#is_enabled() || eskk#get_mode() == ''
+    function! s:clear_real_matched_pairs() abort "{{{
+        if !eskk#is_enabled() || eskk#get_mode() ==# ''
             return
         endif
 
@@ -1684,7 +1684,7 @@ function! eskk#_initialize() "{{{
     " }}}
 
     " Save/Restore 'formatoptions'. {{{
-    function! s:save_restore_formatoptions(enable)
+    function! s:save_restore_formatoptions(enable) abort
         let inst = eskk#get_current_instance()
         if a:enable
             if type(inst.formatoptions) is type(0)
@@ -1715,12 +1715,12 @@ function! eskk#_initialize() "{{{
 
     let s:initialization_state = s:INIT_DONE
 endfunction "}}}
-function! eskk#is_initialized() "{{{
+function! eskk#is_initialized() abort "{{{
     return s:initialization_state ==# s:INIT_DONE
 endfunction "}}}
 
 " Global variable function
-function! eskk#get_default_mapped_keys() "{{{
+function! eskk#get_default_mapped_keys() abort "{{{
     return split(
     \   'abcdefghijklmnopqrstuvwxyz'
     \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -1754,18 +1754,18 @@ function! eskk#get_default_mapped_keys() "{{{
 endfunction "}}}
 
 " Enable/Disable IM
-function! eskk#is_enabled() "{{{
+function! eskk#is_enabled() abort "{{{
     return eskk#is_initialized()
     \   && &iminsert is 1
 endfunction "}}}
-function! eskk#toggle() "{{{
+function! eskk#toggle() abort "{{{
     if !eskk#is_initialized()
         call eskk#logger#warn('eskk is not initialized.')
         return ''
     endif
     return eskk#is_enabled() ? eskk#disable() : eskk#enable()
 endfunction "}}}
-function! eskk#enable() "{{{
+function! eskk#enable() abort "{{{
     if !eskk#is_initialized()
         call eskk#logger#warn('eskk is not initialized.')
         return ''
@@ -1821,7 +1821,7 @@ function! eskk#enable() "{{{
     endif
     return ret
 endfunction "}}}
-function! eskk#disable() "{{{
+function! eskk#disable() abort "{{{
     if !eskk#is_initialized()
         call eskk#logger#warn('eskk is not initialized.')
         return ''
@@ -1866,7 +1866,7 @@ function! eskk#disable() "{{{
 endfunction "}}}
 
 " Mode
-function! eskk#set_mode(next_mode) "{{{
+function! eskk#set_mode(next_mode) abort "{{{
     let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#logger#warn(
@@ -1894,14 +1894,14 @@ function! eskk#set_mode(next_mode) "{{{
     " For &statusline.
     redrawstatus
 endfunction "}}}
-function! eskk#get_mode() "{{{
+function! eskk#get_mode() abort "{{{
     let inst = eskk#get_current_instance()
     return inst.mode
 endfunction "}}}
-function! eskk#is_supported_mode(mode) "{{{
+function! eskk#is_supported_mode(mode) abort "{{{
     return has_key(s:available_modes, a:mode)
 endfunction "}}}
-function! eskk#register_mode_structure(mode, st) "{{{
+function! eskk#register_mode_structure(mode, st) abort "{{{
     if !s:check_mode_structure(a:mode, a:st)
         call eskk#util#warn('eskk#register_mode_structure(): a invalid structure was given!')
         return
@@ -1914,7 +1914,7 @@ function! eskk#register_mode_structure(mode, st) "{{{
         call eskk#register_mode_table(a:mode, a:st.table)
     endif
 endfunction "}}}
-function! s:check_mode_structure(mode, st) "{{{
+function! s:check_mode_structure(mode, st) abort "{{{
     " Check required keys.
     for key in ['filter']
         if !has_key(a:st, key)
@@ -1939,10 +1939,10 @@ function! s:check_mode_structure(mode, st) "{{{
 
     return 1
 endfunction "}}}
-function! eskk#get_current_mode_structure() "{{{
+function! eskk#get_current_mode_structure() abort "{{{
     return eskk#get_mode_structure(eskk#get_mode())
 endfunction "}}}
-function! eskk#get_mode_structure(mode) "{{{
+function! eskk#get_mode_structure(mode) abort "{{{
     if !eskk#is_supported_mode(a:mode)
         call eskk#logger#warn(
         \   "mode '" . a:mode . "' is not available."
@@ -1952,36 +1952,36 @@ function! eskk#get_mode_structure(mode) "{{{
 endfunction "}}}
 
 " Mode/Table
-function! eskk#has_current_mode_table() "{{{
+function! eskk#has_current_mode_table() abort "{{{
     return eskk#has_mode_table(eskk#get_mode())
 endfunction "}}}
-function! eskk#has_mode_table(mode) "{{{
+function! eskk#has_mode_table(mode) abort "{{{
     return has_key(s:mode_vs_table, a:mode)
 endfunction "}}}
-function! eskk#get_current_mode_table() "{{{
+function! eskk#get_current_mode_table() abort "{{{
     return eskk#get_mode_table(eskk#get_mode())
 endfunction "}}}
-function! eskk#get_mode_table(mode) "{{{
+function! eskk#get_mode_table(mode) abort "{{{
     return s:mode_vs_table[a:mode]
 endfunction "}}}
 
 " Table
-function! eskk#has_table(table_name) "{{{
+function! eskk#has_table(table_name) abort "{{{
     return has_key(s:table_defs, a:table_name)
 endfunction "}}}
-function! eskk#get_all_registered_tables() "{{{
+function! eskk#get_all_registered_tables() abort "{{{
     return keys(s:table_defs)
 endfunction "}}}
-function! eskk#get_table(name) "{{{
+function! eskk#get_table(name) abort "{{{
     return s:table_defs[a:name]
 endfunction "}}}
-function! eskk#register_mode_table(mode, table) "{{{
+function! eskk#register_mode_table(mode, table) abort "{{{
     if !has_key(s:mode_vs_table, a:mode)
         call s:register_table(a:table)
         let s:mode_vs_table[a:mode] = a:table
     endif
 endfunction "}}}
-function! s:register_table(table) "{{{
+function! s:register_table(table) abort "{{{
     for base in a:table.get_base_tables()
         call s:register_table(base)
     endfor
@@ -1996,7 +1996,7 @@ function! s:register_table(table) "{{{
 endfunction "}}}
 
 " Statusline
-function! eskk#statusline(...) "{{{
+function! eskk#statusline(...) abort "{{{
     return eskk#is_enabled()
     \      ? printf(get(a:000, 0, '[eskk:%s]'),
     \               get(g:eskk#statusline_mode_strings,
@@ -2005,7 +2005,7 @@ function! eskk#statusline(...) "{{{
 endfunction "}}}
 
 " Dictionary
-function! eskk#get_skk_dict() "{{{
+function! eskk#get_skk_dict() abort "{{{
     if empty(s:skk_dict)
         let s:skk_dict = eskk#dictionary#new(
         \   g:eskk#dictionary, g:eskk#large_dictionary
@@ -2015,14 +2015,14 @@ function! eskk#get_skk_dict() "{{{
 endfunction "}}}
 
 " Preedit
-function! eskk#get_preedit() "{{{
+function! eskk#get_preedit() abort "{{{
     let inst = eskk#get_current_instance()
     if empty(inst.preedit)
         let inst.preedit = eskk#preedit#new()
     endif
     return inst.preedit
 endfunction "}}}
-function! eskk#set_preedit(preedit) "{{{
+function! eskk#set_preedit(preedit) abort "{{{
     let inst = eskk#get_current_instance()
     call a:preedit.set_old_str(
     \   empty(inst.preedit) ? '' : inst.preedit.get_old_str()
@@ -2031,7 +2031,7 @@ function! eskk#set_preedit(preedit) "{{{
 endfunction "}}}
 
 " Filter
-function! eskk#filter(char) "{{{
+function! eskk#filter(char) abort "{{{
     try
         let inst = eskk#get_current_instance()
         let st = eskk#get_mode_structure(inst.mode)
@@ -2149,7 +2149,7 @@ function! eskk#filter(char) "{{{
         endif
     endtry
 endfunction "}}}
-function! s:force_disable_eskk(stash, error) "{{{
+function! s:force_disable_eskk(stash, error) abort "{{{
     call eskk#disable()
 
     call eskk#logger#write_error_log_file(
@@ -2164,7 +2164,7 @@ function! s:force_disable_eskk(stash, error) "{{{
 endfunction "}}}
 
 " g:eskk#use_color_cursor
-function! eskk#set_cursor_color() "{{{
+function! eskk#set_cursor_color() abort "{{{
     " From s:SkkSetCursorColor() of skk.vim
 
     if !has('gui_running') || !g:eskk#use_color_cursor
@@ -2179,7 +2179,7 @@ function! eskk#set_cursor_color() "{{{
     let color = g:eskk#cursor_color[eskk_mode]
     if type(color) == type([]) && len(color) >= 2
         execute 'highlight lCursor guibg=' . color[&background ==# 'light' ? 0 : 1]
-    elseif type(color) == type("") && color != ''
+    elseif type(color) == type("") && color !=# ''
         execute 'highlight lCursor guibg=' . color
     endif
 endfunction "}}}
@@ -2190,15 +2190,15 @@ function! eskk#has_if_lua() abort "{{{
 endfunction "}}}
 
 " Mapping
-function! eskk#_get_eskk_mappings() "{{{
+function! eskk#_get_eskk_mappings() abort "{{{
     return s:eskk_mappings
 endfunction "}}}
-function! eskk#_get_eskk_general_mappings() "{{{
+function! eskk#_get_eskk_general_mappings() abort "{{{
     return s:eskk_general_mappings
 endfunction "}}}
 
 " Exceptions
-function! eskk#internal_error(from, ...) "{{{
+function! eskk#internal_error(from, ...) abort "{{{
     return eskk#util#build_error(a:from, ['internal error'] + a:000)
 endfunction "}}}
 

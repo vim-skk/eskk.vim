@@ -7,7 +7,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-function! s:SID() "{{{
+function! s:SID() abort "{{{
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
 endfunction "}}}
 let s:SID_PREFIX = s:SID()
@@ -26,7 +26,7 @@ let s:completed_candidates = {}
 
 
 " Complete Function
-function! eskk#complete#eskkcomplete(findstart, base) "{{{
+function! eskk#complete#eskkcomplete(findstart, base) abort "{{{
     if !eskk#is_enabled()
         return s:skip_complete(a:findstart)
     endif
@@ -45,7 +45,7 @@ function! eskk#complete#eskkcomplete(findstart, base) "{{{
         return s:skip_complete(a:findstart)
     endtry
 endfunction "}}}
-function! s:eskkcomplete(findstart, base) "{{{
+function! s:eskkcomplete(findstart, base) abort "{{{
     if a:findstart
         if !eskk#complete#can_find_start()
             return (v:version > 703 || v:version == 703 && has('patch519')) ?
@@ -66,7 +66,7 @@ function! s:eskkcomplete(findstart, base) "{{{
 
     return eskk#complete#do_complete(a:base)
 endfunction "}}}
-function! eskk#complete#can_find_start() "{{{
+function! eskk#complete#can_find_start() abort "{{{
     if !eskk#is_enabled()
         return 0
     endif
@@ -89,7 +89,7 @@ function! eskk#complete#can_find_start() "{{{
 
     return 1
 endfunction "}}}
-function! eskk#complete#do_complete(base) "{{{
+function! eskk#complete#do_complete(base) abort "{{{
     let mode = eskk#get_mode()
     if has_key(s:MODE_FUNC_TABLE, mode)
         return s:MODE_FUNC_TABLE[mode](a:base)
@@ -98,10 +98,10 @@ function! eskk#complete#do_complete(base) "{{{
     endif
 endfunction "}}}
 
-function! eskk#complete#_reset_completed_candidates() "{{{
+function! eskk#complete#_reset_completed_candidates() abort "{{{
     let s:completed_candidates = {}
 endfunction "}}}
-function! s:skip_complete(...) "{{{
+function! s:skip_complete(...) abort "{{{
     let findstart = get(a:000, 0, 0)
     if findstart
         return (v:version > 703 || v:version == 703 && has('patch519')) ?
@@ -113,11 +113,11 @@ function! s:skip_complete(...) "{{{
         \)
     endif
 endfunction "}}}
-function! s:has_completed_candidates(display_str) "{{{
+function! s:has_completed_candidates(display_str) abort "{{{
     let NOTFOUND = {}
     return s:get_completed_candidates(a:display_str, NOTFOUND) isnot NOTFOUND
 endfunction "}}}
-function! s:get_completed_candidates(display_str, else) "{{{
+function! s:get_completed_candidates(display_str, else) abort "{{{
     let mode = eskk#get_mode()
     if !has_key(s:completed_candidates, mode)
         return a:else
@@ -128,8 +128,8 @@ function! s:get_completed_candidates(display_str, else) "{{{
     \   a:else
     \)
 endfunction "}}}
-function! s:set_completed_candidates(display_str, candidates) "{{{
-    if a:display_str == ''    " empty string cannot be a key of dictionary.
+function! s:set_completed_candidates(display_str, candidates) abort "{{{
+    if a:display_str ==# ''    " empty string cannot be a key of dictionary.
         return
     endif
     let mode = eskk#get_mode()
@@ -140,9 +140,9 @@ function! s:set_completed_candidates(display_str, candidates) "{{{
 endfunction "}}}
 
 " s:MODE_FUNC_TABLE
-function! s:MODE_FUNC_TABLE.hira(base) "{{{
+function! s:MODE_FUNC_TABLE.hira(base) abort "{{{
     " Do not complete while inputting rom string.
-    if a:base =~ '\a$'
+    if a:base =~# '\a$'
         return s:skip_complete()
     endif
     let mb_str = eskk#get_preedit().get_buf_str(
@@ -156,16 +156,16 @@ function! s:MODE_FUNC_TABLE.hira(base) "{{{
     return s:complete(eskk#get_mode(), a:base)
 endfunction "}}}
 let s:MODE_FUNC_TABLE.kata = s:MODE_FUNC_TABLE.hira
-function! s:MODE_FUNC_TABLE.ascii(base) "{{{
+function! s:MODE_FUNC_TABLE.ascii(base) abort "{{{
     " ASCII mode.
     return s:complete("ascii", a:base)
 endfunction "}}}
-function! s:MODE_FUNC_TABLE.abbrev(base) "{{{
+function! s:MODE_FUNC_TABLE.abbrev(base) abort "{{{
     " abbrev mode.
     return s:complete("abbrev", a:base)
 endfunction "}}}
 
-function! s:complete(mode, ...) "{{{
+function! s:complete(mode, ...) abort "{{{
     let preedit = eskk#get_preedit()
     let disp = preedit.get_display_str(1, 0)    " with marker, no rom_str.
     if s:has_completed_candidates(disp)

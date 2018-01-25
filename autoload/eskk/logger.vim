@@ -23,7 +23,7 @@ let s:LEVEL_STR_TABLE = {
 
 let s:warning_messages = []
 
-function! eskk#logger#write_debug_log_file() "{{{
+function! eskk#logger#write_debug_log_file() abort "{{{
     if empty(s:warning_messages)
         return
     endif
@@ -43,7 +43,7 @@ function! eskk#logger#write_debug_log_file() "{{{
         let s:warning_messages = []
     endtry
 endfunction "}}}
-function! eskk#logger#write_error_log_file(stash, ...) "{{{
+function! eskk#logger#write_error_log_file(stash, ...) abort "{{{
     let v_exception = a:0 ? a:1 : v:exception
 
     let lines = []
@@ -82,18 +82,18 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     \}
     let o = {}
 
-    function o['a'](arg)
+    function o['a'](arg) abort
         let a:arg.stacktrace =
         \   matchstr(v:throwpoint, '\C'.'^function \zs\S\+\ze, ')
-        return a:arg.stacktrace != ''
+        return a:arg.stacktrace !=# ''
     endfunction
 
-    function o['b'](arg)
+    function o['b'](arg) abort
         let a:arg.funcname = get(split(a:arg.stacktrace, '\.\.'), -1, '')
-        return a:arg.funcname != ''
+        return a:arg.funcname !=# ''
     endfunction
 
-    function o['c'](arg)
+    function o['c'](arg) abort
         try
             return exists('*' . a:arg.funcname)
         catch    " E129: Function name required
@@ -102,7 +102,7 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
         endtry
     endfunction
 
-    function o['d'](arg)
+    function o['d'](arg) abort
         let output = eskk#util#redir_english('function ' . a:arg.funcname)
         let a:arg.lines += split(output, '\n')
     endfunction
@@ -196,7 +196,7 @@ function! eskk#logger#write_error_log_file(stash, ...) "{{{
     endtry
 endfunction "}}}
 
-function! s:do_log(level, hl, msg) "{{{
+function! s:do_log(level, hl, msg) abort "{{{
     let msg = printf('[%s] [%s] [%s] %s',
     \           v:servername, strftime('%c'),
     \           s:LEVEL_STR_TABLE[a:level], a:msg)
@@ -215,17 +215,17 @@ function! s:do_log(level, hl, msg) "{{{
         execute printf('sleep %dm', g:eskk#debug_wait_ms)
     endif
 endfunction "}}}
-function! s:do_logf(level, hl, ...) "{{{
+function! s:do_logf(level, hl, ...) abort "{{{
     call s:do_log(a:level, a:hl, call('printf', a:000))
 endfunction "}}}
 
-function! eskk#logger#log_exception(what) "{{{
+function! eskk#logger#log_exception(what) abort "{{{
     call eskk#logger#warn("'" . a:what . "' threw exception")
     call eskk#logger#warn('v:exception = ' . string(v:exception))
     call eskk#logger#warn('v:throwpoint = ' . string(v:throwpoint))
 endfunction "}}}
 
-function! s:echomsg(hl, msg) "{{{
+function! s:echomsg(hl, msg) abort "{{{
     execute 'echohl' a:hl
     try
         echomsg a:msg
@@ -234,24 +234,24 @@ function! s:echomsg(hl, msg) "{{{
     endtry
 endfunction "}}}
 
-function! eskk#logger#warn(msg) "{{{
+function! eskk#logger#warn(msg) abort "{{{
     call s:do_log(s:LOG_WARN, 'WarningMsg', a:msg)
 endfunction "}}}
-function! eskk#logger#warnf(...) "{{{
+function! eskk#logger#warnf(...) abort "{{{
     call eskk#logger#warn(call('printf', a:000))
 endfunction "}}}
 
-function! eskk#logger#info(msg) "{{{
+function! eskk#logger#info(msg) abort "{{{
     call s:do_log(s:LOG_INFO, 'WarningMsg', a:msg)
 endfunction "}}}
-function! eskk#logger#infof(...) "{{{
+function! eskk#logger#infof(...) abort "{{{
     call eskk#logger#info(call('printf', a:000))
 endfunction "}}}
 
-function! eskk#logger#debug(msg) "{{{
+function! eskk#logger#debug(msg) abort "{{{
     call s:do_log(s:LOG_DEBUG, 'Debug', a:msg)
 endfunction "}}}
-function! eskk#logger#debugf(...) "{{{
+function! eskk#logger#debugf(...) abort "{{{
     call eskk#logger#debug(call('printf', a:000))
 endfunction "}}}
 
