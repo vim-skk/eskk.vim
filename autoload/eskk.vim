@@ -27,10 +27,10 @@ delfunction s:SID
 " preedit:
 "   Buffer strings for inserted, filtered and so on.
 let s:eskk = {
-\   'mode': '',
-\   'preedit': {},
-\   'formatoptions': 0,
-\}
+            \   'mode': '',
+            \   'preedit': {},
+            \   'formatoptions': 0,
+            \}
 
 
 
@@ -58,130 +58,130 @@ let s:table_defs = {}
 " All special mappings.
 let s:eskk_general_mappings = {}
 let s:eskk_mappings = {
-\   'disable': {'fn': eskk#util#get_local_func('handle_disable', s:SID_PREFIX)},
-\   'enable': {'fn': eskk#util#get_local_func('handle_enable', s:SID_PREFIX)},
-\   'toggle': {'fn': eskk#util#get_local_func('handle_toggle', s:SID_PREFIX)},
-\   'kakutei': {'fn': eskk#util#get_local_func('handle_kakutei', s:SID_PREFIX)},
-\   'sticky': {},
-\   'backspace-key': {},
-\   'escape-key': {},
-\   'enter-key': {},
-\   'tab': {},
-\   'cancel': {},
-\   'phase:henkan:henkan-key': {},
-\   'phase:okuri:henkan-key': {},
-\   'phase:henkan-select:choose-next': {},
-\   'phase:henkan-select:choose-prev': {},
-\   'phase:henkan-select:next-page': {},
-\   'phase:henkan-select:prev-page': {},
-\   'phase:henkan-select:escape': {},
-\   'phase:henkan-select:delete-from-dict': {},
-\   'mode:hira:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
-\   'mode:hira:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
-\   'mode:hira:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
-\   'mode:hira:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
-\   'mode:hira:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
-\   'mode:hira:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
-\   'mode:hira:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
-\   'mode:hira:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
-\   'mode:kata:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
-\   'mode:kata:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
-\   'mode:kata:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
-\   'mode:kata:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
-\   'mode:kata:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
-\   'mode:kata:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
-\   'mode:kata:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
-\   'mode:kata:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
-\   'mode:hankata:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
-\   'mode:hankata:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
-\   'mode:hankata:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
-\   'mode:hankata:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
-\   'mode:hankata:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
-\   'mode:hankata:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
-\   'mode:hankata:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
-\   'mode:hankata:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
-\   'mode:ascii:to-hira': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
-\   'mode:zenei:to-hira': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
-\   'mode:abbrev:henkan-key': {},
-\}
+            \   'disable': {'fn': eskk#util#get_local_func('handle_disable', s:SID_PREFIX)},
+            \   'enable': {'fn': eskk#util#get_local_func('handle_enable', s:SID_PREFIX)},
+            \   'toggle': {'fn': eskk#util#get_local_func('handle_toggle', s:SID_PREFIX)},
+            \   'kakutei': {'fn': eskk#util#get_local_func('handle_kakutei', s:SID_PREFIX)},
+            \   'sticky': {},
+            \   'backspace-key': {},
+            \   'escape-key': {},
+            \   'enter-key': {},
+            \   'tab': {},
+            \   'cancel': {},
+            \   'phase:henkan:henkan-key': {},
+            \   'phase:okuri:henkan-key': {},
+            \   'phase:henkan-select:choose-next': {},
+            \   'phase:henkan-select:choose-prev': {},
+            \   'phase:henkan-select:next-page': {},
+            \   'phase:henkan-select:prev-page': {},
+            \   'phase:henkan-select:escape': {},
+            \   'phase:henkan-select:delete-from-dict': {},
+            \   'mode:hira:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+            \   'mode:hira:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
+            \   'mode:hira:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
+            \   'mode:hira:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
+            \   'mode:hira:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
+            \   'mode:hira:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
+            \   'mode:hira:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
+            \   'mode:hira:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
+            \   'mode:kata:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+            \   'mode:kata:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
+            \   'mode:kata:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
+            \   'mode:kata:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
+            \   'mode:kata:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
+            \   'mode:kata:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
+            \   'mode:kata:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
+            \   'mode:kata:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
+            \   'mode:hankata:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+            \   'mode:hankata:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
+            \   'mode:hankata:toggle-kata': {'fn': eskk#util#get_local_func('handle_toggle_kata', s:SID_PREFIX)},
+            \   'mode:hankata:q-key': {'fn': eskk#util#get_local_func('handle_q_key', s:SID_PREFIX)},
+            \   'mode:hankata:l-key': {'fn': eskk#util#get_local_func('handle_l_key', s:SID_PREFIX)},
+            \   'mode:hankata:to-ascii': {'fn': eskk#util#get_local_func('handle_to_ascii', s:SID_PREFIX)},
+            \   'mode:hankata:to-zenei': {'fn': eskk#util#get_local_func('handle_to_zenei', s:SID_PREFIX)},
+            \   'mode:hankata:to-abbrev': {'fn': eskk#util#get_local_func('handle_to_abbrev', s:SID_PREFIX)},
+            \   'mode:ascii:to-hira': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+            \   'mode:zenei:to-hira': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
+            \   'mode:abbrev:henkan-key': {},
+            \}
 " Keys used by only its mode.
 let s:MODE_LOCAL_KEYS = {
-\   'hira': [
-\       'kakutei',
-\       'disable',
-\       'enable',
-\       'toggle',
-\       'cancel',
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:hira:toggle-hankata',
-\       'mode:hira:ctrl-q-key',
-\       'mode:hira:toggle-kata',
-\       'mode:hira:q-key',
-\       'mode:hira:l-key',
-\       'mode:hira:to-ascii',
-\       'mode:hira:to-zenei',
-\       'mode:hira:to-abbrev',
-\   ],
-\   'kata': [
-\       'kakutei',
-\       'disable',
-\       'enable',
-\       'toggle',
-\       'cancel',
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:kata:toggle-hankata',
-\       'mode:kata:ctrl-q-key',
-\       'mode:kata:toggle-kata',
-\       'mode:kata:q-key',
-\       'mode:kata:l-key',
-\       'mode:kata:to-ascii',
-\       'mode:kata:to-zenei',
-\       'mode:kata:to-abbrev',
-\   ],
-\   'hankata': [
-\       'kakutei',
-\       'disable',
-\       'enable',
-\       'toggle',
-\       'cancel',
-\       'phase:henkan:henkan-key',
-\       'phase:okuri:henkan-key',
-\       'phase:henkan-select:choose-next',
-\       'phase:henkan-select:choose-prev',
-\       'phase:henkan-select:next-page',
-\       'phase:henkan-select:prev-page',
-\       'phase:henkan-select:escape',
-\       'mode:hankata:toggle-hankata',
-\       'mode:hankata:ctrl-q-key',
-\       'mode:hankata:toggle-kata',
-\       'mode:hankata:q-key',
-\       'mode:hankata:l-key',
-\       'mode:hankata:to-ascii',
-\       'mode:hankata:to-zenei',
-\       'mode:hankata:to-abbrev',
-\   ],
-\   'ascii': [
-\       'mode:ascii:to-hira',
-\   ],
-\   'zenei': [
-\       'mode:zenei:to-hira',
-\   ],
-\   'abbrev': [
-\       'cancel',
-\   ],
-\}
+            \   'hira': [
+            \       'kakutei',
+            \       'disable',
+            \       'enable',
+            \       'toggle',
+            \       'cancel',
+            \       'phase:henkan:henkan-key',
+            \       'phase:okuri:henkan-key',
+            \       'phase:henkan-select:choose-next',
+            \       'phase:henkan-select:choose-prev',
+            \       'phase:henkan-select:next-page',
+            \       'phase:henkan-select:prev-page',
+            \       'phase:henkan-select:escape',
+            \       'mode:hira:toggle-hankata',
+            \       'mode:hira:ctrl-q-key',
+            \       'mode:hira:toggle-kata',
+            \       'mode:hira:q-key',
+            \       'mode:hira:l-key',
+            \       'mode:hira:to-ascii',
+            \       'mode:hira:to-zenei',
+            \       'mode:hira:to-abbrev',
+            \   ],
+            \   'kata': [
+            \       'kakutei',
+            \       'disable',
+            \       'enable',
+            \       'toggle',
+            \       'cancel',
+            \       'phase:henkan:henkan-key',
+            \       'phase:okuri:henkan-key',
+            \       'phase:henkan-select:choose-next',
+            \       'phase:henkan-select:choose-prev',
+            \       'phase:henkan-select:next-page',
+            \       'phase:henkan-select:prev-page',
+            \       'phase:henkan-select:escape',
+            \       'mode:kata:toggle-hankata',
+            \       'mode:kata:ctrl-q-key',
+            \       'mode:kata:toggle-kata',
+            \       'mode:kata:q-key',
+            \       'mode:kata:l-key',
+            \       'mode:kata:to-ascii',
+            \       'mode:kata:to-zenei',
+            \       'mode:kata:to-abbrev',
+            \   ],
+            \   'hankata': [
+            \       'kakutei',
+            \       'disable',
+            \       'enable',
+            \       'toggle',
+            \       'cancel',
+            \       'phase:henkan:henkan-key',
+            \       'phase:okuri:henkan-key',
+            \       'phase:henkan-select:choose-next',
+            \       'phase:henkan-select:choose-prev',
+            \       'phase:henkan-select:next-page',
+            \       'phase:henkan-select:prev-page',
+            \       'phase:henkan-select:escape',
+            \       'mode:hankata:toggle-hankata',
+            \       'mode:hankata:ctrl-q-key',
+            \       'mode:hankata:toggle-kata',
+            \       'mode:hankata:q-key',
+            \       'mode:hankata:l-key',
+            \       'mode:hankata:to-ascii',
+            \       'mode:hankata:to-zenei',
+            \       'mode:hankata:to-abbrev',
+            \   ],
+            \   'ascii': [
+            \       'mode:ascii:to-hira',
+            \   ],
+            \   'zenei': [
+            \       'mode:zenei:to-hira',
+            \   ],
+            \   'abbrev': [
+            \       'cancel',
+            \   ],
+            \}
 " The number of 'eskk#filter()' was called.
 let s:filter_count = 0
 " }}}
@@ -203,7 +203,7 @@ function! eskk#get_current_instance() abort "{{{
         return s:eskk_instances[s:eskk_instance_id]
     catch
         call eskk#logger#log_exception(
-        \   'eskk#get_current_instance()')
+                    \   'eskk#get_current_instance()')
         " Trap "E684: list index our of range ..."
         call eskk#initialize_instance()
         " This must not raise an error.
@@ -278,8 +278,8 @@ function! s:handle_kakutei(stash) abort "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
-    \   || phase ==# g:eskk#preedit#PHASE_OKURI
-    \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
+                \   || phase ==# g:eskk#preedit#PHASE_OKURI
+                \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         call s:do_enter_egglike(a:stash)
         return 1
     endif
@@ -304,7 +304,7 @@ endfunction "}}}
 function! s:handle_ctrl_q_key(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
-    \   || phase ==# g:eskk#preedit#PHASE_OKURI
+                \   || phase ==# g:eskk#preedit#PHASE_OKURI
         call s:do_ctrl_q_key(a:stash)
         return 1
     endif
@@ -313,7 +313,7 @@ endfunction "}}}
 function! s:handle_q_key(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
-    \   || phase ==# g:eskk#preedit#PHASE_OKURI
+                \   || phase ==# g:eskk#preedit#PHASE_OKURI
         call s:do_q_key(a:stash)
         return 1
     endif
@@ -322,7 +322,7 @@ endfunction "}}}
 function! s:handle_l_key(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
-    \   || phase ==# g:eskk#preedit#PHASE_OKURI
+                \   || phase ==# g:eskk#preedit#PHASE_OKURI
         call s:do_l_key(a:stash)
         return 1
     endif
@@ -333,7 +333,7 @@ function! s:handle_to_ascii(stash) abort "{{{
     let phase = preedit.get_henkan_phase()
     let buf_str = preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() ==# ''
+                \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('ascii')
         return 1
     endif
@@ -344,7 +344,7 @@ function! s:handle_to_zenei(stash) abort "{{{
     let phase = preedit.get_henkan_phase()
     let buf_str = preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() ==# ''
+                \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('zenei')
         return 1
     endif
@@ -354,7 +354,7 @@ function! s:handle_to_abbrev(stash) abort "{{{
     let phase = a:stash.preedit.get_henkan_phase()
     let buf_str = a:stash.preedit.get_current_buf_str()
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   && buf_str.rom_str.get() ==# ''
+                \   && buf_str.rom_str.get() ==# ''
         call eskk#set_mode('abbrev')
         return 1
     endif
@@ -364,14 +364,14 @@ function! s:is_mode_local_char(char, type) abort "{{{
     " NOTE: This function must not show error
     " when `s:eskk_mappings[a:type]` does not exist.
     return has_key(s:eskk_mappings, a:type)
-    \   && has_key(s:eskk_mappings[a:type], 'lhs')
-    \   && eskk#util#key2char(s:eskk_mappings[a:type].lhs) ==# a:char
+                \   && has_key(s:eskk_mappings[a:type], 'lhs')
+                \   && eskk#util#key2char(s:eskk_mappings[a:type].lhs) ==# a:char
 endfunction "}}}
 function! s:handle_mode_local_char(char, type, stash) abort "{{{
     return s:is_mode_local_char(a:char, a:type)
-    \   && has_key(s:eskk_mappings, a:type)
-    \   && has_key(s:eskk_mappings[a:type], 'fn')
-    \   && call(s:eskk_mappings[a:type].fn, [a:stash])
+                \   && has_key(s:eskk_mappings, a:type)
+                \   && has_key(s:eskk_mappings[a:type], 'fn')
+                \   && call(s:eskk_mappings[a:type].fn, [a:stash])
 endfunction "}}}
 
 
@@ -386,9 +386,9 @@ function! s:asym_filter(stash) abort "{{{
 
     " Handle popupmenu-keys.
     if g:eskk#enable_completion &&
-    \   mode() ==# 'i' && pumvisible()
-    \   && phase is g:eskk#preedit#PHASE_HENKAN
-    \   && s:handle_popupmenu_keys(a:stash)
+                \   mode() ==# 'i' && pumvisible()
+                \   && phase is g:eskk#preedit#PHASE_HENKAN
+                \   && s:handle_popupmenu_keys(a:stash)
         " Handled.
         return
     endif
@@ -449,7 +449,7 @@ function! s:asym_filter(stash) abort "{{{
             let henkan_result = eskk#get_skk_dict().get_henkan_result()
             if !empty(henkan_result)
                 let prev_preedit =
-                \   deepcopy(henkan_result.preedit)
+                            \   deepcopy(henkan_result.preedit)
                 if henkan_result.delete_from_dict()
                     call eskk#set_preedit(prev_preedit)
                 else
@@ -457,16 +457,16 @@ function! s:asym_filter(stash) abort "{{{
                     " push current candidate and
                     " back to normal phase.
                     call eskk#logger#warn(
-                    \   'Failed to delete current candidate...'
-                    \)
+                                \   'Failed to delete current candidate...'
+                                \)
                     sleep 1
 
                     call preedit.push_kakutei_str(
-                    \   preedit.get_display_str(0)
-                    \)
+                                \   preedit.get_display_str(0)
+                                \)
                     call preedit.set_henkan_phase(
-                    \   g:eskk#preedit#PHASE_NORMAL
-                    \)
+                                \   g:eskk#preedit#PHASE_NORMAL
+                                \)
                 endif
             endif
         else
@@ -475,9 +475,9 @@ function! s:asym_filter(stash) abort "{{{
         endif
     else
         throw eskk#internal_error(
-        \   ['eskk'],
-        \   "s:asym_filter() does not support phase " . phase . "."
-        \)
+                    \   ['eskk'],
+                    \   "s:asym_filter() does not support phase " . phase . "."
+                    \)
     endif
 endfunction "}}}
 
@@ -540,8 +540,8 @@ function! s:handle_popupmenu_keys(stash) abort "{{{
         call preedit.kakutei(disp)
         return 1
     elseif char ==# "\<PageUp>" || char ==# "\<PageDown>"
-    \   || char ==# "\<Up>"     || char ==# "\<Down>"
-    \   || char ==# "\<C-n>"    || char ==# "\<C-p>"
+                \   || char ==# "\<Up>"     || char ==# "\<Down>"
+                \   || char ==# "\<C-n>"    || char ==# "\<C-p>"
         call preedit.push_filter_pre_char(char)
         return 1
     endif
@@ -577,8 +577,8 @@ function! s:do_backspace(stash) abort "{{{
             let filter_str = eskk#util#mb_chop(preedit.get_display_str(0))
             call preedit.push_kakutei_str(filter_str)
             let henkan_select_buf_str = preedit.get_buf_str(
-            \   g:eskk#preedit#PHASE_HENKAN_SELECT
-            \)
+                        \   g:eskk#preedit#PHASE_HENKAN_SELECT
+                        \)
             call henkan_select_buf_str.clear()
 
             call preedit.set_henkan_phase(g:eskk#preedit#PHASE_NORMAL)
@@ -592,7 +592,7 @@ function! s:do_backspace(stash) abort "{{{
 
     let mode_st = eskk#get_current_mode_structure()
     if g:eskk#convert_at_exact_match
-    \   && has_key(mode_st.temp, 'real_matched_pairs')
+                \   && has_key(mode_st.temp, 'real_matched_pairs')
 
         let p = mode_st.temp.real_matched_pairs
         unlet mode_st.temp.real_matched_pairs
@@ -602,8 +602,8 @@ function! s:do_backspace(stash) abort "{{{
             let filter_str = eskk#util#mb_chop(preedit.get_display_str(0))
             call preedit.push_kakutei_str(filter_str)
             let henkan_select_buf_str = preedit.get_buf_str(
-            \   g:eskk#preedit#PHASE_HENKAN_SELECT
-            \)
+                        \   g:eskk#preedit#PHASE_HENKAN_SELECT
+                        \)
             call henkan_select_buf_str.clear()
 
             call preedit.set_henkan_phase(g:eskk#preedit#PHASE_NORMAL)
@@ -611,8 +611,8 @@ function! s:do_backspace(stash) abort "{{{
         else
             let filter_str = join(map(copy(p), 'v:val[1]'), '')
             let buf_str = preedit.get_buf_str(
-            \   g:eskk#preedit#PHASE_HENKAN
-            \)
+                        \   g:eskk#preedit#PHASE_HENKAN
+                        \)
             if filter_str !=# buf_str.rom_pairs.get_filter()
                 call buf_str.rom_pairs.set(p)
                 return
@@ -626,8 +626,8 @@ function! s:do_backspace(stash) abort "{{{
         if !buf_str.rom_str.empty()
             call buf_str.rom_str.pop()
             if buf_str.rom_str.empty()
-            \   && !buf_str.rom_pairs.empty()
-            \   && !get(buf_str.rom_pairs.get(-1)[2], 'converted')
+                        \   && !buf_str.rom_pairs.empty()
+                        \   && !get(buf_str.rom_pairs.get(-1)[2], 'converted')
                 " Move rom_pairs data into rom_str.
                 let pair = buf_str.rom_pairs.pop()
                 call buf_str.rom_str.set(pair[0])
@@ -639,8 +639,8 @@ function! s:do_backspace(stash) abort "{{{
         elseif preedit.get_marker(phase) !=# ''
             if !preedit.step_back_henkan_phase()
                 let msg = "Normal phase's marker is empty, "
-                \       . "and other phases *should* be able to change "
-                \       . "current henkan phase."
+                            \       . "and other phases *should* be able to change "
+                            \       . "current henkan phase."
                 throw eskk#internal_error(['eskk', 'preedit'], msg)
             endif
             break
@@ -661,8 +661,8 @@ function! s:get_enter_repeat_times(stash) abort "{{{
     endif
     let phase = a:stash.preedit.get_henkan_phase()
     if phase ==# g:eskk#preedit#PHASE_HENKAN
-    \   || phase ==# g:eskk#preedit#PHASE_OKURI
-    \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
+                \   || phase ==# g:eskk#preedit#PHASE_OKURI
+                \   || phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
         return g:eskk#egg_like_newline ? 1 : 2
     endif
     " Default is <CR> once.
@@ -691,8 +691,8 @@ function! s:do_enter_egglike(stash) abort "{{{
 
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
         call preedit.convert_rom_str_inplace(
-        \   [g:eskk#preedit#PHASE_HENKAN, phase]
-        \)
+                    \   [g:eskk#preedit#PHASE_HENKAN, phase]
+                    \)
         if get(g:eskk#set_undo_point, 'kakutei', 0) && mode() ==# 'i'
             call preedit.push_filter_post_char(undo_char)
         endif
@@ -724,13 +724,13 @@ function! s:do_sticky(stash) abort "{{{
 
     " Convert rom_str if possible.
     call preedit.convert_rom_str_inplace([
-    \   g:eskk#preedit#PHASE_HENKAN,
-    \   g:eskk#preedit#PHASE_OKURI
-    \])
+                \   g:eskk#preedit#PHASE_HENKAN,
+                \   g:eskk#preedit#PHASE_OKURI
+                \])
 
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         if !buf_str.rom_str.empty()
-        \   || !buf_str.rom_pairs.empty()
+                    \   || !buf_str.rom_pairs.empty()
             call preedit.convert_rom_str_inplace(phase)
             call preedit.push_kakutei_str(preedit.get_display_str(0))
             call buf_str.clear()
@@ -742,7 +742,7 @@ function! s:do_sticky(stash) abort "{{{
         call preedit.set_henkan_phase(g:eskk#preedit#PHASE_HENKAN)
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN
         if !buf_str.rom_str.empty()
-        \   || !buf_str.rom_pairs.empty()
+                    \   || !buf_str.rom_pairs.empty()
             call preedit.set_henkan_phase(g:eskk#preedit#PHASE_OKURI)
         endif
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
@@ -771,8 +771,8 @@ endfunction "}}}
 function! s:do_escape(stash) abort "{{{
     let preedit = a:stash.preedit
     call preedit.convert_rom_str_inplace(
-    \   preedit.get_henkan_phase()
-    \)
+                \   preedit.get_henkan_phase()
+                \)
 
     if g:eskk#rom_input_style ==# 'skk'
         let with_rom_str = 0
@@ -780,9 +780,9 @@ function! s:do_escape(stash) abort "{{{
         let with_rom_str = 1
     else
         throw eskk#internal_error(
-        \   ['eskk'],
-        \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
-        \)
+                    \   ['eskk'],
+                    \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
+                    \)
     endif
     let kakutei_str = preedit.get_display_str(0, with_rom_str)
     call preedit.kakutei(kakutei_str . "\<Esc>")
@@ -797,7 +797,7 @@ function! s:do_henkan(stash, ...) abort "{{{
     endif
 
     if phase isnot g:eskk#preedit#PHASE_HENKAN
-    \   && phase isnot g:eskk#preedit#PHASE_OKURI
+                \   && phase isnot g:eskk#preedit#PHASE_OKURI
         return
     endif
 
@@ -810,11 +810,11 @@ endfunction "}}}
 function! s:do_henkan_abbrev(stash, convert_at_exact_match) abort "{{{
     let preedit = a:stash.preedit
     let henkan_buf_str = preedit.get_buf_str(
-    \   g:eskk#preedit#PHASE_HENKAN
-    \)
+                \   g:eskk#preedit#PHASE_HENKAN
+                \)
     let henkan_select_buf_str = preedit.get_buf_str(
-    \   g:eskk#preedit#PHASE_HENKAN_SELECT
-    \)
+                \   g:eskk#preedit#PHASE_HENKAN_SELECT
+                \)
 
     let rom_str = henkan_buf_str.rom_str.get()
     let dict = eskk#get_skk_dict()
@@ -830,15 +830,15 @@ function! s:do_henkan_abbrev(stash, convert_at_exact_match) abort "{{{
         else
             call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
             call preedit.set_henkan_phase(
-            \   g:eskk#preedit#PHASE_HENKAN_SELECT
-            \)
+                        \   g:eskk#preedit#PHASE_HENKAN_SELECT
+                        \)
         endif
     catch /^eskk: dictionary look up error/
         " No candidates.
         let result =
-        \   dict.remember_word_prompt_hr(
-        \      dict.get_henkan_result()
-        \   )
+                    \   dict.remember_word_prompt_hr(
+                    \      dict.get_henkan_result()
+                    \   )
         let [input, okuri] = [result[0], result[2]]
         if input !=# ''
             call preedit.kakutei(input . okuri)
@@ -854,35 +854,35 @@ function! s:do_henkan_other(stash, convert_at_exact_match) abort "{{{
     " This makes all reference values of
     " Preedit.get_buf_str()'s return values invalid.
     if g:eskk#kata_convert_to_hira_at_henkan
-    \   && eskk#get_mode() ==# 'kata'
+                \   && eskk#get_mode() ==# 'kata'
         call preedit.convert_rom_all_inplace(
-        \   [
-        \       g:eskk#preedit#PHASE_HENKAN,
-        \       g:eskk#preedit#PHASE_OKURI,
-        \   ],
-        \   eskk#get_mode_table('hira')
-        \)
+                    \   [
+                    \       g:eskk#preedit#PHASE_HENKAN,
+                    \       g:eskk#preedit#PHASE_OKURI,
+                    \   ],
+                    \   eskk#get_mode_table('hira')
+                    \)
     endif
 
     let henkan_buf_str = preedit.get_buf_str(
-    \   g:eskk#preedit#PHASE_HENKAN
-    \)
+                \   g:eskk#preedit#PHASE_HENKAN
+                \)
     let okuri_buf_str = preedit.get_buf_str(
-    \   g:eskk#preedit#PHASE_OKURI
-    \)
+                \   g:eskk#preedit#PHASE_OKURI
+                \)
     let henkan_select_buf_str = preedit.get_buf_str(
-    \   g:eskk#preedit#PHASE_HENKAN_SELECT
-    \)
+                \   g:eskk#preedit#PHASE_HENKAN_SELECT
+                \)
 
     " Convert rom_str if possible.
     call preedit.convert_rom_str_inplace([
-    \   g:eskk#preedit#PHASE_HENKAN,
-    \   g:eskk#preedit#PHASE_OKURI
-    \])
+                \   g:eskk#preedit#PHASE_HENKAN,
+                \   g:eskk#preedit#PHASE_OKURI
+                \])
 
     if g:eskk#fix_extra_okuri
-    \   && !henkan_buf_str.rom_str.empty()
-    \   && phase ==# g:eskk#preedit#PHASE_HENKAN
+                \   && !henkan_buf_str.rom_str.empty()
+                \   && phase ==# g:eskk#preedit#PHASE_HENKAN
         call okuri_buf_str.rom_str.set(henkan_buf_str.rom_str.get())
         call henkan_buf_str.rom_str.clear()
         call preedit.set_henkan_phase(g:eskk#preedit#PHASE_OKURI)
@@ -910,19 +910,19 @@ function! s:do_henkan_other(stash, convert_at_exact_match) abort "{{{
         else
             call henkan_select_buf_str.rom_pairs.set_one_pair(rom_str, candidate, {'converted': 1})
             call preedit.set_henkan_phase(
-            \   g:eskk#preedit#PHASE_HENKAN_SELECT
-            \)
+                        \   g:eskk#preedit#PHASE_HENKAN_SELECT
+                        \)
             if g:eskk#kakutei_when_unique_candidate
-            \   && !henkan_result.has_next()
+                        \   && !henkan_result.has_next()
                 call preedit.kakutei(preedit.get_display_str(0))
             endif
         endif
     catch /^eskk: dictionary look up error/
         " No candidates.
         let [input, hira, okuri] =
-        \   dict.remember_word_prompt_hr(
-        \      dict.get_henkan_result()
-        \   )
+                    \   dict.remember_word_prompt_hr(
+                    \      dict.get_henkan_result()
+                    \   )
         if input !=# ''
             call preedit.kakutei(input . okuri)
         endif
@@ -930,19 +930,19 @@ function! s:do_henkan_other(stash, convert_at_exact_match) abort "{{{
 endfunction "}}}
 function! s:do_ctrl_q_key(stash) abort "{{{
     return s:convert_roms_and_kakutei(
-    \   a:stash,
-    \   (eskk#get_mode() ==# 'hira' ?
-    \       eskk#get_mode_table('hankata') :
-    \       eskk#get_mode_table('hira'))
-    \)
+                \   a:stash,
+                \   (eskk#get_mode() ==# 'hira' ?
+                \       eskk#get_mode_table('hankata') :
+                \       eskk#get_mode_table('hira'))
+                \)
 endfunction "}}}
 function! s:do_q_key(stash) abort "{{{
     return s:convert_roms_and_kakutei(
-    \   a:stash,
-    \   (eskk#get_mode() ==# 'hira' ?
-    \       eskk#get_mode_table('kata') :
-    \       eskk#get_mode_table('hira'))
-    \)
+                \   a:stash,
+                \   (eskk#get_mode() ==# 'hira' ?
+                \       eskk#get_mode_table('kata') :
+                \       eskk#get_mode_table('hira'))
+                \)
 endfunction "}}}
 function! s:do_l_key(stash) abort "{{{
     " s:convert_roms_and_kakutei() does not convert rom_str
@@ -952,13 +952,13 @@ endfunction "}}}
 function! s:convert_roms_and_kakutei(stash, table) abort "{{{
     let preedit = a:stash.preedit
     call preedit.convert_rom_str_inplace(
-    \   preedit.get_henkan_phase()
-    \)
+                \   preedit.get_henkan_phase()
+                \)
     call preedit.convert_rom_all_inplace([
-    \   g:eskk#preedit#PHASE_NORMAL,
-    \   g:eskk#preedit#PHASE_HENKAN,
-    \   g:eskk#preedit#PHASE_OKURI,
-    \], a:table)
+                \   g:eskk#preedit#PHASE_NORMAL,
+                \   g:eskk#preedit#PHASE_HENKAN,
+                \   g:eskk#preedit#PHASE_OKURI,
+                \], a:table)
     call preedit.kakutei(preedit.get_display_str(0))
 endfunction "}}}
 
@@ -1021,32 +1021,32 @@ function! s:filter_rom_okuri(stash, table) abort "{{{
     let char = a:stash.char
     let preedit = a:stash.preedit
     let henkan_buf_str = preedit.get_buf_str(
-    \   g:eskk#preedit#PHASE_HENKAN
-    \)
+                \   g:eskk#preedit#PHASE_HENKAN
+                \)
     let okuri_buf_str = preedit.get_buf_str(
-    \   g:eskk#preedit#PHASE_OKURI
-    \)
+                \   g:eskk#preedit#PHASE_OKURI
+                \)
     let rom_str = henkan_buf_str.rom_str.get() . char
     " Input #1.
     if !henkan_buf_str.rom_str.empty()
-    \   && okuri_buf_str.rom_str.empty()
-    \   && a:table.has_map(rom_str)
+                \   && okuri_buf_str.rom_str.empty()
+                \   && a:table.has_map(rom_str)
         call henkan_buf_str.rom_str.clear()
         call henkan_buf_str.rom_pairs.push_one_pair(
-        \   rom_str,
-        \   a:table.get_map(rom_str),
-        \   {'converted': 1}
-        \)
+                    \   rom_str,
+                    \   a:table.get_map(rom_str),
+                    \   {'converted': 1}
+                    \)
         let rest = a:table.get_rest(rom_str, -1)
         if rest !=# -1
             call okuri_buf_str.rom_str.set(rest)
         elseif g:eskk#fix_extra_okuri
             " Input #2.
             call okuri_buf_str.rom_pairs.push(
-            \   henkan_buf_str.rom_pairs.pop()
-            \)
+                        \   henkan_buf_str.rom_pairs.pop()
+                        \)
             if g:eskk#auto_henkan_at_okuri_match
-            \   && a:table.has_map(okuri_buf_str.rom_str.get() . char)
+                        \   && a:table.has_map(okuri_buf_str.rom_str.get() . char)
                 call s:do_henkan(a:stash)
             endif
         endif
@@ -1074,7 +1074,7 @@ function! s:filter_rom_exact_match(stash, table) abort "{{{
     let phase = preedit.get_henkan_phase()
 
     if phase ==# g:eskk#preedit#PHASE_NORMAL
-    \   || phase ==# g:eskk#preedit#PHASE_HENKAN
+                \   || phase ==# g:eskk#preedit#PHASE_HENKAN
         " Set filtered string.
         call buf_str.rom_pairs.push_one_pair(rom_str, a:table.get_map(rom_str), {'converted': 1})
         call buf_str.rom_str.clear()
@@ -1094,17 +1094,17 @@ function! s:filter_rom_exact_match(stash, table) abort "{{{
         endif
 
         if g:eskk#convert_at_exact_match
-        \   && phase ==# g:eskk#preedit#PHASE_HENKAN
+                    \   && phase ==# g:eskk#preedit#PHASE_HENKAN
             let st = eskk#get_current_mode_structure()
             let henkan_buf_str = preedit.get_buf_str(
-            \   g:eskk#preedit#PHASE_HENKAN
-            \)
+                        \   g:eskk#preedit#PHASE_HENKAN
+                        \)
             if has_key(st.temp, 'real_matched_pairs')
                 " Restore previous hiragana & push current to the tail.
                 let p = henkan_buf_str.rom_pairs.pop()
                 call henkan_buf_str.rom_pairs.set(
-                \   st.temp.real_matched_pairs + [p]
-                \)
+                            \   st.temp.real_matched_pairs + [p]
+                            \)
             endif
             let st.temp.real_matched_pairs = henkan_buf_str.rom_pairs.get()
 
@@ -1112,16 +1112,16 @@ function! s:filter_rom_exact_match(stash, table) abort "{{{
         endif
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
         call eskk#util#assert(
-        \   a:table.has_map(rom_str),
-        \   'a:table.has_map(rom_str) ==# 1')
+                    \   a:table.has_map(rom_str),
+                    \   'a:table.has_map(rom_str) ==# 1')
 
         call buf_str.rom_str.clear()
 
         call buf_str.rom_pairs.push_one_pair(
-        \   rom_str,
-        \   a:table.get_map(rom_str),
-        \   {'converted': 1}
-        \)
+                    \   rom_str,
+                    \   a:table.get_map(rom_str),
+                    \   {'converted': 1}
+                    \)
         let rest = a:table.get_rest(rom_str, -1)
         if rest !=# -1
             for rest_char in split(rest, '\zs')
@@ -1162,13 +1162,13 @@ function! s:filter_rom_no_match(stash, table) abort "{{{
         elseif g:eskk#rom_input_style ==# 'msime'
             " rom_str is "zyk" => "zyk"
             call buf_str.rom_pairs.push_one_pair(
-            \   rom_str_without_char, rom_str_without_char
-            \)
+                        \   rom_str_without_char, rom_str_without_char
+                        \)
         else
             throw eskk#internal_error(
-            \   ['eskk'],
-            \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
-            \)
+                        \   ['eskk'],
+                        \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
+                        \)
         endif
         " *** FALLTHROUGH ***
     endif
@@ -1195,10 +1195,10 @@ function! s:ascii_filter(stash) abort "{{{
                 let this.temp.table = eskk#get_mode_table('ascii')
             endif
             call a:stash.preedit.push_kakutei_str(
-            \   this.temp.table.get_map(
-            \      a:stash.char, a:stash.char
-            \   )
-            \)
+                        \   this.temp.table.get_map(
+                        \      a:stash.char, a:stash.char
+                        \   )
+                        \)
         else
             call a:stash.preedit.push_kakutei_str(a:stash.char)
         endif
@@ -1213,10 +1213,10 @@ function! s:zenei_filter(stash) abort "{{{
             let this.temp.table = eskk#get_mode_table('zenei')
         endif
         call a:stash.preedit.push_kakutei_str(
-        \   this.temp.table.get_map(
-        \      a:stash.char, a:stash.char
-        \   )
-        \)
+                    \   this.temp.table.get_map(
+                    \      a:stash.char, a:stash.char
+                    \   )
+                    \)
     endif
 endfunction "}}}
 function! s:abbrev_filter(stash) abort "{{{
@@ -1262,8 +1262,8 @@ function! s:abbrev_filter(stash) abort "{{{
             return
         else
             call preedit.push_kakutei_str(
-            \   preedit.get_display_str(0)
-            \)
+                        \   preedit.get_display_str(0)
+                        \)
             call preedit.clear_all()
             call preedit.push_filter_queue(char)
 
@@ -1272,9 +1272,9 @@ function! s:abbrev_filter(stash) abort "{{{
         endif
     else
         throw eskk#internal_error(
-        \   ['eskk'],
-        \   "'abbrev' mode does not support phase " . phase . "."
-        \)
+                    \   ['eskk'],
+                    \   "'abbrev' mode does not support phase " . phase . "."
+                    \)
     endif
 endfunction "}}}
 
@@ -1319,7 +1319,7 @@ endfunction "}}}
 " Initialization
 function! eskk#_initialize() abort "{{{
     if s:initialization_state ==# s:INIT_DONE
-    \   || s:initialization_state ==# s:INIT_ABORT
+                \   || s:initialization_state ==# s:INIT_ABORT
         return
     endif
     let s:initialization_state = s:INIT_ABORT
@@ -1327,9 +1327,9 @@ function! eskk#_initialize() abort "{{{
     " Validate Vim versions {{{
     if v:version < 703 || v:version == 703 && !has('patch32')
         call eskk#logger#warn(
-        \   "eskk.vim: warning: Your Vim is too old."
-        \   . " Please use 7.3.32 at least."
-        \)
+                    \   "eskk.vim: warning: Your Vim is too old."
+                    \   . " Please use 7.3.32 at least."
+                    \)
         " do not initialize eskk
         " if user doesn't fill requirements!
         return
@@ -1350,17 +1350,17 @@ function! eskk#_initialize() abort "{{{
 
     " Debug
     call eskk#util#set_default('g:eskk#log_cmdline_level',
-    \   get(g:, 'eskk#debug', 0) ? 2 : 0)
+                \   get(g:, 'eskk#debug', 0) ? 2 : 0)
     call eskk#util#set_default('g:eskk#log_file_level',
-    \   get(g:, 'eskk#debug', 0) ? 2 : 0)
+                \   get(g:, 'eskk#debug', 0) ? 2 : 0)
     call eskk#util#set_default('g:eskk#debug_wait_ms', 0)
     call eskk#util#set_default('g:eskk#directory', '~/.eskk')
 
     if exists('g:eskk#server') && !has('channel') && !eskk#util#has_vimproc()
         call eskk#logger#warn(
-        \   "eskk.vim: warning: cannot use skkserv " .
-        \   "because vimproc is not installed."
-        \)
+                    \   "eskk.vim: warning: cannot use skkserv " .
+                    \   "because vimproc is not installed."
+                    \)
         let g:eskk#server = {}
     else
         call eskk#util#set_default('g:eskk#server', {})
@@ -1368,17 +1368,17 @@ function! eskk#_initialize() abort "{{{
 
     " Dictionary
     for [varname, default] in [
-    \   ['g:eskk#dictionary', {
-    \       'path': expand("~/.skk-jisyo"),
-    \       'sorted': 0,
-    \       'encoding': 'utf-8',
-    \   }],
-    \   ['g:eskk#large_dictionary', {
-    \       'path': "/usr/local/share/skk/SKK-JISYO.L",
-    \       'sorted': 1,
-    \       'encoding': 'euc-jp',
-    \   }],
-    \]
+                \   ['g:eskk#dictionary', {
+                \       'path': expand("~/.skk-jisyo"),
+                \       'sorted': 0,
+                \       'encoding': 'utf-8',
+                \   }],
+                \   ['g:eskk#large_dictionary', {
+                \       'path': "/usr/local/share/skk/SKK-JISYO.L",
+                \       'sorted': 1,
+                \       'encoding': 'euc-jp',
+                \   }],
+                \]
         if exists(varname)
             if type({varname}) == type("")
                 let default.path = {varname}
@@ -1388,8 +1388,8 @@ function! eskk#_initialize() abort "{{{
                 call extend({varname}, default, "keep")
             else
                 call eskk#logger#warn(
-                \   varname . "'s type is either String or Dictionary."
-                \)
+                            \   varname . "'s type is either String or Dictionary."
+                            \)
             endif
         else
             let {varname} = default
@@ -1401,8 +1401,8 @@ function! eskk#_initialize() abort "{{{
     for dict in [g:eskk#dictionary, g:eskk#large_dictionary]
         if !filereadable(dict.path)
             call eskk#logger#warnf(
-            \   "Cannot read SKK dictionary: %s", dict.path
-            \)
+                        \   "Cannot read SKK dictionary: %s", dict.path
+                        \)
             sleep 1
         endif
     endfor
@@ -1450,12 +1450,12 @@ function! eskk#_initialize() abort "{{{
     " abbrev: royalblue:#4169e1
     " zenei: gold:#ffd700
     call eskk#util#set_default_dict('g:eskk#cursor_color', {
-    \   'ascii': ['#8b8b83', '#bebebe'],
-    \   'hira': ['#8b3e2f', '#ffc0cb'],
-    \   'kata': ['#228b22', '#00ff00'],
-    \   'abbrev': '#4169e1',
-    \   'zenei': '#ffd700',
-    \})
+                \   'ascii': ['#8b8b83', '#bebebe'],
+                \   'hira': ['#8b3e2f', '#ffc0cb'],
+                \   'kata': ['#228b22', '#00ff00'],
+                \   'abbrev': '#4169e1',
+                \   'zenei': '#ffd700',
+                \})
 
     " Lua
     call eskk#util#set_default('g:eskk#disable_if_lua', 0)
@@ -1470,9 +1470,9 @@ function! eskk#_initialize() abort "{{{
     call eskk#util#set_default('g:eskk#auto_henkan_at_okuri_match', 1)
 
     call eskk#util#set_default_dict('g:eskk#set_undo_point', {
-    \   'sticky': 1,
-    \   'kakutei': 1,
-    \})
+                \   'sticky': 1,
+                \   'kakutei': 1,
+                \})
 
     call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
@@ -1492,7 +1492,7 @@ function! eskk#_initialize() abort "{{{
         call eskk#util#mkdir_nothrow(dir, 'p')
         if !isdirectory(dir)
             call eskk#logger#write_error_log_file(
-            \       {}, printf("can't create directory '%s'.", dir))
+                        \       {}, printf("can't create directory '%s'.", dir))
         endif
     endfunction
     call s:initialize_set_up_eskk_directory()
@@ -1579,39 +1579,39 @@ function! eskk#_initialize() abort "{{{
     function! s:initialize_builtin_modes() abort
         " 'ascii' mode {{{
         call eskk#register_mode_structure('ascii', {
-        \   'filter': eskk#util#get_local_funcref('ascii_filter', s:SID_PREFIX),
-        \})
+                    \   'filter': eskk#util#get_local_funcref('ascii_filter', s:SID_PREFIX),
+                    \})
         " }}}
 
         " 'zenei' mode {{{
         call eskk#register_mode_structure('zenei', {
-        \   'filter': eskk#util#get_local_funcref('zenei_filter', s:SID_PREFIX),
-        \   'table': eskk#table#new_from_file('rom_to_zenei'),
-        \})
+                    \   'filter': eskk#util#get_local_funcref('zenei_filter', s:SID_PREFIX),
+                    \   'table': eskk#table#new_from_file('rom_to_zenei'),
+                    \})
         " }}}
 
         " 'hira' mode {{{
         call eskk#register_mode_structure('hira', {
-        \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
-        \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
-        \   'table': eskk#table#new_from_file('rom_to_hira'),
-        \})
+                    \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+                    \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
+                    \   'table': eskk#table#new_from_file('rom_to_hira'),
+                    \})
         " }}}
 
         " 'kata' mode {{{
         call eskk#register_mode_structure('kata', {
-        \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
-        \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
-        \   'table': eskk#table#new_from_file('rom_to_kata'),
-        \})
+                    \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+                    \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
+                    \   'table': eskk#table#new_from_file('rom_to_kata'),
+                    \})
         " }}}
 
         " 'hankata' mode {{{
         call eskk#register_mode_structure('hankata', {
-        \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
-        \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
-        \   'table': eskk#table#new_from_file('rom_to_hankata'),
-        \})
+                    \   'filter': eskk#util#get_local_funcref('asym_filter', s:SID_PREFIX),
+                    \   'prefilter': eskk#util#get_local_funcref('asym_prefilter', s:SID_PREFIX),
+                    \   'table': eskk#table#new_from_file('rom_to_hankata'),
+                    \})
         " }}}
 
         " 'abbrev' mode {{{
@@ -1630,8 +1630,8 @@ function! eskk#_initialize() abort "{{{
     " BufEnter: Restore global option value of &iminsert, &imsearch {{{
     if !g:eskk#keep_state_beyond_buffer
         execute 'autocmd eskk BufLeave *'
-        \   'let [&g:iminsert, &g:imsearch] ='
-        \   string([&g:iminsert, &g:imsearch])
+                    \   'let [&g:iminsert, &g:imsearch] ='
+                    \   string([&g:iminsert, &g:imsearch])
     endif
     " }}}
 
@@ -1672,7 +1672,7 @@ function! eskk#_initialize() abort "{{{
     " s:completed_candidates should have non-empty value
     " only during insert-mode.
     autocmd eskk InsertLeave *
-    \   call eskk#complete#_reset_completed_candidates()
+                \   call eskk#complete#_reset_completed_candidates()
     " }}}
 
     " Throw "eskk-initialize-post" autocmd event. {{{
@@ -1704,13 +1704,13 @@ function! eskk#_initialize() abort "{{{
     " Log startup/shutdown info. {{{
     call eskk#logger#debug('----- eskk.vim was started. -----')
     autocmd eskk VimLeavePre *
-    \       call eskk#logger#debug('----- Vim is exiting... -----')
+                \       call eskk#logger#debug('----- Vim is exiting... -----')
     " }}}
 
     " Flush log. {{{
     " NOTE: This auto-command must be at the end of eskk#_initialize().
     autocmd eskk CursorHold,VimLeavePre *
-    \            call eskk#logger#write_debug_log_file()
+                \            call eskk#logger#write_debug_log_file()
     " }}}
 
     let s:initialization_state = s:INIT_DONE
@@ -1722,41 +1722,41 @@ endfunction "}}}
 " Global variable function
 function! eskk#get_default_mapped_keys() abort "{{{
     return split(
-    \   'abcdefghijklmnopqrstuvwxyz'
-    \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    \  .'1234567890'
-    \  .'!"#$%&''()'
-    \  .',./;:]@[-^\'
-    \  .'>?_+*}`{=~'
-    \   ,
-    \   '\zs'
-    \) + [
-    \   "<lt>",
-    \   "<Bar>",
-    \   "<Tab>",
-    \   "<BS>",
-    \   "<C-h>",
-    \   "<CR>",
-    \   "<Space>",
-    \   "<C-q>",
-    \   "<C-y>",
-    \   "<C-e>",
-    \   "<PageUp>",
-    \   "<PageDown>",
-    \   "<Up>",
-    \   "<Down>",
-    \   "<C-n>",
-    \   "<C-p>",
-    \   "<C-j>",
-    \   "<C-g>",
-    \   "<Esc>",
-    \]
+                \   'abcdefghijklmnopqrstuvwxyz'
+                \  .'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                \  .'1234567890'
+                \  .'!"#$%&''()'
+                \  .',./;:]@[-^\'
+                \  .'>?_+*}`{=~'
+                \   ,
+                \   '\zs'
+                \) + [
+                \   "<lt>",
+                \   "<Bar>",
+                \   "<Tab>",
+                \   "<BS>",
+                \   "<C-h>",
+                \   "<CR>",
+                \   "<Space>",
+                \   "<C-q>",
+                \   "<C-y>",
+                \   "<C-e>",
+                \   "<PageUp>",
+                \   "<PageDown>",
+                \   "<Up>",
+                \   "<Down>",
+                \   "<C-n>",
+                \   "<C-p>",
+                \   "<C-j>",
+                \   "<C-g>",
+                \   "<Esc>",
+                \]
 endfunction "}}}
 
 " Enable/Disable IM
 function! eskk#is_enabled() abort "{{{
     return eskk#is_initialized()
-    \   && &iminsert is 1
+                \   && &iminsert is 1
 endfunction "}}}
 function! eskk#toggle() abort "{{{
     if !eskk#is_initialized()
@@ -1870,11 +1870,11 @@ function! eskk#set_mode(next_mode) abort "{{{
     let inst = eskk#get_current_instance()
     if !eskk#is_supported_mode(a:next_mode)
         call eskk#logger#warn(
-        \   "mode '" . a:next_mode . "' is not supported."
-        \)
+                    \   "mode '" . a:next_mode . "' is not supported."
+                    \)
         call eskk#logger#warn(
-        \   's:available_modes = ' . string(s:available_modes)
-        \)
+                    \   's:available_modes = ' . string(s:available_modes)
+                    \)
         return
     endif
     " Change mode.
@@ -1887,10 +1887,10 @@ function! eskk#set_mode(next_mode) abort "{{{
     " Set initial henkan phase.
     let st = eskk#get_current_mode_structure()
     call preedit.set_henkan_phase(
-    \   (has_key(st, 'init_phase') ?
-    \       st.init_phase
-    \       : g:eskk#preedit#PHASE_NORMAL)
-    \)
+                \   (has_key(st, 'init_phase') ?
+                \       st.init_phase
+                \       : g:eskk#preedit#PHASE_NORMAL)
+                \)
     " For &statusline.
     redrawstatus
 endfunction "}}}
@@ -1919,21 +1919,21 @@ function! s:check_mode_structure(mode, st) abort "{{{
     for key in ['filter']
         if !has_key(a:st, key)
             call eskk#logger#warn(
-            \   "s:check_mode_structure(): "
-            \       . string(a:mode) . ": "
-            \       . string(key) . " is not present in structure"
-            \)
+                        \   "s:check_mode_structure(): "
+                        \       . string(a:mode) . ": "
+                        \       . string(key) . " is not present in structure"
+                        \)
             return 0
         endif
     endfor
 
     " Check optional keys.
     if has_key(a:st, 'temp')
-    \   && type(a:st.table) isnot type({})
+                \   && type(a:st.table) isnot type({})
         return 0
     endif
     if has_key(a:st, 'table')
-    \   && type(a:st.table) isnot type({})
+                \   && type(a:st.table) isnot type({})
         return 0
     endif
 
@@ -1945,8 +1945,8 @@ endfunction "}}}
 function! eskk#get_mode_structure(mode) abort "{{{
     if !eskk#is_supported_mode(a:mode)
         call eskk#logger#warn(
-        \   "mode '" . a:mode . "' is not available."
-        \)
+                    \   "mode '" . a:mode . "' is not available."
+                    \)
     endif
     return s:available_modes[a:mode]
 endfunction "}}}
@@ -1998,18 +1998,18 @@ endfunction "}}}
 " Statusline
 function! eskk#statusline(...) abort "{{{
     return eskk#is_enabled()
-    \      ? printf(get(a:000, 0, '[eskk:%s]'),
-    \               get(g:eskk#statusline_mode_strings,
-    \                   eskk#get_current_instance().mode, '??'))
-    \      : get(a:000, 1, '')
+                \      ? printf(get(a:000, 0, '[eskk:%s]'),
+                \               get(g:eskk#statusline_mode_strings,
+                \                   eskk#get_current_instance().mode, '??'))
+                \      : get(a:000, 1, '')
 endfunction "}}}
 
 " Dictionary
 function! eskk#get_skk_dict() abort "{{{
     if empty(s:skk_dict)
         let s:skk_dict = eskk#dictionary#new(
-        \   g:eskk#dictionary, g:eskk#large_dictionary
-        \)
+                    \   g:eskk#dictionary, g:eskk#large_dictionary
+                    \)
     endif
     return s:skk_dict
 endfunction "}}}
@@ -2025,8 +2025,8 @@ endfunction "}}}
 function! eskk#set_preedit(preedit) abort "{{{
     let inst = eskk#get_current_instance()
     call a:preedit.set_old_str(
-    \   empty(inst.preedit) ? '' : inst.preedit.get_old_str()
-    \)
+                \   empty(inst.preedit) ? '' : inst.preedit.get_old_str()
+                \)
     let inst.preedit = a:preedit
 endfunction "}}}
 
@@ -2037,21 +2037,21 @@ function! eskk#filter(char) abort "{{{
         let st = eskk#get_mode_structure(inst.mode)
         let preedit = eskk#get_preedit()
         let stash = {
-        \   'char': a:char,
-        \   'preedit': preedit,
-        \}
+                    \   'char': a:char,
+                    \   'preedit': preedit,
+                    \}
 
         " Check irregular circumstance.
         if !eskk#is_supported_mode(inst.mode)
             " Detect fatal error. disable eskk...
             return s:force_disable_eskk(
-            \   stash,
-            \   eskk#util#build_error(
-            \       ['eskk'],
-            \       ['current mode is not supported: '
-            \           . string(inst.mode)]
-            \   )
-            \)
+                        \   stash,
+                        \   eskk#util#build_error(
+                        \       ['eskk'],
+                        \       ['current mode is not supported: '
+                        \           . string(inst.mode)]
+                        \   )
+                        \)
         endif
 
         " Log pressed char.
@@ -2086,7 +2086,7 @@ function! eskk#filter(char) abort "{{{
 
         " Push a pressed character.
         for c in has_key(st, 'prefilter') ?
-        \           st.prefilter(stash) : [a:char]
+                    \           st.prefilter(stash) : [a:char]
             call preedit.push_filter_queue(c)
         endfor
 
@@ -2126,12 +2126,12 @@ function! eskk#filter(char) abort "{{{
     catch
         " Detect fatal error. disable eskk...
         return s:force_disable_eskk(
-        \   stash,
-        \   eskk#util#build_error(
-        \       ['eskk'],
-        \       ['main routine raised an error: '.v:exception]
-        \   )
-        \)
+                    \   stash,
+                    \   eskk#util#build_error(
+                    \       ['eskk'],
+                    \       ['main routine raised an error: '.v:exception]
+                    \   )
+                    \)
 
     finally
         " In normal phase, clear rom_pairs each time.
@@ -2153,8 +2153,8 @@ function! s:force_disable_eskk(stash, error) abort "{{{
     call eskk#disable()
 
     call eskk#logger#write_error_log_file(
-    \   a:stash, a:error,
-    \)
+                \   a:stash, a:error,
+                \)
     sleep 1
 
     " Vim does not disable IME

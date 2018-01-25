@@ -7,12 +7,12 @@ set cpo&vim
 
 
 function! s:run()
-    call simpletap#ok(eskk#util#has_idx([0], 0))
-    call simpletap#ok(! eskk#util#has_idx([0], 1))
+  call simpletap#ok(eskk#util#has_idx([0], 0))
+  call simpletap#ok(! eskk#util#has_idx([0], 1))
 
-    " The followings should not be allowed!
-    " call simpletap#ok(eskk#util#has_idx([0], -1))
-    " call simpletap#ok(! eskk#util#has_idx([0], -2))
+  " The followings should not be allowed!
+  " call simpletap#ok(eskk#util#has_idx([0], -1))
+  " call simpletap#ok(! eskk#util#has_idx([0], -2))
 endfunction
 
 

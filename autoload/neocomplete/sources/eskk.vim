@@ -13,13 +13,13 @@ function! neocomplete#sources#eskk#define() abort "{{{
 endfunction"}}}
 
 let s:source = {
-      \ 'name': 'eskk',
-      \ 'kind': 'manual',
-      \ 'min_pattern_length': 0,
-      \ 'is_volatile': 1,
-      \ 'matchers': ['matcher_nothing'],
-      \ 'sorters': [],
-      \}
+            \ 'name': 'eskk',
+            \ 'kind': 'manual',
+            \ 'min_pattern_length': 0,
+            \ 'is_volatile': 1,
+            \ 'matchers': ['matcher_nothing'],
+            \ 'sorters': [],
+            \}
 
 function! s:source.get_complete_position(context) abort "{{{
     if !eskk#is_enabled()

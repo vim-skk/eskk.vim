@@ -9,8 +9,8 @@ set cpo&vim
 
 
 function! s:run()
-    " TODO
-    Skip
+  " TODO
+  Skip
 endfunction
 
 call s:run()
