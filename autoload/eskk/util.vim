@@ -16,7 +16,7 @@ delfunc s:SID
 
 
 " Load the vital of eskk.
-let s:Vital = vital#of('eskk')
+let s:Vital = vital#eskk#new()
 call s:Vital.load('Prelude')
 call s:Vital.load('Process')
 call s:Vital.load('Data.OrderedSet')
