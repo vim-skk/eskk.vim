@@ -49,15 +49,15 @@ endfunction "}}}
 function! eskk#util#assert(cond, msg) abort "{{{
     if !a:cond
         throw eskk#util#build_error(
-        \   ['eskk', 'util'],
-        \   ['assertion failed', a:msg]
-        \)
+                    \   ['eskk', 'util'],
+                    \   ['assertion failed', a:msg]
+                    \)
     endif
 endfunction "}}}
 function! eskk#util#build_error(from, msg_list) abort "{{{
     let file = 'autoload/' . join(a:from, '/') . '.vim'
     let msg = type(a:msg_list) is type([]) ?
-    \           join(a:msg_list, ': ') : a:msg_list
+                \           join(a:msg_list, ': ') : a:msg_list
     return 'eskk: ' . msg . ' (at ' . file . ')'
 endfunction "}}}
 
@@ -68,8 +68,8 @@ function! eskk#util#set_default(var, Value) abort "{{{
         let {a:var} = a:Value
     elseif type({a:var}) isnot type(a:Value)
         call eskk#logger#warn(
-        \   "'".string(a:var)."' is invalid type value. "
-        \   . "use default value...")
+                    \   "'".string(a:var)."' is invalid type value. "
+                    \   . "use default value...")
         execute 'unlet' a:var
         let {a:var} = a:Value
     endif
@@ -133,15 +133,15 @@ function! eskk#util#split_byte_range(s, begin, end) abort "{{{
 
     let len   = strlen(s)
     let begin = begin <# 0 ? 0 :
-    \           (begin >=# len ? len - 1 : begin)
+                \           (begin >=# len ? len - 1 : begin)
     let end   = end   <# 0 ? 0 :
-    \           (end   >=# len ? len - 1 : end  )
+                \           (end   >=# len ? len - 1 : end  )
 
     return [
-    \   (begin >=# 1 ? s[: begin-1] : ''),
-    \   s[begin : end],
-    \   (end < strlen(s) - 1 ? s[end+1 :] : ''),
-    \]
+                \   (begin >=# 1 ? s[: begin-1] : ''),
+                \   s[begin : end],
+                \   (end < strlen(s) - 1 ? s[end+1 :] : ''),
+                \]
 endfunction "}}}
 
 
@@ -186,10 +186,10 @@ function! eskk#util#mkdir_nothrow(...) abort "{{{
 endfunction "}}}
 function! eskk#util#dlog(data, filename) abort "{{{
     let data = type(a:data) is type([]) ?
-    \              a:data :
-    \          type(a:data) is type("") ?
-    \              split(a:data, "\n") :
-    \              0
+                \              a:data :
+                \          type(a:data) is type("") ?
+                \              split(a:data, "\n") :
+                \              0
     if data is 0 | return | endif
 
     " Append to filename.
@@ -239,12 +239,12 @@ function! eskk#util#key2char(key) abort "{{{
         return a:key
     endif
     return join(
-    \   map(
-    \       s:split_to_keys(a:key),
-    \       'v:val =~# "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
-    \   ),
-    \   ''
-    \)
+                \   map(
+                \       s:split_to_keys(a:key),
+                \       'v:val =~# "^<.*>$" ? eval(''"\'' . v:val . ''"'') : v:val'
+                \   ),
+                \   ''
+                \)
 endfunction "}}}
 function! s:split_to_keys(lhs) abort  "{{{
     " From arpeggio.vim

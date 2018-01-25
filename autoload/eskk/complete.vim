@@ -32,8 +32,8 @@ function! eskk#complete#eskkcomplete(findstart, base) abort "{{{
     endif
 
     call eskk#logger#debug('eskk#complete#eskkcomplete(): '
-    \                    . 'a:findstart = ' . a:findstart
-    \                    . ', a:base = ' . string(a:base))
+                \                    . 'a:findstart = ' . a:findstart
+                \                    . ', a:base = ' . string(a:base))
 
     " Complete Function should not throw exception.
     try
@@ -49,7 +49,7 @@ function! s:eskkcomplete(findstart, base) abort "{{{
     if a:findstart
         if !eskk#complete#can_find_start()
             return (v:version > 703 || v:version == 703 && has('patch519')) ?
-                    \ -3 : -1
+                        \ -3 : -1
         endif
         let begin_col = eskk#get_preedit().get_begin_col()
         if begin_col >= 0 && empty(eskk#complete#do_complete(
@@ -59,7 +59,7 @@ function! s:eskkcomplete(findstart, base) abort "{{{
         endif
         if begin_col <=# 0
             return (v:version > 703 || v:version == 703 && has('patch519')) ?
-                    \ -3 : -1
+                        \ -3 : -1
         endif
         return begin_col - 1
     endif
@@ -83,7 +83,7 @@ function! eskk#complete#can_find_start() abort "{{{
 
     let buf_str = preedit.get_buf_str(preedit.get_henkan_phase())
     if preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_HENKAN
-    \   && buf_str.empty()
+                \   && buf_str.empty()
         return 0
     endif
 
@@ -108,9 +108,9 @@ function! s:skip_complete(...) abort "{{{
                     \ -3 : -1
     else
         return s:get_completed_candidates(
-        \   eskk#get_preedit().get_display_str(1, 0),
-        \   []
-        \)
+                    \   eskk#get_preedit().get_display_str(1, 0),
+                    \   []
+                    \)
     endif
 endfunction "}}}
 function! s:has_completed_candidates(display_str) abort "{{{
@@ -123,10 +123,10 @@ function! s:get_completed_candidates(display_str, else) abort "{{{
         return a:else
     endif
     return get(
-    \   s:completed_candidates[mode],
-    \   a:display_str,
-    \   a:else
-    \)
+                \   s:completed_candidates[mode],
+                \   a:display_str,
+                \   a:else
+                \)
 endfunction "}}}
 function! s:set_completed_candidates(display_str, candidates) abort "{{{
     if a:display_str ==# ''    " empty string cannot be a key of dictionary.
@@ -146,8 +146,8 @@ function! s:MODE_FUNC_TABLE.hira(base) abort "{{{
         return s:skip_complete()
     endif
     let mb_str = eskk#get_preedit().get_buf_str(
-    \   g:eskk#preedit#PHASE_HENKAN
-    \).rom_pairs.get_filter()
+                \   g:eskk#preedit#PHASE_HENKAN
+                \).rom_pairs.get_filter()
     let length = eskk#util#mb_strlen(mb_str)
     if length < g:eskk#start_completion_length
         return s:skip_complete()
@@ -177,22 +177,22 @@ function! s:complete(mode, ...) abort "{{{
     let dict = eskk#get_skk_dict()
 
     if g:eskk#kata_convert_to_hira_at_completion
-    \   && a:mode ==# 'kata'
+                \   && a:mode ==# 'kata'
         let [henkan_buf_str, okuri_buf_str] =
-        \   preedit.convert_rom_all(
-        \       [
-        \           g:eskk#preedit#PHASE_HENKAN,
-        \           g:eskk#preedit#PHASE_OKURI,
-        \       ],
-        \       eskk#get_mode_table('hira')
-        \   )
+                    \   preedit.convert_rom_all(
+                    \       [
+                    \           g:eskk#preedit#PHASE_HENKAN,
+                    \           g:eskk#preedit#PHASE_OKURI,
+                    \       ],
+                    \       eskk#get_mode_table('hira')
+                    \   )
     else
         let henkan_buf_str = preedit.get_buf_str(
-        \   g:eskk#preedit#PHASE_HENKAN
-        \)
+                    \   g:eskk#preedit#PHASE_HENKAN
+                    \)
         let okuri_buf_str = preedit.get_buf_str(
-        \   g:eskk#preedit#PHASE_OKURI
-        \)
+                    \   g:eskk#preedit#PHASE_OKURI
+                    \)
     endif
     let key       = henkan_buf_str.rom_pairs.get_filter()
     let okuri     = okuri_buf_str.rom_pairs.get_filter()
@@ -204,28 +204,28 @@ function! s:complete(mode, ...) abort "{{{
     endif
 
     let do_list_okuri_candidates =
-    \   preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_OKURI
+                \   preedit.get_henkan_phase() ==# g:eskk#preedit#PHASE_OKURI
     for c in candidates
         if do_list_okuri_candidates
             if c.okuri_rom_first !=# ''
                 call add(list, {
-                \   'word': c.input,
-                \   'abbr': c.input
-                \           . (get(c, 'annotation', '') !=# '' ?
-                \               '; ' . c.annotation : ''),
-                \   'menu': 'kanji:okuri'
-                \})
+                            \   'word': c.input,
+                            \   'abbr': c.input
+                            \           . (get(c, 'annotation', '') !=# '' ?
+                            \               '; ' . c.annotation : ''),
+                            \   'menu': 'kanji:okuri'
+                            \})
             endif
             continue
         endif
 
         call add(list, {
-        \   'word': c.input,
-        \   'abbr': c.input
-        \           . (get(c, 'annotation', '') !=# '' ?
-        \               '; ' . c.annotation : ''),
-        \   'menu': 'kanji'
-        \})
+                    \   'word': c.input,
+                    \   'abbr': c.input
+                    \           . (get(c, 'annotation', '') !=# '' ?
+                    \               '; ' . c.annotation : ''),
+                    \   'menu': 'kanji'
+                    \})
     endfor
 
     call s:set_completed_candidates(disp, list)

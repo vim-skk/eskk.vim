@@ -14,9 +14,9 @@ set cpo&vim
 function! eskk#dictionary#parse_skk_dict_line(line, from_type) abort "{{{
     let list = split(a:line, '/')
     call eskk#util#assert(
-    \   !empty(list),
-    \   'list must not be empty. (a:line = '
-    \   .string(a:line).')')
+                \   !empty(list),
+                \   'list must not be empty. (a:line = '
+                \   .string(a:line).')')
     if list[0] =~# '^[[:alpha:]]\+'
         let key = substitute(list[0], '\s\+$', '', '')
         let okuri_rom = ''
@@ -30,22 +30,22 @@ function! eskk#dictionary#parse_skk_dict_line(line, from_type) abort "{{{
         let semicolon = stridx(_, ';')
         if semicolon != -1
             let c = s:candidate_new(
-            \   a:from_type,
-            \   _[: semicolon - 1],
-            \   key,
-            \   '',
-            \   okuri_rom,
-            \   _[semicolon + 1 :]
-            \)
+                        \   a:from_type,
+                        \   _[: semicolon - 1],
+                        \   key,
+                        \   '',
+                        \   okuri_rom,
+                        \   _[semicolon + 1 :]
+                        \)
         else
             let c = s:candidate_new(
-            \   a:from_type,
-            \   _,
-            \   key,
-            \   '',
-            \   okuri_rom,
-            \   ''
-            \)
+                        \   a:from_type,
+                        \   _,
+                        \   key,
+                        \   '',
+                        \   okuri_rom,
+                        \   ''
+                        \)
         endif
         call add(candidates, c)
     endfor
@@ -60,11 +60,11 @@ function! s:insert_candidate_to_line(line, candidate) abort "{{{
         return ''
     endif
     let candidates =
-    \   eskk#dictionary#parse_skk_dict_line(
-    \       a:line, a:candidate.from_type)
+                \   eskk#dictionary#parse_skk_dict_line(
+                \       a:line, a:candidate.from_type)
     call insert(candidates, a:candidate)
     let candidates = eskk#util#uniq_by(
-    \   candidates, 'eskk#dictionary#_candidate_identifier(v:val)')
+                \   candidates, 'eskk#dictionary#_candidate_identifier(v:val)')
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
 
@@ -76,28 +76,28 @@ function! s:delete_candidate_from_line(line, candidate) abort "{{{
     endif
 
     let candidates =
-    \   eskk#dictionary#parse_skk_dict_line(
-    \       a:line, a:candidate.from_type)
+                \   eskk#dictionary#parse_skk_dict_line(
+                \       a:line, a:candidate.from_type)
     let not_match =
-    \   '!(v:val.input ==# a:candidate.input'
-    \   . '&& v:val.key ==# a:candidate.key'
-    \   . '&& v:val.okuri_rom ==# a:candidate.okuri_rom)'
+                \   '!(v:val.input ==# a:candidate.input'
+                \   . '&& v:val.key ==# a:candidate.key'
+                \   . '&& v:val.okuri_rom ==# a:candidate.okuri_rom)'
     call filter(candidates, not_match)
     return s:make_line_from_candidates(candidates)
 endfunction "}}}
 function! s:make_line_from_candidates(candidates) abort "{{{
     if type(a:candidates) isnot type([])
-    \   || empty(a:candidates)
+                \   || empty(a:candidates)
         return ''
     endif
     let c = a:candidates[0]
     let make_string =
-    \   'v:val.input . '
-    \   . '(v:val.annotation ==# "" ? "" : '
-    \   . '";" . v:val.annotation)'
+                \   'v:val.input . '
+                \   . '(v:val.annotation ==# "" ? "" : '
+                \   . '";" . v:val.annotation)'
     return
-    \   c.key . c.okuri_rom . ' '
-    \   . '/'.join(map(copy(a:candidates), make_string), '/').'/'
+                \   c.key . c.okuri_rom . ' '
+                \   . '/'.join(map(copy(a:candidates), make_string), '/').'/'
 endfunction "}}}
 
 
@@ -114,21 +114,21 @@ endfunction "}}}
 " It is the pair of filtered string and its converted string.
 
 let [
-\   s:CANDIDATE_FROM_USER_DICT,
-\   s:CANDIDATE_FROM_SYSTEM_DICT,
-\   s:CANDIDATE_FROM_REGISTERED_WORDS
-\] = range(3)
+            \   s:CANDIDATE_FROM_USER_DICT,
+            \   s:CANDIDATE_FROM_SYSTEM_DICT,
+            \   s:CANDIDATE_FROM_REGISTERED_WORDS
+            \] = range(3)
 
 " e.g.) {key}[{okuri_rom}] /{input};{annotation}/
 function! s:candidate_new(from_type, input, key, okuri, okuri_rom, annotation) abort "{{{
     return {
-    \   'from_type': a:from_type,
-    \   'input': a:input,
-    \   'key': a:key,
-    \   'okuri': a:okuri,
-    \   'okuri_rom': a:okuri_rom[0],
-    \   'annotation': a:annotation,
-    \}
+                \   'from_type': a:from_type,
+                \   'input': a:input,
+                \   'key': a:key,
+                \   'okuri': a:okuri,
+                \   'okuri_rom': a:okuri_rom[0],
+                \   'annotation': a:annotation,
+                \}
 endfunction "}}}
 
 function! eskk#dictionary#_candidate_identifier(candidate) abort "{{{
@@ -168,21 +168,21 @@ delfunc s:SID
 "   Current index of List self._candidates
 
 let [
-\   g:eskk#dictionary#HR_NO_RESULT,
-\   g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
-\   g:eskk#dictionary#HR_GOT_RESULT
-\] = range(3)
+            \   g:eskk#dictionary#HR_NO_RESULT,
+            \   g:eskk#dictionary#HR_LOOK_UP_DICTIONARY,
+            \   g:eskk#dictionary#HR_GOT_RESULT
+            \] = range(3)
 
 
 
 function! s:HenkanResult_new(key, okuri_rom, okuri, preedit) abort "{{{
     let obj = deepcopy(s:HenkanResult)
     let obj = extend(obj, {
-    \    'preedit': a:preedit,
-    \    '_key': a:key,
-    \    '_okuri_rom': a:okuri_rom[0],
-    \    '_okuri': a:okuri,
-    \}, 'force')
+                \    'preedit': a:preedit,
+                \    '_key': a:key,
+                \    '_okuri_rom': a:okuri_rom[0],
+                \    '_okuri': a:okuri,
+                \}, 'force')
     call obj.reset()
     return obj
 endfunction "}}}
@@ -193,8 +193,8 @@ endfunction "}}}
 function! s:HenkanResult_reset() abort dict "{{{
     let self._status = g:eskk#dictionary#HR_LOOK_UP_DICTIONARY
     let self._candidates = eskk#util#create_data_ordered_set(
-    \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
-    \)
+                \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
+                \)
     let self._candidates_index = 0
     call self.remove_cache()
 endfunction "}}}
@@ -210,7 +210,7 @@ function! s:HenkanResult_advance(advance) abort dict "{{{
         return 1
     catch /^eskk: dictionary look up error/
         call eskk#logger#log_exception(
-        \   's:HenkanResult.get_candidates()')
+                    \   's:HenkanResult.get_candidates()')
         return 0
     endtry
 endfunction "}}}
@@ -244,7 +244,7 @@ endfunction "}}}
 " @throws eskk#dictionary#look_up_error()
 function! s:HenkanResult_update_candidate_prompt() abort dict "{{{
     let max_count = g:eskk#show_candidates_count >= 0 ?
-    \                   g:eskk#show_candidates_count : 0
+                \                   g:eskk#show_candidates_count : 0
     if self._candidates_index >= max_count
         let NONE = []
         let cand = self.select_candidate_prompt(max_count, NONE)
@@ -261,9 +261,9 @@ function! s:HenkanResult_update_candidate_prompt() abort dict "{{{
             " self.get_candidates() may throw an exception.
             let candidates = self.get_candidates()
             return [
-            \   candidates[self._candidates_index].input,
-            \   self._okuri
-            \]
+                        \   candidates[self._candidates_index].input,
+                        \   self._okuri
+                        \]
         endif
     else
         call self.update_candidate()
@@ -274,10 +274,10 @@ endfunction "}}}
 function! s:HenkanResult_update_candidate() abort dict "{{{
     let candidates = self.get_candidates()
     let [self._candidate, self._candidate_okuri] =
-    \   [
-    \       candidates[self._candidates_index].input,
-    \       self._okuri
-    \   ]
+                \   [
+                \       candidates[self._candidates_index].input,
+                \       self._okuri
+                \   ]
 endfunction "}}}
 
 " Returns List of candidates.
@@ -291,18 +291,18 @@ function! s:HenkanResult_get_candidates() abort dict "{{{
 
         " Look up from registered words.
         let registered = filter(
-        \   copy(dict.get_registered_words()),
-        \   'v:val.key ==# self._key '
-        \       . '&& v:val.okuri_rom ==# self._okuri_rom'
-        \)
+                    \   copy(dict.get_registered_words()),
+                    \   'v:val.key ==# self._key '
+                    \       . '&& v:val.okuri_rom ==# self._okuri_rom'
+                    \)
 
         " Look up from dictionaries.
         let user_dict = dict.get_user_dict()
         let system_dict = dict.get_system_dict()
         let server_dict = dict.get_server_dict()
         let user_dict_result =
-        \   user_dict.search_candidate(
-        \       self._key, self._okuri_rom)
+                    \   user_dict.search_candidate(
+                    \       self._key, self._okuri_rom)
 
         let NOTFOUND = ['', -1]
         let main_dict_result = NOTFOUND
@@ -310,27 +310,27 @@ function! s:HenkanResult_get_candidates() abort dict "{{{
         " Note: skk server does not support okuri.
         if !empty(server_dict) && server_dict.type ==# 'dictionary'
             let main_dict_result =
-            \   server_dict.search_candidate(
-            \       self._key, self._okuri_rom)
+                        \   server_dict.search_candidate(
+                        \       self._key, self._okuri_rom)
         endif
         if main_dict_result[1] ==# -1
             let main_dict_result =
-            \   system_dict.search_candidate(
-            \       self._key, self._okuri_rom)
+                        \   system_dict.search_candidate(
+                        \       self._key, self._okuri_rom)
         endif
 
         if user_dict_result[1] ==# -1
-        \   && main_dict_result[1] ==# -1
-        \   && empty(registered)
+                    \   && main_dict_result[1] ==# -1
+                    \   && empty(registered)
             let self._status = g:eskk#dictionary#HR_NO_RESULT
             throw eskk#dictionary#look_up_error(
-            \   "Can't look up '"
-            \   . g:eskk#marker_henkan
-            \   . self._key
-            \   . g:eskk#marker_okuri
-            \   . self._okuri_rom
-            \   . "' in dictionaries."
-            \)
+                        \   "Can't look up '"
+                        \   . g:eskk#marker_henkan
+                        \   . self._key
+                        \   . g:eskk#marker_okuri
+                        \   . self._okuri_rom
+                        \   . "' in dictionaries."
+                        \)
         endif
 
         " NOTE: The order is important.
@@ -341,29 +341,29 @@ function! s:HenkanResult_get_candidates() abort dict "{{{
 
         " Merge dictionaries(user, large, skkserv).
         for [result, from_type] in [
-        \   [user_dict_result, s:CANDIDATE_FROM_USER_DICT],
-        \   [main_dict_result, s:CANDIDATE_FROM_SYSTEM_DICT],
-        \]
+                    \   [user_dict_result, s:CANDIDATE_FROM_USER_DICT],
+                    \   [main_dict_result, s:CANDIDATE_FROM_SYSTEM_DICT],
+                    \]
             if result[1] !=# -1
                 let candidates =
-                \   eskk#dictionary#parse_skk_dict_line(result[0], from_type)
+                            \   eskk#dictionary#parse_skk_dict_line(result[0], from_type)
                 call eskk#util#assert(
-                \   !empty(candidates),
-                \   (result is user_dict_result ? "user" : "system")
-                \   . ' dict: `candidates` is not empty.'
-                \)
+                            \   !empty(candidates),
+                            \   (result is user_dict_result ? "user" : "system")
+                            \   . ' dict: `candidates` is not empty.'
+                            \)
                 let key = candidates[0].key
                 let okuri_rom = candidates[0].okuri_rom
                 call eskk#util#assert(
-                \   key ==# self._key,
-                \   (result is user_dict_result ? "user" : "system")
-                \   . " dict:".string(key)." ==# ".string(self._key)
-                \)
+                            \   key ==# self._key,
+                            \   (result is user_dict_result ? "user" : "system")
+                            \   . " dict:".string(key)." ==# ".string(self._key)
+                            \)
                 call eskk#util#assert(
-                \   okuri_rom ==# self._okuri_rom[0],
-                \   (result is user_dict_result ? "user" : "system")
-                \   . " dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
-                \)
+                            \   okuri_rom ==# self._okuri_rom[0],
+                            \   (result is user_dict_result ? "user" : "system")
+                            \   . " dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
+                            \)
 
                 call self._candidates.append(candidates)
             endif
@@ -372,18 +372,18 @@ function! s:HenkanResult_get_candidates() abort dict "{{{
         let self._status = g:eskk#dictionary#HR_GOT_RESULT
         return self._candidates.to_list()
 
-    " This routine makes error when using completion.
-    " elseif self._status ==# g:eskk#dictionary#HR_NO_RESULT
-    "     throw eskk#dictionary#look_up_error(
-    "     \   "Can't look up '"
-    "     \   . g:eskk#marker_henkan
-    "     \   . self._key
-    "     \   . g:eskk#marker_okuri
-    "     \   . self._okuri_rom
-    "     \   . "' in dictionaries."
-    "     \)
-    " else
-    "     throw eskk#internal_error(['eskk', 'dictionary'])
+        " This routine makes error when using completion.
+        " elseif self._status ==# g:eskk#dictionary#HR_NO_RESULT
+        "     throw eskk#dictionary#look_up_error(
+        "     \   "Can't look up '"
+        "     \   . g:eskk#marker_henkan
+        "     \   . self._key
+        "     \   . g:eskk#marker_okuri
+        "     \   . self._okuri_rom
+        "     \   . "' in dictionaries."
+        "     \)
+        " else
+        "     throw eskk#internal_error(['eskk', 'dictionary'])
 
     else
         return []
@@ -392,9 +392,9 @@ endfunction "}}}
 
 function! eskk#dictionary#look_up_error(msg) abort "{{{
     return eskk#util#build_error(
-    \   ['eskk', 'dictionary'],
-    \   ['dictionary look up error', a:msg]
-    \)
+                \   ['eskk', 'dictionary'],
+                \   ['dictionary look up error', a:msg]
+                \)
 endfunction "}}}
 
 " Select candidate from command-line.
@@ -406,9 +406,9 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
     let pages = []
 
     call eskk#util#assert(
-    \   len(words) > a:skip_num,
-    \   "words has more than skip_num words."
-    \)
+                \   len(words) > a:skip_num,
+                \   "words has more than skip_num words."
+                \)
     let words = words[a:skip_num :]
 
     while !empty(words)
@@ -430,8 +430,8 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
         for [c, word] in pages[page_index]
             if g:eskk#show_annotation
                 echon printf('%s:%s%s  ', c, word.input,
-                \       (get(word, 'annotation', '') !=# '' ?
-                \           ';' . word.annotation : ''))
+                            \       (get(word, 'annotation', '') !=# '' ?
+                            \           ';' . word.annotation : ''))
             else
                 echon printf('%s:%s  ', c, word.input)
             endif
@@ -456,16 +456,16 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
                 let dict = eskk#get_skk_dict()
                 let input = dict.remember_word_prompt_hr(self)[0]
                 let henkan_buf_str = self.preedit.get_buf_str(
-                \   g:eskk#preedit#PHASE_HENKAN
-                \)
+                            \   g:eskk#preedit#PHASE_HENKAN
+                            \)
                 let okuri_buf_str = self.preedit.get_buf_str(
-                \   g:eskk#preedit#PHASE_OKURI
-                \)
+                            \   g:eskk#preedit#PHASE_OKURI
+                            \)
                 return [
-                \   (input !=# '' ?
-                \       input : henkan_buf_str.rom_pairs.get_filter()),
-                \   okuri_buf_str.rom_pairs.get_filter()
-                \]
+                            \   (input !=# '' ?
+                            \       input : henkan_buf_str.rom_pairs.get_filter()),
+                            \   okuri_buf_str.rom_pairs.get_filter()
+                            \]
             endif
         elseif char ==# 'x'
             if eskk#util#has_idx(pages, page_index - 1)
@@ -475,8 +475,8 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
             endif
         elseif stridx(g:eskk#select_cand_keys, char) != -1
             let selected = g:eskk#select_cand_keys[
-            \   stridx(g:eskk#select_cand_keys, char)
-            \]
+                        \   stridx(g:eskk#select_cand_keys, char)
+                        \]
             for idx in range(len(pages[page_index]))
                 let [c, word] = pages[page_index][idx]
                 if c ==# selected
@@ -503,7 +503,7 @@ endfunction "}}}
 function! s:HenkanResult_get_current_candidate(...) abort dict "{{{
     let with_okuri = a:0 ? a:1 : 1
     return self._candidate
-    \   . (with_okuri ? self._candidate_okuri : '')
+                \   . (with_okuri ? self._candidate_okuri : '')
 endfunction "}}}
 " Getter for self._key
 function! s:HenkanResult_get_key() abort dict "{{{
@@ -563,7 +563,7 @@ function! s:HenkanResult_do_delete_from_dict() abort dict "{{{
         let candidates = self.get_candidates()
     catch /^eskk: dictionary look up error/
         call eskk#logger#log_exception(
-        \   's:HenkanResult.get_candidates()')
+                    \   's:HenkanResult.get_candidates()')
         return 0
     endtry
     " Check invalid index.
@@ -579,15 +579,15 @@ function! s:HenkanResult_do_delete_from_dict() abort dict "{{{
     endif
     " Check user input.
     let input = eskk#util#input(
-    \   'Really purge? '
-    \   . self._key . self._okuri_rom
-    \   . ' /'
-    \   . del_cand.input
-    \   . (get(del_cand, 'annotation', '') !=# '' ?
-    \       ';' . del_cand.annotation :
-    \       '')
-    \   . '/ (yes/no):'
-    \)
+                \   'Really purge? '
+                \   . self._key . self._okuri_rom
+                \   . ' /'
+                \   . del_cand.input
+                \   . (get(del_cand, 'annotation', '') !=# '' ?
+                \       ';' . del_cand.annotation :
+                \       '')
+                \   . '/ (yes/no):'
+                \)
     if input !~? '^y\%[es]$'
         return 0
     endif
@@ -615,7 +615,7 @@ function! s:HenkanResult_do_delete_from_dict() abort dict "{{{
         endif
 
         let lines[i] =
-        \   s:delete_candidate_from_line(lines[i], del_cand)
+                    \   s:delete_candidate_from_line(lines[i], del_cand)
         if lines[i] ==# ''
             " If there is no more candidates,
             " delete the line.
@@ -643,7 +643,7 @@ function! s:HenkanResult_update_rank() abort dict "{{{
         let candidates = self.get_candidates()
     catch /^eskk: dictionary look up error/
         call eskk#logger#log_exception(
-        \   's:HenkanResult.get_candidates()')
+                    \   's:HenkanResult.get_candidates()')
         return
     endtry
     let candidates_index = self._candidates_index
@@ -660,36 +660,36 @@ endfunction "}}}
 
 
 let s:HenkanResult = {
-\   'preedit': {},
-\   '_key': '',
-\   '_okuri_rom': '',
-\   '_okuri': '',
-\   '_status': -1,
-\   '_candidates': {},
-\   '_candidates_index': -1,
-\   '_candidate': '',
-\   '_candidate_okuri': '',
-\
-\   'reset': eskk#util#get_local_funcref('HenkanResult_reset', s:SID_PREFIX),
-\   'advance': eskk#util#get_local_funcref('HenkanResult_advance', s:SID_PREFIX),
-\   'advance_index': eskk#util#get_local_funcref('HenkanResult_advance_index', s:SID_PREFIX),
-\   'update_candidate': eskk#util#get_local_funcref('HenkanResult_update_candidate', s:SID_PREFIX),
-\   'update_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_update_candidate_prompt', s:SID_PREFIX),
-\   'get_candidates': eskk#util#get_local_funcref('HenkanResult_get_candidates', s:SID_PREFIX),
-\   'select_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_select_candidate_prompt', s:SID_PREFIX),
-\   'remove_cache': eskk#util#get_local_funcref('HenkanResult_remove_cache', s:SID_PREFIX),
-\   'get_current_candidate': eskk#util#get_local_funcref('HenkanResult_get_current_candidate', s:SID_PREFIX),
-\   'get_key': eskk#util#get_local_funcref('HenkanResult_get_key', s:SID_PREFIX),
-\   'get_okuri': eskk#util#get_local_funcref('HenkanResult_get_okuri', s:SID_PREFIX),
-\   'get_okuri_rom': eskk#util#get_local_funcref('HenkanResult_get_okuri_rom', s:SID_PREFIX),
-\   'get_status': eskk#util#get_local_funcref('HenkanResult_get_status', s:SID_PREFIX),
-\   'forward': eskk#util#get_local_funcref('HenkanResult_forward', s:SID_PREFIX),
-\   'back': eskk#util#get_local_funcref('HenkanResult_back', s:SID_PREFIX),
-\   'has_next': eskk#util#get_local_funcref('HenkanResult_has_next', s:SID_PREFIX),
-\   'delete_from_dict': eskk#util#get_local_funcref('HenkanResult_delete_from_dict', s:SID_PREFIX),
-\   'do_delete_from_dict': eskk#util#get_local_funcref('HenkanResult_do_delete_from_dict', s:SID_PREFIX),
-\   'update_rank': eskk#util#get_local_funcref('HenkanResult_update_rank', s:SID_PREFIX),
-\}
+            \   'preedit': {},
+            \   '_key': '',
+            \   '_okuri_rom': '',
+            \   '_okuri': '',
+            \   '_status': -1,
+            \   '_candidates': {},
+            \   '_candidates_index': -1,
+            \   '_candidate': '',
+            \   '_candidate_okuri': '',
+            \
+            \   'reset': eskk#util#get_local_funcref('HenkanResult_reset', s:SID_PREFIX),
+            \   'advance': eskk#util#get_local_funcref('HenkanResult_advance', s:SID_PREFIX),
+            \   'advance_index': eskk#util#get_local_funcref('HenkanResult_advance_index', s:SID_PREFIX),
+            \   'update_candidate': eskk#util#get_local_funcref('HenkanResult_update_candidate', s:SID_PREFIX),
+            \   'update_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_update_candidate_prompt', s:SID_PREFIX),
+            \   'get_candidates': eskk#util#get_local_funcref('HenkanResult_get_candidates', s:SID_PREFIX),
+            \   'select_candidate_prompt': eskk#util#get_local_funcref('HenkanResult_select_candidate_prompt', s:SID_PREFIX),
+            \   'remove_cache': eskk#util#get_local_funcref('HenkanResult_remove_cache', s:SID_PREFIX),
+            \   'get_current_candidate': eskk#util#get_local_funcref('HenkanResult_get_current_candidate', s:SID_PREFIX),
+            \   'get_key': eskk#util#get_local_funcref('HenkanResult_get_key', s:SID_PREFIX),
+            \   'get_okuri': eskk#util#get_local_funcref('HenkanResult_get_okuri', s:SID_PREFIX),
+            \   'get_okuri_rom': eskk#util#get_local_funcref('HenkanResult_get_okuri_rom', s:SID_PREFIX),
+            \   'get_status': eskk#util#get_local_funcref('HenkanResult_get_status', s:SID_PREFIX),
+            \   'forward': eskk#util#get_local_funcref('HenkanResult_forward', s:SID_PREFIX),
+            \   'back': eskk#util#get_local_funcref('HenkanResult_back', s:SID_PREFIX),
+            \   'has_next': eskk#util#get_local_funcref('HenkanResult_has_next', s:SID_PREFIX),
+            \   'delete_from_dict': eskk#util#get_local_funcref('HenkanResult_delete_from_dict', s:SID_PREFIX),
+            \   'do_delete_from_dict': eskk#util#get_local_funcref('HenkanResult_do_delete_from_dict', s:SID_PREFIX),
+            \   'update_rank': eskk#util#get_local_funcref('HenkanResult_update_rank', s:SID_PREFIX),
+            \}
 
 " }}}
 
@@ -734,14 +734,14 @@ let s:HenkanResult = {
 
 function! s:PhysicalDict_new(path, sorted, encoding) abort "{{{
     let obj = extend(
-    \   deepcopy(s:PhysicalDict),
-    \   {
-    \       'path': a:path,
-    \       'sorted': a:sorted,
-    \       'encoding': a:encoding,
-    \   },
-    \   'force'
-    \)
+                \   deepcopy(s:PhysicalDict),
+                \   {
+                \       'path': a:path,
+                \       'sorted': a:sorted,
+                \       'encoding': a:encoding,
+                \   },
+                \   'force'
+                \)
     call obj.update_lines()
     return obj
 endfunction "}}}
@@ -774,20 +774,20 @@ function! s:PhysicalDict_make_updated_lines(registered_words) abort dict "{{{
         if index >=# 0
             " If the line exists, add `word` to the line.
             call eskk#util#assert(
-            \   l !=# '',
-            \   'line must not be empty string'
-            \   . ' (index = '.index.')'
-            \)
+                        \   l !=# '',
+                        \   'line must not be empty string'
+                        \   . ' (index = '.index.')'
+                        \)
             let lines[index] =
-            \   s:insert_candidate_to_line(l, word)
+                        \   s:insert_candidate_to_line(l, word)
         else
             " If the line does not exists, add new line.
             let l = s:make_line_from_candidates([word])
             call eskk#util#assert(
-            \   l !=# '',
-            \   'line must not be empty string'
-            \   . ' (index = '.index.')'
-            \)
+                        \   l !=# '',
+                        \   'line must not be empty string'
+                        \   . ' (index = '.index.')'
+                        \)
             if word.okuri_rom !=# ''
                 call insert(lines, l, ari_lnum)
                 let nasi_lnum += 1
@@ -802,7 +802,7 @@ endfunction "}}}
 
 function! s:PhysicalDict_update_lines() abort dict "{{{
     if self._ftime_at_set isnot -1
-    \   && self._ftime_at_set >=# getftime(self.path)
+                \   && self._ftime_at_set >=# getftime(self.path)
         return self._content_lines
     endif
 
@@ -810,10 +810,10 @@ function! s:PhysicalDict_update_lines() abort dict "{{{
         call self.update_lines_main()
     catch /E484:/    " Can't open file
         call eskk#logger#write_error_log_file(
-        \   {}, printf("Can't read '%s'!", self.path))
+                    \   {}, printf("Can't read '%s'!", self.path))
     catch /^eskk: .* parse error/
         call eskk#logger#warn(
-        \   "SKK dictionary is broken, trying to fix...: " . v:exception)
+                    \   "SKK dictionary is broken, trying to fix...: " . v:exception)
 
         " Try :EskkFixDictionary.
         silent execute 'EskkFixDictionary!' fnameescape(self.path)
@@ -822,7 +822,7 @@ function! s:PhysicalDict_update_lines() abort dict "{{{
             call self.update_lines_main()
         catch /E484:/    " Can't open file
             call eskk#logger#write_error_log_file(
-            \   {}, printf("Can't read '%s'!", self.path))
+                        \   {}, printf("Can't read '%s'!", self.path))
         catch /^eskk: .* parse error/
             " Possible bug.
             call eskk#logger#log_exception('s:PhysicalDict.update_lines()')
@@ -869,37 +869,37 @@ endfunction "}}}
 " - Set self.okuri_ari_idx, self.okuri_nasi_idx.
 function! s:PhysicalDict_parse_lines() abort dict "{{{
     let self.okuri_ari_idx  = index(
-    \   self._content_lines,
-    \   ';; okuri-ari entries.'
-    \)
+                \   self._content_lines,
+                \   ';; okuri-ari entries.'
+                \)
     if self.okuri_ari_idx <# 0
         throw eskk#dictionary#parse_error(
-        \   "invalid self.okuri_ari_idx value"
-        \)
+                    \   "invalid self.okuri_ari_idx value"
+                    \)
     endif
 
     let self.okuri_nasi_idx = index(
-    \   self._content_lines,
-    \   ';; okuri-nasi entries.'
-    \)
+                \   self._content_lines,
+                \   ';; okuri-nasi entries.'
+                \)
     if self.okuri_nasi_idx <# 0
         throw eskk#dictionary#parse_error(
-        \   "invalid self.okuri_nasi_idx value"
-        \)
+                    \   "invalid self.okuri_nasi_idx value"
+                    \)
     endif
 
     if self.okuri_ari_idx >= self.okuri_nasi_idx
         throw eskk#dictionary#parse_error(
-        \   "okuri-ari entries must be before okuri-nasi entries."
-        \)
+                    \   "okuri-ari entries must be before okuri-nasi entries."
+                    \)
     endif
 endfunction "}}}
 
 function! eskk#dictionary#parse_error(msg) abort "{{{
     return eskk#util#build_error(
-    \   ['eskk', 'dictionary'],
-    \   ["SKK dictionary parse error", a:msg]
-    \)
+                \   ['eskk', 'dictionary'],
+                \   ["SKK dictionary parse error", a:msg]
+                \)
 endfunction "}}}
 
 " Returns true value if "self.okuri_ari_idx" and
@@ -907,7 +907,7 @@ endfunction "}}}
 function! s:PhysicalDict_is_valid() abort dict "{{{
     " Succeeded to parse SKK dictionary.
     return self.okuri_ari_idx >= 0
-    \   && self.okuri_nasi_idx >= 0
+                \   && self.okuri_nasi_idx >= 0
 endfunction "}}}
 
 " Set false to `self._is_modified`.
@@ -932,11 +932,11 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) abort
     let converted = eskk#util#iconv(needle, &l:encoding, self.encoding)
     if self.sorted
         let [_, idx] = self.search_binary(
-        \   whole_lines,
-        \   converted,
-        \   has_okuri,
-        \   100
-        \)
+                    \   whole_lines,
+                    \   converted,
+                    \   has_okuri,
+                    \   100
+                    \)
 
         if idx == -1
             return []
@@ -956,19 +956,19 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) abort
         endif
 
         return map(
-        \   whole_lines[begin : end],
-        \   'eskk#util#iconv(v:val, self.encoding, &l:encoding)'
-        \)
+                    \   whole_lines[begin : end],
+                    \   'eskk#util#iconv(v:val, self.encoding, &l:encoding)'
+                    \)
     else
         let lines = []
         let start = 1
         while 1
             let [line, idx] = self.search_linear(
-            \   whole_lines,
-            \   converted,
-            \   has_okuri,
-            \   start
-            \)
+                        \   whole_lines,
+                        \   converted,
+                        \   has_okuri,
+                        \   start
+                        \)
 
             if idx == -1
                 break
@@ -979,9 +979,9 @@ function! s:PhysicalDict_search_all_candidates(key_filter, okuri_rom, ...) abort
         endwhile
 
         return map(
-        \   lines,
-        \   'eskk#util#iconv(v:val, self.encoding, &l:encoding)'
-        \)
+                    \   lines,
+                    \   'eskk#util#iconv(v:val, self.encoding, &l:encoding)'
+                    \)
     endif
 endfunction "}}}
 
@@ -998,18 +998,18 @@ function! s:PhysicalDict_search_candidate(key_filter, okuri_rom) abort dict "{{{
     let converted = eskk#util#iconv(needle, &l:encoding, self.encoding)
     if self.sorted
         let [line, idx] = self.search_binary(
-        \   whole_lines, converted, has_okuri, 100
-        \)
+                    \   whole_lines, converted, has_okuri, 100
+                    \)
     else
         let [line, idx] = self.search_linear(
-        \   whole_lines, converted, has_okuri
-        \)
+                    \   whole_lines, converted, has_okuri
+                    \)
     endif
     if idx !=# -1
         return [
-        \   eskk#util#iconv(line, self.encoding, &l:encoding),
-        \   idx
-        \]
+                    \   eskk#util#iconv(line, self.encoding, &l:encoding),
+                    \   idx
+                    \]
     else
         return ['', -1]
     endif
@@ -1030,13 +1030,13 @@ function! s:PhysicalDict_search_binary(whole_lines, needle, has_okuri, limit) ab
 
     let prefix = (eskk#has_if_lua() ? 'lua' : 'vim')
     let [min, max] = call(printf('s:%s_search_binary%s',
-    \         prefix, (a:has_okuri ? '_okuri' : '')),
-    \     [a:whole_lines, a:needle, a:limit, min, max])
+                \         prefix, (a:has_okuri ? '_okuri' : '')),
+                \     [a:whole_lines, a:needle, a:limit, min, max])
 
     " NOTE: min, max: Give index number, not lnum.
     return self.search_linear(
-    \   a:whole_lines, a:needle, a:has_okuri, min, max
-    \)
+                \   a:whole_lines, a:needle, a:has_okuri, min, max
+                \)
 endfunction "}}}
 
 " Returns [line_string, idx] matching the candidate.
@@ -1053,7 +1053,7 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) abor
 
     let prefix = (eskk#has_if_lua() ? 'lua' : 'vim')
     return call('s:'.prefix.'_search_linear',
-    \     [a:whole_lines, a:needle, min, max])
+                \     [a:whole_lines, a:needle, min, max])
 endfunction "}}}
 
 " vim versions
@@ -1101,33 +1101,33 @@ endfunction"}}}
 " @vimlint(EVL101, 1, l:min)
 " @vimlint(EVL101, 1, l:max)
 function! s:lua_search_binary_okuri(whole_lines, needle, limit, min, max) abort "{{{
-lua << EOF
+    lua << EOF
     do
-        local whole_lines = vim.eval('a:whole_lines')
-        local needle = vim.eval('a:needle')
-        local limit = vim.eval('a:limit+0')
-        local min = vim.eval('a:min+0')
-        local max = vim.eval('a:max+0')
-        local loc = os.setlocale(nil, 'collate')
+    local whole_lines = vim.eval('a:whole_lines')
+    local needle = vim.eval('a:needle')
+    local limit = vim.eval('a:limit+0')
+    local min = vim.eval('a:min+0')
+    local max = vim.eval('a:max+0')
+    local loc = os.setlocale(nil, 'collate')
 
-        os.setlocale('C', 'collate')
+    os.setlocale('C', 'collate')
 
-        while max - min > limit do
-            local mid = math.floor((min + max) / 2)
-            if needle >= whole_lines[mid] then
-                max = mid
-            else
-                min = mid
-            end
+    while max - min > limit do
+        local mid = math.floor((min + max) / 2)
+        if needle >= whole_lines[mid] then
+            max = mid
+        else
+            min = mid
         end
-
-        os.setlocale(loc, 'collate')
-
-        vim.command('let min = ' .. min)
-        vim.command('let max = ' .. max)
     end
+
+    os.setlocale(loc, 'collate')
+
+    vim.command('let min = ' .. min)
+    vim.command('let max = ' .. max)
+end
 EOF
-    return [float2nr(min), float2nr(max)]
+return [float2nr(min), float2nr(max)]
 endfunction"}}}
 " @vimlint(EVL101, 0, l:min)
 " @vimlint(EVL101, 0, l:max)
@@ -1135,33 +1135,33 @@ endfunction"}}}
 " @vimlint(EVL101, 1, l:min)
 " @vimlint(EVL101, 1, l:max)
 function! s:lua_search_binary(whole_lines, needle, limit, min, max) abort "{{{
-lua << EOF
+    lua << EOF
     do
-        local whole_lines = vim.eval('a:whole_lines')
-        local needle = vim.eval('a:needle')
-        local limit = vim.eval('a:limit+0')
-        local min = vim.eval('a:min+0')
-        local max = vim.eval('a:max+0')
-        local loc = os.setlocale(nil, 'collate')
+    local whole_lines = vim.eval('a:whole_lines')
+    local needle = vim.eval('a:needle')
+    local limit = vim.eval('a:limit+0')
+    local min = vim.eval('a:min+0')
+    local max = vim.eval('a:max+0')
+    local loc = os.setlocale(nil, 'collate')
 
-        os.setlocale('C', 'collate')
+    os.setlocale('C', 'collate')
 
-        while max - min > limit do
-            local mid = math.floor((min + max) / 2)
-            if needle >= whole_lines[mid] then
-                min = mid
-            else
-                max = mid
-            end
+    while max - min > limit do
+        local mid = math.floor((min + max) / 2)
+        if needle >= whole_lines[mid] then
+            min = mid
+        else
+            max = mid
         end
-
-        os.setlocale(loc, 'collate')
-
-        vim.command('let min = ' .. min)
-        vim.command('let max = ' .. max)
     end
+
+    os.setlocale(loc, 'collate')
+
+    vim.command('let min = ' .. min)
+    vim.command('let max = ' .. max)
+end
 EOF
-    return [float2nr(min), float2nr(max)]
+return [float2nr(min), float2nr(max)]
 endfunction"}}}
 " @vimlint(EVL101, 0, l:min)
 " @vimlint(EVL101, 0, l:max)
@@ -1169,53 +1169,53 @@ endfunction"}}}
 function! s:lua_search_linear(whole_lines, needle, min, max) abort "{{{
     let ret = ['', -1]
 
-lua << EOF
+    lua << EOF
     do
-        local whole_lines = vim.eval('a:whole_lines')
-        local needle = vim.eval('a:needle')
-        local min = vim.eval('a:min')
-        local max = vim.eval('a:max')
+    local whole_lines = vim.eval('a:whole_lines')
+    local needle = vim.eval('a:needle')
+    local min = vim.eval('a:min')
+    local max = vim.eval('a:max')
 
-        for i = min, max do
-            if (string.find(whole_lines[i], needle, 1, true)) == 1 then
-                local ret = vim.eval('ret')
-                ret[0] = whole_lines[i]
-                vim.command('let ret[1] = float2nr(' .. i ..')')
-                break
-            end
+    for i = min, max do
+        if (string.find(whole_lines[i], needle, 1, true)) == 1 then
+            local ret = vim.eval('ret')
+            ret[0] = whole_lines[i]
+            vim.command('let ret[1] = float2nr(' .. i ..')')
+            break
         end
     end
+end
 EOF
 
-    return ret
+return ret
 endfunction"}}}
 
 
 let s:PhysicalDict = {
-\   '_content_lines': [],
-\   '_ftime_at_set': -1,
-\   'okuri_ari_idx': -1,
-\   'okuri_nasi_idx': -1,
-\   'path': '',
-\   'sorted': 0,
-\   'encoding': '',
-\   '_is_modified': 0,
-\
-\   'get_lines': eskk#util#get_local_funcref('PhysicalDict_get_lines', s:SID_PREFIX),
-\   'get_lines_copy': eskk#util#get_local_funcref('PhysicalDict_get_lines_copy', s:SID_PREFIX),
-\   'make_updated_lines': eskk#util#get_local_funcref('PhysicalDict_make_updated_lines', s:SID_PREFIX),
-\   'update_lines': eskk#util#get_local_funcref('PhysicalDict_update_lines', s:SID_PREFIX),
-\   'update_lines_main': eskk#util#get_local_funcref('PhysicalDict_update_lines_main', s:SID_PREFIX),
-\   'update_lines_copy': eskk#util#get_local_funcref('PhysicalDict_update_lines_copy', s:SID_PREFIX),
-\   'set_lines': eskk#util#get_local_funcref('PhysicalDict_set_lines', s:SID_PREFIX),
-\   'parse_lines': eskk#util#get_local_funcref('PhysicalDict_parse_lines', s:SID_PREFIX),
-\   'is_valid': eskk#util#get_local_funcref('PhysicalDict_is_valid', s:SID_PREFIX),
-\   'clear_modified_flags': eskk#util#get_local_funcref('PhysicalDict_clear_modified_flags', s:SID_PREFIX),
-\   'search_all_candidates': eskk#util#get_local_funcref('PhysicalDict_search_all_candidates', s:SID_PREFIX),
-\   'search_candidate': eskk#util#get_local_funcref('PhysicalDict_search_candidate', s:SID_PREFIX),
-\   'search_binary': eskk#util#get_local_funcref('PhysicalDict_search_binary', s:SID_PREFIX),
-\   'search_linear': eskk#util#get_local_funcref('PhysicalDict_search_linear', s:SID_PREFIX),
-\}
+            \   '_content_lines': [],
+            \   '_ftime_at_set': -1,
+            \   'okuri_ari_idx': -1,
+            \   'okuri_nasi_idx': -1,
+            \   'path': '',
+            \   'sorted': 0,
+            \   'encoding': '',
+            \   '_is_modified': 0,
+            \
+            \   'get_lines': eskk#util#get_local_funcref('PhysicalDict_get_lines', s:SID_PREFIX),
+            \   'get_lines_copy': eskk#util#get_local_funcref('PhysicalDict_get_lines_copy', s:SID_PREFIX),
+            \   'make_updated_lines': eskk#util#get_local_funcref('PhysicalDict_make_updated_lines', s:SID_PREFIX),
+            \   'update_lines': eskk#util#get_local_funcref('PhysicalDict_update_lines', s:SID_PREFIX),
+            \   'update_lines_main': eskk#util#get_local_funcref('PhysicalDict_update_lines_main', s:SID_PREFIX),
+            \   'update_lines_copy': eskk#util#get_local_funcref('PhysicalDict_update_lines_copy', s:SID_PREFIX),
+            \   'set_lines': eskk#util#get_local_funcref('PhysicalDict_set_lines', s:SID_PREFIX),
+            \   'parse_lines': eskk#util#get_local_funcref('PhysicalDict_parse_lines', s:SID_PREFIX),
+            \   'is_valid': eskk#util#get_local_funcref('PhysicalDict_is_valid', s:SID_PREFIX),
+            \   'clear_modified_flags': eskk#util#get_local_funcref('PhysicalDict_clear_modified_flags', s:SID_PREFIX),
+            \   'search_all_candidates': eskk#util#get_local_funcref('PhysicalDict_search_all_candidates', s:SID_PREFIX),
+            \   'search_candidate': eskk#util#get_local_funcref('PhysicalDict_search_candidate', s:SID_PREFIX),
+            \   'search_binary': eskk#util#get_local_funcref('PhysicalDict_search_binary', s:SID_PREFIX),
+            \   'search_linear': eskk#util#get_local_funcref('PhysicalDict_search_linear', s:SID_PREFIX),
+            \}
 
 " }}}
 
@@ -1255,8 +1255,8 @@ function! s:ServerDict_init() abort dict "{{{
         endif
     else
         if !eskk#util#has_vimproc()
-            \ || !vimproc#host_exists(self.host) || self.port <= 0
-                return
+                    \ || !vimproc#host_exists(self.host) || self.port <= 0
+            return
         endif
 
         try
@@ -1279,10 +1279,10 @@ function! s:ServerDict_request(command, key) abort dict "{{{
         endif
         if has('channel')
             let result = ch_evalraw(self._socket, printf("%s%s%s\n",
-            \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
+                        \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
         else
             call self._socket.write(printf("%s%s%s\n",
-            \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
+                        \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
             let result = self._socket.read_line(-1, self.timeout)
         endif
         if self.encoding !=# ''
@@ -1302,9 +1302,9 @@ function! s:ServerDict_request(command, key) abort dict "{{{
         endif
     catch
         if has('channel')
-             call ch_close(self._socket)
+            call ch_close(self._socket)
         else
-             call self._socket.close()
+            call self._socket.close()
         endif
         return ''
     endtry
@@ -1324,19 +1324,19 @@ function! s:ServerDict_search_candidate(key, okuri_rom) abort dict "{{{
 endfunction "}}}
 
 let s:ServerDict = {
-\   '_socket': {},
-\   'host': '',
-\   'port': 1178,
-\   'encoding': 'euc-jp',
-\   'timeout': 1000,
-\   'type': 'dictionary',
-\
-\   'init': eskk#util#get_local_funcref('ServerDict_init', s:SID_PREFIX),
-\   'request': eskk#util#get_local_funcref('ServerDict_request', s:SID_PREFIX),
-\   'lookup': eskk#util#get_local_funcref('ServerDict_lookup', s:SID_PREFIX),
-\   'complete': eskk#util#get_local_funcref('ServerDict_complete', s:SID_PREFIX),
-\   'search_candidate': eskk#util#get_local_funcref('ServerDict_search_candidate', s:SID_PREFIX),
-\}
+            \   '_socket': {},
+            \   'host': '',
+            \   'port': 1178,
+            \   'encoding': 'euc-jp',
+            \   'timeout': 1000,
+            \   'type': 'dictionary',
+            \
+            \   'init': eskk#util#get_local_funcref('ServerDict_init', s:SID_PREFIX),
+            \   'request': eskk#util#get_local_funcref('ServerDict_request', s:SID_PREFIX),
+            \   'lookup': eskk#util#get_local_funcref('ServerDict_lookup', s:SID_PREFIX),
+            \   'complete': eskk#util#get_local_funcref('ServerDict_complete', s:SID_PREFIX),
+            \   'search_candidate': eskk#util#get_local_funcref('ServerDict_search_candidate', s:SID_PREFIX),
+            \}
 
 " }}}
 
@@ -1367,27 +1367,27 @@ function! s:Dictionary_new(...) abort "{{{
     let system_dict = get(a:000, 1, g:eskk#large_dictionary)
     let server_dict = get(a:000, 2, g:eskk#server)
     return extend(
-    \   deepcopy(s:Dictionary),
-    \   {
-    \       '_user_dict': s:PhysicalDict_new(
-    \           user_dict.path,
-    \           user_dict.sorted,
-    \           user_dict.encoding,
-    \       ),
-    \       '_system_dict': s:PhysicalDict_new(
-    \           system_dict.path,
-    \           system_dict.sorted,
-    \           system_dict.encoding,
-    \       ),
-    \       '_server_dict': (!empty(g:eskk#server) ?
-    \                           s:ServerDict_new(server_dict) : {}),
-    \       '_registered_words': eskk#util#create_data_ordered_set(
-    \           {'Fn_identifier':
-    \               'eskk#dictionary#_candidate_identifier'}
-    \       ),
-    \   },
-    \   'force'
-    \)
+                \   deepcopy(s:Dictionary),
+                \   {
+                \       '_user_dict': s:PhysicalDict_new(
+                \           user_dict.path,
+                \           user_dict.sorted,
+                \           user_dict.encoding,
+                \       ),
+                \       '_system_dict': s:PhysicalDict_new(
+                \           system_dict.path,
+                \           system_dict.sorted,
+                \           system_dict.encoding,
+                \       ),
+                \       '_server_dict': (!empty(g:eskk#server) ?
+                \                           s:ServerDict_new(server_dict) : {}),
+                \       '_registered_words': eskk#util#create_data_ordered_set(
+                \           {'Fn_identifier':
+                \               'eskk#dictionary#_candidate_identifier'}
+                \       ),
+                \   },
+                \   'force'
+                \)
 endfunction "}}}
 
 
@@ -1398,11 +1398,11 @@ endfunction "}}}
 " This is interface so s:HenkanResult is implementation.
 function! s:Dictionary_refer(preedit, key, okuri, okuri_rom) abort dict "{{{
     let hr = s:HenkanResult_new(
-    \   a:key,
-    \   a:okuri_rom,
-    \   a:okuri,
-    \   deepcopy(a:preedit, 1),
-    \)
+                \   a:key,
+                \   a:okuri_rom,
+                \   a:okuri,
+                \   deepcopy(a:preedit, 1),
+                \)
     let self._current_henkan_result = hr
     " s:HenkanResult.update_candidates() may throw
     " eskk#dictionary#look_up_error() exception.
@@ -1417,13 +1417,13 @@ endfunction "}}}
 function! s:Dictionary_remember_word_prompt_hr(henkan_result) abort dict "{{{
     let unused = ''
     let word = s:candidate_new(
-    \   unused,
-    \   unused,
-    \   a:henkan_result.get_key(),
-    \   a:henkan_result.get_okuri(),
-    \   a:henkan_result.get_okuri_rom(),
-    \   unused,
-    \)
+                \   unused,
+                \   unused,
+                \   a:henkan_result.get_key(),
+                \   a:henkan_result.get_okuri(),
+                \   a:henkan_result.get_okuri_rom(),
+                \   unused,
+                \)
     return self.remember_word_prompt(word)
 endfunction "}}}
 function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
@@ -1468,11 +1468,11 @@ function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
             return self.remember_word_prompt(a:word)
         endif
         let [input, annotation] =
-        \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
+                    \   matchlist(input, '^\([^;]*\)\(.*\)')[1:2]
         let annotation = substitute(annotation, '^;', '', '')
         let word = s:candidate_new(
-        \   s:CANDIDATE_FROM_REGISTERED_WORDS,
-        \   input, key, okuri, okuri_rom, annotation)
+                    \   s:CANDIDATE_FROM_REGISTERED_WORDS,
+                    \   input, key, okuri, okuri_rom, annotation)
         call self.remember_word(word)
     endif
 
@@ -1482,15 +1482,15 @@ endfunction "}}}
 function! s:check_accidental_input(input) abort "{{{
     if a:input !=# strtrans(a:input)
         let answer = eskk#util#input(
-        \   "'".strtrans(a:input)."' contains unprintable character."
-        \ . " Do you really want to register? (yes/no):")
+                    \   "'".strtrans(a:input)."' contains unprintable character."
+                    \ . " Do you really want to register? (yes/no):")
         return answer =~? '^y\%[es]$'
     elseif a:input =~# '[ 　]'
         let msg = a:input =~# '^[ 　]*$' ?
-        \   'empty string was input.' :
-        \   "'".strtrans(a:input)."' contains space(s)."
+                    \   'empty string was input.' :
+                    \   "'".strtrans(a:input)."' contains space(s)."
         let answer = eskk#util#input(
-        \   msg . " Do you really want to register? (yes/no):")
+                    \   msg . " Do you really want to register? (yes/no):")
         return answer =~? '^y\%[es]$'
     else
         return 1
@@ -1542,8 +1542,8 @@ function! s:Dictionary_is_modified() abort dict "{{{
     " No need to check system dictionary.
     " Because it is immutable.
     return
-    \   self._user_dict._is_modified
-    \   || !self._registered_words.empty()
+                \   self._user_dict._is_modified
+                \   || !self._registered_words.empty()
 endfunction "}}}
 
 " Write to user dictionary.
@@ -1556,27 +1556,27 @@ function! s:Dictionary_update_dictionary(...) abort dict "{{{
     endif
     " Invalid data.
     if filereadable(self._user_dict.path)
-    \   && !self._user_dict.is_valid()
+                \   && !self._user_dict.is_valid()
         return
     endif
     if !filereadable(self._user_dict.path)
         " Create new lines.
         " NOTE: It must not throw parse error exception!
         call self._user_dict.set_lines([
-        \   ';; okuri-ari entries.',
-        \   ';; okuri-nasi entries.'
-        \])
+                    \   ';; okuri-ari entries.',
+                    \   ';; okuri-nasi entries.'
+                    \])
     endif
 
     if do_update_lines
         call self._user_dict.update_lines()
     endif
     call self.write_lines(
-    \   self._user_dict.make_updated_lines(
-    \       self._registered_words
-    \   ),
-    \   verbose
-    \)
+                \   self._user_dict.make_updated_lines(
+                \       self._registered_words
+                \   ),
+                \   verbose
+                \)
     call self.forget_all_words()
     call self._user_dict.clear_modified_flags()
     " Load changed lines.
@@ -1586,9 +1586,9 @@ function! s:Dictionary_write_lines(lines, verbose) abort dict "{{{
     let lines = a:lines
 
     let save_msg =
-    \   "Saving to '"
-    \   . self._user_dict.path
-    \   . "'..."
+                \   "Saving to '"
+                \   . self._user_dict.path
+                \   . "'..."
 
     if a:verbose
         redraw
@@ -1603,20 +1603,20 @@ function! s:Dictionary_write_lines(lines, verbose) abort dict "{{{
         endif
     catch
         throw eskk#internal_error(
-        \   ['eskk', 'dictionary'],
-        \   "can't write to '"
-        \       . self._user_dict.path
-        \       . "'."
-        \   . " Please check permission of '"
-        \   . self._user_dict.path . "'."
-        \)
+                    \   ['eskk', 'dictionary'],
+                    \   "can't write to '"
+                    \       . self._user_dict.path
+                    \       . "'."
+                    \   . " Please check permission of '"
+                    \   . self._user_dict.path . "'."
+                    \)
     endtry
 endfunction "}}}
 
 " Reduce the losses of creating instance.
 let s:dict_search_candidates = eskk#util#create_data_ordered_set(
-\   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
-\)
+            \   {'Fn_identifier': 'eskk#dictionary#_candidate_identifier'}
+            \)
 " Search candidates matching with arguments.
 " @vimlint(EVL102, 1, a:okuri)
 function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) abort dict "{{{
@@ -1645,15 +1645,15 @@ function! s:Dictionary_search_all_candidates(key, okuri, okuri_rom) abort dict "
         " User dictionary, System dictionary
         try
             for [physical_dict, from_type] in [
-            \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
-            \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
-            \]
+                        \   [self._user_dict, s:CANDIDATE_FROM_USER_DICT],
+                        \   [self._system_dict, s:CANDIDATE_FROM_SYSTEM_DICT],
+                        \]
                 for line in physical_dict.search_all_candidates(
-                \   key, okuri_rom, max_count - candidates.size()
-                \)
+                            \   key, okuri_rom, max_count - candidates.size()
+                            \)
                     for c in eskk#dictionary#parse_skk_dict_line(
-                    \   line, from_type
-                    \)
+                                \   line, from_type
+                                \)
                         let c.from_type = s:CANDIDATE_FROM_REGISTERED_WORDS
                         call candidates.push(c)
                         if candidates.size() >= max_count
@@ -1695,29 +1695,29 @@ endfunction "}}}
 
 
 let s:Dictionary = {
-\   '_user_dict': {},
-\   '_system_dict': {},
-\   '_registered_words': {},
-\   '_current_henkan_result': {},
-\
-\   'refer': eskk#util#get_local_funcref('Dictionary_refer', s:SID_PREFIX),
-\   'remember_word_prompt': eskk#util#get_local_funcref('Dictionary_remember_word_prompt', s:SID_PREFIX),
-\   'remember_word_prompt_hr': eskk#util#get_local_funcref('Dictionary_remember_word_prompt_hr', s:SID_PREFIX),
-\   'forget_all_words': eskk#util#get_local_funcref('Dictionary_forget_all_words', s:SID_PREFIX),
-\   'forget_word': eskk#util#get_local_funcref('Dictionary_forget_word', s:SID_PREFIX),
-\   'remember_word': eskk#util#get_local_funcref('Dictionary_remember_word', s:SID_PREFIX),
-\   'get_registered_words': eskk#util#get_local_funcref('Dictionary_get_registered_words', s:SID_PREFIX),
-\   'remove_registered_word': eskk#util#get_local_funcref('Dictionary_remove_registered_word', s:SID_PREFIX),
-\   'is_modified': eskk#util#get_local_funcref('Dictionary_is_modified', s:SID_PREFIX),
-\   'update_dictionary': eskk#util#get_local_funcref('Dictionary_update_dictionary', s:SID_PREFIX),
-\   'write_lines': eskk#util#get_local_funcref('Dictionary_write_lines', s:SID_PREFIX),
-\   'search_all_candidates': eskk#util#get_local_funcref('Dictionary_search_all_candidates', s:SID_PREFIX),
-\   'get_henkan_result': eskk#util#get_local_funcref('Dictionary_get_henkan_result', s:SID_PREFIX),
-\   'get_user_dict': eskk#util#get_local_funcref('Dictionary_get_user_dict', s:SID_PREFIX),
-\   'get_system_dict': eskk#util#get_local_funcref('Dictionary_get_system_dict', s:SID_PREFIX),
-\   'get_server_dict': eskk#util#get_local_funcref('Dictionary_get_server_dict', s:SID_PREFIX),
-\   'clear_henkan_result': eskk#util#get_local_funcref('Dictionary_clear_henkan_result', s:SID_PREFIX),
-\}
+            \   '_user_dict': {},
+            \   '_system_dict': {},
+            \   '_registered_words': {},
+            \   '_current_henkan_result': {},
+            \
+            \   'refer': eskk#util#get_local_funcref('Dictionary_refer', s:SID_PREFIX),
+            \   'remember_word_prompt': eskk#util#get_local_funcref('Dictionary_remember_word_prompt', s:SID_PREFIX),
+            \   'remember_word_prompt_hr': eskk#util#get_local_funcref('Dictionary_remember_word_prompt_hr', s:SID_PREFIX),
+            \   'forget_all_words': eskk#util#get_local_funcref('Dictionary_forget_all_words', s:SID_PREFIX),
+            \   'forget_word': eskk#util#get_local_funcref('Dictionary_forget_word', s:SID_PREFIX),
+            \   'remember_word': eskk#util#get_local_funcref('Dictionary_remember_word', s:SID_PREFIX),
+            \   'get_registered_words': eskk#util#get_local_funcref('Dictionary_get_registered_words', s:SID_PREFIX),
+            \   'remove_registered_word': eskk#util#get_local_funcref('Dictionary_remove_registered_word', s:SID_PREFIX),
+            \   'is_modified': eskk#util#get_local_funcref('Dictionary_is_modified', s:SID_PREFIX),
+            \   'update_dictionary': eskk#util#get_local_funcref('Dictionary_update_dictionary', s:SID_PREFIX),
+            \   'write_lines': eskk#util#get_local_funcref('Dictionary_write_lines', s:SID_PREFIX),
+            \   'search_all_candidates': eskk#util#get_local_funcref('Dictionary_search_all_candidates', s:SID_PREFIX),
+            \   'get_henkan_result': eskk#util#get_local_funcref('Dictionary_get_henkan_result', s:SID_PREFIX),
+            \   'get_user_dict': eskk#util#get_local_funcref('Dictionary_get_user_dict', s:SID_PREFIX),
+            \   'get_system_dict': eskk#util#get_local_funcref('Dictionary_get_system_dict', s:SID_PREFIX),
+            \   'get_server_dict': eskk#util#get_local_funcref('Dictionary_get_server_dict', s:SID_PREFIX),
+            \   'clear_henkan_result': eskk#util#get_local_funcref('Dictionary_clear_henkan_result', s:SID_PREFIX),
+            \}
 
 " }}}
 

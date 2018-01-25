@@ -9,8 +9,8 @@ set cpo&vim
 
 
 function! s:run()
-    call eskk#enable()
-    OK eskk#is_enabled()
+  call eskk#enable()
+  OK eskk#is_enabled()
 endfunction
 
 call s:run()
