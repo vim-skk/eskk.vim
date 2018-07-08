@@ -1516,6 +1516,7 @@ function! s:Dictionary_remember_word(word) abort dict "{{{
     call self._registered_words.unshift(a:word)
 
     if self._registered_words.size() >= g:eskk#dictionary_save_count
+                \   && g:eskk#dictionary_save_count >= 0
         call self.update_dictionary(0)
     endif
 
