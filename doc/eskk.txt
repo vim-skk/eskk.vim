@@ -192,7 +192,8 @@ g:eskk#auto_save_dictionary_at_exit		*g:eskk#auto_save_dictionary_at_exit*
 g:eskk#dictionary_save_count		*g:eskk#dictionary_save_count*
 							(Default: -1)
 	If the number of registered words exceed this count,
-	eskk writes it to user dictionary.
+	eskk writes it to user dictionary (|:EskkUpdateDictionary|).
+	If the number is negative, eskk always writes to user dictionary.
 
 
 Some kanji conversion keys, Annotation
