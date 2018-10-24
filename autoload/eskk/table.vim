@@ -199,9 +199,6 @@ function! s:get_candidates(table, lhs_head, candidates) abort "{{{
     endfor
   endif
 endfunction "}}}
-function! s:AbstractTable_waiting_exact_match(lhs_head) abort dict "{{{
-  return !self.has_map(a:lhs_head) && self.has_candidates(a:lhs_head)
-endfunction "}}}
 
 
 let [
@@ -364,7 +361,6 @@ let s:AbstractTable = {
       \   'has_candidates': eskk#util#get_local_funcref('AbstractTable_has_candidates', s:SID_PREFIX),
       \   'has_n_candidates': eskk#util#get_local_funcref('AbstractTable_has_n_candidates', s:SID_PREFIX),
       \   'get_candidates': eskk#util#get_local_funcref('AbstractTable_get_candidates', s:SID_PREFIX),
-      \   'waiting_exact_match': eskk#util#get_local_funcref('AbstractTable_waiting_exact_match', s:SID_PREFIX),
       \   'has_map': eskk#util#get_local_funcref('AbstractTable_has_map', s:SID_PREFIX),
       \   'get_map': eskk#util#get_local_funcref('AbstractTable_get_map', s:SID_PREFIX),
       \   'has_rest': eskk#util#get_local_funcref('AbstractTable_has_rest', s:SID_PREFIX),
