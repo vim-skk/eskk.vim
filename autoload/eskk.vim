@@ -971,7 +971,7 @@ function! s:filter_rom(stash, table) abort "{{{
 
     if preedit.get_henkan_phase() is g:eskk#preedit#PHASE_OKURI
         return s:filter_rom_okuri(a:stash, a:table)
-    elseif a:table.has_n_candidates(rom_str, 2)
+    elseif a:table.waiting_exact_match(rom_str)
         " Has candidates but not match.
         return s:filter_rom_has_candidates(a:stash)
     elseif a:table.has_map(rom_str)
@@ -1055,7 +1055,7 @@ function! s:filter_rom_okuri(stash, table) abort "{{{
     endif
 
     let rom_str = okuri_buf_str.rom_str.get() . char
-    if a:table.has_n_candidates(rom_str, 2)
+    if a:table.waiting_exact_match(rom_str)
         " Has candidates but not match.
         return s:filter_rom_has_candidates(a:stash)
     elseif a:table.has_map(rom_str)
