@@ -968,13 +968,15 @@ function! s:filter_rom(stash, table) abort "{{{
     let preedit = a:stash.preedit
     let buf_str = preedit.get_current_buf_str()
     let rom_str = buf_str.rom_str.get() . char
+    let cands = a:table.get_candidates(rom_str, [])
+    let exact = a:table.has_map(rom_str)
 
     if preedit.get_henkan_phase() is g:eskk#preedit#PHASE_OKURI
         return s:filter_rom_okuri(a:stash, a:table)
-    elseif a:table.waiting_exact_match(rom_str)
+    elseif len(cands) > 1 || !exact && len(cands) ==# 1
         " Has candidates but not match.
         return s:filter_rom_has_candidates(a:stash)
-    elseif a:table.has_map(rom_str)
+    elseif exact && len(cands) ==# 1
         " Match!
         return s:filter_rom_exact_match(a:stash, a:table)
     else
@@ -1055,10 +1057,13 @@ function! s:filter_rom_okuri(stash, table) abort "{{{
     endif
 
     let rom_str = okuri_buf_str.rom_str.get() . char
-    if a:table.waiting_exact_match(rom_str)
+    let cands = a:table.get_candidates(rom_str, [])
+    let exact = a:table.has_map(rom_str)
+
+    if len(cands) > 1 || !exact && len(cands) ==# 1
         " Has candidates but not match.
         return s:filter_rom_has_candidates(a:stash)
-    elseif a:table.has_map(rom_str)
+    elseif exact && len(cands) ==# 1
         " Match!
         return s:filter_rom_exact_match(a:stash, a:table)
     else
