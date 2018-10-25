@@ -537,36 +537,33 @@ eskk-initialize-pre				*eskk-initialize-pre*
 |eskk-initialize-pre|フックを利用して次のようにアルファベット変換テーブルを
 定義することができる。
 >
-    autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
+    autocmd User eskk-initialize-pre call s:eskk_initial_pre()
     function! s:eskk_initial_pre()
-        let t = eskk#table#new('rom_to_hira*', 'rom_to_hira')
-        call t.add_map('~', '～')
-        call t.add_map('zc', '(c)')
-        call t.add_map('zr', '?')
-        call t.add_map('vh', '?')
-        call t.add_map('vj', '?')
-        call t.add_map('vk', '?')
-        call t.add_map('vl', '?')
-        call t.add_map('jva', '?ぁ')
-        call t.add_map('jvi', '?ぃ')
-        call t.add_map('jvu', '?')
-        call t.add_map('jve', '?ぇ')
-        call t.add_map('jvo', '?ぉ')
-        call t.add_map('z ', '　')
-        call eskk#register_mode_table('hira', t)
+      " ユーザはここで何か重たい初期化処理を実行することができる。
+      let t = eskk#table#new('rom_to_hira*', 'rom_to_hira')
+      call t.add_map('~', '～')
+      call t.add_map('zc', '©')
+      call t.add_map('zr', '®')
+      call t.add_map('tm', '™')
+      call t.add_map('z ', '　')
+      " "1." のように数字の後のドットはそのまま入力
+      for n in range(10)
+        call t.add_map(n . '.', n . '.')
+      endfor
+      call eskk#register_mode_table('hira', t)
     endfunction
 
     " http://subtech.g.hatena.ne.jp/motemen/20110527/1306485690
     " のeskkでの設定例。
-    " この方法はg:eskk#rom_input_styleが"skk"でないと
-    " 最後のzが残ってしまう。
-    autocmd vimrc User eskk-initialize-pre call s:eskk_initial_pre()
+    " この方法は g:eskk#rom_input_style が"skk"でないと
+    " 最後のzが残ってしまうことに注意。
+    autocmd User eskk-initialize-pre call s:eskk_initial_pre()
     function! s:eskk_initial_pre()
-        for [orgtable, mode] in [['rom_to_hira', 'hira'], ['rom_to_kata', 'kata']]
-            let t = eskk#table#new(orgtable.'*', orgtable)
-            call t.add_map('zw', 'w', 'z')
-            call eskk#register_mode_table(mode, t)
-        endfor
+      for [orgtable, mode] in [['rom_to_hira', 'hira'], ['rom_to_kata', 'kata']]
+        let t = eskk#table#new(orgtable.'*', orgtable)
+        call t.add_map('zw', 'w', 'z')
+        call eskk#register_mode_table(mode, t)
+      endfor
     endfunction
 <
 eskk-initialize-post			*eskk-initialize-post*
