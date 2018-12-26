@@ -52,11 +52,11 @@ function! s:eskkcomplete(findstart, base) abort "{{{
                         \ -3 : -1
         endif
         let begin_col = eskk#get_preedit().get_begin_col()
-        if begin_col >= 0 && empty(eskk#complete#do_complete(
-                    \         eskk#get_preedit().get_old_str()))
-            " Skip completion.
-            let begin_col = -1
-        endif
+        " if begin_col >= 0 && empty(eskk#complete#do_complete(
+        "            \         eskk#get_preedit().get_old_str()))
+        "     " Skip completion.
+        "     let begin_col = -1
+        " endif
         if begin_col <=# 0
             return (v:version > 703 || v:version == 703 && has('patch519')) ?
                         \ -3 : -1
@@ -142,9 +142,9 @@ endfunction "}}}
 " s:MODE_FUNC_TABLE
 function! s:MODE_FUNC_TABLE.hira(base) abort "{{{
     " Do not complete while inputting rom string.
-    if a:base =~# '\a$'
-        return s:skip_complete()
-    endif
+    " if a:base =~# '\a$'
+    "     return s:skip_complete()
+    " endif
     let mb_str = eskk#get_preedit().get_buf_str(
                 \   g:eskk#preedit#PHASE_HENKAN
                 \).rom_pairs.get_filter()

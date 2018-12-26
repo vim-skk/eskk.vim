@@ -35,18 +35,17 @@ class Source(Base):
         self.name = 'eskk'
         self.mark = '[eskk]'
         self.is_bytepos = True
+        self.is_volatile = True
         self.rank = 500
         self.matchers = []
         self.sorters = []
         self.min_pattern_length = 0
 
     def get_complete_position(self, context):
-        if not self.vim.call('eskk#is_enabled') or re.search(
-                r'[a-zA-Z0-9_]$', context['input']):
+        if not self.vim.call('eskk#is_enabled'):
             return -1
         return self.vim.call('eskk#complete#eskkcomplete', 1, '')
 
     def gather_candidates(self, context):
         return self.vim.call(
             'eskk#complete#eskkcomplete', 0, context['complete_str'])
-
