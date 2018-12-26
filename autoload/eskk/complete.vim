@@ -53,7 +53,7 @@ function! s:eskkcomplete(findstart, base) abort "{{{
         endif
         let begin_col = eskk#get_preedit().get_begin_col()
         if begin_col >= 0 && empty(eskk#complete#do_complete(
-                   \         eskk#get_preedit().get_old_str()))
+                    \         eskk#get_preedit().get_old_str()))
             " Skip completion.
             let begin_col = -1
         endif
