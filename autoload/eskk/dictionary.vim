@@ -1254,17 +1254,19 @@ function! s:ServerDict_init() abort dict "{{{
             call eskk#logger#warn('server initialization failed.')
         endif
     else
-        if !eskk#util#has_vimproc()
-                    \ || !vimproc#host_exists(self.host) || self.port <= 0
-            return
-        endif
-
+        let s:chunks = ['']
         try
-            let self._socket = vimproc#socket_open(self.host, self.port)
+            let self._socket = sockconnect('tcp',
+                        \ printf('%s:%s', self.host, self.port),
+                        \ {'on_data': function('s:on_data')})
         catch
             call eskk#logger#warn('server initialization failed.')
         endtry
     endif
+endfunction "}}}
+function! s:on_data(job_id, data, event) abort "{{{
+    let s:chunks[-1] .= a:data[0]
+    call extend(s:chunks, a:data[1:])
 endfunction "}}}
 
 function! s:ServerDict_request(command, key) abort dict "{{{
@@ -1277,13 +1279,17 @@ function! s:ServerDict_request(command, key) abort dict "{{{
         if self.encoding !=# ''
             let key = iconv(key, &encoding, self.encoding)
         endif
+        let request = printf("%s%s%s\n",
+                    \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : ''))
         if has('channel')
-            let result = ch_evalraw(self._socket, printf("%s%s%s\n",
-                        \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
+            let result = ch_evalraw(self._socket, request)
         else
-            call self._socket.write(printf("%s%s%s\n",
-                        \ a:command, key, (key[strlen(key)-1] !=# ' ' ? ' ' : '')))
-            let result = self._socket.read_line(-1, self.timeout)
+            call chansend(self._socket, request)
+            while len(s:chunks) == 1
+                sleep 10m
+            endwhile
+            let result = s:chunks[-2]
+            let s:chunks = ['']
         endif
         if self.encoding !=# ''
             let result = iconv(result, self.encoding, &encoding)
@@ -1295,8 +1301,8 @@ function! s:ServerDict_request(command, key) abort dict "{{{
                 call ch_evalraw(self._socket, "0\n")
                 call ch_close(self._socket)
             else
-                call self._socket.write("0\n")
-                call self._socket.close()
+                call chansend(self._socket, "0\n")
+                call chanclose(self._socket)
             endif
             call self.init()
         endif
@@ -1304,7 +1310,7 @@ function! s:ServerDict_request(command, key) abort dict "{{{
         if has('channel')
             call ch_close(self._socket)
         else
-            call self._socket.close()
+            call chanclose(self._socket)
         endif
         return ''
     endtry

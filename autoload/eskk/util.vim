@@ -39,10 +39,6 @@ else
     endfunction
 endif
 " }}}
-function! eskk#util#has_vimproc(...) abort "{{{
-    let module = s:Vital.Process
-    return call(module.has_vimproc, a:000, module)
-endfunction "}}}
 
 
 " Assert, Error
