@@ -22,6 +22,8 @@ delfunc s:SID
 let s:MODE_FUNC_TABLE = {}
 " The previously completed candidates in each mode.
 let s:completed_candidates = {}
+" The previously completed dictionary word items.
+let s:completed_dict_items = []
 
 
 
@@ -100,6 +102,24 @@ endfunction "}}}
 
 function! eskk#complete#_reset_completed_candidates() abort "{{{
     let s:completed_candidates = {}
+    let s:completed_dict_items = []
+endfunction "}}}
+function! eskk#complete#_add_completed_candidates() abort "{{{
+    if empty(v:completed_item)
+        return
+    endif
+
+    let items = filter(copy(s:completed_dict_items),
+                \ 'v:val.input ==# v:completed_item.word')
+    if empty(items)
+        return
+    endif
+
+    " Move self to the first.
+    let dict = eskk#get_skk_dict()
+    call dict.forget_word(items[0])
+    call dict.remember_word(items[0])
+    call eskk#complete#_reset_completed_candidates()
 endfunction "}}}
 function! s:skip_complete(...) abort "{{{
     let findstart = get(a:000, 0, 0)
@@ -128,7 +148,8 @@ function! s:get_completed_candidates(display_str, else) abort "{{{
                 \   a:else
                 \)
 endfunction "}}}
-function! s:set_completed_candidates(display_str, candidates) abort "{{{
+function! s:set_completed_candidates(display_str, candidates, dict_items) abort "{{{
+    let s:completed_dict_items = a:dict_items
     if a:display_str ==# ''    " empty string cannot be a key of dictionary.
         return
     endif
@@ -228,7 +249,7 @@ function! s:complete(mode, ...) abort "{{{
                     \})
     endfor
 
-    call s:set_completed_candidates(disp, list)
+    call s:set_completed_candidates(disp, list, candidates)
 
     return list
 endfunction "}}}

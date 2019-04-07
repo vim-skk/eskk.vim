@@ -1717,6 +1717,13 @@ function! eskk#_initialize() abort "{{{
                 \            call eskk#logger#write_debug_log_file()
     " }}}
 
+    " Auto add dictionary feature. {{{
+    if exists('v:completed_item')
+        autocmd eskk CompleteDone *
+        \            call eskk#complete#_add_completed_candidates()
+    endif
+    " }}}
+
     let s:initialization_state = s:INIT_DONE
 endfunction "}}}
 function! eskk#is_initialized() abort "{{{
