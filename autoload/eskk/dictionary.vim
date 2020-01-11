@@ -629,7 +629,7 @@ function! s:HenkanResult_do_delete_from_dict() abort dict "{{{
         return 0
     endtry
     " Write to dictionary.
-    call dict.update_dictionary(1, 0)
+    call dict.update_dictionary(1)
 
     return 1
 endfunction "}}}
@@ -1527,8 +1527,7 @@ endfunction "}}}
 " Write to user dictionary.
 " By default, This function is executed at VimLeavePre.
 function! s:Dictionary_update_dictionary(...) abort dict "{{{
-    let verbose      = get(a:000, 0, 1)
-    let do_update_lines = get(a:000, 1, 1)
+    let verbose = get(a:000, 0, 1)
     if !self.is_modified()
         return
     endif
@@ -1546,9 +1545,7 @@ function! s:Dictionary_update_dictionary(...) abort dict "{{{
                     \])
     endif
 
-    if do_update_lines
-        call self._user_dict.update_lines()
-    endif
+    call self._user_dict.update_lines()
     call self.write_lines(
                 \   self._user_dict.make_updated_lines(
                 \       self._registered_words
