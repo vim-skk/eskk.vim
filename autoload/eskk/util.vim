@@ -260,11 +260,13 @@ function! eskk#util#getchar(...) abort "{{{
     let module = s:Vital.Prelude
     return call(module.getchar_safe, a:000, module)
 endfunction "}}}
-function! eskk#util#prompt(prompt, imsearch) abort
+function! eskk#util#prompt(prompt, ...) abort
     let save_imsearch = &l:imsearch
 
     call eskk#create_new_instance()
-    let &l:imsearch = a:imsearch
+    if a:0
+        let &l:imsearch = a:1
+    endif
 
     try
         redraw

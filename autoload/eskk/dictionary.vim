@@ -1438,7 +1438,7 @@ function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
         let prompt = printf('%s%s%s ', key, g:eskk#marker_okuri, okuri)
     endif
 
-    let input = eskk#util#prompt(prompt, 0)
+    let input = eskk#util#prompt(prompt)
     if input !=# ''
         if !s:check_accidental_input(input)
             return self.remember_word_prompt(a:word)
