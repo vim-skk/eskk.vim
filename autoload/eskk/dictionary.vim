@@ -797,9 +797,11 @@ function! s:PhysicalDict_make_updated_lines(registered_words) abort dict "{{{
     return lines
 endfunction "}}}
 
-function! s:PhysicalDict_update_lines() abort dict "{{{
-    if self._ftime_at_set isnot -1
-                \   && self._ftime_at_set >=# getftime(self.path)
+function! s:PhysicalDict_update_lines(...) abort dict "{{{
+    let read_forcibly = get(a:000, 0, 0)
+    if !read_forcibly &&
+      \ self._ftime_at_set isnot -1 &&
+      \ self._ftime_at_set >=# getftime(self.path)
         return self._content_lines
     endif
 
@@ -1555,7 +1557,7 @@ function! s:Dictionary_update_dictionary(...) abort dict "{{{
     call self.forget_all_words()
     call self._user_dict.clear_modified_flags()
     " Load changed lines.
-    call self._user_dict.update_lines()
+    call self._user_dict.update_lines(1)
 endfunction "}}}
 function! s:Dictionary_write_lines(lines, verbose) abort dict "{{{
     let lines = a:lines
