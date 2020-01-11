@@ -1,4 +1,4 @@
-" vim:foldmethod=marker:fen:
+" vim:foldmethod=marker:fen:sw=4
 scriptencoding utf-8
 
 " Saving 'cpoptions' {{{
