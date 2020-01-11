@@ -577,21 +577,18 @@ function! s:HenkanResult_do_delete_from_dict() abort dict "{{{
     if !dict.get_user_dict().is_valid()
         return 0
     endif
-    " Check user input.
-    let input = eskk#util#input(
-                \   'Really purge? '
-                \   . self._key . self._okuri_rom
-                \   . ' /'
-                \   . del_cand.input
-                \   . (get(del_cand, 'annotation', '') !=# '' ?
-                \       ';' . del_cand.annotation :
-                \       '')
-                \   . '/ (yes/no):'
-                \)
-    if input !~? '^y\%[es]$'
+    let prompt =
+    \   'Really purge? '
+    \   . self._key . self._okuri_rom
+    \   . ' /'
+    \   . del_cand.input
+    \   . (get(del_cand, 'annotation', '') !=# '' ?
+    \       ';' . del_cand.annotation :
+    \       '')
+    \   . '/ (yes/no):'
+    if eskk#util#prompt(prompt, 0) !~? '^y\%[es]$'
         return 0
     endif
-
 
     " Clear self.
     call self.reset()
@@ -1435,40 +1432,13 @@ endfunction "}}}
 function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
     let [key, okuri, okuri_rom] = [a:word.key, a:word.okuri, a:word.okuri_rom]
 
-    " Save `&imsearch`.
-    let save_imsearch = &l:imsearch
-    let &l:imsearch = 1
-
-    " Create new eskk instance.
-    call eskk#create_new_instance()
-
     if okuri ==# ''
         let prompt = printf('%s ', key)
     else
         let prompt = printf('%s%s%s ', key, g:eskk#marker_okuri, okuri)
     endif
-    try
-        " Get input from command-line.
-        redraw
-        let input  = eskk#util#input(prompt)
-    catch /^Vim:Interrupt$/
-        let input = ''
-    finally
-        " Destroy current eskk instance.
-        try
-            call eskk#destroy_current_instance()
-        catch /^eskk:/
-            call eskk#log_warn('eskk#destroy_current_instance()')
-        endtry
 
-        " Enable eskk mapping if it has been disabled.
-        call eskk#map#map_all_keys()
-
-        " Restore `&imsearch`.
-        let &l:imsearch = save_imsearch
-    endtry
-
-
+    let input = eskk#util#prompt(prompt, 0)
     if input !=# ''
         if !s:check_accidental_input(input)
             return self.remember_word_prompt(a:word)
@@ -1487,16 +1457,18 @@ function! s:Dictionary_remember_word_prompt(word) abort dict "{{{
 endfunction "}}}
 function! s:check_accidental_input(input) abort "{{{
     if a:input !=# strtrans(a:input)
-        let answer = eskk#util#input(
+        let answer = eskk#util#prompt(
                     \   "'".strtrans(a:input)."' contains unprintable character."
-                    \ . " Do you really want to register? (yes/no):")
+                    \ . " Do you really want to register? (yes/no):",
+                    \   0)
         return answer =~? '^y\%[es]$'
     elseif a:input =~# '[ 　]'
         let msg = a:input =~# '^[ 　]*$' ?
                     \   'empty string was input.' :
                     \   "'".strtrans(a:input)."' contains space(s)."
-        let answer = eskk#util#input(
-                    \   msg . " Do you really want to register? (yes/no):")
+        let answer = eskk#util#prompt(
+                    \   msg . " Do you really want to register? (yes/no):",
+                    \   0)
         return answer =~? '^y\%[es]$'
     else
         return 1
