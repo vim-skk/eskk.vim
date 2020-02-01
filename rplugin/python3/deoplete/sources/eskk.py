@@ -36,6 +36,7 @@ class Source(Base):
         self.mark = '[eskk]'
         self.is_bytepos = True
         self.is_volatile = True
+        self.is_skip_langmap = False
         self.rank = 500
         self.matchers = []
         self.sorters = []
