@@ -1479,7 +1479,7 @@ function! s:Dictionary_write_lines(lines, verbose) abort dict "{{{
     endif
 
     try
-        call writefile(lines, self._user_dict.path, 's')
+        call writefile(lines, self._user_dict.path, 'sba')
         if a:verbose
             redraw
             echo save_msg . 'Done.'
