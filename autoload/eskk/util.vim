@@ -65,7 +65,7 @@ function! eskk#util#set_default(var, Value) abort "{{{
     elseif type({a:var}) isnot type(a:Value)
         call eskk#logger#warn(
                     \   "'".string(a:var)."' is invalid type value. "
-                    \   . "use default value...")
+                    \   . 'use default value...')
         execute 'unlet' a:var
         let {a:var} = a:Value
     endif
@@ -183,7 +183,7 @@ endfunction "}}}
 function! eskk#util#dlog(data, filename) abort "{{{
     let data = type(a:data) is type([]) ?
                 \              a:data :
-                \          type(a:data) is type("") ?
+                \          type(a:data) is type('') ?
                 \              split(a:data, "\n") :
                 \              0
     if data is 0 | return | endif

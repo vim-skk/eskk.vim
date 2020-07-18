@@ -258,7 +258,7 @@ function! s:create_general_map(options, lhs, rhs) abort "{{{
   let type_st = eskk#_get_eskk_general_mappings()
 
   if lhs ==# ''
-    call eskk#logger#warn("lhs must not be empty string.")
+    call eskk#logger#warn('lhs must not be empty string.')
     return
   endif
   if has_key(type_st, lhs) && a:options.unique

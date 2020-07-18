@@ -349,20 +349,20 @@ function! s:HenkanResult_get_candidates() abort dict "{{{
                             \   eskk#dictionary#parse_skk_dict_line(result[0], from_type)
                 call eskk#util#assert(
                             \   !empty(candidates),
-                            \   (result is user_dict_result ? "user" : "system")
+                            \   (result is user_dict_result ? 'user' : 'system')
                             \   . ' dict: `candidates` is not empty.'
                             \)
                 let key = candidates[0].key
                 let okuri_rom = candidates[0].okuri_rom
                 call eskk#util#assert(
                             \   key ==# self._key,
-                            \   (result is user_dict_result ? "user" : "system")
-                            \   . " dict:".string(key)." ==# ".string(self._key)
+                            \   (result is user_dict_result ? 'user' : 'system')
+                            \   . ' dict:'.string(key).' ==# '.string(self._key)
                             \)
                 call eskk#util#assert(
                             \   okuri_rom ==# self._okuri_rom[0],
-                            \   (result is user_dict_result ? "user" : "system")
-                            \   . " dict:".string(okuri_rom)." ==# ".string(self._okuri_rom)
+                            \   (result is user_dict_result ? 'user' : 'system')
+                            \   . ' dict:'.string(okuri_rom).' ==# '.string(self._okuri_rom)
                             \)
 
                 call self._candidates.append(candidates)
@@ -407,7 +407,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
 
     call eskk#util#assert(
                 \   len(words) > a:skip_num,
-                \   "words has more than skip_num words."
+                \   'words has more than skip_num words.'
                 \)
     let words = words[a:skip_num :]
 
@@ -812,7 +812,7 @@ function! s:PhysicalDict_update_lines(...) abort dict "{{{
                     \   {}, printf("Can't read '%s'!", self.path))
     catch /^eskk: .* parse error/
         call eskk#logger#warn(
-                    \   "SKK dictionary is broken, trying to fix...: " . v:exception)
+                    \   'SKK dictionary is broken, trying to fix...: ' . v:exception)
 
         " Try :EskkFixDictionary.
         silent execute 'EskkFixDictionary!' fnameescape(self.path)
@@ -873,7 +873,7 @@ function! s:PhysicalDict_parse_lines() abort dict "{{{
                 \)
     if self.okuri_ari_idx <# 0
         throw eskk#dictionary#parse_error(
-                    \   "invalid self.okuri_ari_idx value"
+                    \   'invalid self.okuri_ari_idx value'
                     \)
     endif
 
@@ -883,13 +883,13 @@ function! s:PhysicalDict_parse_lines() abort dict "{{{
                 \)
     if self.okuri_nasi_idx <# 0
         throw eskk#dictionary#parse_error(
-                    \   "invalid self.okuri_nasi_idx value"
+                    \   'invalid self.okuri_nasi_idx value'
                     \)
     endif
 
     if self.okuri_ari_idx >= self.okuri_nasi_idx
         throw eskk#dictionary#parse_error(
-                    \   "okuri-ari entries must be before okuri-nasi entries."
+                    \   'okuri-ari entries must be before okuri-nasi entries.'
                     \)
     endif
 endfunction "}}}
@@ -897,7 +897,7 @@ endfunction "}}}
 function! eskk#dictionary#parse_error(msg) abort "{{{
     return eskk#util#build_error(
                 \   ['eskk', 'dictionary'],
-                \   ["SKK dictionary parse error", a:msg]
+                \   ['SKK dictionary parse error', a:msg]
                 \)
 endfunction "}}}
 
@@ -1048,7 +1048,7 @@ function! s:PhysicalDict_search_linear(whole_lines, needle, has_okuri, ...) abor
     if min > max
         return ['', -1]
     endif
-    call eskk#util#assert(min >= 0, "min is not invalid (negative) number:" . min)
+    call eskk#util#assert(min >= 0, 'min is not invalid (negative) number:' . min)
 
     let prefix = 'vim'
     return call('s:'.prefix.'_search_linear',
@@ -1154,8 +1154,8 @@ endfunction "}}}
 " Initialize server.
 function! s:ServerDict_init() abort dict "{{{
     if has('channel')
-        let self._socket = ch_open(printf("%s:%s", self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
-        if ch_status(self._socket) ==# "fail"
+        let self._socket = ch_open(printf('%s:%', self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
+        if ch_status(self._socket) ==# 'fail'
             call eskk#logger#warn('server initialization failed.')
         endif
     else
@@ -1367,7 +1367,7 @@ function! s:check_accidental_input(input) abort "{{{
     if a:input !=# strtrans(a:input)
         let answer = eskk#util#prompt(
                     \   "'".strtrans(a:input)."' contains unprintable character."
-                    \ . " Do you really want to register? (yes/no):",
+                    \ . ' Do you really want to register? (yes/no):',
                     \   0)
         return answer =~? '^y\%[es]$'
     elseif a:input =~# '[ 　]'
@@ -1375,7 +1375,7 @@ function! s:check_accidental_input(input) abort "{{{
                     \   'empty string was input.' :
                     \   "'".strtrans(a:input)."' contains space(s)."
         let answer = eskk#util#prompt(
-                    \   msg . " Do you really want to register? (yes/no):",
+                    \   msg . ' Do you really want to register? (yes/no):',
                     \   0)
         return answer =~? '^y\%[es]$'
     else

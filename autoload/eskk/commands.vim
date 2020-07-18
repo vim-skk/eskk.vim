@@ -75,8 +75,8 @@ function! s:cmd_fix_dictionary(path, skip_prompt) abort "{{{
       echom "original file was moved to '" . path . ".bak'."
     else
       call eskk#logger#warn(
-            \   "Could not back up dictionary '" . path . "'."
-            \   . " skip fixing the dictionary."
+            \   printf("Could not back up dictionary '%s'"
+            \   . ' skip fixing the dictionary.', path)
             \)
       return
     endif
@@ -115,7 +115,7 @@ function! s:cmd_fix_dictionary(path, skip_prompt) abort "{{{
             \   . fnamemodify(path, ':~')
             \   . "'."
             \)
-      call eskk#logger#warn("Cause: " . v:exception)
+      call eskk#logger#warn('Cause: ' . v:exception)
     endtry
   endif
 endfunction "}}}
@@ -129,13 +129,13 @@ let s:Collector = {
       \   'pattern' : '',
       \}
 
-function s:Collector.new(pattern) abort
+function! s:Collector.new(pattern) abort
   let obj = deepcopy(self)
   let obj.pattern = a:pattern
   return obj
-endfunction
+endfunction "}}}
 
-function s:Collector.add_matching_line(line) abort
+function! s:Collector.add_matching_line(line) abort
   let m = matchlist(a:line, self.pattern)
   if !empty(m)
     let [hira, kanji] = m[1:2]
@@ -159,7 +159,7 @@ function s:Collector.add_matching_line(line) abort
   endif
 endfunction
 
-function s:Collector.get_candidates() abort
+function! s:Collector.get_candidates() abort
   return
         \   map(
         \       map(
