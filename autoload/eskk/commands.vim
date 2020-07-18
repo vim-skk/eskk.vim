@@ -133,7 +133,7 @@ function! s:Collector.new(pattern) abort
   let obj = deepcopy(self)
   let obj.pattern = a:pattern
   return obj
-endfunction "}}}
+endfunction
 
 function! s:Collector.add_matching_line(line) abort
   let m = matchlist(a:line, self.pattern)
