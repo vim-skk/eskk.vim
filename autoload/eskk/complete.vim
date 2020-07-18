@@ -179,11 +179,11 @@ endfunction "}}}
 let s:MODE_FUNC_TABLE.kata = s:MODE_FUNC_TABLE.hira
 function! s:MODE_FUNC_TABLE.ascii(base) abort "{{{
     " ASCII mode.
-    return s:complete("ascii", a:base)
+    return s:complete('ascii', a:base)
 endfunction "}}}
 function! s:MODE_FUNC_TABLE.abbrev(base) abort "{{{
     " abbrev mode.
-    return s:complete("abbrev", a:base)
+    return s:complete('wabbrev', a:base)
 endfunction "}}}
 
 function! s:complete(mode, ...) abort "{{{

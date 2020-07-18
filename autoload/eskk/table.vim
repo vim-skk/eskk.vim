@@ -60,7 +60,7 @@ function! s:must_not_reach_here(table) abort "{{{
   let dump = type(a:table) ==# type([]) ? '[Array]' : string(a:table)
   throw eskk#util#build_error(
         \   ['eskk', 'build'],
-        \   ["s:get_table_obj() received invalid arguments: "
+        \   ['s:get_table_obj() received invalid arguments: '
         \   . dump]
         \)
 endfunction "}}}
@@ -81,7 +81,7 @@ function! eskk#table#new(table_name, ...) abort "{{{
     let obj._name = a:table_name
     let obj._bases = []
     for base in type(a:1) == type([]) ? a:1 : [a:1]
-      if type(base) == type("")
+      if type(base) == type('')
         " Assume it's installed table name.
         call add(obj._bases, eskk#table#new_from_file(base))
       elseif type(base) == type({})
@@ -117,8 +117,8 @@ endfunction "}}}
 function! eskk#table#invalid_arguments_error(table_name) abort "{{{
   return eskk#util#build_error(
         \   ['eskk', 'build'],
-        \   ["eskk#table#new() received invalid arguments "
-        \   . "(table name: " . a:table_name . ")"]
+        \   ['eskk#table#new() received invalid arguments '
+        \   . '(table name: ' . a:table_name . ')']
         \)
 endfunction "}}}
 

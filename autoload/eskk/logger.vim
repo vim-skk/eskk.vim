@@ -13,11 +13,11 @@ let s:LOG_WARN = 2
 let s:LOG_INFO = 3
 let s:LOG_DEBUG = 4
 let s:LEVEL_STR_TABLE = {
-      \   s:LOG_NONE : "",
-      \   s:LOG_ERROR : "ERROR",
-      \   s:LOG_WARN : "WARN",
-      \   s:LOG_INFO : "INFO",
-      \   s:LOG_DEBUG : "DEBUG",
+      \   s:LOG_NONE : '',
+      \   s:LOG_ERROR : 'ERROR',
+      \   s:LOG_WARN : 'WARN',
+      \   s:LOG_INFO : 'INFO',
+      \   s:LOG_DEBUG : 'DEBUG',
       \}
 
 
@@ -48,7 +48,7 @@ function! eskk#logger#write_error_log_file(stash, ...) abort "{{{
 
   let lines = []
 
-  call add(lines, "Please report this error to author.")
+  call add(lines, 'Please report this error to author.')
   call add(lines, "`:help eskk` to see author's e-mail address.")
   call add(lines, '')
   call add(lines, strftime('%c'))
@@ -82,18 +82,18 @@ function! eskk#logger#write_error_log_file(stash, ...) abort "{{{
         \}
   let o = {}
 
-  function o['a'](arg) abort
+  function! o['a'](arg) abort
     let a:arg.stacktrace =
           \   matchstr(v:throwpoint, '\C'.'^function \zs\S\+\ze, ')
     return a:arg.stacktrace !=# ''
   endfunction
 
-  function o['b'](arg) abort
+  function! o['b'](arg) abort
     let a:arg.funcname = get(split(a:arg.stacktrace, '\.\.'), -1, '')
     return a:arg.funcname !=# ''
   endfunction
 
-  function o['c'](arg) abort
+  function! o['c'](arg) abort
     try
       return exists('*' . a:arg.funcname)
     catch    " E129: Function name required
@@ -102,7 +102,7 @@ function! eskk#logger#write_error_log_file(stash, ...) abort "{{{
     endtry
   endfunction
 
-  function o['d'](arg) abort
+  function! o['d'](arg) abort
     let output = eskk#util#redir_english('function ' . a:arg.funcname)
     let a:arg.lines += split(output, '\n')
   endfunction
@@ -137,10 +137,10 @@ function! eskk#logger#write_error_log_file(stash, ...) abort "{{{
   call add(lines, '')
 
   if executable('uname')
-    call add(lines, "--- Operating System ---")
+    call add(lines, '--- Operating System ---')
     let uname = substitute(system('uname -a'), '\n\+$', '', '')
     call add(lines, printf('"uname -a" = %s', uname))
-    call add(lines, "--- Operating System ---")
+    call add(lines, '--- Operating System ---')
     call add(lines, '')
   endif
 
@@ -188,7 +188,7 @@ function! eskk#logger#write_error_log_file(stash, ...) abort "{{{
   setlocal cmdheight=3
   try
     call eskk#logger#warnf(
-          \   "Error!! See %s for details.",
+          \   'Error!! See %s for details.',
           \   (write_success ? string(log_file) : ':messages')
           \)
   finally

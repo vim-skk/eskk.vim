@@ -392,7 +392,7 @@ function! s:get_next_candidate(this, next) abort "{{{
     call eskk#util#assert(
                 \   a:this.get_henkan_phase()
                 \       ==# g:eskk#preedit#PHASE_HENKAN_SELECT,
-                \   "current phase is henkan select phase."
+                \   'current phase is henkan select phase.'
                 \)
 
     if henkan_result[a:next ? 'forward' : 'back']()
@@ -459,7 +459,7 @@ function! s:get_next_candidate(this, next) abort "{{{
             else
                 throw eskk#internal_error(
                             \   ['eskk', 'preedit'],
-                            \   "This will never be reached"
+                            \   'This will never be reached'
                             \)
             endif
 
@@ -663,7 +663,7 @@ function! s:validate_table_idx(table, henkan_phase) abort "{{{
 endfunction "}}}
 function! eskk#preedit#invalid_henkan_phase_value_error(henkan_phase) abort "{{{
     return eskk#util#build_error(
-                \   ["eskk", "preedit"],
+                \   ['eskk', 'preedit'],
                 \   ["invalid henkan phase value '" . a:henkan_phase . "'"]
                 \)
 endfunction "}}}

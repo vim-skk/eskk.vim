@@ -88,15 +88,15 @@ function! s:save_map(is_abbr, arg, ...) abort "{{{
                 endfor
             endfor
         endfor
-    elseif type(a:arg) == type("")
+    elseif type(a:arg) == type('')
     \   && a:0 == 1
-    \   && type(a:1) == type("")
+    \   && type(a:1) == type('')
         " {mode}, {lhs}
         let [mode, lhs] = [a:arg, a:1]
         call map_dict.add_map_info(
         \   s:make_map_info(mode, lhs, a:is_abbr)
         \)
-    elseif type(a:arg) == type("")
+    elseif type(a:arg) == type('')
     \   && a:0 == 0
         " {mode}
         let mode = a:arg

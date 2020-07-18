@@ -216,7 +216,7 @@ function! eskk#initialize_instance() abort "{{{
 endfunction "}}}
 function! eskk#create_new_instance() abort "{{{
     if s:eskk_instance_id != len(s:eskk_instances) - 1
-        throw eskk#internal_error(['eskk'], "mismatch values between s:eskk_instance_id and s:eskk_instances")
+        throw eskk#internal_error(['eskk'], 'mismatch values between s:eskk_instance_id and s:eskk_instances')
     endif
 
     " Deactivate a current instance.
@@ -231,10 +231,10 @@ function! eskk#create_new_instance() abort "{{{
 endfunction "}}}
 function! eskk#destroy_current_instance() abort "{{{
     if s:eskk_instance_id == 0
-        throw eskk#internal_error(['eskk'], "No more instances.")
+        throw eskk#internal_error(['eskk'], 'No more instances.')
     endif
     if s:eskk_instance_id != len(s:eskk_instances) - 1
-        throw eskk#internal_error(['eskk'], "mismatch values between s:eskk_instance_id and s:eskk_instances")
+        throw eskk#internal_error(['eskk'], 'mismatch values between s:eskk_instance_id and s:eskk_instances')
     endif
 
     " Destroy current instance.
@@ -476,7 +476,7 @@ function! s:asym_filter(stash) abort "{{{
     else
         throw eskk#internal_error(
                     \   ['eskk'],
-                    \   "s:asym_filter() does not support phase " . phase . "."
+                    \   's:asym_filter() does not support phase'  . phase . '.'
                     \)
     endif
 endfunction "}}}
@@ -639,8 +639,8 @@ function! s:do_backspace(stash) abort "{{{
         elseif preedit.get_marker(phase) !=# ''
             if !preedit.step_back_henkan_phase()
                 let msg = "Normal phase's marker is empty, "
-                            \       . "and other phases *should* be able to change "
-                            \       . "current henkan phase."
+                            \       . 'and other phases *should* be able to change' 
+                            \       . 'current henkan phase.'
                 throw eskk#internal_error(['eskk', 'preedit'], msg)
             endif
             break
@@ -781,7 +781,7 @@ function! s:do_escape(stash) abort "{{{
     else
         throw eskk#internal_error(
                     \   ['eskk'],
-                    \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
+                    \   'invalid g:eskk#rom_input_style value. (' . g:eskk#rom_input_style . ')'
                     \)
     endif
     let kakutei_str = preedit.get_display_str(0, with_rom_str)
@@ -1172,7 +1172,7 @@ function! s:filter_rom_no_match(stash, table) abort "{{{
         else
             throw eskk#internal_error(
                         \   ['eskk'],
-                        \   "invalid g:eskk#rom_input_style value. (" . g:eskk#rom_input_style . ")"
+                        \   'invalid g:eskk#rom_input_style value. (' . g:eskk#rom_input_style . ')'
                         \)
         endif
         " *** FALLTHROUGH ***
@@ -1278,7 +1278,7 @@ function! s:abbrev_filter(stash) abort "{{{
     else
         throw eskk#internal_error(
                     \   ['eskk'],
-                    \   "'abbrev' mode does not support phase " . phase . "."
+                    \   "'abbrev' mode does not support phase " . phase . '.'
                     \)
     endif
 endfunction "}}}
@@ -1332,8 +1332,8 @@ function! eskk#_initialize() abort "{{{
     " Validate Vim versions {{{
     if v:version < 703 || v:version == 703 && !has('patch32')
         call eskk#logger#warn(
-                    \   "eskk.vim: warning: Your Vim is too old."
-                    \   . " Please use 7.3.32 at least."
+                    \   'eskk.vim: warning: Your Vim is too old.'
+                    \   . 'Please use 7.3.32 at least.'
                     \)
         " do not initialize eskk
         " if user doesn't fill requirements!
@@ -1363,7 +1363,7 @@ function! eskk#_initialize() abort "{{{
 
     if exists('g:eskk#server') && !has('channel') && !has('nvim')
         call eskk#logger#warn(
-                    \   "eskk.vim: warning: cannot use skkserv"
+                    \   'eskk.vim: warning: cannot use skkserv'
                     \)
         let g:eskk#server = {}
     else
@@ -1373,23 +1373,23 @@ function! eskk#_initialize() abort "{{{
     " Dictionary
     for [varname, default] in [
                 \   ['g:eskk#dictionary', {
-                \       'path': expand("~/.skk-jisyo"),
+                \       'path': expand('~/.skk-jisyo'),
                 \       'sorted': 0,
                 \       'encoding': 'utf-8',
                 \   }],
                 \   ['g:eskk#large_dictionary', {
-                \       'path': "/usr/local/share/skk/SKK-JISYO.L",
+                \       'path': '/usr/local/share/skk/SKK-JISYO.L',
                 \       'sorted': 1,
                 \       'encoding': 'euc-jp',
                 \   }],
                 \]
         if exists(varname)
-            if type({varname}) == type("")
+            if type({varname}) == type('')
                 let default.path = {varname}
                 unlet {varname}
                 let {varname} = default
             elseif type({varname}) == type({})
-                call extend({varname}, default, "keep")
+                call extend({varname}, default, 'keep')
             else
                 call eskk#logger#warn(
                             \   varname . "'s type is either String or Dictionary."
@@ -1405,7 +1405,7 @@ function! eskk#_initialize() abort "{{{
     for dict in [g:eskk#dictionary, g:eskk#large_dictionary]
         if !filereadable(dict.path)
             call eskk#logger#warnf(
-                        \   "Cannot read SKK dictionary: %s", dict.path
+                        \   'Cannot read SKK dictionary: %s', dict.path
                         \)
             sleep 1
         endif
@@ -1418,7 +1418,7 @@ function! eskk#_initialize() abort "{{{
     call eskk#util#set_default('g:eskk#dictionary_save_count', -1)
 
     " Henkan
-    call eskk#util#set_default('g:eskk#select_cand_keys', "asdfjkl")
+    call eskk#util#set_default('g:eskk#select_cand_keys', 'asdfjkl')
     call eskk#util#set_default('g:eskk#show_candidates_count', 4)
     call eskk#util#set_default('g:eskk#kata_convert_to_hira_at_henkan', 1)
     call eskk#util#set_default('g:eskk#kata_convert_to_hira_at_completion', 1)
@@ -1696,7 +1696,7 @@ function! eskk#_initialize() abort "{{{
                 let &l:formatoptions = ''
             endif
         else
-            if type(inst.formatoptions) is type("")
+            if type(inst.formatoptions) is type('')
                 let &l:formatoptions = inst.formatoptions
                 let inst.formatoptions = 0
             endif
@@ -1742,25 +1742,25 @@ function! eskk#get_default_mapped_keys() abort "{{{
                 \   ,
                 \   '\zs'
                 \) + [
-                \   "<lt>",
-                \   "<Bar>",
-                \   "<Tab>",
-                \   "<BS>",
-                \   "<C-h>",
-                \   "<CR>",
-                \   "<Space>",
-                \   "<C-q>",
-                \   "<C-y>",
-                \   "<C-e>",
-                \   "<PageUp>",
-                \   "<PageDown>",
-                \   "<Up>",
-                \   "<Down>",
-                \   "<C-n>",
-                \   "<C-p>",
-                \   "<C-j>",
-                \   "<C-g>",
-                \   "<Esc>",
+                \   '<lt>',
+                \   '<Bar>',
+                \   '<Tab>',
+                \   '<BS>',
+                \   '<C-h>',
+                \   '<CR>',
+                \   '<Space>',
+                \   '<C-q>',
+                \   '<C-y>',
+                \   '<C-e>',
+                \   '<PageUp>',
+                \   '<PageDown>',
+                \   '<Up>',
+                \   '<Down>',
+                \   '<C-n>',
+                \   '<C-p>',
+                \   '<C-j>',
+                \   '<C-g>',
+                \   '<Esc>',
                 \]
 endfunction "}}}
 
@@ -1934,9 +1934,9 @@ function! s:check_mode_structure(mode, st) abort "{{{
     for key in ['filter']
         if !has_key(a:st, key)
             call eskk#logger#warn(
-                        \   "s:check_mode_structure(): "
-                        \       . string(a:mode) . ": "
-                        \       . string(key) . " is not present in structure"
+                        \   's:check_mode_structure():'
+                        \       . string(a:mode) . ': '
+                        \       . string(key) .  'is not present in structure'
                         \)
             return 0
         endif
@@ -2194,7 +2194,7 @@ function! eskk#set_cursor_color() abort "{{{
     let color = g:eskk#cursor_color[eskk_mode]
     if type(color) == type([]) && len(color) >= 2
         execute 'highlight lCursor guibg=' . color[&background ==# 'light' ? 0 : 1]
-    elseif type(color) == type("") && color !=# ''
+    elseif type(color) == type('') && color !=# ''
         execute 'highlight lCursor guibg=' . color
     endif
 endfunction "}}}
