@@ -102,6 +102,11 @@ endfunction "}}}
 
 
 function! s:clear_command_line() abort "{{{
+    " Note: In neovim, clear command line breaks cursor position.
+    if has('nvim')
+        return
+    endif
+
     redraw
     echo ''
 endfunction "}}}

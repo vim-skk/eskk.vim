@@ -2129,8 +2129,10 @@ function! eskk#filter(char) abort "{{{
                 " NOTE: Vim can't escape lang-mode immediately
                 " in insert-mode or commandline-mode.
                 " We have to use i_CTRL-^ .
-                let kakutei_str = preedit.generate_kakutei_str()
-                return kakutei_str . "\<C-^>"
+                let str = eskk#get_preedit().rewrite()
+                let str .= preedit.generate_kakutei_str()
+                let str .= "\<C-^>"
+                return str
             endif
         endwhile
 
