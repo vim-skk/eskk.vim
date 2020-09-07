@@ -107,7 +107,6 @@ function! s:clear_command_line() abort "{{{
         return
     endif
 
-    redraw
     echo ''
 endfunction "}}}
 
