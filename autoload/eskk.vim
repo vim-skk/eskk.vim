@@ -1831,6 +1831,7 @@ function! eskk#enable() abort "{{{
         redrawstatus
         let ret = ''
     endif
+    let b:keymap_name = 'eskk'
     if exists('#User#eskk-enable-post')
         doautocmd User eskk-enable-post
     endif
