@@ -1832,8 +1832,8 @@ function! eskk#enable() abort "{{{
         let ret = ''
     endif
 
-    # Specify the "keymap" name
-    # https://github.com/neovim/neovim/blob/v0.4.4/runtime/doc/insert.txt#L230-L231
+    " Specify the "keymap" name
+    " https://github.com/neovim/neovim/blob/v0.4.4/runtime/doc/insert.txt#L230-L231
     let b:keymap_name = 'eskk'
 
     if exists('#User#eskk-enable-post')
