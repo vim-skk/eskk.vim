@@ -1185,7 +1185,14 @@ function! s:filter_rom_no_match(stash, table) abort "{{{
         call buf_str.rom_pairs.push_one_pair(char, map, {'converted': 1})
         call buf_str.rom_str.clear()
     else
-        call buf_str.rom_str.set(char)
+        " If typed character isn't a Roman character, it will be confirmed.
+        " Because it will be removed in a later phase.
+        if empty(a:table.get_candidates(char, [])) && g:eskk#rom_input_style ==# 'skk'
+            call buf_str.rom_pairs.push_one_pair(char, char)
+            call buf_str.rom_str.clear()
+        else
+            call buf_str.rom_str.set(char)
+        endif
     endif
 endfunction "}}}
 
