@@ -38,7 +38,7 @@ Alphabet table			|eskk-alphabet-table|
 Modes				|eskk-modes|
 Phases				|eskk-phases|
 Completion			|eskk-completion|
-FAQ					|eskk-faq|
+FAQ				|eskk-faq|
 TODO				|eskk-todo|
 Changelog			|eskk-changelog|
 
