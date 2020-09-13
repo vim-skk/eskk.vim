@@ -26,6 +26,7 @@ Interface			|eskk-interface|
   Variables			|eskk-variables|
   Commands			|eskk-commands|
   Functions			|eskk-functions|
+  Status line			|eskk-status-line|
 Hooks				|eskk-hooks|
   initialize-pre		|eskk-initialize-pre|
     Register alphabet table	|eskk-alphabet-table|
@@ -512,6 +513,47 @@ eskk#update_dictionary()		*eskk#update_dictionary()*
 eskk#get_default_mapped_keys()			*eskk#get_default_mapped_keys()*
 	Return default value of |g:eskk#mapped_keys|.
 
+}}}
+------------------------------------------------------------------------------
+STATUS LINE                                               *eskk-status-line* {{{
+
+eskk provides a helper function to display the current mode in the
+status line. Given the default status line: >
+
+    set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+
+One can add the eskk indicator this way: >
+
+    set statusline=%<%f\ %h%m%r%{eskk#statusline()}%=%-14.(%l,%c%V%)\ %P
+
+The function takes 2 parameters:
+
+    * A format string for the case where eskk is enabled
+      (default: '[eskk:%s]'). %s is replaced by the eskk mode.
+    * What to display when eskk is disabled (default: '').
+
+To display [%s]/[-] instead: >
+
+    set statusline=%<%f\ %h%m%r%{eskk#statusline('[%s]','[-]')}%=%-14.(%l,%c%V%)\ %P
+
+
+lightline <https://github.com/itchyny/lightline.vim>
+----------------------------------------------------
+
+To display the eskk mode in the mode component: >
+
+    let g:lightline = {
+    \   'component_function': {
+    \       'mode': 'LightlineMode',
+    \   }}
+
+    function! LightlineMode()
+        return lightline#mode()
+        \   . (exists('g:loaded_eskk') && eskk#is_enabled()
+        \       ? ' (' . eskk#get_mode() . ')'
+        \       : '')
+    endfunction
+<
 }}}
 }}}
 ==============================================================================
