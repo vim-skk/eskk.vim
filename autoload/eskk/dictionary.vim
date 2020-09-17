@@ -1158,7 +1158,7 @@ endfunction "}}}
 " Initialize server.
 function! s:ServerDict_init() abort dict "{{{
     if has('channel')
-        let self._socket = ch_open(printf('%s:%', self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
+        let self._socket = ch_open(printf('%s:%s', self.host, self.port), {'mode': 'nl', 'timeout': self.timeout})
         if ch_status(self._socket) ==# 'fail'
             call eskk#logger#warn('server initialization failed.')
         endif
