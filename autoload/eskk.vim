@@ -402,6 +402,7 @@ function! s:asym_filter(stash) abort "{{{
         endif
     endfor
 
+    let mappings = eskk#_get_eskk_mappings()
 
     " Handle specific characters.
     " These characters are handled regardless of current phase.
@@ -411,7 +412,7 @@ function! s:asym_filter(stash) abort "{{{
     elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
         return
-    elseif char ==# ';'
+    elseif char ==# get(mappings.sticky, 'lhs', '')
         call s:do_sticky(a:stash)
         return
     elseif char ==# "\<C-g>"
@@ -1292,6 +1293,7 @@ endfunction "}}}
 
 " Preprocessor
 function! s:asym_prefilter(stash) abort "{{{
+    let mappings = eskk#_get_eskk_mappings()
     let char = a:stash.char
     " 'X' is phase:henkan-select:delete-from-dict
     " 'L' is mode:{hira,kata,hankata}:to-zenei
@@ -1307,10 +1309,11 @@ function! s:asym_prefilter(stash) abort "{{{
         "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
         "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
         let buf_str = a:stash.preedit.get_current_buf_str()
+        let sticky = get(mappings.sticky, 'lhs', '')
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             return [tolower(char)]
         else
-            return [';', tolower(char)]
+            return [sticky, tolower(char)]
         endif
     elseif char ==# "\<BS>"
         return ["\<C-h>"]

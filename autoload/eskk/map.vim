@@ -75,6 +75,7 @@ function! eskk#map#unmap(options, lhs, modes) abort "{{{
       continue
     endif
     let mapcmd = eskk#util#get_unmap_command(mode, dict, a:lhs)
+    echomsg string(mapcmd)
     try
       execute mapcmd
     catch
@@ -397,6 +398,34 @@ function! eskk#map#_cmd_eskk_map(args) abort "{{{
           \   rhs,
           \)
   endif
+endfunction "}}}
+function! eskk#map#_cmd_eskk_unmap(args) abort "{{{
+  let [options, type, args] = s:parse_options(a:args)
+
+  " Get lhs.
+  let args = s:skip_white(args)
+  let [lhs, args] = s:parse_one_arg_from_q_args(args)
+
+  let eskk_mappings = type ==# 'general' ?
+        \ eskk#_get_eskk_general_mappings() : eskk#_get_eskk_mappings()
+
+  if !has_key(eskk_mappings, type)
+    call eskk#logger#warn(
+          \   "EskkMap: unknown type '" . type . "'."
+          \)
+    return
+  endif
+  let type_st = eskk_mappings[type]
+
+  if !has_key(type_st, 'lhs')
+    call eskk#logger#warn(
+          \   'EskkMap: ' . type . ': the mapping not exists.'
+          \)
+    return
+  endif
+
+  let type_st.options = options
+  call remove(type_st, 'lhs')
 endfunction "}}}
 
 
