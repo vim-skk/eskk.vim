@@ -1317,7 +1317,7 @@ function! s:asym_prefilter(stash) abort "{{{
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             return [tolower(char)]
         else
-            return [sticky, tolower(char)]
+            return [sticky_char, tolower(char)]
         endif
     elseif char ==# "\<BS>"
         return ["\<C-h>"]
