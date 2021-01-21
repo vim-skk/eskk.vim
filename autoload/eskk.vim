@@ -1294,10 +1294,14 @@ endfunction "}}}
 " Preprocessor
 function! s:asym_prefilter(stash) abort "{{{
     let mappings = eskk#_get_eskk_mappings()
+    let sticky = get(mappings.sticky, 'lhs', '')
+
     let char = a:stash.char
-    " 'X' is phase:henkan-select:delete-from-dict
-    " 'L' is mode:{hira,kata,hankata}:to-zenei
-    if char ==# 'X' || char ==# 'L'
+    if char ==# sticky
+        return [g:eskk#marker_henkan]
+    elseif char ==# 'X' || char ==# 'L'
+        " 'X' is phase:henkan-select:delete-from-dict
+        " 'L' is mode:{hira,kata,hankata}:to-zenei
         return [char]
     elseif char =~# '^[A-Z]$'
         " Treat uppercase "A" in "SAkujo" as lowercase.
@@ -1309,7 +1313,6 @@ function! s:asym_prefilter(stash) abort "{{{
         "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
         "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
         let buf_str = a:stash.preedit.get_current_buf_str()
-        let sticky = get(mappings.sticky, 'lhs', '')
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             return [tolower(char)]
         else
