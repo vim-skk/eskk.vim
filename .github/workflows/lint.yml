@@ -12,8 +12,8 @@ jobs:
       - name: Install
         run: |
           sudo apt install python3-setuptools python3-wheel
+          pip3 install --user vim-vint
 
       - name: Lint
         run: |
-            pip3 install --user vim-vint
             ~/.local/bin/vint autoload plugin
