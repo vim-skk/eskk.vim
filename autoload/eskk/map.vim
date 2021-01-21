@@ -75,7 +75,6 @@ function! eskk#map#unmap(options, lhs, modes) abort "{{{
       continue
     endif
     let mapcmd = eskk#util#get_unmap_command(mode, dict, a:lhs)
-    echomsg string(mapcmd)
     try
       execute mapcmd
     catch
