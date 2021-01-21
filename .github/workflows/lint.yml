@@ -1,0 +1,19 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install
+        run: |
+          sudo apt install python3-setuptools python3-wheel
+          pip3 install --user vim-vint
+
+      - name: Lint
+        run: |
+            ~/.local/bin/vint autoload plugin

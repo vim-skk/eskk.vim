@@ -474,6 +474,10 @@ COMMANDS					*eskk-commands* {{{
 	In near feature, user can be going to define mappings
 	when only eskk is enabled.
 
+:EskkUnmap						*:EskkUnmap*
+	This Ex command disables a eskk default mapping.
+	Note: It is experimental feature.
+
 :EskkForgetRegisteredWords		*:EskkForgetRegisteredWords*
 	Forget all registered words.
 
@@ -706,6 +710,16 @@ You can choose one from the followings:
 >
 	autocmd VimEnter * imap <C-j> <Plug>(eskk:toggle)
 	autocmd VimEnter * cmap <C-j> <Plug>(eskk:toggle)
+
+Q. How to change/disable sticky key?
+
+A.
+>
+	autocmd User eskk-initialize-post call s:eskk_initial_pre()
+	function! s:eskk_initial_pre() abort
+	    EskkUnmap -type=sticky ;
+	    EskkMap -type=sticky Q
+	endfunction
 
 }}}
 ==============================================================================

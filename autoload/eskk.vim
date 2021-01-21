@@ -402,6 +402,8 @@ function! s:asym_filter(stash) abort "{{{
         endif
     endfor
 
+    let mappings = eskk#_get_eskk_mappings()
+    let sticky_char = get(mappings.sticky, 'lhs', '')
 
     " Handle specific characters.
     " These characters are handled regardless of current phase.
@@ -411,7 +413,7 @@ function! s:asym_filter(stash) abort "{{{
     elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
         return
-    elseif char ==# ';'
+    elseif char ==# sticky_char
         call s:do_sticky(a:stash)
         return
     elseif char ==# "\<C-g>"
@@ -1292,10 +1294,15 @@ endfunction "}}}
 
 " Preprocessor
 function! s:asym_prefilter(stash) abort "{{{
+    let mappings = eskk#_get_eskk_mappings()
+    let sticky_char = get(mappings.sticky, 'lhs', '')
+
     let char = a:stash.char
-    " 'X' is phase:henkan-select:delete-from-dict
-    " 'L' is mode:{hira,kata,hankata}:to-zenei
-    if char ==# 'X' || char ==# 'L'
+    if char ==# sticky_char
+        return [sticky_char]
+    elseif char ==# 'X' || char ==# 'L'
+        " 'X' is phase:henkan-select:delete-from-dict
+        " 'L' is mode:{hira,kata,hankata}:to-zenei
         return [char]
     elseif char =~# '^[A-Z]$'
         " Treat uppercase "A" in "SAkujo" as lowercase.
@@ -1310,7 +1317,7 @@ function! s:asym_prefilter(stash) abort "{{{
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             return [tolower(char)]
         else
-            return [';', tolower(char)]
+            return [sticky_char, tolower(char)]
         endif
     elseif char ==# "\<BS>"
         return ["\<C-h>"]

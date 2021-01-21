@@ -15,6 +15,11 @@ function! eskk#commands#define() abort "{{{
         \   call eskk#map#_cmd_eskk_map(<q-args>)
 
   command!
+        \   -nargs=+
+        \   EskkUnmap
+        \   call eskk#map#_cmd_eskk_unmap(<q-args>)
+
+  command!
         \   -bar
         \   EskkForgetRegisteredWords
         \   call s:cmd_forget_registered_words()

@@ -478,6 +478,9 @@ g:eskk#log_file_level				*g:eskk#log_file_level*
 	今の所、内部的に使われているExコマンド。
 	将来はこのExコマンドによってeskk有効時のマッピングを定義できる予定。
 
+:EskkUnmap					*:EskkUnmap*
+	eskk 内部マッピングを無効化する。まだ実験的な機能。
+
 :EskkForgetRegisteredWords			*:EskkForgetRegisteredWords*
 	辞書登録した単語を全て消去する。
 
@@ -670,6 +673,16 @@ A. 他のプラグインと干渉している可能性があります。
 >
 	autocmd VimEnter * imap <C-j> <Plug>(eskk:toggle)
 	autocmd VimEnter * cmap <C-j> <Plug>(eskk:toggle)
+
+Q. Sticky キーを無効化または変更したいです。
+
+A.
+>
+	autocmd User eskk-initialize-post call s:eskk_initial_pre()
+	function! s:eskk_initial_pre() abort
+	    EskkUnmap -type=sticky ;
+	    EskkMap -type=sticky Q
+	endfunction
 
 }}}
 ==============================================================================
