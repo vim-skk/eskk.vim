@@ -403,6 +403,7 @@ function! s:asym_filter(stash) abort "{{{
     endfor
 
     let mappings = eskk#_get_eskk_mappings()
+    let sticky_char = get(mappings.sticky, 'lhs', '')
 
     " Handle specific characters.
     " These characters are handled regardless of current phase.
@@ -412,7 +413,7 @@ function! s:asym_filter(stash) abort "{{{
     elseif char ==# "\<CR>"
         call s:do_enter(a:stash)
         return
-    elseif char ==# get(mappings.sticky, 'lhs', '')
+    elseif char ==# sticky_char
         call s:do_sticky(a:stash)
         return
     elseif char ==# "\<C-g>"
@@ -1294,11 +1295,11 @@ endfunction "}}}
 " Preprocessor
 function! s:asym_prefilter(stash) abort "{{{
     let mappings = eskk#_get_eskk_mappings()
-    let sticky = get(mappings.sticky, 'lhs', '')
+    let sticky_char = get(mappings.sticky, 'lhs', '')
 
     let char = a:stash.char
-    if char ==# sticky
-        return [sticky]
+    if char ==# sticky_char
+        return [sticky_char]
     elseif char ==# 'X' || char ==# 'L'
         " 'X' is phase:henkan-select:delete-from-dict
         " 'L' is mode:{hira,kata,hankata}:to-zenei
