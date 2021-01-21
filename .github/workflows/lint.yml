@@ -16,4 +16,4 @@ jobs:
       - name: Lint
         run: |
             pip3 install --user vim-vint
-            vint autoload plugin
+            ~/.local/bin/vint autoload plugin
