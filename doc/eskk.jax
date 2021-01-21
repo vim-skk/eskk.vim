@@ -681,7 +681,7 @@ A.
 	autocmd User eskk-initialize-post call s:eskk_initial_pre()
 	function! s:eskk_initial_pre() abort
 	    EskkUnmap -type=sticky ;
-	    EskkMap -type=sticky =
+	    EskkMap -type=sticky Q
 	endfunction
 
 }}}

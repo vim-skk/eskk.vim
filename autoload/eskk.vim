@@ -1297,7 +1297,9 @@ function! s:asym_prefilter(stash) abort "{{{
     let sticky = get(mappings.sticky, 'lhs', '')
 
     let char = a:stash.char
-    if char ==# 'X' || char ==# 'L'
+    if char ==# sticky
+        return [sticky]
+    elseif char ==# 'X' || char ==# 'L'
         " 'X' is phase:henkan-select:delete-from-dict
         " 'L' is mode:{hira,kata,hankata}:to-zenei
         return [char]
@@ -1311,9 +1313,7 @@ function! s:asym_prefilter(stash) abort "{{{
         "   k => phase: 1, rom_str: '', rom_pairs: ['さ', 'sa', {'converted': 1}]
         "   u => phase: 1, rom_str: 'k', rom_pairs: ['さ', 'sa', {'converted': 1}]
         let buf_str = a:stash.preedit.get_current_buf_str()
-        if char ==# sticky
-            return [g:eskk#marker_henkan]
-        elseif !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
+        if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             return [tolower(char)]
         else
             return [sticky, tolower(char)]
