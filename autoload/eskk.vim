@@ -404,6 +404,10 @@ function! s:asym_filter(stash) abort "{{{
 
     let mappings = eskk#_get_eskk_mappings()
     let sticky_char = get(mappings.sticky, 'lhs', '')
+    " Convert to real key
+    if sticky_char ==# '<Space>' && phase ==# g:eskk#preedit#PHASE_NORMAL
+      let sticky_char = "\<Space>"
+    endif
 
     " Handle specific characters.
     " These characters are handled regardless of current phase.
