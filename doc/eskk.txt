@@ -721,6 +721,19 @@ A.
 	    EskkMap -type=sticky Q
 	endfunction
 
+Q. How to enable eskk completion in ddc.vim?
+
+A.
+>
+	call ddc#custom#patch_global('sources', ['eskk'])
+	call ddc#custom#patch_global('sourceOptions', {
+	    \ '_': {
+	    \   'matchers': ['matcher_head'],
+	    \   'sorters': ['sorter_rank']
+	    \ },
+	    \ 'eskk': {'mark': 'eskk', 'matchers': [], 'sorters': []},
+	    \ })
+
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
