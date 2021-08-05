@@ -3,10 +3,9 @@ import {
   Candidate,
   Context,
   DdcOptions,
-  Denops,
   SourceOptions,
 } from "https://deno.land/x/ddc_vim@v0.0.9/types.ts";
-import { fn, } from "https://deno.land/x/ddc_vim@v0.0.9/deps.ts";
+import { fn, Denops } from "https://deno.land/x/ddc_vim@v0.0.9/deps.ts";
 
 export class Source extends BaseSource {
   isBytePos = true;
