@@ -689,16 +689,13 @@ A.
 TODO						*eskk-todo* {{{
 
 現在判明している問題については、
-https://github.com/tyru/eskk.vim/issues を参照せよ。
+https://github.com/vim-skk/eskk.vim/issues を参照せよ。
 
 特に優先度が高いと思われるものについて、以下に示す。
 
 * ドキュメンテーションの改善
 
 * 時々eskkが謎のエラーを吐く場合がある
-
-* 変換時に学習されない
-https://github.com/tyru/eskk.vim/issues/164
 
 * "the mapping already exists" の警告メッセージが表示される
 
