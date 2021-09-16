@@ -739,16 +739,13 @@ A.
 TODO						*eskk-todo* {{{
 
 See this issue for known problems:
-https://github.com/tyru/eskk.vim/issues
+https://github.com/vim-skk/eskk.vim/issues
 
 Here is the high priority problems:
 
 * Improve documentation
 
 * sometimes eskk vomits unknown errors
-
-* eskk does not learn a new word
-https://github.com/tyru/eskk.vim/issues/164
 
 * eskk displays warning message "the mapping already exists"
 
