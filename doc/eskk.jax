@@ -684,6 +684,19 @@ A.
 	    EskkMap -type=sticky Q
 	endfunction
 
+Q. ddc.vim で eskk の補完を有効にしたいです
+
+A.
+>
+	call ddc#custom#patch_global('sources', ['eskk'])
+	call ddc#custom#patch_global('sourceOptions', {
+	    \ '_': {
+	    \   'matchers': ['matcher_head'],
+	    \   'sorters': ['sorter_rank']
+	    \ },
+	    \ 'eskk': {'mark': 'eskk', 'matchers': [], 'sorters': []},
+	    \ })
+
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
