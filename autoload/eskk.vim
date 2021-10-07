@@ -780,6 +780,12 @@ function! s:do_escape(stash) abort "{{{
                 \   preedit.get_henkan_phase()
                 \)
 
+    let dict = eskk#get_skk_dict()
+    let henkan_result = dict.get_henkan_result()
+    if !empty(henkan_result)
+        call henkan_result.update_rank()
+    endif
+
     if g:eskk#rom_input_style ==# 'skk'
         let with_rom_str = 0
     elseif g:eskk#rom_input_style ==# 'msime'
@@ -1892,6 +1898,12 @@ function! eskk#disable() abort "{{{
         redrawstatus
         let kakutei_str = eskk#get_preedit().generate_kakutei_str()
         let ret = kakutei_str . "\<C-^>"
+
+        let dict = eskk#get_skk_dict()
+        let henkan_result = dict.get_henkan_result()
+        if !empty(henkan_result)
+            call henkan_result.update_rank()
+        endif
     else
         setlocal iminsert=0 imsearch=0
         redrawstatus
