@@ -678,8 +678,6 @@ function! s:do_enter_egglike(stash) abort "{{{
     let preedit = a:stash.preedit
     let phase = preedit.get_henkan_phase()
     let undo_char = "\<C-g>u"
-    let dict = eskk#get_skk_dict()
-    let henkan_result = dict.get_henkan_result()
 
     if phase ==# g:eskk#preedit#PHASE_NORMAL
         call preedit.convert_rom_str_inplace(phase)
@@ -690,9 +688,7 @@ function! s:do_enter_egglike(stash) abort "{{{
             call preedit.push_filter_post_char(undo_char)
         endif
 
-        if !empty(henkan_result)
-            call henkan_result.update_rank()
-        endif
+        call s:dict_update_rank()
         call preedit.kakutei(preedit.get_display_str(0))
 
     elseif phase ==# g:eskk#preedit#PHASE_OKURI
@@ -703,9 +699,7 @@ function! s:do_enter_egglike(stash) abort "{{{
             call preedit.push_filter_post_char(undo_char)
         endif
 
-        if !empty(henkan_result)
-            call henkan_result.update_rank()
-        endif
+        call s:dict_update_rank()
         call preedit.kakutei(preedit.get_display_str(0))
 
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN_SELECT
@@ -714,9 +708,7 @@ function! s:do_enter_egglike(stash) abort "{{{
             call preedit.push_filter_post_char(undo_char)
         endif
 
-        if !empty(henkan_result)
-            call henkan_result.update_rank()
-        endif
+        call s:dict_update_rank()
         call preedit.kakutei(preedit.get_display_str(0))
 
     else
@@ -780,11 +772,7 @@ function! s:do_escape(stash) abort "{{{
                 \   preedit.get_henkan_phase()
                 \)
 
-    let dict = eskk#get_skk_dict()
-    let henkan_result = dict.get_henkan_result()
-    if !empty(henkan_result)
-        call henkan_result.update_rank()
-    endif
+    call s:dict_update_rank()
 
     if g:eskk#rom_input_style ==# 'skk'
         let with_rom_str = 0
@@ -1898,12 +1886,7 @@ function! eskk#disable() abort "{{{
         redrawstatus
         let kakutei_str = eskk#get_preedit().generate_kakutei_str()
         let ret = kakutei_str . "\<C-^>"
-
-        let dict = eskk#get_skk_dict()
-        let henkan_result = dict.get_henkan_result()
-        if !empty(henkan_result)
-            call henkan_result.update_rank()
-        endif
+        call s:dict_update_rank()
     else
         setlocal iminsert=0 imsearch=0
         redrawstatus
@@ -2063,6 +2046,14 @@ function! eskk#get_skk_dict() abort "{{{
     endif
     return s:skk_dict
 endfunction "}}}
+
+function! s:dict_update_rank() abort
+    let dict = eskk#get_skk_dict()
+    let henkan_result = dict.get_henkan_result()
+    if !empty(henkan_result)
+        call henkan_result.update_rank()
+    endif
+endfunction
 
 " Preedit
 function! eskk#get_preedit() abort "{{{
