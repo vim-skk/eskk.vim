@@ -734,6 +734,7 @@ A.
 	    \ 'eskk': {'mark': 'eskk', 'matchers': [], 'sorters': []},
 	    \ })
 
+Note that eskk completion does not run on pum.vim.
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
