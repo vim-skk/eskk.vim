@@ -484,9 +484,8 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
             for idx in range(len(pages[page_index]))
                 let [c, word] = pages[page_index][idx]
                 if c ==# selected
-                    " Dummy result list for `word`.
-                    " Note that assigning to index number is useless.
                     let self._candidates_index = idx + a:skip_num
+                                \ + page_index * len(g:eskk#select_cand_keys)
                     return [word.input, self._okuri]
                 endif
             endfor
