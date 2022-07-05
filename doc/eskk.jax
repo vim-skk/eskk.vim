@@ -678,8 +678,8 @@ Q. Sticky キーを無効化または変更したいです。
 
 A.
 >
-	autocmd User eskk-initialize-post call s:eskk_initial_pre()
-	function! s:eskk_initial_pre() abort
+	autocmd User eskk-initialize-post call s:eskk_initial_post()
+	function! s:eskk_initial_post() abort
 	    EskkUnmap -type=sticky ;
 	    EskkMap -type=sticky Q
 	endfunction
