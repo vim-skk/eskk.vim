@@ -422,6 +422,14 @@ g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 							(デフォルト値: 0)
 	(TODO: doc)
 
+g:eskk#use_azik					*g:eskk#use_azik*
+							(デフォルト値: 0)
+	もし真なら、Xから始まる単語を変換出来るようになる。
+	一方、▼モードで誤った単語登録を削除することは出来なくなるため注意。
+	この変数は、自分でアルファベットテーブルを定義してAZIKで入力する場合に必要となる。
+	AZIKについては http://hp.vector.co.jp/authors/VA002116/azik/azikinfo.htm を、
+	アルファベットテーブルの登録については|eskk-alphabet-table|を参照のこと。
+
 
 
 デバッグ用変数
