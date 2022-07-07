@@ -692,7 +692,7 @@ A.
 	    EskkMap -type=sticky Q
 	endfunction
 
-Q. ddc.vim で eskk の補完を有効にしたいです
+Q. ddc.vim で eskk の補完を有効にしたいです。
 
 A.
 >
@@ -706,6 +706,56 @@ A.
 	    \ })
 
 eskkの補完はpum.vimでは動作しないことに注意してください．
+
+					*eskk-faq-use-azik*
+Q. AZIKで入力したいです。
+A. 以下に設定例を示します。 |g:eskk#use_azik| も参照してください。
+>
+	let g:eskk#use_azik=1
+	let g:eskk#azik_keyboard_type="jp106"
+	augroup EskkInit
+	  autocmd!
+	  autocmd User eskk-initialize-pre call s:eskk_initial_pre()
+	  autocmd User eskk-initialize-post call s:eskk_initial_post()
+	augroup END
+	function! s:eskk_initial_pre() abort
+	  let t = eskk#table#new('rom_to_hira*', 'rom_to_hira')
+	    " ここにひらがなの変換テーブルを定義する
+	  call eskk#register_mode_table('hira', t)
+	  let t = eskk#table#new('rom_to_kata*', 'rom_to_kata')
+	    " ここにカタカナの変換テーブルを定義する
+	  call eskk#register_mode_table('kata', t)
+	  let t = eskk#table#new('rom_to_hankata*', 'rom_to_hankata')
+	    " ここに半角ｶﾀｶﾅの変換テーブルを定義する
+	  call eskk#register_mode_table('hankata', t)
+	endfunction
+	function! s:eskk_initial_post() abort
+	  if g:eskk#use_azik
+	    EskkUnmap -type=mode:hira:toggle-kata q
+	    EskkUnmap -type=mode:hira:q-key q
+	    EskkUnmap -type=mode:kata:toggle-kata q
+	    EskkUnmap -type=mode:kata:q-key q
+	    EskkUnmap -type=mode:hankata:toggle-kata q
+	    EskkUnmap -type=mode:hankata:q-key q
+	    EskkUnmap -type=sticky ;
+	    EskkUnmap -type=phase:henkan-select:delete-from-dict X
+	    if g:eskk#azik_keyboard_type=="jp106"
+	      EskkMap -type=mode:hira:toggle-kata @
+	      EskkMap -type=mode:hira:q-key @
+	      EskkMap -type=mode:kata:toggle-kata @
+	      EskkMap -type=mode:kata:q-key @
+	      EskkMap -type=mode:hankata:toggle-kata @
+	      EskkMap -type=mode:hankata:q-key @
+	    elseif g:eskk#azik_keyboard_type=="us101"
+	      EskkMap -type=mode:hira:toggle-kata [
+	      EskkMap -type=mode:hira:q-key [
+	      EskkMap -type=mode:kata:toggle-kata [
+	      EskkMap -type=mode:kata:q-key [
+	      EskkMap -type=mode:hankata:toggle-kata [
+	      EskkMap -type=mode:hankata:q-key [
+	    endif
+	  endif
+	endfunction
 }}}
 ==============================================================================
 TODO						*eskk-todo* {{{
