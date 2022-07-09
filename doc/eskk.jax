@@ -733,10 +733,13 @@ A. 以下に設定例を示します。 |g:eskk#use_azik| も参照してくだ�
 	  if g:eskk#use_azik
 	    EskkUnmap -type=mode:hira:toggle-kata q
 	    EskkUnmap -type=mode:hira:q-key q
+	    EskkUnmap -type=mode:hira:l-key l
 	    EskkUnmap -type=mode:kata:toggle-kata q
 	    EskkUnmap -type=mode:kata:q-key q
+	    EskkUnmap -type=mode:kata:l-key l
 	    EskkUnmap -type=mode:hankata:toggle-kata q
 	    EskkUnmap -type=mode:hankata:q-key q
+	    EskkUnmap -type=mode:hankata:l-key l
 	    EskkUnmap -type=sticky ;
 	    EskkUnmap -type=phase:henkan-select:delete-from-dict X
 	    if g:eskk#azik_keyboard_type=="jp106"
