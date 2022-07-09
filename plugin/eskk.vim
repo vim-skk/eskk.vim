@@ -36,9 +36,6 @@ endif
 if !exists('g:eskk#dont_map_default_if_already_mapped')
   let g:eskk#dont_map_default_if_already_mapped = 1
 endif
-if !exists('g:eskk#use_azik')
-  let g:eskk#use_azik = 0
-endif
 
 
 if !g:eskk#no_default_mappings
