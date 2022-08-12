@@ -1497,6 +1497,10 @@ function! eskk#_initialize() abort "{{{
 
     call eskk#util#set_default('g:eskk#fix_extra_okuri', 1)
     call eskk#util#set_default('g:eskk#convert_at_exact_match', 0)
+
+    " AZIK
+    call eskk#util#set_default('g:eskk#use_azik', 0)
+    call eskk#util#set_default('g:eskk#azik_keyboard_type', 'jp106')
     " }}}
 
     " Throw "eskk-initialize-pre" autocmd event. {{{
