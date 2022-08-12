@@ -1303,12 +1303,7 @@ function! s:asym_prefilter(stash) abort "{{{
         " 'L' is mode:{hira,kata,hankata}:to-zenei
         return [char]
     elseif char ==# 'Q' && g:eskk#use_azik
-        let buf_str = a:stash.preedit.get_current_buf_str()
-        if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
-            return [tolower(char)]
-        else
-            return [sticky_char, "nn"]
-        endif
+        return [sticky_char, "nn"]
     elseif char =~# '^[A-Z]$'
         " Treat uppercase "A" in "SAkujo" as lowercase.
         "
@@ -1326,7 +1321,7 @@ function! s:asym_prefilter(stash) abort "{{{
         endif
     elseif char ==# "+" && g:eskk#use_azik && g:eskk#azik_keyboard_type == 'jp106'
       \ || char ==# ":" && g:eskk#use_azik && g:eskk#azik_keyboard_type == 'us101'
-        return [sticky_char, "ta", ";"]
+        return [sticky_char, "t;"]
     elseif char ==# "\<BS>"
         return ["\<C-h>"]
     else
