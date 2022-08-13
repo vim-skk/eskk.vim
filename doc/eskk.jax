@@ -368,7 +368,8 @@ g:eskk#cursor_color			*g:eskk#cursor_color*
 
 g:eskk#egg_like_newline				*g:eskk#egg_like_newline*
 							(デフォルト値: 0)
-	(TODO: doc)
+	もし真なら、変換候補を確定する為に<Enter>キーを押しても改行されなくなる。
+	ちなみにeggとはかな漢字変換システムWnnのクライアントプログラムのこと。
 
 g:eskk#egg_like_newline_completion	*g:eskk#egg_like_newline_completion*
 							(デフォルト値: 0)
@@ -424,11 +425,40 @@ g:eskk#convert_at_exact_match		*g:eskk#convert_at_exact_match*
 
 g:eskk#use_azik					*g:eskk#use_azik*
 							(デフォルト値: 0)
-	もし真なら、Xから始まる単語を変換出来るようになる。
-	一方、▼モードで誤った単語登録を削除することは出来なくなるため注意。
-	この変数は、自分でアルファベットテーブルを定義してAZIKで入力する場合に必要となる。
-	AZIKについては http://hp.vector.co.jp/authors/VA002116/azik/azikinfo.htm を、
-	アルファベットテーブルの登録については|eskk-alphabet-table|を参照のこと。
+	もし真なら、AZIKのアルファベットテーブルを定義して入力する場合に、
+	|vimrc|では設定できないいくつかの変換が可能となる。
+	具体的には以下のとおり。
+
+	Xから始まる単語を変換出来るようになる。~
+	例1: 社会主義 Xakqxugi
+	Note: 一方、▼モードで誤った単語登録を削除することは出来なくなる。
+
+	Z, K, J, D, L, Q, W, H, Pから始まる送り仮名を変換出来るようになる。~
+	例2: かもめが飛んだ kamomegaTLda
+	例3: さくらが咲いた sakuragaSQta
+	例4: ぱんつを編んだ pztuwoAQda
+	例5: 急いてはことを仕損ずる SWtehaktwoSislZuru
+
+	<S-;>から始まる送り仮名を変換出来るようになる。~
+	例6: くららが立った kuraragaTa<S-;>ta
+	Note: SKK辞書の仕様上、一般的なAZIKのアルファベットテーブルに加え、
+	以下の定義を追加する必要がある。
+>
+	let t = eskk#table#new('rom_to_hira*', 'rom_to_hira')
+	call t.add_map('t;', 'っ')
+	call eskk#register_mode_table('hira', t)
+<
+	AZIKについては以下のWebサイトを参照のこと。
+	http://hp.vector.co.jp/authors/VA002116/azik/azikinfo.htm
+	アルファベットテーブルについては|eskk-alphabet-table|を参照のこと。
+	また、|vimrc|の設定例は|eskk-faq-use-azik|を参照のこと。
+
+g:eskk#use_azik					*g:eskk#azik_keyboard_type*
+							(デフォルト値: "jp106")
+	AZIKを使う際のキーボード配列を指定する。
+	値は"jp106"または"us101"。
+	Note: "us101"を選択した場合、かぎかっこ"「"が入力できなくなる。
+	(TODO: "jp-pc98"を実装する?)
 
 
 
@@ -710,6 +740,9 @@ eskkの補完はpum.vimでは動作しないことに注意してください．
 					*eskk-faq-use-azik*
 Q. AZIKで入力したいです。
 A. 以下に設定例を示します。 |g:eskk#use_azik| も参照してください。
+なお、アルファベット変換テーブルは長くなりすぎるのでここでは割愛します。
+例えば以下を参照してください。
+https://github.com/hakehash/vimrc/blob/master/.vimrc#L104-L1787
 >
 	let g:eskk#use_azik=1
 	let g:eskk#azik_keyboard_type="jp106"
