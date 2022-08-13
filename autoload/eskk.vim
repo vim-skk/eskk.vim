@@ -1298,12 +1298,42 @@ function! s:asym_prefilter(stash) abort "{{{
     let char = a:stash.char
     if char ==# sticky_char
         return [sticky_char]
-    elseif char ==# 'X' && !g:eskk#use_azik || char ==# 'L'
+    elseif char ==# 'X' && !g:eskk#use_azik || char ==# 'L' && !g:eskk#use_azik
         " 'X' is phase:henkan-select:delete-from-dict
         " 'L' is mode:{hira,kata,hankata}:to-zenei
         return [char]
-    elseif char ==# 'Q' && g:eskk#use_azik
-        return [sticky_char, "nn"]
+    elseif char =~# '^[ZKJDLQHWP]$' && g:eskk#use_azik "{{{
+        let buf_str = a:stash.preedit.get_current_buf_str()
+        if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
+            if char ==# 'Z'
+                return ["a", sticky_char, "nn"]
+            elseif char ==# 'K'
+                return ["i", sticky_char, "nn"]
+            elseif char ==# 'J'
+                return ["u", sticky_char, "nn"]
+            elseif char ==# 'D'
+                return ["e", sticky_char, "nn"]
+            elseif char ==# 'L'
+                return ["o", sticky_char, "nn"]
+            elseif char ==# 'Q'
+                return ["a", sticky_char, "i"]
+            elseif char ==# 'H'
+                return ["u", sticky_char, "u"]
+            elseif char ==# 'W'
+                return ["e", sticky_char, "i"]
+            elseif char ==# 'P'
+                return ["o", sticky_char, "u"]
+            endif
+        else
+            if char ==# 'L'
+                " 'L' is mode:{hira,kata,hankata}:to-zenei
+                return [char]
+            elseif char ==# 'Q'
+                return [sticky_char, "nn"]
+            else
+                return [sticky_char, tolower(char)]
+            endif
+        endif "}}}
     elseif char =~# '^[A-Z]$'
         " Treat uppercase "A" in "SAkujo" as lowercase.
         "
