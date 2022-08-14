@@ -744,8 +744,8 @@ A. 以下に設定例を示します。 |g:eskk#use_azik| も参照してくだ�
 例えば以下を参照してください。
 https://github.com/hakehash/vimrc/blob/47a31028330b8463ef73e274a733bab269735b9f/.vimrc#L108-L1791
 >
-	let g:eskk#use_azik=1
-	let g:eskk#azik_keyboard_type="jp106"
+	let g:eskk#use_azik = 1
+	let g:eskk#azik_keyboard_type = 'jp106'
 	augroup EskkInit
 	  autocmd!
 	  autocmd User eskk-initialize-pre call s:eskk_initial_pre()
