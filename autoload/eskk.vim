@@ -1306,30 +1306,30 @@ function! s:asym_prefilter(stash) abort "{{{
         let buf_str = a:stash.preedit.get_current_buf_str()
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             if char ==# 'Z'
-                return ["a", sticky_char, "nn"]
+                return ['a', sticky_char, 'nn']
             elseif char ==# 'K'
-                return ["i", sticky_char, "nn"]
+                return ['i', sticky_char, 'nn']
             elseif char ==# 'J'
-                return ["u", sticky_char, "nn"]
+                return ['u', sticky_char, 'nn']
             elseif char ==# 'D'
-                return ["e", sticky_char, "nn"]
+                return ['e', sticky_char, 'nn']
             elseif char ==# 'L'
-                return ["o", sticky_char, "nn"]
+                return ['o', sticky_char, 'nn']
             elseif char ==# 'Q'
-                return ["a", sticky_char, "i"]
+                return ['a', sticky_char, 'i']
             elseif char ==# 'H'
-                return ["u", sticky_char, "u"]
+                return ['u', sticky_char, 'u']
             elseif char ==# 'W'
-                return ["e", sticky_char, "i"]
+                return ['e', sticky_char, 'i']
             elseif char ==# 'P'
-                return ["o", sticky_char, "u"]
+                return ['o', sticky_char, 'u']
             endif
         else
             if char ==# 'L'
                 " 'L' is mode:{hira,kata,hankata}:to-zenei
                 return [char]
             elseif char ==# 'Q'
-                return [sticky_char, "nn"]
+                return [sticky_char, 'nn']
             else
                 return [sticky_char, tolower(char)]
             endif
@@ -1349,9 +1349,9 @@ function! s:asym_prefilter(stash) abort "{{{
         else
             return [sticky_char, tolower(char)]
         endif
-    elseif char ==# "+" && g:eskk#use_azik && g:eskk#azik_keyboard_type == 'jp106'
-      \ || char ==# ":" && g:eskk#use_azik && g:eskk#azik_keyboard_type == 'us101'
-        return [sticky_char, "t;"]
+    elseif char ==# '+' && g:eskk#use_azik && g:eskk#azik_keyboard_type ==? 'jp106'
+      \ || char ==# ':' && g:eskk#use_azik && g:eskk#azik_keyboard_type ==? 'us101'
+        return [sticky_char, 't;']
     elseif char ==# "\<BS>"
         return ["\<C-h>"]
     else
