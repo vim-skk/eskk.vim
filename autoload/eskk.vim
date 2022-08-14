@@ -1298,7 +1298,7 @@ function! s:asym_prefilter(stash) abort "{{{
     let char = a:stash.char
     if char ==# sticky_char
         return [sticky_char]
-    elseif char ==# 'X' && !g:eskk#use_azik || char ==# 'L' && !g:eskk#use_azik
+    elseif (char ==# 'X' || char ==# 'L') && !g:eskk#use_azik
         " 'X' is phase:henkan-select:delete-from-dict
         " 'L' is mode:{hira,kata,hankata}:to-zenei
         return [char]
