@@ -433,14 +433,8 @@ g:eskk#use_azik					*g:eskk#use_azik*
 	例1: 社会主義 Xakqxugi
 	Note: 一方、▼モードで誤った単語登録を削除することは出来なくなる。
 
-	Z, K, J, D, L, Q, W, H, Pから始まる送り仮名を変換出来るようになる。~
-	例2: かもめが飛んだ kamomegaTLda
-	例3: さくらが咲いた sakuragaSQta
-	例4: ぱんつを編んだ pztuwoAQda
-	例5: 急いてはことを仕損ずる SWtehaktwoSislZuru
-
 	<S-;>から始まる送り仮名を変換出来るようになる。~
-	例6: くららが立った kuraragaTa<S-;>ta
+	例2: くららが立った kuraragaTa<S-;>ta
 	Note: SKK辞書の仕様上、一般的なAZIKのアルファベットテーブルに加え、
 	以下の定義を追加する必要がある。
 >
@@ -453,11 +447,26 @@ g:eskk#use_azik					*g:eskk#use_azik*
 	アルファベットテーブルについては|eskk-alphabet-table|を参照のこと。
 	また、|vimrc|の設定例は|eskk-faq-use-azik|を参照のこと。
 
-g:eskk#use_azik					*g:eskk#azik_keyboard_type*
+g:eskk#azik_enable_precise_shift		*g:eskk#azik_enable_precise_shift*
+							(デフォルト値: 0)
+	AZIKを使う際、Shiftキーを正確に入力することを前提として、
+	Z, K, J, D, L, Q, W, H, Pから始まる送り仮名を変換出来るようになる。
+	例1: かもめが飛んだ kamomegaTLda
+	例2: さくらが咲いた sakuragaSQta
+	例3: ぱんつを編んだ pztuwoAQda
+	例4: 急いてはことを仕損ずる SWtehaktwoSislZuru
+
+g:eskk#azik_keyboard_type				*g:eskk#azik_keyboard_type*
 							(デフォルト値: "jp106")
 	AZIKを使う際のキーボード配列を指定する。
 	値は"jp106"または"us101"。
-	Note: "us101"を選択した場合、かぎかっこ"「"が入力できなくなる。
+	Note: "us101"を選択した場合、かぎかっこ"「"が入力できなくなるので、
+	例えば以下のとおり別のキーに割り当てる必要がある。
+>
+	let t = eskk#table#new('rom_to_hira*', 'rom_to_hira')
+	call t.add_map('x[', '「')
+	call eskk#register_mode_table('hira', t)
+<
 	(TODO: "jp-pc98"を実装する?)
 
 
@@ -742,7 +751,7 @@ Q. AZIKで入力したいです。
 A. 以下に設定例を示します。 |g:eskk#use_azik| も参照してください。
 なお、アルファベット変換テーブルは長くなりすぎるのでここでは割愛します。
 例えば以下を参照してください。
-https://github.com/hakehash/vimrc/blob/47a31028330b8463ef73e274a733bab269735b9f/.vimrc#L108-L1791
+https://github.com/hakehash/vimrc/blob/9823c5c91522eb5a1534bc81a6304c21d209545c/.vimrc#L112-L1820
 >
 	let g:eskk#use_azik = 1
 	let g:eskk#azik_keyboard_type = 'jp106'

@@ -1305,24 +1305,28 @@ function! s:asym_prefilter(stash) abort "{{{
     elseif char =~# '^[ZKJDLQHWP]$' && g:eskk#use_azik "{{{
         let buf_str = a:stash.preedit.get_current_buf_str()
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
-            if char ==# 'Z'
-                return ['a', sticky_char, 'nn']
-            elseif char ==# 'K'
-                return ['i', sticky_char, 'nn']
-            elseif char ==# 'J'
-                return ['u', sticky_char, 'nn']
-            elseif char ==# 'D'
-                return ['e', sticky_char, 'nn']
-            elseif char ==# 'L'
-                return ['o', sticky_char, 'nn']
-            elseif char ==# 'Q'
-                return ['a', sticky_char, 'i']
-            elseif char ==# 'H'
-                return ['u', sticky_char, 'u']
-            elseif char ==# 'W'
-                return ['e', sticky_char, 'i']
-            elseif char ==# 'P'
-                return ['o', sticky_char, 'u']
+            if g:eskk#azik_enable_precise_shift
+                if char ==# 'Z'
+                    return ['a', sticky_char, 'nn']
+                elseif char ==# 'K'
+                    return ['i', sticky_char, 'nn']
+                elseif char ==# 'J'
+                    return ['u', sticky_char, 'nn']
+                elseif char ==# 'D'
+                    return ['e', sticky_char, 'nn']
+                elseif char ==# 'L'
+                    return ['o', sticky_char, 'nn']
+                elseif char ==# 'Q'
+                    return ['a', sticky_char, 'i']
+                elseif char ==# 'H'
+                    return ['u', sticky_char, 'u']
+                elseif char ==# 'W'
+                    return ['e', sticky_char, 'i']
+                elseif char ==# 'P'
+                    return ['o', sticky_char, 'u']
+                endif
+            else
+                return [tolower(char)]
             endif
         else
             if char ==# 'L'
@@ -1530,6 +1534,7 @@ function! eskk#_initialize() abort "{{{
 
     " AZIK
     call eskk#util#set_default('g:eskk#use_azik', 0)
+    call eskk#util#set_default('g:eskk#azik_enable_precise_shift', 0)
     call eskk#util#set_default('g:eskk#azik_keyboard_type', 'jp106')
     " }}}
 
