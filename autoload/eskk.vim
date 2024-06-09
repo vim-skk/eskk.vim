@@ -1302,7 +1302,7 @@ function! s:asym_prefilter(stash) abort "{{{
         " 'X' is phase:henkan-select:delete-from-dict
         " 'L' is mode:{hira,kata,hankata}:to-zenei
         return [char]
-    elseif char =~# '^[ZKJDLQHWP]$' && g:eskk#use_azik "{{{
+    elseif char =~# '^[ZKJDLQHWP]$' && g:eskk#use_azik && g:eskk#azik_enable_precise_shift "{{{
         let buf_str = a:stash.preedit.get_current_buf_str()
         if !buf_str.rom_str.empty() && buf_str.rom_pairs.empty()
             if char ==# 'Z'
@@ -1530,6 +1530,7 @@ function! eskk#_initialize() abort "{{{
 
     " AZIK
     call eskk#util#set_default('g:eskk#use_azik', 0)
+    call eskk#util#set_default('g:eskk#azik_enable_precise_shift', 0)
     call eskk#util#set_default('g:eskk#azik_keyboard_type', 'jp106')
     " }}}
 
