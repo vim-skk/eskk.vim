@@ -397,6 +397,9 @@ function! eskk#map#_cmd_eskk_map(args) abort "{{{
           \   rhs,
           \)
   endif
+  if index(g:eskk#mapped_keys, lhs) == -1
+    call add(g:eskk#mapped_keys, lhs)
+  endif
 endfunction "}}}
 function! eskk#map#_cmd_eskk_unmap(args) abort "{{{
   let [options, type, args] = s:parse_options(a:args)

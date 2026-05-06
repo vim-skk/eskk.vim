@@ -409,6 +409,10 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
     let page_index = 0
     let pages = []
 
+    let mappings = eskk#_get_eskk_mappings()
+    let choose_prev = get(mappings['phase:henkan-select:choose-prev'], 'lhs', '')
+    let choose_prev = eskk#util#key2char(choose_prev)
+
     call eskk#util#assert(
                 \   len(words) > a:skip_num,
                 \   'words has more than skip_num words.'
@@ -471,7 +475,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
                             \   okuri_buf_str.rom_pairs.get_filter()
                             \]
             endif
-        elseif char ==# 'x'
+        elseif char ==# choose_prev
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
