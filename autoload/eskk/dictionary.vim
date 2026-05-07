@@ -410,8 +410,8 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
     let pages = []
 
     let mappings = eskk#_get_eskk_mappings()
-    let choose_prev = get(mappings['phase:henkan-select:choose-prev'], 'lhs', '')
-    let choose_prev = eskk#util#key2char(choose_prev)
+    let prev_page = get(mappings['phase:henkan-select:prev-page'], 'lhs', '')
+    let prev_page = eskk#util#key2char(prev_page)
 
     call eskk#util#assert(
                 \   len(words) > a:skip_num,
@@ -475,7 +475,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
                             \   okuri_buf_str.rom_pairs.get_filter()
                             \]
             endif
-        elseif char ==# choose_prev
+        elseif char ==# prev_page
             if eskk#util#has_idx(pages, page_index - 1)
                 let page_index -= 1
             else
