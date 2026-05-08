@@ -404,6 +404,10 @@ function! s:asym_filter(stash) abort "{{{
 
     let mappings = eskk#_get_eskk_mappings()
     let sticky_char = get(mappings.sticky, 'lhs', '')
+    let delete_from_dict = get(mappings['phase:henkan-select:delete-from-dict'], 'lhs', '')
+    let delete_from_dict = eskk#util#key2char(delete_from_dict)
+    let choose_prev = get(mappings['phase:henkan-select:choose-prev'], 'lhs', '')
+    let choose_prev = eskk#util#key2char(choose_prev)
     " Convert to real key
     if sticky_char ==# '<Space>' && phase ==# g:eskk#preedit#PHASE_NORMAL
       let sticky_char = "\<Space>"
@@ -448,10 +452,10 @@ function! s:asym_filter(stash) abort "{{{
         if char ==# ' '
             call preedit.choose_next_candidate(a:stash)
             return
-        elseif char ==# 'x'
+        elseif char ==# choose_prev
             call preedit.choose_prev_candidate(a:stash)
             return
-        elseif char ==# 'X'
+        elseif char ==# delete_from_dict
             let henkan_result = eskk#get_skk_dict().get_henkan_result()
             if !empty(henkan_result)
                 let prev_preedit =
@@ -1237,6 +1241,10 @@ function! s:abbrev_filter(stash) abort "{{{
     let buf_str = preedit.get_current_buf_str()
     let phase = preedit.get_henkan_phase()
 
+    let mappings = eskk#_get_eskk_mappings()
+    let choose_prev = get(mappings['phase:henkan-select:choose-prev'], 'lhs', '')
+    let choose_prev = eskk#util#key2char(choose_prev)
+
     " Handle special characters.
     " These characters are handled regardless of current phase.
     if char ==# "\<C-g>"
@@ -1269,7 +1277,7 @@ function! s:abbrev_filter(stash) abort "{{{
         if char ==# ' '
             call preedit.choose_next_candidate(a:stash)
             return
-        elseif char ==# 'x'
+        elseif char ==# choose_prev
             call preedit.choose_prev_candidate(a:stash)
             return
         else

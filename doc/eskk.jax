@@ -431,8 +431,11 @@ g:eskk#use_azik					*g:eskk#use_azik*
 
 	Xから始まる単語を変換出来るようになる。~
 	例1: 社会主義 Xakqxugi
-	Note: 一方、▼モードで誤った単語登録を削除することは出来なくなる。
-
+	Note: 一方、▼モードで誤った単語登録を削除することは出来なくなるため、
+	必要なら別のキーに設定する。
+>
+	EskkMap -type=phase:henkan-select:delete-from-dict <C-d>
+<
 	<S-;>から始まる送り仮名を変換出来るようになる。~
 	例2: くららが立った kuraragaTa<S-;>ta
 	Note: SKK辞書の仕様上、一般的なAZIKのアルファベットテーブルに加え、
@@ -786,7 +789,6 @@ https://github.com/hakehash/vimrc/blob/9823c5c91522eb5a1534bc81a6304c21d209545c/
 	    EskkUnmap -type=mode:hankata:l-key l
 	    EskkUnmap -type=mode:hankata:to-ascii l
 	    EskkUnmap -type=sticky ;
-	    EskkUnmap -type=phase:henkan-select:delete-from-dict X
 	    if g:eskk#azik_keyboard_type=="jp106"
 	      EskkMap -type=mode:hira:toggle-kata @
 	      EskkMap -type=mode:hira:q-key @
@@ -802,6 +804,14 @@ https://github.com/hakehash/vimrc/blob/9823c5c91522eb5a1534bc81a6304c21d209545c/
 	      EskkMap -type=mode:hankata:toggle-kata [
 	      EskkMap -type=mode:hankata:q-key [
 	    endif
+	    " Xで始まる日本語を変換できるように削除キーを別のキーに設定する
+	    EskkUnmap -type=phase:henkan-select:delete-from-dict X
+	    EskkMap -type=phase:henkan-select:delete-from-dict <C-d>
+	    " xで始まる日本語を入力できるように候補選択用のキーを別のキーに設定する
+	    EskkUnmap -type=phase:henkan-select:choose-prev x
+	    EskkUnmap -type=phase:henkan-select:prev-page x
+	    EskkMap -type=phase:henkan-select:choose-prev <S-Space>
+	    EskkMap -type=phase:henkan-select:prev-page <C-b>
 	  endif
 	endfunction
 }}}
