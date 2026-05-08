@@ -182,11 +182,19 @@ function! s:AbstractTable_get_candidates(lhs_head, ...) abort dict "{{{
   endif
 endfunction "}}}
 function! s:get_candidates(table, lhs_head, candidates) abort "{{{
+
+  let data = a:table.load()
   " Search in this table.
-  call a:candidates.append(filter(
-        \   keys(a:table.load()),
-        \   '!stridx(v:val, a:lhs_head)'
-        \))
+  let matched_keys = filter(keys(data), '!stridx(v:val, a:lhs_head)')
+
+  let removed_keys = []
+  for key in matched_keys
+    if get(data[key], 'method', '') ==# 'remove'
+      call add(removed_keys, key)
+    endif
+  endfor
+
+  call a:candidates.append(matched_keys)
 
   " Search in base tables.
   if a:table.is_child()
@@ -198,6 +206,13 @@ function! s:get_candidates(table, lhs_head, candidates) abort "{{{
             \)
     endfor
   endif
+
+  " Remove the removed mappings.
+  for key in removed_keys
+    if a:candidates.has(key)
+      call a:candidates.remove(key)
+    endif
+  endfor
 endfunction "}}}
 
 
