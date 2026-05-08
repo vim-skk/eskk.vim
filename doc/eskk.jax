@@ -431,10 +431,10 @@ g:eskk#use_azik					*g:eskk#use_azik*
 
 	Xから始まる単語を変換出来るようになる。~
 	例1: 社会主義 Xakqxugi
-	Note: 一方、▼モードで誤った単語登録を削除することは出来なくなため、
+	Note: 一方、▼モードで誤った単語登録を削除することは出来なくなるため、
 	必要なら別のキーに設定する。
 >
-    EskkMap -type=phase:henkan-select:delete-from-dict <C-d>
+	EskkMap -type=phase:henkan-select:delete-from-dict <C-d>
 <
 	<S-;>から始まる送り仮名を変換出来るようになる。~
 	例2: くららが立った kuraragaTa<S-;>ta
@@ -786,14 +786,6 @@ https://github.com/hakehash/vimrc/blob/9823c5c91522eb5a1534bc81a6304c21d209545c/
 	    EskkUnmap -type=mode:hankata:q-key q
 	    EskkUnmap -type=mode:hankata:l-key l
 	    EskkUnmap -type=sticky ;
-	    " Xから始まる日本語を変換できるように振り直す
-	    EskkUnmap -type=phase:henkan-select:delete-from-dict X
-	    EskkMap -type=phase:henkan-select:delete-from-dict <C-d>
-	    " 変換中もxから始まる日本語を入力できるように振り直す
-	    EskkUnmap -type=phase:henkan-select:choose-prev x
-	    EskkUnmap -type=phase:henkan-select:prev-page x
-	    EskkMap -type=phase:henkan-select:choose-prev <S-Space>
-	    EskkMap -type=phase:henkan-select:prev-page <C-b>
 
 	    if g:eskk#azik_keyboard_type=="jp106"
 	      EskkMap -type=mode:hira:toggle-kata @
@@ -811,6 +803,14 @@ https://github.com/hakehash/vimrc/blob/9823c5c91522eb5a1534bc81a6304c21d209545c/
 	      EskkMap -type=mode:hankata:q-key [
 	    endif
 
+	    " Xから始まる日本語を変換できるように振り直す
+	    EskkUnmap -type=phase:henkan-select:delete-from-dict X
+	    EskkMap -type=phase:henkan-select:delete-from-dict <C-d>
+	    " 変換中もxから始まる日本語を入力できるように振り直す
+	    EskkUnmap -type=phase:henkan-select:choose-prev x
+	    EskkUnmap -type=phase:henkan-select:prev-page x
+	    EskkMap -type=phase:henkan-select:choose-prev <S-Space>
+	    EskkMap -type=phase:henkan-select:prev-page <C-b>
 	  endif
 	endfunction
 }}}
