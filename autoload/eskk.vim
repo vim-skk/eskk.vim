@@ -439,6 +439,9 @@ function! s:asym_filter(stash) abort "{{{
     elseif phase ==# g:eskk#preedit#PHASE_HENKAN
         if char ==# ' '
             call s:do_henkan(a:stash)
+	elseif char ==# '>'
+            call s:filter_rom(a:stash, eskk#get_current_mode_table())
+            call s:do_henkan(a:stash)
         else
             return s:filter_rom(a:stash, eskk#get_current_mode_table())
         endif
@@ -479,6 +482,9 @@ function! s:asym_filter(stash) abort "{{{
                                 \)
                 endif
             endif
+        elseif char ==# '>'
+            call s:do_sticky(a:stash)
+            call s:filter_rom(a:stash, eskk#get_current_mode_table())
         else
             call s:do_enter_egglike(a:stash)
             call preedit.push_filter_queue(char)
