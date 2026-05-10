@@ -412,7 +412,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
     let mappings = eskk#_get_eskk_mappings()
     let prev_page = get(mappings['phase:henkan-select:prev-page'], 'lhs', '')
     let prev_page = eskk#util#key2char(prev_page)
-    let back_to_henkan = get(mappings['phase:henkan-select:back_to_henkan'], 'lhs', '')
+    let back_to_henkan = get(mappings['phase:henkan-select:back-to-henkan'], 'lhs', '')
     let back_to_henkan = eskk#util#key2char(back_to_henkan)
     let escape = get(mappings['phase:henkan-select:escape'], 'lhs', '')
     let escape = eskk#util#key2char(escape)
