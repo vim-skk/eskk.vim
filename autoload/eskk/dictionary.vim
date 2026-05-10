@@ -414,6 +414,8 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
     let prev_page = eskk#util#key2char(prev_page)
     let back_to_henkan = get(mappings['phase:henkan-select:back_to_henkan'], 'lhs', '')
     let back_to_henkan = eskk#util#key2char(back_to_henkan)
+    let escape = get(mappings['phase:henkan-select:escape'], 'lhs', '')
+    let escape = eskk#util#key2char(escape)
 
     call eskk#util#assert(
                 \   len(words) > a:skip_num,
@@ -456,7 +458,7 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
         endtry
 
 
-        if char ==# "\<C-g>"
+        if char ==# escape
             return a:fallback
         elseif char ==# back_to_henkan
             let self._candidates_index = -1
