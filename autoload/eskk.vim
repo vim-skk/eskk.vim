@@ -428,7 +428,11 @@ function! s:asym_filter(stash) abort "{{{
         call s:do_cancel(a:stash)
         return
     elseif char ==# "\<Esc>"
-        call s:do_escape(a:stash)
+        if mode() ==# 'c' && !preedit.empty()
+            call s:do_cancel(a:stash)
+        else
+            call s:do_escape(a:stash)
+        endif
         return
     endif
 
@@ -770,7 +774,9 @@ endfunction "}}}
 function! s:do_cancel(stash) abort "{{{
     let preedit = a:stash.preedit
     if mode() ==# 'c'
-        call preedit.push_filter_pre_char("\<Esc>")
+        call preedit.set_henkan_phase(g:eskk#preedit#PHASE_NORMAL)
+        call preedit.clear_all()
+        call preedit.push_filter_post_char("\<Esc>")
     else
         call preedit.set_henkan_phase(g:eskk#preedit#PHASE_NORMAL)
         call preedit.clear_all()
