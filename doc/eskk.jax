@@ -749,6 +749,20 @@ A.
 
 eskkの補完はpum.vimでは動作しないことに注意してください．
 
+Q. 候補一覧表示時に <ESC> でキャンセルしたいです。
+
+A.
+>
+	    EskkUnmap -type=phase:henkan-select:escape <C-g>
+	    EskkMap -type=phase:henkan-select:escape <ESC>
+
+Q. 候補一覧表示時のキャンセルで変換前の状態に戻りたいです。
+
+A.
+>
+	    EskkUnmap -type=phase:henkan-select:escape <C-g>
+	    EskkMap -type=phase:henkan-select:back_to_henkan <C-g>
+
 					*eskk-faq-use-azik*
 Q. AZIKで入力したいです。
 A. 以下に設定例を示します。 |g:eskk#use_azik| も参照してください。
