@@ -412,6 +412,8 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
     let mappings = eskk#_get_eskk_mappings()
     let prev_page = get(mappings['phase:henkan-select:prev-page'], 'lhs', '')
     let prev_page = eskk#util#key2char(prev_page)
+    let back_to_henkan = get(mappings['phase:henkan-select:back_to_henkan'], 'lhs', '')
+    let back_to_henkan = eskk#util#key2char(back_to_henkan)
 
     call eskk#util#assert(
                 \   len(words) > a:skip_num,
@@ -456,6 +458,10 @@ function! s:HenkanResult_select_candidate_prompt(skip_num, fallback) abort dict 
 
         if char ==# "\<C-g>"
             return a:fallback
+        elseif char ==# back_to_henkan
+            let self._candidates_index = -1
+            call self.preedit.set_henkan_phase(g:eskk#preedit#PHASE_HENKAN)
+            return [self._key, self._okuri]
         elseif char ==# ' '
             if eskk#util#has_idx(pages, page_index + 1)
                 let page_index += 1
