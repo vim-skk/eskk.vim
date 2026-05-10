@@ -1842,8 +1842,13 @@ endfunction "}}}
 
 " Enable/Disable IM
 function! eskk#is_enabled() abort "{{{
-    return eskk#is_initialized()
-                \   && &iminsert is 1
+    if !eskk#is_initialized()
+        return 0
+    endif
+    if &iminsert is 1
+        return 1
+    endif
+    return has_key(eskk#get_buffer_instance(), 'prev_lang_keys')
 endfunction "}}}
 function! eskk#toggle() abort "{{{
     if !eskk#is_initialized()
