@@ -25,6 +25,7 @@ function! s:run() abort "{{{
 
     call eskk#enable()
     let &l:iminsert = 0
+    let &l:imsearch = 1
     OK eskk#is_enabled()
 
     call eskk#disable()
