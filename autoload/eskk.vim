@@ -1850,6 +1850,9 @@ function! eskk#is_enabled() abort "{{{
     endif
     return has_key(eskk#get_buffer_instance(), 'prev_lang_keys')
 endfunction "}}}
+function! s:is_im_enabled_in_current_mode() abort "{{{
+    return mode() ==# 'c' ? (&l:imsearch ==# 1) : (&l:iminsert ==# 1)
+endfunction "}}}
 function! eskk#toggle() abort "{{{
     if !eskk#is_initialized()
         call eskk#logger#warn('eskk is not initialized.')
@@ -1866,8 +1869,7 @@ function! eskk#enable() abort "{{{
         " Initialize mode.
         call eskk#set_mode(g:eskk#initial_mode)
         if mode() =~# '^[ic]$'
-            let im_on = mode() ==# 'c' ? &l:imsearch : &l:iminsert
-            if im_on !=# 1
+            if !s:is_im_enabled_in_current_mode()
                 " NOTE: Vim can't enter lang-mode immediately
                 " in insert-mode or commandline-mode.
                 " We have to use i_CTRL-^ .
@@ -1962,7 +1964,7 @@ function! eskk#disable() abort "{{{
         " NOTE: Vim can't escape lang-mode immediately
         " in insert-mode or commandline-mode.
         " We have to use i_CTRL-^ .
-        let was_im_enabled = mode() ==# 'c' ? (&l:imsearch ==# 1) : (&l:iminsert ==# 1)
+        let was_im_enabled = s:is_im_enabled_in_current_mode()
         setlocal iminsert=0 imsearch=0
         redrawstatus
         let kakutei_str = eskk#get_preedit().generate_kakutei_str()
