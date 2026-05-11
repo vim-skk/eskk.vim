@@ -1582,6 +1582,7 @@ function! eskk#_initialize() abort "{{{
     if g:eskk#keep_state
         autocmd eskk InsertEnter * call eskk#map#save_normal_keys()
         autocmd eskk InsertLeave * call eskk#map#restore_normal_keys()
+        autocmd eskk CmdlineEnter * call eskk#disable()
     else
         autocmd eskk InsertLeave * call eskk#disable()
     endif
