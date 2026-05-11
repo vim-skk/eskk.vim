@@ -1851,7 +1851,7 @@ function! eskk#is_enabled() abort "{{{
     return has_key(eskk#get_buffer_instance(), 'prev_lang_keys')
 endfunction "}}}
 function! s:is_im_enabled_in_current_mode() abort "{{{
-    return mode() ==# 'c' ? (&l:imsearch ==# 1) : (&l:iminsert ==# 1)
+    return mode() ==# 'c' ? (&imsearch ==# 1) : (&iminsert ==# 1)
 endfunction "}}}
 function! eskk#toggle() abort "{{{
     if !eskk#is_initialized()
