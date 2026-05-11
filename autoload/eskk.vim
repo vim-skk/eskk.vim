@@ -1867,16 +1867,14 @@ function! eskk#enable() abort "{{{
         call eskk#set_mode(g:eskk#initial_mode)
         if mode() =~# '^[ic]$'
             let im_on = mode() ==# 'c' ? &l:imsearch : &l:iminsert
-        else
-            let im_on = 1
-        endif
-        if mode() =~# '^[ic]$' && im_on !=# 1
-            " NOTE: Vim can't enter lang-mode immediately
-            " in insert-mode or commandline-mode.
-            " We have to use i_CTRL-^ .
-            setlocal iminsert=1 imsearch=1
-            redrawstatus
-            return "\<C-^>"
+            if im_on !=# 1
+                " NOTE: Vim can't enter lang-mode immediately
+                " in insert-mode or commandline-mode.
+                " We have to use i_CTRL-^ .
+                setlocal iminsert=1 imsearch=1
+                redrawstatus
+                return "\<C-^>"
+            endif
         endif
         return ''
     endif
