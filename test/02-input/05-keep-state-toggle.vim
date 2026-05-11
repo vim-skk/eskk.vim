@@ -22,6 +22,15 @@ function! s:run() abort "{{{
     let inst = eskk#get_buffer_instance()
     OK !has_key(inst, 'prev_lang_keys')
     OK !eskk#is_enabled()
+
+    call eskk#enable()
+    let &l:iminsert = 0
+    OK eskk#is_enabled()
+
+    call eskk#disable()
+    let inst = eskk#get_buffer_instance()
+    OK !has_key(inst, 'prev_lang_keys')
+    OK !eskk#is_enabled()
   finally
     call eskk#disable()
     let &l:iminsert = save_iminsert

@@ -1865,6 +1865,14 @@ function! eskk#enable() abort "{{{
     if eskk#is_enabled()
         " Initialize mode.
         call eskk#set_mode(g:eskk#initial_mode)
+        if mode() =~# '^[ic]$' && &l:iminsert isnot 1
+            " NOTE: Vim can't enter lang-mode immediately
+            " in insert-mode or commandline-mode.
+            " We have to use i_CTRL-^ .
+            setlocal iminsert=1 imsearch=1
+            redrawstatus
+            return "\<C-^>"
+        endif
         return ''
     endif
     if exists('b:skk_on') && b:skk_on
@@ -1951,10 +1959,11 @@ function! eskk#disable() abort "{{{
         " NOTE: Vim can't escape lang-mode immediately
         " in insert-mode or commandline-mode.
         " We have to use i_CTRL-^ .
+        let was_iminsert = (&l:iminsert is 1)
         setlocal iminsert=0 imsearch=0
         redrawstatus
         let kakutei_str = eskk#get_preedit().generate_kakutei_str()
-        let ret = kakutei_str . "\<C-^>"
+        let ret = kakutei_str . (was_iminsert ? "\<C-^>" : '')
         call s:dict_update_rank()
     else
         setlocal iminsert=0 imsearch=0
