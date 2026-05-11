@@ -75,6 +75,8 @@ let s:eskk_mappings = {
             \   'phase:henkan-select:next-page': {},
             \   'phase:henkan-select:prev-page': {},
             \   'phase:henkan-select:escape': {},
+            \   'phase:henkan-select:clear': {},
+            \   'phase:henkan-select:back-to-henkan': {},
             \   'phase:henkan-select:delete-from-dict': {},
             \   'mode:hira:toggle-hankata': {'fn': eskk#util#get_local_func('handle_toggle_hankata', s:SID_PREFIX)},
             \   'mode:hira:ctrl-q-key': {'fn': eskk#util#get_local_func('handle_ctrl_q_key', s:SID_PREFIX)},
@@ -119,6 +121,8 @@ let s:MODE_LOCAL_KEYS = {
             \       'phase:henkan-select:next-page',
             \       'phase:henkan-select:prev-page',
             \       'phase:henkan-select:escape',
+            \       'phase:henkan-select:clear',
+            \       'phase:henkan-select:back-to-henkan',
             \       'mode:hira:toggle-hankata',
             \       'mode:hira:ctrl-q-key',
             \       'mode:hira:toggle-kata',
@@ -141,6 +145,8 @@ let s:MODE_LOCAL_KEYS = {
             \       'phase:henkan-select:next-page',
             \       'phase:henkan-select:prev-page',
             \       'phase:henkan-select:escape',
+            \       'phase:henkan-select:clear',
+            \       'phase:henkan-select:back-to-henkan',
             \       'mode:kata:toggle-hankata',
             \       'mode:kata:ctrl-q-key',
             \       'mode:kata:toggle-kata',
@@ -163,6 +169,8 @@ let s:MODE_LOCAL_KEYS = {
             \       'phase:henkan-select:next-page',
             \       'phase:henkan-select:prev-page',
             \       'phase:henkan-select:escape',
+            \       'phase:henkan-select:clear',
+            \       'phase:henkan-select:back-to-henkan',
             \       'mode:hankata:toggle-hankata',
             \       'mode:hankata:ctrl-q-key',
             \       'mode:hankata:toggle-kata',
@@ -408,6 +416,8 @@ function! s:asym_filter(stash) abort "{{{
     let delete_from_dict = eskk#util#key2char(delete_from_dict)
     let choose_prev = get(mappings['phase:henkan-select:choose-prev'], 'lhs', '')
     let choose_prev = eskk#util#key2char(choose_prev)
+    let back_to_henkan = get(mappings['phase:henkan-select:back-to-henkan'], 'lhs', '')
+    let back_to_henkan = eskk#util#key2char(back_to_henkan)
     " Convert to real key
     if sticky_char ==# '<Space>' && phase ==# g:eskk#preedit#PHASE_NORMAL
       let sticky_char = "\<Space>"
@@ -459,6 +469,14 @@ function! s:asym_filter(stash) abort "{{{
         if char ==# ' '
             call preedit.choose_next_candidate(a:stash)
             return
+        elseif char ==# back_to_henkan
+            let henkan_result = eskk#get_skk_dict().get_henkan_result()
+            if !empty(henkan_result)
+                call preedit.set_henkan_phase(g:eskk#preedit#PHASE_HENKAN)
+                let yomi = henkan_result.get_key()
+                let buf_str = preedit.get_buf_str(g:eskk#preedit#PHASE_HENKAN)
+                call buf_str.rom_pairs.set_one_pair(yomi, yomi, {'converted': 1})
+            endif
         elseif char ==# choose_prev
             call preedit.choose_prev_candidate(a:stash)
             return
